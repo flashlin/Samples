@@ -12,4 +12,15 @@ public static class LogicalOperatorExtensions
             _ => string.Empty
         };
     }
+    
+    public static LogicalOperator ToLogicalOperator(this string value)
+    {
+        return value switch
+        {
+            "AND" => LogicalOperator.And,
+            "OR" => LogicalOperator.Or,
+            "NOT" => LogicalOperator.Not,
+            _ => LogicalOperator.None
+        };
+    }
 }

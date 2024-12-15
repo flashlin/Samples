@@ -1308,7 +1308,7 @@ public class SqlParser
         return NoneResult<SelectColumn>();
     }
 
-    private ParseResult<ComparisonOperator?> Parse_ComparisonOperator()
+    private ParseResult<SqlComparisonOperator> Parse_ComparisonOperator()
     {
         var rc = Or(
             Keywords("IS", "NOT"),
@@ -1333,10 +1333,14 @@ public class SqlParser
 
         if (rc.Result == null)
         {
-            return NoneResult<ComparisonOperator?>();
+            return NoneResult<SqlComparisonOperator>();
         }
 
-        return rc.Result.Value.ToUpper().ToComparisonOperator();
+        return new SqlComparisonOperator
+        {
+            Span = rc.Result.Span,
+            Value = rc.Result.Value.ToComparisonOperator()
+        };
     }
 
     private ParseResult<ISqlExpression> Parse_ConditionExpr(Func<ParseResult<ISqlExpression>> parseTerm)
@@ -1344,8 +1348,7 @@ public class SqlParser
         var left = parseTerm();
         while (Try(Parse_ComparisonOperator, out var comparisonOperator))
         {
-            var op = comparisonOperator.Result!.Value;
-
+            var op = comparisonOperator.ResultValue.Value;
             ISqlExpression? right;
             switch (op)
             {
@@ -1355,7 +1358,6 @@ public class SqlParser
                     {
                         return betweenValue.Error;
                     }
-
                     right = betweenValue.ResultValue;
                     break;
                 default:
@@ -1368,6 +1370,7 @@ public class SqlParser
                 Span = TextSpan.FromBound(left.ResultValue.Span, right.Span),
                 Left = left.ResultValue,
                 ComparisonOperator = op,
+                OperatorSpan = comparisonOperator.ResultValue.Span,
                 Right = right
             }).To<ISqlExpression>();
         }
@@ -1601,7 +1604,7 @@ public class SqlParser
         };
     }
 
-    private ParseResult<LogicalOperator?> Parse_LogicalOperator()
+    private ParseResult<SqlLogicalOperator> Parse_LogicalOperator()
     {
         var rc = Or(Keywords("AND"), Keywords("OR"), Keywords("NOT"))();
         if (rc.HasError)
@@ -1611,17 +1614,14 @@ public class SqlParser
 
         if (rc.Result == null)
         {
-            return NoneResult<LogicalOperator?>();
+            return NoneResult<SqlLogicalOperator>();
         }
 
-        var logicalOperator = rc.Result.Value.ToUpper() switch
+        return new SqlLogicalOperator
         {
-            "AND" => LogicalOperator.And,
-            "OR" => LogicalOperator.Or,
-            "NOT" => LogicalOperator.Not,
-            _ => LogicalOperator.None
+            Span = rc.ResultValue.Span,
+            Value = rc.Result.Value.ToLogicalOperator(),
         };
-        return logicalOperator;
     }
 
     private ParseResult<SqlNegativeValue> Parse_NegativeValue()
@@ -1659,13 +1659,14 @@ public class SqlParser
         var left = parseTerm();
         while (Try(Parse_LogicalOperator, out var logicalOperator))
         {
-            var op = logicalOperator.Result!.Value;
+            var op = logicalOperator.ResultValue;
             var right = parseTerm();
             left = CreateParseResult(new SqlSearchCondition
             {
                 Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span),
                 Left = left.ResultValue,
-                LogicalOperator = op,
+                LogicalOperator = op.Value,
+                OperatorSpan = op.Span,
                 Right = right.ResultValue
             }).To<ISqlExpression>();
         }

@@ -6,6 +6,7 @@ public class SqlConditionExpression : ISqlExpression
     public TextSpan Span { get; set; } = new();
     public required ISqlExpression Left { get; set; }
     public ComparisonOperator ComparisonOperator { get; set; }
+    public TextSpan OperatorSpan { get; set; } = new();
     public required ISqlExpression Right { get; set; }
 
     public string ToSql()

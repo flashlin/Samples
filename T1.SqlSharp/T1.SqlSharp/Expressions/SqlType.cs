@@ -53,5 +53,7 @@ public enum SqlType
     UnpivotClause,
     ForXmlPathClause,
     ForXmlAutoClause,
-    ForXmlRootDirective
+    ForXmlRootDirective,
+    LogicalOperator,
+    ComparisonOperator
 }

@@ -8,6 +8,7 @@ public class SqlSearchCondition : ISqlExpression
     public TextSpan Span { get; set; } = new();
     public required ISqlExpression Left { get; set; }
     public LogicalOperator LogicalOperator { get; set; } = LogicalOperator.None;
+    public TextSpan OperatorSpan { get; set; } = new();
     public ISqlExpression? Right { get; set; }
     public string ToSql()
     {
