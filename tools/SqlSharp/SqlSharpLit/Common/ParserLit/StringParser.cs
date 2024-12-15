@@ -754,6 +754,11 @@ public class StringParser
         var startPosition = _position;
         if (Try(ReadSymbols, out var openSymbol))
         {
+            if (openSymbol.Word == "/**/")
+            {
+                return true;
+            }
+            
             if (openSymbol.Word == "/*")
             {
                 _position = startPosition;

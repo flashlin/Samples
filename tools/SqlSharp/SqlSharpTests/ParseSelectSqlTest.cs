@@ -10,6 +10,36 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_field_StarComment_field()
+    {
+        var sql = $"""
+                   SELECT id,
+                   /**/
+                   name
+                   FROM customer
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                },
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "name" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+    
+    [Test]
     public void Having()
     {
         var sql = $"""
