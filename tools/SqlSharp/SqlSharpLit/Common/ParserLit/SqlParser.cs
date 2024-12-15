@@ -1442,6 +1442,31 @@ public class SqlParser
 
     private ParseResult<List<ISqlExpression>> Parse_FromTableSources()
     {
+        var allTableSources = new List<ISqlExpression>();
+        ParseWithComma(() =>
+        {
+            var fromTableSources = Parse_FromTableSourcesWithComma();
+            var tableSourcesExpr = fromTableSources.ResultValue;
+            var joinTableSources = Parse_JoinTableSources();
+            if (joinTableSources.HasError)
+            {
+                return joinTableSources.Error;
+            }
+            if (joinTableSources.Result != null)
+            {
+                tableSourcesExpr.AddRange(joinTableSources.ResultValue);
+            }
+            foreach (var tableSource in tableSourcesExpr)
+            {
+                allTableSources.Add(tableSource);
+            }
+            return CreateParseResult(tableSourcesExpr[0]);
+        });
+        return allTableSources;
+    }
+
+    private ParseResult<List<ISqlExpression>> Parse_FromTableSourcesWithComma()
+    {
         var fromTableSources = ParseWithComma(() =>
         {
             var tableSource = Or<ISqlExpression>(Parse_TableSourceWithHints, Parse_JoinTableSource)();
@@ -1451,19 +1476,7 @@ public class SqlParser
             }
             return tableSource;
         });
-        var tableSourcesExpr = fromTableSources.ResultValue;
-        
-        var joinTableSources = Parse_JoinTableSources();
-        if (joinTableSources.HasError)
-        {
-            return joinTableSources.Error;
-        }
-        if (joinTableSources.Result != null)
-        {
-            tableSourcesExpr.AddRange(joinTableSources.ResultValue);
-        }
-
-        return CreateParseResult(tableSourcesExpr);
+        return fromTableSources;
     }
 
     private ParseResult<List<SqlJoinTableCondition>> Parse_JoinTableSources()

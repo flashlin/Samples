@@ -10,14 +10,96 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Join_group_select_from_inner_join_FROM()
+    {
+        var sql = $"""
+                   select id
+                   from @tempTable t 
+                   join        
+                   (        
+                   	select id
+                   	from emp b 
+                   	inner join home h on b.field1 = e.field2, 
+                   	@tb2 ts
+                   	where b.id = 1
+                   ) b on t.id = b.id
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "@tempTable",
+                    Alias = "t"
+                },
+                new SqlJoinTableCondition
+                {
+                    JoinType = JoinType.Inner,
+                    JoinedTable = new SqlInnerTableSource
+                    {
+                        Inner = new SelectStatement
+                        {
+                            Columns =
+                            [
+                                new SelectColumn
+                                {
+                                    Field = new SqlFieldExpr { FieldName = "id" }
+                                }
+                            ],
+                            FromSources =
+                            [
+                                new SqlTableSource { TableName = "emp", Alias = "b" },
+                                new SqlJoinTableCondition
+                                {
+                                    JoinType = JoinType.Inner,
+                                    JoinedTable = new SqlTableSource { TableName = "home", Alias = "h" },
+                                    OnCondition = new SqlConditionExpression
+                                    {
+                                        Left = new SqlFieldExpr { FieldName = "b.field1" },
+                                        ComparisonOperator = ComparisonOperator.Equal,
+                                        Right = new SqlFieldExpr { FieldName = "e.field2" }
+                                    }
+                                },
+                                new SqlTableSource { TableName = "@tb2", Alias = "ts" }
+                            ],
+                            Where = new SqlConditionExpression
+                            {
+                                Left = new SqlFieldExpr { FieldName = "b.id" },
+                                ComparisonOperator = ComparisonOperator.Equal,
+                                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                            }
+                        },
+                        Alias = "b"
+                    },
+                    OnCondition = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "t.id" },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlFieldExpr { FieldName = "b.id" }
+                    }
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void Where_for_xml_auto()
     {
         var sq = $"""
-                   SELECT id
-                   FROM customer
-                   where id = 1
-                   for xml auto, ROOT('customer')
-                   """;
+                  SELECT id
+                  FROM customer
+                  where id = 1
+                  for xml auto, ROOT('customer')
+                  """;
         var rc = ParseSql(sq);
         rc.ShouldBe(new SelectStatement
         {
@@ -50,7 +132,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void ForXmlAuto()
     {
