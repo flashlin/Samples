@@ -16,7 +16,7 @@ public class SqlValue : ISqlExpression
 
 public class SqlUnpivotClause : ISqlExpression
 {
-    public SqlType SqlType => SqlType.Unpivot;
+    public SqlType SqlType => SqlType.UnpivotClause;
     public required ISqlExpression NewColumn { get; set; }
     public required ISqlExpression ForSource { get; set; }
     public List<ISqlExpression> InColumns { get; set; } = [];
