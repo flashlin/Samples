@@ -1154,9 +1154,9 @@ public class SqlParser
             var betweenExpr = Sub_Between_And_Expr(searchCondition);
             return new SqlBetweenValue
             {
-                Span = TextSpan.FromBound(searchCondition.Left.Span, betweenExpr.Span),
-                Start = searchCondition.Left,
-                End = searchCondition.Right!
+                Span = TextSpan.FromBound(searchCondition.Left.Span, betweenExpr!.Span),
+                Start = betweenExpr.Left,
+                End = betweenExpr.Right!
             };
         }
 
@@ -1170,26 +1170,25 @@ public class SqlParser
         {
             return end.Error;
         }
-
         return new SqlBetweenValue
         {
+            Span = TextSpan.FromBound(start.ResultValue.Span, end.ResultValue.Span),
             Start = start.ResultValue,
             End = end.ResultValue
         };
     }
 
-    private ISqlExpression Sub_Between_And_Expr(ISqlExpression endExpr)
+    private SqlSearchCondition? Sub_Between_And_Expr(ISqlExpression endExpr)
     {
         if (endExpr.SqlType == SqlType.SearchCondition)
         {
             var subSearchExpr = ((SqlSearchCondition)endExpr);
             var betweenExpr = subSearchExpr.Left;
-            var subEndExpr = subSearchExpr.Right;
-            _text.Position = subEndExpr!.Span.Offset;
-            return betweenExpr;
+            _text.Position = subSearchExpr.OperatorSpan.Offset;
+            return (SqlSearchCondition)betweenExpr;
         }
 
-        return endExpr;
+        return null;
     }
 
     private ParseResult<SqlWhenThenClause> Parse_Case_WhenClause()

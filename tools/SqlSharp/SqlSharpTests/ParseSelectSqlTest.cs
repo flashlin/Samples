@@ -10,7 +10,7 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
-    public void METHOD()
+    public void Where_in_between_equal()
     {
         var sql = $"""
                    select id
@@ -36,48 +36,49 @@ public class ParseSelectSqlTest
             ],
             Where = new SqlSearchCondition
             {
-                Left = new SqlConditionExpression
-                {
-                    Left = new SqlFieldExpr { FieldName = "name" },
-                    ComparisonOperator = ComparisonOperator.In,
-                    Right = new SqlValues { Items = [new SqlValue { Value = "'a'" }, new SqlValue { Value = "'b'" }] }
-                },
-                LogicalOperator = LogicalOperator.And,
-                Right = new SqlSearchCondition
+                Left = new SqlSearchCondition()
                 {
                     Left = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "name" },
+                        ComparisonOperator = ComparisonOperator.In,
+                        Right = new SqlValues
+                            { Items = [new SqlValue { Value = "'a'" }, new SqlValue { Value = "'b'" }] }
+                    },
+                    LogicalOperator = LogicalOperator.And,
+                    Right = new SqlConditionExpression
                     {
                         Left = new SqlFieldExpr { FieldName = "birth" },
                         ComparisonOperator = ComparisonOperator.Between,
                         Right = new SqlBetweenValue
                         {
-                            Start = new SqlArithmeticBinaryExpr 
-                            { 
+                            Start = new SqlArithmeticBinaryExpr
+                            {
                                 Left = new SqlFieldExpr { FieldName = "@startDate" },
                                 Operator = ArithmeticOperator.Subtract,
                                 Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
                             },
-                            End = new SqlArithmeticBinaryExpr 
-                            { 
+                            End = new SqlArithmeticBinaryExpr
+                            {
                                 Left = new SqlFieldExpr { FieldName = "@endDate" },
                                 Operator = ArithmeticOperator.Add,
                                 Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
                             }
                         }
-                    },
-                    LogicalOperator = LogicalOperator.And,
-                    Right = new SqlConditionExpression
-                    {
-                        Left = new SqlFieldExpr { FieldName = "id" },
-                        ComparisonOperator = ComparisonOperator.Equal,
-                        Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
                     }
+                },
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlConditionExpression
+                {
+                    Left = new SqlFieldExpr { FieldName = "id" },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
                 }
             }
         });
     }
-    
-    
+
+
     [Test]
     public void Join_group_select_from_inner_join_FROM()
     {
