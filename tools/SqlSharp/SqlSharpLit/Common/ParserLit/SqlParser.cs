@@ -294,6 +294,12 @@ public class SqlParser
             return NoneResult<ISqlExpression>();
         }
 
+        if (Try(ParseOverPartitionByClause, out var overPartitionByClause))
+        {
+            overPartitionByClause.ResultValue.Field = value.ResultValue;
+            value = overPartitionByClause.ResultValue;
+        }
+        
         if (Try(ParseOverOrderByClause, out var overOrderByClause))
         {
             overOrderByClause.ResultValue.Field = value.ResultValue;
@@ -1033,12 +1039,55 @@ public class SqlParser
             Columns = orderColumns
         };
     }
-
-    private ParseResult<SqlPartitionByClause> ParsePartitionBy()
+    
+    private ParseResult<SqlOverPartitionByClause> ParseOverPartitionByClause()
     {
-        if (!TryKeywords(["PARTITION", "BY"], out _))
+        if (!TryKeywords(["OVER"], out var startSpan))
         {
-            return NoneResult<SqlPartitionByClause>();
+            return NoneResult<SqlOverPartitionByClause>();
+        }
+        if (!TryMatch("(", out _))
+        {
+            _text.Position = startSpan.Offset;
+            return NoneResult<SqlOverPartitionByClause>();
+        }
+        if(!TryKeywords(["PARTITION", "BY"], out _))
+        {
+            _text.Position = startSpan.Offset;
+            return NoneResult<SqlOverPartitionByClause>();
+        }
+        var partitionBy = new SqlFieldExpr
+        {
+            FieldName = Parse_SqlIdentifier().ResultValue.Value,
+        };
+        var orderBy = ParseOrderByClause();
+        if (orderBy.HasError)
+        {
+            return orderBy.Error;
+        }
+        if(orderBy.Result == null)
+        {
+            _text.Position = startSpan.Offset;
+            return NoneResult<SqlOverPartitionByClause>();
+        }
+        var orderColumns = orderBy.ResultValue.Columns;
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+        return new SqlOverPartitionByClause()
+        {
+            Span = _text.CreateSpan(startSpan),
+            By = partitionBy,
+            Columns = orderColumns
+        };
+    }
+
+    private ParseResult<SqlPartitionBy> ParsePartitionBy()
+    {
+        if (!TryKeywords(["PARTITION", "BY"], out var startSpan))
+        {
+            return NoneResult<SqlPartitionBy>();
         }
 
         var columns = ParseWithComma(ParseValue);
@@ -1047,8 +1096,9 @@ public class SqlParser
             return columns.Error;
         }
 
-        return CreateParseResult(new SqlPartitionByClause
+        return CreateParseResult(new SqlPartitionBy
         {
+            Span = _text.CreateSpan(startSpan),
             Columns = columns.ResultValue
         });
     }

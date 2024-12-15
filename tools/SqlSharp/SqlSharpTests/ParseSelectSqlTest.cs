@@ -629,6 +629,39 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void Over_partition_by_order_by()
+    {
+        var sql = $"""
+                   SELECT ROW_NUMBER() OVER (PARTITION BY id ORDER BY birth desc) AS rn
+                   FROM customer
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlOverPartitionByClause
+                    {
+                        Field = new SqlFunctionExpression
+                        {
+                            FunctionName = "ROW_NUMBER"
+                        },
+                        By = new SqlFieldExpr { FieldName = "id" },
+                        Columns = [new SqlOrderColumn { ColumnName = "birth", Order = OrderType.Desc }]
+                    },
+                    Alias = "rn"
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+
+    [Test]
     public void Rank_Partition()
     {
         var sql = $"""
@@ -645,7 +678,7 @@ public class ParseSelectSqlTest
                 {
                     Field = new SqlRankClause
                     {
-                        PartitionBy = new SqlPartitionByClause
+                        PartitionBy = new SqlPartitionBy
                         {
                             Columns = [new SqlFieldExpr { FieldName = "id" }]
                         },

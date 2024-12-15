@@ -56,5 +56,6 @@ public enum SqlType
     ForXmlRootDirective,
     LogicalOperator,
     ComparisonOperator,
-    OverOrderBy
+    OverOrderBy,
+    OverPartitionByClause
 }

@@ -2,7 +2,7 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public class SqlPartitionByClause : ISqlExpression
+public class SqlPartitionBy : ISqlExpression
 {
     public SqlType SqlType { get; set; } = SqlType.PartitionBy;
     public TextSpan Span { get; set; } = new();
