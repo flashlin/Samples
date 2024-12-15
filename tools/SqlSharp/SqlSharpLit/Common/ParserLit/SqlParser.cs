@@ -607,11 +607,6 @@ public class SqlParser
                 return tableSources.Error;
             }
             selectStatement.FromSources = tableSources.ResultValue;
-            
-            if(Try(ParseForXmlClause, out var forXmlClause))
-            {
-                selectStatement.ForXml = forXmlClause.ResultValue;
-            }
         }
         
         if (Try(ParseUnpivotClause, out var unpivotClause))
@@ -642,6 +637,11 @@ public class SqlParser
         }
 
         selectStatement.OrderBy = orderByClause.Result;
+        
+        if(Try(ParseForXmlClause, out var forXmlClause))
+        {
+            selectStatement.ForXml = forXmlClause.ResultValue;
+        }
 
         if(Try(ParseUnionSelectClauseList, out var unionSelectClauseList))
         {

@@ -10,6 +10,48 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Where_for_xml_auto()
+    {
+        var sq = $"""
+                   SELECT id
+                   FROM customer
+                   where id = 1
+                   for xml auto, ROOT('customer')
+                   """;
+        var rc = ParseSql(sq);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "id" },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+            },
+            ForXml = new SqlForXmlAutoClause
+            {
+                CommonDirectives =
+                [
+                    new SqlForXmlRootDirective
+                    {
+                        RootName = new SqlValue { Value = "'customer'" }
+                    }
+                ]
+            }
+        });
+    }
+    
+    [Test]
     public void ForXmlAuto()
     {
         var sql = $"""
