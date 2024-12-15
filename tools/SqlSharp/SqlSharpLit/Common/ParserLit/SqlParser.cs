@@ -283,15 +283,21 @@ public class SqlParser
 
     public ParseResult<ISqlExpression> Parse_Value_As_DataType()
     {
-        var valueExpr = ParseValue();
-        if (valueExpr.HasError)
+        var value = ParseValue();
+        if (value.HasError)
         {
-            return valueExpr.Error;
+            return value.Error;
         }
 
-        if (valueExpr.Result == null)
+        if (value.Result == null)
         {
             return NoneResult<ISqlExpression>();
+        }
+
+        if (Try(ParseOverOrderByClause, out var overOrderByClause))
+        {
+            overOrderByClause.ResultValue.Field = value.ResultValue;
+            value = overOrderByClause.ResultValue;
         }
 
         if (TryKeyword("AS", out var asSpan))
@@ -300,12 +306,12 @@ public class SqlParser
             return new SqlAsExpr
             {
                 Span = _text.CreateSpan(asSpan),
-                Instance = valueExpr.ResultValue,
+                Instance = value.ResultValue,
                 As = dataType.ResultValue
             };
         }
 
-        return valueExpr;
+        return value;
     }
 
     public ParseResult<ISqlExpression> ParseArithmetic_AdditionOrSubtraction(
@@ -999,6 +1005,32 @@ public class SqlParser
             Span = _text.CreateSpan(startSpan),
             PartitionBy = partitionBy,
             OrderBy = orderBy
+        };
+    }
+    
+    private ParseResult<SqlOverOrderByClause> ParseOverOrderByClause()
+    {
+        if (!TryKeywords(["OVER"], out _))
+        {
+            return NoneResult<SqlOverOrderByClause>();
+        }
+        if (!TryMatch("(", out _))
+        {
+            return NoneResult<SqlOverOrderByClause>();
+        }
+        var orderByClause = ParseOrderByClause();
+        if (orderByClause.HasError)
+        {
+            return orderByClause.Error;
+        }
+        var orderColumns = orderByClause.Result?.Columns ?? [];
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+        return new SqlOverOrderByClause
+        {
+            Columns = orderColumns
         };
     }
 

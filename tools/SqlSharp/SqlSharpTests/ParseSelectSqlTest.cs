@@ -10,6 +10,51 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Over_syntax()
+    {
+        var sql = $"""
+                   select Count(*) OVER() as TotalRow, 
+                   ROW_NUMBER() OVER (ORDER BY id DESC) AS Row 
+                   from customer
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlOverOrderByClause()
+                    {
+                        Field = new SqlFunctionExpression
+                        {
+                            FunctionName = "Count",
+                            Parameters = [new SqlValue { Value = "*" }]
+                        },
+                    },
+                    Alias = "TotalRow"
+                },
+                new SelectColumn
+                {
+                    Field = new SqlOverOrderByClause
+                    {
+                        Field = new SqlFunctionExpression
+                        {
+                            FunctionName = "ROW_NUMBER"
+                        },
+                        Columns = [new SqlOrderColumn { ColumnName = "id", Order = OrderType.Desc }]
+                    },
+                    Alias = "Row"
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+    
+    [Test]
     public void Right_outer_join()
     {
         var sql = $"""

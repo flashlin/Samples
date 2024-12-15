@@ -55,5 +55,6 @@ public enum SqlType
     ForXmlAutoClause,
     ForXmlRootDirective,
     LogicalOperator,
-    ComparisonOperator
+    ComparisonOperator,
+    OverOrderBy
 }
