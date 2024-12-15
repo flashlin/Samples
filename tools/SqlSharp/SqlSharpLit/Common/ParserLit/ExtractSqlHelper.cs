@@ -241,6 +241,10 @@ public class ExtractSqlHelper
         var inComment = false;
         foreach (var line in lines)
         {
+            if (line.Trim().StartsWith("/*") && line.Trim().EndsWith("*/"))
+            {
+                continue;
+            }
             if (line.TrimStart().StartsWith("/*"))
             {
                 inComment = true;
