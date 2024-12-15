@@ -10,6 +10,21 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   select id
+                   from customer
+                   where 
+                   	 name in ('a','b') and
+                   	 birth between @startDate-1 and @endDate+1 and
+                   	 id = 1
+                   """;
+        var rc = ParseSql(sql);
+    }
+    
+    
+    [Test]
     public void Join_group_select_from_inner_join_FROM()
     {
         var sql = $"""

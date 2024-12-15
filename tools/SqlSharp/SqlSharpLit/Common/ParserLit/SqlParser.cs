@@ -1097,10 +1097,23 @@ public class SqlParser
 
     private ParseResult<SqlBetweenValue> Parse_BetweenValue()
     {
-        var start = ParseValue();
+        var start = ParseArithmeticExpr();
         if (start.HasError)
         {
             return start.Error;
+        }
+
+        if (start.ResultValue.SqlType == SqlType.SearchCondition)
+        {
+            var searchCondition = (SqlSearchCondition)start.ResultValue;
+            // if(searchCondition.LogicalOperator == LogicalOperator.And)
+            // {
+            //     return new SqlBetweenValue
+            //     {
+            //         Start = searchCondition.Left,
+            //         End = searchCondition.Right
+            //     };
+            // }
         }
 
         if (!TryKeyword("AND"))
@@ -1108,7 +1121,7 @@ public class SqlParser
             return CreateParseError("Expected AND");
         }
 
-        var end = ParseValue();
+        var end = ParseArithmeticExpr();
         if (end.HasError)
         {
             return end.Error;
@@ -1335,7 +1348,6 @@ public class SqlParser
                     {
                         return betweenValue.Error;
                     }
-
                     right = betweenValue.ResultValue;
                     break;
                 default:
