@@ -1,4 +1,4 @@
-namespace SqlSharpLit.Common.ParserLit;
+namespace T1.SqlSharp.Expressions;
 
 public enum ReferentialAction
 {

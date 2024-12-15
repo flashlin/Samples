@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices.JavaScript;
 using System.Text.RegularExpressions;
+using T1.SqlSharp;
 using T1.SqlSharp.Expressions;
 
 namespace SqlSharpLit.Common.ParserLit;
@@ -88,7 +89,7 @@ public class SqlParser
 
     private ParseResult<SqlGroupByClause> ParseGroupByClause()
     {
-        if (!TryKeywords("GROUP", "BY"))
+        if (!TryKeywords(["GROUP", "BY"], out _))
         {
             return NoneResult<SqlGroupByClause>();
         }
@@ -132,7 +133,7 @@ public class SqlParser
             topClause.IsPercent = true;
         }
 
-        if (TryKeywords("WITH", "TIES"))
+        if (TryKeywords(["WITH", "TIES"], out _))
         {
             topClause.IsWithTies = true;
         }
@@ -147,7 +148,7 @@ public class SqlParser
             return values.ResultValue;
         }
 
-        if (TryMatch("("))
+        if (TryMatch("(", out var openParenthesis))
         {
             var value = ParseArithmeticExpr();
             if (value.HasError)
@@ -155,13 +156,18 @@ public class SqlParser
                 return value.Error;
             }
 
-            if (!TryMatch(")"))
+            if (!TryMatch(")", out var closeParenthesis))
             {
                 return CreateParseError("Expected )");
             }
 
             return new SqlGroup
             {
+                Span = new TextSpan
+                {
+                    Offset = openParenthesis.Offset,
+                    Length = closeParenthesis.Offset - openParenthesis.Offset + 1
+                },
                 Inner = value.ResultValue
             };
         }
@@ -171,10 +177,11 @@ public class SqlParser
             return unaryExpr.ResultValue;
         }
 
-        if (TryMatch("*"))
+        if (TryMatch("*", out var starSpan))
         {
             return new SqlValue
             {
+                Span = starSpan,
                 Value = "*"
             };
         }
@@ -210,10 +217,7 @@ public class SqlParser
 
         if (Try(ParseSqlQuotedString, out var quotedString))
         {
-            return new SqlValue()
-            {
-                Value = quotedString.ResultValue.Value,
-            };
+            return quotedString.ResultValue;
         }
 
         if (IsPeekKeywords("SELECT"))
@@ -400,13 +404,13 @@ public class SqlParser
 
     public ParseResult<SqlCreateTableExpression> ParseCreateTableStatement()
     {
-        if (!TryKeywords("CREATE", "TABLE"))
+        if (!TryKeywords(["CREATE", "TABLE"], out _))
         {
             return NoneResult<SqlCreateTableExpression>();
         }
 
         var tableName = _text.ReadSqlIdentifier();
-        if (!TryMatch("("))
+        if (!TryMatch("(", out var openParenthesis))
         {
             return CreateParseError("Expected (");
         }
@@ -447,7 +451,7 @@ public class SqlParser
             break;
         }
 
-        if (!TryMatch(")"))
+        if (!TryMatch(")", out var closeParenthesis)) 
         {
             return CreateParseError("ParseCreateTableStatement Expected )");
         }
@@ -459,7 +463,7 @@ public class SqlParser
 
     public ParseResult<SqlSpAddExtendedPropertyExpression> ParseExecSpAddExtendedProperty()
     {
-        if (!TryKeywords("EXEC", "SP_AddExtendedProperty"))
+        if (!TryKeywords(["EXEC", "SP_AddExtendedProperty"], out _))
         {
             return NoneResult<SqlSpAddExtendedPropertyExpression>();
         }
@@ -493,7 +497,7 @@ public class SqlParser
 
     public ParseResult<SqlConstraintForeignKey> ParseForeignKeyExpression()
     {
-        if (!TryKeywords("FOREIGN", "KEY"))
+        if (!TryKeywords(["FOREIGN", "KEY"], out _))
         {
             return NoneResult<SqlConstraintForeignKey>();
         }
@@ -517,17 +521,17 @@ public class SqlParser
         }
 
         var refColumn = string.Empty;
-        if (TryMatch("("))
+        if (TryMatch("(", out var openParenthesis))
         {
             refColumn = _text.ReadSqlIdentifier().Word;
-            if (!TryMatch(")"))
+            if (!TryMatch(")", out var closeParenthesis))
             {
                 return CreateParseError("Expected )");
             }
         }
 
         var onDelete = ReferentialAction.NoAction;
-        if (TryKeywords("ON", "DELETE"))
+        if (TryKeywords(["ON", "DELETE"], out _))
         {
             var rc = ParseReferentialAction();
             if (rc.HasError)
@@ -540,7 +544,7 @@ public class SqlParser
 
         var onUpdate = ReferentialAction.NoAction;
 
-        if (TryKeywords("ON", "UPDATE"))
+        if (TryKeywords(["ON", "UPDATE"], out _))
         {
             var rc = ParseReferentialAction();
             if (rc.HasError)
@@ -551,7 +555,7 @@ public class SqlParser
             onUpdate = rc.Result;
         }
 
-        var notForReplication = TryKeywords("NOT", "FOR", "REPLICATION");
+        var notForReplication = TryKeywords(["NOT", "FOR", "REPLICATION"], out _);
         return CreateParseResult(new SqlConstraintForeignKey
         {
             Columns = columns,
@@ -667,11 +671,11 @@ public class SqlParser
     
     private ParseResult<SqlUnpivotClause> ParseUnpivotClause()
     {
-        if (!TryKeywords("UNPIVOT"))
+        if (!TryKeyword("UNPIVOT"))
         {
             return NoneResult<SqlUnpivotClause>();
         }
-        if(!TryMatch("("))
+        if(!TryMatch("(", out var openParenthesis))
         {
             return CreateParseError("Expected (");
         }
@@ -698,7 +702,7 @@ public class SqlParser
         }
         var inColumns = ParseParenthesesWithComma(ParseValue);
         
-        if(!TryMatch(")"))
+        if(!TryMatch(")", out var closeParenthesis))
         {
             return CreateParseError("Expected )");
         }
@@ -716,13 +720,13 @@ public class SqlParser
     
     private ParseResult<SqlForXmlPathClause> ParseForXmlPathClause()
     {
-        if (!TryKeywords("FOR", "XML", "PATH"))
+        if (!TryKeywords(["FOR", "XML", "PATH"], out _))
         {
             return NoneResult<SqlForXmlPathClause>();
         }
         
         var forXmlClause = new SqlForXmlPathClause();
-        if (TryMatch("("))
+        if (TryMatch("(", out var openParenthesis))
         {
             forXmlClause.PathName = Parse_QuotedString().ResultValue.Value;
             MatchSymbol(")");
@@ -733,7 +737,7 @@ public class SqlParser
     
     private ParseResult<SqlForXmlAutoClause> ParseForXmlAutoClause()
     {
-        if (!TryKeywords("FOR", "XML", "AUTO"))
+        if (!TryKeywords(["FOR", "XML", "AUTO"], out _))
         {
             return NoneResult<SqlForXmlAutoClause>();
         }
@@ -745,7 +749,7 @@ public class SqlParser
     private List<SqlForXmlRootDirective> Parse_ForXmlRootDirectives()
     {
         var directives = new List<SqlForXmlRootDirective>();
-        if (!TryMatch(","))
+        if (!TryMatch(",", out var commaSpan)) 
         {
             return directives;
         }
@@ -796,9 +800,9 @@ public class SqlParser
     private ParseResult<SqlUnionSelect> Parse_UnionSelect()
     {
         var isAll = false;
-        if (!TryKeywords("UNION", "ALL"))
+        if (!TryKeywords(["UNION", "ALL"], out _))
         {
-            if (!TryKeywords("UNION"))
+            if (!TryKeyword("UNION"))
             {
                 return NoneResult<SqlUnionSelect>();
             }
@@ -824,16 +828,17 @@ public class SqlParser
     private ParseResult<ISqlExpression> ParseGroupOr<T>(Func<ParseResult<T>> parseFn)
         where T : ISqlExpression
     {
-        if (TryMatch("("))
+        if (TryMatch("(", out var openSpan))
         {
             var inner = parseFn();
             if (inner.HasError)
             {
                 return inner.Error;
             }
-            MatchSymbol(")");
+            var closeSpan = MatchSymbol(")");
             return new SqlGroup()
             {
+                Span = TextSpan.FromBound(openSpan, closeSpan),
                 Inner = inner.ResultValue
             };
         }
@@ -901,7 +906,7 @@ public class SqlParser
 
     private ParseResult<SqlUnaryExpr> ParseUnaryExpr()
     {
-        if (TryMatch("~"))
+        if (TryMatch("~", out _))
         {
             var expr = ParseArithmeticExpr();
             if (expr.HasError)
@@ -927,7 +932,7 @@ public class SqlParser
             return NoneResult<SqlRankClause>();
         }
 
-        if (!TryMatch("()"))
+        if (!TryMatch("()", out _)) 
         {
             _text.Position = startPosition;
             return NoneResult<SqlRankClause>();
@@ -938,14 +943,14 @@ public class SqlParser
             return CreateParseError("Expected OVER");
         }
 
-        if (!TryMatch("("))
+        if (!TryMatch("(", out _))
         {
             return CreateParseError("Expected (");
         }
 
         var partitionBy = ParsePartitionBy().Result;
         var orderBy = ParseOrderByClause().ResultValue;
-        if (!TryMatch(")"))
+        if (!TryMatch(")", out _)) 
         {
             return CreateParseError("Expected )");
         }
@@ -959,7 +964,7 @@ public class SqlParser
 
     private ParseResult<SqlPartitionByClause> ParsePartitionBy()
     {
-        if (!TryKeywords("PARTITION", "BY"))
+        if (!TryKeywords(["PARTITION", "BY"], out _))
         {
             return NoneResult<SqlPartitionByClause>();
         }
@@ -991,7 +996,7 @@ public class SqlParser
     {
         SkipWhiteSpace();
         var tmpPosition = _text.Position;
-        var isSuccess = _text.TryMatch(expected);
+        var isSuccess = _text.TryMatch(expected, out _); 
         _text.Position = tmpPosition;
         return isSuccess;
     }
@@ -1002,10 +1007,10 @@ public class SqlParser
     }
 
 
-    private void MatchSymbol(string expected)
+    private TextSpan MatchSymbol(string expected)
     {
         SkipWhiteSpace();
-        _text.MatchSymbol(expected);
+        return _text.MatchSymbol(expected);
     }
 
     private ParseResult<T> NoneResult<T>()
@@ -1249,58 +1254,6 @@ public class SqlParser
         return NoneResult<SelectColumn>();
     }
 
-    private ParseResult<SelectColumn> Parse_Column_Identifier()
-    {
-        if (TryReadSqlIdentifier(out var fieldName))
-        {
-            return new SelectColumn()
-            {
-                Field = new SqlValue { Value = fieldName.Word }
-            };
-        }
-
-        return NoneResult<SelectColumn>();
-    }
-
-    private ParseResult<SelectColumn> Parse_Column_Star()
-    {
-        if (TryMatch("*"))
-        {
-            return new SelectColumn
-            {
-                Field = new SqlValue()
-                {
-                    Value = "*"
-                }
-            };
-        }
-
-        return NoneResult<SelectColumn>();
-    }
-
-    private ParseResult<SelectColumn> Parse_Column_SubQuery()
-    {
-        if (Try(Parse_Value_As_DataType, out var valueExpr))
-        {
-            if (valueExpr.ResultValue.SqlType == SqlType.AsExpr)
-            {
-                var asExpr = (SqlAsExpr)valueExpr.ResultValue;
-                return new SelectColumn
-                {
-                    Field = asExpr.Instance,
-                    Alias = asExpr.As.ToSql(),
-                };
-            }
-
-            return new SelectColumn
-            {
-                Field = valueExpr.ResultValue,
-            };
-        }
-
-        return NoneResult<SelectColumn>();
-    }
-
     private ParseResult<ComparisonOperator?> Parse_ComparisonOperator()
     {
         var rc = Or(
@@ -1368,7 +1321,7 @@ public class SqlParser
 
     private ParseResult<SqlDataSize> Parse_DataSize()
     {
-        if (!TryMatch("("))
+        if (!TryMatch("(", out var openParenthesis))
         {
             return NoneResult<SqlDataSize>();
         }
@@ -1388,7 +1341,7 @@ public class SqlParser
             dataSize.Scale = int.Parse(_text.ReadInt().Word);
         }
 
-        if (!TryMatch(")"))
+        if (!TryMatch(")", out var closeParenthesis))
         {
             return CreateParseError("Expected )");
         }
@@ -1418,7 +1371,7 @@ public class SqlParser
 
     private ParseResult<ITableSource> Parse_FromTableSource()
     {
-        if (TryMatch("("))
+        if (TryMatch("(", out var openParenthesis))
         {
             var sub = ParseSelectStatement();
             if (sub.HasError)
@@ -1515,7 +1468,7 @@ public class SqlParser
         var startPosition = _text.Position;
         if (TryReadSqlFunctionName(out var identifier))
         {
-            if (TryMatch("("))
+            if (TryMatch("(", out var openParenthesis))
             {
                 var parameters = ParseWithComma(ParseArithmeticExpr);
                 MatchSymbol(")");
@@ -1534,26 +1487,26 @@ public class SqlParser
 
     private ParseResult<SqlJoinTableCondition> Parse_JoinTableSource()
     {
-        if (TryKeywords("INNER", "JOIN"))
+        if (TryKeywords(["INNER", "JOIN"], out _))
         {
             var tableSource = Parse_JoinTableSourceOn();
             return tableSource.ResultValue;
         }
 
-        if (TryKeywords("JOIN"))
+        if (TryKeyword("JOIN"))
         {
             var tableSource = Parse_JoinTableSourceOn();
             return tableSource.ResultValue;
         }
 
-        if (TryKeywords("LEFT", "JOIN"))
+        if (TryKeywords(["LEFT", "JOIN"], out _))
         {
             var tableSource = Parse_JoinTableSourceOn().ResultValue;
             tableSource.JoinType = JoinType.Left;
             return tableSource;
         }
 
-        if (TryKeywords("RIGHT", "JOIN"))
+        if (TryKeywords(["RIGHT", "JOIN"], out _))
         {
             var tableSource = Parse_JoinTableSourceOn().ResultValue;
             tableSource.JoinType = JoinType.Right;
@@ -1608,7 +1561,7 @@ public class SqlParser
 
     private ParseResult<SqlNegativeValue> Parse_NegativeValue()
     {
-        if (TryMatch("-"))
+        if (TryMatch("-", out var minusSpan))
         {
             if (Try(Parse_SqlIdentifier, out var identifier) && !IsPeekMatch("("))
             {
@@ -1703,7 +1656,7 @@ public class SqlParser
                 
             }
 
-            if (TryMatch("="))
+            if (TryMatch("=", out var equalSpan))
             {
                 var rightExpr = ParseArithmeticExpr();
                 if (rightExpr.HasError)
@@ -1765,11 +1718,12 @@ public class SqlParser
 
     private ParseResult<SqlValue> Parse_SqlIdentifier()
     {
-        if (TryReadSqlIdentifier(out var identifier))
+        if (TryReadSqlIdentifier(out var identifierSpan))
         {
             return new SqlValue
             {
-                Value = identifier.Word
+                Span = identifierSpan,
+                Value = identifierSpan.Word
             };
         }
 
@@ -1779,18 +1733,19 @@ public class SqlParser
     private ParseResult<SqlValue> Parse_SqlIdentifierExclude(string[] reservedWords)
     {
         var startPosition = _text.Position;
-        if (!TryReadSqlIdentifier(out var identifier))
+        if (!TryReadSqlIdentifier(out var identifierSpan))
         {
             return NoneResult<SqlValue>();
         }
-        if (reservedWords.Contains(identifier.Word.ToUpper()))
+        if (reservedWords.Contains(identifierSpan.Word.ToUpper()))
         {
             _text.Position = startPosition;
             return NoneResult<SqlValue>();
         }
         return CreateParseResult(new SqlValue()
         {
-            Value = identifier.Word
+            Span = identifierSpan,
+            Value = identifierSpan.Word
         });
     }
     
@@ -1802,15 +1757,15 @@ public class SqlParser
             return NoneResult<SqlTableHintIndex>();
         }
 
-        if (TryMatch("="))
+        if (TryMatch("=", out var equalSpan))
         {
-            if (!TryMatch("("))
+            if (!TryMatch("(", out var openParenthesis))
             {
                 return CreateParseError("Expected (");
             }
 
             var indexName = _text.ReadSqlIdentifier();
-            if (!TryMatch(")"))
+            if (!TryMatch(")", out var closeParenthesis))
             {
                 return CreateParseError("Expected )");
             }
@@ -1821,7 +1776,7 @@ public class SqlParser
             };
         }
 
-        if (!TryMatch("("))
+        if (!TryMatch("(", out _)) 
         {
             return CreateParseError("Expected (");
         }
@@ -1832,7 +1787,7 @@ public class SqlParser
             return indexName.Word;
         });
 
-        if (!TryMatch(")"))
+        if (!TryMatch(")", out _)) 
         {
             return CreateParseError("Expected )");
         }
@@ -1939,7 +1894,7 @@ public class SqlParser
             return value.To<ISqlExpression>();
         }
 
-        if (TryMatch("("))
+        if (TryMatch("(", out var openSpan))
         {
             var subExpr = ParseArithmeticExpr();
             if (subExpr.HasError)
@@ -1947,13 +1902,18 @@ public class SqlParser
                 return subExpr.Error;
             }
 
-            if (!TryMatch(")"))
+            if (!TryMatch(")", out var closeSpan))
             {
                 return CreateParseError("InvalidOperationException Mismatched parentheses");
             }
 
             return new SqlGroup
             {
+                Span = new TextSpan
+                {
+                    Offset = openSpan.Offset,
+                    Length = closeSpan.Offset - openSpan.Offset + closeSpan.Length
+                },
                 Inner = subExpr.ResultValue
             };
         }
@@ -1971,7 +1931,7 @@ public class SqlParser
         do
         {
             var startPosition = _text.Position;
-            if (TryKeywords("PRIMARY", "KEY"))
+            if (TryKeywords(["PRIMARY", "KEY"], out _))
             {
                 // 最後一個column 有可能沒有逗號 又寫 Table Constraint 的話會被誤判, 所以要檢查是否有 CLUSTERED 
                 if (TryKeyword("CLUSTERED"))
@@ -2007,7 +1967,7 @@ public class SqlParser
             }
 
             var constraintStartPosition = _text.Position;
-            if (TryMatch(ConstraintKeyword))
+            if (TryMatch(ConstraintKeyword, out _))
             {
                 var constraintName = _text.ReadSqlIdentifier();
                 if (Try(ParseDefaultValue, out var constraintDefaultValue))
@@ -2038,19 +1998,19 @@ public class SqlParser
                 sqlColumn.Constraints.Add(columnConstraint.Result);
             }
 
-            if (TryKeywords("NOT", "FOR", "REPLICATION"))
+            if (TryKeywords(["NOT", "FOR", "REPLICATION"], out _))
             {
                 sqlColumn.NotForReplication = true;
                 continue;
             }
 
-            if (TryKeywords("NOT", "NULL"))
+            if (TryKeywords(["NOT", "NULL"], out _))
             {
                 sqlColumn.IsNullable = false;
                 continue;
             }
 
-            if (TryKeywords("NULL"))
+            if (TryKeyword("NULL"))
             {
                 sqlColumn.IsNullable = true;
                 continue;
@@ -2171,7 +2131,7 @@ column_name AS computed_column_expression
             return NoneResult<SqlComputedColumnDefinition>();
         }
 
-        if (!TryMatch("("))
+        if (!TryMatch("(", out _))
         {
             _text.Position = startPosition;
             return CreateParseError("Expected (");
@@ -2179,14 +2139,14 @@ column_name AS computed_column_expression
 
         var computedColumnExpressionSpan = _text.ReadUntilRightParenthesis();
 
-        if (!TryMatch(")"))
+        if (!TryMatch(")", out _))
         {
             _text.Position = startPosition;
             return CreateParseError("Expected )");
         }
 
         var persist = TryKeyword("PERSISTED");
-        var notNull = TryKeywords("NOT", "NULL");
+        var notNull = TryKeywords(["NOT", "NULL"], out  _);
 
         return CreateParseResult(new SqlComputedColumnDefinition
         {
@@ -2205,7 +2165,7 @@ column_name AS computed_column_expression
         }
 
         TextSpan defaultValue;
-        if (TryMatch("("))
+        if (TryMatch("(", out _))
         {
             defaultValue = _text.ReadUntilRightParenthesis();
             _text.MatchSymbol(")");
@@ -2295,6 +2255,7 @@ column_name AS computed_column_expression
         {
             return new SqlValue
             {
+                Span = floatNumber,
                 Value = floatNumber.Word
             };
         }
@@ -2304,7 +2265,7 @@ column_name AS computed_column_expression
 
     private ParseResult<SqlValue> ParseHexValue()
     {
-        if (!TryMatch("0x"))
+        if (!TryMatch("0x", out var startSpan))
         {
             return NoneResult<SqlValue>();
         }
@@ -2313,13 +2274,18 @@ column_name AS computed_column_expression
         return new SqlValue()
         {
             SqlType = SqlType.HexValue,
-            Value = "0x" + hexValue.Word
+            Value = "0x" + hexValue.Word,
+            Span = new TextSpan
+            {
+                Offset = startSpan.Offset,
+                Length = hexValue.Offset - startSpan.Offset + hexValue.Length
+            }
         };
     }
 
     private ParseResult<SqlIdentity> ParseIdentity()
     {
-        if (!TryMatch("IDENTITY"))
+        if (!TryMatch("IDENTITY", out var startSpan))
         {
             return NoneResult<SqlIdentity>();
         }
@@ -2329,7 +2295,7 @@ column_name AS computed_column_expression
             Seed = 1,
             Increment = 1
         };
-        if (TryMatch("("))
+        if (TryMatch("(", out _))
         {
             sqlIdentity.Seed = long.Parse(_text.ReadInt().Word);
             _text.MatchSymbol(",");
@@ -2347,7 +2313,8 @@ column_name AS computed_column_expression
             return CreateParseResult(new SqlValue
             {
                 SqlType = SqlType.IntValue,
-                Value = number.Word
+                Value = number.Word,
+                Span = number
             });
         }
 
@@ -2356,10 +2323,11 @@ column_name AS computed_column_expression
 
     private ParseResult<SqlToken> ParseKeywords(params string[] keywords)
     {
-        if (TryKeywords(keywords))
+        if (TryKeywords(keywords, out var span))
         {
             return CreateParseResult(new SqlToken
             {
+                Span = span,
                 Value = string.Join(" ", keywords)
             });
         }
@@ -2380,7 +2348,7 @@ column_name AS computed_column_expression
         }
 
         var startPosition = _text.Position;
-        var negative = TryMatch("-");
+        var negative = TryMatch("-", out _);
         var number = Or(ParseFloatValue, ParseIntValue)();
         if (number.HasError)
         {
@@ -2400,7 +2368,7 @@ column_name AS computed_column_expression
 
     private ParseResult<SqlOrderByClause> ParseOrderByClause()
     {
-        if (!TryKeywords("ORDER", "BY"))
+        if (!TryKeywords(["ORDER", "BY"], out _))
         {
             return NoneResult<SqlOrderByClause>();
         }
@@ -2443,7 +2411,7 @@ column_name AS computed_column_expression
             return NoneResult<SqlParameterValue>();
         }
 
-        if (!_text.TryMatch("="))
+        if (!_text.TryMatch("=", out _))
         {
             return CreateParseError("Expected =");
         }
@@ -2519,7 +2487,7 @@ column_name AS computed_column_expression
     
     private ParseResult<T> ParseWithParentheses<T>(Func<ParseResult<T>> parseElemFn)
     {
-        if (!TryMatch("("))
+        if (!TryMatch("(", out _))
         {
             return CreateParseError("Expected (");
         }
@@ -2530,7 +2498,7 @@ column_name AS computed_column_expression
             return inner.Error;
         }
 
-        if (!TryMatch(")"))
+        if (!TryMatch(")", out _))
         {
             return CreateParseError("Expected )");
         }
@@ -2540,7 +2508,7 @@ column_name AS computed_column_expression
 
     private ParseResult<List<T>> ParseParenthesesWithComma<T>(Func<ParseResult<T>> parseElemFn)
     {
-        if (!TryMatch("("))
+        if (!TryMatch("(", out _))
         {
             return CreateParseError("Expected (");
         }
@@ -2551,7 +2519,7 @@ column_name AS computed_column_expression
             return elements.Error;
         }
 
-        if (!TryMatch(")"))
+        if (!TryMatch(")", out _))
         {
             return CreateParseError("Expected )");
         }
@@ -2659,27 +2627,12 @@ column_name AS computed_column_expression
         {
             return new SqlValue
             {
-                Value = quotedString.Word
+                Value = quotedString.Word,
+                Span = quotedString
             };
         }
 
         return NoneResult<SqlValue>();
-    }
-
-    private Func<ParseResult<SqlToken>> ParseSymbol(string expected)
-    {
-        return () =>
-        {
-            if (TryMatch(expected))
-            {
-                return new SqlToken
-                {
-                    Value = expected
-                };
-            }
-
-            return NoneResult<SqlToken>();
-        };
     }
 
     private ParseResult<ISqlConstraint> ParseTableConstraint()
@@ -2733,7 +2686,7 @@ column_name AS computed_column_expression
     private ParseResult<SqlValues> Parse_Values()
     {
         var startPosition = _text.Position;
-        if (!TryMatch("("))
+        if (!TryMatch("(", out _))
         {
             return NoneResult<SqlValues>();
         }
@@ -2754,7 +2707,7 @@ column_name AS computed_column_expression
             return items.Error;
         }
 
-        if (!TryMatch(")"))
+        if (!TryMatch(")", out _))
         {
             _text.Position = startPosition;
             return NoneResult<SqlValues>();
@@ -2820,7 +2773,7 @@ column_name AS computed_column_expression
             ToggleName = toggleName.Word
         };
 
-        if (!_text.TryMatch("="))
+        if (!_text.TryMatch("=", out _)) 
         {
             _text.Position = startPosition;
             return CreateParseError("Expected toggleName =");
@@ -2891,14 +2844,14 @@ column_name AS computed_column_expression
         return () =>
         {
             SkipWhiteSpace();
-            if (_text.TryMatch(symbol))
+            if (_text.TryMatch(symbol, out var symbolSpan))
             {
                 return new SqlToken
                 {
+                    Span = symbolSpan,
                     Value = symbol
                 };
             }
-
             return NoneResult<SqlToken>();
         };
     }
@@ -2921,6 +2874,11 @@ column_name AS computed_column_expression
 
             return new SqlToken
             {
+                Span = new TextSpan()
+                {
+                    Offset = startPosition,
+                    Length = _text.Position - startPosition  
+                },
                 Value = symbol.Replace(" ", "").Replace("\t", "")
             };
         };
@@ -2932,16 +2890,16 @@ column_name AS computed_column_expression
         return _text.TryKeywordIgnoreCase(expected);
     }
 
-    private bool TryKeywords(params string[] keywords)
+    private bool TryKeywords(string[] keywords, out TextSpan span)
     {
         SkipWhiteSpace();
-        return _text.TryKeywordsIgnoreCase(keywords);
+        return _text.TryKeywordsIgnoreCase(keywords, out span);
     }
 
-    private bool TryMatch(string expected)
+    private bool TryMatch(string expected, out TextSpan textSpan)
     {
         SkipWhiteSpace();
-        return _text.TryMatch(expected);
+        return _text.TryMatch(expected, out textSpan);
     }
 
     private bool TryPeekKeyword(string expected)
@@ -2969,6 +2927,7 @@ column_name AS computed_column_expression
         }
         return new SqlValue
         {
+            Span = token,
             Value = token.Word
         };
     }

@@ -90,7 +90,10 @@ public class ParseSelectSqlTest
                             {
                                 Left = new SqlFieldExpr { FieldName = "b.id" },
                                 ComparisonOperator = ComparisonOperator.Equal,
-                                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                                Right = new SqlValue
+                                {
+                                    SqlType = SqlType.IntValue, Value = "1"
+                                }
                             }
                         },
                         Alias = "b"

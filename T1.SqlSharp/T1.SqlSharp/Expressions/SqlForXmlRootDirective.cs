@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlForXmlRootDirective : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.ForXmlRootDirective;
+    public TextSpan Span { get; set; } = new();
     public ISqlExpression? RootName { get; set; }
 
     public string ToSql()

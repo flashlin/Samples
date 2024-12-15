@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SelectStatement : ISqlExpression
 {
     public SqlType SqlType => SqlType.Select;
+    public TextSpan Span { get; set; } = new();
     public SelectType SelectType { get; set; } = SelectType.All; 
     public SqlTopClause? Top { get; set; }
     public List<ISelectColumnExpression> Columns { get; set; } = [];

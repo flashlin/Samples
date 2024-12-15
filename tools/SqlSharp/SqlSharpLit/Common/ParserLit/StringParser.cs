@@ -1,3 +1,5 @@
+using T1.SqlSharp;
+
 namespace SqlSharpLit.Common.ParserLit;
 
 public class StringParser
@@ -51,9 +53,10 @@ public class StringParser
         return char.IsLetterOrDigit(c) || c == '_' || c == '@' || c == '#' || c == '$';
     }
 
-    public void MatchSymbol(string expected)
+    public TextSpan MatchSymbol(string expected)
     {
         SkipWhitespace();
+        var startPosition = _position;
         foreach (char c in expected)
         {
             if (IsEnd())
@@ -66,6 +69,12 @@ public class StringParser
                 throw new Exception($"Expected '{expected}' at position {_position}, but found different content '{nextChar}'.");
             }
         }
+        return new TextSpan
+        {
+            Word = _text.Substring(startPosition, _position - startPosition),
+            Offset = startPosition,
+            Length = _position - startPosition
+        };
     }
 
     public char NextChar()
@@ -794,18 +803,25 @@ public class StringParser
         return true;
     }
 
-    public bool TryMatch(string keyword)
+    public bool TryMatch(string keyword, out TextSpan textSpan)
     {
         SkipWhitespace();
         var startPosition = _position;
-        if (Try(() => NextText(keyword.Length), out var textSpan))
+        if (Try(() => NextText(keyword.Length), out var textSpan1))
         {
-            if (textSpan.Word == keyword)
+            if (textSpan1.Word == keyword)
             {
+                textSpan = textSpan1;
                 return true;
             }
             _position = startPosition;   
         }
+        textSpan = new TextSpan
+        {
+            Word = string.Empty,
+            Offset = startPosition,
+            Length = 0
+        };
         return false;
     }
 
@@ -815,7 +831,7 @@ public class StringParser
         var startPosition = _position;
         foreach (var keyword in keywords)
         {
-            if (!TryMatch(keyword))
+            if (!TryMatch(keyword, out _))
             {
                 _position = startPosition;
                 return false;
@@ -824,7 +840,7 @@ public class StringParser
         return true;
     }
 
-    public bool TryKeywordsIgnoreCase(params string[] keywords)
+    public bool TryKeywordsIgnoreCase(string[] keywords, out TextSpan textSpan)
     {
         SkipWhitespace();
         var startPosition = _position;
@@ -833,9 +849,21 @@ public class StringParser
             if (!TryKeywordIgnoreCase(keyword))
             {
                 _position = startPosition;
+                textSpan = new TextSpan
+                {
+                    Word = string.Empty,
+                    Offset = startPosition,
+                    Length = 0
+                };
                 return false;
             }
         }
+        textSpan = new TextSpan
+        {
+            Word = _text.Substring(startPosition, _position - startPosition),
+            Offset = startPosition,
+            Length = _position - startPosition
+        };
         return true;
     }
 

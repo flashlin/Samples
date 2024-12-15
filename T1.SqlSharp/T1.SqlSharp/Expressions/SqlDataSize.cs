@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlDataSize : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.DataSize;
+    public TextSpan Span { get; set; } = new();
     public string Size { get; set; } = string.Empty;
     public int Scale { get; set; }
     public string ToSql()

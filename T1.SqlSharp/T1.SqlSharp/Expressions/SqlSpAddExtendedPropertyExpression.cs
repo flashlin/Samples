@@ -3,6 +3,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlSpAddExtendedPropertyExpression : ISqlExpression
 {
     public SqlType SqlType => SqlType.AddExtendedProperty;
+    public TextSpan Span { get; set; } = new();
     /// <summary>
     /// 固定為 'MS_Description' 來表示描述
     /// </summary>

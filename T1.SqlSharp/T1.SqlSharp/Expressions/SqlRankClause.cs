@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlRankClause : ISqlExpression
 {
     public SqlType SqlType { get; set; } = SqlType.RankClause;
+    public TextSpan Span { get; set; } = new();
     public ISqlExpression? PartitionBy { get; set; }
     public required ISqlExpression OrderBy { get; set; }
 

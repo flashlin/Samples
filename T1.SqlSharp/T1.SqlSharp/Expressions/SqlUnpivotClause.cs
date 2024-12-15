@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlUnpivotClause : ISqlExpression
 {
     public SqlType SqlType => SqlType.UnpivotClause;
+    public TextSpan Span { get; set; } = new();
     public required ISqlExpression NewColumn { get; set; }
     public required ISqlExpression ForSource { get; set; }
     public List<ISqlExpression> InColumns { get; set; } = [];

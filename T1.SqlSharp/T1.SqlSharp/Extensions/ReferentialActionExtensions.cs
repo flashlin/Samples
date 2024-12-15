@@ -1,4 +1,6 @@
-namespace SqlSharpLit.Common.ParserLit;
+using T1.SqlSharp.Expressions;
+
+namespace T1.SqlSharp.Extensions;
 
 public static class ReferentialActionExtensions
 {

@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlCaseCaluse : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.CaseClause;
+    public TextSpan Span { get; set; } = new();
     public ISqlExpression? When { get; set; }
     public List<SqlWhenThenClause> WhenThens { get; set; } = [];
     public ISqlExpression? Else { get; set; }

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using SqlSharpLit.Common.ParserLit;
+using T1.SqlSharp;
 using T1.SqlSharp.Expressions;
 using T1.Standard.DesignPatterns;
 
@@ -18,13 +19,21 @@ public static class TestHelper
         var castedStatement = (T)rc.ResultValue;
         castedStatement.Should().BeEquivalentTo(expectedSqlStatement, 
             options => options.RespectingRuntimeTypes()
-                .WithTracing());
+                .WithTracing()
+                .ExcludingMissingMembers()
+                .Using<TextSpan>(_ => { })
+                .WhenTypeIs<TextSpan>()
+                .Excluding(x => x.Span)
+            );
     }
     
     public static void ShouldBe<T>(this object rc, T expected)
     {
         rc.Should().BeEquivalentTo(expected, 
             options => options.RespectingRuntimeTypes()
-                .WithTracing());
+                .WithTracing()
+                .Using<TextSpan>(_ => { })
+                .WhenTypeIs<TextSpan>()
+            );
     }
 }

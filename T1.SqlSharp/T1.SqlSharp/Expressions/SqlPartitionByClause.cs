@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlPartitionByClause : ISqlExpression
 {
     public SqlType SqlType { get; set; } = SqlType.PartitionBy;
+    public TextSpan Span { get; set; } = new();
     public List<ISqlExpression> Columns { get; set; } = [];
 
     public string ToSql()

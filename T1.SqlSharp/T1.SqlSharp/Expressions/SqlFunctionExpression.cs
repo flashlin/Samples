@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlFunctionExpression : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.Function;
+    public TextSpan Span { get; set; } = new();
     public string FunctionName { get; set; } =string.Empty;
     public ISqlExpression[] Parameters { get; set; } = [];
 

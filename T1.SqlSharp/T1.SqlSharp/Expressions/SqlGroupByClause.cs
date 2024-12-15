@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlGroupByClause : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.GroupByClause;
+    public TextSpan Span { get; set; } = new();
     public List<ISqlExpression> Columns { get; set; } = [];
     public string ToSql()
     {

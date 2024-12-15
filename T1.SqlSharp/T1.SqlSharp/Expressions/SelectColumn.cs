@@ -1,11 +1,11 @@
 using System.Text;
-using T1.SqlSharp.Expressions;
 
-namespace SqlSharpLit.Common.ParserLit;
+namespace T1.SqlSharp.Expressions;
 
 public class SelectColumn : ISelectColumnExpression
 {
     public SqlType SqlType { get; } = SqlType.SelectColumn;
+    public TextSpan Span { get; set; } = new();
     public required ISqlExpression Field { get; set; }
     public string Alias { get; set; } = string.Empty;
 

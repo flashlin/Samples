@@ -3,6 +3,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlIdentity : ISqlExpression 
 {
     public static SqlIdentity Default => new();
+    public TextSpan Span { get; set; } = new();
     public SqlType SqlType { get; } = SqlType.Identity;
     public long Seed { get; set; }
     public int Increment { get; set; }

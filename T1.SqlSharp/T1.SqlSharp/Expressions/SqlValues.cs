@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlValues : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.Values;
+    public TextSpan Span { get; set; } = new();
     public List<ISqlExpression> Items { get; set; } = [];
 
     public string ToSql()

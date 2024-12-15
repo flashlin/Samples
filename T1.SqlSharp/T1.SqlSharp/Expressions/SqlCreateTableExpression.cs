@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlCreateTableExpression : ISqlExpression
 {
     public SqlType SqlType => SqlType.CreateTable;
+    public TextSpan Span { get; set; } = new();
     public string TableName { get; set; } = string.Empty;
     public List<ISqlExpression> Columns { get; set; } = [];
     public List<ISqlConstraint> Constraints { get; set; } = [];

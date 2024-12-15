@@ -10,6 +10,7 @@ public interface ISqlForXmlClause : ISqlExpression
 public class SqlForXmlAutoClause : ISqlForXmlClause
 {
     public SqlType SqlType { get; } = SqlType.ForXmlAutoClause;
+    public TextSpan Span { get; set; } = new();
     public List<SqlForXmlRootDirective> CommonDirectives { get; set; } = [];
 
     public string ToSql()
@@ -28,6 +29,7 @@ public class SqlForXmlAutoClause : ISqlForXmlClause
 public class SqlForXmlPathClause : ISqlForXmlClause
 {
     public SqlType SqlType { get; } = SqlType.ForXmlPathClause;
+    public TextSpan Span { get; set; } = new();
     public string? PathName { get; set; }
     public List<SqlForXmlRootDirective> CommonDirectives { get; set; } = [];
 

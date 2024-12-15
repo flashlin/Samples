@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlUnionSelect : ISqlExpression
 {
     public SqlType SqlType => SqlType.UnionSelect;
+    public TextSpan Span { get; set; } = new();
     public bool IsAll { get; set; } = false;
     public required ISqlExpression SelectStatement { get; set; }
 

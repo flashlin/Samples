@@ -5,6 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlSearchCondition : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.SearchCondition;
+    public TextSpan Span { get; set; } = new();
     public required ISqlExpression Left { get; set; }
     public LogicalOperator LogicalOperator { get; set; } = LogicalOperator.None;
     public ISqlExpression? Right { get; set; }
