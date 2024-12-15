@@ -337,7 +337,7 @@ public class SqlParser
             var right = parseTerm();
             left = new SqlArithmeticBinaryExpr
             {
-                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span), 
+                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span),
                 Left = left.ResultValue,
                 Operator = op.ToArithmeticOperator(),
                 Right = right.ResultValue,
@@ -357,7 +357,7 @@ public class SqlParser
             var right = parseTerm();
             left = new SqlArithmeticBinaryExpr
             {
-                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span), 
+                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span),
                 Left = left.ResultValue,
                 Operator = op.ToArithmeticOperator(),
                 Right = right.ResultValue,
@@ -1151,14 +1151,13 @@ public class SqlParser
         if (start.ResultValue.SqlType == SqlType.SearchCondition)
         {
             var searchCondition = (SqlSearchCondition)start.ResultValue;
-            if (searchCondition.LogicalOperator == LogicalOperator.And)
+            var betweenExpr = Sub_Between_And_Expr(searchCondition);
+            return new SqlBetweenValue
             {
-                // return new SqlBetweenValue
-                // {
-                //     Start = searchCondition.Left,
-                //     End = searchCondition.Right
-                // };
-            }
+                Span = TextSpan.FromBound(searchCondition.Left.Span, betweenExpr.Span),
+                Start = searchCondition.Left,
+                End = searchCondition.Right!
+            };
         }
 
         if (!TryKeyword("AND", out _))
@@ -1177,6 +1176,20 @@ public class SqlParser
             Start = start.ResultValue,
             End = end.ResultValue
         };
+    }
+
+    private ISqlExpression Sub_Between_And_Expr(ISqlExpression endExpr)
+    {
+        if (endExpr.SqlType == SqlType.SearchCondition)
+        {
+            var subSearchExpr = ((SqlSearchCondition)endExpr);
+            var betweenExpr = subSearchExpr.Left;
+            var subEndExpr = subSearchExpr.Right;
+            _text.Position = subEndExpr!.Span.Offset;
+            return betweenExpr;
+        }
+
+        return endExpr;
     }
 
     private ParseResult<SqlWhenThenClause> Parse_Case_WhenClause()
@@ -1342,6 +1355,7 @@ public class SqlParser
                     {
                         return betweenValue.Error;
                     }
+
                     right = betweenValue.ResultValue;
                     break;
                 default:
@@ -1531,6 +1545,7 @@ public class SqlParser
                 return function;
             }
         }
+
         _text.Position = startPosition;
         return NoneResult<SqlFunctionExpression>();
     }
@@ -1648,6 +1663,7 @@ public class SqlParser
             var right = parseTerm();
             left = CreateParseResult(new SqlSearchCondition
             {
+                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span),
                 Left = left.ResultValue,
                 LogicalOperator = op,
                 Right = right.ResultValue
@@ -2396,6 +2412,7 @@ column_name AS computed_column_expression
             {
                 return hexValue.Error;
             }
+
             return hexValue;
         }
 
@@ -2418,8 +2435,8 @@ column_name AS computed_column_expression
         numberExpr.Span = new TextSpan
         {
             Word = _text.GetText(startPosition, _text.Position),
-            Offset = startPosition, 
-            Length = _text.Position -startPosition,
+            Offset = startPosition,
+            Length = _text.Position - startPosition,
         };
         numberExpr.Value = negative ? $"-{numberExpr.Value}" : numberExpr.Value;
         return number;
