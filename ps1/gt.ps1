@@ -152,6 +152,14 @@ if( "ll" -eq $action ) {
     return
 }
 
+if( "lc" -eq $action )
+{
+    # 列出尚未 push 的 commit
+    $name = git branch --show-current
+    InvokeCmd "git log --oneline origin/$name..HEAD"
+    return
+}
+
 if( "c" -eq $action ) {
     $branch = $arg1
     if( $branch -eq "" ) {
@@ -340,6 +348,7 @@ Write-Host "info               :顯示目前專案的 Git 倉庫所佔用的檔�
 Write-Host "l                  :show short log"
 Write-Host "ll                 :show long log"
 Write-Host "lf <hash>          :show hash changed files 只列出該 commit 中變更的檔案名稱，而不顯示內容變更細節"
+Write-Host "lc                 :list unpushed commit 列出尚未 push 的 commit"
 Write-Host "r                  :undo previous action"
 Write-Host "rm <file>          :remove file in commited file"
 Write-Host "rd <folder>        :remove add folder in git"
