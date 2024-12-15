@@ -944,13 +944,23 @@ public class StringParser
         return _text.AsSpan(_position, readLength);
     }
 
-    public TextSpan CreateTextSpan(TextSpan startSpan)
+    public TextSpan CreateSpan(TextSpan startSpan)
     {
         return new TextSpan
         {
             Word = _text.Substring(startSpan.Offset, _position - startSpan.Offset),
             Offset = startSpan.Offset,
             Length = _position - startSpan.Offset
+        };
+    }
+    
+    public TextSpan CreateSpan(int startOffset)
+    {
+        return new TextSpan
+        {
+            Word = _text.Substring(startOffset, _position - startOffset),
+            Offset = startOffset,
+            Length = _position - startOffset
         };
     }
 }

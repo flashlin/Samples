@@ -244,11 +244,12 @@ public class SqlParser
             return function.ResultValue;
         }
 
-        if (TryReadSqlIdentifier(out var identifier))
+        if (TryReadSqlIdentifier(out var identifierSpan))
         {
             return new SqlFieldExpr
             {
-                FieldName = identifier.Word
+                Span = identifierSpan,
+                FieldName = identifierSpan.Word
             };
         }
 
@@ -961,7 +962,7 @@ public class SqlParser
     private ParseResult<SqlRankClause> ParseRankClause()
     {
         var startPosition = _text.Position;
-        if (!TryKeyword("RANK", out _))
+        if (!TryKeyword("RANK", out var startSpan))
         {
             return NoneResult<SqlRankClause>();
         }
@@ -991,6 +992,7 @@ public class SqlParser
 
         return new SqlRankClause
         {
+            Span = _text.CreateSpan(startSpan),
             PartitionBy = partitionBy,
             OrderBy = orderBy
         };
@@ -1269,7 +1271,7 @@ public class SqlParser
 
         return CreateParseResult(new SqlCaseCaluse
         {
-            Span = _text.CreateTextSpan(startSpan),
+            Span = _text.CreateSpan(startSpan),
             When = whenExpr,
             WhenThens = whenClause,
             Else = elseClause
@@ -1517,6 +1519,7 @@ public class SqlParser
                 MatchSymbol(")");
                 var function = new SqlFunctionExpression
                 {
+                    Span = _text.CreateSpan(startPosition),
                     FunctionName = identifier.Word,
                     Parameters = parameters.ResultValue!.ToArray()
                 };
@@ -1524,7 +1527,6 @@ public class SqlParser
                 return function;
             }
         }
-
         _text.Position = startPosition;
         return NoneResult<SqlFunctionExpression>();
     }
@@ -2725,11 +2727,12 @@ column_name AS computed_column_expression
 
     private ParseResult<SqlFieldExpr> ParseTableName()
     {
-        if (_text.Try(_text.ReadIdentifier, out var fieldName))
+        if (_text.Try(_text.ReadIdentifier, out var fieldNameSpan))
         {
             return CreateParseResult(new SqlFieldExpr()
             {
-                FieldName = fieldName.Word
+                Span = fieldNameSpan,
+                FieldName = fieldNameSpan.Word
             });
         }
 
@@ -2739,7 +2742,7 @@ column_name AS computed_column_expression
     private ParseResult<SqlValues> Parse_Values()
     {
         var startPosition = _text.Position;
-        if (!TryMatch("(", out _))
+        if (!TryMatch("(", out var startSpan))
         {
             return NoneResult<SqlValues>();
         }
@@ -2774,6 +2777,7 @@ column_name AS computed_column_expression
 
         return new SqlValues
         {
+            Span = _text.CreateSpan(startSpan),
             Items = items.ResultValue.ToList()
         };
     }
