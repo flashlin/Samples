@@ -638,22 +638,6 @@ public class SqlParser
         {
             selectStatement.Unions = unionSelectClauseList.ResultValue;
         }
-        // do
-        // {
-        //     var unionSelect = Parse_UnionSelect();
-        //     if (unionSelect.HasError)
-        //     {
-        //         return unionSelect.Error;
-        //     }
-        //
-        //     if (unionSelect.Result == null)
-        //     {
-        //         break;
-        //     }
-        //
-        //     selectStatement.Unions.Add(unionSelect.ResultValue);
-        // } while (true);
-
 
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
