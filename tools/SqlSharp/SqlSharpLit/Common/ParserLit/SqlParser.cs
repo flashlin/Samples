@@ -294,11 +294,12 @@ public class SqlParser
             return NoneResult<ISqlExpression>();
         }
 
-        if (TryKeyword("AS", out _))
+        if (TryKeyword("AS", out var asSpan))
         {
             var dataType = Or<ISqlExpression>(Parse_DataType, ParseSqlQuotedString)();
             return new SqlAsExpr
             {
+                Span = _text.CreateSpan(asSpan),
                 Instance = valueExpr.ResultValue,
                 As = dataType.ResultValue
             };
@@ -2507,6 +2508,7 @@ column_name AS computed_column_expression
 
         return new SqlParameterValue
         {
+            Span = _text.CreateSpan(startPosition),
             Name = string.Empty,
             Value = valueResult.ResultValue.ToSql()
         };
