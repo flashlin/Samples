@@ -318,6 +318,7 @@ public class SqlParser
             var right = parseTerm();
             left = CreateParseResult(new SqlArithmeticBinaryExpr
             {
+                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span),
                 Left = left.ResultValue,
                 Operator = op.ToArithmeticOperator(),
                 Right = right.ResultValue
@@ -336,6 +337,7 @@ public class SqlParser
             var right = parseTerm();
             left = new SqlArithmeticBinaryExpr
             {
+                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span), 
                 Left = left.ResultValue,
                 Operator = op.ToArithmeticOperator(),
                 Right = right.ResultValue,
@@ -355,6 +357,7 @@ public class SqlParser
             var right = parseTerm();
             left = new SqlArithmeticBinaryExpr
             {
+                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span), 
                 Left = left.ResultValue,
                 Operator = op.ToArithmeticOperator(),
                 Right = right.ResultValue,
@@ -1339,7 +1342,6 @@ public class SqlParser
                     {
                         return betweenValue.Error;
                     }
-
                     right = betweenValue.ResultValue;
                     break;
                 default:
@@ -1349,6 +1351,7 @@ public class SqlParser
 
             left = CreateParseResult(new SqlConditionExpression
             {
+                Span = TextSpan.FromBound(left.ResultValue.Span, right.Span),
                 Left = left.ResultValue,
                 ComparisonOperator = op,
                 Right = right
