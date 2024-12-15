@@ -234,7 +234,7 @@ public class ExtractSqlHelper
         var result = new StringBuilder();
         foreach (var line in lines)
         {
-            if (!IsCommentLine(line.TrimStart()))
+            if (!line.TrimStart().StartsWith("--"))
             {
                 result.AppendLine(line);
             }
