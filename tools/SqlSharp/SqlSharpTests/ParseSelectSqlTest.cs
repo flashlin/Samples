@@ -10,6 +10,42 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Right_outer_join()
+    {
+        var sql = $"""
+                   select id
+                   from customer c
+                   right outer join tb on tb.id = c.id  
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer", Alias = "c" },
+                new SqlJoinTableCondition
+                {
+                    JoinType = JoinType.Right,
+                    JoinedTable = new SqlTableSource { TableName = "tb" },
+                    OnCondition = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "tb.id" },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlFieldExpr { FieldName = "c.id" }
+                    }
+                },
+            ]
+        });
+    }
+    
+    [Test]
     public void Where_in_between_equal()
     {
         var sql = $"""

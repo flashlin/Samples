@@ -1585,6 +1585,13 @@ public class SqlParser
             tableSource.JoinType = JoinType.Right;
             return tableSource;
         }
+        
+        if (TryKeywords(["RIGHT", "OUTER", "JOIN"], out _))
+        {
+            var tableSource = Parse_JoinTableSourceOn().ResultValue;
+            tableSource.JoinType = JoinType.Right;
+            return tableSource;
+        }
 
         return NoneResult<SqlJoinTableCondition>();
     }
