@@ -10,6 +10,42 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Func_a_multi_negativeNumber()
+    {
+        var sql = $"""
+                   Select SUM(a*-1)
+                   from customer
+                   """; 
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFunctionExpression
+                    {
+                        FunctionName = "SUM",
+                        Parameters =
+                        [
+                            new SqlArithmeticBinaryExpr
+                            {
+                                Left = new SqlFieldExpr { FieldName = "a" },
+                                Operator = ArithmeticOperator.Multiply,
+                                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "-1" }
+                            }
+                        ]
+                    }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+    
+    [Test]
     public void Over_order_by_func()
     {
         var sql = $"""

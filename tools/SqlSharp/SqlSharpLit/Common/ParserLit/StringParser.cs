@@ -603,15 +603,15 @@ public class StringParser
         SkipWhitespace();
         var startPosition = _position;
         var symbol = NextText(length);
-        if (!IsSymbolEnd(PeekNext()))
-        {
-            return new TextSpan
-            {
-                Word = string.Empty,
-                Offset = startPosition,
-                Length = 0
-            };
-        }
+        // if (!IsSymbolEnd(PeekNext()))
+        // {
+        //     return new TextSpan
+        //     {
+        //         Word = string.Empty,
+        //         Offset = startPosition,
+        //         Length = 0
+        //     };
+        // }
         return symbol;
     }
     
