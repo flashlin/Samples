@@ -167,6 +167,7 @@ public class ExtractSqlHelper
         var fileCount = 0;
         foreach (var (sqlFile, selectSql) in ExtractStartSelectSqlString(folder))
         {
+            Console.WriteLine($"Processing {sqlFile}");
             ParseResult<SelectStatement> result;
             var sqlParser = new SqlParser(selectSql);
             try
@@ -176,6 +177,7 @@ public class ExtractSqlHelper
             catch (Exception)
             {
                 var sql = sqlParser.GetRemainingText();
+                Console.Clear();
                 Console.WriteLine("Processed files count: " + fileCount);
                 Console.WriteLine($"Exception {sqlFile}:\n{sql}");
                 throw;
