@@ -21,6 +21,60 @@ public class ParseSelectSqlTest
                    	 id = 1
                    """;
         var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            Where = new SqlSearchCondition
+            {
+                Left = new SqlConditionExpression
+                {
+                    Left = new SqlFieldExpr { FieldName = "name" },
+                    ComparisonOperator = ComparisonOperator.In,
+                    Right = new SqlValues { Items = [new SqlValue { Value = "'a'" }, new SqlValue { Value = "'b'" }] }
+                },
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlSearchCondition
+                {
+                    Left = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "birth" },
+                        ComparisonOperator = ComparisonOperator.Between,
+                        Right = new SqlBetweenValue
+                        {
+                            Start = new SqlArithmeticBinaryExpr 
+                            { 
+                                Left = new SqlFieldExpr { FieldName = "@startDate" },
+                                Operator = ArithmeticOperator.Subtract,
+                                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                            },
+                            End = new SqlArithmeticBinaryExpr 
+                            { 
+                                Left = new SqlFieldExpr { FieldName = "@endDate" },
+                                Operator = ArithmeticOperator.Add,
+                                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                            }
+                        }
+                    },
+                    LogicalOperator = LogicalOperator.And,
+                    Right = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "id" },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                    }
+                }
+            }
+        });
     }
     
     

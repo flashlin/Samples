@@ -163,11 +163,7 @@ public class SqlParser
 
             return new SqlGroup
             {
-                Span = new TextSpan
-                {
-                    Offset = openParenthesis.Offset,
-                    Length = closeParenthesis.Offset - openParenthesis.Offset + 1
-                },
+                Span = TextSpan.FromBound(openParenthesis, closeParenthesis),
                 Inner = value.ResultValue
             };
         }
@@ -906,16 +902,16 @@ public class SqlParser
 
     private ParseResult<SqlUnaryExpr> ParseUnaryExpr()
     {
-        if (TryMatch("~", out _))
+        if (TryMatch("~", out var startSpan))
         {
             var expr = ParseArithmeticExpr();
             if (expr.HasError)
             {
                 return expr.Error;
             }
-
             return new SqlUnaryExpr
             {
+                Span = TextSpan.FromBound(startSpan, expr.ResultValue.Span),
                 Operator = UnaryOperator.BitwiseNot,
                 Operand = expr.ResultValue
             };
@@ -1111,14 +1107,14 @@ public class SqlParser
         if (start.ResultValue.SqlType == SqlType.SearchCondition)
         {
             var searchCondition = (SqlSearchCondition)start.ResultValue;
-            // if(searchCondition.LogicalOperator == LogicalOperator.And)
-            // {
-            //     return new SqlBetweenValue
-            //     {
-            //         Start = searchCondition.Left,
-            //         End = searchCondition.Right
-            //     };
-            // }
+            if(searchCondition.LogicalOperator == LogicalOperator.And)
+            {
+                // return new SqlBetweenValue
+                // {
+                //     Start = searchCondition.Left,
+                //     End = searchCondition.Right
+                // };
+            }
         }
 
         if (!TryKeyword("AND"))
