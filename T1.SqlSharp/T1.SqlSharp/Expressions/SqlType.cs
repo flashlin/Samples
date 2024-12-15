@@ -51,5 +51,5 @@ public enum SqlType
     PartitionBy,
     AliasExpr,
     UnpivotClause,
-    ForXmlClause
+    ForXmlPathClause
 }

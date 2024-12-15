@@ -30,38 +30,9 @@ public class ParseSelectSqlTest
             [
                 new SqlTableSource { TableName = "customer" }
             ],
-            ForXml = new SqlForXmlClause
+            ForXml = new SqlForXmlPathClause
             {
-                XmlType = ForXmlType.Path,
-                Path = "''"
-            }
-        });
-    }
-    
-    [Test]
-    public void ForXmlAuto()
-    {
-        var sql = $"""
-                   select id from customer
-                   for xml auto
-                   """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new SelectStatement
-        {
-            Columns =
-            [
-                new SelectColumn
-                {
-                    Field = new SqlFieldExpr { FieldName = "id" }
-                }
-            ],
-            FromSources =
-            [
-                new SqlTableSource { TableName = "customer" }
-            ],
-            ForXml = new SqlForXmlClause
-            {
-                XmlType = ForXmlType.Auto
+                PathName = "''"
             }
         });
     }

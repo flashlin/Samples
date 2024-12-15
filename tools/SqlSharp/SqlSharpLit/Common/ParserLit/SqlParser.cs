@@ -608,7 +608,7 @@ public class SqlParser
             }
             selectStatement.FromSources = tableSources.ResultValue;
             
-            if(Try(ParseForXmlClause, out var forXmlClause))
+            if(Try(ParseForXmlPathClause, out var forXmlClause))
             {
                 selectStatement.ForXml = forXmlClause.ResultValue;
             }
@@ -701,32 +701,20 @@ public class SqlParser
         });
     }
     
-    private ParseResult<SqlForXmlClause> ParseForXmlClause()
+    private ParseResult<SqlForXmlPathClause> ParseForXmlPathClause()
     {
-        if (!TryKeywords("FOR", "XML"))
+        if (!TryKeywords("FOR", "XML", "PATH"))
         {
-            return NoneResult<SqlForXmlClause>();
+            return NoneResult<SqlForXmlPathClause>();
         }
         
-        var mode = Or(Keywords("AUTO"), Keywords("RAW"), Keywords("EXPLICIT"), Keywords("PATH"))();
-        if (mode.Result == null)
+        var forXmlClause = new SqlForXmlPathClause();
+        if (TryMatch("("))
         {
-            return CreateParseError("Expected AUTO, RAW, EXPLICIT, PATH");
-        }
-        var xmlType = Enum.Parse<ForXmlType>(mode.ResultValue.Value, true);
-        var forXmlClause = new SqlForXmlClause
-        {
-            XmlType = xmlType,
-        };
-        if (xmlType == ForXmlType.Path)
-        {
-            if (!TryMatch("("))
-            {
-                return CreateParseError("Expected (");
-            }
-            forXmlClause.Path = Parse_QuotedString().ResultValue.Value;
+            forXmlClause.PathName = Parse_QuotedString().ResultValue.Value;
             MatchSymbol(")");
         }
+
         return forXmlClause;
     }
 
