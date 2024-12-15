@@ -29,10 +29,18 @@ public class ParseSelectSqlTest
                         {
                             FunctionName = "ROW_NUMBER"
                         },
-                        Columns = [
+                        Columns =
+                        [
                             new SqlOrderColumn
                             {
-                                ColumnName = "Sum(id)", 
+                                ColumnName = new SqlFunctionExpression()
+                                {
+                                    FunctionName = "Sum",
+                                    Parameters =
+                                    [
+                                        new SqlFieldExpr { FieldName = "id" }
+                                    ]
+                                },
                                 Order = OrderType.Desc
                             }
                         ]
@@ -46,7 +54,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Select_field_StarComment_field()
     {
@@ -76,7 +84,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Having()
     {
@@ -121,7 +129,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Over_syntax()
     {
@@ -155,7 +163,17 @@ public class ParseSelectSqlTest
                         {
                             FunctionName = "ROW_NUMBER"
                         },
-                        Columns = [new SqlOrderColumn { ColumnName = "id", Order = OrderType.Desc }]
+                        Columns =
+                        [
+                            new SqlOrderColumn
+                            {
+                                ColumnName = new SqlFieldExpr()
+                                {
+                                    FieldName = "id"
+                                },
+                                Order = OrderType.Desc
+                            }
+                        ]
                     },
                     Alias = "Row"
                 }
@@ -202,7 +220,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Right_outer_join()
     {
@@ -238,7 +256,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Where_in_between_equal()
     {
@@ -798,7 +816,17 @@ public class ParseSelectSqlTest
                             FunctionName = "ROW_NUMBER"
                         },
                         By = new SqlFieldExpr { FieldName = "id" },
-                        Columns = [new SqlOrderColumn { ColumnName = "birth", Order = OrderType.Desc }]
+                        Columns =
+                        [
+                            new SqlOrderColumn
+                            {
+                                ColumnName = new SqlFieldExpr()
+                                {
+                                    FieldName = "birth"
+                                },
+                                Order = OrderType.Desc
+                            }
+                        ]
                     },
                     Alias = "rn"
                 }
@@ -833,7 +861,13 @@ public class ParseSelectSqlTest
                         },
                         OrderBy = new SqlOrderByClause
                         {
-                            Columns = [new SqlOrderColumn() { ColumnName = "id" }]
+                            Columns = [new SqlOrderColumn()
+                            {
+                                ColumnName = new SqlFieldExpr()
+                                {
+                                    FieldName = "id"
+                                }
+                            }]
                         },
                     },
                     Alias = "Row"
@@ -2575,7 +2609,10 @@ public class ParseSelectSqlTest
                 [
                     new SqlOrderColumn
                     {
-                        ColumnName = "LastDate",
+                        ColumnName = new SqlFieldExpr()
+                        {
+                            FieldName = "LastDate"
+                        },
                         Order = OrderType.Desc,
                     }
                 ]

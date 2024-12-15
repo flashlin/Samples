@@ -4,7 +4,7 @@ public class SqlOrderColumn : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.OrderColumn;
     public TextSpan Span { get; set; } = new();
-    public string ColumnName { get; set; } = string.Empty;
+    public required ISqlExpression ColumnName { get; set; }
     public OrderType Order { get; set; }
 
     public string ToSql()

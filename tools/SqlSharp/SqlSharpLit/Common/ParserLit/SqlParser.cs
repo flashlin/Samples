@@ -1061,10 +1061,7 @@ public class SqlParser
             _text.Position = startSpan.Offset;
             return NoneResult<SqlOverPartitionByClause>();
         }
-        var partitionBy = new SqlFieldExpr
-        {
-            FieldName = Parse_SqlIdentifier().ResultValue.Value,
-        };
+        var partitionBy = Parse_SqlIdentifier().ResultValue;
         var orderBy = ParseOrderByClause();
         if (orderBy.HasError)
         {
@@ -1549,7 +1546,7 @@ public class SqlParser
         {
             return new SqlTableSource()
             {
-                TableName = tableName.ResultValue.Value
+                TableName = tableName.ResultValue.FieldName
             };
         }
 
@@ -1756,10 +1753,7 @@ public class SqlParser
             {
                 return new SqlNegativeValue
                 {
-                    Value = new SqlFieldExpr()
-                    {
-                        FieldName = identifier.ResultValue.Value
-                    }
+                    Value = identifier.ResultValue,
                 };
             }
 
@@ -1874,7 +1868,7 @@ public class SqlParser
     {
         if (TryKeyword("AS", out _))
         {
-            var aliasName = Or(Parse_SqlIdentifier, ParseSqlQuotedString)();
+            var aliasName = Or(Parse_SqlIdentifierValue, ParseSqlQuotedString)();
             if (aliasName.HasError)
             {
                 return aliasName.Error;
@@ -1907,14 +1901,28 @@ public class SqlParser
         return NoneResult<SqlValue>();
     }
 
-    private ParseResult<SqlValue> Parse_SqlIdentifier()
+    private ParseResult<SqlFieldExpr> Parse_SqlIdentifier()
     {
         if (TryReadSqlIdentifier(out var identifierSpan))
         {
-            return new SqlValue
+            return new SqlFieldExpr()
             {
                 Span = identifierSpan,
-                Value = identifierSpan.Word
+                FieldName = identifierSpan.Word
+            };
+        }
+        return NoneResult<SqlFieldExpr>();
+    }
+    
+    
+    private ParseResult<SqlValue> Parse_SqlIdentifierValue()
+    {
+        if (Try(Parse_SqlIdentifier,out var identifier))
+        {
+            return new SqlValue()
+            {
+                Span = identifier.ResultValue.Span,
+                Value = identifier.ResultValue.FieldName
             };
         }
 
@@ -2576,7 +2584,7 @@ column_name AS computed_column_expression
 
         var orderByColumns = ParseWithComma<SqlOrderColumn>(() =>
         {
-            var column = ReadSqlIdentifier().Word;
+            var column = Parse_SqlIdentifier().ResultValue;
             var order = OrderType.Asc;
             if (TryKeyword("ASC", out _))
             {
