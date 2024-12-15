@@ -2584,7 +2584,7 @@ column_name AS computed_column_expression
 
         var orderByColumns = ParseWithComma<SqlOrderColumn>(() =>
         {
-            var column = Parse_SqlIdentifier().ResultValue;
+            var column = ParseArithmeticExpr().ResultValue;
             var order = OrderType.Asc;
             if (TryKeyword("ASC", out _))
             {
