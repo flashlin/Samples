@@ -246,7 +246,7 @@ public class ExtractSqlHelper
                 inComment = true;
                 continue;
             }
-            if (line.TrimEnd().StartsWith("*/"))
+            if (line.TrimEnd().EndsWith("*/"))
             {
                 inComment = false;
                 continue;
@@ -255,10 +255,11 @@ public class ExtractSqlHelper
             {
                 continue;
             }
-            if (!line.TrimStart().StartsWith("--"))
+            if (line.TrimStart().StartsWith("--"))
             {
-                result.AppendLine(line);
+                continue;
             }
+            result.AppendLine(line);
         }
         return result.ToString();
     }
@@ -272,11 +273,11 @@ public class ExtractSqlHelper
             yield break;
         }
         
-        var previousLine = GetPreviousLine(text, startSelectIndex);
-        if (IsCommentLine(previousLine))
-        {
-            yield break;
-        }
+        // var previousLine = GetPreviousLine(text, startSelectIndex);
+        // if (IsCommentLine(previousLine))
+        // {
+        //     yield break;
+        // }
         
         var startSelectSql = text.Substring(startSelectIndex);
         var nextChar = startSelectSql[select.Length];
