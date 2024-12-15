@@ -1182,7 +1182,13 @@ public class SqlParser
     {
         if (endExpr.SqlType == SqlType.SearchCondition)
         {
-            var subSearchExpr = ((SqlSearchCondition)endExpr);
+            var subSearchExpr = (SqlSearchCondition)endExpr;
+            
+            if(subSearchExpr.Left.SqlType != SqlType.SearchCondition)
+            {
+                return subSearchExpr;
+            }
+            
             var betweenExpr = subSearchExpr.Left;
             _text.Position = subSearchExpr.OperatorSpan.Offset;
             return (SqlSearchCondition)betweenExpr;
