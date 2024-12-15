@@ -203,7 +203,8 @@ public class ExtractSqlHelper
     {
         foreach (var sqlFile in GetSqlTextFromFolder(folder))
         {
-            foreach (var startSelectSql in ExtractSelectSqlFromText(sqlFile.Sql))
+            var sql = ExcludeSqlComments(sqlFile.Sql);
+            foreach (var startSelectSql in ExtractSelectSqlFromText(sql))
             {
                 yield return (sqlFile.FileName, startSelectSql);
             }
@@ -224,6 +225,21 @@ public class ExtractSqlHelper
     private bool IsCommentLine(string line)
     {
         return line.StartsWith("/*") || line.StartsWith("--");
+    }
+
+
+    private string ExcludeSqlComments(string text)
+    {
+        var lines = text.Split(["\r\n", "\n"], StringSplitOptions.None);
+        var result = new StringBuilder();
+        foreach (var line in lines)
+        {
+            if (!IsCommentLine(line.TrimStart()))
+            {
+                result.AppendLine(line);
+            }
+        }
+        return result.ToString();
     }
 
     private IEnumerable<string> ExtractSelectSqlFromText(string text)
