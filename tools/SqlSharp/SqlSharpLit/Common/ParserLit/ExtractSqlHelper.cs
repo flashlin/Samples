@@ -238,8 +238,23 @@ public class ExtractSqlHelper
     {
         var lines = text.Split(["\r\n", "\n"], StringSplitOptions.None);
         var result = new StringBuilder();
+        var inComment = false;
         foreach (var line in lines)
         {
+            if (line.TrimStart().StartsWith("/*"))
+            {
+                inComment = true;
+                continue;
+            }
+            if (line.TrimEnd().StartsWith("*/"))
+            {
+                inComment = false;
+                continue;
+            }
+            if (inComment)
+            {
+                continue;
+            }
             if (!line.TrimStart().StartsWith("--"))
             {
                 result.AppendLine(line);
