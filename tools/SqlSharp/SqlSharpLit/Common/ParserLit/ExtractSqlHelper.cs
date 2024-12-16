@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using T1.SqlSharp;
 using T1.SqlSharp.DatabaseDescriptions;
 using T1.SqlSharp.Expressions;
 using T1.Standard.Collections.Generics;
@@ -207,7 +208,22 @@ public class ExtractSqlHelper
 
     private string ExcludeNonSelectSql(string text)
     {
-        return string.Empty;
+        var sqlParser = new SqlParser(text);
+        var sb = new StringBuilder();
+        var lastOffset = 0;
+        foreach (var sql in sqlParser.ExtractStatements())
+        {
+            if (sql.SqlType != SqlType.SelectStatement)
+            {
+                var previous = text.Substring(lastOffset, sql.Span.Offset - lastOffset);
+                lastOffset = sql.Span.Offset + sql.Span.Length;
+                sb.AppendLine(previous);
+            }
+        }
+        
+        var lastPrevious = text.Substring(lastOffset, text.Length - lastOffset);
+        sb.AppendLine(lastPrevious);
+        return sb.ToString();
     }
 
     private IEnumerable<(string FileName, string startSelectSql)> ExtractStartSelectSqlString(string folder)
@@ -215,6 +231,7 @@ public class ExtractSqlHelper
         foreach (var sqlFile in GetSqlTextFromFolder(folder))
         {
             var sql = ExcludeSqlComments(sqlFile.Sql);
+            sql = ExcludeNonSelectSql(sql);
             foreach (var startSelectSql in ExtractSelectSqlFromText(sql))
             {
                 yield return (sqlFile.FileName, startSelectSql);
@@ -281,12 +298,6 @@ public class ExtractSqlHelper
         {
             yield break;
         }
-        
-        // var previousLine = GetPreviousLine(text, startSelectIndex);
-        // if (IsCommentLine(previousLine))
-        // {
-        //     yield break;
-        // }
         
         var startSelectSql = text.Substring(startSelectIndex);
         var nextChar = startSelectSql[select.Length];

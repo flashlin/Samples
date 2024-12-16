@@ -12,7 +12,7 @@ public enum SqlType
     TableForeignKey,
     WithToggle,
     Identity,
-    Select,
+    SelectStatement,
     Field,
     IntValue,
     HexValue,
