@@ -994,6 +994,10 @@ public class StringParser
                 Length = 0
             };
         }
+        if(Try(ReadSqlIdentifier, out var sqlIdentifierSpan))
+        {
+            return sqlIdentifierSpan;
+        }
         if(Try(ReadSqlQuotedString, out var quotedStringSpan))
         {
             return quotedStringSpan;
@@ -1022,11 +1026,10 @@ public class StringParser
         {
             return symbolSpan;
         }
-        if(Try(ReadSqlIdentifier, out var sqlIdentifierSpan))
-        {
-            return sqlIdentifierSpan;
-        }
-        var remainingText = _text.Substring(_position, 20);
-        throw new NotSupportedException(remainingText);
+        
+        var span = ReadUntil(c => c=='\n');
+        //var remainingText = _text.Substring(_position, 20);
+        //throw new NotSupportedException(remainingText);
+        return span;
     }
 }
