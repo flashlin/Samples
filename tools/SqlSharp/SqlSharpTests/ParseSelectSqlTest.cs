@@ -10,7 +10,7 @@ namespace SqlSharpTests;
 public class ExcludeNonSelectStatementTest
 {
     [Test]
-    public void METHOD()
+    public void ExtractKnownStatements()
     {
         var sql = $"""
                    print '123'

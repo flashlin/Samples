@@ -79,6 +79,7 @@ public class SqlParser
             var rc = Parse();
             if (rc.HasError)
             {
+                _text.ReadNextSqlToken();
                 continue;
             }
 
@@ -1953,7 +1954,7 @@ public class SqlParser
 
     private ParseResult<SqlSetValueStatement> ParseSetValueStatement()
     {
-        if (!TryKeywords(["SET"], out _))
+        if (!TryKeywords(["SET"], out var startSpan))
         {
             return NoneResult<SqlSetValueStatement>();
         }
@@ -1967,6 +1968,7 @@ public class SqlParser
         var value = ParseArithmeticExpr().ResultValue;
         return new SqlSetValueStatement()
         {
+            Span = _text.CreateSpan(startSpan),
             Name = name,
             Value = value
         };
