@@ -776,7 +776,7 @@ public class StringParser
         var startPosition = _position;
         if (Try(ReadSymbols, out var openSymbol))
         {
-            if (openSymbol.Word == "--")
+            if (openSymbol.Word.StartsWith("--"))
             {
                 _position = startPosition;
                 ReadSqlSingleComment();

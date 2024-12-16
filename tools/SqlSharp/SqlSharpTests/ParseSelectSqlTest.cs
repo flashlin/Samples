@@ -10,12 +10,23 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
-    public void METHOD()
+    public void Select_number_as_aliasName()
     {
         var sql = $"""
-                   select 0 as OrderID --, @cashBalance as CashBalance
+                   select 0 as OrderID --, @test
                    """;
         var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlValue { SqlType = SqlType.IntValue, Value = "0" },
+                    Alias = "OrderID"
+                }
+            ]
+        });
     }
     
     [Test]
