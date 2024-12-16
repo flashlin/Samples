@@ -231,7 +231,7 @@ public class ExtractSqlHelper
         foreach (var sqlFile in GetSqlTextFromFolder(folder))
         {
             var sql = ExcludeSqlComments(sqlFile.Sql);
-            sql = ExcludeNonSelectSql(sql);
+            //sql = ExcludeNonSelectSql(sql);
             foreach (var startSelectSql in ExtractSelectSqlFromText(sql))
             {
                 yield return (sqlFile.FileName, startSelectSql);
