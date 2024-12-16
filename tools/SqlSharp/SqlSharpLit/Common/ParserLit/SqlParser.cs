@@ -1991,7 +1991,12 @@ public class SqlParser
             return NoneResult<SqlSetValueStatement>();
         }
 
-        var name = Parse_SqlIdentifier().ResultValue;
+        var name = Parse_SqlIdentifier();
+        if (name.Result == null)
+        {
+            return NoneResult<SqlSetValueStatement>();
+        }
+        
         if (!TryMatch("=", out var equalSpan))
         {
             return CreateParseError("Expected =");
@@ -2001,7 +2006,7 @@ public class SqlParser
         return new SqlSetValueStatement()
         {
             Span = _text.CreateSpan(startSpan),
-            Name = name,
+            Name = name.ResultValue,
             Value = value
         };
     }
