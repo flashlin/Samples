@@ -10,6 +10,15 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   select 0 as OrderID --, @cashBalance as CashBalance
+                   """;
+        var rc = ParseSql(sql);
+    }
+    
+    [Test]
     public void Func_a_multi_negativeNumber()
     {
         var sql = $"""
