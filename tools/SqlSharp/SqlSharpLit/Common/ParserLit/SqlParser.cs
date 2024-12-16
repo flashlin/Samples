@@ -114,7 +114,7 @@ public class SqlParser
 
     private ParseResult<SqlGroupByClause> ParseGroupByClause()
     {
-        if (!TryKeywords(["GROUP", "BY"], out _))
+        if (!TryKeywords(["GROUP", "BY"], out var startSpan))
         {
             return NoneResult<SqlGroupByClause>();
         }
@@ -125,10 +125,11 @@ public class SqlParser
             return groupByColumns.Error;
         }
 
-        return CreateParseResult(new SqlGroupByClause
+        return new SqlGroupByClause
         {
+            Span = _text.CreateSpan(startSpan),
             Columns = groupByColumns.ResultValue
-        });
+        };
     }
 
     public ParseResult<SqlTopClause> Parse_TopClause()
@@ -151,6 +152,7 @@ public class SqlParser
 
         var topClause = new SqlTopClause()
         {
+            Span = _text.CreateSpan(startSpan),
             Expression = expression.ResultValue
         };
         if (TryKeyword("PERCENT", out _))
@@ -163,12 +165,7 @@ public class SqlParser
             topClause.IsWithTies = true;
         }
 
-        topClause.Span = new TextSpan()
-        {
-            Word = _text.GetText(startSpan.Offset, _text.Position),
-            Offset = startSpan.Offset,
-            Length = _text.Position - startSpan.Offset,
-        };
+        topClause.Span = _text.CreateSpan(startSpan);
         return CreateParseResult(topClause);
     }
 
@@ -194,7 +191,7 @@ public class SqlParser
 
             return new SqlGroup
             {
-                Span = TextSpan.FromBound(openParenthesis, closeParenthesis),
+                Span = _text.CreateSpan(openParenthesis),
                 Inner = value.ResultValue
             };
         }
@@ -299,7 +296,7 @@ public class SqlParser
 
         return new SqlDistinct()
         {
-            Span = TextSpan.FromBound(startSpan, value.ResultValue.Span),
+            Span = _text.CreateSpan(startSpan),
             Value = value.ResultValue
         };
     }
@@ -353,7 +350,7 @@ public class SqlParser
             var right = parseTerm();
             left = CreateParseResult(new SqlArithmeticBinaryExpr
             {
-                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span),
+                Span = _text.CreateSpan(left.ResultValue.Span, right.ResultValue.Span),
                 Left = left.ResultValue,
                 Operator = op.ToArithmeticOperator(),
                 Right = right.ResultValue
@@ -372,7 +369,7 @@ public class SqlParser
             var right = parseTerm();
             left = new SqlArithmeticBinaryExpr
             {
-                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span),
+                Span = _text.CreateSpan(left.ResultValue.Span, right.ResultValue.Span),
                 Left = left.ResultValue,
                 Operator = op.ToArithmeticOperator(),
                 Right = right.ResultValue,
@@ -392,7 +389,7 @@ public class SqlParser
             var right = parseTerm();
             left = new SqlArithmeticBinaryExpr
             {
-                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span),
+                Span = _text.CreateSpan(left.ResultValue.Span, right.ResultValue.Span),
                 Left = left.ResultValue,
                 Operator = op.ToArithmeticOperator(),
                 Right = right.ResultValue,
@@ -462,7 +459,7 @@ public class SqlParser
 
     public ParseResult<SqlCreateTableExpression> ParseCreateTableStatement()
     {
-        if (!TryKeywords(["CREATE", "TABLE"], out _))
+        if (!TryKeywords(["CREATE", "TABLE"], out var startSpan))
         {
             return NoneResult<SqlCreateTableExpression>();
         }
@@ -475,6 +472,7 @@ public class SqlParser
 
         var createTableStatement = new SqlCreateTableExpression()
         {
+            Span = _text.CreateSpan(startSpan),
             TableName = tableName.Word,
         };
 
@@ -516,12 +514,13 @@ public class SqlParser
 
         SkipStatementEnd();
 
+        createTableStatement.Span = _text.CreateSpan(startSpan);
         return CreateParseResult(createTableStatement);
     }
 
     public ParseResult<SqlSpAddExtendedPropertyExpression> ParseExecSpAddExtendedProperty()
     {
-        if (!TryKeywords(["EXEC", "SP_AddExtendedProperty"], out _))
+        if (!TryKeywords(["EXEC", "SP_AddExtendedProperty"], out var startSpan))
         {
             return NoneResult<SqlSpAddExtendedPropertyExpression>();
         }
@@ -541,6 +540,7 @@ public class SqlParser
 
         var sqlSpAddExtendedProperty = new SqlSpAddExtendedPropertyExpression
         {
+            Span = _text.CreateSpan(startSpan),
             Name = p[0].Value,
             Value = p[1].Value,
             Level0Type = p[2].Value,
@@ -555,7 +555,7 @@ public class SqlParser
 
     public ParseResult<SqlConstraintForeignKey> ParseForeignKeyExpression()
     {
-        if (!TryKeywords(["FOREIGN", "KEY"], out _))
+        if (!TryKeywords(["FOREIGN", "KEY"], out var startSpan))
         {
             return NoneResult<SqlConstraintForeignKey>();
         }
@@ -616,6 +616,7 @@ public class SqlParser
         var notForReplication = TryKeywords(["NOT", "FOR", "REPLICATION"], out _);
         return CreateParseResult(new SqlConstraintForeignKey
         {
+            Span = _text.CreateSpan(startSpan),
             Columns = columns,
             ReferencedTableName = tableName.Word,
             RefColumn = refColumn,
@@ -627,7 +628,7 @@ public class SqlParser
 
     public ParseResult<SelectStatement> ParseSelectStatement()
     {
-        if (!TryKeyword("SELECT", out _))
+        if (!TryKeyword("SELECT", out var startSpan))
         {
             return NoneResult<SelectStatement>();
         }
@@ -717,6 +718,7 @@ public class SqlParser
         }
 
         SkipStatementEnd();
+        selectStatement.Span = _text.CreateSpan(startSpan);
         return CreateParseResult(selectStatement);
     }
 
@@ -737,7 +739,7 @@ public class SqlParser
 
     private ParseResult<SqlUnpivotClause> ParseUnpivotClause()
     {
-        if (!TryKeyword("UNPIVOT", out _))
+        if (!TryKeyword("UNPIVOT", out var startSpan))
         {
             return NoneResult<SqlUnpivotClause>();
         }
@@ -780,6 +782,7 @@ public class SqlParser
 
         return CreateParseResult(new SqlUnpivotClause
         {
+            Span = _text.CreateSpan(startSpan),
             NewColumn = newColumn.ResultValue,
             ForSource = forSource.ResultValue,
             InColumns = inColumns.ResultValue,
@@ -789,7 +792,7 @@ public class SqlParser
 
     private ParseResult<SqlForXmlPathClause> ParseForXmlPathClause()
     {
-        if (!TryKeywords(["FOR", "XML", "PATH"], out _))
+        if (!TryKeywords(["FOR", "XML", "PATH"], out var startSpan))
         {
             return NoneResult<SqlForXmlPathClause>();
         }
@@ -802,18 +805,22 @@ public class SqlParser
         }
 
         forXmlClause.CommonDirectives = Parse_ForXmlRootDirectives();
+        forXmlClause.Span = _text.CreateSpan(startSpan); 
         return forXmlClause;
     }
 
     private ParseResult<SqlForXmlAutoClause> ParseForXmlAutoClause()
     {
-        if (!TryKeywords(["FOR", "XML", "AUTO"], out _))
+        if (!TryKeywords(["FOR", "XML", "AUTO"], out var startSpan))
         {
             return NoneResult<SqlForXmlAutoClause>();
         }
 
-        var forXmlClause = new SqlForXmlAutoClause();
-        forXmlClause.CommonDirectives = Parse_ForXmlRootDirectives();
+        var forXmlClause = new SqlForXmlAutoClause
+        {
+            CommonDirectives = Parse_ForXmlRootDirectives(),
+            Span = _text.CreateSpan(startSpan),
+        };
         return forXmlClause;
     }
 
@@ -827,11 +834,12 @@ public class SqlParser
 
         var elements = ParseWithComma(() =>
         {
-            if (TryKeyword("ROOT", out _))
+            if (TryKeyword("ROOT", out var span))
             {
                 var rootName = ParseWithParentheses(ParseValue);
                 return new SqlForXmlRootDirective
                 {
+                    Span = _text.CreateSpan(span),
                     RootName = rootName.ResultValue
                 };
             }
@@ -876,9 +884,10 @@ public class SqlParser
     private ParseResult<SqlUnionSelect> Parse_UnionSelect()
     {
         var isAll = false;
-        if (!TryKeywords(["UNION", "ALL"], out _))
+        var startSpan = new TextSpan();
+        if (!TryKeywords(["UNION", "ALL"], out startSpan))
         {
-            if (!TryKeyword("UNION", out _))
+            if (!TryKeyword("UNION", out startSpan))
             {
                 return NoneResult<SqlUnionSelect>();
             }
@@ -887,7 +896,7 @@ public class SqlParser
         {
             isAll = true;
         }
-
+        
         var select = ParseGroupOr(ParseSelectStatement);
         if (select.HasError)
         {
@@ -896,6 +905,7 @@ public class SqlParser
 
         return new SqlUnionSelect
         {
+            Span = _text.CreateSpan(startSpan),
             IsAll = isAll,
             SelectStatement = select.ResultValue,
         };
@@ -915,7 +925,7 @@ public class SqlParser
             var closeSpan = MatchSymbol(")");
             return new SqlGroup()
             {
-                Span = TextSpan.FromBound(openSpan, closeSpan),
+                Span = _text.CreateSpan(openSpan, closeSpan),
                 Inner = inner.ResultValue
             };
         }
@@ -1044,7 +1054,7 @@ public class SqlParser
 
     private ParseResult<SqlOverOrderByClause> ParseOverOrderByClause()
     {
-        if (!TryKeywords(["OVER"], out _))
+        if (!TryKeywords(["OVER"], out var startSpan))
         {
             return NoneResult<SqlOverOrderByClause>();
         }
@@ -1068,6 +1078,7 @@ public class SqlParser
 
         return new SqlOverOrderByClause
         {
+            Span = _text.CreateSpan(startSpan),
             Columns = orderColumns
         };
     }
@@ -1271,7 +1282,7 @@ public class SqlParser
             var betweenExpr = Sub_Between_And_Expr(searchCondition);
             return new SqlBetweenValue
             {
-                Span = TextSpan.FromBound(searchCondition.Left.Span, betweenExpr!.Span),
+                Span = _text.CreateSpan(searchCondition.Left.Span, betweenExpr!.Span),
                 Start = betweenExpr.Left,
                 End = betweenExpr.Right!
             };
@@ -1290,7 +1301,7 @@ public class SqlParser
 
         return new SqlBetweenValue
         {
-            Span = TextSpan.FromBound(start.ResultValue.Span, end.ResultValue.Span),
+            Span = _text.CreateSpan(start.ResultValue.Span, end.ResultValue.Span),
             Start = start.ResultValue,
             End = end.ResultValue
         };
@@ -1317,7 +1328,7 @@ public class SqlParser
 
     private ParseResult<SqlWhenThenClause> Parse_Case_WhenClause()
     {
-        if (!TryKeyword("WHEN", out _))
+        if (!TryKeyword("WHEN", out var startSpan))
         {
             return NoneResult<SqlWhenThenClause>();
         }
@@ -1341,6 +1352,7 @@ public class SqlParser
 
         return CreateParseResult(new SqlWhenThenClause
         {
+            Span = _text.CreateSpan(startSpan),
             When = whenExpr.ResultValue,
             Then = thenExpr.ResultValue
         });
@@ -1424,6 +1436,7 @@ public class SqlParser
         {
             return CreateParseResult(new SelectColumn
             {
+                Span = arithmetic.ResultValue.Span,
                 Field = arithmetic.ResultValue
             });
         }
@@ -1491,7 +1504,7 @@ public class SqlParser
 
             left = CreateParseResult(new SqlConditionExpression
             {
-                Span = TextSpan.FromBound(left.ResultValue.Span, right.Span),
+                Span = _text.CreateSpan(left.ResultValue.Span, right.Span),
                 Left = left.ResultValue,
                 ComparisonOperator = op,
                 OperatorSpan = comparisonOperator.ResultValue.Span,
@@ -1514,6 +1527,7 @@ public class SqlParser
         {
             dataSize.Size = "MAX";
             _text.MatchSymbol(")");
+            dataSize.Span = _text.CreateSpan(openParenthesis);
             return dataSize;
         }
 
@@ -1529,6 +1543,7 @@ public class SqlParser
             return CreateParseError("Expected )");
         }
 
+        dataSize.Span = _text.CreateSpan(openParenthesis);
         return dataSize;
     }
 
@@ -1573,6 +1588,7 @@ public class SqlParser
         {
             return new SqlFuncTableSource()
             {
+                Span = function.ResultValue.Span,
                 Function = function.ResultValue
             };
         }
@@ -1581,6 +1597,7 @@ public class SqlParser
         {
             return new SqlTableSource()
             {
+                Span = tableName.ResultValue.Span,
                 TableName = tableName.ResultValue.FieldName
             };
         }
@@ -1699,43 +1716,49 @@ public class SqlParser
 
     private ParseResult<SqlJoinTableCondition> Parse_JoinTableSource()
     {
-        if (TryKeywords(["INNER", "JOIN"], out _))
+        if (TryKeywords(["INNER", "JOIN"], out var innerJoinStartSpan))
         {
             var tableSource = Parse_JoinTableSourceOn();
+            tableSource.ResultValue.Span = _text.CreateSpan(innerJoinStartSpan);
             return tableSource.ResultValue;
         }
 
-        if (TryKeyword("JOIN", out _))
+        if (TryKeyword("JOIN", out var joinStartSpan))
         {
             var tableSource = Parse_JoinTableSourceOn();
+            tableSource.ResultValue.Span = _text.CreateSpan(joinStartSpan);
             return tableSource.ResultValue;
         }
 
-        if (TryKeywords(["LEFT", "JOIN"], out _))
+        if (TryKeywords(["LEFT", "JOIN"], out var leftJoinStartSpan))
         {
             var tableSource = Parse_JoinTableSourceOn().ResultValue;
             tableSource.JoinType = JoinType.Left;
+            tableSource.Span = _text.CreateSpan(leftJoinStartSpan);
             return tableSource;
         }
 
-        if (TryKeywords(["LEFT", "OUTER", "JOIN"], out _))
+        if (TryKeywords(["LEFT", "OUTER", "JOIN"], out var leftOuterJoinStartSpan))
         {
             var tableSource = Parse_JoinTableSourceOn().ResultValue;
             tableSource.JoinType = JoinType.Left;
+            tableSource.Span = _text.CreateSpan(leftOuterJoinStartSpan);
             return tableSource;
         }
 
-        if (TryKeywords(["RIGHT", "JOIN"], out _))
+        if (TryKeywords(["RIGHT", "JOIN"], out var rightJoinStartSpan))
         {
             var tableSource = Parse_JoinTableSourceOn().ResultValue;
             tableSource.JoinType = JoinType.Right;
+            tableSource.Span = _text.CreateSpan(rightJoinStartSpan);
             return tableSource;
         }
 
-        if (TryKeywords(["RIGHT", "OUTER", "JOIN"], out _))
+        if (TryKeywords(["RIGHT", "OUTER", "JOIN"], out var rightOuterJoinStartSpan))
         {
             var tableSource = Parse_JoinTableSourceOn().ResultValue;
             tableSource.JoinType = JoinType.Right;
+            tableSource.Span = _text.CreateSpan(rightOuterJoinStartSpan);
             return tableSource;
         }
 
@@ -1757,6 +1780,7 @@ public class SqlParser
         var onCondition = ParseArithmeticExpr();
         return new SqlJoinTableCondition()
         {
+            Span = _text.CreateSpan(tableSource.ResultValue.Span),
             JoinedTable = tableSource.ResultValue,
             OnCondition = onCondition.ResultValue,
         };
@@ -1790,6 +1814,7 @@ public class SqlParser
             {
                 return new SqlNegativeValue
                 {
+                    Span = _text.CreateSpan(minusSpan),
                     Value = identifier.ResultValue,
                 };
             }
@@ -1802,6 +1827,7 @@ public class SqlParser
 
             return new SqlNegativeValue
             {
+                Span = _text.CreateSpan(minusSpan),
                 Value = expr.ResultValue
             };
         }
@@ -1818,7 +1844,7 @@ public class SqlParser
             var right = parseTerm();
             left = CreateParseResult(new SqlSearchCondition
             {
-                Span = TextSpan.FromBound(left.ResultValue.Span, right.ResultValue.Span),
+                Span = _text.CreateSpan(left.ResultValue.Span, right.ResultValue.Span),
                 Left = left.ResultValue,
                 LogicalOperator = op.Value,
                 OperatorSpan = op.Span,
@@ -1851,6 +1877,7 @@ public class SqlParser
                 var asExpr = (SqlAsExpr)columnExpr.Field;
                 columnExpr = new SelectColumn()
                 {
+                    Span = asExpr.Span,
                     Field = asExpr.Instance,
                     Alias = asExpr.As.ToSql()
                 };
@@ -1865,6 +1892,7 @@ public class SqlParser
                     {
                         Field = new SqlAssignExpr()
                         {
+                            Span = condition.Span,
                             Left = condition.Left,
                             Right = condition.Right
                         }
@@ -1889,6 +1917,7 @@ public class SqlParser
                 {
                     Field = new SqlAssignExpr()
                     {
+                        Span = _text.CreateSpan(columnExpr.Span, rightExpr.ResultValue.Span),
                         Left = columnExpr,
                         Right = rightExpr.ResultValue,
                     },
@@ -1913,6 +1942,7 @@ public class SqlParser
 
             return new SqlAliasExpr()
             {
+                Span = aliasName.ResultValue.Span,
                 Name = aliasName.ResultValue.Value
             };
         }
@@ -1921,6 +1951,7 @@ public class SqlParser
         {
             return new SqlAliasExpr
             {
+                Span = aliasName2.ResultValue.Span,
                 Name = aliasName2.ResultValue.Value
             };
         }
@@ -2012,7 +2043,7 @@ public class SqlParser
 
     private ParseResult<SqlTableHintIndex> Parse_TableHintIndex()
     {
-        if (!TryKeyword("INDEX", out _))
+        if (!TryKeyword("INDEX", out var startSpan))
         {
             return NoneResult<SqlTableHintIndex>();
         }
@@ -2056,6 +2087,7 @@ public class SqlParser
 
         return new SqlTableHintIndex
         {
+            Span = _text.CreateSpan(startSpan),
             IndexValues = indexValues.ResultValue
         };
     }
@@ -2100,6 +2132,7 @@ public class SqlParser
                 var hint = ReadSqlIdentifier().Word;
                 return new SqlHint()
                 {
+                    Span = _text.CreateSpan(tableHintIndex.ResultValue.Span),
                     Name = hint
                 };
             });
@@ -2117,7 +2150,7 @@ public class SqlParser
 
     private ParseResult<ISqlExpression> Parse_WhereExpression()
     {
-        //var rc = Or<ISqlExpression>(Parse_SearchCondition, Parse_ConditionExpression)();
+        var startPosition = _text.Position;
         var rc = ParseArithmeticExpr();
         if (rc.HasError)
         {
@@ -2134,6 +2167,7 @@ public class SqlParser
 
             return new SqlSearchCondition
             {
+                Span = _text.CreateSpan(startPosition),
                 Left = rc.ResultValue,
                 LogicalOperator = logicalOperator.Result!.Value,
                 Right = rightExprResult.Result
@@ -2172,11 +2206,7 @@ public class SqlParser
 
             return new SqlGroup
             {
-                Span = new TextSpan
-                {
-                    Offset = openSpan.Offset,
-                    Length = closeSpan.Offset - openSpan.Offset + closeSpan.Length
-                },
+                Span = _text.CreateSpan(startPosition),
                 Inner = subExpr.ResultValue
             };
         }
@@ -2318,6 +2348,7 @@ public class SqlParser
     {
         var columns = ParseParenthesesWithComma(() =>
         {
+            var startPosition = _text.Position;
             var columnName = _text.ReadSqlIdentifier();
             var order = string.Empty;
             if (TryKeyword("ASC", out _))
@@ -2331,6 +2362,7 @@ public class SqlParser
 
             return CreateParseResult(new SqlConstraintColumn
             {
+                Span = _text.CreateSpan(startPosition),
                 ColumnName = columnName.Word,
                 Order = order,
             });
@@ -2340,6 +2372,7 @@ public class SqlParser
 
     private ParseResult<SqlColumnDefinition> ParseColumnTypeDefinition(TextSpan columnNameSpan)
     {
+        var startPosition = _text.Position;
         var column = new SqlColumnDefinition
         {
             ColumnName = columnNameSpan.Word,
@@ -2353,33 +2386,10 @@ public class SqlParser
         }
 
         column.DataSize = dataSize.Result;
+        column.Span = _text.CreateSpan(startPosition);
         return CreateParseResult(column);
     }
 
-    /*
-     * <computed_column_definition> ::=
-column_name AS computed_column_expression
-[ PERSISTED [ NOT NULL ] ]
-[
-    [ CONSTRAINT constraint_name ]
-    { PRIMARY KEY | UNIQUE }
-        [ CLUSTERED | NONCLUSTERED ]
-        [
-            WITH FILLFACTOR = fillfactor
-          | WITH ( <index_option> [ ,... n ] )
-        ]
-        [ ON { partition_scheme_name ( partition_column_name )
-        | filegroup | "default" } ]
-
-    | [ FOREIGN KEY ]
-        REFERENCES referenced_table_name [ ( ref_column ) ]
-        [ ON DELETE { NO ACTION | CASCADE } ]
-        [ ON UPDATE { NO ACTION } ]
-        [ NOT FOR REPLICATION ]
-
-    | CHECK [ NOT FOR REPLICATION ] ( logical_expression )
-]
-     */
     private ParseResult<SqlComputedColumnDefinition> ParseComputedColumnDefinition()
     {
         var startPosition = _text.Position;
@@ -2411,18 +2421,19 @@ column_name AS computed_column_expression
         var persist = TryKeyword("PERSISTED", out _);
         var notNull = TryKeywords(["NOT", "NULL"], out _);
 
-        return CreateParseResult(new SqlComputedColumnDefinition
+        return new SqlComputedColumnDefinition
         {
+            Span = _text.CreateSpan(startPosition),
             ColumnName = columnNameSpan.Word,
             Expression = computedColumnExpressionSpan.Word,
             IsPersisted = persist,
             IsNotNull = notNull
-        });
+        };
     }
 
     private ParseResult<SqlConstraintDefaultValue> ParseDefaultValue()
     {
-        if (!TryKeyword("DEFAULT", out _))
+        if (!TryKeyword("DEFAULT", out var startSpan))
         {
             return NoneResult<SqlConstraintDefaultValue>();
         }
@@ -2434,6 +2445,7 @@ column_name AS computed_column_expression
             _text.MatchSymbol(")");
             return CreateParseResult(new SqlConstraintDefaultValue
             {
+                Span = _text.CreateSpan(startSpan),
                 ConstraintName = string.Empty,
                 DefaultValue = defaultValue.Word
             });
@@ -2445,6 +2457,7 @@ column_name AS computed_column_expression
             _text.ReadIdentifier();
             return CreateParseResult(new SqlConstraintDefaultValue
             {
+                Span = _text.CreateSpan(startSpan),
                 ConstraintName = string.Empty,
                 DefaultValue = nullValue.Word
             });
@@ -2463,6 +2476,7 @@ column_name AS computed_column_expression
             };
             return CreateParseResult(new SqlConstraintDefaultValue
             {
+                Span = _text.CreateSpan(startSpan),
                 ConstraintName = string.Empty,
                 DefaultValue = defaultValue.Word,
             });
@@ -2472,6 +2486,7 @@ column_name AS computed_column_expression
         {
             return CreateParseResult(new SqlConstraintDefaultValue
             {
+                Span = _text.CreateSpan(startSpan),
                 ConstraintName = string.Empty,
                 DefaultValue = quotedString.Word,
             });
@@ -2481,6 +2496,7 @@ column_name AS computed_column_expression
         {
             return CreateParseResult(new SqlConstraintDefaultValue
             {
+                Span = _text.CreateSpan(startSpan),
                 ConstraintName = string.Empty,
                 DefaultValue = date.Word,
             });
@@ -2490,6 +2506,7 @@ column_name AS computed_column_expression
         {
             return CreateParseResult(new SqlConstraintDefaultValue
             {
+                Span = _text.CreateSpan(startSpan),
                 ConstraintName = string.Empty,
                 DefaultValue = negativeNumber.Word,
             });
@@ -2499,6 +2516,7 @@ column_name AS computed_column_expression
         {
             return CreateParseResult(new SqlConstraintDefaultValue
             {
+                Span = _text.CreateSpan(startSpan),
                 ConstraintName = string.Empty,
                 DefaultValue = floatNumber.Word,
             });
@@ -2507,6 +2525,7 @@ column_name AS computed_column_expression
         defaultValue = _text.ReadInt();
         return CreateParseResult(new SqlConstraintDefaultValue
         {
+            Span = _text.CreateSpan(startSpan),
             ConstraintName = string.Empty,
             DefaultValue = defaultValue.Word,
         });
@@ -2538,11 +2557,7 @@ column_name AS computed_column_expression
         {
             SqlType = SqlType.HexValue,
             Value = "0x" + hexValue.Word,
-            Span = new TextSpan
-            {
-                Offset = startSpan.Offset,
-                Length = hexValue.Offset - startSpan.Offset + hexValue.Length
-            }
+            Span = _text.CreateSpan(startSpan),
         };
     }
 
@@ -2566,18 +2581,19 @@ column_name AS computed_column_expression
             _text.MatchSymbol(")");
         }
 
+        sqlIdentity.Span = _text.CreateSpan(startSpan);
         return CreateParseResult(sqlIdentity);
     }
 
     private ParseResult<SqlValue> ParseIntValue()
     {
-        if (_text.Try(_text.ReadInt, out var number))
+        if (_text.Try(_text.ReadInt, out var numberSpan))
         {
             return CreateParseResult(new SqlValue
             {
                 SqlType = SqlType.IntValue,
-                Value = number.Word,
-                Span = number
+                Value = numberSpan.Word,
+                Span = numberSpan
             });
         }
 
@@ -2626,25 +2642,21 @@ column_name AS computed_column_expression
         }
 
         var numberExpr = number.ResultValue;
-        numberExpr.Span = new TextSpan
-        {
-            Word = _text.GetText(startPosition, _text.Position),
-            Offset = startPosition,
-            Length = _text.Position - startPosition,
-        };
+        numberExpr.Span = _text.CreateSpan(startPosition);
         numberExpr.Value = negative ? $"-{numberExpr.Value}" : numberExpr.Value;
         return number;
     }
 
     private ParseResult<SqlOrderByClause> ParseOrderByClause()
     {
-        if (!TryKeywords(["ORDER", "BY"], out _))
+        if (!TryKeywords(["ORDER", "BY"], out var startSpan))
         {
             return NoneResult<SqlOrderByClause>();
         }
 
         var orderByColumns = ParseWithComma<SqlOrderColumn>(() =>
         {
+            var columnStartPosition = _text.Position;
             var column = ParseArithmeticExpr().ResultValue;
             var order = OrderType.Asc;
             if (TryKeyword("ASC", out _))
@@ -2658,6 +2670,7 @@ column_name AS computed_column_expression
 
             return new SqlOrderColumn
             {
+                Span = _text.CreateSpan(columnStartPosition),
                 ColumnName = column,
                 Order = order
             };
@@ -2669,6 +2682,7 @@ column_name AS computed_column_expression
 
         return new SqlOrderByClause
         {
+            Span = _text.CreateSpan(startSpan),
             Columns = orderByColumns.ResultValue
         };
     }
@@ -2676,7 +2690,7 @@ column_name AS computed_column_expression
     private ParseResult<SqlParameterValue> ParseParameterAssignValue()
     {
         SkipWhiteSpace();
-        if (!_text.Try(_text.ReadSqlIdentifier, out var name))
+        if (!_text.Try(_text.ReadSqlIdentifier, out var nameSpan))
         {
             return NoneResult<SqlParameterValue>();
         }
@@ -2693,7 +2707,7 @@ column_name AS computed_column_expression
 
         return CreateParseResult(new SqlParameterValue
         {
-            Name = name.Word,
+            Name = nameSpan.Word,
             Value = nameValue.Word
         });
     }
@@ -2894,12 +2908,12 @@ column_name AS computed_column_expression
 
     private ParseResult<SqlValue> ParseSqlQuotedString()
     {
-        if (_text.Try(_text.ReadSqlQuotedString, out var quotedString))
+        if (_text.Try(_text.ReadSqlQuotedString, out var quotedStringSpan))
         {
             return new SqlValue
             {
-                Span = quotedString,
-                Value = quotedString.Word,
+                Span = quotedStringSpan,
+                Value = quotedStringSpan.Word,
             };
         }
 
@@ -3055,10 +3069,12 @@ column_name AS computed_column_expression
         if (_text.Try(_text.ReadInt, out var number))
         {
             toggle.Value = number.Word;
+            toggle.Span = _text.CreateSpan(startPosition);
             return CreateParseResult(toggle);
         }
 
         toggle.Value = _text.ReadSqlIdentifier().Word;
+        toggle.Span = _text.CreateSpan(startPosition);
         return CreateParseResult(toggle);
     }
 
@@ -3195,24 +3211,10 @@ column_name AS computed_column_expression
     private bool TryReadSqlIdentifier(out TextSpan result)
     {
         SkipWhiteSpace();
-        var startPosition = _text.Position;
         if (!_text.Try(_text.ReadSqlIdentifier, out result))
         {
             return false;
         }
-
-        // if (ReservedWords.Contains(result.Word.ToUpper()))
-        // {
-        //     _text.Position = startPosition;
-        //     result = new TextSpan
-        //     {
-        //         Word = string.Empty,
-        //         Offset = startPosition,
-        //         Length = 0
-        //     };
-        //     return false;
-        // }
-
         return true;
     }
 
@@ -3223,7 +3225,6 @@ column_name AS computed_column_expression
         {
             return false;
         }
-
         return true;
     }
 }

@@ -959,6 +959,17 @@ public class StringParser
         };
     }
     
+    public TextSpan CreateSpan(TextSpan startSpan, TextSpan endSpan)
+    {
+        var length = endSpan.Offset + endSpan.Length - startSpan.Offset;
+        return new TextSpan
+        {
+            Word = _text.Substring(startSpan.Offset, length),
+            Offset = startSpan.Offset,
+            Length = length
+        };
+    }
+    
     public TextSpan CreateSpan(int startOffset)
     {
         return new TextSpan
