@@ -36,4 +36,10 @@ public static class TestHelper
                 .WhenTypeIs<TextSpan>()
             );
     }
+
+    public static ParseResult<ISqlExpression> ParseSql(this string text)
+    {
+        var sqlParser = new SqlParser(text);
+        return sqlParser.Parse();
+    }
 }

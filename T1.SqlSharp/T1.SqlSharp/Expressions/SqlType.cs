@@ -58,5 +58,6 @@ public enum SqlType
     ComparisonOperator,
     OverOrderBy,
     OverPartitionByClause,
-    HavingClause
+    HavingClause,
+    SetValueStatement
 }

@@ -49,19 +49,24 @@ public class SqlParser
 
     public ParseResult<ISqlExpression> Parse()
     {
-        if (Try(ParseCreateTableStatement, out var createTableResult))
+        if (Try(ParseCreateTableStatement, out var createTableStatement))
         {
-            return createTableResult.Result;
+            return createTableStatement.Result;
         }
 
-        if (Try(ParseSelectStatement, out var selectResult))
+        if (Try(ParseSelectStatement, out var selectStatement))
         {
-            return selectResult.Result;
+            return selectStatement.Result;
         }
 
-        if (Try(ParseExecSpAddExtendedProperty, out var execSpAddExtendedPropertyResult))
+        if (Try(ParseExecSpAddExtendedProperty, out var execSpAddExtendedProperty))
         {
-            return execSpAddExtendedPropertyResult.Result;
+            return execSpAddExtendedProperty.Result;
+        }
+        
+        if(Try(ParseSetValueStatement, out var setValueStatement))
+        {
+            return setValueStatement.Result;
         }
 
         return CreateParseError("Unknown statement");
@@ -1913,7 +1918,25 @@ public class SqlParser
         }
         return NoneResult<SqlFieldExpr>();
     }
-    
+
+    private ParseResult<SqlSetValueStatement> ParseSetValueStatement()
+    {
+        if (!TryKeywords(["SET"], out _))
+        {
+            return NoneResult<SqlSetValueStatement>();
+        }
+        var name = Parse_SqlIdentifier().ResultValue;
+        if (!TryMatch("=", out var equalSpan))
+        {
+            return CreateParseError("Expected =");
+        }
+        var value = ParseArithmeticExpr().ResultValue;
+        return new SqlSetValueStatement()
+        {
+            Name = name,
+            Value = value
+        };
+    }
     
     private ParseResult<SqlValue> Parse_SqlIdentifierValue()
     {
