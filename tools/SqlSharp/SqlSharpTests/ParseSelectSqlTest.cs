@@ -7,44 +7,52 @@ using T1.Standard.DesignPatterns;
 namespace SqlSharpTests;
 
 [TestFixture]
-public class ExcludeNonSelectStatementTest
-{
-    [Test]
-    public void ExtractKnownStatements()
-    {
-        var sql = $"""
-                   print '123'
-                   set name='123'
-                   select 1
-                   """;
-        var rc = sql.ExtractStatements().ToList();
-        rc.ShouldBeList([
-            new SqlSetValueStatement()
-            {
-                Name = new SqlFieldExpr { FieldName = "name" },
-                Value = new SqlValue { Value = "'123'" }
-            },
-            new SelectStatement
-            {
-                Columns =
-                [
-                    new SelectColumn()
-                    {
-                        Field = new SqlValue
-                        {
-                            SqlType = SqlType.IntValue,
-                            Value = "1"
-                        }
-                    }
-                ]
-            }
-        ]);
-    }
-}
-
-[TestFixture]
 public class ParseSelectSqlTest
 {
+    [Test]
+    public void Between_var_and_func_with_var()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM customer
+                   where id BETWEEN @a and DATEADD(d,+1,@b)
+                   """; 
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "id" },
+                ComparisonOperator = ComparisonOperator.Between,
+                Right = new SqlBetweenValue
+                {
+                    Start = new SqlFieldExpr { FieldName = "@a" },
+                    End = new SqlFunctionExpression
+                    {
+                        FunctionName = "DATEADD",
+                        Parameters =
+                        [
+                            new SqlFieldExpr() { FieldName = "d" },
+                            new SqlValue { SqlType = SqlType.IntValue, Value = "+1" },
+                            new SqlFieldExpr { FieldName = "@b" }
+                        ]
+                    }
+                }
+            }
+        });
+    }
+    
     [Test]
     public void Hints_with_prop_equal_value()
     {

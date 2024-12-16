@@ -2620,6 +2620,29 @@ public class SqlParser
 
         return NoneResult<SqlToken>();
     }
+    
+    private ParseResult<SqlToken> Parse_NegativeOrPositive()
+    {
+        if (TryMatch("-", out var minusSpan))
+        {
+            return new SqlToken
+            {
+                Span = minusSpan,
+                Value = "-"
+            };
+        }
+
+        if (TryMatch("+", out var plusSpan))
+        {
+            return new SqlToken
+            {
+                Span = plusSpan,
+                Value = "+"
+            };
+        }
+
+        return NoneResult<SqlToken>();
+    }
 
     private ParseResult<SqlValue> ParseNumberValue()
     {
@@ -2634,7 +2657,14 @@ public class SqlParser
         }
 
         var startPosition = _text.Position;
-        var negative = TryMatch("-", out _);
+        var negativeOrPositive = string.Empty;
+        var negativeOrPositiveToken = Parse_NegativeOrPositive().Result;
+        if (negativeOrPositiveToken != null)
+        {
+            negativeOrPositive = negativeOrPositiveToken.Value;
+        }
+        
+        
         var number = Or(ParseFloatValue, ParseIntValue)();
         if (number.HasError)
         {
@@ -2650,7 +2680,18 @@ public class SqlParser
 
         var numberExpr = number.ResultValue;
         numberExpr.Span = _text.CreateSpan(startPosition);
-        numberExpr.Value = negative ? $"-{numberExpr.Value}" : numberExpr.Value;
+        switch (negativeOrPositive)
+        {
+            case "":
+                numberExpr.Value = numberExpr.Value;
+                break;
+            case "+":
+                numberExpr.Value = $"+{numberExpr.Value}";
+                break;
+            case "-":
+                numberExpr.Value = $"-{numberExpr.Value}";
+                break;
+        }
         return number;
     }
 
