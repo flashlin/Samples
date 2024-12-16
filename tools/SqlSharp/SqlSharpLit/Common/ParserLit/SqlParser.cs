@@ -1767,6 +1767,7 @@ public class SqlParser
 
     private ParseResult<SqlJoinTableCondition> Parse_JoinTableSourceOn()
     {
+        var startPosition = _text.Position;
         if (!Try(Parse_TableSourceWithHints, out var tableSource))
         {
             return NoneResult<SqlJoinTableCondition>();
@@ -1780,7 +1781,7 @@ public class SqlParser
         var onCondition = ParseArithmeticExpr();
         return new SqlJoinTableCondition()
         {
-            Span = _text.CreateSpan(tableSource.ResultValue.Span),
+            Span = _text.CreateSpan(startPosition),
             JoinedTable = tableSource.ResultValue,
             OnCondition = onCondition.ResultValue,
         };
@@ -2124,6 +2125,7 @@ public class SqlParser
             MatchSymbol("(");
             var tableHints = ParseWithComma<ISqlExpression>(() =>
             {
+                var hintStartPosition = _text.Position;
                 if (Try(Parse_TableHintIndex, out var tableHintIndex))
                 {
                     return tableHintIndex.ResultValue;
@@ -2132,7 +2134,7 @@ public class SqlParser
                 var hint = ReadSqlIdentifier().Word;
                 return new SqlHint()
                 {
-                    Span = _text.CreateSpan(tableHintIndex.ResultValue.Span),
+                    Span = _text.CreateSpan(hintStartPosition),
                     Name = hint
                 };
             });
