@@ -1004,7 +1004,7 @@ public class SqlParser
 
             return new SqlUnaryExpr
             {
-                Span = TextSpan.FromBound(startSpan, expr.ResultValue.Span),
+                Span = _text.CreateSpan(startSpan, expr.ResultValue.Span),
                 Operator = UnaryOperator.BitwiseNot,
                 Operand = expr.ResultValue
             };
