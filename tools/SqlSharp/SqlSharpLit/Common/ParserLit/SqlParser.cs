@@ -1960,19 +1960,21 @@ public class SqlParser
 
         if (TryMatch("=", out var equalSpan))
         {
-            if (!TryMatch("(", out var openParenthesis))
-            {
-                return CreateParseError("Expected (");
-            }
-
+            var hasParenthesis = TryMatch("(", out var openParenthesis);
             var indexName = _text.ReadSqlIdentifier();
-            if (!TryMatch(")", out var closeParenthesis))
+            if (hasParenthesis && !TryMatch(")", out var closeParenthesis))
             {
                 return CreateParseError("Expected )");
             }
 
+            if (!hasParenthesis)
+            {
+                openParenthesis = indexName;
+            }
+
             return new SqlTableHintIndex()
             {
+                Span = _text.CreateSpan(openParenthesis),
                 IndexValues = [indexName.Word]
             };
         }

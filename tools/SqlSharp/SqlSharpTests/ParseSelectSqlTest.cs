@@ -10,6 +10,40 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Hints_with_prop_equal_value()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM  
+                   customer c WITH (nolock, index=IX_id)  
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement()
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource 
+                { 
+                    TableName = "customer", 
+                    Alias = "c",
+                    Withs =
+                    [
+                        new SqlHint { Name = "nolock" },
+                        new SqlTableHintIndex { IndexValues = ["IX_id"] }
+                    ]
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Select_number_as_aliasName()
     {
         var sql = $"""
