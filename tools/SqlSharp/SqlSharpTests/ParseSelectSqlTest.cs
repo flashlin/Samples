@@ -7,6 +7,42 @@ using T1.Standard.DesignPatterns;
 namespace SqlSharpTests;
 
 [TestFixture]
+public class ExcludeNonSelectStatementTest
+{
+    [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   print '123'
+                   set name='123'
+                   select 1
+                   """;
+        var rc = sql.ExtractStatements().ToList();
+        rc.ShouldBeList([
+            new SqlSetValueStatement()
+            {
+                Name = new SqlFieldExpr { FieldName = "name" },
+                Value = new SqlValue { Value = "'123'" }
+            },
+            new SelectStatement
+            {
+                Columns =
+                [
+                    new SelectColumn()
+                    {
+                        Field = new SqlValue
+                        {
+                            SqlType = SqlType.IntValue,
+                            Value = "1"
+                        }
+                    }
+                ]
+            }
+        ]);
+    }
+}
+
+[TestFixture]
 public class ParseSelectSqlTest
 {
     [Test]
@@ -29,9 +65,9 @@ public class ParseSelectSqlTest
             ],
             FromSources =
             [
-                new SqlTableSource 
-                { 
-                    TableName = "customer", 
+                new SqlTableSource
+                {
+                    TableName = "customer",
                     Alias = "c",
                     Withs =
                     [
@@ -42,7 +78,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Select_number_as_aliasName()
     {
@@ -62,14 +98,14 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Func_a_multi_negativeNumber()
     {
         var sql = $"""
                    Select SUM(a*-1)
                    from customer
-                   """; 
+                   """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
@@ -98,7 +134,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Over_order_by_func()
     {
@@ -951,13 +987,16 @@ public class ParseSelectSqlTest
                         },
                         OrderBy = new SqlOrderByClause
                         {
-                            Columns = [new SqlOrderColumn()
-                            {
-                                ColumnName = new SqlFieldExpr()
+                            Columns =
+                            [
+                                new SqlOrderColumn()
                                 {
-                                    FieldName = "id"
+                                    ColumnName = new SqlFieldExpr()
+                                    {
+                                        FieldName = "id"
+                                    }
                                 }
-                            }]
+                            ]
                         },
                     },
                     Alias = "Row"

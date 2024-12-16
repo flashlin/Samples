@@ -205,6 +205,11 @@ public class ExtractSqlHelper
         }
     }
 
+    private string ExcludeNonSelectSql(string text)
+    {
+        return string.Empty;
+    }
+
     private IEnumerable<(string FileName, string startSelectSql)> ExtractStartSelectSqlString(string folder)
     {
         foreach (var sqlFile in GetSqlTextFromFolder(folder))

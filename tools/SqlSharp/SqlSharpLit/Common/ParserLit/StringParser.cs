@@ -968,4 +968,41 @@ public class StringParser
             Length = _position - startOffset
         };
     }
+
+    public TextSpan ReadNextSqlToken()
+    {
+        SkipWhitespace();
+        SkipSqlComment();
+        var startPosition = _position;
+        if (IsEnd())
+        {
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = startPosition,
+                Length = 0
+            };
+        }
+        if (Try(ReadQuotedIdentifier, out var quotedIdentifierSpan))
+        {
+            return quotedIdentifierSpan;
+        }
+        if (Try(ReadIdentifier, out var identifierSpan))
+        {
+            return identifierSpan;
+        }
+        if (Try(ReadFloat, out var floatSpan))
+        {
+            return floatSpan;
+        }
+        if (Try(ReadInt, out var intSpan))
+        {
+            return intSpan;
+        }
+        if(Try(ReadSymbols, out var symbolSpan))
+        {
+            return symbolSpan;
+        }
+        throw new NotSupportedException();
+    }
 }

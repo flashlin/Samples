@@ -63,13 +63,30 @@ public class SqlParser
         {
             return execSpAddExtendedProperty.Result;
         }
-        
-        if(Try(ParseSetValueStatement, out var setValueStatement))
+
+        if (Try(ParseSetValueStatement, out var setValueStatement))
         {
             return setValueStatement.Result;
         }
 
         return CreateParseError("Unknown statement");
+    }
+
+    public IEnumerable<ISqlExpression> ExtractStatements()
+    {
+        while(!_text.IsEnd())
+        {
+            var rc = Parse();
+            if (rc.HasError)
+            {
+                continue;
+            }
+
+            if (rc.Result != null)
+            {
+                yield return rc.ResultValue;
+            }
+        }
     }
 
     public ParseResult<SelectType> Parse_SelectTypeClause()
@@ -304,7 +321,7 @@ public class SqlParser
             overPartitionByClause.ResultValue.Field = value.ResultValue;
             value = overPartitionByClause.ResultValue;
         }
-        
+
         if (Try(ParseOverOrderByClause, out var overOrderByClause))
         {
             overOrderByClause.ResultValue.Field = value.ResultValue;
@@ -692,8 +709,8 @@ public class SqlParser
         {
             selectStatement.Unions = unionSelectClauseList.ResultValue;
         }
-        
-        if(Try(ParseHavingClause, out var havingClause))
+
+        if (Try(ParseHavingClause, out var havingClause))
         {
             selectStatement.Having = havingClause.Result;
         }
@@ -1023,65 +1040,75 @@ public class SqlParser
             OrderBy = orderBy
         };
     }
-    
+
     private ParseResult<SqlOverOrderByClause> ParseOverOrderByClause()
     {
         if (!TryKeywords(["OVER"], out _))
         {
             return NoneResult<SqlOverOrderByClause>();
         }
+
         if (!TryMatch("(", out _))
         {
             return NoneResult<SqlOverOrderByClause>();
         }
+
         var orderByClause = ParseOrderByClause();
         if (orderByClause.HasError)
         {
             return orderByClause.Error;
         }
+
         var orderColumns = orderByClause.Result?.Columns ?? [];
         if (!TryMatch(")", out _))
         {
             return CreateParseError("Expected )");
         }
+
         return new SqlOverOrderByClause
         {
             Columns = orderColumns
         };
     }
-    
+
     private ParseResult<SqlOverPartitionByClause> ParseOverPartitionByClause()
     {
         if (!TryKeywords(["OVER"], out var startSpan))
         {
             return NoneResult<SqlOverPartitionByClause>();
         }
+
         if (!TryMatch("(", out _))
         {
             _text.Position = startSpan.Offset;
             return NoneResult<SqlOverPartitionByClause>();
         }
-        if(!TryKeywords(["PARTITION", "BY"], out _))
+
+        if (!TryKeywords(["PARTITION", "BY"], out _))
         {
             _text.Position = startSpan.Offset;
             return NoneResult<SqlOverPartitionByClause>();
         }
+
         var partitionBy = Parse_SqlIdentifier().ResultValue;
         var orderBy = ParseOrderByClause();
         if (orderBy.HasError)
         {
             return orderBy.Error;
         }
-        if(orderBy.Result == null)
+
+        if (orderBy.Result == null)
         {
             _text.Position = startSpan.Offset;
             return NoneResult<SqlOverPartitionByClause>();
         }
+
         var orderColumns = orderBy.ResultValue.Columns;
         if (!TryMatch(")", out _))
         {
             return CreateParseError("Expected )");
         }
+
         return new SqlOverPartitionByClause()
         {
             Span = _text.CreateSpan(startSpan),
@@ -1259,6 +1286,7 @@ public class SqlParser
         {
             return end.Error;
         }
+
         return new SqlBetweenValue
         {
             Span = TextSpan.FromBound(start.ResultValue.Span, end.ResultValue.Span),
@@ -1272,12 +1300,12 @@ public class SqlParser
         if (endExpr.SqlType == SqlType.SearchCondition)
         {
             var subSearchExpr = (SqlSearchCondition)endExpr;
-            
-            if(subSearchExpr.Left.SqlType != SqlType.SearchCondition)
+
+            if (subSearchExpr.Left.SqlType != SqlType.SearchCondition)
             {
                 return subSearchExpr;
             }
-            
+
             var betweenExpr = subSearchExpr.Left;
             _text.Position = subSearchExpr.OperatorSpan.Offset;
             return (SqlSearchCondition)betweenExpr;
@@ -1452,6 +1480,7 @@ public class SqlParser
                     {
                         return betweenValue.Error;
                     }
+
                     right = betweenValue.ResultValue;
                     break;
                 default:
@@ -1649,15 +1678,17 @@ public class SqlParser
 
     private ParseResult<SqlHavingClause> ParseHavingClause()
     {
-        if(!TryKeywords(["HAVING"], out var startSpan))
+        if (!TryKeywords(["HAVING"], out var startSpan))
         {
             return NoneResult<SqlHavingClause>();
         }
+
         var searchCondition = ParseArithmeticExpr();
-        if(searchCondition.HasError)
+        if (searchCondition.HasError)
         {
             return searchCondition.Error;
         }
+
         return new SqlHavingClause
         {
             Span = _text.CreateSpan(startSpan),
@@ -1685,7 +1716,7 @@ public class SqlParser
             tableSource.JoinType = JoinType.Left;
             return tableSource;
         }
-        
+
         if (TryKeywords(["LEFT", "OUTER", "JOIN"], out _))
         {
             var tableSource = Parse_JoinTableSourceOn().ResultValue;
@@ -1699,7 +1730,7 @@ public class SqlParser
             tableSource.JoinType = JoinType.Right;
             return tableSource;
         }
-        
+
         if (TryKeywords(["RIGHT", "OUTER", "JOIN"], out _))
         {
             var tableSource = Parse_JoinTableSourceOn().ResultValue;
@@ -1916,6 +1947,7 @@ public class SqlParser
                 FieldName = identifierSpan.Word
             };
         }
+
         return NoneResult<SqlFieldExpr>();
     }
 
@@ -1925,11 +1957,13 @@ public class SqlParser
         {
             return NoneResult<SqlSetValueStatement>();
         }
+
         var name = Parse_SqlIdentifier().ResultValue;
         if (!TryMatch("=", out var equalSpan))
         {
             return CreateParseError("Expected =");
         }
+
         var value = ParseArithmeticExpr().ResultValue;
         return new SqlSetValueStatement()
         {
@@ -1937,10 +1971,10 @@ public class SqlParser
             Value = value
         };
     }
-    
+
     private ParseResult<SqlValue> Parse_SqlIdentifierValue()
     {
-        if (Try(Parse_SqlIdentifier,out var identifier))
+        if (Try(Parse_SqlIdentifier, out var identifier))
         {
             return new SqlValue()
             {
