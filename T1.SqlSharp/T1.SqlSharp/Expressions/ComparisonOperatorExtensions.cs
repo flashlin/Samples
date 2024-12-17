@@ -16,7 +16,8 @@ public static class ComparisonOperatorExtensions
             ComparisonOperator.In => "IN",
             ComparisonOperator.Between => "BETWEEN",
             ComparisonOperator.Is => "IS",
-            ComparisonOperator.IsNot => "IS NOT NULL",
+            ComparisonOperator.IsNot => "IS NOT",
+            ComparisonOperator.NotLike=> "NOT LIKE",
             _ => throw new NotImplementedException()
         };
     }
@@ -37,6 +38,7 @@ public static class ComparisonOperatorExtensions
             "BETWEEN" => ComparisonOperator.Between,
             "IS" => ComparisonOperator.Is,
             "IS NOT" => ComparisonOperator.IsNot,
+            "NOT LIKE" => ComparisonOperator.NotLike,
             _ => throw new NotImplementedException()
         };
     }

@@ -10,6 +10,52 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Where_x_and_group()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM customer
+                   where id=1 and 
+                   (object_name(b) not like '%1%')
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            Where = new SqlSearchCondition
+            {
+                Left = new SqlConditionExpression
+                {
+                    Left = new SqlFieldExpr { FieldName = "id" },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                },
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlConditionExpression
+                {
+                    Left = new SqlFunctionExpression
+                    {
+                        FunctionName = "object_name",
+                        Parameters = [new SqlFieldExpr { FieldName = "b" }]
+                    },
+                    ComparisonOperator = ComparisonOperator.NotLike,
+                    Right = new SqlValue { Value = "'%1%'" }
+                }
+            }
+        });
+    }
+
+    [Test]
     public void From_group_table_join()
     {
         var sql = $"""
