@@ -16,9 +16,36 @@ public class ParseSelectSqlTest
                    select id from customer with(nolock, index(1))
                    """;
         var rc = ParseSql(sql);
-        
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                    Withs =
+                    [
+                        new SqlHint { Name = "nolock" },
+                        new SqlTableHintIndex
+                        {
+                            IndexValues =
+                            [
+                                new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
     }
-    
+
     [Test]
     public void Between_var_and_func_with_var()
     {
@@ -26,7 +53,7 @@ public class ParseSelectSqlTest
                    SELECT id
                    FROM customer
                    where id BETWEEN @a and DATEADD(d,+1,@b)
-                   """; 
+                   """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
@@ -62,7 +89,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Hints_with_prop_equal_value()
     {
@@ -90,7 +117,13 @@ public class ParseSelectSqlTest
                     Withs =
                     [
                         new SqlHint { Name = "nolock" },
-                        new SqlTableHintIndex { IndexValues = ["IX_id"] }
+                        new SqlTableHintIndex
+                        {
+                            IndexValues =
+                            [
+                                new SqlFieldExpr { FieldName = "IX_id" }
+                            ]
+                        }
                     ]
                 }
             ]
@@ -1525,7 +1558,10 @@ public class ParseSelectSqlTest
                         new SqlHint { Name = "nolock" },
                         new SqlTableHintIndex()
                         {
-                            IndexValues = ["PK_customer"]
+                            IndexValues =
+                            [
+                                new SqlFieldExpr { FieldName = "PK_customer" }
+                            ]
                         }
                     ]
                 }

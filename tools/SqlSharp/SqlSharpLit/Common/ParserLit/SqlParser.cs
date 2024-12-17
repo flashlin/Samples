@@ -74,7 +74,7 @@ public class SqlParser
 
     public IEnumerable<ISqlExpression> ExtractStatements()
     {
-        while(!_text.IsEnd())
+        while (!_text.IsEnd())
         {
             var rc = Parse();
             if (rc.HasError)
@@ -805,7 +805,7 @@ public class SqlParser
         }
 
         forXmlClause.CommonDirectives = Parse_ForXmlRootDirectives();
-        forXmlClause.Span = _text.CreateSpan(startSpan); 
+        forXmlClause.Span = _text.CreateSpan(startSpan);
         return forXmlClause;
     }
 
@@ -896,7 +896,7 @@ public class SqlParser
         {
             isAll = true;
         }
-        
+
         var select = ParseGroupOr(ParseSelectStatement);
         if (select.HasError)
         {
@@ -1996,7 +1996,7 @@ public class SqlParser
         {
             return NoneResult<SqlSetValueStatement>();
         }
-        
+
         if (!TryMatch("=", out var equalSpan))
         {
             return CreateParseError("Expected =");
@@ -2071,25 +2071,31 @@ public class SqlParser
             return new SqlTableHintIndex()
             {
                 Span = _text.CreateSpan(openParenthesis),
-                IndexValues = [indexName.Word]
+                IndexValues = [new SqlFieldExpr()
+                {
+                    Span = indexName,
+                    FieldName  = indexName.Word
+                }]
             };
         }
 
-        if (!TryMatch("(", out _))
-        {
-            return CreateParseError("Expected (");
-        }
+        var indexValues = ParseParenthesesOption(() => ParseWithComma(ParseArithmeticExpr));
 
-        var indexValues = ParseWithComma<string>(() =>
-        {
-            var indexName = _text.ReadSqlIdentifier();
-            return indexName.Word;
-        });
-
-        if (!TryMatch(")", out _))
-        {
-            return CreateParseError("Expected )");
-        }
+        // if (!TryMatch("(", out _))
+        // {
+        //     return CreateParseError("Expected (");
+        // }
+        //
+        // var indexValues = ParseWithComma<string>(() =>
+        // {
+        //     var indexName = _text.ReadSqlIdentifier();
+        //     return indexName.Word;
+        // });
+        //
+        // if (!TryMatch(")", out _))
+        // {
+        //     return CreateParseError("Expected )");
+        // }
 
         return new SqlTableHintIndex
         {
@@ -2620,7 +2626,7 @@ public class SqlParser
 
         return NoneResult<SqlToken>();
     }
-    
+
     private ParseResult<SqlToken> Parse_NegativeOrPositive()
     {
         if (TryMatch("-", out var minusSpan))
@@ -2663,8 +2669,8 @@ public class SqlParser
         {
             negativeOrPositive = negativeOrPositiveToken.Value;
         }
-        
-        
+
+
         var number = Or(ParseFloatValue, ParseIntValue)();
         if (number.HasError)
         {
@@ -2692,6 +2698,7 @@ public class SqlParser
                 numberExpr.Value = $"-{numberExpr.Value}";
                 break;
         }
+
         return number;
     }
 
@@ -2836,6 +2843,28 @@ public class SqlParser
             return CreateParseError("Expected )");
         }
 
+        return inner;
+    }
+
+    private ParseResult<T> ParseParenthesesOption<T>(Func<ParseResult<T>> parseElemFn)
+    {
+        var has = TryMatch("(", out var startSpan);
+        var inner = parseElemFn();
+        if (inner.HasError)
+        {
+            return inner.Error;
+        }
+
+        var endSpan = new TextSpan();
+        if (has && !TryMatch(")", out endSpan))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        if (has && inner.Result is ISqlExpression sqlExpr)
+        {
+            sqlExpr.Span = _text.CreateSpan(startSpan, endSpan);
+        }
         return inner;
     }
 
@@ -3263,6 +3292,7 @@ public class SqlParser
         {
             return false;
         }
+
         return true;
     }
 
@@ -3273,6 +3303,7 @@ public class SqlParser
         {
             return false;
         }
+
         return true;
     }
 }
