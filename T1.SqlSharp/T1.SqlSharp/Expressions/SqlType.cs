@@ -59,5 +59,7 @@ public enum SqlType
     OverOrderBy,
     OverPartitionByClause,
     HavingClause,
-    SetValueStatement
+    SetValueStatement,
+    NotExpression,
+    ExistsExpression
 }

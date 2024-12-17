@@ -10,6 +10,42 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Where_NOT_expr()
+    {
+        var sql = $"""
+                   select id
+                   from customer c 
+                   where not exists (select 1 from emp)
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer", Alias = "c" }
+            ],
+            Where = new SqlNotExpression
+            {
+                Value = new SqlExistsExpression
+                {
+                    Query = new SelectStatement
+                    {
+                        Columns = [new SelectColumn { Field = new SqlValue { SqlType = SqlType.IntValue, Value = "1" } }],
+                        FromSources = [new SqlTableSource { TableName = "emp" }]
+                    }
+                }
+            }
+        });
+    }
+    
+    [Test]
     public void LeftJoin_group()
     {
         var sql = $"""

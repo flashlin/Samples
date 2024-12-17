@@ -171,6 +171,34 @@ public class SqlParser
 
     public ParseResult<ISqlExpression> ParseValue()
     {
+        if(TryKeyword("NOT", out var notSpan))
+        {
+            var value = ParseValue();
+            if (value.HasError)
+            {
+                return value.Error;
+            }
+            return new SqlNotExpression
+            {
+                Span = _text.CreateSpan(notSpan),
+                Value = value.ResultValue
+            };
+        }
+        
+        if(TryKeyword("EXISTS", out var existsSpan))
+        {
+            var query = ParseParenthesesWith(ParseSelectStatement);
+            if (query.HasError)
+            {
+                return query.Error;
+            }
+            return new SqlExistsExpression
+            {
+                Span = _text.CreateSpan(existsSpan),
+                Query = query.ResultValue.Inner
+            };
+        }
+        
         if (Try(Parse_Values, out var values))
         {
             return values.ResultValue;
@@ -2854,6 +2882,30 @@ public class SqlParser
         }
 
         return inner;
+    }
+    
+    private ParseResult<SqlGroup> ParseParenthesesWith<T>(Func<ParseResult<T>> parseElemFn)
+        where T : ISqlExpression
+    {
+        if (!TryMatch("(", out var startSpan))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var inner = parseElemFn();
+        if (inner.HasError)
+        {
+            return inner.Error;
+        }
+        if (!TryMatch(")", out var endSpan))
+        {
+            return CreateParseError("Expected )");
+        }
+        return new SqlGroup
+        {
+            Span = _text.CreateSpan(startSpan, endSpan),
+            Inner = inner.ResultValue
+        };
     }
 
     private ParseResult<T> ParseParenthesesOption<T>(Func<ParseResult<T>> parseElemFn)
