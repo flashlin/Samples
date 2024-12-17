@@ -208,22 +208,12 @@ public class ExtractSqlHelper
 
     private string ExcludeNonSelectSql(string text)
     {
-        var sqlParser = new SqlParser(text);
-        var sb = new StringBuilder();
-        var lastOffset = 0;
-        foreach (var sql in sqlParser.ExtractStatements())
+        if (text.Contains("'''"))
         {
-            if (sql.SqlType != SqlType.SelectStatement)
-            {
-                var previous = text.Substring(lastOffset, sql.Span.Offset - lastOffset);
-                lastOffset = sql.Span.Offset + sql.Span.Length;
-                sb.AppendLine(previous);
-            }
+            return string.Empty;
         }
-        
-        var lastPrevious = text.Substring(lastOffset, text.Length - lastOffset);
-        sb.AppendLine(lastPrevious);
-        return sb.ToString();
+
+        return text;
     }
 
     private IEnumerable<(string FileName, string startSelectSql)> ExtractStartSelectSqlString(string folder)
@@ -231,7 +221,7 @@ public class ExtractSqlHelper
         foreach (var sqlFile in GetSqlTextFromFolder(folder))
         {
             var sql = ExcludeSqlComments(sqlFile.Sql);
-            //sql = ExcludeNonSelectSql(sql);
+            sql = ExcludeNonSelectSql(sql);
             foreach (var startSelectSql in ExtractSelectSqlFromText(sql))
             {
                 yield return (sqlFile.FileName, startSelectSql);
