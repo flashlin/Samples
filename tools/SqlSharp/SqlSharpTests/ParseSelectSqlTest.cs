@@ -10,6 +10,16 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void With_nolock_index_1()
+    {
+        var sql = $"""
+                   select id from customer with(nolock, index(1))
+                   """;
+        var rc = ParseSql(sql);
+        
+    }
+    
+    [Test]
     public void Between_var_and_func_with_var()
     {
         var sql = $"""
