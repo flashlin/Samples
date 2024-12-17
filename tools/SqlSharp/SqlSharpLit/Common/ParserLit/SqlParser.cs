@@ -664,7 +664,7 @@ public class SqlParser
 
         if (TryKeyword("FROM", out _))
         {
-            var tableSources = Parse_FromTableSources();
+            var tableSources = Or(Parse_FromGroupFromTableSources, Parse_FromTableSources)();
             if (tableSources.HasError)
             {
                 return tableSources.Error;
@@ -720,6 +720,26 @@ public class SqlParser
         SkipStatementEnd();
         selectStatement.Span = _text.CreateSpan(startSpan);
         return CreateParseResult(selectStatement);
+    }
+
+    private ParseResult<List<ISqlExpression>> Parse_FromGroupFromTableSources()
+    {
+        var startPosition = _text.Position;
+        if (!TryMatch("(", out _))
+        {
+            return NoneResult<List<ISqlExpression>>();
+        }
+        if(IsPeekKeywords("SELECT"))
+        {
+            _text.Position = startPosition;
+            return NoneResult<List<ISqlExpression>>();
+        }
+        var tableSources = Parse_FromTableSources();
+        if(!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+        return tableSources.ResultValue;
     }
 
     private ParseResult<ISqlForXmlClause> ParseForXmlClause()
@@ -2071,11 +2091,14 @@ public class SqlParser
             return new SqlTableHintIndex()
             {
                 Span = _text.CreateSpan(openParenthesis),
-                IndexValues = [new SqlFieldExpr()
-                {
-                    Span = indexName,
-                    FieldName  = indexName.Word
-                }]
+                IndexValues =
+                [
+                    new SqlFieldExpr()
+                    {
+                        Span = indexName,
+                        FieldName = indexName.Word
+                    }
+                ]
             };
         }
 
@@ -2849,6 +2872,7 @@ public class SqlParser
         {
             sqlExpr.Span = _text.CreateSpan(startSpan, endSpan);
         }
+
         return inner;
     }
 
