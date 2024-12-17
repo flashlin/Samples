@@ -2081,22 +2081,6 @@ public class SqlParser
 
         var indexValues = ParseParenthesesOption(() => ParseWithComma(ParseArithmeticExpr));
 
-        // if (!TryMatch("(", out _))
-        // {
-        //     return CreateParseError("Expected (");
-        // }
-        //
-        // var indexValues = ParseWithComma<string>(() =>
-        // {
-        //     var indexName = _text.ReadSqlIdentifier();
-        //     return indexName.Word;
-        // });
-        //
-        // if (!TryMatch(")", out _))
-        // {
-        //     return CreateParseError("Expected )");
-        // }
-
         return new SqlTableHintIndex
         {
             Span = _text.CreateSpan(startSpan),
