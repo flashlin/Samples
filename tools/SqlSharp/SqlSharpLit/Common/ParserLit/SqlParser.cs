@@ -11,7 +11,8 @@ public class SqlParser
     private const string ConstraintKeyword = "CONSTRAINT";
 
     private static readonly string[] ReservedWords =
-        ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH", "WHERE", "UNPIVOT", "FOR", "AS"];
+        ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH", 
+            "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS"];
 
     private readonly StringParser _text;
 
@@ -171,34 +172,36 @@ public class SqlParser
 
     public ParseResult<ISqlExpression> ParseValue()
     {
-        if(TryKeyword("NOT", out var notSpan))
+        if (TryKeyword("NOT", out var notSpan))
         {
             var value = ParseValue();
             if (value.HasError)
             {
                 return value.Error;
             }
+
             return new SqlNotExpression
             {
                 Span = _text.CreateSpan(notSpan),
                 Value = value.ResultValue
             };
         }
-        
-        if(TryKeyword("EXISTS", out var existsSpan))
+
+        if (TryKeyword("EXISTS", out var existsSpan))
         {
             var query = ParseParenthesesWith(ParseSelectStatement);
             if (query.HasError)
             {
                 return query.Error;
             }
+
             return new SqlExistsExpression
             {
                 Span = _text.CreateSpan(existsSpan),
                 Query = query.ResultValue.Inner
             };
         }
-        
+
         if (Try(Parse_Values, out var values))
         {
             return values.ResultValue;
@@ -430,15 +433,15 @@ public class SqlParser
     public ParseResult<ISqlExpression> ParseArithmeticExpr()
     {
         return Parse_SearchCondition(
-                () => Parse_ConditionExpr(
-                    () => ParseArithmetic_AdditionOrSubtraction(
-                        () => ParseArithmetic_MultiplicationOrDivision(
-                            () => ParseArithmetic_Bitwise(
-                                ParseArithmetic_Primary
-                            )
+            () => Parse_ConditionExpr(
+                () => ParseArithmetic_AdditionOrSubtraction(
+                    () => ParseArithmetic_MultiplicationOrDivision(
+                        () => ParseArithmetic_Bitwise(
+                            ParseArithmetic_Primary
                         )
                     )
-                ));
+                )
+            ));
     }
 
 
@@ -699,6 +702,11 @@ public class SqlParser
 
             selectStatement.FromSources = tableSources.ResultValue;
         }
+        
+        if (Try(ParsePivotClause, out var pivotClause))
+        {
+            selectStatement.FromSources.Add(pivotClause.ResultValue);
+        }
 
         if (Try(ParseUnpivotClause, out var unpivotClause))
         {
@@ -785,6 +793,59 @@ public class SqlParser
         }
 
         return NoneResult<ISqlForXmlClause>();
+    }
+
+    private ParseResult<SqlPivotClause> ParsePivotClause()
+    {
+        if (!TryKeyword("PIVOT", out var startSpan))
+        {
+            return NoneResult<SqlPivotClause>();
+        }
+
+        if (!TryMatch("(", out var openParenthesis))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var newColumn = ParseValue();
+        if (newColumn.HasError)
+        {
+            return newColumn.Error;
+        }
+
+        if (!TryKeyword("FOR", out _))
+        {
+            return CreateParseError("Expected FOR");
+        }
+
+        var forSource = ParseValue();
+        if (forSource.HasError)
+        {
+            return forSource.Error;
+        }
+
+        if (!TryKeyword("IN", out _))
+        {
+            return CreateParseError("Expected IN");
+        }
+
+        var inColumns = ParseParenthesesWithComma(ParseValue);
+
+        if (!TryMatch(")", out var closeParenthesis))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        var alias = ParseAliasExpr();
+
+        return new SqlPivotClause
+        {
+            Span = _text.CreateSpan(startSpan),
+            NewColumn = newColumn.ResultValue,
+            ForSource = forSource.ResultValue,
+            InColumns = inColumns.ResultValue,
+            AliasName = alias.ResultValue.Name
+        };
     }
 
     private ParseResult<SqlUnpivotClause> ParseUnpivotClause()
@@ -1823,7 +1884,7 @@ public class SqlParser
         {
             return NoneResult<SqlJoinTableCondition>();
         }
-        
+
         if (!TryKeyword("ON", out _))
         {
             return CreateParseError("Expected ON");
@@ -2883,7 +2944,7 @@ public class SqlParser
 
         return inner;
     }
-    
+
     private ParseResult<SqlGroup> ParseParenthesesWith<T>(Func<ParseResult<T>> parseElemFn)
         where T : ISqlExpression
     {
@@ -2897,10 +2958,12 @@ public class SqlParser
         {
             return inner.Error;
         }
+
         if (!TryMatch(")", out var endSpan))
         {
             return CreateParseError("Expected )");
         }
+
         return new SqlGroup
         {
             Span = _text.CreateSpan(startSpan, endSpan),

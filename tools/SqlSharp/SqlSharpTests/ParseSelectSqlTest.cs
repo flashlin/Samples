@@ -10,6 +10,48 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Pivot()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM customer
+                   pivot (
+                       MAX(Permission) for id in ([1],[2])
+                   ) p
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" },
+                new SqlPivotClause
+                {
+                    NewColumn = new SqlFunctionExpression
+                    {
+                        FunctionName = "MAX",
+                        Parameters = [new SqlFieldExpr { FieldName = "Permission" }]
+                    },
+                    ForSource = new SqlFieldExpr { FieldName = "id" },
+                    InColumns =
+                    [
+                        new SqlValue { SqlType = SqlType.Field, Value = "[1]" },
+                        new SqlValue { SqlType = SqlType.Field, Value = "[2]" },
+                    ],
+                    AliasName = "p"
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Where_NOT_expr()
     {
         var sql = $"""

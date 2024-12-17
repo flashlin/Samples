@@ -51,6 +51,7 @@ public enum SqlType
     PartitionBy,
     AliasExpr,
     UnpivotClause,
+    PivotClause,
     ForXmlPathClause,
     ForXmlAutoClause,
     ForXmlRootDirective,
@@ -61,5 +62,5 @@ public enum SqlType
     HavingClause,
     SetValueStatement,
     NotExpression,
-    ExistsExpression
+    ExistsExpression,
 }
