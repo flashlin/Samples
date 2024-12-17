@@ -41,15 +41,18 @@ public class ParseSelectSqlTest
                     Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
                 },
                 LogicalOperator = LogicalOperator.And,
-                Right = new SqlConditionExpression
+                Right = new SqlGroup()
                 {
-                    Left = new SqlFunctionExpression
+                    Inner = new SqlConditionExpression
                     {
-                        FunctionName = "object_name",
-                        Parameters = [new SqlFieldExpr { FieldName = "b" }]
-                    },
-                    ComparisonOperator = ComparisonOperator.NotLike,
-                    Right = new SqlValue { Value = "'%1%'" }
+                        Left = new SqlFunctionExpression
+                        {
+                            FunctionName = "object_name",
+                            Parameters = [new SqlFieldExpr { FieldName = "b" }]
+                        },
+                        ComparisonOperator = ComparisonOperator.NotLike,
+                        Right = new SqlValue { Value = "'%1%'" }
+                    }
                 }
             }
         });

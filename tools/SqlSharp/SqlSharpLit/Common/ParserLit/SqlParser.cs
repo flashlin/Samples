@@ -401,8 +401,7 @@ public class SqlParser
 
     public ParseResult<ISqlExpression> ParseArithmeticExpr()
     {
-        return
-            Parse_SearchCondition(
+        return Parse_SearchCondition(
                 () => Parse_ConditionExpr(
                     () => ParseArithmetic_AdditionOrSubtraction(
                         () => ParseArithmetic_MultiplicationOrDivision(
@@ -729,16 +728,19 @@ public class SqlParser
         {
             return NoneResult<List<ISqlExpression>>();
         }
-        if(IsPeekKeywords("SELECT"))
+
+        if (IsPeekKeywords("SELECT"))
         {
             _text.Position = startPosition;
             return NoneResult<List<ISqlExpression>>();
         }
+
         var tableSources = Parse_FromTableSources();
-        if(!TryMatch(")", out _))
+        if (!TryMatch(")", out _))
         {
             return CreateParseError("Expected )");
         }
+
         return tableSources.ResultValue;
     }
 
@@ -1468,6 +1470,7 @@ public class SqlParser
     {
         var rc = Or(
             Keywords("IS", "NOT"),
+            Keywords("NOT", "LIKE"),
             Keywords("IS"),
             Keywords("LIKE"),
             Keywords("IN"),
