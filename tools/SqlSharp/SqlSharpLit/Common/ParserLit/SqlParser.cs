@@ -11,7 +11,7 @@ public class SqlParser
     private const string ConstraintKeyword = "CONSTRAINT";
 
     private static readonly string[] ReservedWords =
-        ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH", "WHERE", "UNPIVOT", "FOR"];
+        ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH", "WHERE", "UNPIVOT", "FOR", "AS"];
 
     private readonly StringParser _text;
 
@@ -1795,7 +1795,7 @@ public class SqlParser
         {
             return NoneResult<SqlJoinTableCondition>();
         }
-
+        
         if (!TryKeyword("ON", out _))
         {
             return CreateParseError("Expected ON");

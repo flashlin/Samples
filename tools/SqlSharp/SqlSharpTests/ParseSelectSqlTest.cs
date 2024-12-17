@@ -10,6 +10,59 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void LeftJoin_group()
+    {
+        var sql = $"""
+                   select id
+                   from	customer c
+                   left join (select id from emp) e on e.id = c.id
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer", Alias = "c" },
+                new SqlJoinTableCondition
+                {
+                    JoinType = JoinType.Left,
+                    JoinedTable = new SqlInnerTableSource
+                    {
+                        Inner = new SelectStatement
+                        {
+                            Columns =
+                            [
+                                new SelectColumn
+                                {
+                                    Field = new SqlFieldExpr { FieldName = "id" }
+                                }
+                            ],
+                            FromSources =
+                            [
+                                new SqlTableSource { TableName = "emp" }
+                            ],
+                        },
+                        Alias = "e"
+                    },
+                    OnCondition = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "e.id" },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlFieldExpr { FieldName = "c.id" }
+                    }
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Where_x_and_group()
     {
         var sql = $"""
