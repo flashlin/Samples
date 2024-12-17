@@ -10,6 +10,54 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void From_group_table_join()
+    {
+       var sql = $"""
+                  SELECT id
+                  FROM (
+                    customer c 
+                    join emp e on c.id = e.id
+                  )
+                  """; 
+         var rc = ParseSql(sql);
+         rc.ShouldBe(new SelectStatement
+         {
+             Columns =
+             [
+                 new SelectColumn
+                 {
+                     Field = new SqlFieldExpr { FieldName = "id" }
+                 }
+             ],
+             FromSources =
+             [
+                 new SqlInnerTableSource
+                 {
+                     Inner = new SelectStatement
+                     {
+                         Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
+                         FromSources =
+                         [
+                             new SqlTableSource { TableName = "customer", Alias = "c" },
+                             new SqlJoinTableCondition
+                             {
+                                 JoinType = JoinType.Inner,
+                                 JoinedTable = new SqlTableSource { TableName = "emp", Alias = "e" },
+                                 OnCondition = new SqlConditionExpression
+                                 {
+                                     Left = new SqlFieldExpr { FieldName = "c.id" },
+                                     ComparisonOperator = ComparisonOperator.Equal,
+                                     Right = new SqlFieldExpr { FieldName = "e.id" }
+                                 }
+                             }
+                         ]
+                     }
+                 }
+             ]
+         });
+    }
+    
+    [Test]
     public void With_nolock_index_1()
     {
         var sql = $"""
