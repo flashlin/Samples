@@ -102,7 +102,7 @@ public class SqlVisitor
     {
     }
 
-    public virtual void Visit_DataType(SqlDataType sqlDataType)
+    public virtual void Visit_DataTypeWithSize(SqlDataTypeWithSize sqlDataTypeWithSize)
     {
     }
 

@@ -1130,7 +1130,7 @@ public class ParseSelectSqlTest
                                     new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
                                 ]
                             },
-                            As = new SqlDataType { DataTypeName = "int" }
+                            As = new SqlDataTypeWithSize { DataTypeName = "int" }
                         }
                     ]
                 }
@@ -1622,7 +1622,7 @@ public class ParseSelectSqlTest
                                     FunctionName = "convert",
                                     Parameters =
                                     [
-                                        new SqlDataType
+                                        new SqlDataTypeWithSize
                                         {
                                             DataTypeName = "nvarchar"
                                         },
@@ -2975,7 +2975,7 @@ public class ParseSelectSqlTest
                                     {
                                         FieldName = "@a",
                                     },
-                                    As = new SqlDataType
+                                    As = new SqlDataTypeWithSize
                                     {
                                         DataTypeName = "nvarchar",
                                         Size = new SqlDataSize
@@ -3004,7 +3004,7 @@ public class ParseSelectSqlTest
                                 {
                                     FieldName = "@b",
                                 },
-                                As = new SqlDataType
+                                As = new SqlDataTypeWithSize
                                 {
                                     DataTypeName = "nvarchar",
                                     Size = new SqlDataSize

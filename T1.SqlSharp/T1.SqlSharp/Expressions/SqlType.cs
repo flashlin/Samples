@@ -7,7 +7,7 @@ public enum SqlType
     Constraint,
     ConstraintDefaultValue,
     ComputedColumn,
-    DataType,
+    DataTypeWithSize,
     DataSize,
     TableForeignKey,
     WithToggle,

@@ -2,13 +2,13 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public class SqlDataType : ISqlExpression
+public class SqlDataTypeWithSize : ISqlExpression
 {
-    public SqlType SqlType { get; } = SqlType.DataType;
+    public SqlType SqlType { get; } = SqlType.DataTypeWithSize;
     public TextSpan Span { get; set; } = new();
     public void Accept(SqlVisitor visitor)
     {
-        visitor.Visit_DataType(this);
+        visitor.Visit_DataTypeWithSize(this);
     }
 
     public string DataTypeName { get; set; } = string.Empty;

@@ -361,7 +361,7 @@ public class SqlParser
 
         if (TryKeyword("AS", out var asSpan))
         {
-            var dataType = Or<ISqlExpression>(Parse_DataType, ParseSqlQuotedString)();
+            var dataType = Or<ISqlExpression>(Parse_DataTypeWithSize, ParseSqlQuotedString)();
             return new SqlAsExpr
             {
                 Span = _text.CreateSpan(asSpan),
@@ -1307,7 +1307,7 @@ public class SqlParser
             if (p0.SqlType == SqlType.Field)
             {
                 var field = (SqlFieldExpr)p0;
-                function.Parameters[0] = new SqlDataType
+                function.Parameters[0] = new SqlDataTypeWithSize
                 {
                     DataTypeName = field.FieldName
                 };
@@ -1661,11 +1661,11 @@ public class SqlParser
         return dataSize;
     }
 
-    private ParseResult<SqlDataType> Parse_DataType()
+    private ParseResult<SqlDataTypeWithSize> Parse_DataTypeWithSize()
     {
         if (!TryReadSqlIdentifier(out var identifier))
         {
-            return NoneResult<SqlDataType>();
+            return NoneResult<SqlDataTypeWithSize>();
         }
 
         var dataType = Parse_DataSize();
@@ -1674,7 +1674,7 @@ public class SqlParser
             return dataType.Error;
         }
 
-        return new SqlDataType()
+        return new SqlDataTypeWithSize()
         {
             DataTypeName = identifier.Word,
             Size = dataType.Result != null ? dataType.ResultValue : new SqlDataSize()

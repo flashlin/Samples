@@ -28,7 +28,7 @@ public class ParseSqlArithmeticTest
                             { 
                                 FieldName  = "@score1"
                             },
-                            As = new SqlDataType()
+                            As = new SqlDataTypeWithSize()
                             {
                                 DataTypeName = "nvarchar",
                                 Size = new SqlDataSize()
@@ -56,7 +56,7 @@ public class ParseSqlArithmeticTest
                         { 
                             FieldName  = "@score2"
                         },
-                        As = new SqlDataType()
+                        As = new SqlDataTypeWithSize()
                         {
                             DataTypeName = "nvarchar",
                             Size = new SqlDataSize()
