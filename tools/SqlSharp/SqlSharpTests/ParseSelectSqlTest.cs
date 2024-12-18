@@ -10,6 +10,36 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_arithmetic_as_aliasName()
+    {
+        var sql = $"""
+                   select 1 as ErrorCode, 'Message' + @errorMsg as ErrorMessage  
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlValue { SqlType = SqlType.IntValue, Value = "1" },
+                    Alias = "ErrorCode"
+                },
+                new SelectColumn
+                {
+                    Field = new SqlArithmeticBinaryExpr
+                    {
+                        Left = new SqlValue { SqlType = SqlType.String, Value = "'Message'" },
+                        Operator = ArithmeticOperator.Add,
+                        Right = new SqlFieldExpr { FieldName = "@errorMsg" }
+                    },
+                    Alias = "ErrorMessage"
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Case_GROUP_when()
     {
         var sql = $"""
