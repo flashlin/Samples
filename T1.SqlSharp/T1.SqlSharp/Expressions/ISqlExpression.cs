@@ -8,50 +8,125 @@ public interface ISqlExpression
     void Accept(SqlVisitor visitor);
 }
 
+public class SqlExpressionNode
+{
+    public required ISqlExpression Expression { get; set; }
+    public int Depth { get; set; }
+}
+
 public class SqlVisitor
 {
+    private readonly List<SqlExpressionNode> _expressions = new();
+    private int _depth = 0;
+    
+    public List<SqlExpressionNode> Visit(ISqlExpression expression)
+    {
+        _expressions.Clear();
+        AddSqlExpression(expression);
+        expression.Accept(this);
+        return _expressions;
+    }
+
+    private void AddSqlExpression(ISqlExpression expression)
+    {
+        _expressions.Add(new SqlExpressionNode()
+        {
+            Expression = expression,
+            Depth = _depth
+        });
+    }
+
     public virtual void Visit_SqlArithmeticBinaryExpr(SqlArithmeticBinaryExpr expr)
     {
+        _depth++;
+        AddSqlExpression(expr.Left);
         expr.Left.Accept(this);
+        AddSqlExpression(expr.Right);
         expr.Right.Accept(this);
+        _depth--;
     }
 
     public virtual void Visit_AliasExpr(SqlAliasExpr expr)
     {
+        AddSqlExpression(expr);
     }
 
     public virtual void Visit_AsExpr(SqlAsExpr expr)
     {
+        AddSqlExpression(expr.Instance);
         expr.Instance.Accept(this);
+        AddSqlExpression(expr.As);
         expr.As.Accept(this);
     }
 
     public virtual void Visit_ArithmeticBinaryExpr(SqlArithmeticBinaryExpr expr)
     {
+        _depth++;
+        AddSqlExpression(expr.Left);
         expr.Left.Accept(this);
+        AddSqlExpression(expr.Right);
         expr.Right.Accept(this);
+        _depth--;
     }
 
     public virtual void Visit_LogicalOperator(SqlLogicalOperator expr)
     {
+        AddSqlExpression(expr);
     }
 
     public virtual void Visit_SelectColumn(SelectColumn expr)
     {
+        AddSqlExpression(expr.Field);
         expr.Field.Accept(this);
     }
 
     public virtual void Visit_SelectStatement(SelectStatement expr)
     {
+        if (expr.Top != null)
+        {
+            AddSqlExpression(expr.Top);
+        }
         expr.Top?.Accept(this);
-        expr.Columns.ForEach(x => x.Accept(this));
-        expr.FromSources.ForEach(x=>x.Accept(this));
-        expr.ForXml?.Accept(this);
-        expr.Where?.Accept(this);
-        expr.OrderBy?.Accept(this);   
-        expr.Unions.ForEach(x=>x.Accept(this));
-        expr.GroupBy?.Accept(this);
-        expr.Having?.Accept(this);
+        expr.Columns.ForEach(x =>
+        {
+            AddSqlExpression(x);
+            x.Accept(this);
+        });
+        expr.FromSources.ForEach(x=>
+        {
+            AddSqlExpression(x);
+            x.Accept(this);
+        });
+        if(expr.ForXml != null)
+        {
+            AddSqlExpression(expr.ForXml);
+            expr.ForXml.Accept(this);
+        }
+        if(expr.Where != null)
+        {
+            AddSqlExpression(expr.Where);
+            expr.Where.Accept(this);
+        }
+        if(expr.OrderBy != null)
+        {
+            AddSqlExpression(expr.OrderBy);
+            expr.OrderBy.Accept(this);
+        }
+        expr.Unions.ForEach(x=>
+        {
+            AddSqlExpression(x);
+            x.Accept(this);
+        });
+        if(expr.GroupBy != null)
+        {
+            AddSqlExpression(expr.GroupBy);
+            expr.GroupBy.Accept(this);
+        }
+        if(expr.Having != null)
+        {
+            AddSqlExpression(expr.Having);
+            expr.Having.Accept(this);
+        }
     }
 
     public virtual void Visit_SqlToken(SqlToken expr)
@@ -64,13 +139,17 @@ public class SqlVisitor
 
     public virtual void Visit_AssignExpr(SqlAssignExpr expr)
     {
+        AddSqlExpression(expr.Left);
         expr.Left.Accept(this);
+        AddSqlExpression(expr.Right);
         expr.Right.Accept(this);
     }
 
     public virtual void Visit_BetweenValue(SqlBetweenValue expr)
     {
+        AddSqlExpression(expr.Start);
         expr.Start.Accept(this);
+        AddSqlExpression(expr.End);
         expr.End.Accept(this);
     }
 
@@ -102,7 +181,9 @@ public class SqlVisitor
 
     public virtual void Visit_ConditionExpression(SqlConditionExpression expr)
     {
+        AddSqlExpression(expr.Left);
         expr.Left.Accept(this);
+        AddSqlExpression(expr.Right);
         expr.Right.Accept(this);
     }
 
