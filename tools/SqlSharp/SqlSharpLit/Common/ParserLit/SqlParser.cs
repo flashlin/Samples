@@ -1469,11 +1469,11 @@ public class SqlParser
         });
     }
 
-    private ParseResult<SqlCaseCaluse> ParseCaseClause()
+    private ParseResult<SqlCaseClause> ParseCaseClause()
     {
         if (!TryKeyword("CASE", out var startSpan))
         {
-            return NoneResult<SqlCaseCaluse>();
+            return NoneResult<SqlCaseClause>();
         }
 
         ISqlExpression? whenExpr = null;
@@ -1532,10 +1532,10 @@ public class SqlParser
             return CreateParseError("Expected END");
         }
 
-        return CreateParseResult(new SqlCaseCaluse
+        return CreateParseResult(new SqlCaseClause
         {
             Span = _text.CreateSpan(startSpan),
-            When = whenExpr,
+            Case = whenExpr,
             WhenThens = whenClause,
             Else = elseClause
         });

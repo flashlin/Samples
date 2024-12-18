@@ -2,11 +2,11 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public class SqlCaseCaluse : ISqlExpression
+public class SqlCaseClause : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.CaseClause;
     public TextSpan Span { get; set; } = new();
-    public ISqlExpression? When { get; set; }
+    public ISqlExpression? Case { get; set; }
     public List<SqlWhenThenClause> WhenThens { get; set; } = [];
     public ISqlExpression? Else { get; set; }
 
@@ -14,9 +14,9 @@ public class SqlCaseCaluse : ISqlExpression
     {
         var sql = new IndentStringBuilder();
         sql.Write("CASE");
-        if (When != null)
+        if (Case != null)
         {
-            sql.Write(" " + When.ToSql());
+            sql.Write(" " + Case.ToSql());
         }
         sql.WriteLine();
         sql.Indent++;
