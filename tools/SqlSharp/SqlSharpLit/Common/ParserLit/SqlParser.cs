@@ -15,6 +15,14 @@ public class SqlParser
         "FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH",
         "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS"
     ];
+    
+    private static string[] DataTypes =
+    {
+        "BIGINT", "INT", "SMALLINT", "TINYINT", "BIT", "DECIMAL", "NUMERIC", "MONEY", "SMALLMONEY",
+        "FLOAT", "REAL", "DATE", "DATETIME", "DATETIME2", "DATETIMEOFFSET", "TIME", "CHAR", "VARCHAR",
+        "TEXT", "NCHAR", "NVARCHAR", "NTEXT", "BINARY", "VARBINARY", "IMAGE", "UNIQUEIDENTIFIER", "XML",
+        "CURSOR", "TIMESTAMP", "ROWVERSION", "HIERARCHYID", "GEOMETRY", "GEOGRAPHY", "SQL_VARIANT"
+    };
 
     private readonly StringParser _text;
 
@@ -1659,6 +1667,27 @@ public class SqlParser
 
         dataSize.Span = _text.CreateSpan(openParenthesis);
         return dataSize;
+    }
+    
+    private ParseResult<SqlToken> Parse_DataType()
+    {
+        var startPosition = _text.Position;
+        if (!TryReadSqlIdentifier(out var identifierSpan))
+        {
+            return NoneResult<SqlToken>();
+        }
+
+        if(!DataTypes.Contains(identifierSpan.Word.ToUpper()))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlToken>();
+        }
+
+        return new SqlToken
+        {
+            Value = identifierSpan.Word,
+            Span = identifierSpan
+        };
     }
 
     private ParseResult<SqlDataTypeWithSize> Parse_DataTypeWithSize()
