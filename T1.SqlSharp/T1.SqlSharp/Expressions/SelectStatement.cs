@@ -6,6 +6,11 @@ public class SelectStatement : ISqlExpression
 {
     public SqlType SqlType => SqlType.SelectStatement;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_SelectStatement(this);
+    }
+
     public SelectType SelectType { get; set; } = SelectType.All; 
     public SqlTopClause? Top { get; set; }
     public List<ISelectColumnExpression> Columns { get; set; } = [];

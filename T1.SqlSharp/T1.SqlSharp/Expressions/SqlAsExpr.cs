@@ -4,6 +4,7 @@ public class SqlAsExpr : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.AsExpr;
     public TextSpan Span { get; set; } = new();
+
     public required ISqlExpression Instance { get; set; }
     public required ISqlExpression As { get; set; }
 
@@ -11,15 +12,8 @@ public class SqlAsExpr : ISqlExpression
     {
         return $"{Instance.ToSql()} as {As.ToSql()}";
     }
-}
-
-public class SqlAliasExpr : ISqlExpression
-{
-    public SqlType SqlType { get; } = SqlType.AliasExpr;
-    public TextSpan Span { get; set; } = new();
-    public required string Name { get; set; } = string.Empty;
-    public string ToSql()
+    public void Accept(SqlVisitor visitor)
     {
-        return $"AS {Name}";
+        visitor.Visit_AsExpr(this);
     }
 }
