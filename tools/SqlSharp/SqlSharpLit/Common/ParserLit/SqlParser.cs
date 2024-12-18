@@ -2194,7 +2194,7 @@ public class SqlParser
             };
         }
 
-        var indexValues = ParseParenthesesOption(() => ParseWithComma(ParseArithmeticExpr));
+        var indexValues = ParseWithoutParenthesesOption(() => ParseWithComma(ParseArithmeticExpr));
 
         return new SqlTableHintIndex
         {
@@ -2970,8 +2970,36 @@ public class SqlParser
             Inner = inner.ResultValue
         };
     }
+    
+    private ParseResult<ISqlExpression> ParseParenthesesOption<T>(Func<ParseResult<T>> parseElemFn)
+        where T : ISqlExpression
+    {
+        var has = TryMatch("(", out var startSpan);
+        var inner = parseElemFn();
+        if (inner.HasError)
+        {
+            return inner.Error;
+        }
 
-    private ParseResult<T> ParseParenthesesOption<T>(Func<ParseResult<T>> parseElemFn)
+        var endSpan = new TextSpan();
+        if (has && !TryMatch(")", out endSpan))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        if (has)
+        {
+            return new SqlGroup()
+            {
+                Span = _text.CreateSpan(startSpan, endSpan),
+                Inner = inner.ResultValue
+            };
+        }
+
+        return inner.To<ISqlExpression>();
+    }
+
+    private ParseResult<T> ParseWithoutParenthesesOption<T>(Func<ParseResult<T>> parseElemFn)
     {
         var has = TryMatch("(", out var startSpan);
         var inner = parseElemFn();
