@@ -2015,6 +2015,13 @@ public class SqlParser
             }
 
             var columnExpr = column.ResultValue;
+            
+            var visitor = new SqlAsExprVisitor();
+            columnExpr.Accept(visitor);
+            if(visitor.HasAs)
+            {
+                throw new InvalidOperationException("AS is not allowed in select columns");
+            }
 
             if(TryCast<SqlAsExpr>(columnExpr.Field, out var asExpr))
             {
@@ -3513,4 +3520,9 @@ public class SqlParser
 
         return true;
     }
+}
+
+public class SqlAsExprVisitor : SqlVisitor
+{
+    public bool HasAs { get; set; }
 }
