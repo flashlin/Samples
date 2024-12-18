@@ -6,6 +6,11 @@ public class SqlConstraintPrimaryKeyOrUnique : ISqlConstraint
 {
     public SqlType SqlType => SqlType.Constraint;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_ConstraintPrimaryKeyOrUnique(this);
+    }
+
     public string ConstraintName { get; set; } = string.Empty;
     public string ConstraintType { get; set; } = string.Empty;
     public string Clustered { get; set; } = string.Empty;

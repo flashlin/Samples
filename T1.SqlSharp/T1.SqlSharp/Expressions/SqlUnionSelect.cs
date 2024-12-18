@@ -6,6 +6,11 @@ public class SqlUnionSelect : ISqlExpression
 {
     public SqlType SqlType => SqlType.UnionSelect;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_UnionSelect(this);
+    }
+
     public bool IsAll { get; set; } = false;
     public required ISqlExpression SelectStatement { get; set; }
 

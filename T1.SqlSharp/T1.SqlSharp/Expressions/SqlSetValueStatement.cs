@@ -6,6 +6,10 @@ public class SqlSetValueStatement : ISqlExpression
     public required ISqlExpression Name { get; set; } = new SqlValue();
     public required ISqlExpression Value { get; set; } = new SqlValue();
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_SetValueStatement(this);
+    }
 
     public string ToSql()
     {

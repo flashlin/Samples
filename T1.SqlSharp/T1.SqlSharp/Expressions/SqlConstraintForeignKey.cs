@@ -7,6 +7,11 @@ public class SqlConstraintForeignKey : ISqlConstraint
 {
     public SqlType SqlType { get; }= SqlType.TableForeignKey;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_ConstraintForeignKey(this);
+    }
+
     public string ConstraintName { get; set; } = string.Empty;
     public List<SqlConstraintColumn> Columns { get; set; } = [];
     public string ReferencedTableName { get; set; } = string.Empty;

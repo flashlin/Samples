@@ -4,6 +4,11 @@ public class SqlIdentity : ISqlExpression
 {
     public static SqlIdentity Default => new();
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_Identity(this);
+    }
+
     public SqlType SqlType { get; } = SqlType.Identity;
     public long Seed { get; set; }
     public int Increment { get; set; }

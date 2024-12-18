@@ -4,6 +4,11 @@ public class SqlSpAddExtendedPropertyExpression : ISqlExpression
 {
     public SqlType SqlType => SqlType.AddExtendedProperty;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_AddExtendedProperty(this);
+    }
+
     /// <summary>
     /// 固定為 'MS_Description' 來表示描述
     /// </summary>

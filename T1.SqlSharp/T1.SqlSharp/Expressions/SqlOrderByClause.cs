@@ -6,6 +6,11 @@ public class SqlOrderByClause : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.OrderByClause;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_OrderByClause(this);
+    }
+
     public List<SqlOrderColumn> Columns { get; set; } = [];
 
     public string ToSql()

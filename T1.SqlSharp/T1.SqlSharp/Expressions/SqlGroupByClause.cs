@@ -6,6 +6,11 @@ public class SqlGroupByClause : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.GroupByClause;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_GroupByClause(this);
+    }
+
     public List<ISqlExpression> Columns { get; set; } = [];
     public string ToSql()
     {

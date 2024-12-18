@@ -6,6 +6,11 @@ public class SqlValues : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.Values;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_Values(this);
+    }
+
     public List<ISqlExpression> Items { get; set; } = [];
 
     public string ToSql()

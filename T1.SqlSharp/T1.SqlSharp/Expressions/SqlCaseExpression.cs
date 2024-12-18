@@ -6,6 +6,11 @@ public class SqlCaseClause : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.CaseClause;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_CaseClause(this);
+    }
+
     public ISqlExpression? Case { get; set; }
     public List<SqlWhenThenClause> WhenThens { get; set; } = [];
     public ISqlExpression? Else { get; set; }

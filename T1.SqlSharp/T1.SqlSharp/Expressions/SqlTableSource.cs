@@ -6,6 +6,11 @@ public class SqlTableSource : ITableSource
 {
     public SqlType SqlType { get; } = SqlType.TableSource;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_TableSource(this);
+    }
+
     public string TableName { get; set; } = string.Empty;
     public string Alias { get; set; } = string.Empty;
     public List<ISqlExpression> Withs { get; set; } = [];

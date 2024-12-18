@@ -6,6 +6,11 @@ public class SqlOverOrderByClause : ISqlExpression
 {
     public SqlType SqlType { get; set; } = SqlType.OverOrderBy;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_OverOrderByClause(this);
+    }
+
     public ISqlExpression Field { get; set; } = new SqlFieldExpr();
     public List<SqlOrderColumn> Columns { get; set; } = [];
 

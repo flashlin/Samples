@@ -6,6 +6,11 @@ public class SqlComputedColumnDefinition : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.ComputedColumn;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_ComputedColumnDefinition(this);
+    }
+
     public string ColumnName { get; set; } = string.Empty;
     public string Expression { get; set; } = string.Empty;
     public bool IsPersisted { get; set; } = false;

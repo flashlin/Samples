@@ -6,6 +6,11 @@ public class SqlRankClause : ISqlExpression
 {
     public SqlType SqlType { get; set; } = SqlType.RankClause;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_RankClause(this);
+    }
+
     public ISqlExpression? PartitionBy { get; set; }
     public required ISqlExpression OrderBy { get; set; }
 

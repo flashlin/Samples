@@ -6,6 +6,11 @@ public class SqlSearchCondition : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.SearchCondition;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_SearchCondition(this);
+    }
+
     public required ISqlExpression Left { get; set; }
     public LogicalOperator LogicalOperator { get; set; } = LogicalOperator.None;
     public TextSpan OperatorSpan { get; set; } = new();

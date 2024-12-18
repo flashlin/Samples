@@ -6,6 +6,11 @@ public class SqlTopClause : ISqlExpression
 {
     public SqlType SqlType => SqlType.TopClause;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_TopClause(this);
+    }
+
     public required ISqlExpression Expression { get; set; }
     public bool IsPercent { get; set; }
     public bool IsWithTies { get; set; }

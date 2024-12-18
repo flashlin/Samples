@@ -4,6 +4,11 @@ public class SqlColumnDefinition : ISqlExpression
 {
     public SqlType SqlType => SqlType.ColumnDefinition;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_ColumnDefinition(this);
+    }
+
     public string ColumnName { get; set; } = string.Empty;
     public string DataType { get; set; } = string.Empty;
     public SqlDataSize? DataSize { get; set; }

@@ -6,6 +6,11 @@ public class SqlOverPartitionByClause : ISqlExpression
 {
     public SqlType SqlType { get; set; } = SqlType.OverPartitionByClause;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_OverPartitionByClause(this);
+    }
+
     public ISqlExpression Field { get; set; } = new SqlFieldExpr();
     public ISqlExpression By { get; set; } = new SqlFieldExpr();
     public List<SqlOrderColumn> Columns { get; set; } = [];

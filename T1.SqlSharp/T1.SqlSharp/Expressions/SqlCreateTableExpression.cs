@@ -6,6 +6,11 @@ public class SqlCreateTableExpression : ISqlExpression
 {
     public SqlType SqlType => SqlType.CreateTable;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_CreateTableExpression(this);
+    }
+
     public string TableName { get; set; } = string.Empty;
     public List<ISqlExpression> Columns { get; set; } = [];
     public List<ISqlConstraint> Constraints { get; set; } = [];

@@ -2,13 +2,13 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public class SqlUnpivotClause : ISqlExpression
+public class SqlPivotClause : ISqlExpression
 {
-    public SqlType SqlType => SqlType.UnpivotClause;
+    public SqlType SqlType => SqlType.PivotClause;
     public TextSpan Span { get; set; } = new();
     public void Accept(SqlVisitor visitor)
     {
-        visitor.Visit_UnpivotClause(this);
+        visitor.Visit_PivotClause(this);
     }
 
     public required ISqlExpression NewColumn { get; set; }
@@ -19,7 +19,7 @@ public class SqlUnpivotClause : ISqlExpression
     public string ToSql()
     {
         var sql = new IndentStringBuilder();
-        sql.Write("UNPIVOT (");
+        sql.Write("PIVOT (");
         sql.WriteLine();
         sql.Indent++;
         sql.Write(NewColumn.ToSql());

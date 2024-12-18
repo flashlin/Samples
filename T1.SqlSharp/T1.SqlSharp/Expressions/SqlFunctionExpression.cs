@@ -6,6 +6,11 @@ public class SqlFunctionExpression : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.Function;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_FunctionExpression(this);
+    }
+
     public string FunctionName { get; set; } =string.Empty;
     public ISqlExpression[] Parameters { get; set; } = [];
 

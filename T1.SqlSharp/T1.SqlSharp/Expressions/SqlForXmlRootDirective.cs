@@ -6,6 +6,11 @@ public class SqlForXmlRootDirective : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.ForXmlRootDirective;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_ForXmlRootDirective(this);
+    }
+
     public ISqlExpression? RootName { get; set; }
 
     public string ToSql()

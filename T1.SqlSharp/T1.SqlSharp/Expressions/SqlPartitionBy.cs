@@ -6,6 +6,11 @@ public class SqlPartitionBy : ISqlExpression
 {
     public SqlType SqlType { get; set; } = SqlType.PartitionBy;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_PartitionBy(this);
+    }
+
     public List<ISqlExpression> Columns { get; set; } = [];
 
     public string ToSql()

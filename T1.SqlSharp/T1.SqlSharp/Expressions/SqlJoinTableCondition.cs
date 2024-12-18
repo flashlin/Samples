@@ -6,6 +6,11 @@ public class SqlJoinTableCondition : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.JoinCondition; 
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_JoinTableCondition(this); 
+    }
+
     public JoinType JoinType { get; set; } = JoinType.Inner;
     public required ITableSource JoinedTable { get; set; }
     public required ISqlExpression OnCondition { get; set; }

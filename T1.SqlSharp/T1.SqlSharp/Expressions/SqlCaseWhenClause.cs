@@ -4,6 +4,11 @@ public class SqlWhenThenClause : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.WhenThen;
     public TextSpan Span { get; set; } = new();
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_WhenThen(this);
+    }
+
     public required ISqlExpression When { get; set; }
     public required ISqlExpression Then { get; set; }
 
