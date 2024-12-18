@@ -15,7 +15,7 @@ public class SqlParser
         "FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH",
         "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS"
     ];
-    
+
     private static string[] DataTypes =
     {
         "BIGINT", "INT", "SMALLINT", "TINYINT", "BIT", "DECIMAL", "NUMERIC", "MONEY", "SMALLMONEY",
@@ -1668,7 +1668,7 @@ public class SqlParser
         dataSize.Span = _text.CreateSpan(openParenthesis);
         return dataSize;
     }
-    
+
     private ParseResult<SqlToken> Parse_DataType()
     {
         var startPosition = _text.Position;
@@ -1677,7 +1677,7 @@ public class SqlParser
             return NoneResult<SqlToken>();
         }
 
-        if(!DataTypes.Contains(identifierSpan.Word.ToUpper()))
+        if (!DataTypes.Contains(identifierSpan.Word.ToUpper()))
         {
             _text.Position = startPosition;
             return NoneResult<SqlToken>();
@@ -2016,9 +2016,8 @@ public class SqlParser
 
             var columnExpr = column.ResultValue;
 
-            if (columnExpr.Field.SqlType == SqlType.AsExpr)
+            if(TryCast<SqlAsExpr>(columnExpr.Field, out var asExpr))
             {
-                var asExpr = (SqlAsExpr)columnExpr.Field;
                 columnExpr = new SelectColumn()
                 {
                     Span = asExpr.Span,
@@ -2101,6 +2100,17 @@ public class SqlParser
         }
 
         return NoneResult<SqlAliasExpr>();
+    }
+
+    private bool TryCast<T>(ISqlExpression expr, out T result)
+    {
+        if (expr.SqlType == SqlType.AsExpr)
+        {
+            result = (T)expr;
+            return true;
+        }
+        result = default;
+        return false;
     }
 
     private ParseResult<SqlValue> Parse_SqlIdentifierNonReservedWord()
