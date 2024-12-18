@@ -12,7 +12,7 @@ public class ParseSelectSqlTest
     [Test]
     public void Case_GROUP_when()
     {
-        var     sql = $"""
+        var sql = $"""
                    SELECT 
                    (case (id % 2)
                    		when 0 then n.id1
@@ -28,32 +28,34 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    Field = new SqlCaseClause()
+                    Field = new SqlGroup()
                     {
-                        Case = new SqlArithmeticBinaryExpr
+                        Inner = new SqlCaseClause()
                         {
-                            Left = new SqlFieldExpr { FieldName = "id" },
-                            Operator = ArithmeticOperator.Modulo,
-                            Right = new SqlValue { SqlType = SqlType.IntValue, Value = "2" }
-                        },
-                        WhenThens =
-                        [
-                            new SqlWhenThenClause
+                            Case = new SqlGroup()
                             {
-                                When = new SqlValue { SqlType = SqlType.IntValue, Value = "0" },
-                                Then = new SqlFieldExpr { FieldName = "n.id1" }
+                                Inner = new SqlArithmeticBinaryExpr
+                                {
+                                    Left = new SqlFieldExpr { FieldName = "id" },
+                                    Operator = ArithmeticOperator.Modulo,
+                                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "2" }
+                                }
                             },
-                            new SqlWhenThenClause()
-                            {
-                                When = new SqlValue { SqlType = SqlType.IntValue, Value = "1" },
-                                Then = new SqlFieldExpr { FieldName = "n.id2" }
-                            },
-                            new SqlWhenThenClause()
-                            {
-                                When = new SqlValue { SqlType = SqlType.IntValue, Value = "else" },
-                                Then = new SqlValue { SqlType = SqlType.String, Value = "''" }
-                            }
-                        ],
+                            WhenThens =
+                            [
+                                new SqlWhenThenClause
+                                {
+                                    When = new SqlValue { SqlType = SqlType.IntValue, Value = "0" },
+                                    Then = new SqlFieldExpr { FieldName = "n.id1" }
+                                },
+                                new SqlWhenThenClause()
+                                {
+                                    When = new SqlValue { SqlType = SqlType.IntValue, Value = "1" },
+                                    Then = new SqlFieldExpr { FieldName = "n.id2" }
+                                },
+                            ],
+                            Else = new SqlValue { SqlType = SqlType.String, Value = "''" }
+                        }
                     },
                     Alias = "id3"
                 }
@@ -64,7 +66,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Pivot()
     {
@@ -106,7 +108,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Where_NOT_expr()
     {
@@ -135,14 +137,17 @@ public class ParseSelectSqlTest
                 {
                     Query = new SelectStatement
                     {
-                        Columns = [new SelectColumn { Field = new SqlValue { SqlType = SqlType.IntValue, Value = "1" } }],
+                        Columns =
+                        [
+                            new SelectColumn { Field = new SqlValue { SqlType = SqlType.IntValue, Value = "1" } }
+                        ],
                         FromSources = [new SqlTableSource { TableName = "emp" }]
                     }
                 }
             }
         });
     }
-    
+
     [Test]
     public void LeftJoin_group()
     {
@@ -195,7 +200,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Where_x_and_group()
     {

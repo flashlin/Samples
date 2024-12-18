@@ -11,8 +11,10 @@ public class SqlParser
     private const string ConstraintKeyword = "CONSTRAINT";
 
     private static readonly string[] ReservedWords =
-        ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH", 
-            "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS"];
+    [
+        "FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH",
+        "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS"
+    ];
 
     private readonly StringParser _text;
 
@@ -414,7 +416,7 @@ public class SqlParser
         Func<ParseResult<ISqlExpression>> parseTerm)
     {
         var left = parseTerm();
-        while (PeekSymbolString(1).Equals("*") || PeekSymbolString(1).Equals("/"))
+        while (TryPeekSymbolContains(1, ["*", "/", "%"], out _))
         {
             var op = ReadSymbolString(1);
             var right = parseTerm();
@@ -702,7 +704,7 @@ public class SqlParser
 
             selectStatement.FromSources = tableSources.ResultValue;
         }
-        
+
         if (Try(ParsePivotClause, out var pivotClause))
         {
             selectStatement.FromSources.Add(pivotClause.ResultValue);
@@ -2970,7 +2972,7 @@ public class SqlParser
             Inner = inner.ResultValue
         };
     }
-    
+
     private ParseResult<ISqlExpression> ParseParenthesesOption<T>(Func<ParseResult<T>> parseElemFn)
         where T : ISqlExpression
     {
@@ -3330,6 +3332,18 @@ public class SqlParser
     {
         SkipWhiteSpace();
         return _text.Peek(() => _text.ReadSymbol(length)).Word;
+    }
+
+    private bool TryPeekSymbolContains(int length, string[] symbols, out string actual)
+    {
+        actual = PeekSymbolString(length);
+        if (symbols.Contains(actual))
+        {
+            return true;
+        }
+
+        actual = string.Empty;
+        return false;
     }
 
     private TextSpan ReadSqlIdentifier()
