@@ -128,6 +128,55 @@ public class SqlParser
         return CreateParseResult(selectType);
     }
 
+    private ParseResult<SqlChangeTableChanges> Parse_ChangeTableChanges()
+    {
+        if (!TryKeywords(["CHANGETABLE"], out var startSpan))
+        {
+            return NoneResult<SqlChangeTableChanges>();
+        }
+
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        if (!TryKeyword("CHANGES", out _))
+        {
+            return CreateParseError("Expected CHANGES");
+        }
+
+        var tableName = _text.ReadSqlIdentifier();
+        if (!TryMatch(",", out _))
+        {
+            return CreateParseError("Expected ,");
+        }
+
+        var syncVersion = ParseArithmeticExpr();
+        if (syncVersion.HasError)
+        {
+            return syncVersion.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        var alias = ParseAliasExpr();
+        if (alias.HasError)
+        {
+            return alias.Error;
+        }
+
+        return new SqlChangeTableChanges
+        {
+            Span = _text.CreateSpan(startSpan),
+            TableName = tableName.Word,
+            LastSyncVersion = syncVersion.ResultValue,
+            Alias = alias.Result?.Name ?? string.Empty
+        };
+    }
+
     private ParseResult<SqlGroupByClause> ParseGroupByClause()
     {
         if (!TryKeywords(["GROUP", "BY"], out var startSpan))
@@ -1738,6 +1787,15 @@ public class SqlParser
             return new SqlInnerTableSource()
             {
                 Inner = sub.ResultValue
+            };
+        }
+        
+        if(Try(Parse_ChangeTableChanges, out var changeTableChanges))
+        {
+            return new SqlInnerTableSource()
+            {
+                Inner = changeTableChanges.ResultValue,
+                Alias = changeTableChanges.ResultValue.Alias
             };
         }
 

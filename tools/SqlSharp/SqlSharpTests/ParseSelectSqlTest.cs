@@ -10,6 +10,38 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void From_ChangeTable_Changes()
+    {
+        var sql = $"""
+                   select id
+                   FROM CHANGETABLE (CHANGES Customer, @lastSyncVersion) AS c
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement(){
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources = 
+            [
+                new SqlInnerTableSource
+                {
+                    Inner = new SqlChangeTableChanges
+                    {
+                        TableName = "Customer",
+                        LastSyncVersion = new SqlFieldExpr() { FieldName = "@lastSyncVersion" },
+                        Alias = "c"
+                    },
+                    Alias = "c"
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Select_arithmetic_as_aliasName()
     {
         var sql = $"""

@@ -397,4 +397,12 @@ public class SqlVisitor
         AddSqlExpression(expr);
         expr.Items.ForEach(x=>x.Accept(this));
     }
+
+    public virtual void Visit_ChangeTableChanges(SqlChangeTableChanges expr)
+    {
+    }
+
+    public virtual void Visit_ChangeTableVersion(SqlChangeTableVersion expr)
+    {
+    }
 }
