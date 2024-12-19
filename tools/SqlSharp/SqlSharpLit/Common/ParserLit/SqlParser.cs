@@ -831,7 +831,7 @@ public class SqlParser
     private ParseResult<List<ISqlExpression>> Parse_FromGroupWithTableSources()
     {
         var startPosition = _text.Position;
-        if (!TryMatch("(", out _))
+        if (!TryMatch("(", out var startSpan))
         {
             return NoneResult<List<ISqlExpression>>();
         }
@@ -853,7 +853,11 @@ public class SqlParser
                 new SqlInnerTableSource()
                 {
                     Span = _text.CreateSpan(startPosition),
-                    Inner = subSelect.ResultValue,
+                    Inner = new SqlGroup()
+                    {
+                        Span = _text.CreateSpan(startSpan),
+                        Inner = subSelect.ResultValue,
+                    },
                     Alias = alias.Result?.Name ?? string.Empty
                 }
             };
