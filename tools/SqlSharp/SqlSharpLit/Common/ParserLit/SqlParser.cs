@@ -51,7 +51,7 @@ public class SqlParser
     {
         return _text.GetRemainingText();
     }
-    
+
     public string GetPreviousText(int offset)
     {
         return _text.GetPreviousText(offset);
@@ -424,7 +424,7 @@ public class SqlParser
         if (TryKeyword("AS", out var asSpan))
         {
             var dataType = Or<ISqlExpression>(
-                Parse_DataTypeWithSize, 
+                Parse_DataTypeWithSize,
                 ParseSqlQuotedString, Parse_SqlIdentifier)();
             return new SqlAsExpr
             {
@@ -480,7 +480,7 @@ public class SqlParser
         Func<ParseResult<ISqlExpression>> parseTerm)
     {
         var left = parseTerm();
-        while (TryPeekSymbolContains(1, ["*", "/", "%"], out _))
+        while (TryPeekSymbolContains(["*", "/", "%"], out _))
         {
             var op = ReadSymbolString(1);
             var right = parseTerm();
@@ -1753,7 +1753,7 @@ public class SqlParser
         {
             return NoneResult<SqlDataTypeWithSize>();
         }
-        
+
         if (!DataTypes.Contains(identifierSpan.Word.ToUpper()))
         {
             _text.Position = startPosition;
@@ -1789,8 +1789,8 @@ public class SqlParser
                 Inner = sub.ResultValue
             };
         }
-        
-        if(Try(Parse_ChangeTableChanges, out var changeTableChanges))
+
+        if (Try(Parse_ChangeTableChanges, out var changeTableChanges))
         {
             return new SqlInnerTableSource()
             {
@@ -2087,11 +2087,11 @@ public class SqlParser
             }
 
             var columnExpr = column.ResultValue;
-            
+
             //'Message' + @errorMsg as ErrorMessage
             var visitor = new SqlVisitor();
             var exprList = visitor.Visit(columnExpr);
-            if(TryCast<SqlAsExpr>(exprList[^1].Expression, SqlType.AsExpr, out var subAsExpr))
+            if (TryCast<SqlAsExpr>(exprList[^1].Expression, SqlType.AsExpr, out var subAsExpr))
             {
                 var previous = exprList[^2].Expression;
                 if (TryCast<SqlArithmeticBinaryExpr>(previous, SqlType.ArithmeticBinaryExpr, out var binaryExpr))
@@ -2101,7 +2101,7 @@ public class SqlParser
                 }
             }
 
-            if(TryCast<SqlAsExpr>(columnExpr.Field, SqlType.AsExpr, out var asExpr))
+            if (TryCast<SqlAsExpr>(columnExpr.Field, SqlType.AsExpr, out var asExpr))
             {
                 columnExpr = new SelectColumn()
                 {
@@ -2195,6 +2195,7 @@ public class SqlParser
             result = (T)expr;
             return true;
         }
+
         result = default;
         return false;
     }
@@ -3459,14 +3460,17 @@ public class SqlParser
         return _text.Peek(() => _text.ReadSymbol(length)).Word;
     }
 
-    private bool TryPeekSymbolContains(int length, string[] symbols, out string actual)
+    private bool TryPeekSymbolContains(string[] symbols, out string actual)
     {
-        actual = PeekSymbolString(length);
-        if (symbols.Contains(actual))
+        var symbolsOrdered = symbols.OrderByDescending(s => s.Length).ToArray();
+        foreach (var symbol in symbolsOrdered)
         {
-            return true;
+            actual = PeekSymbolString(symbol.Length);
+            if (symbol==actual)
+            {
+                return true;
+            }
         }
-
         actual = string.Empty;
         return false;
     }
@@ -3604,5 +3608,4 @@ public class SqlParser
 public class SqlAsExprVisitor : SqlVisitor
 {
     public bool HasAs { get; set; }
-    
 }
