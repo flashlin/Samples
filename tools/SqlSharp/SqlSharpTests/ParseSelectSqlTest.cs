@@ -16,6 +16,21 @@ public class ParseSelectSqlTest
                    SELECT @id += 1
                    """;
         var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlArithmeticBinaryExpr
+                    {
+                        Left = new SqlFieldExpr { FieldName = "@id" },
+                        Operator = ArithmeticOperator.AddAssign,
+                        Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                    }
+                }
+            ]
+        });
     }
     
     

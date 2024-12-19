@@ -441,9 +441,9 @@ public class SqlParser
         Func<ParseResult<ISqlExpression>> parseTerm)
     {
         var left = parseTerm();
-        while (PeekSymbolString(1).Equals("+") || PeekSymbolString(1).Equals("-"))
+        while (TryPeekSymbolContains(["+=", "-=", "+", "-"], out var symbol))
         {
-            var op = ReadSymbolString(1);
+            var op = ReadSymbolString(symbol.Length);
             var right = parseTerm();
             left = CreateParseResult(new SqlArithmeticBinaryExpr
             {
