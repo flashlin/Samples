@@ -39,38 +39,61 @@ public class ParseSelectSqlTest
             [
                 new SqlInnerTableSource
                 {
-                    Inner = new SelectStatement
+                    Inner = new SqlGroup()
                     {
-                        Columns =
-                        [
-                            new SelectColumn
-                            {
-                                Field = new SqlFieldExpr { FieldName = "id" }
-                            }
-                        ],
-                        FromSources =
-                        [
-                            new SqlTableSource { TableName = "customer" }
-                        ],
-                        GroupBy = new SqlGroupByClause
+                        Inner = new SelectStatement
                         {
                             Columns =
                             [
-                                new SqlFieldExpr { FieldName = "id" }
-                            ]
-                        },
-                        Having = new SqlHavingClause
-                        {
-                            Condition = new SqlConditionExpression
-                            {
-                                Left = new SqlFunctionExpression
+                                new SelectColumn
                                 {
-                                    FunctionName = "count",
-                                    Parameters = [new SqlValue { SqlType = SqlType.IntValue, Value = "1" }]
-                                },
-                                ComparisonOperator = ComparisonOperator.GreaterThan,
-                                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "10" }
-                            }
+                                    Field = new SqlFieldExpr { FieldName = "id" }
+                                }
+                            ],
+                            FromSources =
+                            [
+                                new SqlTableSource { TableName = "customer" }
+                            ],
+                            GroupBy = new SqlGroupByClause
+                            {
+                                Columns =
+                                [
+                                    new SqlFieldExpr { FieldName = "id" }
+                                ]
+                            },
+                            Having = new SqlHavingClause
+                            {
+                                Condition = new SqlConditionExpression
+                                {
+                                    Left = new SqlFunctionExpression
+                                    {
+                                        FunctionName = "count",
+                                        Parameters = [new SqlValue { SqlType = SqlType.IntValue, Value = "1" }]
+                                    },
+                                    ComparisonOperator = ComparisonOperator.GreaterThan,
+                                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "10" }
+                                }
+                            },
+                            Unions =
+                            [
+                                new SqlUnionSelect
+                                {
+                                    SelectStatement = new SelectStatement
+                                    {
+                                        Columns =
+                                        [
+                                            new SelectColumn
+                                            {
+                                                Field = new SqlFieldExpr { FieldName = "id" }
+                                            }
+                                        ],
+                                        FromSources =
+                                        [
+                                            new SqlTableSource { TableName = "customer" }
+                                        ]
+                                    }
+                                }
+                            ]
                         }
                     },
                     Alias = "Temp"
@@ -78,7 +101,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Partition_by_without_order_by()
     {
@@ -118,7 +141,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Select_field_add_equal_value()
     {
@@ -142,8 +165,8 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
-    
+
+
     [Test]
     public void Select_ROW_NUMBER_OVER()
     {
@@ -184,7 +207,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void From_ChangeTable_Changes()
     {
@@ -193,7 +216,8 @@ public class ParseSelectSqlTest
                    FROM CHANGETABLE (CHANGES Customer, @lastSyncVersion) AS c
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SelectStatement(){
+        rc.ShouldBe(new SelectStatement()
+        {
             Columns =
             [
                 new SelectColumn
@@ -201,7 +225,7 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "id" }
                 }
             ],
-            FromSources = 
+            FromSources =
             [
                 new SqlInnerTableSource
                 {
@@ -216,7 +240,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Select_arithmetic_as_aliasName()
     {
@@ -246,7 +270,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Case_GROUP_when()
     {
@@ -1509,7 +1533,8 @@ public class ParseSelectSqlTest
                         {
                             FunctionName = "ROW_NUMBER"
                         },
-                        By = [
+                        By =
+                        [
                             new SqlFieldExpr { FieldName = "id" }
                         ],
                         Columns =
