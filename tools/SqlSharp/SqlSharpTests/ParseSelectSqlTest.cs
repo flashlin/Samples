@@ -18,6 +18,36 @@ public class ParseSelectSqlTest
                    from customer
                    """;
         var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlOverPartitionByClause
+                    {
+                        Field = new SqlFunctionExpression
+                        {
+                            FunctionName = "ROW_NUMBER"
+                        },
+                        By = [new SqlFieldExpr { FieldName = "r.id" }, new SqlFieldExpr { FieldName = "r.name" }],
+                        Columns =
+                        [
+                            new SqlOrderColumn
+                            {
+                                ColumnName = new SqlFieldExpr { FieldName = "ID" },
+                                Order = OrderType.Desc
+                            }
+                        ]
+                    },
+                    Alias = "id2"
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
     }
     
     [Test]
