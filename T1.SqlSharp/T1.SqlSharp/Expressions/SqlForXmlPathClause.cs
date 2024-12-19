@@ -2,11 +2,6 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public interface ISqlForXmlClause : ISqlExpression
-{
-    List<SqlForXmlRootDirective> CommonDirectives { get; set; }
-}
-
 public class SqlForXmlPathClause : ISqlForXmlClause
 {
     public SqlType SqlType { get; } = SqlType.ForXmlPathClause;

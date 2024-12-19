@@ -12,17 +12,17 @@ public class SqlFunctionExpression : ISqlExpression
     }
 
     public string FunctionName { get; set; } =string.Empty;
-    public ISqlExpression[] Parameters { get; set; } = [];
+    public List<ISqlExpression> Parameters { get; set; } = [];
 
     public string ToSql()
     {
         var sql = new IndentStringBuilder();
         sql.Write(FunctionName);
         sql.Write("(");
-        for (var i = 0; i < Parameters.Length; i++)
+        for (var i = 0; i < Parameters.Count; i++)
         {
             sql.Write(Parameters[i].ToSql());
-            if (i < Parameters.Length - 1)
+            if (i < Parameters.Count - 1)
             {
                 sql.Write(", ");
             }

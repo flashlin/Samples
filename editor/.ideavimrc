@@ -1,4 +1,5 @@
 " https://github.com/JetBrains/ideavim/wiki/IdeaVim-Plugins
+" ideavimmulcursor
 ":actionlist 顯示所有的 action
 let mapleader=" "
 set number relativenumber
@@ -84,6 +85,10 @@ nmap zdt :action RiderUnitTestDebugContextAction<CR>
 " 打開單元測試視窗
 nmap zot :action RiderUnitTestFocusExplorerAction<CR>
 nmap zvf :action HideAllWindows<CR>
+"打開快速跳轉檔案 
+nmap ztt :action GotoFile<CR>
+nmap ztm :action FileStructurePopup<CR>
+nmap zte :action GotoTestFailedLine<CR>
 
 " 重新 rearrange code layout
 nmap zmc :action RearrangeCode<CR>

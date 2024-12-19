@@ -5,20 +5,21 @@ namespace T1.SqlSharp.Expressions;
 
 public class SqlConstraintForeignKey : ISqlConstraint
 {
+    public List<SqlConstraintColumn> Columns { get; set; } = [];
+    public string ReferencedTableName { get; set; } = string.Empty;
+    public string RefColumn { get; set; } = string.Empty;
+    public ReferentialAction OnDeleteAction { get; set; } = ReferentialAction.NoAction;
+    public ReferentialAction OnUpdateAction { get; set; } = ReferentialAction.NoAction;
+    public bool NotForReplication { get; set; }
     public SqlType SqlType { get; }= SqlType.TableForeignKey;
     public TextSpan Span { get; set; } = new();
+
     public void Accept(SqlVisitor visitor)
     {
         visitor.Visit_ConstraintForeignKey(this);
     }
 
     public string ConstraintName { get; set; } = string.Empty;
-    public List<SqlConstraintColumn> Columns { get; set; } = [];
-    public string ReferencedTableName { get; set; } = string.Empty;
-    public string RefColumn { get; set; } = string.Empty; 
-    public ReferentialAction OnDeleteAction { get; set; } = ReferentialAction.NoAction;
-    public ReferentialAction OnUpdateAction { get; set; } = ReferentialAction.NoAction;
-    public bool NotForReplication { get; set; }
 
     public string ToSql()
     {

@@ -1835,7 +1835,7 @@ public class SqlParser
                 {
                     Span = _text.CreateSpan(startPosition),
                     FunctionName = identifier.Word,
-                    Parameters = parameters.ResultValue!.ToArray()
+                    Parameters = parameters.ResultValue
                 };
                 function = NormalizeFunctionName(function);
                 return function;
