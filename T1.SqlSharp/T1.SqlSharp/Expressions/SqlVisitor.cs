@@ -303,7 +303,7 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
         expr.Field.Accept(this);
-        expr.By.Accept(this);
+        expr.By.ForEach(x=>x.Accept(this));
         expr.Columns.ForEach(x=>x.Accept(this));
     }
 

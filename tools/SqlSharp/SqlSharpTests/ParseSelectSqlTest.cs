@@ -10,6 +10,17 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_ROW_NUMBER_OVER()
+    {
+        var sql = $"""
+                   select 
+                   ROW_NUMBER() OVER(PARTITION BY r.id, r.name ORDER BY ID DESC) AS id2
+                   from customer
+                   """;
+        var rc = ParseSql(sql);
+    }
+    
+    [Test]
     public void From_ChangeTable_Changes()
     {
         var sql = $"""
@@ -1333,7 +1344,9 @@ public class ParseSelectSqlTest
                         {
                             FunctionName = "ROW_NUMBER"
                         },
-                        By = new SqlFieldExpr { FieldName = "id" },
+                        By = [
+                            new SqlFieldExpr { FieldName = "id" }
+                        ],
                         Columns =
                         [
                             new SqlOrderColumn

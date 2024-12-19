@@ -12,14 +12,15 @@ public class SqlOverPartitionByClause : ISqlExpression
     }
 
     public ISqlExpression Field { get; set; } = new SqlFieldExpr();
-    public ISqlExpression By { get; set; } = new SqlFieldExpr();
+    public List<ISqlExpression> By { get; set; } = [];
     public List<SqlOrderColumn> Columns { get; set; } = [];
     public string ToSql()
     {
         var sql = new IndentStringBuilder();
         sql.Write(Field.ToSql());
         sql.Write(" OVER (");
-        sql.Write($"PARTITION BY {By.ToSql()} ");
+        sql.Write($"PARTITION BY ");
+        sql.Write(string.Join(",", By.Select(x => x.ToSql())));
         sql.Write("ORDER BY ");
         foreach (var column in Columns.Select((value,index)=> new {value, index}))
         {

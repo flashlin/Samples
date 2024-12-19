@@ -1279,7 +1279,7 @@ public class SqlParser
             return NoneResult<SqlOverPartitionByClause>();
         }
 
-        var partitionBy = Parse_SqlIdentifier().ResultValue;
+        var partitionBy = ParseWithComma(Parse_SqlIdentifier);
         var orderBy = ParseOrderByClause();
         if (orderBy.HasError)
         {
@@ -1301,7 +1301,7 @@ public class SqlParser
         return new SqlOverPartitionByClause()
         {
             Span = _text.CreateSpan(startSpan),
-            By = partitionBy,
+            By = partitionBy.ResultValue.Cast<ISqlExpression>().ToList(),
             Columns = orderColumns
         };
     }
