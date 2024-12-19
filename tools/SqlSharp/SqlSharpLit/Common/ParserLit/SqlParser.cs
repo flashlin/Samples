@@ -51,6 +51,11 @@ public class SqlParser
     {
         return _text.GetRemainingText();
     }
+    
+    public string GetPreviousText(int offset)
+    {
+        return _text.GetPreviousText(offset);
+    }
 
     public static ParseResult<ISqlExpression> Parse(string sql)
     {

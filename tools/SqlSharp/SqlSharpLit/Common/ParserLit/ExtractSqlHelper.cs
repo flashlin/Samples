@@ -177,10 +177,11 @@ public class ExtractSqlHelper
             }
             catch (Exception)
             {
-                var sql = sqlParser.GetRemainingText();
+                var remainingSql = sqlParser.GetRemainingText();
                 Console.Clear();
                 Console.WriteLine("Processed files count: " + fileCount);
-                Console.WriteLine($"Exception {sqlFile}:\n{sql}");
+                Console.WriteLine($"Exception {sqlFile}:\n{remainingSql}");
+                Console.WriteLine($"----------\n{sqlParser.GetPreviousText(0)}");
                 throw;
             }
 
