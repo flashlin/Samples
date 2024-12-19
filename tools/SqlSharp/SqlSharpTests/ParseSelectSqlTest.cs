@@ -10,11 +10,11 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
-    public void METHOD()
+    public void Partition_by_without_order_by()
     {
         var sql = $"""
-                   SELECT id, /* comment */ 
-                   name
+                   select sum(count(1)) over(partition by id) as [Total]
+                   from customer
                    """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
@@ -23,12 +23,28 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    Field = new SqlFieldExpr { FieldName = "id" }
-                },
-                new SelectColumn
-                {
-                    Field = new SqlFieldExpr { FieldName = "name" }
+                    Field = new SqlOverPartitionByClause
+                    {
+                        Field = new SqlFunctionExpression
+                        {
+                            FunctionName = "sum",
+                            Parameters =
+                            [
+                                new SqlFunctionExpression
+                                {
+                                    FunctionName = "count",
+                                    Parameters = [new SqlValue { SqlType = SqlType.IntValue, Value = "1" }]
+                                }
+                            ]
+                        },
+                        By = [new SqlFieldExpr { FieldName = "id" }]
+                    },
+                    Alias = "[Total]"
                 }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
             ]
         });
     }

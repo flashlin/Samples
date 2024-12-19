@@ -1286,13 +1286,7 @@ public class SqlParser
             return orderBy.Error;
         }
 
-        if (orderBy.Result == null)
-        {
-            _text.Position = startSpan.Offset;
-            return NoneResult<SqlOverPartitionByClause>();
-        }
-
-        var orderColumns = orderBy.ResultValue.Columns;
+        var orderColumns = orderBy.Result?.Columns ?? [];
         if (!TryMatch(")", out _))
         {
             return CreateParseError("Expected )");
