@@ -10,6 +10,30 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   SELECT id, /* comment */ 
+                   name
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                },
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "name" }
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Select_field_add_equal_value()
     {
         var sql = $"""
