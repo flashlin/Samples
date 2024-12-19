@@ -206,6 +206,28 @@ public class ExtractSqlHelper
             fileCount++;
         }
     }
+    
+    public static bool FindOccurrences(string text, int n)
+    {
+        if (string.IsNullOrEmpty(text) || n <= 0)
+        {
+            return false;
+        }
+        var count = 0;
+        for (var i = 0; i < text.Length - 1; i++)
+        {
+            if (text[i] == '\'' && text[i + 1] == '\'')
+            {
+                count++;
+                i++;
+                if (count == n)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     private string ExcludeNonSelectSql(string text)
     {
@@ -213,7 +235,10 @@ public class ExtractSqlHelper
         {
             return string.Empty;
         }
-
+        if (FindOccurrences(text, 2))
+        {
+            return string.Empty;
+        }
         return text;
     }
 
