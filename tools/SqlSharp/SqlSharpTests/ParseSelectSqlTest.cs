@@ -10,6 +10,76 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   select id
+                   from
+                   (
+                   		select id
+                   		from customer
+                   		group by id
+                   		having count(1) > 10
+                   		union
+                   		select id
+                   		from customer
+                   ) Temp
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlInnerTableSource
+                {
+                    Inner = new SelectStatement
+                    {
+                        Columns =
+                        [
+                            new SelectColumn
+                            {
+                                Field = new SqlFieldExpr { FieldName = "id" }
+                            }
+                        ],
+                        FromSources =
+                        [
+                            new SqlTableSource { TableName = "customer" }
+                        ],
+                        GroupBy = new SqlGroupByClause
+                        {
+                            Columns =
+                            [
+                                new SqlFieldExpr { FieldName = "id" }
+                            ]
+                        },
+                        Having = new SqlHavingClause
+                        {
+                            Condition = new SqlConditionExpression
+                            {
+                                Left = new SqlFunctionExpression
+                                {
+                                    FunctionName = "count",
+                                    Parameters = [new SqlValue { SqlType = SqlType.IntValue, Value = "1" }]
+                                },
+                                ComparisonOperator = ComparisonOperator.GreaterThan,
+                                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "10" }
+                            }
+                        }
+                    },
+                    Alias = "Temp"
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Partition_by_without_order_by()
     {
         var sql = $"""

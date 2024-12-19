@@ -760,7 +760,7 @@ public class SqlParser
 
         if (TryKeyword("FROM", out _))
         {
-            var tableSources = Or(Parse_FromGroupFromTableSources, Parse_FromTableSources)();
+            var tableSources = Parse_FromSources();
             if (tableSources.HasError)
             {
                 return tableSources.Error;
@@ -808,14 +808,14 @@ public class SqlParser
             selectStatement.ForXml = forXmlClause.ResultValue;
         }
 
-        if (Try(ParseUnionSelectClauseList, out var unionSelectClauseList))
-        {
-            selectStatement.Unions = unionSelectClauseList.ResultValue;
-        }
-
         if (Try(ParseHavingClause, out var havingClause))
         {
             selectStatement.Having = havingClause.Result;
+        }
+        
+        if (Try(ParseUnionSelectClauseList, out var unionSelectClauseList))
+        {
+            selectStatement.Unions = unionSelectClauseList.ResultValue;
         }
 
         SkipStatementEnd();
@@ -823,7 +823,12 @@ public class SqlParser
         return CreateParseResult(selectStatement);
     }
 
-    private ParseResult<List<ISqlExpression>> Parse_FromGroupFromTableSources()
+    private ParseResult<List<ISqlExpression>> Parse_FromSources()
+    {
+        return Or(Parse_FromGroupWithTableSources, Parse_FromTableSources)();
+    }
+
+    private ParseResult<List<ISqlExpression>> Parse_FromGroupWithTableSources()
     {
         var startPosition = _text.Position;
         if (!TryMatch("(", out _))
@@ -833,8 +838,35 @@ public class SqlParser
 
         if (IsPeekKeywords("SELECT"))
         {
-            _text.Position = startPosition;
-            return NoneResult<List<ISqlExpression>>();
+            var subSelect = ParseSelectStatement();
+            if (subSelect.HasError)
+            {
+                return subSelect.Error;
+            }
+            if (!TryMatch(")", out _))
+            {
+                return CreateParseError("Expected )");
+            }
+            var alias = ParseAliasExpr(); 
+            var sources = new List<ISqlExpression>
+            {
+                new SqlInnerTableSource()
+                {
+                    Span = _text.CreateSpan(startPosition),
+                    Inner = subSelect.ResultValue,
+                    Alias = alias.Result?.Name ?? string.Empty
+                }
+            };
+            if (IsPeekMatch(","))
+            {
+                var moreSources = Parse_FromSources();
+                if (moreSources.HasError)
+                {
+                    return moreSources.Error;
+                }
+                sources.AddRange(moreSources.ResultValue);
+            }
+            return sources;
         }
 
         var tableSources = Parse_FromTableSources();
