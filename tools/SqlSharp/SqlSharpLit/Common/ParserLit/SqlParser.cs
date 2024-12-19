@@ -2025,11 +2025,17 @@ public class SqlParser
 
             var columnExpr = column.ResultValue;
             
+            //'Message' + @errorMsg as ErrorMessage
             var visitor = new SqlVisitor();
             var exprList = visitor.Visit(columnExpr);
             if(TryCast<SqlAsExpr>(exprList[^1].Expression, SqlType.AsExpr, out var subAsExpr))
             {
-                throw new InvalidOperationException("AS is not allowed in select columns");
+                var previous = exprList[^2].Expression;
+                if (TryCast<SqlArithmeticBinaryExpr>(previous, SqlType.ArithmeticBinaryExpr, out var binaryExpr))
+                {
+                    binaryExpr.Right = subAsExpr.Instance;
+                    columnExpr.Alias = subAsExpr.As.ToSql();
+                }
             }
 
             if(TryCast<SqlAsExpr>(columnExpr.Field, SqlType.AsExpr, out var asExpr))
