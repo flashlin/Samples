@@ -1996,25 +1996,28 @@ public class ParseSelectSqlTest
             [
                 new SqlInnerTableSource()
                 {
-                    Inner = new SelectStatement()
+                    Inner = new SqlGroup()
                     {
-                        Columns =
-                        [
-                            new SelectColumn
-                            {
-                                Field = new SqlFieldExpr
+                        Inner = new SelectStatement()
+                        {
+                            Columns =
+                            [
+                                new SelectColumn
                                 {
-                                    FieldName = "id"
+                                    Field = new SqlFieldExpr
+                                    {
+                                        FieldName = "id"
+                                    }
                                 }
-                            }
-                        ],
-                        FromSources =
-                        [
-                            new SqlTableSource
-                            {
-                                TableName = "emp"
-                            }
-                        ]
+                            ],
+                            FromSources =
+                            [
+                                new SqlTableSource
+                                {
+                                    TableName = "emp"
+                                }
+                            ]
+                        }
                     }
                 }
             ]
