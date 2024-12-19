@@ -369,7 +369,9 @@ public class SqlParser
 
         if (TryKeyword("AS", out var asSpan))
         {
-            var dataType = Or<ISqlExpression>(Parse_DataTypeWithSize, ParseSqlQuotedString)();
+            var dataType = Or<ISqlExpression>(
+                Parse_DataTypeWithSize, 
+                ParseSqlQuotedString, Parse_SqlIdentifier)();
             return new SqlAsExpr
             {
                 Span = _text.CreateSpan(asSpan),
@@ -1692,8 +1694,15 @@ public class SqlParser
 
     private ParseResult<SqlDataTypeWithSize> Parse_DataTypeWithSize()
     {
-        if (!TryReadSqlIdentifier(out var identifier))
+        var startPosition = _text.Position;
+        if (!TryReadSqlIdentifier(out var identifierSpan))
         {
+            return NoneResult<SqlDataTypeWithSize>();
+        }
+        
+        if (!DataTypes.Contains(identifierSpan.Word.ToUpper()))
+        {
+            _text.Position = startPosition;
             return NoneResult<SqlDataTypeWithSize>();
         }
 
@@ -1705,7 +1714,7 @@ public class SqlParser
 
         return new SqlDataTypeWithSize()
         {
-            DataTypeName = identifier.Word,
+            DataTypeName = identifierSpan.Word,
             Size = dataType.Result != null ? dataType.ResultValue : new SqlDataSize()
         };
     }
@@ -2016,14 +2025,14 @@ public class SqlParser
 
             var columnExpr = column.ResultValue;
             
-            var visitor = new SqlAsExprVisitor();
+            var visitor = new SqlVisitor();
             var exprList = visitor.Visit(columnExpr);
-            if(visitor.HasAs)
+            if(TryCast<SqlAsExpr>(exprList[^1].Expression, SqlType.AsExpr, out var subAsExpr))
             {
                 throw new InvalidOperationException("AS is not allowed in select columns");
             }
 
-            if(TryCast<SqlAsExpr>(columnExpr.Field, out var asExpr))
+            if(TryCast<SqlAsExpr>(columnExpr.Field, SqlType.AsExpr, out var asExpr))
             {
                 columnExpr = new SelectColumn()
                 {
@@ -2109,9 +2118,10 @@ public class SqlParser
         return NoneResult<SqlAliasExpr>();
     }
 
-    private bool TryCast<T>(ISqlExpression expr, out T result)
+    private bool TryCast<T>(ISqlExpression expr, SqlType sqlType, out T result)
+        where T : ISqlExpression
     {
-        if (expr.SqlType == SqlType.AsExpr)
+        if (expr.SqlType == sqlType)
         {
             result = (T)expr;
             return true;
