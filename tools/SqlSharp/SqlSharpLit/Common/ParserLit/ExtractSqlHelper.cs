@@ -281,10 +281,10 @@ public class ExtractSqlHelper
         return result.ToString();
     }
 
-    private IEnumerable<string> ExtractSelectSqlFromText(string text)
+    private IEnumerable<string> ExtractSelectSqlFromText(string text, int startOffset=0)
     {
         var select = "SELECT";
-        var startSelectIndex = text.IndexOf(select, StringComparison.OrdinalIgnoreCase);
+        var startSelectIndex = text.IndexOf(select, startOffset, StringComparison.OrdinalIgnoreCase);
         if (startSelectIndex < 0)
         {
             yield break;
@@ -294,15 +294,14 @@ public class ExtractSqlHelper
         var nextChar = startSelectSql[select.Length];
         if (!char.IsWhiteSpace(nextChar))
         {
-            var nextSelect = startSelectSql.Substring(select.Length);
-            foreach (var subSelectSql in ExtractSelectSqlFromText(nextSelect))
+            foreach (var subSelectSql in ExtractSelectSqlFromText(text, startOffset + select.Length))
             {
                 yield return subSelectSql;
             }
             yield break;
         }
         yield return startSelectSql;
-        foreach (var subSelectSql in ExtractSelectSqlFromText(startSelectSql.Substring(select.Length)))
+        foreach (var subSelectSql in ExtractSelectSqlFromText(text, startOffset + startSelectSql.Length))
         {
             yield return subSelectSql;
         }
