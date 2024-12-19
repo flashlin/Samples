@@ -10,6 +10,16 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_field_add_equal_value()
+    {
+        var sql = $"""
+                   SELECT @id += 1
+                   """;
+        var rc = ParseSql(sql);
+    }
+    
+    
+    [Test]
     public void Select_ROW_NUMBER_OVER()
     {
         var sql = $"""
