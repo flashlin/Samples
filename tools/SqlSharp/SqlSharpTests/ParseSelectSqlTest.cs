@@ -10,6 +10,96 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   select bt.transid as MainBetTransId,d.refno, 
+                    case when bt.betstatus & 16 = 16 then 1 else 0 end as  IsCashout,
+                    case when bt.betstatus & 32 = 32 then 1 else 0 end as  IsCashoutBefore,
+                    d.modds as NewModds, 
+                    case when d.countDlVoid >0 then 'D.L.VOID'
+                   	  when d.countLose> 0 then 'Lose'
+                         when d.countRunning > 0 then 'Running'
+                   	  when d.countVoid = d.countAllSubbet then 'Void'
+                   	  when d.countRefund > 0 and d.countVoid + d.countRefund = d.countAllSubbet then 'Refund'
+                   	  when d.MOdds > 0 and d.Modds <> 1 then  'WON'    
+                         when d.MOdds = 1 then 'DRAW'    
+                   	  else 'Unknown'
+                   	end as NewStatus,
+                   case when d.countLose> 0 then minLoseDate
+                   	 else maxWinDate 
+                   	 end as NewWinLostDate,
+                    bt.modds as OldModds,bt.winlost/bt.stake as OldCalculatedModds, bt.status as OldStatus,
+                    bt.winlostdate as OldWinLostDate,countLose,countRunning, countVoid, countRefund,countDlVoid,countAllSubbet from (
+                    select c.refno  , c.Modds, maxWinDate,minLoseDate,ignoreLosecase as countLose,ignoreRunningcase as countRunning, countVoid, countRefund,countDlVoid,countAllSubbet  
+                    from 
+                    (  		
+                        select b.refno ,  
+                         case   
+                          when MIN(ABS(b.MOdds)) = 0 then 0   
+                          else   
+                           EXP(SUM(Log(nullif(b.MOdds,0)))) -- the base mathematics    
+                         end as Modds,  
+                         SUM(ignoreLcase) as ignoreLosecase,   
+                         SUM(ignoreRcase) as ignoreRunningcase,  
+                         SUM(isVoid) as countVoid,  
+                         SUM(isRefund) as countRefund,
+                         SUM(isDlVoid) as countDlVoid,	  
+                         COUNT(1) as countAllSubbet, 
+                         MAX(winDate) as maxWinDate,  
+                         MIN(loseDate) as minLoseDate  
+                        from   
+                   		
+                        (   select bm.refno ,   
+                          case       
+                           when bm.StatusWinlost=0 and bm.[Status]<>'running' then 1       -- draw  
+                           when bm.StatusWinlost=1 and bm.[Status]<>'running' then 1 + ((bm.Odds - 1) / 2) -- half win      
+                           when bm.StatusWinlost=2 and bm.[Status]<>'running' then bm.Odds     -- win  
+                           when bm.StatusWinlost=3 and bm.[Status]<>'running' then 0.5      -- half lose  
+                           when bm.statuswinlost=4 then 0   -- lose case  
+                           else 1    
+                          end as MOdds ,  
+                          case  
+                           when (bm.statuswinlost=4)  then 1   
+                           else 0   
+                          end as ignoreLCase , --losecnt         
+                          case   
+                           when  bm.[status] = 'running' then 1   
+                           else 0   
+                          end as ignoreRCase,  --runningcnt  
+                           case  
+                           when (bm.status in ('void', 'Void(Suspended Match)', 'd.l.void'))  then 1   
+                           else 0   
+                          end as isVoid,    
+                          case  
+                           when (bm.status='Done')  then 1   
+                           else 0   
+                          end as isRefund,  
+                   	   case  
+                           when (bm.status='D.L.VOID')  then 1   
+                           else 0   
+                          end as isDlVoid, 	   
+                          case   
+                           when bm.statuswinlost in (0,1,2,3) then  bm.winlostdate   
+                           else null  
+                          end as winDate, -- max win date of sub bets  
+                          case   
+                           when bm.statuswinlost in (4) then  bm.winlostdate  
+                           else null  
+                          end as loseDate -- max lose date of sub bets  
+                         from  bettransm bm with (nolock) 
+                         where bm.refno in (select refno from bettransm with (nolock) where matchresultid = @matchresultid)
+                         ) b 
+                         group by b.refno
+                       ) c  
+                      ) d join bettrans bt with (nolock) on d.refno = bt.refno
+                   	where (isnull(bt.BetStatus,0)&524288 = 0)
+                   """;
+        var rc = ParseSql(sql);
+        rc.HasError.ShouldBe(false);
+    }
+    
+    [Test]
     public void From_multi_group()
     {
         var sql = $"""

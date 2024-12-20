@@ -185,14 +185,20 @@ public class ExtractSqlHelper
                 throw;
             }
 
+            if (result.HasError)
+            {
+                var msg = result.Error.Message + "\n" + GetErrorMessage(sqlFile, sqlParser);
+                throw new Exception(msg);
+            }
+
             if (!result.HasResult)
             {
-                Console.WriteLine("Processed files count: " + fileCount);
-                var positionSql = sqlParser.GetRemainingText();
-                var msg = $"Exception {sqlFile}:\n";
-                msg += $"GetRemainingText:\n{positionSql}\nError: {result.Error.Message}\n";
-                msg += $"----------\n{sqlParser.GetPreviousText(0)}";
-                throw new Exception(msg);
+                // Console.WriteLine("Processed files count: " + fileCount);
+                // var positionSql = sqlParser.GetRemainingText();
+                // var msg = $"Exception {sqlFile}:\n";
+                // msg += $"GetRemainingText:\n{positionSql}\nError: {result.Error.Message}\n";
+                // msg += $"----------\n{sqlParser.GetPreviousText(0)}";
+                // throw new Exception(msg);
             }
 
             try
@@ -208,6 +214,15 @@ public class ExtractSqlHelper
             }
             fileCount++;
         }
+    }
+
+    private string GetErrorMessage(string sqlFile, SqlParser sqlParser)
+    {
+        var msg = $"{sqlFile}:\n";
+        var positionSql = sqlParser.GetRemainingText();
+        msg += $"GetRemainingText:\n{positionSql}\n";
+        msg += $"----------\n{sqlParser.GetPreviousText(0)}";
+        return msg;
     }
     
     public static bool FindOccurrences(string text, int n)
