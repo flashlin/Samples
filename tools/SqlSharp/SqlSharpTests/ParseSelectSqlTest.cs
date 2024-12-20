@@ -1845,32 +1845,35 @@ public class ParseSelectSqlTest
             [
                 new SqlInnerTableSource
                 {
-                    Inner = new SelectStatement
+                    Inner = new SqlGroup()
                     {
-                        Columns =
-                        [
-                            new SelectColumn
-                            {
-                                Field = new SqlFieldExpr { FieldName = "id" }
-                            },
-                            new SelectColumn
-                            {
-                                Field = new SqlFunctionExpression
+                        Inner = new SelectStatement
+                        {
+                            Columns =
+                            [
+                                new SelectColumn
                                 {
-                                    FunctionName = "convert",
-                                    Parameters =
-                                    [
-                                        new SqlDataTypeWithSize
-                                        {
-                                            DataTypeName = "nvarchar"
-                                        },
-                                        new SqlFieldExpr { FieldName = "customer.refno" }
-                                    ]
+                                    Field = new SqlFieldExpr { FieldName = "id" }
                                 },
-                                Alias = "refno"
-                            }
-                        ],
-                        FromSources = [new SqlTableSource { TableName = "customer" }]
+                                new SelectColumn
+                                {
+                                    Field = new SqlFunctionExpression
+                                    {
+                                        FunctionName = "convert",
+                                        Parameters =
+                                        [
+                                            new SqlDataTypeWithSize
+                                            {
+                                                DataTypeName = "nvarchar"
+                                            },
+                                            new SqlFieldExpr { FieldName = "customer.refno" }
+                                        ]
+                                    },
+                                    Alias = "refno"
+                                }
+                            ],
+                            FromSources = [new SqlTableSource { TableName = "customer" }]
+                        }
                     }
                 }
             ]
