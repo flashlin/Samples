@@ -67,13 +67,13 @@ public class SelectStatement : ISqlExpression
             }
         }
         sql.WriteLine();
-        sql.Indent++;
         if(Where!=null)
         {
-            sql.WriteLine(" WHERE ");
+            sql.Indent++;
+            sql.WriteLine("WHERE ");
             sql.Write(Where.ToSql());
+            sql.Indent--;
         }
-        sql.Indent--;
         if(GroupBy!=null)
         {
             sql.WriteLine(" " + GroupBy.ToSql());
@@ -84,7 +84,7 @@ public class SelectStatement : ISqlExpression
         }
         foreach (var unionSelect in Unions)
         {
-            sql.WriteLine(unionSelect.ToSql());
+            sql.WriteLine(" " + unionSelect.ToSql());
         }
         if(Having!=null)
         {
