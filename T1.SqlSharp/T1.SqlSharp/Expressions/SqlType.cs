@@ -63,5 +63,5 @@ public enum SqlType
     SetValueStatement,
     NotExpression,
     ExistsExpression,
-    ChangeTable
+    ChangeTable,
 }

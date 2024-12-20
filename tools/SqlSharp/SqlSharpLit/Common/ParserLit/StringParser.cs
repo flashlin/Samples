@@ -812,14 +812,36 @@ public class StringParser
         _previousWord = textSpan;
         return true;
     }
-
-    public bool TryMatch(string keyword, out TextSpan textSpan)
+    
+    public bool TryTextIgnoreCase(string text, out TextSpan textSpan)
     {
         SkipWhitespace();
         var startPosition = _position;
-        if (Try(() => NextText(keyword.Length), out var textSpan1))
+        if (Try(() => NextText(text.Length), out var textSpan1))
         {
-            if (textSpan1.Word == keyword)
+            if (string.Equals(textSpan1.Word, text, StringComparison.InvariantCultureIgnoreCase))
+            {
+                textSpan = textSpan1;
+                return true;
+            }
+            _position = startPosition;
+        }
+        textSpan = new TextSpan
+        {
+            Word = string.Empty,
+            Offset = startPosition,
+            Length = 0
+        };
+        return false;
+    }
+
+    public bool TryMatch(string symbol, out TextSpan textSpan)
+    {
+        SkipWhitespace();
+        var startPosition = _position;
+        if (Try(() => NextText(symbol.Length), out var textSpan1))
+        {
+            if (textSpan1.Word == symbol)
             {
                 textSpan = textSpan1;
                 return true;

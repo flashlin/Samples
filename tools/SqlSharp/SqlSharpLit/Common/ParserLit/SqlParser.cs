@@ -2858,7 +2858,7 @@ public class SqlParser
 
     private ParseResult<SqlValue> ParseHexValue()
     {
-        if (!TryMatch("0x", out var startSpan))
+        if (!TryTextIgnoreCase("0x", out var startSpan))
         {
             return NoneResult<SqlValue>();
         }
@@ -3652,10 +3652,16 @@ public class SqlParser
         return _text.TryKeywordsIgnoreCase(keywords, out span);
     }
 
-    private bool TryMatch(string expected, out TextSpan textSpan)
+    private bool TryMatch(string symbolExpected, out TextSpan textSpan)
     {
         SkipWhiteSpace();
-        return _text.TryMatch(expected, out textSpan);
+        return _text.TryMatch(symbolExpected, out textSpan);
+    }
+    
+    private bool TryTextIgnoreCase(string expected, out TextSpan textSpan)
+    {
+        SkipWhiteSpace();
+        return _text.TryTextIgnoreCase(expected, out textSpan);
     }
 
     private ParseResult<SqlValue> Parse_QuotedString()
@@ -3695,9 +3701,4 @@ public class SqlParser
 
         return true;
     }
-}
-
-public class SqlAsExprVisitor : SqlVisitor
-{
-    public bool HasAs { get; set; }
 }

@@ -10,6 +10,92 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void From_group_from()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM 
+                   (
+                   	 SELECT id2 FROM customer2 
+                   ) A,
+                   customer3 M 
+                   WHERE M.id = A.id 
+                   AND 
+                   (
+                   		id = 1
+                   		OR
+                   		id = 0X2
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlInnerTableSource()
+                {
+                    Inner = new SqlParenthesizedExpression()
+                    {
+                        Inner = new SelectStatement
+                        {
+                            Columns =
+                            [
+                                new SelectColumn
+                                {
+                                    Field = new SqlFieldExpr { FieldName = "id2" }
+                                }
+                            ],
+                            FromSources =
+                            [
+                                new SqlTableSource { TableName = "customer2" }
+                            ]
+                        }
+                    },
+                    Alias = "A"
+                },
+                new SqlTableSource { TableName = "customer3", Alias = "M" }
+            ],
+            Where = new SqlSearchCondition
+            {
+                Left = new SqlConditionExpression
+                {
+                    Left = new SqlFieldExpr { FieldName = "M.id" },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlFieldExpr { FieldName = "A.id" }
+                },
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlParenthesizedExpression
+                {
+                    Inner = new SqlSearchCondition
+                    {
+                        Left = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpr { FieldName = "id" },
+                            ComparisonOperator = ComparisonOperator.Equal,
+                            Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                        },
+                        LogicalOperator = LogicalOperator.Or,
+                        Right = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpr { FieldName = "id" },
+                            ComparisonOperator = ComparisonOperator.Equal,
+                            Right = new SqlValue { SqlType = SqlType.HexValue, Value = "0x2" }
+                        }
+                    }
+                }
+            }
+        });
+    }
+        
+    
+    [Test]
     public void From_group_select_inner_join()
     {
         var sql = $"""
