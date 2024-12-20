@@ -194,12 +194,8 @@ public class ExtractSqlHelper
 
             if (!result.HasResult)
             {
-                // Console.WriteLine("Processed files count: " + fileCount);
-                // var positionSql = sqlParser.GetRemainingText();
-                // var msg = $"Exception {sqlFile}:\n";
-                // msg += $"GetRemainingText:\n{positionSql}\nError: {result.Error.Message}\n";
-                // msg += $"----------\n{sqlParser.GetPreviousText(0)}";
-                // throw new Exception(msg);
+                WriteErrorSqlFile(sqlFile, sqlParser);
+                throw new Exception("No result");
             }
 
             try
