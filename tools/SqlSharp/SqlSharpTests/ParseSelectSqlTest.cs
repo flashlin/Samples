@@ -10,7 +10,78 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
-    public void METHOD()
+    public void From_multi_group()
+    {
+        var sql = $"""
+                   select id
+                   from (
+                       select id from customer
+                   ) s, (
+                       select id
+                       from customer
+                   ) d
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlInnerTableSource
+                {
+                    Inner = new SqlGroup()
+                    {
+                        Inner = new SelectStatement
+                        {
+                            Columns =
+                            [
+                                new SelectColumn
+                                {
+                                    Field = new SqlFieldExpr { FieldName = "id" }
+                                }
+                            ],
+                            FromSources =
+                            [
+                                new SqlTableSource { TableName = "customer" }
+                            ]
+                        }
+                    },
+                    Alias = "s"
+                },
+                new SqlInnerTableSource
+                {
+                    Inner = new SqlGroup()
+                    {
+                        Inner = new SelectStatement
+                        {
+                            Columns =
+                            [
+                                new SelectColumn
+                                {
+                                    Field = new SqlFieldExpr { FieldName = "id" }
+                                }
+                            ],
+                            FromSources =
+                            [
+                                new SqlTableSource { TableName = "customer" }
+                            ]
+                        }
+                    },
+                    Alias = "d"
+                }
+            ]
+        });
+    }
+
+
+    [Test]
+    public void From_Group()
     {
         var sql = $"""
                    select id
