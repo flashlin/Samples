@@ -17,7 +17,7 @@ public class SelectColumn : ISelectColumnExpression
     public string ToSql()
     {
         var sql = new StringBuilder();
-        sql.Append($"({Field.ToSql()})");
+        sql.Append($"{Field.ToSql()}");
         if (!string.IsNullOrEmpty(Alias))
         {
             sql.Append($" AS {Alias}");
