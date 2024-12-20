@@ -14,6 +14,6 @@ public class SqlOrderColumn : ISqlExpression
 
     public string ToSql()
     {
-        return $"{ColumnName} {Order.ToString().ToUpper()}";
+        return $"{ColumnName.ToSql()} {Order.ToString().ToUpper()}";
     }
 }

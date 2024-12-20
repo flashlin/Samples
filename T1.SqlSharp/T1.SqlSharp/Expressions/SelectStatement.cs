@@ -76,11 +76,11 @@ public class SelectStatement : ISqlExpression
         }
         if(GroupBy!=null)
         {
-            sql.WriteLine( GroupBy.ToSql());
+            sql.WriteLine(GroupBy.ToSql());
         }
         if(OrderBy!=null)
         {
-            sql.WriteLine(" " + OrderBy.ToSql());
+            sql.WriteLine(OrderBy.ToSql());
         }
         foreach (var unionSelect in Unions)
         {
