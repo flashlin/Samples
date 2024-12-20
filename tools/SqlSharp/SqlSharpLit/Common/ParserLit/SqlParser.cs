@@ -834,6 +834,10 @@ public class SqlParser
         return () =>
         {
             var rc = fn();
+            if(rc.HasError)
+            {
+                return rc.Error;
+            }
             return Flat2(rc);
         };
     }
@@ -1181,7 +1185,7 @@ public class SqlParser
         if (localResult.HasError)
         {
             result = localResult;
-            return true;
+            return false;
         }
 
         if (localResult.Result == null)

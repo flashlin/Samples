@@ -187,6 +187,7 @@ public class ExtractSqlHelper
 
             if (result.HasError)
             {
+                WriteErrorSqlFile(sqlFile, sqlParser);
                 var msg = result.Error.Message + "\n" + GetErrorMessage(sqlFile, sqlParser);
                 throw new Exception(msg);
             }
@@ -214,6 +215,17 @@ public class ExtractSqlHelper
             }
             fileCount++;
         }
+    }
+    
+    private void WriteErrorSqlFile(string sqlFile, SqlParser sqlParser)
+    {
+        var errorFile = Path.Combine("outputs", "error.sql");
+        var sql = sqlParser.GetPreviousText(0);
+        var msg = $"{sqlFile}\n";
+        msg += sql + "\n";
+        msg += "----------------\n";
+        msg += sqlParser.GetRemainingText();
+        File.WriteAllText(errorFile, msg);
     }
 
     private string GetErrorMessage(string sqlFile, SqlParser sqlParser)
