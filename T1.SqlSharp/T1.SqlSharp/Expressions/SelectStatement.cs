@@ -60,7 +60,6 @@ public class SelectStatement : ISqlExpression
                 }
             }
             sql.Indent--;
-            
             if(ForXml!=null)
             {
                 sql.WriteLine(ForXml.ToSql());
@@ -69,14 +68,15 @@ public class SelectStatement : ISqlExpression
         sql.WriteLine();
         if(Where!=null)
         {
-            sql.Indent++;
             sql.WriteLine("WHERE ");
+            sql.Indent++;
             sql.Write(Where.ToSql());
             sql.Indent--;
+            sql.WriteLine();
         }
         if(GroupBy!=null)
         {
-            sql.WriteLine(" " + GroupBy.ToSql());
+            sql.WriteLine( GroupBy.ToSql());
         }
         if(OrderBy!=null)
         {
