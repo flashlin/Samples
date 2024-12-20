@@ -212,6 +212,36 @@ public class ExtractSqlHelper
             fileCount++;
         }
     }
+
+    private IEnumerable<SqlSelectContent> ExtractSelectStatement(string folder)
+    {
+        foreach (var (sqlFile, selectSql) in ExtractStartSelectSqlString(folder))
+        {
+            var sqlParser = new SqlParser(selectSql);
+            var result = sqlParser.ParseSelectStatement();
+            if (result.HasError)
+            {
+                throw result.Error;
+            }
+            yield return new SqlSelectContent
+            {
+                FileName = sqlFile,
+                Statement = result.ResultValue
+            };
+        }
+    }
+
+    public void GenerateSelectStatementQaMdFile(string folder, string outputFile)
+    {
+        var selectContents = ExtractSelectStatement(folder);
+        using var writer = new StreamWriter(outputFile, false, Encoding.UTF8);
+        foreach (var selectContent in selectContents)
+        {
+            writer.WriteLine($"## {selectContent.FileName}");
+            writer.WriteLine(selectContent.Statement.ToSql());
+            writer.WriteLine();
+        }
+    }
     
     private void WriteErrorSqlFile(string sqlFile, SqlParser sqlParser)
     {
@@ -841,6 +871,12 @@ public class ExtractSqlHelper
         writer.WriteLine();
         writer.WriteLine();
     }
+}
+
+public class SqlSelectContent
+{
+    public string FileName { get; set; } = string.Empty;
+    public required SelectStatement Statement { get; set; }
 }
 
 public class SqlFileContent
