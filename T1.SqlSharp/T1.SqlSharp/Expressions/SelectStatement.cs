@@ -84,12 +84,13 @@ public class SelectStatement : ISqlExpression
         }
         foreach (var unionSelect in Unions)
         {
-            sql.WriteLine(" " + unionSelect.ToSql());
+            sql.WriteLine(unionSelect.ToSql());
         }
         if(Having!=null)
         {
-            sql.WriteLine(" HAVING ");
+            sql.Write("HAVING ");
             sql.Write(Having.ToSql());
+            sql.WriteLine();
         }
         return sql.ToString();
     }
