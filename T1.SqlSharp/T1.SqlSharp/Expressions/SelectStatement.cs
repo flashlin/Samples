@@ -66,10 +66,11 @@ public class SelectStatement : ISqlExpression
                 sql.WriteLine(ForXml.ToSql());
             }
         }
+        sql.WriteLine();
         sql.Indent++;
         if(Where!=null)
         {
-            sql.WriteLine("WHERE ");
+            sql.WriteLine(" WHERE ");
             sql.Write(Where.ToSql());
         }
         sql.Indent--;
@@ -87,7 +88,7 @@ public class SelectStatement : ISqlExpression
         }
         if(Having!=null)
         {
-            sql.WriteLine("HAVING ");
+            sql.WriteLine(" HAVING ");
             sql.Write(Having.ToSql());
         }
         return sql.ToString();
