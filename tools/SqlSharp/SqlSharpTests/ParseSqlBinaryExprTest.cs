@@ -20,7 +20,7 @@ public class ParseSqlBinaryExprTest
                 FieldName = "BetStatus"
             },
             Operator = ArithmeticOperator.BitwiseAnd,
-            Right = new SqlGroup
+            Right = new SqlParenthesizedExpression
             {
                 Inner = new SqlArithmeticBinaryExpr
                 {

@@ -1,6 +1,6 @@
 namespace T1.SqlSharp.Expressions;
 
-public class SqlGroup : ISqlExpression
+public class SqlParenthesizedExpression : ISqlExpression
 {
     public SqlType SqlType => SqlType.Group;
     public required ISqlExpression Inner { get; set; }

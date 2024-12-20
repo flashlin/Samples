@@ -284,7 +284,7 @@ public class SqlParser
                 return CreateParseError("Expected )");
             }
 
-            return new SqlGroup
+            return new SqlParenthesizedExpression
             {
                 Span = _text.CreateSpan(openParenthesis),
                 Inner = value.ResultValue
@@ -879,20 +879,28 @@ public class SqlParser
             {
                 return CreateParseError("Expected )");
             }
-            var alias = ParseAliasExpr(); 
+            var alias = ParseAliasExpr();
             var sources = new List<ISqlExpression>
             {
                 new SqlInnerTableSource()
                 {
                     Span = _text.CreateSpan(startPosition),
-                    Inner = new SqlGroup()
+                    Inner = new SqlParenthesizedExpression()
                     {
                         Span = _text.CreateSpan(startSpan),
                         Inner = subSelect.ResultValue,
                     },
-                    Alias = alias.Result?.Name ?? string.Empty
+                    Alias = alias.Result?.Name ?? string.Empty,
                 }
             };
+            
+            var joinTables = Parse_JoinTableSources();
+            if(joinTables.HasError)
+            {
+                return joinTables.Error;
+            }
+            sources.AddRange(joinTables.ResultValue);
+            
             if (IsPeekMatch(","))
             {
                 _text.MatchSymbol(",");
@@ -1169,7 +1177,7 @@ public class SqlParser
             }
 
             var closeSpan = MatchSymbol(")");
-            return new SqlGroup()
+            return new SqlParenthesizedExpression()
             {
                 Span = _text.CreateSpan(openSpan, closeSpan),
                 Inner = inner.ResultValue
@@ -2507,7 +2515,7 @@ public class SqlParser
                 return CreateParseError("InvalidOperationException Mismatched parentheses");
             }
 
-            return new SqlGroup
+            return new SqlParenthesizedExpression
             {
                 Span = _text.CreateSpan(startPosition),
                 Inner = subExpr.ResultValue
@@ -3136,7 +3144,7 @@ public class SqlParser
         return inner;
     }
 
-    private ParseResult<SqlGroup> ParseParenthesesWith<T>(Func<ParseResult<T>> parseElemFn)
+    private ParseResult<SqlParenthesizedExpression> ParseParenthesesWith<T>(Func<ParseResult<T>> parseElemFn)
         where T : ISqlExpression
     {
         if (!TryMatch("(", out var startSpan))
@@ -3155,7 +3163,7 @@ public class SqlParser
             return CreateParseError("Expected )");
         }
 
-        return new SqlGroup
+        return new SqlParenthesizedExpression
         {
             Span = _text.CreateSpan(startSpan, endSpan),
             Inner = inner.ResultValue
@@ -3180,7 +3188,7 @@ public class SqlParser
 
         if (has)
         {
-            return new SqlGroup()
+            return new SqlParenthesizedExpression()
             {
                 Span = _text.CreateSpan(startSpan, endSpan),
                 Inner = inner.ResultValue
