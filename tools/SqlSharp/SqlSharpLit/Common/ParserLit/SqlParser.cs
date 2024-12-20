@@ -116,7 +116,7 @@ public class SqlParser
 
         if (rc is not { HasValue: true, Result: not null })
         {
-            return CreateParseResult(SelectType.All);
+            return CreateParseResult(SelectType.None);
         }
 
         var selectType = rc.Result.Value.ToUpper() switch

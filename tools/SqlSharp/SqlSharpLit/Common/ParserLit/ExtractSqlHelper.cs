@@ -234,12 +234,14 @@ public class ExtractSqlHelper
     public void GenerateSelectStatementQaMdFile(string folder, string outputFile)
     {
         var selectContents = ExtractSelectStatement(folder);
-        using var writer = new StreamWriter(outputFile, false, Encoding.UTF8);
+        using var writer = new StreamWriter(outputFile, true, Encoding.UTF8);
         foreach (var selectContent in selectContents)
         {
+            Console.WriteLine($"Processing {selectContent.FileName}");
             writer.WriteLine($"## {selectContent.FileName}");
             writer.WriteLine(selectContent.Statement.ToSql());
             writer.WriteLine();
+            writer.Flush();
         }
     }
     

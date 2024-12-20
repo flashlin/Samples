@@ -11,7 +11,7 @@ public class SelectStatement : ISqlExpression
         visitor.Visit_SelectStatement(this);
     }
 
-    public SelectType SelectType { get; set; } = SelectType.All; 
+    public SelectType SelectType { get; set; } = SelectType.None; 
     public SqlTopClause? Top { get; set; }
     public List<ISelectColumnExpression> Columns { get; set; } = [];
     public List<ISqlExpression> FromSources { get; set; } = [];
