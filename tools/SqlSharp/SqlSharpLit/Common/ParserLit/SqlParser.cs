@@ -825,7 +825,35 @@ public class SqlParser
 
     private ParseResult<List<ISqlExpression>> Parse_FromSources()
     {
-        return Or(Parse_FromGroupWithTableSources, Parse_FromTableSources)();
+        var f1 = FlatFn(() => ParseWithCommaOrNone(Parse_FromGroupWithTableSources));
+        return Or(f1, Parse_FromTableSources)();
+    }
+
+    private Func<ParseResult<List<ISqlExpression>>> FlatFn(Func<ParseResult<List<List<ISqlExpression>>>> fn)
+    {
+        return () =>
+        {
+            var rc = fn();
+            return Flat2(rc);
+        };
+    }
+
+    private ParseResult<List<T>> Flat2<T>(ParseResult<List<List<T>>> result)
+    {
+        if (result.HasError)
+        {
+            return result.Error;
+        }
+        if (result.Result == null)
+        {
+            return NoneResult<List<T>>();
+        }
+        var list = new List<T>();
+        foreach (var rc in result.ResultValue)
+        {
+            list.AddRange(rc);
+        }
+        return list;
     }
 
     private ParseResult<List<ISqlExpression>> Parse_FromGroupWithTableSources()
@@ -863,6 +891,7 @@ public class SqlParser
             };
             if (IsPeekMatch(","))
             {
+                _text.MatchSymbol(",");
                 var moreSources = Parse_FromSources();
                 if (moreSources.HasError)
                 {
@@ -3399,6 +3428,27 @@ public class SqlParser
             Span = _text.CreateSpan(startSpan),
             Items = items.ResultValue.ToList()
         };
+    }
+
+    private ParseResult<List<T>> ParseWithCommaOrNone<T>(Func<ParseResult<T>> parseElemFn)
+    {
+        var rc = ParseWithComma(parseElemFn);
+        if (rc.HasError)
+        {
+            return rc.Error;
+        }
+
+        if (rc.Result == null)
+        {
+            return NoneResult<List<T>>();
+        }
+
+        if (rc.ResultValue.Count == 0)
+        {
+            return NoneResult<List<T>>();
+        }
+
+        return rc.ResultValue;
     }
 
     private ParseResult<List<T>> ParseWithComma<T>(Func<ParseResult<T>> parseElemFn)
