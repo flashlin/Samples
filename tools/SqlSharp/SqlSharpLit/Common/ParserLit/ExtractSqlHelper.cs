@@ -269,6 +269,10 @@ public class ExtractSqlHelper
         {
             return string.Empty;
         }
+        if(text.Contains("set @sql ="))
+        {
+            return string.Empty;
+        }
         return text;
     }
 
