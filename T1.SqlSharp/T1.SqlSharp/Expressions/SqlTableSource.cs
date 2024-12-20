@@ -15,7 +15,7 @@ public class SqlTableSource : ITableSource
     public string Alias { get; set; } = string.Empty;
     public List<ISqlExpression> Withs { get; set; } = [];
 
-    public string ToSql()
+    public virtual string ToSql()
     {
         var sql = new IndentStringBuilder();
         sql.Write(TableName);

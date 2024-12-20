@@ -123,7 +123,7 @@ public class SqlParser
         {
             "ALL" => SelectType.All,
             "DISTINCT" => SelectType.Distinct,
-            _ => SelectType.All
+            _ => SelectType.None
         };
         return CreateParseResult(selectType);
     }

@@ -26,7 +26,10 @@ public class SelectStatement : ISqlExpression
     {
         var sql = new IndentStringBuilder();
         sql.Write("SELECT");
-        sql.Write($" {SelectType.ToString().ToUpper()}");
+        if(SelectType!=SelectType.None)
+        {
+            sql.Write($" {SelectType.ToString().ToUpper()} ");
+        }
         sql.WriteLine();
         if(Top!=null)
         {

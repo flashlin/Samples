@@ -28,5 +28,4 @@ public class SqlValues : ISqlExpression
         sql.Append(")");
         return sql.ToString();
     }
-
 }
