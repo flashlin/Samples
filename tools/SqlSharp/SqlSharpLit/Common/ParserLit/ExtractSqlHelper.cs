@@ -82,12 +82,23 @@ public class ExtractSqlHelper
         }
 
         var userDatabaseDesc = GetUserDatabaseDescription(outputFolder);
+        var databasesDesc = GetDatabasesDescFromFolder(folder);
 
+        UpdateDatabaseDescription(databasesDesc, userDatabaseDesc);
+        UpdateTableDescription(databasesDesc, userDatabaseDesc);
+        SaveDatabasesDescJsonFile(databasesDesc, outputFolder);
+
+        foreach (var database in databasesDesc)
+        {
+            WriteAllTableDescriptions(database, outputFolder);
+        }
+    }
+
+    private List<DatabaseDescription> GetDatabasesDescFromFolder(string folder)
+    {
         var sqlFileContents = GetSqlContentsFromFolder(folder)
             .ToList();
         var databasesDesc = GetDatabaseDescriptions(sqlFileContents);
-
-
         foreach (var db in databasesDesc)
         {
             var tables = db.Tables
@@ -95,17 +106,7 @@ public class ExtractSqlHelper
                 .ToList();
             db.Tables = tables;
         }
-
-        UpdateDatabaseDescription(databasesDesc, userDatabaseDesc);
-
-        UpdateTableDescription(databasesDesc, userDatabaseDesc);
-
-        SaveDatabasesDescJsonFile(databasesDesc, outputFolder);
-
-        foreach (var database in databasesDesc)
-        {
-            WriteAllTableDescriptions(database, outputFolder);
-        }
+        return databasesDesc;
     }
 
     public void GenerateRagFiles(string sqlFolder)
