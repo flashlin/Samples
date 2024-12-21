@@ -30,6 +30,7 @@ public class ExtractSqlHelper
             {
                 break;
             }
+
             yield return createTableSql;
             text = remainingText;
         } while (true);
@@ -82,32 +83,33 @@ public class ExtractSqlHelper
             return;
         }
 
-        var userDatabaseDesc = GetUserDatabaseDescription(outputFolder);
-        var databasesDesc = GetDatabasesDescFromFolder(folder);
+        var userDatabase = GetUserDatabaseDescription(outputFolder);
+        var databases = GetDatabasesDescFromFolder(folder);
 
-        var updatedDatabasesDesc = UpdateDatabaseDescription(databasesDesc, userDatabaseDesc);
-        UpdateTableDescription(databasesDesc, updatedDatabasesDesc);
-        SaveDatabasesDescJsonFile(databasesDesc, outputFolder);
+        var updatedDatabases = UpdateDatabaseDescription(databases, userDatabase);
+        UpdateTableDescription(updatedDatabases, userDatabase);
+        SaveDatabasesDescJsonFile(updatedDatabases, outputFolder);
 
-        
-        GenerateDatabaseQaMdFile(databasesDesc, outputFolder);
+        GenerateDatabaseQaMdFile(updatedDatabases, outputFolder);
     }
 
     private static void GenerateDatabaseQaMdFile(List<DatabaseDescription> databasesDesc, string outputFolder)
     {
         using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.md"));
         foreach (var database in databasesDesc)
-        { 
+        {
             writer.WriteLine($"Question: What are the tables in the {database.DatabaseName} database?");
             writer.WriteLine($"Answer:");
             foreach (var table in database.Tables)
             {
                 writer.WriteLine($"- {table.TableName}");
             }
+
             WriteDelimitLine(writer);
-            
-            
-            writer.WriteLine($"Question: What are the tables in the {database.DatabaseName} database? use JSON format response");
+
+
+            writer.WriteLine(
+                $"Question: What are the tables in the {database.DatabaseName} database? use JSON format response");
             writer.WriteLine($"Answer:");
             writer.WriteLine($"<|json|>");
             writer.WriteLine($"```json");
@@ -121,66 +123,77 @@ public class ExtractSqlHelper
             writer.WriteLine($"<|end_json|>");
             WriteDelimitLine(writer);
             writer.Flush();
-            
-            
-            if(!string.IsNullOrEmpty(database.Description.Trim()))
+
+
+            if (!string.IsNullOrEmpty(database.Description.Trim()))
             {
-                writer.WriteLine($"Question: What is the purpose or description of the {database.DatabaseName} database?");
+                writer.WriteLine(
+                    $"Question: What is the purpose or description of the {database.DatabaseName} database?");
                 writer.WriteLine($"Answer:");
                 writer.WriteLine($"{database.Description}");
                 WriteDelimitLine(writer);
             }
-            
+
             foreach (var table in database.Tables)
             {
-                if(string.IsNullOrEmpty(table.Description.Trim()))
-                {
-                    continue;
-                }
-                writer.WriteLine($"Question: What is the purpose or description of the {table.TableName} table in the {database.DatabaseName} database?");
-                writer.WriteLine($"Answer:");
-                writer.WriteLine($"{table.Description}");
-                WriteDelimitLine(writer);
-                
-                
-                writer.WriteLine($"Question: List all the column names in the {table.TableName} table.");
-                writer.WriteLine($"Answer:");
-                foreach (var column in table.Columns)
-                {
-                    writer.WriteLine($"- {column.ColumnName}");
-                }
-                WriteDelimitLine(writer);
-                
-                
-                writer.WriteLine($"Question: List all the column definitions in the {table.TableName} table.");
-                writer.WriteLine($"Answer:");
-                foreach (var column in table.Columns)
-                {
-                    writer.Write($"- {column.ColumnName} {column.DataType}");
-                    if (column.IsNullable)
-                    {
-                        writer.Write($"  ,is Nullable");
-                    }
-
-                    if (column.IsIdentity)
-                    {
-                        writer.Write($" ,is Identity");
-                    }
-
-                    if (!string.IsNullOrEmpty(column.DefaultValue))
-                    {
-                        writer.Write($" ,Default Value: {column.DefaultValue}");
-                    }
-
-                    if (!string.IsNullOrEmpty(column.Description))
-                    {
-                        writer.Write($"  ,Description: {column.Description}");
-                    }
-                    writer.WriteLine();
-                }
-                WriteDelimitLine(writer);
+                WritePurposeOfTable(writer, database, table);
+                WriteColumnNames(writer, table);
+                WriteColumnDefinitions(writer, table);
             }
         }
+    }
+
+    private static void WritePurposeOfTable(StreamWriter writer, DatabaseDescription database, TableDescription table)
+    {
+        if (!string.IsNullOrEmpty(table.Description.Trim()))
+        {
+            writer.WriteLine(
+                $"Question: What is the purpose or description of the {table.TableName} table in the {database.DatabaseName} database?");
+            writer.WriteLine($"Answer:");
+            writer.WriteLine($"{table.Description}");
+            WriteDelimitLine(writer);
+        }
+    }
+
+    private static void WriteColumnNames(StreamWriter writer, TableDescription table)
+    {
+        writer.WriteLine($"Question: List all the column names in the {table.TableName} table.");
+        writer.WriteLine($"Answer:");
+        foreach (var column in table.Columns)
+        {
+            writer.WriteLine($"- {column.ColumnName}");
+        }
+        WriteDelimitLine(writer);
+    }
+
+    private static void WriteColumnDefinitions(StreamWriter writer, TableDescription table)
+    {
+        writer.WriteLine($"Question: List all the column definitions in the {table.TableName} table.");
+        writer.WriteLine($"Answer:");
+        foreach (var column in table.Columns)
+        {
+            writer.Write($"- {column.ColumnName} {column.DataType}");
+            if (column.IsNullable)
+            {
+                writer.Write($"  ,is Nullable");
+            }
+            if (column.IsIdentity)
+            {
+                writer.Write($" ,is Identity");
+            }
+
+            if (!string.IsNullOrEmpty(column.DefaultValue))
+            {
+                writer.Write($" ,Default Value: {column.DefaultValue}");
+            }
+
+            if (!string.IsNullOrEmpty(column.Description))
+            {
+                writer.Write($"  ,Description: {column.Description}");
+            }
+            writer.WriteLine();
+        }
+        WriteDelimitLine(writer);
     }
 
     private static void WriteDelimitLine(StreamWriter writer)
@@ -202,6 +215,7 @@ public class ExtractSqlHelper
                 .ToList();
             db.Tables = tables;
         }
+
         return databasesDesc;
     }
 
@@ -306,6 +320,7 @@ public class ExtractSqlHelper
                 Console.WriteLine($"Error file {sqlFile}:\n{sql}");
                 throw;
             }
+
             fileCount++;
         }
     }
@@ -320,6 +335,7 @@ public class ExtractSqlHelper
             {
                 throw result.Error;
             }
+
             yield return new SqlSelectContent
             {
                 FileName = sqlFile,
@@ -341,7 +357,7 @@ public class ExtractSqlHelper
             writer.Flush();
         }
     }
-    
+
     private void WriteErrorSqlFile(string sqlFile, SqlParser sqlParser)
     {
         var errorFile = Path.Combine("outputs", "error.sql");
@@ -361,13 +377,14 @@ public class ExtractSqlHelper
         msg += $"----------\n{sqlParser.GetPreviousText(0)}";
         return msg;
     }
-    
+
     public static bool FindOccurrences(string text, int n)
     {
         if (string.IsNullOrEmpty(text) || n <= 0)
         {
             return false;
         }
+
         var count = 0;
         for (var i = 0; i < text.Length - 1; i++)
         {
@@ -381,6 +398,7 @@ public class ExtractSqlHelper
                 }
             }
         }
+
         return false;
     }
 
@@ -390,14 +408,17 @@ public class ExtractSqlHelper
         {
             return string.Empty;
         }
+
         if (FindOccurrences(text, 2))
         {
             return string.Empty;
         }
-        if(text.Contains("set @sql ="))
+
+        if (text.Contains("set @sql ="))
         {
             return string.Empty;
         }
+
         return text;
     }
 
@@ -413,7 +434,7 @@ public class ExtractSqlHelper
             }
         }
     }
-    
+
     private string GetPreviousLine(string text, int offset)
     {
         var lastNewLineIndex = text.LastIndexOf('\n', offset - 1);
@@ -421,6 +442,7 @@ public class ExtractSqlHelper
         {
             return string.Empty;
         }
+
         var line = text.Substring(lastNewLineIndex + 1, offset - lastNewLineIndex - 1);
         return line;
     }
@@ -442,30 +464,36 @@ public class ExtractSqlHelper
             {
                 continue;
             }
+
             if (line.TrimStart().StartsWith("/*"))
             {
                 inComment = true;
                 continue;
             }
+
             if (line.TrimEnd().EndsWith("*/"))
             {
                 inComment = false;
                 continue;
             }
+
             if (inComment)
             {
                 continue;
             }
+
             if (line.TrimStart().StartsWith("--"))
             {
                 continue;
             }
+
             result.AppendLine(line);
         }
+
         return result.ToString();
     }
 
-    private IEnumerable<string> ExtractSelectSqlFromText(string text, int startOffset=0)
+    private IEnumerable<string> ExtractSelectSqlFromText(string text, int startOffset = 0)
     {
         var select = "SELECT";
         var startSelectIndex = text.IndexOf(select, startOffset, StringComparison.OrdinalIgnoreCase);
@@ -473,7 +501,7 @@ public class ExtractSqlHelper
         {
             yield break;
         }
-        
+
         var startSelectSql = text.Substring(startSelectIndex);
         var nextChar = startSelectSql[select.Length];
         if (!char.IsWhiteSpace(nextChar))
@@ -482,15 +510,17 @@ public class ExtractSqlHelper
             {
                 yield return subSelectSql;
             }
+
             yield break;
         }
+
         yield return startSelectSql;
         foreach (var subSelectSql in ExtractSelectSqlFromText(text, startOffset + startSelectSql.Length))
         {
             yield return subSelectSql;
         }
     }
-    
+
     public IEnumerable<SqlFileContent> GetSqlTextFromFolder(string folder)
     {
         foreach (var sqlFile in GetSqlFiles(folder))
@@ -537,6 +567,7 @@ public class ExtractSqlHelper
         {
             yield break;
         }
+
         var files = Directory.GetFiles(folder, "*.sql");
         foreach (var file in files)
         {
@@ -790,7 +821,7 @@ public class ExtractSqlHelper
                 (udb) => udb,
                 (db, udb) => new DatabaseDescription()
                 {
-                    DatabaseName = db.DatabaseName, 
+                    DatabaseName = db.DatabaseName,
                     Description = udb.Description,
                     Tables = db.Tables
                 })
@@ -801,33 +832,51 @@ public class ExtractSqlHelper
     private static void UpdateTableDescription(List<DatabaseDescription> databasesDesc,
         List<DatabaseDescription> userDatabaseDesc)
     {
-        var tables = databasesDesc.SelectMany(x => x.Tables, (db, table) => new
+        foreach (var database in databasesDesc)
         {
-            db.DatabaseName,
-            Table = table
-        }).ToList();
-        var userTables = userDatabaseDesc.SelectMany(x => x.Tables, (db, table) => new
-        {
-            db.DatabaseName,
-            Table = table
-        }).ToList();
-        var innerTables = tables.Join(userTables,
-                t => new { t.DatabaseName, t.Table.TableName },
-                ut => new { ut.DatabaseName, ut.Table.TableName },
-                (t, ut) => new { Table = t.Table, UserTable = ut.Table })
-            .ToList();
-        foreach (var tableDesc in innerTables)
-        {
-            tableDesc.Table.Description = tableDesc.UserTable.Description;
-            var innerColumns = tableDesc.Table.Columns.Join(tableDesc.UserTable.Columns,
-                    c => c.ColumnName,
-                    uc => uc.ColumnName,
-                    (c, uc) => new { Column = c, UserColumn = uc })
+            var tables = database.Tables;
+            var userTables = userDatabaseDesc.FirstOrDefault(x => x.DatabaseName == database.DatabaseName)?.Tables ??
+                             [];
+            var updatedTables = tables.LeftOuterJoin(userTables,
+                    ut => ut.TableName,
+                    t => t.TableName,
+                    ut => ut,
+                    (t, ut) => new TableDescription()
+                    {
+                        TableName = t.TableName,
+                        Description = string.IsNullOrEmpty(ut.Description) ? t.Description : ut.Description,
+                        Columns = t.Columns
+                    })
                 .ToList();
-            foreach (var columnDesc in innerColumns)
-            {
-                columnDesc.Column.Description = columnDesc.UserColumn.Description;
-            }
+            database.Tables = updatedTables;
+            UpdateColumnDescription(tables, userTables);
+        }
+    }
+
+
+    private static void UpdateColumnDescription(List<TableDescription> tables, List<TableDescription> userTables)
+    {
+        foreach (var table in tables)
+        {
+            var columns = table.Columns;
+            var userColumns = userTables.FirstOrDefault(x => x.TableName == table.TableName)?.Columns ?? [];
+            var updatedColumns = columns.LeftOuterJoin(userColumns,
+                    userColumn => userColumn.ColumnName,
+                    info => info.ColumnName,
+                    userColumn => userColumn,
+                    (info, userColumn) => new ColumnDescription()
+                    {
+                        ColumnName = info.ColumnName,
+                        DataType = info.DataType,
+                        IsNullable = info.IsNullable,
+                        IsIdentity = info.IsIdentity,
+                        DefaultValue = info.DefaultValue,
+                        Description = string.IsNullOrEmpty(userColumn.Description)
+                            ? info.Description
+                            : userColumn.Description,
+                    })
+                .ToList();
+            table.Columns = updatedColumns;
         }
     }
 
