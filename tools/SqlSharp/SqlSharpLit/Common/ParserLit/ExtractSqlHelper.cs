@@ -90,6 +90,11 @@ public class ExtractSqlHelper
         SaveDatabasesDescJsonFile(databasesDesc, outputFolder);
 
         
+        GenerateDatabaseQaMdFile(databasesDesc, outputFolder);
+    }
+
+    private static void GenerateDatabaseQaMdFile(List<DatabaseDescription> databasesDesc, string outputFolder)
+    {
         var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.md"));
         foreach (var database in databasesDesc)
         { 
@@ -117,7 +122,25 @@ public class ExtractSqlHelper
             WriteDelimitLine(writer);
             
             
-            writer.WriteLine($"Question: What are the description the {database.DatabaseName} database?");
+            if(!string.IsNullOrEmpty(database.Description.Trim()))
+            {
+                writer.WriteLine($"Question: What is the purpose or description of the {database.DatabaseName} database?");
+                writer.WriteLine($"Answer:");
+                writer.WriteLine($"{database.Description}");
+                WriteDelimitLine(writer);
+            }
+            
+            foreach (var table in database.Tables)
+            {
+                if(string.IsNullOrEmpty(table.Description.Trim()))
+                {
+                    continue;
+                }
+                writer.WriteLine($"Question: What is the purpose or description of the {table.TableName} table in the {database.DatabaseName} database?");
+                writer.WriteLine($"Answer:");
+                writer.WriteLine($"{table.Description}");
+                WriteDelimitLine(writer);
+            }
         }
     }
 
