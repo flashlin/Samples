@@ -7,7 +7,7 @@ public class SqlParenthesizedExpression : ISqlExpression
     public TextSpan Span { get; set; } = new();
     public void Accept(SqlVisitor visitor)
     {
-        visitor.Visit_Group(this);
+        visitor.Visit_ParenthesizedExpression(this);
     }
 
     public string ToSql()

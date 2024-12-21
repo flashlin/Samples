@@ -231,7 +231,7 @@ public class SqlVisitor
         expr.Parameters.ForEach(x=>x.Accept(this));
     }
 
-    public virtual void Visit_Group(SqlParenthesizedExpression expr)
+    public virtual void Visit_ParenthesizedExpression(SqlParenthesizedExpression expr)
     {
         AddSqlExpression(expr);
         expr.Inner.Accept(this);
