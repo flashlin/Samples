@@ -99,7 +99,33 @@ public class ExtractSqlHelper
             {
                 writer.WriteLine($"- {table.TableName}");
             }
+            WriteDelimitLine(writer);
+            
+            
+            writer.WriteLine($"Question: What are the tables in the {database.DatabaseName} database? use JSON format response");
+            writer.WriteLine($"Answer:");
+            writer.WriteLine($"<|json|>");
+            writer.WriteLine($"```json");
+            var tables = database.Tables.Select(x => new { x.TableName }).ToList();
+            var json = JsonSerializer.Serialize(tables, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+            writer.WriteLine(json);
+            writer.WriteLine($"```");
+            writer.WriteLine($"<|end_json|>");
+            WriteDelimitLine(writer);
+            
+            
+            writer.WriteLine($"Question: What are the description the {database.DatabaseName} database?");
         }
+    }
+
+    private static void WriteDelimitLine(StreamWriter writer)
+    {
+        writer.WriteLine();
+        writer.WriteLine();
+        writer.WriteLine();
     }
 
     private List<DatabaseDescription> GetDatabasesDescFromFolder(string folder)
