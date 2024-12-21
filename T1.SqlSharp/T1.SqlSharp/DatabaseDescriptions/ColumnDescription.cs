@@ -17,15 +17,15 @@ public class ColumnDescription
         text.Append($"{ColumnName} {DataType}");
         if (IsNullable)
         {
-            text.Append($", Nullable: {IsNullable}");
+            text.Append($",Is Nullable");
         }
         if (IsIdentity)
         {
-            text.Append($", Identity: {IsIdentity}");
+            text.Append($",Is Identity");
         }
         if (!string.IsNullOrEmpty(DefaultValue))
         {
-            text.Append($", Default: {DefaultValue}");
+            text.Append($",Default: {DefaultValue}");
         }
         if (!string.IsNullOrEmpty(Description))
         {
