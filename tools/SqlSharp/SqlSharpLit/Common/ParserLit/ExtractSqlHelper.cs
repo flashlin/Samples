@@ -98,41 +98,10 @@ public class ExtractSqlHelper
         using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.md"));
         foreach (var database in databasesDesc)
         {
-            writer.WriteLine($"Question: What are the tables in the {database.DatabaseName} database?");
-            writer.WriteLine($"Answer:");
-            foreach (var table in database.Tables)
-            {
-                writer.WriteLine($"- {table.TableName}");
-            }
+            Write_WhatAreTheTables(writer, database);
+            Write_WhatAreTheTablesUseJson(writer, database);
 
-            WriteDelimitLine(writer);
-
-
-            writer.WriteLine(
-                $"Question: What are the tables in the {database.DatabaseName} database? use JSON format response");
-            writer.WriteLine($"Answer:");
-            writer.WriteLine($"<|json|>");
-            writer.WriteLine($"```json");
-            var tables = database.Tables.Select(x => new { x.TableName }).ToList();
-            var json = JsonSerializer.Serialize(tables, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-            writer.WriteLine(json);
-            writer.WriteLine($"```");
-            writer.WriteLine($"<|end_json|>");
-            WriteDelimitLine(writer);
-            writer.Flush();
-
-
-            if (!string.IsNullOrEmpty(database.Description.Trim()))
-            {
-                writer.WriteLine(
-                    $"Question: What is the purpose or description of the {database.DatabaseName} database?");
-                writer.WriteLine($"Answer:");
-                writer.WriteLine($"{database.Description}");
-                WriteDelimitLine(writer);
-            }
+            Write_WhatIsThePurposeOfDatabase(database, writer);
 
             foreach (var table in database.Tables)
             {
@@ -141,6 +110,47 @@ public class ExtractSqlHelper
                 WriteColumnDefinitions(writer, table);
             }
         }
+    }
+
+    private static void Write_WhatIsThePurposeOfDatabase(DatabaseDescription database, StreamWriter writer)
+    {
+        if (!string.IsNullOrEmpty(database.Description.Trim()))
+        {
+            writer.WriteLine(
+                $"Question: What is the purpose or description of the {database.DatabaseName} database?");
+            writer.WriteLine($"Answer:");
+            writer.WriteLine($"{database.Description}");
+            WriteDelimitLine(writer);
+        }
+    }
+
+    private static void Write_WhatAreTheTables(StreamWriter writer, DatabaseDescription database)
+    {
+        writer.WriteLine($"Question: What are the tables in the {database.DatabaseName} database?");
+        writer.WriteLine($"Answer:");
+        foreach (var table in database.Tables)
+        {
+            writer.WriteLine($"* {table.TableName}");
+        }
+        WriteDelimitLine(writer);
+    }
+
+    private static void Write_WhatAreTheTablesUseJson(StreamWriter writer, DatabaseDescription database)
+    {
+        writer.WriteLine(
+            $"Question: What are the tables in the {database.DatabaseName} database? use JSON format response");
+        writer.WriteLine($"Answer:");
+        writer.WriteLine($"<|json|>");
+        writer.WriteLine($"```json");
+        var tables = database.Tables.Select(x => new { x.TableName }).ToList();
+        var json = JsonSerializer.Serialize(tables, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+        writer.WriteLine(json);
+        writer.WriteLine($"```");
+        writer.WriteLine($"<|end_json|>");
+        WriteDelimitLine(writer);
     }
 
     private static void WritePurposeOfTable(StreamWriter writer, DatabaseDescription database, TableDescription table)
@@ -161,7 +171,7 @@ public class ExtractSqlHelper
         writer.WriteLine($"Answer:");
         foreach (var column in table.Columns)
         {
-            writer.WriteLine($"- {column.ColumnName}");
+            writer.WriteLine($"* {column.ColumnName}");
         }
         WriteDelimitLine(writer);
     }
@@ -175,21 +185,21 @@ public class ExtractSqlHelper
             writer.Write($"- {column.ColumnName} {column.DataType}");
             if (column.IsNullable)
             {
-                writer.Write($"  ,is Nullable");
+                writer.Write($",is Nullable");
             }
             if (column.IsIdentity)
             {
-                writer.Write($" ,is Identity");
+                writer.Write($",is Identity");
             }
 
             if (!string.IsNullOrEmpty(column.DefaultValue))
             {
-                writer.Write($" ,Default Value: {column.DefaultValue}");
+                writer.Write($",Default Value: {column.DefaultValue}");
             }
 
             if (!string.IsNullOrEmpty(column.Description))
             {
-                writer.Write($"  ,Description: {column.Description}");
+                writer.Write($",Description: {column.Description}");
             }
             writer.WriteLine();
         }
