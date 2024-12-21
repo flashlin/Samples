@@ -1055,7 +1055,10 @@ public class SqlParser
         if (TryMatch("(", out var openParenthesis))
         {
             forXmlClause.PathName = Parse_QuotedString().ResultValue.Value;
-            MatchSymbol(")");
+            if(!TryMatch(")", out _))
+            {
+                return CreateParseError("Expected )");
+            }
         }
 
         forXmlClause.CommonDirectives = Parse_ForXmlRootDirectives();
@@ -1176,7 +1179,11 @@ public class SqlParser
                 return inner.Error;
             }
 
-            var closeSpan = MatchSymbol(")");
+            if(!TryMatch(")", out var closeSpan))
+            {
+                return CreateParseError("Expected )");
+            }
+            
             return new SqlParenthesizedExpression()
             {
                 Span = _text.CreateSpan(openSpan, closeSpan),
@@ -1420,13 +1427,6 @@ public class SqlParser
     private Func<ParseResult<SqlToken>> Keywords(params string[] keywords)
     {
         return () => ParseKeywords(keywords);
-    }
-
-
-    private TextSpan MatchSymbol(string expected)
-    {
-        SkipWhiteSpace();
-        return _text.MatchSymbol(expected);
     }
 
     private ParseResult<T> NoneResult<T>()
@@ -1854,7 +1854,11 @@ public class SqlParser
                 return sub.Error;
             }
 
-            MatchSymbol(")");
+            if(!TryMatch(")", out _))
+            {
+                return CreateParseError("Expected )");
+            }
+            
             return new SqlInnerTableSource()
             {
                 Inner = sub.ResultValue
@@ -1964,7 +1968,10 @@ public class SqlParser
             if (TryMatch("(", out var openParenthesis))
             {
                 var parameters = ParseWithComma(ParseArithmeticExpr);
-                MatchSymbol(")");
+                if (!TryMatch(")", out _))
+                {
+                    return CreateParseError("Expected )");
+                }
                 var function = new SqlFunctionExpression
                 {
                     Span = _text.CreateSpan(startPosition),
@@ -2431,7 +2438,10 @@ public class SqlParser
 
         if (TryKeyword("WITH", out _))
         {
-            MatchSymbol("(");
+            if (!TryMatch("(", out _))
+            {
+                return CreateParseError("Expected (");
+            }
             var tableHints = ParseWithComma<ISqlExpression>(() =>
             {
                 var hintStartPosition = _text.Position;
@@ -2452,7 +2462,10 @@ public class SqlParser
                 return tableHints.Error;
             }
 
-            MatchSymbol(")");
+            if (!TryMatch(")", out _))
+            {
+                return CreateParseError("Expected )");
+            }
             tableSourceExpr.Withs = tableHints.ResultValue;
         }
 
