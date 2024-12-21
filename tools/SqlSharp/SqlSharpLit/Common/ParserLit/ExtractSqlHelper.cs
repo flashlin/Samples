@@ -422,7 +422,18 @@ public class ExtractSqlHelper
         {
             Console.WriteLine($"Parsing {sqlFile}");
             var sql = File.ReadAllText(sqlFile);
-            var sqlExpressions = new SqlParser(sql).Extract().ToList();
+            List<ISqlExpression> sqlExpressions;
+            try
+            {
+                sqlExpressions = new SqlParser(sql).Extract().ToList();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error parsing {sqlFile}");
+                Console.WriteLine(e.Message);
+                continue;
+            }
+
             yield return new SqlFileContent
             {
                 FileName = sqlFile,
