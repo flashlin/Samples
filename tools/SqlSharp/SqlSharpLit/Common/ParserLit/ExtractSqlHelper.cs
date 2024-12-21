@@ -141,6 +141,44 @@ public class ExtractSqlHelper
                 writer.WriteLine($"Answer:");
                 writer.WriteLine($"{table.Description}");
                 WriteDelimitLine(writer);
+                
+                
+                writer.WriteLine($"Question: List all the column names in the {table.TableName} table.");
+                writer.WriteLine($"Answer:");
+                foreach (var column in table.Columns)
+                {
+                    writer.WriteLine($"- {column.ColumnName}");
+                }
+                WriteDelimitLine(writer);
+                
+                
+                writer.WriteLine($"Question: List all the column definitions in the {table.TableName} table.");
+                writer.WriteLine($"Answer:");
+                foreach (var column in table.Columns)
+                {
+                    writer.Write($"- {column.ColumnName} {column.DataType}");
+                    if (column.IsNullable)
+                    {
+                        writer.Write($"  ,is Nullable");
+                    }
+
+                    if (column.IsIdentity)
+                    {
+                        writer.Write($" ,is Identity");
+                    }
+
+                    if (!string.IsNullOrEmpty(column.DefaultValue))
+                    {
+                        writer.Write($" ,Default Value: {column.DefaultValue}");
+                    }
+
+                    if (!string.IsNullOrEmpty(column.Description))
+                    {
+                        writer.Write($"  ,Description: {column.Description}");
+                    }
+                    writer.WriteLine();
+                }
+                WriteDelimitLine(writer);
             }
         }
     }
