@@ -5,6 +5,7 @@ using T1.SqlSharp;
 using T1.SqlSharp.DatabaseDescriptions;
 using T1.SqlSharp.Expressions;
 using T1.Standard.Collections.Generics;
+using T1.Standard.Linq;
 using T1.Standard.Serialization;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -84,13 +85,20 @@ public class ExtractSqlHelper
         var userDatabaseDesc = GetUserDatabaseDescription(outputFolder);
         var databasesDesc = GetDatabasesDescFromFolder(folder);
 
-        UpdateDatabaseDescription(databasesDesc, userDatabaseDesc);
-        UpdateTableDescription(databasesDesc, userDatabaseDesc);
+        var updatedDatabasesDesc = UpdateDatabaseDescription(databasesDesc, userDatabaseDesc);
+        UpdateTableDescription(databasesDesc, updatedDatabasesDesc);
         SaveDatabasesDescJsonFile(databasesDesc, outputFolder);
 
+        
+        var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.md"));
         foreach (var database in databasesDesc)
-        {
-            WriteAllTableDescriptions(database, outputFolder);
+        { 
+            writer.WriteLine($"Question: What are the tables in the {database.DatabaseName} database?");
+            writer.WriteLine($"Answer:");
+            foreach (var table in database.Tables)
+            {
+                writer.WriteLine($"- {table.TableName}");
+            }
         }
     }
 
@@ -674,18 +682,21 @@ public class ExtractSqlHelper
         return !string.IsNullOrEmpty(text) && (char.IsLetter(text[0]) || text[0] == '_' || text[0] == '[');
     }
 
-    private static void UpdateDatabaseDescription(List<DatabaseDescription> databasesDesc,
+    private static List<DatabaseDescription> UpdateDatabaseDescription(List<DatabaseDescription> databasesDesc,
         List<DatabaseDescription> userDatabaseDesc)
     {
-        var innerDatabases = databasesDesc.Join(userDatabaseDesc,
-                db => db.DatabaseName,
+        var result = databasesDesc.LeftOuterJoin(userDatabaseDesc,
                 udb => udb.DatabaseName,
-                (db, udb) => new { Database = db, UserDatabase = udb })
+                db => db.DatabaseName,
+                (udb) => udb,
+                (db, udb) => new DatabaseDescription()
+                {
+                    DatabaseName = db.DatabaseName, 
+                    Description = udb.Description,
+                    Tables = db.Tables
+                })
             .ToList();
-        foreach (var desc in innerDatabases)
-        {
-            desc.Database.Description = desc.UserDatabase.Description;
-        }
+        return result;
     }
 
     private static void UpdateTableDescription(List<DatabaseDescription> databasesDesc,
@@ -698,7 +709,7 @@ public class ExtractSqlHelper
         }).ToList();
         var userTables = userDatabaseDesc.SelectMany(x => x.Tables, (db, table) => new
         {
-            DatabaseName = db.DatabaseName,
+            db.DatabaseName,
             Table = table
         }).ToList();
         var innerTables = tables.Join(userTables,
@@ -709,7 +720,6 @@ public class ExtractSqlHelper
         foreach (var tableDesc in innerTables)
         {
             tableDesc.Table.Description = tableDesc.UserTable.Description;
-
             var innerColumns = tableDesc.Table.Columns.Join(tableDesc.UserTable.Columns,
                     c => c.ColumnName,
                     uc => uc.ColumnName,
