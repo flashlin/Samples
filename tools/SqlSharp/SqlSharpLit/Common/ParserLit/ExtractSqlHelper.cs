@@ -101,18 +101,18 @@ public class ExtractSqlHelper
             Write_WhatAreTheTables(writer, database);
             Write_WhatAreTheTablesUseJson(writer, database);
 
-            Write_WhatIsThePurposeOfDatabase(database, writer);
+            Write_WhatIsThePurposeOfDatabase(writer, database);
 
             foreach (var table in database.Tables)
             {
                 Write_WhatIsThePurposeOfTable(writer, database, table);
-                Write_list_all_the_column_names_in_the_table(writer, table);
-                Write_list_all_the_column_definitions_in_the_table(writer, table);
+                Write_list_all_the_column_names_in_the_table(writer, database, table);
+                Write_list_all_the_column_definitions_in_the_table(writer, database, table);
             }
         }
     }
 
-    private static void Write_WhatIsThePurposeOfDatabase(DatabaseDescription database, StreamWriter writer)
+    private static void Write_WhatIsThePurposeOfDatabase(StreamWriter writer, DatabaseDescription database)
     {
         if (!string.IsNullOrEmpty(database.Description.Trim()))
         {
@@ -165,9 +165,10 @@ public class ExtractSqlHelper
         }
     }
 
-    private static void Write_list_all_the_column_names_in_the_table(StreamWriter writer, TableDescription table)
+    private static void Write_list_all_the_column_names_in_the_table(StreamWriter writer,
+        DatabaseDescription database, TableDescription table)
     {
-        writer.WriteLine($"Question: List all the column names in the {table.TableName} table.");
+        writer.WriteLine($"Question: List all column names in the {table.TableName} table of the {database.DatabaseName} database.");
         writer.WriteLine($"Answer:");
         foreach (var column in table.Columns)
         {
@@ -176,9 +177,10 @@ public class ExtractSqlHelper
         WriteDelimitLine(writer);
     }
 
-    private static void Write_list_all_the_column_definitions_in_the_table(StreamWriter writer, TableDescription table)
+    private static void Write_list_all_the_column_definitions_in_the_table(StreamWriter writer,
+        DatabaseDescription database, TableDescription table)
     {
-        writer.WriteLine($"Question: List all the column definitions in the {table.TableName} table.");
+        writer.WriteLine($"Question: List all the column definitions in the {table.TableName} table of the {database.DatabaseName} database.");
         writer.WriteLine($"Answer:");
         foreach (var column in table.Columns)
         {
