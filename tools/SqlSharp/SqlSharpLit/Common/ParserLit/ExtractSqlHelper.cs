@@ -105,9 +105,9 @@ public class ExtractSqlHelper
 
             foreach (var table in database.Tables)
             {
-                WritePurposeOfTable(writer, database, table);
-                WriteColumnNames(writer, table);
-                WriteColumnDefinitions(writer, table);
+                Write_WhatIsThePurposeOfTable(writer, database, table);
+                Write_list_all_the_column_names_in_the_table(writer, table);
+                Write_list_all_the_column_definitions_in_the_table(writer, table);
             }
         }
     }
@@ -153,7 +153,7 @@ public class ExtractSqlHelper
         WriteDelimitLine(writer);
     }
 
-    private static void WritePurposeOfTable(StreamWriter writer, DatabaseDescription database, TableDescription table)
+    private static void Write_WhatIsThePurposeOfTable(StreamWriter writer, DatabaseDescription database, TableDescription table)
     {
         if (!string.IsNullOrEmpty(table.Description.Trim()))
         {
@@ -165,7 +165,7 @@ public class ExtractSqlHelper
         }
     }
 
-    private static void WriteColumnNames(StreamWriter writer, TableDescription table)
+    private static void Write_list_all_the_column_names_in_the_table(StreamWriter writer, TableDescription table)
     {
         writer.WriteLine($"Question: List all the column names in the {table.TableName} table.");
         writer.WriteLine($"Answer:");
@@ -176,13 +176,13 @@ public class ExtractSqlHelper
         WriteDelimitLine(writer);
     }
 
-    private static void WriteColumnDefinitions(StreamWriter writer, TableDescription table)
+    private static void Write_list_all_the_column_definitions_in_the_table(StreamWriter writer, TableDescription table)
     {
         writer.WriteLine($"Question: List all the column definitions in the {table.TableName} table.");
         writer.WriteLine($"Answer:");
         foreach (var column in table.Columns)
         {
-            writer.Write($"- {column.ColumnName} {column.DataType}");
+            writer.Write($"* {column.ColumnName} {column.DataType}");
             if (column.IsNullable)
             {
                 writer.Write($",is Nullable");
