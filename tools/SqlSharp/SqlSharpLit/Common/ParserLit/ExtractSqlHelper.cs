@@ -95,7 +95,7 @@ public class ExtractSqlHelper
 
     private static void GenerateDatabaseQaMdFile(List<DatabaseDescription> databasesDesc, string outputFolder)
     {
-        var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.md"));
+        using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.md"));
         foreach (var database in databasesDesc)
         { 
             writer.WriteLine($"Question: What are the tables in the {database.DatabaseName} database?");
@@ -120,6 +120,7 @@ public class ExtractSqlHelper
             writer.WriteLine($"```");
             writer.WriteLine($"<|end_json|>");
             WriteDelimitLine(writer);
+            writer.Flush();
             
             
             if(!string.IsNullOrEmpty(database.Description.Trim()))
