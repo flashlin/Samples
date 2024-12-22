@@ -88,7 +88,7 @@ public class ExtractSqlHelper
         SaveDatabasesDescriptionJsonFile(databases, Path.Combine(outputFolder, "DatabasesDescription_FromSqlFiles.json"));
     }
     
-    public void MergeDatabasesDescription(string outputFolder)
+    public void MergeUserDatabasesDescription(string outputFolder)
     {
         var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, "../DatabasesDescription.yaml");
         var userDatabase = GetUserDatabaseDescription(userDatabaseDescriptionYamlFile);
