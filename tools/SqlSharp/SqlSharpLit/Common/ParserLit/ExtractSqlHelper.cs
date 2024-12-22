@@ -532,11 +532,7 @@ public class ExtractSqlHelper
                 .Cast<SqlConstraintDefaultValue>()
                 .Select(x => x.DefaultValue)
                 .FirstOrDefault(string.Empty),
-            Description = allSqlExpressions.FilterAddExtendedPropertyExpression()
-                .Where(x => x.Name.Contains("MS_Description") && x.Level1Name == tableName &&
-                            x.Level2Name == column.ColumnName)
-                .Select(x => x.Value)
-                .FirstOrDefault(string.Empty)
+            Description = allSqlExpressions.FilterAddExtendedPropertyExpression().GetColumnDescription(tableName, column.ColumnName),
         };
     }
 

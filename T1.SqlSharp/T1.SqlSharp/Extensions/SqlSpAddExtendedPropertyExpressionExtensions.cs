@@ -20,7 +20,7 @@ public static class SqlSpAddExtendedPropertyExpressionExtensions
             .ToList();
     }
     
-    public static string FilterColumnDescription(this List<SqlSpAddExtendedPropertyExpression> spAddExtendedPropertyExpressions, string tableName, string columnName)
+    public static string GetColumnDescription(this List<SqlSpAddExtendedPropertyExpression> spAddExtendedPropertyExpressions, string tableName, string columnName)
     {
         return spAddExtendedPropertyExpressions
             .FilterByTableName(tableName)
