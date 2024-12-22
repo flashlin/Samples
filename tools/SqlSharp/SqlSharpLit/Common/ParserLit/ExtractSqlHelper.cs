@@ -87,6 +87,21 @@ public class ExtractSqlHelper
         var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
         SaveDatabasesDescriptionJsonFile(databases, Path.Combine(outputFolder, "DatabasesDescription_FromSqlFiles.json"));
     }
+    
+    public void MergeDatabasesDescription(string databasesDescriptionFromSqlFilesOfJsonFile, 
+        string userDatabaseDescriptionYamlFile)
+    {
+        var userDatabase = GetUserDatabaseDescription(userDatabaseDescriptionYamlFile);
+        
+        var json = File.ReadAllText(databasesDescriptionFromSqlFilesOfJsonFile);
+        var databases = JsonSerializer.Deserialize<List<DatabaseDescription>>(json)!;
+        
+        var updatedDatabases = UpdateDatabaseDescription(databases, userDatabase);
+        UpdateTableDescription(updatedDatabases, userDatabase);
+        var outputParentFolder = Path.GetDirectoryName(databasesDescriptionFromSqlFilesOfJsonFile)!;
+        var databasesDescriptionFinishFile = Path.Combine(outputParentFolder, "DatabasesDescription_Finish.json");
+        SaveDatabasesDescriptionJsonFile(updatedDatabases, databasesDescriptionFinishFile);
+    }
 
     public void GenerateDatabasesDescriptionJonsFileFromFolder(string createTablesSqlFolder, string outputFolder)
     {
