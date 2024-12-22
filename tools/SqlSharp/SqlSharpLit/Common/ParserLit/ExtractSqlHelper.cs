@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using T1.SqlSharp;
 using T1.SqlSharp.DatabaseDescriptions;
 using T1.SqlSharp.Expressions;
+using T1.SqlSharp.Extensions;
 using T1.Standard.Collections.Generics;
 using T1.Standard.Linq;
 using T1.Standard.Serialization;
@@ -531,20 +532,12 @@ public class ExtractSqlHelper
                 .Cast<SqlConstraintDefaultValue>()
                 .Select(x => x.DefaultValue)
                 .FirstOrDefault(string.Empty),
-            Description = FilterAddExtendedPropertyExpression(allSqlExpressions)
+            Description = allSqlExpressions.FilterAddExtendedPropertyExpression()
                 .Where(x => x.Name.Contains("MS_Description") && x.Level1Name == tableName &&
                             x.Level2Name == column.ColumnName)
                 .Select(x => x.Value)
                 .FirstOrDefault(string.Empty)
         };
-    }
-
-    private static List<SqlSpAddExtendedPropertyExpression> FilterAddExtendedPropertyExpression(List<ISqlExpression> allSqlExpressions)
-    {
-        return allSqlExpressions
-            .Where(x => x.SqlType == SqlType.AddExtendedProperty)
-            .Cast<SqlSpAddExtendedPropertyExpression>()
-            .ToList();
     }
 
     private static string CreateColumnDataType(SqlColumnDefinition column)
