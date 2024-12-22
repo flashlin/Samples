@@ -610,22 +610,6 @@ public class ExtractSqlHelper
             var spAddExtendedPropertyExpressions = sqlExpressions
                 .FilterAddExtendedPropertyExpression();
             db.Tables.AddRange(createTablesSql.Select(x => DatabaseDescriptionCreator.CreateTableDescription(x, spAddExtendedPropertyExpressions)));
-            var addExtendedProperties = sqlExpressions
-                .Where(x => x.SqlType == SqlType.AddExtendedProperty)
-                .Cast<SqlSpAddExtendedPropertyExpression>()
-                .ToList();
-            foreach (var extendedProperty in addExtendedProperties)
-            {
-                var tableName = extendedProperty.Level1Name;
-                var table = db.Tables.FirstOrDefault(x => x.TableName == tableName);
-                if (table == null)
-                {
-                    continue;
-                }
-                var columnName = extendedProperty.Level2Name;
-                var column = table.Columns.First(x => x.ColumnName == columnName);
-                column.Description = extendedProperty.Value;
-            }
             databases[databaseName] = db;
         }
         return databases.Values.ToList();
