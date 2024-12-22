@@ -501,15 +501,14 @@ public class ExtractSqlHelper
         }
     }
 
-    public void WriteCreateTablesFromFolder(string folder, string outputFolder)
+    public void WriteCreateTablesFromFolder(string createTablesSqlFolder, string outputFolder)
     {
-        if (!Directory.Exists(folder))
+        if (!Directory.Exists(createTablesSqlFolder))
         {
             return;
         }
-
         using var writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "CreateTables.sql"));
-        var sqlFileContents = GetSqlContentsFromFolder(folder)
+        var sqlFileContents = GetSqlContentsFromFolder(createTablesSqlFolder)
             .ToList();
         WriteCreateTablesTo(sqlFileContents, writer);
         GenerateRagFilesFromSqlContents(sqlFileContents, outputFolder);
