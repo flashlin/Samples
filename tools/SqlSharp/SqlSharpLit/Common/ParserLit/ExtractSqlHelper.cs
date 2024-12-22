@@ -77,6 +77,16 @@ public class ExtractSqlHelper
 
         return (string.Empty, 0);
     }
+    
+    public void GenerateDatabasesDescriptionFileFromFolder(string createTablesSqlFolder, string outputFolder)
+    {
+        if (!Directory.Exists(createTablesSqlFolder))
+        {
+            return;
+        }
+        var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
+        SaveDatabasesDescriptionJsonFile(databases, Path.Combine(outputFolder, "DatabasesDescription_FromSqlFiles.json"));
+    }
 
     public void GenerateDatabasesDescriptionJonsFileFromFolder(string createTablesSqlFolder, string outputFolder)
     {
@@ -91,7 +101,7 @@ public class ExtractSqlHelper
 
         var updatedDatabases = UpdateDatabaseDescription(databases, userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
-        SaveDatabasesDescJsonFile(updatedDatabases, outputFolder);
+        SaveDatabasesDescriptionJsonFile(updatedDatabases, Path.Combine(outputFolder, "DatabasesDescription.json"));
 
         using var databaseSchemaQaWriter = new DatabaseSchemaQaWriter(outputFolder);
         databaseSchemaQaWriter.GenerateQaMdFile(updatedDatabases);
@@ -620,10 +630,10 @@ public class ExtractSqlHelper
         return yamlSerializer.Deserialize<List<DatabaseDescription>>(yaml);
     }
 
-    private void SaveDatabasesDescJsonFile(List<DatabaseDescription> databasesDesc, string outputFolder)
+    private void SaveDatabasesDescriptionJsonFile(List<DatabaseDescription> databasesDesc, string outputFile)
     {
         var json = _jsonSerializer.Serialize(databasesDesc);
-        using var writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "DatabasesDescription.json"));
+        using var writer = StreamWriterCreator.Create(outputFile);
         writer.Write(json);
         writer.Flush();
     }
