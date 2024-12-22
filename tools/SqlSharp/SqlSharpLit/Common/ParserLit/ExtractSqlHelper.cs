@@ -519,8 +519,7 @@ public class ExtractSqlHelper
         return lineContent.Contains("--") || lineContent.Contains("/*");
     }
 
-    private ColumnDescription CreateColumnDescription(string tableName, SqlColumnDefinition column,
-        List<ISqlExpression> allSqlExpressions)
+    private ColumnDescription CreateColumnDescription(SqlColumnDefinition column)
     {
         return new ColumnDescription()
         {
@@ -532,7 +531,6 @@ public class ExtractSqlHelper
                 .Cast<SqlConstraintDefaultValue>()
                 .Select(x => x.DefaultValue)
                 .FirstOrDefault(string.Empty),
-            Description = allSqlExpressions.FilterAddExtendedPropertyExpression().GetColumnDescription(tableName, column.ColumnName),
         };
     }
 
@@ -576,8 +574,16 @@ public class ExtractSqlHelper
         var table = new TableDescription()
         {
             TableName = createTable.TableName,
-            Columns = columns.Select(x => CreateColumnDescription(tableName, x, allSqlExpressions)).ToList()
+            Columns = columns.Select(x =>
+            {
+                var columnDescription = CreateColumnDescription(x);
+                columnDescription.Description = allSqlExpressions
+                    .FilterAddExtendedPropertyExpression()
+                    .GetColumnDescription(tableName, columnDescription.ColumnName);
+                return columnDescription;
+            }).ToList()
         };
+        
         return table;
     }
 
