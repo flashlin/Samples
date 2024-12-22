@@ -11,6 +11,162 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace SqlSharpLit.Common.ParserLit;
 
+public static class StreamWriterCreator
+{
+    public static StreamWriter Create(string createTablesFile)
+    {
+        var fileStream = new FileStream(createTablesFile, FileMode.Create);
+        var writer = new StreamWriter(fileStream, Encoding.UTF8);
+        return writer;
+    }
+}
+
+public class DatabaseSchemaQaGenerator
+{
+    public static void GenerateDatabaseQaMdFile(List<DatabaseDescription> databasesDesc, string outputFolder)
+    {
+        using var writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "DatabasesDescription.md"));
+        foreach (var database in databasesDesc)
+        {
+            Write_WhatAreTheTables(writer, database);
+            Write_WhatAreTheTablesUseJson(writer, database);
+
+            Write_WhatIsThePurposeOfDatabase(writer, database);
+
+            foreach (var table in database.Tables)
+            {
+                Write_WhatIsThePurposeOfTable(writer, database, table);
+                Write_ListAllTheColumnNamesInTheTable(writer, database, table);
+                Write_ListAllTheColumnDefinitionsInTheTable(writer, database, table);
+                
+                foreach (var column in table.Columns)
+                {
+                    Write_WhatIsThePurposeOfColumn(writer, database, table, column);
+                }
+            }
+        }
+    }
+
+    private static void Write_WhatIsThePurposeOfColumn(StreamWriter writer, DatabaseDescription database, TableDescription table, ColumnDescription column)
+    {
+        if(column.Description.Trim().Length == 0)
+        {
+            return;
+        }
+        writer.WriteLine(
+            $"Question: What is the purpose or description of the {column.ColumnName} column in the {table.TableName} table of the {database.DatabaseName} database?");
+        writer.WriteLine($"Answer:");
+        writer.WriteLine($"{column.Description}");
+        WriteDelimitLine(writer);
+    }
+
+    private static void Write_WhatIsThePurposeOfDatabase(StreamWriter writer, DatabaseDescription database)
+    {
+        if (!string.IsNullOrEmpty(database.Description.Trim()))
+        {
+            writer.WriteLine(
+                $"Question: What is the purpose or description of the {database.DatabaseName} database?");
+            writer.WriteLine($"Answer:");
+            writer.WriteLine($"{database.Description}");
+            WriteDelimitLine(writer);
+        }
+    }
+
+    private static void Write_WhatAreTheTables(StreamWriter writer, DatabaseDescription database)
+    {
+        writer.WriteLine($"Question: What are the tables in the {database.DatabaseName} database?");
+        writer.WriteLine($"Answer:");
+        foreach (var table in database.Tables)
+        {
+            writer.WriteLine($"* {table.TableName}");
+        }
+
+        WriteDelimitLine(writer);
+    }
+
+    private static void Write_WhatAreTheTablesUseJson(StreamWriter writer, DatabaseDescription database)
+    {
+        writer.WriteLine(
+            $"Question: What are the tables in the {database.DatabaseName} database? use JSON format response");
+        writer.WriteLine($"Answer:");
+        writer.WriteLine($"<|json|>");
+        writer.WriteLine($"```json");
+        var tables = database.Tables.Select(x => new { x.TableName }).ToList();
+        var json = JsonSerializer.Serialize(tables, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+        writer.WriteLine(json);
+        writer.WriteLine($"```");
+        writer.WriteLine($"<|end_json|>");
+        WriteDelimitLine(writer);
+    }
+
+    private static void Write_WhatIsThePurposeOfTable(StreamWriter writer, DatabaseDescription database, TableDescription table)
+    {
+        if (!string.IsNullOrEmpty(table.Description.Trim()))
+        {
+            writer.WriteLine(
+                $"Question: What is the purpose or description of the {table.TableName} table in the {database.DatabaseName} database?");
+            writer.WriteLine($"Answer:");
+            writer.WriteLine($"{table.Description}");
+            WriteDelimitLine(writer);
+        }
+    }
+
+    private static void Write_ListAllTheColumnNamesInTheTable(StreamWriter writer,
+        DatabaseDescription database, TableDescription table)
+    {
+        writer.WriteLine($"Question: List all column names in the {table.TableName} table of the {database.DatabaseName} database.");
+        writer.WriteLine($"Answer:");
+        foreach (var column in table.Columns)
+        {
+            writer.WriteLine($"* {column.ColumnName}");
+        }
+
+        WriteDelimitLine(writer);
+    }
+
+    private static void Write_ListAllTheColumnDefinitionsInTheTable(StreamWriter writer,
+        DatabaseDescription database, TableDescription table)
+    {
+        writer.WriteLine($"Question: List all the column definitions in the {table.TableName} table of the {database.DatabaseName} database.");
+        writer.WriteLine($"Answer:");
+        foreach (var column in table.Columns)
+        {
+            writer.Write($"* {column.ColumnName} {column.DataType}");
+            if (column.IsNullable)
+            {
+                writer.Write($",is Nullable");
+            }
+            if (column.IsIdentity)
+            {
+                writer.Write($",is Identity");
+            }
+
+            if (!string.IsNullOrEmpty(column.DefaultValue))
+            {
+                writer.Write($",Default Value: {column.DefaultValue}");
+            }
+
+            if (!string.IsNullOrEmpty(column.Description))
+            {
+                writer.Write($",Description: {column.Description}");
+            }
+            writer.WriteLine();
+        }
+
+        WriteDelimitLine(writer);
+    }
+
+    private static void WriteDelimitLine(StreamWriter writer)
+    {
+        writer.WriteLine();
+        writer.WriteLine();
+        writer.WriteLine();
+    }
+}
+
 public class ExtractSqlHelper
 {
     private readonly IDatabaseNameProvider _databaseNameProvider;
@@ -90,147 +246,7 @@ public class ExtractSqlHelper
         UpdateTableDescription(updatedDatabases, userDatabase);
         SaveDatabasesDescJsonFile(updatedDatabases, outputFolder);
 
-        GenerateDatabaseQaMdFile(updatedDatabases, outputFolder);
-    }
-
-    private static void GenerateDatabaseQaMdFile(List<DatabaseDescription> databasesDesc, string outputFolder)
-    {
-        using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.md"));
-        foreach (var database in databasesDesc)
-        {
-            Write_WhatAreTheTables(writer, database);
-            Write_WhatAreTheTablesUseJson(writer, database);
-
-            Write_WhatIsThePurposeOfDatabase(writer, database);
-
-            foreach (var table in database.Tables)
-            {
-                Write_WhatIsThePurposeOfTable(writer, database, table);
-                Write_ListAllTheColumnNamesInTheTable(writer, database, table);
-                Write_ListAllTheColumnDefinitionsInTheTable(writer, database, table);
-                
-                foreach (var column in table.Columns)
-                {
-                    Write_WhatIsThePurposeOfColumn(writer, database, table, column);
-                }
-            }
-        }
-    }
-
-    private static void Write_WhatIsThePurposeOfColumn(StreamWriter writer, DatabaseDescription database, TableDescription table, ColumnDescription column)
-    {
-        if(column.Description.Trim().Length == 0)
-        {
-            return;
-        }
-        writer.WriteLine(
-            $"Question: What is the purpose or description of the {column.ColumnName} column in the {table.TableName} table of the {database.DatabaseName} database?");
-        writer.WriteLine($"Answer:");
-        writer.WriteLine($"{column.Description}");
-        WriteDelimitLine(writer);
-    }
-
-    private static void Write_WhatIsThePurposeOfDatabase(StreamWriter writer, DatabaseDescription database)
-    {
-        if (!string.IsNullOrEmpty(database.Description.Trim()))
-        {
-            writer.WriteLine(
-                $"Question: What is the purpose or description of the {database.DatabaseName} database?");
-            writer.WriteLine($"Answer:");
-            writer.WriteLine($"{database.Description}");
-            WriteDelimitLine(writer);
-        }
-    }
-
-    private static void Write_WhatAreTheTables(StreamWriter writer, DatabaseDescription database)
-    {
-        writer.WriteLine($"Question: What are the tables in the {database.DatabaseName} database?");
-        writer.WriteLine($"Answer:");
-        foreach (var table in database.Tables)
-        {
-            writer.WriteLine($"* {table.TableName}");
-        }
-        WriteDelimitLine(writer);
-    }
-
-    private static void Write_WhatAreTheTablesUseJson(StreamWriter writer, DatabaseDescription database)
-    {
-        writer.WriteLine(
-            $"Question: What are the tables in the {database.DatabaseName} database? use JSON format response");
-        writer.WriteLine($"Answer:");
-        writer.WriteLine($"<|json|>");
-        writer.WriteLine($"```json");
-        var tables = database.Tables.Select(x => new { x.TableName }).ToList();
-        var json = JsonSerializer.Serialize(tables, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        });
-        writer.WriteLine(json);
-        writer.WriteLine($"```");
-        writer.WriteLine($"<|end_json|>");
-        WriteDelimitLine(writer);
-    }
-
-    private static void Write_WhatIsThePurposeOfTable(StreamWriter writer, DatabaseDescription database, TableDescription table)
-    {
-        if (!string.IsNullOrEmpty(table.Description.Trim()))
-        {
-            writer.WriteLine(
-                $"Question: What is the purpose or description of the {table.TableName} table in the {database.DatabaseName} database?");
-            writer.WriteLine($"Answer:");
-            writer.WriteLine($"{table.Description}");
-            WriteDelimitLine(writer);
-        }
-    }
-
-    private static void Write_ListAllTheColumnNamesInTheTable(StreamWriter writer,
-        DatabaseDescription database, TableDescription table)
-    {
-        writer.WriteLine($"Question: List all column names in the {table.TableName} table of the {database.DatabaseName} database.");
-        writer.WriteLine($"Answer:");
-        foreach (var column in table.Columns)
-        {
-            writer.WriteLine($"* {column.ColumnName}");
-        }
-        WriteDelimitLine(writer);
-    }
-
-    private static void Write_ListAllTheColumnDefinitionsInTheTable(StreamWriter writer,
-        DatabaseDescription database, TableDescription table)
-    {
-        writer.WriteLine($"Question: List all the column definitions in the {table.TableName} table of the {database.DatabaseName} database.");
-        writer.WriteLine($"Answer:");
-        foreach (var column in table.Columns)
-        {
-            writer.Write($"* {column.ColumnName} {column.DataType}");
-            if (column.IsNullable)
-            {
-                writer.Write($",is Nullable");
-            }
-            if (column.IsIdentity)
-            {
-                writer.Write($",is Identity");
-            }
-
-            if (!string.IsNullOrEmpty(column.DefaultValue))
-            {
-                writer.Write($",Default Value: {column.DefaultValue}");
-            }
-
-            if (!string.IsNullOrEmpty(column.Description))
-            {
-                writer.Write($",Description: {column.Description}");
-            }
-            writer.WriteLine();
-        }
-        WriteDelimitLine(writer);
-    }
-
-    private static void WriteDelimitLine(StreamWriter writer)
-    {
-        writer.WriteLine();
-        writer.WriteLine();
-        writer.WriteLine();
+        DatabaseSchemaQaGenerator.GenerateDatabaseQaMdFile(updatedDatabases, outputFolder);
     }
 
     private List<DatabaseDescription> GetDatabasesDescFromFolder(string folder)
@@ -621,7 +637,7 @@ public class ExtractSqlHelper
             return;
         }
 
-        using var writer = CreateStreamWriter(Path.Combine(outputFolder, "CreateTables.sql"));
+        using var writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "CreateTables.sql"));
         var sqlFileContents = GetSqlContentsFromFolder(folder)
             .ToList();
         WriteCreateTablesTo(sqlFileContents, writer);
@@ -683,13 +699,6 @@ public class ExtractSqlHelper
         }
 
         return database;
-    }
-
-    private static StreamWriter CreateStreamWriter(string createTablesFile)
-    {
-        var fileStream = new FileStream(createTablesFile, FileMode.Create);
-        var writer = new StreamWriter(fileStream, Encoding.UTF8);
-        return writer;
     }
 
     private TableDescription CreateTableDescription(SqlCreateTableExpression createTable,
@@ -841,7 +850,7 @@ public class ExtractSqlHelper
     private void SaveDatabasesDescJsonFile(List<DatabaseDescription> databasesDesc, string outputFolder)
     {
         var json = _jsonSerializer.Serialize(databasesDesc);
-        using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.json"));
+        using var writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "DatabasesDescription.json"));
         writer.Write(json);
         writer.Flush();
     }
