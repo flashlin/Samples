@@ -78,16 +78,16 @@ public class ExtractSqlHelper
         return (string.Empty, 0);
     }
 
-    public void GenerateDatabasesDescriptionJonsFileFromFolder(string folder, string outputFolder)
+    public void GenerateDatabasesDescriptionJonsFileFromFolder(string createTablesSqlFolder, string outputFolder)
     {
-        if (!Directory.Exists(folder))
+        if (!Directory.Exists(createTablesSqlFolder))
         {
             return;
         }
 
         var outputParentFolder = Path.GetDirectoryName(outputFolder)!;
         var userDatabase = GetUserDatabaseDescription(Path.Combine(outputParentFolder, "DatabasesDescription.yaml"));
-        var databases = ExtractDatabasesDescriptionFromFolder(folder);
+        var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
 
         var updatedDatabases = UpdateDatabaseDescription(databases, userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
