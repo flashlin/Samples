@@ -601,18 +601,30 @@ public class ExtractSqlHelper
         {
             Console.WriteLine($"Processing {sqlFileContent.FileName}");
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
-            var db = databases[databaseName];
             var sqlExpressions = sqlFileContent.SqlExpressions;
-            var createTablesSql = sqlExpressions
-                .FilterCreateTableExpression()
-                .OrderBy(x => x.TableName)
-                .ToList();
-            var spAddExtendedPropertyExpressions = sqlExpressions
-                .FilterAddExtendedPropertyExpression();
-            db.Tables.AddRange(createTablesSql.Select(x => DatabaseDescriptionCreator.CreateTableDescription(x, spAddExtendedPropertyExpressions)));
+            var newDb = CreateDatabaseDescription(databaseName, sqlExpressions);
+            
+            var db = databases[databaseName];
+            db.Tables.AddRange(newDb.Tables);
             databases[databaseName] = db;
         }
         return databases.Values.ToList();
+    }
+
+    private static DatabaseDescription CreateDatabaseDescription(string databaseName, List<ISqlExpression> sqlExpressions)
+    {
+        var databaseDescription = new DatabaseDescription
+        {
+            DatabaseName = databaseName
+        };
+        var createTablesSql = sqlExpressions
+            .FilterCreateTableExpression()
+            .OrderBy(x => x.TableName)
+            .ToList();
+        var spAddExtendedPropertyExpressions = sqlExpressions
+            .FilterAddExtendedPropertyExpression();
+        databaseDescription.Tables.AddRange(createTablesSql.Select(x => DatabaseDescriptionCreator.CreateTableDescription(x, spAddExtendedPropertyExpressions)));
+        return databaseDescription;
     }
 
     private static List<DatabaseDescription> GetUserDatabaseDescription(string userDatabaseDescriptionYamlFile)
