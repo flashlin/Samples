@@ -99,7 +99,7 @@ public class ExtractSqlHelper
         var updatedDatabases = UpdateDatabaseDescription(databases, userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
         var outputParentFolder = Path.GetDirectoryName(databasesDescriptionFromSqlFilesOfJsonFile)!;
-        var databasesDescriptionFinishFile = Path.Combine(outputParentFolder, "DatabasesDescription_Finish.json");
+        var databasesDescriptionFinishFile = Path.Combine(outputFolder, "DatabasesDescription_Finish.json");
         SaveDatabasesDescriptionJsonFile(updatedDatabases, databasesDescriptionFinishFile);
     }
 
@@ -108,6 +108,14 @@ public class ExtractSqlHelper
         var json = File.ReadAllText(databasesDescriptionFromSqlFilesOfJsonFile);
         var databases = JsonSerializer.Deserialize<List<DatabaseDescription>>(json)!;
         return databases;
+    }
+    
+    public void GenerateDatabasesDescriptionJonsFile(string outputFolder)
+    {
+        var databasesDescriptionFinishFile = Path.Combine(outputFolder, "DatabasesDescription_Finish.json");
+        using var databaseSchemaQaWriter = new DatabaseSchemaQaWriter(outputFolder);
+        var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFinishFile);
+        databaseSchemaQaWriter.GenerateQaMdFile(databases);
     }
 
     public void GenerateDatabasesDescriptionJonsFileFromFolder(string createTablesSqlFolder, string outputFolder)
