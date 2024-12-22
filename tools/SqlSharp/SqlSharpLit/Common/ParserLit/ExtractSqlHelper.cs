@@ -574,9 +574,9 @@ public class ExtractSqlHelper
         var table = new TableDescription()
         {
             TableName = createTable.TableName,
-            Columns = columns.Select(x =>
+            Columns = columns.Select(column =>
             {
-                var columnDescription = CreateColumnDescription(x);
+                var columnDescription = CreateColumnDescription(column);
                 columnDescription.Description = allSqlExpressions
                     .FilterAddExtendedPropertyExpression()
                     .GetColumnDescription(tableName, columnDescription.ColumnName);
