@@ -642,7 +642,7 @@ public class ExtractSqlHelper
     {
         if (column.DataSize != null)
         {
-            return $"{column.DataType}({column.DataSize.ToSql()})";
+            return $"{column.DataType}{column.DataSize.ToSql()}";
         }
         return column.DataType;
     }
