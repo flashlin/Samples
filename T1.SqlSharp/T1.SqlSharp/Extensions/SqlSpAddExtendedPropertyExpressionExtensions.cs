@@ -19,4 +19,13 @@ public static class SqlSpAddExtendedPropertyExpressionExtensions
             .Where(x => x.Name.Contains("MS_Description") && x.Level2Name.IsSameAs(columnName))
             .ToList();
     }
+    
+    public static string FilterColumnDescription(this List<SqlSpAddExtendedPropertyExpression> spAddExtendedPropertyExpressions, string tableName, string columnName)
+    {
+        return spAddExtendedPropertyExpressions
+            .FilterByTableName(tableName)
+            .FilterByColumnName(columnName)
+            .Select(x => x.Value)
+            .FirstOrDefault(string.Empty);
+    }
 }
