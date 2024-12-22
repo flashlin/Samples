@@ -554,17 +554,19 @@ public class ExtractSqlHelper
             .Cast<SqlCreateTableExpression>()
             .Where(x => StartsWithValidChar(x.TableName))
             .ToList();
+        var sqlSpAddExtendedPropertyExpressions = sqlFileContent.SqlExpressions
+            .FilterAddExtendedPropertyExpression();
         foreach (var createTable in createTables)
         {
-            var table = CreateTableDescription(createTable, sqlFileContent.SqlExpressions);
+            var table = CreateTableDescription(createTable, sqlSpAddExtendedPropertyExpressions);
             database.Tables.Add(table);
         }
 
         return database;
     }
 
-    private TableDescription CreateTableDescription(SqlCreateTableExpression createTable,
-        List<ISqlExpression> allSqlExpressions)
+    private TableDescription CreateTableDescription(SqlCreateTableExpression createTable, 
+        List<SqlSpAddExtendedPropertyExpression> sqlSpAddExtendedPropertyExpressions)
     {
         var tableName = createTable.TableName;
         var columns = createTable.Columns
@@ -577,8 +579,7 @@ public class ExtractSqlHelper
             Columns = columns.Select(column =>
             {
                 var columnDescription = CreateColumnDescription(column);
-                columnDescription.Description = allSqlExpressions
-                    .FilterAddExtendedPropertyExpression()
+                columnDescription.Description = sqlSpAddExtendedPropertyExpressions
                     .GetColumnDescription(tableName, columnDescription.ColumnName);
                 return columnDescription;
             }).ToList()
@@ -674,7 +675,12 @@ public class ExtractSqlHelper
                 .Cast<SqlCreateTableExpression>()
                 .OrderBy(x => x.TableName)
                 .ToList();
-            db.Tables.AddRange(createTablesSql.Select(x => CreateTableDescription(x, sqlFileContent.SqlExpressions)));
+            db.Tables.AddRange(createTablesSql.Select(x =>
+            {
+                List<ISqlExpression> allSqlExpressions = sqlFileContent.SqlExpressions;
+                return CreateTableDescription(x, allSqlExpressions
+                    .FilterAddExtendedPropertyExpression());
+            }));
             var addExtendedProperties = sqlFileContent.SqlExpressions
                 .Where(x => x.SqlType == SqlType.AddExtendedProperty)
                 .Cast<SqlSpAddExtendedPropertyExpression>()
