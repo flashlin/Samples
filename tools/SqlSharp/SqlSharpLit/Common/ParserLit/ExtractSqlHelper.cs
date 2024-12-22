@@ -83,7 +83,8 @@ public class ExtractSqlHelper
             return;
         }
 
-        var userDatabase = GetUserDatabaseDescription(outputFolder);
+        var outputParentFolder = Path.GetDirectoryName(outputFolder)!;
+        var userDatabase = GetUserDatabaseDescription(Path.Combine(outputParentFolder, "DatabasesDescription.yaml"));
         var databases = GetDatabasesDescFromFolder(folder);
 
         var updatedDatabases = UpdateDatabaseDescription(databases, userDatabase);
@@ -99,6 +100,7 @@ public class ExtractSqlHelper
         var sqlFileContents = GetSqlContentsFromFolder(folder)
             .ToList();
         var databasesDesc = GetDatabaseDescriptions(sqlFileContents);
+        NormalizeDatabaseDescriptions(databasesDesc);
         foreach (var db in databasesDesc)
         {
             var tables = db.Tables
@@ -106,8 +108,30 @@ public class ExtractSqlHelper
                 .ToList();
             db.Tables = tables;
         }
-
         return databasesDesc;
+    }
+
+    private void NormalizeDatabaseDescriptions(List<DatabaseDescription> databasesDesc)
+    {
+        foreach (var database in databasesDesc)
+        {
+            foreach (var table in database.Tables)
+            {
+                var tableName = NormalizeName(table.TableName);
+                table.TableName = tableName;
+                foreach (var column in table.Columns)
+                {
+                    column.ColumnName = NormalizeName(column.ColumnName);
+                }
+            }
+        }
+    }
+
+    private static string NormalizeName(string tableName)
+    {
+        tableName = tableName.Replace("[dbo].", "");
+        tableName = Regex.Replace(tableName, @"\[(.*?)\]", "$1");
+        return tableName;
     }
 
     public void GenerateRagFiles(string sqlFolder)
@@ -667,21 +691,17 @@ public class ExtractSqlHelper
                 var column = table.Columns.First(x => x.ColumnName == columnName);
                 column.Description = extendedProperty.Value;
             }
-
             databases[databaseName] = db;
         }
-
         return databases.Values.ToList();
     }
 
-    private static List<DatabaseDescription> GetUserDatabaseDescription(string outputFolder)
+    private static List<DatabaseDescription> GetUserDatabaseDescription(string userDatabaseDescriptionYamlFile)
     {
-        var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, "DatabasesDescription.yaml");
         if (!File.Exists(userDatabaseDescriptionYamlFile))
         {
             return [];
         }
-
         var yamlSerializer = new YamlSerializer();
         var yaml = File.ReadAllText(userDatabaseDescriptionYamlFile);
         return yamlSerializer.Deserialize<List<DatabaseDescription>>(yaml);
@@ -728,7 +748,7 @@ public class ExtractSqlHelper
         foreach (var database in databasesDesc)
         {
             var tables = database.Tables;
-            var userTables = userDatabaseDesc.FirstOrDefault(x => x.DatabaseName == database.DatabaseName)?.Tables ??
+            var userTables = userDatabaseDesc.FirstOrDefault(x => x.DatabaseName.IsSameAs(database.DatabaseName))?.Tables ??
                              [];
             var updatedTables = tables.LeftOuterJoin(userTables,
                     ut => ut.TableName,
@@ -752,24 +772,12 @@ public class ExtractSqlHelper
         foreach (var table in tables)
         {
             var columns = table.Columns;
-            var userColumns = userTables.FirstOrDefault(x => x.TableName == table.TableName)?.Columns ?? [];
-            var updatedColumns = columns.LeftOuterJoin(userColumns,
-                    userColumn => userColumn.ColumnName,
-                    info => info.ColumnName,
-                    userColumn => userColumn,
-                    (info, userColumn) => new ColumnDescription()
-                    {
-                        ColumnName = info.ColumnName,
-                        DataType = info.DataType,
-                        IsNullable = info.IsNullable,
-                        IsIdentity = info.IsIdentity,
-                        DefaultValue = info.DefaultValue,
-                        Description = string.IsNullOrEmpty(userColumn.Description)
-                            ? info.Description
-                            : userColumn.Description,
-                    })
-                .ToList();
-            table.Columns = updatedColumns;
+            var userColumns = userTables.FirstOrDefault(x => x.TableName.IsSameAs(table.TableName))?.Columns ?? [];
+            foreach (var column in columns)
+            {
+                var userColumn = userColumns.FirstOrDefault(x => x.ColumnName.IsSameAs(column.ColumnName)) ?? new ColumnDescription();
+                column.Description = string.IsNullOrEmpty(userColumn.Description) ? column.Description : userColumn.Description;
+            }
         }
     }
 
@@ -946,4 +954,12 @@ public class SqlCreateTablesSqlFiles
     public SqlFileContent File { get; set; } = SqlFileContent.Empty;
     public List<string> CreateTables { get; set; } = [];
     public string DatabaseName { get; set; } = string.Empty;
+}
+
+public static class StringExtensions
+{
+    public static bool IsSameAs(this string text, string other)
+    {
+        return string.Equals(text, other, StringComparison.OrdinalIgnoreCase);
+    }
 }
