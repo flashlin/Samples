@@ -1,5 +1,4 @@
 " https://github.com/JetBrains/ideavim/wiki/IdeaVim-Plugins
-" ideavimmulcursor
 ":actionlist 顯示所有的 action
 let mapleader=" "
 set number relativenumber
@@ -64,6 +63,8 @@ map mx <A-x>
 map mp <A-p>
 
 
+
+
 """ Commentary plugin -------------------------------------------
 " 在 V 模式下, 輸入 gc 即可註解
 " 在 V 模式下, 輸入 gcc 即可反註解
@@ -85,13 +86,15 @@ nmap zdt :action RiderUnitTestDebugContextAction<CR>
 " 打開單元測試視窗
 nmap zot :action RiderUnitTestFocusExplorerAction<CR>
 nmap zvf :action HideAllWindows<CR>
-"打開快速跳轉檔案 
-nmap ztt :action GotoFile<CR>
-nmap ztm :action FileStructurePopup<CR>
-nmap zte :action GotoTestFailedLine<CR>
+nmap zet :action RiderUnitTestAbortedTestsFilterAction<CR>
+" 跳到標記 a then刪除
+map zdm v`aD
 
 " 重新 rearrange code layout
 nmap zmc :action RearrangeCode<CR>
+
+" 快速跳轉檔案
+nmap ztt :action GotoFile<CR>
 
 """ -------------------------------------------
 " daa 刪除參數
