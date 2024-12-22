@@ -549,11 +549,7 @@ public class ExtractSqlHelper
         {
             DatabaseName = databaseName
         };
-        var createTables = sqlFileContent.SqlExpressions
-            .Where(x => x.SqlType == SqlType.CreateTable)
-            .Cast<SqlCreateTableExpression>()
-            .Where(x => StartsWithValidChar(x.TableName))
-            .ToList();
+        var createTables = FilterCreateTableExpression(sqlFileContent);
         var sqlSpAddExtendedPropertyExpressions = sqlFileContent.SqlExpressions
             .FilterAddExtendedPropertyExpression();
         foreach (var createTable in createTables)
@@ -561,8 +557,16 @@ public class ExtractSqlHelper
             var table = CreateTableDescription(createTable, sqlSpAddExtendedPropertyExpressions);
             database.Tables.Add(table);
         }
-
         return database;
+    }
+
+    private List<SqlCreateTableExpression> FilterCreateTableExpression(SqlFileContent sqlFileContent)
+    {
+        return sqlFileContent.SqlExpressions
+            .Where(x => x.SqlType == SqlType.CreateTable)
+            .Cast<SqlCreateTableExpression>()
+            .Where(x => StartsWithValidChar(x.TableName))
+            .ToList();
     }
 
     private TableDescription CreateTableDescription(SqlCreateTableExpression createTable, 
