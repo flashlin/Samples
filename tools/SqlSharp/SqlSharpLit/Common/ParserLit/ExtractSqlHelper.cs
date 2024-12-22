@@ -5,6 +5,7 @@ using T1.SqlSharp;
 using T1.SqlSharp.DatabaseDescriptions;
 using T1.SqlSharp.Expressions;
 using T1.SqlSharp.Extensions;
+using T1.SqlSharp.Helper;
 using T1.Standard.Collections.Generics;
 using T1.Standard.Linq;
 using T1.Standard.Serialization;
@@ -519,70 +520,6 @@ public class ExtractSqlHelper
         return lineContent.Contains("--") || lineContent.Contains("/*");
     }
 
-    private ColumnDescription CreateColumnDescription(SqlColumnDefinition column)
-    {
-        return new ColumnDescription()
-        {
-            ColumnName = column.ColumnName,
-            DataType = CreateColumnDataType(column),
-            IsNullable = column.IsNullable,
-            IsIdentity = IsIdentity(column.Identity),
-            DefaultValue = column.Constraints.Where(x => x.SqlType == SqlType.ConstraintDefaultValue)
-                .Cast<SqlConstraintDefaultValue>()
-                .Select(x => x.DefaultValue)
-                .FirstOrDefault(string.Empty),
-        };
-    }
-
-    private static string CreateColumnDataType(SqlColumnDefinition column)
-    {
-        if (column.DataSize != null)
-        {
-            return $"{column.DataType}{column.DataSize.ToSql()}";
-        }
-        return column.DataType;
-    }
-
-    private DatabaseDescription CreateDatabaseDescription(string databaseName, List<ISqlExpression> sqlExpressions)
-    {
-        var database = new DatabaseDescription
-        {
-            DatabaseName = databaseName
-        };
-        var createTables = sqlExpressions.FilterCreateTableExpression();
-        var sqlSpAddExtendedPropertyExpressions = sqlExpressions
-            .FilterAddExtendedPropertyExpression();
-        foreach (var createTable in createTables)
-        {
-            var table = CreateTableDescription(createTable, sqlSpAddExtendedPropertyExpressions);
-            database.Tables.Add(table);
-        }
-        return database;
-    }
-
-    private TableDescription CreateTableDescription(SqlCreateTableExpression createTable, 
-        List<SqlSpAddExtendedPropertyExpression> sqlSpAddExtendedPropertyExpressions)
-    {
-        var tableName = createTable.TableName;
-        var columns = createTable.Columns
-            .Where(x => x.SqlType == SqlType.ColumnDefinition)
-            .Cast<SqlColumnDefinition>()
-            .ToList();
-        var table = new TableDescription()
-        {
-            TableName = createTable.TableName,
-            Columns = columns.Select(column =>
-            {
-                var columnDescription = CreateColumnDescription(column);
-                columnDescription.Description = sqlSpAddExtendedPropertyExpressions
-                    .GetColumnDescription(tableName, columnDescription.ColumnName);
-                return columnDescription;
-            }).ToList()
-        };
-        
-        return table;
-    }
-
     private static StreamWriter CreateWriter(string filename)
     {
         return new StreamWriter(Path.Combine("outputs", filename), false, Encoding.UTF8);
@@ -593,7 +530,7 @@ public class ExtractSqlHelper
         foreach (var sqlFileContent in sqlContents)
         {
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
-            yield return CreateDatabaseDescription(databaseName, sqlFileContent.SqlExpressions);
+            yield return DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName, sqlFileContent.SqlExpressions);
         }
     }
 
@@ -673,7 +610,7 @@ public class ExtractSqlHelper
             db.Tables.AddRange(createTablesSql.Select(x =>
             {
                 List<ISqlExpression> allSqlExpressions = sqlFileContent.SqlExpressions;
-                return CreateTableDescription(x, allSqlExpressions
+                return DatabaseDescriptionCreator.CreateTableDescription(x, allSqlExpressions
                     .FilterAddExtendedPropertyExpression());
             }));
             var addExtendedProperties = sqlFileContent.SqlExpressions
@@ -707,11 +644,6 @@ public class ExtractSqlHelper
         var yamlSerializer = new YamlSerializer();
         var yaml = File.ReadAllText(userDatabaseDescriptionYamlFile);
         return yamlSerializer.Deserialize<List<DatabaseDescription>>(yaml);
-    }
-
-    private bool IsIdentity(SqlIdentity sqlIdentity)
-    {
-        return sqlIdentity.Increment > 0;
     }
 
     private void SaveDatabasesDescJsonFile(List<DatabaseDescription> databasesDesc, string outputFolder)
