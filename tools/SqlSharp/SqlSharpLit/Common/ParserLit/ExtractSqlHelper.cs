@@ -531,14 +531,20 @@ public class ExtractSqlHelper
                 .Cast<SqlConstraintDefaultValue>()
                 .Select(x => x.DefaultValue)
                 .FirstOrDefault(string.Empty),
-            Description = allSqlExpressions
-                .Where(x => x.SqlType == SqlType.AddExtendedProperty)
-                .Cast<SqlSpAddExtendedPropertyExpression>()
+            Description = FilterAddExtendedPropertyExpression(allSqlExpressions)
                 .Where(x => x.Name.Contains("MS_Description") && x.Level1Name == tableName &&
                             x.Level2Name == column.ColumnName)
                 .Select(x => x.Value)
                 .FirstOrDefault(string.Empty)
         };
+    }
+
+    private static List<SqlSpAddExtendedPropertyExpression> FilterAddExtendedPropertyExpression(List<ISqlExpression> allSqlExpressions)
+    {
+        return allSqlExpressions
+            .Where(x => x.SqlType == SqlType.AddExtendedProperty)
+            .Cast<SqlSpAddExtendedPropertyExpression>()
+            .ToList();
     }
 
     private static string CreateColumnDataType(SqlColumnDefinition column)
