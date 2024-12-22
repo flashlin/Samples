@@ -602,7 +602,9 @@ public class ExtractSqlHelper
             Console.WriteLine($"Processing {sqlFileContent.FileName}");
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
             var sqlExpressions = sqlFileContent.SqlExpressions;
-            var newDb = CreateDatabaseDescription(databaseName, sqlExpressions);
+            //var newDb = CreateDatabaseDescription(databaseName, sqlExpressions);
+            
+            var newDb = DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName, sqlExpressions);
             
             var db = databases[databaseName];
             db.Tables.AddRange(newDb.Tables);
@@ -611,7 +613,7 @@ public class ExtractSqlHelper
         return databases.Values.ToList();
     }
 
-    private static DatabaseDescription CreateDatabaseDescription(string databaseName, List<ISqlExpression> sqlExpressions)
+    public static DatabaseDescription CreateDatabaseDescription(string databaseName, List<ISqlExpression> sqlExpressions)
     {
         var databaseDescription = new DatabaseDescription
         {
