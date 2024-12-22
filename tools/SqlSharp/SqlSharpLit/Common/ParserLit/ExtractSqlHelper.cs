@@ -88,19 +88,26 @@ public class ExtractSqlHelper
         SaveDatabasesDescriptionJsonFile(databases, Path.Combine(outputFolder, "DatabasesDescription_FromSqlFiles.json"));
     }
     
-    public void MergeDatabasesDescription(string databasesDescriptionFromSqlFilesOfJsonFile, 
-        string userDatabaseDescriptionYamlFile)
+    public void MergeDatabasesDescription(string outputFolder)
     {
+        var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, "../DatabasesDescription.yaml");
         var userDatabase = GetUserDatabaseDescription(userDatabaseDescriptionYamlFile);
         
-        var json = File.ReadAllText(databasesDescriptionFromSqlFilesOfJsonFile);
-        var databases = JsonSerializer.Deserialize<List<DatabaseDescription>>(json)!;
-        
+        var databasesDescriptionFromSqlFilesOfJsonFile = Path.Combine(outputFolder, "DatabasesDescription_FromSqlFiles.json");
+        var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesOfJsonFile);
+
         var updatedDatabases = UpdateDatabaseDescription(databases, userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
         var outputParentFolder = Path.GetDirectoryName(databasesDescriptionFromSqlFilesOfJsonFile)!;
         var databasesDescriptionFinishFile = Path.Combine(outputParentFolder, "DatabasesDescription_Finish.json");
         SaveDatabasesDescriptionJsonFile(updatedDatabases, databasesDescriptionFinishFile);
+    }
+
+    private static List<DatabaseDescription> LoadDatabasesDescriptionJsonFile(string databasesDescriptionFromSqlFilesOfJsonFile)
+    {
+        var json = File.ReadAllText(databasesDescriptionFromSqlFilesOfJsonFile);
+        var databases = JsonSerializer.Deserialize<List<DatabaseDescription>>(json)!;
+        return databases;
     }
 
     public void GenerateDatabasesDescriptionJonsFileFromFolder(string createTablesSqlFolder, string outputFolder)
