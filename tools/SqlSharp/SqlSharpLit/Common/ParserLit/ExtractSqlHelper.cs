@@ -602,18 +602,15 @@ public class ExtractSqlHelper
             Console.WriteLine($"Processing {sqlFileContent.FileName}");
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
             var db = databases[databaseName];
-            var createTablesSql = sqlFileContent.SqlExpressions
-                .Where(x => x.SqlType == SqlType.CreateTable)
-                .Cast<SqlCreateTableExpression>()
+            var sqlExpressions = sqlFileContent.SqlExpressions;
+            var createTablesSql = sqlExpressions
+                .FilterCreateTableExpression()
                 .OrderBy(x => x.TableName)
                 .ToList();
-            db.Tables.AddRange(createTablesSql.Select(x =>
-            {
-                List<ISqlExpression> allSqlExpressions = sqlFileContent.SqlExpressions;
-                return DatabaseDescriptionCreator.CreateTableDescription(x, allSqlExpressions
-                    .FilterAddExtendedPropertyExpression());
-            }));
-            var addExtendedProperties = sqlFileContent.SqlExpressions
+            var spAddExtendedPropertyExpressions = sqlExpressions
+                .FilterAddExtendedPropertyExpression();
+            db.Tables.AddRange(createTablesSql.Select(x => DatabaseDescriptionCreator.CreateTableDescription(x, spAddExtendedPropertyExpressions)));
+            var addExtendedProperties = sqlExpressions
                 .Where(x => x.SqlType == SqlType.AddExtendedProperty)
                 .Cast<SqlSpAddExtendedPropertyExpression>()
                 .ToList();
@@ -625,7 +622,6 @@ public class ExtractSqlHelper
                 {
                     continue;
                 }
-
                 var columnName = extendedProperty.Level2Name;
                 var column = table.Columns.First(x => x.ColumnName == columnName);
                 column.Description = extendedProperty.Value;
