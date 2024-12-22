@@ -12,4 +12,18 @@ public static class SqlExpressionExtensions
             .Cast<SqlSpAddExtendedPropertyExpression>()
             .ToList();
     }
+
+    public static List<SqlCreateTableExpression> FilterCreateTableExpression(this List<ISqlExpression> sqlExpressions)
+    {
+        return sqlExpressions
+            .Where(x => x.SqlType == SqlType.CreateTable)
+            .Cast<SqlCreateTableExpression>()
+            .Where(x => StartsWithValidChar(x.TableName))
+            .ToList();
+    }
+
+    private static bool StartsWithValidChar(string text)
+    {
+        return !string.IsNullOrEmpty(text) && (char.IsLetter(text[0]) || text[0] == '_' || text[0] == '[');
+    }
 }

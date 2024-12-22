@@ -549,7 +549,7 @@ public class ExtractSqlHelper
         {
             DatabaseName = databaseName
         };
-        var createTables = FilterCreateTableExpression(sqlFileContent.SqlExpressions);
+        var createTables = sqlFileContent.SqlExpressions.FilterCreateTableExpression();
         var sqlSpAddExtendedPropertyExpressions = sqlFileContent.SqlExpressions
             .FilterAddExtendedPropertyExpression();
         foreach (var createTable in createTables)
@@ -558,15 +558,6 @@ public class ExtractSqlHelper
             database.Tables.Add(table);
         }
         return database;
-    }
-
-    private List<SqlCreateTableExpression> FilterCreateTableExpression(List<ISqlExpression> sqlExpressions)
-    {
-        return sqlExpressions
-            .Where(x => x.SqlType == SqlType.CreateTable)
-            .Cast<SqlCreateTableExpression>()
-            .Where(x => StartsWithValidChar(x.TableName))
-            .ToList();
     }
 
     private TableDescription CreateTableDescription(SqlCreateTableExpression createTable, 
@@ -729,11 +720,6 @@ public class ExtractSqlHelper
         using var writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "DatabasesDescription.json"));
         writer.Write(json);
         writer.Flush();
-    }
-
-    bool StartsWithValidChar(string text)
-    {
-        return !string.IsNullOrEmpty(text) && (char.IsLetter(text[0]) || text[0] == '_' || text[0] == '[');
     }
 
     private static List<DatabaseDescription> UpdateDatabaseDescription(List<DatabaseDescription> databasesDesc,
