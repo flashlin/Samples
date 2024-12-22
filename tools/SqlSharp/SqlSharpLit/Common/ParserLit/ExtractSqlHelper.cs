@@ -621,7 +621,7 @@ public class ExtractSqlHelper
         return new ColumnDescription()
         {
             ColumnName = column.ColumnName,
-            DataType = column.DataType,
+            DataType = CreateColumnDataType(column),
             IsNullable = column.IsNullable,
             IsIdentity = IsIdentity(column.Identity),
             DefaultValue = column.Constraints.Where(x => x.SqlType == SqlType.ConstraintDefaultValue)
@@ -636,6 +636,15 @@ public class ExtractSqlHelper
                 .Select(x => x.Value)
                 .FirstOrDefault(string.Empty)
         };
+    }
+
+    private static string CreateColumnDataType(SqlColumnDefinition column)
+    {
+        if (column.DataSize != null)
+        {
+            return $"{column.DataType}({column.DataSize.ToSql()})";
+        }
+        return column.DataType;
     }
 
     private DatabaseDescription CreateDatabaseDescription(string databaseName, SqlFileContent sqlFileContent)
