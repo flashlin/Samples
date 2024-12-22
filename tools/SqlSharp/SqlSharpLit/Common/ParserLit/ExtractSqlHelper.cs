@@ -954,11 +954,3 @@ public class SqlCreateTablesSqlFiles
     public List<string> CreateTables { get; set; } = [];
     public string DatabaseName { get; set; } = string.Empty;
 }
-
-public static class StringExtensions
-{
-    public static bool IsSameAs(this string text, string other)
-    {
-        return string.Equals(text, other, StringComparison.OrdinalIgnoreCase);
-    }
-}
