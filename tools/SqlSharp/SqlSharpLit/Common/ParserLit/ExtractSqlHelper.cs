@@ -543,14 +543,14 @@ public class ExtractSqlHelper
         return column.DataType;
     }
 
-    private DatabaseDescription CreateDatabaseDescription(string databaseName, SqlFileContent sqlFileContent)
+    private DatabaseDescription CreateDatabaseDescription(string databaseName, List<ISqlExpression> sqlExpressions)
     {
         var database = new DatabaseDescription
         {
             DatabaseName = databaseName
         };
-        var createTables = sqlFileContent.SqlExpressions.FilterCreateTableExpression();
-        var sqlSpAddExtendedPropertyExpressions = sqlFileContent.SqlExpressions
+        var createTables = sqlExpressions.FilterCreateTableExpression();
+        var sqlSpAddExtendedPropertyExpressions = sqlExpressions
             .FilterAddExtendedPropertyExpression();
         foreach (var createTable in createTables)
         {
@@ -593,7 +593,7 @@ public class ExtractSqlHelper
         foreach (var sqlFileContent in sqlContents)
         {
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
-            yield return CreateDatabaseDescription(databaseName, sqlFileContent);
+            yield return CreateDatabaseDescription(databaseName, sqlFileContent.SqlExpressions);
         }
     }
 
