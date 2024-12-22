@@ -87,7 +87,7 @@ public class ExtractSqlHelper
 
         var outputParentFolder = Path.GetDirectoryName(outputFolder)!;
         var userDatabase = GetUserDatabaseDescription(Path.Combine(outputParentFolder, "DatabasesDescription.yaml"));
-        var databases = GetDatabasesDescFromFolder(folder);
+        var databases = ExtractDatabasesDescriptionFromFolder(folder);
 
         var updatedDatabases = UpdateDatabaseDescription(databases, userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
@@ -97,11 +97,11 @@ public class ExtractSqlHelper
         databaseSchemaQaWriter.GenerateQaMdFile(updatedDatabases);
     }
 
-    private List<DatabaseDescription> GetDatabasesDescFromFolder(string folder)
+    private List<DatabaseDescription> ExtractDatabasesDescriptionFromFolder(string folder)
     {
         var sqlFileContents = GetSqlContentsFromFolder(folder)
             .ToList();
-        var databasesDesc = GetDatabaseDescriptions(sqlFileContents);
+        var databasesDesc = CreateDatabaseDescriptions(sqlFileContents);
         NormalizeDatabaseDescriptions(databasesDesc);
         foreach (var db in databasesDesc)
         {
@@ -591,7 +591,7 @@ public class ExtractSqlHelper
         File.WriteAllText(outputJsonFile, json);
     }
 
-    private List<DatabaseDescription> GetDatabaseDescriptions(List<SqlFileContent> sqlFileContents)
+    private List<DatabaseDescription> CreateDatabaseDescriptions(List<SqlFileContent> sqlFileContents)
     {
         var databases = new EnsureKeyDictionary<string, DatabaseDescription>(databaseName => new DatabaseDescription()
         {
@@ -601,9 +601,7 @@ public class ExtractSqlHelper
         {
             Console.WriteLine($"Processing {sqlFileContent.FileName}");
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
-            var sqlExpressions = sqlFileContent.SqlExpressions;
-            
-            var newDb = DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName, sqlExpressions);
+            var newDb = DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName, sqlFileContent.SqlExpressions);
             
             var db = databases[databaseName];
             db.Tables.AddRange(newDb.Tables);
