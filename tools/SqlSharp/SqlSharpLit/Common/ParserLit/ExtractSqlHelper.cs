@@ -96,9 +96,8 @@ public class ExtractSqlHelper
         var databasesDescriptionFromSqlFilesOfJsonFile = Path.Combine(outputFolder, "DatabasesDescription_FromSqlFiles.json");
         var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesOfJsonFile);
 
-        var updatedDatabases = UpdateDatabaseDescription(databases, userDatabase);
+        var updatedDatabases = MergeDatabaseDescription(databases, userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
-        var outputParentFolder = Path.GetDirectoryName(databasesDescriptionFromSqlFilesOfJsonFile)!;
         var databasesDescriptionFinishFile = Path.Combine(outputFolder, "DatabasesDescription_Finish.json");
         SaveDatabasesDescriptionJsonFile(updatedDatabases, databasesDescriptionFinishFile);
     }
@@ -129,7 +128,7 @@ public class ExtractSqlHelper
         var userDatabase = GetUserDatabaseDescription(Path.Combine(outputParentFolder, "DatabasesDescription.yaml"));
         var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
 
-        var updatedDatabases = UpdateDatabaseDescription(databases, userDatabase);
+        var updatedDatabases = MergeDatabaseDescription(databases, userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
         SaveDatabasesDescriptionJsonFile(updatedDatabases, Path.Combine(outputFolder, "DatabasesDescription.json"));
 
@@ -668,7 +667,7 @@ public class ExtractSqlHelper
         writer.Flush();
     }
 
-    private static List<DatabaseDescription> UpdateDatabaseDescription(List<DatabaseDescription> databasesDesc,
+    private static List<DatabaseDescription> MergeDatabaseDescription(List<DatabaseDescription> databasesDesc,
         List<DatabaseDescription> userDatabaseDesc)
     {
         var result = databasesDesc.LeftOuterJoin(userDatabaseDesc,
