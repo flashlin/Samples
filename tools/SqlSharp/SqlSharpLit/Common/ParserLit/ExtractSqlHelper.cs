@@ -687,24 +687,10 @@ public class ExtractSqlHelper
                     })
                 .ToList();
             database.Tables = updatedTables;
-            UpdateColumnDescription(tables, userTables);
+            tables.MergeTableColumnsDescription(userTables);
         }
     }
 
-
-    private static void UpdateColumnDescription(List<TableDescription> tables, List<TableDescription> userTables)
-    {
-        foreach (var table in tables)
-        {
-            var columns = table.Columns;
-            var userColumns = userTables.FirstOrDefault(x => x.TableName.IsSameAs(table.TableName))?.Columns ?? [];
-            foreach (var column in columns)
-            {
-                var userColumn = userColumns.FirstOrDefault(x => x.ColumnName.IsSameAs(column.ColumnName)) ?? new ColumnDescription();
-                column.Description = string.IsNullOrEmpty(userColumn.Description) ? column.Description : userColumn.Description;
-            }
-        }
-    }
 
     private static void WriteAllDatabaseTableNames(DatabaseDescription database)
     {

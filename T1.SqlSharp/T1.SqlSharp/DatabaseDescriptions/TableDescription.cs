@@ -1,4 +1,5 @@
 using System.Text;
+using T1.SqlSharp.Extensions;
 
 namespace T1.SqlSharp.DatabaseDescriptions;
 
@@ -23,5 +24,15 @@ public class TableDescription
             sb.AppendLine(column.ToDescriptionText());
         }
         return sb.ToString();
+    }
+
+    public void MergeColumnsDescription(TableDescription userTable)
+    {
+        var columns = Columns;
+        foreach (var column in columns)
+        {
+            var userColumn = userTable.Columns.FirstOrDefault(x => x.ColumnName.IsSameAs(column.ColumnName)) ?? new ColumnDescription();
+            column.Description = string.IsNullOrEmpty(userColumn.Description) ? column.Description : userColumn.Description;
+        }
     }
 }

@@ -21,4 +21,16 @@ public static class DatabaseDescriptionListExtensions
             .ToList();
         return result;
     }
+
+    public static void MergeTableColumnsDescription(this List<TableDescription> tables, List<TableDescription> userTables)
+    {
+        foreach (var table in tables)
+        {
+            var userTable = userTables.FirstOrDefault(x => x.TableName.IsSameAs(table.TableName)) ?? new TableDescription()
+            {
+                TableName = table.TableName,
+            };
+            table.MergeColumnsDescription(userTable);
+        }
+    }
 }
