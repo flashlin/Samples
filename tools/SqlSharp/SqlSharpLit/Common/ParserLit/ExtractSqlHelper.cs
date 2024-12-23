@@ -96,7 +96,7 @@ public class ExtractSqlHelper
         var databasesDescriptionFromSqlFilesOfJsonFile = Path.Combine(outputFolder, "DatabasesDescription_FromSqlFiles.json");
         var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesOfJsonFile);
 
-        var updatedDatabases = databases.MergeDatabaseDescription(userDatabase);
+        var updatedDatabases = databases.UpdateDatabaseDescription(userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
         var databasesDescriptionFinishFile = Path.Combine(outputFolder, "DatabasesDescription_Finish.json");
         SaveDatabasesDescriptionJsonFile(updatedDatabases, databasesDescriptionFinishFile);
@@ -128,7 +128,7 @@ public class ExtractSqlHelper
         var userDatabase = GetUserDatabaseDescription(Path.Combine(outputParentFolder, "DatabasesDescription.yaml"));
         var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
 
-        var updatedDatabases = databases.MergeDatabaseDescription(userDatabase);
+        var updatedDatabases = databases.UpdateDatabaseDescription(userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
         SaveDatabasesDescriptionJsonFile(updatedDatabases, Path.Combine(outputFolder, "DatabasesDescription.json"));
 
@@ -687,10 +687,9 @@ public class ExtractSqlHelper
                     })
                 .ToList();
             database.Tables = updatedTables;
-            tables.MergeTableColumnsDescription(userTables);
+            tables.UpdateTableColumnsDescription(userTables);
         }
     }
-
 
     private static void WriteAllDatabaseTableNames(DatabaseDescription database)
     {

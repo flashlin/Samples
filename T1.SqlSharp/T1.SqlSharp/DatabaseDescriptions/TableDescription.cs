@@ -26,7 +26,7 @@ public class TableDescription
         return sb.ToString();
     }
 
-    public void MergeColumnsDescription(TableDescription userTable)
+    public void UpdateColumnsDescription(TableDescription userTable)
     {
         var columns = Columns;
         foreach (var column in columns)

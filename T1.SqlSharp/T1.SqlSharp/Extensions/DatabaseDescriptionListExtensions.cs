@@ -5,7 +5,7 @@ namespace T1.SqlSharp.Extensions;
 
 public static class DatabaseDescriptionListExtensions
 {
-    public static List<DatabaseDescription> MergeDatabaseDescription(this List<DatabaseDescription> databasesDesc,
+    public static List<DatabaseDescription> UpdateDatabaseDescription(this List<DatabaseDescription> databasesDesc,
         List<DatabaseDescription> userDatabaseDesc)
     {
         var result = databasesDesc.LeftOuterJoin(userDatabaseDesc,
@@ -22,7 +22,7 @@ public static class DatabaseDescriptionListExtensions
         return result;
     }
 
-    public static void MergeTableColumnsDescription(this List<TableDescription> tables, List<TableDescription> userTables)
+    public static void UpdateTableColumnsDescription(this List<TableDescription> tables, List<TableDescription> userTables)
     {
         foreach (var table in tables)
         {
@@ -30,7 +30,7 @@ public static class DatabaseDescriptionListExtensions
             {
                 TableName = table.TableName,
             };
-            table.MergeColumnsDescription(userTable);
+            table.UpdateColumnsDescription(userTable);
         }
     }
 }
