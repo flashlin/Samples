@@ -9,7 +9,7 @@ public class DatabaseSchemaQaWriter : IDisposable
 
     public DatabaseSchemaQaWriter(string outputFolder)
     {
-        _writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "DatabasesDescription.md"));
+        _writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "DatabasesDescriptionsQa.md"));
     }
     
     public void GenerateQaMdFile(List<DatabaseDescription> databasesDesc)

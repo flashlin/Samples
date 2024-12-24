@@ -85,20 +85,20 @@ public class ExtractSqlHelper
             return;
         }
         var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
-        SaveDatabasesDescriptionJsonFile(databases, Path.Combine(outputFolder, "DatabasesDescription_FromSqlFiles.json"));
+        SaveDatabasesDescriptionJsonFile(databases, Path.Combine(outputFolder, "DatabasesDescriptions_FromSqlFiles.json"));
     }
     
     public void MergeUserDatabasesDescription(string outputFolder)
     {
-        var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, "../DatabasesDescription.yaml");
+        var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, "../DatabasesDescriptions.yaml");
         var userDatabase = GetUserDatabaseDescription(userDatabaseDescriptionYamlFile);
         
-        var databasesDescriptionFromSqlFilesOfJsonFile = Path.Combine(outputFolder, "DatabasesDescription_FromSqlFiles.json");
+        var databasesDescriptionFromSqlFilesOfJsonFile = Path.Combine(outputFolder, "DatabasesDescriptions_FromSqlFiles.json");
         var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesOfJsonFile);
 
         var updatedDatabases = databases.UpdateDatabaseDescription(userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
-        var databasesDescriptionFinishFile = Path.Combine(outputFolder, "DatabasesDescription_User.json");
+        var databasesDescriptionFinishFile = Path.Combine(outputFolder, "DatabasesDescriptions_User.json");
         SaveDatabasesDescriptionJsonFile(updatedDatabases, databasesDescriptionFinishFile);
     }
 
