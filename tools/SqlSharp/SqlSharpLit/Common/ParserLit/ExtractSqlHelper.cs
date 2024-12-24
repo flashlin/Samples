@@ -98,7 +98,7 @@ public class ExtractSqlHelper
 
         var updatedDatabases = databases.UpdateDatabaseDescription(userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
-        var databasesDescriptionFinishFile = Path.Combine(outputFolder, "DatabasesDescription_Finish.json");
+        var databasesDescriptionFinishFile = Path.Combine(outputFolder, "DatabasesDescription_User.json");
         SaveDatabasesDescriptionJsonFile(updatedDatabases, databasesDescriptionFinishFile);
     }
 
@@ -109,11 +109,11 @@ public class ExtractSqlHelper
         return databases;
     }
     
-    public void GenerateDatabasesDescriptionJonsFile(string outputFolder)
+    public void GenerateDatabaseDescriptionsQaMdFile(string databaseDescriptionsFile)
     {
-        var databasesDescriptionFinishFile = Path.Combine(outputFolder, "DatabasesDescription_Finish.json");
+        var outputFolder = Path.GetDirectoryName(databaseDescriptionsFile)!;
         using var databaseSchemaQaWriter = new DatabaseSchemaQaWriter(outputFolder);
-        var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFinishFile);
+        var databases = LoadDatabasesDescriptionJsonFile(databaseDescriptionsFile);
         databaseSchemaQaWriter.GenerateQaMdFile(databases);
     }
 
