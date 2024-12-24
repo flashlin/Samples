@@ -85,8 +85,13 @@ public class ExtractSqlHelper
         {
             return;
         }
+        var outputFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
+        if(File.Exists(outputFile))
+        {
+            return;
+        }
         var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
-        SaveDatabasesDescriptionJsonFile(databases, Path.Combine(outputFolder, $"{DatabasesDescriptionName}.json"));
+        SaveDatabasesDescriptionJsonFile(databases, outputFile);
     }
     
     public void MergeUserDatabasesDescription(string outputFolder)
