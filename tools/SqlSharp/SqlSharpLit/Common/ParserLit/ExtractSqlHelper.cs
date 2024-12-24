@@ -844,6 +844,11 @@ public class ExtractSqlHelper
         writer.WriteLine();
         writer.WriteLine();
     }
+
+    public void SetDatabaseNameDeep(int deep)
+    {
+        _databaseNameProvider.SetDeep(deep);
+    }
 }
 
 public class SqlSelectContent

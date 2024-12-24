@@ -18,6 +18,8 @@ public class SqlSharpOptions
     [Option('o', "Output", Required = false, HelpText = "Output file or folder")]
     public string Output { get; set; } = "";
 
+    [Option( "DatabaseNamePathDeep", Required = false, HelpText = "DatabaseNamePath deep")]
+    public int DatabaseNamePathDeep { get; set; } = 6;
 
     public bool IsActionName(string expectedActionName)
     {
