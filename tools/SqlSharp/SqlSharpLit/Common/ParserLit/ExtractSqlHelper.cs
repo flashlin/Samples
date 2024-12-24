@@ -17,6 +17,7 @@ public class ExtractSqlHelper
 {
     private readonly IDatabaseNameProvider _databaseNameProvider;
     private readonly IJsonSerializer _jsonSerializer = new T1.Standard.Serialization.JsonSerializer();
+    private const string DatabasesDescriptionName = "DatabasesDescription";
 
     public ExtractSqlHelper(IDatabaseNameProvider databaseNameProvider)
     {
@@ -85,20 +86,20 @@ public class ExtractSqlHelper
             return;
         }
         var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
-        SaveDatabasesDescriptionJsonFile(databases, Path.Combine(outputFolder, "DatabasesDescriptions_FromSqlFiles.json"));
+        SaveDatabasesDescriptionJsonFile(databases, Path.Combine(outputFolder, $"{DatabasesDescriptionName}.json"));
     }
     
     public void MergeUserDatabasesDescription(string outputFolder)
     {
-        var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, "../DatabasesDescriptions.yaml");
+        var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, $"../{DatabasesDescriptionName}.yaml");
         var userDatabase = GetUserDatabaseDescription(userDatabaseDescriptionYamlFile);
         
-        var databasesDescriptionFromSqlFilesOfJsonFile = Path.Combine(outputFolder, "DatabasesDescriptions_FromSqlFiles.json");
+        var databasesDescriptionFromSqlFilesOfJsonFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
         var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesOfJsonFile);
 
         var updatedDatabases = databases.UpdateDatabaseDescription(userDatabase);
         UpdateTableDescription(updatedDatabases, userDatabase);
-        var databasesDescriptionFinishFile = Path.Combine(outputFolder, "DatabasesDescriptions_User.json");
+        var databasesDescriptionFinishFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_User.json");
         SaveDatabasesDescriptionJsonFile(updatedDatabases, databasesDescriptionFinishFile);
     }
 
