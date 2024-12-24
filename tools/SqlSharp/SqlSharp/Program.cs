@@ -20,6 +20,7 @@ services.AddSqlSharpServices(builder.Configuration);
 services.AddTransient<ExtractTableDataCommand>();
 services.AddTransient<ExtractCreateTableSqlFromFolderCommand>();
 services.AddTransient<ExtractSelectSqlFromFolderCommand>();
+services.AddTransient<GenerateDatabaseDescriptionsMdFileCommand>();
 
 var app = builder.Build();
 var serviceProvider = app.Services;
