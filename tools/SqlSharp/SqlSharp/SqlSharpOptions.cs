@@ -7,6 +7,7 @@ public class SqlSharpOptions
     public const string ExportTableData = "exportTableData";
     public const string ExtractCreateTableSql = "extractCreateTableSql";
     public const string ExtractSelectSql = "extractSelectSql";
+    public const string GenerateDatabaseDescriptionsMdFile = "generateDatabaseDescriptionsMdFile";
     
     [Option('v', "Verb", Required = true, HelpText = "The action to perform. (export)")]
     public string ActionName { get; set; } = string.Empty;

@@ -29,7 +29,8 @@ var options = await LineCommandParseHelper.ParseAsync<SqlSharpOptions>(args);
 var command = new SpecificationAsyncEvaluator<SqlSharpOptions, Task>([
      serviceProvider.GetRequiredService<ExtractTableDataCommand>(),
      serviceProvider.GetRequiredService<ExtractCreateTableSqlFromFolderCommand>(),
-     serviceProvider.GetRequiredService<ExtractSelectSqlFromFolderCommand>()
+     serviceProvider.GetRequiredService<ExtractSelectSqlFromFolderCommand>(),
+     serviceProvider.GetRequiredService<GenerateDatabaseDescriptionsMdFileCommand>(),
 ]);
 await command.EvaluateAsync(options);
      
