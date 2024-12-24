@@ -1,4 +1,4 @@
-Remove-Item \VDisk\Github\qa-pair\qa-files\synthetic\outputs\*.*
+#Remove-Item \VDisk\Github\qa-pair\qa-files\synthetic\outputs\*.*
 
 $output_path = "\VDisk\Github\qa-pair\qa-files\synthetic\outputs"
 
