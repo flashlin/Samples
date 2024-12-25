@@ -58,7 +58,6 @@ public class ExtractSqlHelper
         return (createTableSql, remainingText);
     }
 
-
     public (string truncatedText, int length) FindCreateTableStart(string text)
     {
         var pattern = @"\bCREATE\s+TABLE\b";
