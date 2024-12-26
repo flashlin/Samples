@@ -159,21 +159,14 @@ public class ExtractSqlHelper
         {
             foreach (var table in database.Tables)
             {
-                var tableName = NormalizeName(table.TableName);
+                var tableName = table.TableName.NormalizeName();
                 table.TableName = tableName;
                 foreach (var column in table.Columns)
                 {
-                    column.ColumnName = NormalizeName(column.ColumnName);
+                    column.ColumnName = column.ColumnName.NormalizeName();
                 }
             }
         }
-    }
-
-    private static string NormalizeName(string tableName)
-    {
-        tableName = tableName.Replace("[dbo].", "");
-        tableName = Regex.Replace(tableName, @"\[(.*?)\]", "$1");
-        return tableName;
     }
 
     public void GenerateRagFiles(string sqlFolder)
