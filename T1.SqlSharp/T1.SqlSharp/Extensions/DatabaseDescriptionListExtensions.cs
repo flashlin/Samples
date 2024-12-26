@@ -22,14 +22,16 @@ public static class DatabaseDescriptionListExtensions
         return result;
     }
 
-    public static void UpdateTableColumnsDescription(this List<TableDescription> tables, List<TableDescription> userTables)
+    public static void UpdateTableColumnsDescription(this List<TableDescription> tables,
+        List<TableDescription> userTables)
     {
         foreach (var table in tables)
         {
-            var userTable = userTables.FirstOrDefault(x => x.TableName.IsSameAs(table.TableName)) ?? new TableDescription()
-            {
-                TableName = table.TableName,
-            };
+            var userTable = userTables.FirstOrDefault(x => x.TableName.IsSameAs(table.TableName)) ??
+                            new TableDescription()
+                            {
+                                TableName = table.TableName,
+                            };
             table.UpdateColumnsDescription(userTable);
         }
     }

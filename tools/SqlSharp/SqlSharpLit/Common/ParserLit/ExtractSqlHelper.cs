@@ -16,7 +16,7 @@ namespace SqlSharpLit.Common.ParserLit;
 public class ExtractSqlHelper
 {
     private readonly IDatabaseNameProvider _databaseNameProvider;
-    private readonly IJsonSerializer _jsonSerializer = new T1.Standard.Serialization.JsonSerializer();
+    private readonly JsonDocSerializer _jsonDocSerializer = new();
     private const string DatabasesDescriptionName = "DatabasesDescription";
 
     public ExtractSqlHelper(IDatabaseNameProvider databaseNameProvider)
@@ -84,12 +84,8 @@ public class ExtractSqlHelper
         {
             return;
         }
-        var outputFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
-        if(File.Exists(outputFile))
-        {
-            return;
-        }
         var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
+        var outputFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
         SaveDatabasesDescriptionJsonFile(databases, outputFile);
     }
     
@@ -666,10 +662,7 @@ public class ExtractSqlHelper
 
     private void SaveDatabasesDescriptionJsonFile(List<DatabaseDescription> databasesDesc, string outputFile)
     {
-        var json = _jsonSerializer.Serialize(databasesDesc);
-        using var writer = StreamWriterCreator.Create(outputFile);
-        writer.Write(json);
-        writer.Flush();
+        _jsonDocSerializer.WriteToJsonFile(databasesDesc, outputFile);
     }
 
     private static void UpdateTableDescription(List<DatabaseDescription> databasesDesc,
