@@ -141,7 +141,7 @@ public class ExtractSqlHelper
     {
         var sqlFileContents = GetSqlContentsFromFolder(folder)
             .ToList();
-        var databasesDesc = CreateDatabaseDescriptions(sqlFileContents);
+        var databasesDesc = CreateDatabasesDescription(sqlFileContents);
         NormalizeDatabaseDescriptions(databasesDesc);
         foreach (var db in databasesDesc)
         {
@@ -630,7 +630,7 @@ public class ExtractSqlHelper
         File.WriteAllText(outputJsonFile, json);
     }
 
-    private List<DatabaseDescription> CreateDatabaseDescriptions(List<SqlFileContent> sqlFileContents)
+    private List<DatabaseDescription> CreateDatabasesDescription(List<SqlFileContent> sqlFileContents)
     {
         var databases = new EnsureKeyDictionary<string, DatabaseDescription>(databaseName => new DatabaseDescription()
         {
