@@ -618,7 +618,11 @@ public class SqlParser
     {
         if (!TryKeywords(["EXEC", "SP_AddExtendedProperty"], out var startSpan))
         {
-            return NoneResult<SqlSpAddExtendedPropertyExpression>();
+            if (!TryKeywords(["EXEC", "SYS", ".", "SP_AddExtendedProperty"], out startSpan))
+            {
+                return NoneResult<SqlSpAddExtendedPropertyExpression>();
+            }
+            //return NoneResult<SqlSpAddExtendedPropertyExpression>();
         }
 
         var parameters = ParseWithComma(ParseParameterValueOrAssignValue);
