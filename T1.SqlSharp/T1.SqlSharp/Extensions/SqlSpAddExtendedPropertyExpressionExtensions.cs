@@ -22,6 +22,7 @@ public static class SqlSpAddExtendedPropertyExpressionExtensions
     
     public static string GetColumnDescription(this List<SqlSpAddExtendedPropertyExpression> spAddExtendedPropertyExpressions, string tableName, string columnName)
     {
+        //TODO: modify logical
         return spAddExtendedPropertyExpressions
             .FilterByTableName(tableName)
             .FilterByColumnName(columnName)
