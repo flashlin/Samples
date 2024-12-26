@@ -618,11 +618,10 @@ public class SqlParser
     {
         if (!TryKeywords(["EXEC", "SP_AddExtendedProperty"], out var startSpan))
         {
-            if (!TryKeywords(["EXEC", "SYS", ".", "SP_AddExtendedProperty"], out startSpan))
+            if (!Try([Keywords("EXEC", "SYS"), Symbol("."), Keywords("SP_AddExtendedProperty")], out startSpan))
             {
                 return NoneResult<SqlSpAddExtendedPropertyExpression>();
             }
-            //return NoneResult<SqlSpAddExtendedPropertyExpression>();
         }
 
         var parameters = ParseWithComma(ParseParameterValueOrAssignValue);
@@ -631,26 +630,21 @@ public class SqlParser
             return parameters.Error;
         }
 
-        if (parameters.ResultValue.Count != 8)
-        {
-            return CreateParseError("Expected 8 parameters");
-        }
-
         var p = parameters.ResultValue;
-
         var sqlSpAddExtendedProperty = new SqlSpAddExtendedPropertyExpression
         {
             Span = _text.CreateSpan(startSpan),
-            Name = p[0].Value,
+            Name =  p[0].Value,
             Value = p[1].Value,
-            Level0Type = p[2].Value,
-            Level0Name = p[3].Value,
-            Level1Type = p[4].Value,
-            Level1Name = p[5].Value,
-            Level2Type = p[6].Value,
-            Level2Name = p[7].Value
+            Level0Type = GetParameterValue(2),
+            Level0Name = GetParameterValue(3),
+            Level1Type = GetParameterValue(4),
+            Level1Name = GetParameterValue(5),
+            Level2Type = GetParameterValue(6),
+            Level2Name = GetParameterValue(7),
         };
         return CreateParseResult(sqlSpAddExtendedProperty);
+        string GetParameterValue(int index) => p.GetValueOrDefault(index, () => new SqlParameterValue()).Value;
     }
 
     public ParseResult<SqlConstraintForeignKey> ParseForeignKeyExpression()
@@ -1214,6 +1208,30 @@ public class SqlParser
         }
 
         result = localResult;
+        return true;
+    }
+
+
+    public bool Try(Func<ParseResult<SqlToken>>[] parseFuncList, out TextSpan result)
+    {
+        var startPositon = _text.Position;
+        foreach (var parseFunc in parseFuncList)
+        {
+            var localResult = parseFunc();
+            if (localResult.HasError)
+            {
+                _text.Position = startPositon;
+                result = _text.CreateEmptySpan();
+                return false;
+            }
+            if (localResult.Result == null)
+            {
+                _text.Position = startPositon;
+                result = _text.CreateEmptySpan();
+                return false;
+            }
+        }
+        result = _text.CreateSpan(startPositon);
         return true;
     }
 
@@ -3717,5 +3735,14 @@ public class SqlParser
         }
 
         return true;
+    }
+}
+
+
+public static class ArrayExtensions
+{
+    public static T GetValueOrDefault<T>(this List<T> tokens, int index, Func<T> defaultValue)
+    {
+        return index >= 0 && index < tokens.Count ? tokens[index] : defaultValue();
     }
 }

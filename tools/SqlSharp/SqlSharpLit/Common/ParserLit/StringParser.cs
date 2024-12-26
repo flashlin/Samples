@@ -970,6 +970,16 @@ public class StringParser
         var readLength = Math.Min(length, remainLength);
         return _text.AsSpan(_position, readLength);
     }
+    
+    public TextSpan CreateEmptySpan()
+    {
+        return new TextSpan
+        {
+            Word =  string.Empty,
+            Offset = _position,
+            Length = 0,
+        };
+    }
 
     public TextSpan CreateSpan(TextSpan startSpan)
     {

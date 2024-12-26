@@ -12,7 +12,7 @@ public class ParseExecSpAddExtendedPropertyTest
     public void SysSpAddExtendedPRoperty()
     {
         var sql = $"""
-                   EXEC sys.sp_addextendedproperty @name=N'CreatedBy', @value=N'created by' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Customer'
+                   EXEC sys.sp_addextendedproperty @name=N'CreatedBy', @value=N'created by', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'Customer'
                    """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SqlSpAddExtendedPropertyExpression
