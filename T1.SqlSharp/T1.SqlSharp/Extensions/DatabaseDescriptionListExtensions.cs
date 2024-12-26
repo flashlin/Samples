@@ -5,21 +5,19 @@ namespace T1.SqlSharp.Extensions;
 
 public static class DatabaseDescriptionListExtensions
 {
-    public static List<DatabaseDescription> UpdateDatabaseDescription(this List<DatabaseDescription> databasesDesc,
+    public static void UpdateDatabaseDescription(this List<DatabaseDescription> databasesDesc,
         List<DatabaseDescription> userDatabaseDesc)
     {
-        var result = databasesDesc.LeftOuterJoin(userDatabaseDesc,
-                udb => udb.DatabaseName,
-                db => db.DatabaseName,
-                (udb) => udb,
-                (db, udb) => new DatabaseDescription()
-                {
-                    DatabaseName = db.DatabaseName,
-                    Description = udb.Description,
-                    Tables = db.Tables
-                })
-            .ToList();
-        return result;
+        foreach (var database in databasesDesc)
+        {
+            var userDatabase = userDatabaseDesc.FirstOrDefault(x => x.DatabaseName.IsSameAs(database.DatabaseName)) ??
+                               new DatabaseDescription()
+                               {
+                                   DatabaseName = database.DatabaseName,
+                               };
+            database.Description = string.IsNullOrEmpty(userDatabase.Description) ? database.Description : userDatabase.Description;
+            database.Tables.UpdateTableColumnsDescription(userDatabase.Tables);
+        }
     }
 
     public static void UpdateTableColumnsDescription(this List<TableDescription> tables,

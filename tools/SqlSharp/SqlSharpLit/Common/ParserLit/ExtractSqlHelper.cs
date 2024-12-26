@@ -97,10 +97,10 @@ public class ExtractSqlHelper
         var databasesDescriptionFromSqlFilesOfJsonFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
         var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesOfJsonFile);
 
-        var updatedDatabases = databases.UpdateDatabaseDescription(userDatabase);
-        UpdateTableDescription(updatedDatabases, userDatabase);
+        databases.UpdateDatabaseDescription(userDatabase);
+        UpdateTableDescription(databases, userDatabase);
         var databasesDescriptionFinishFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_User.json");
-        SaveDatabasesDescriptionJsonFile(updatedDatabases, databasesDescriptionFinishFile);
+        SaveDatabasesDescriptionJsonFile(databases, databasesDescriptionFinishFile);
     }
 
     private static List<DatabaseDescription> LoadDatabasesDescriptionJsonFile(string databasesDescriptionFromSqlFilesOfJsonFile)
@@ -129,12 +129,12 @@ public class ExtractSqlHelper
         var userDatabase = GetUserDatabaseDescription(Path.Combine(outputParentFolder, "DatabasesDescription.yaml"));
         var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
 
-        var updatedDatabases = databases.UpdateDatabaseDescription(userDatabase);
-        UpdateTableDescription(updatedDatabases, userDatabase);
-        SaveDatabasesDescriptionJsonFile(updatedDatabases, Path.Combine(outputFolder, "DatabasesDescription.json"));
+        databases.UpdateDatabaseDescription(userDatabase);
+        UpdateTableDescription(databases, userDatabase);
+        SaveDatabasesDescriptionJsonFile(databases, Path.Combine(outputFolder, "DatabasesDescription.json"));
 
         using var databaseSchemaQaWriter = new DatabaseSchemaQaWriter(outputFolder);
-        databaseSchemaQaWriter.GenerateQaMdFile(updatedDatabases);
+        databaseSchemaQaWriter.GenerateQaMdFile(databases);
     }
 
     private List<DatabaseDescription> ExtractDatabasesDescriptionFromFolder(string folder)

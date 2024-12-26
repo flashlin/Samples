@@ -616,9 +616,14 @@ public class SqlParser
 
     public ParseResult<SqlSpAddExtendedPropertyExpression> ParseExecSpAddExtendedProperty()
     {
-        if (!TryKeywords(["EXEC", "SP_AddExtendedProperty"], out var startSpan))
+        if (!IsAny(Keywords("EXECUTE"), Keywords("EXEC")))
         {
-            if (!Try([Keywords("EXEC", "SYS"), Symbol("."), Keywords("SP_AddExtendedProperty")], out startSpan))
+            return NoneResult<SqlSpAddExtendedPropertyExpression>();
+        }
+        
+        if (!TryKeywords(["SP_AddExtendedProperty"], out var startSpan))
+        {
+            if (!Try([Keywords("SYS"), Symbol("."), Keywords("SP_AddExtendedProperty")], out startSpan))
             {
                 return NoneResult<SqlSpAddExtendedPropertyExpression>();
             }

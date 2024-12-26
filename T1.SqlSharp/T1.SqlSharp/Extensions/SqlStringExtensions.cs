@@ -9,15 +9,19 @@ public static class SqlStringExtensions
         return string.Equals(text, other, StringComparison.OrdinalIgnoreCase);
     }
 
-    public static string NormalizeName(this string tableName)
+    public static string NormalizeName(this string name)
     {
-        tableName = tableName.Replace("[dbo].", "");
-        tableName = Regex.Replace(tableName, @"\[(.*?)\]", "$1");
-        return tableName;
+        name = name.Replace("[dbo].", "");
+        name = Regex.Replace(name, @"\[(.*?)\]", "$1");
+        if (name.StartsWith("N'", StringComparison.InvariantCultureIgnoreCase) && name.EndsWith("'"))
+        {
+            name = name.Substring(2, name.Length - 3);
+        }
+        return name;
     }
     
     public static bool IsNormalizeSameAs(this string text, string other)
     {
-        return NormalizeName(text).IsSameAs(NormalizeName(other));
+        return text.NormalizeName().IsSameAs(other.NormalizeName());
     }
 }

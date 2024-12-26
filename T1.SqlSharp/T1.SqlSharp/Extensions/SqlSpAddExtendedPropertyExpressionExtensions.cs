@@ -7,8 +7,8 @@ public static class SqlSpAddExtendedPropertyExpressionExtensions
     public static List<SqlSpAddExtendedPropertyExpression> FilterByTableName(
         this List<SqlSpAddExtendedPropertyExpression> spAddExtendedPropertyExpressions, string tableName)
     {
-        return spAddExtendedPropertyExpressions
-            .Where(x => x.Name.Contains("MS_Description") && x.Level1Name.IsNormalizeSameAs(tableName))
+        return spAddExtendedPropertyExpressions.Where(x=>
+            x.Level1Type.IsNormalizeSameAs("TABLE") && x.Level1Name.IsNormalizeSameAs(tableName))
             .ToList();
     }
 
@@ -16,17 +16,17 @@ public static class SqlSpAddExtendedPropertyExpressionExtensions
         this List<SqlSpAddExtendedPropertyExpression> spAddExtendedPropertyExpressions, string columnName)
     {
         return spAddExtendedPropertyExpressions
-            .Where(x => x.Name.Contains("MS_Description") && x.Level2Name.IsNormalizeSameAs(columnName))
+            .Where(x => x.Level2Type.IsNormalizeSameAs("COLUMN") && x.Level2Name.IsNormalizeSameAs(columnName))
             .ToList();
     }
     
     public static string GetColumnDescription(this List<SqlSpAddExtendedPropertyExpression> spAddExtendedPropertyExpressions, string tableName, string columnName)
     {
-        //TODO: modify logical
         return spAddExtendedPropertyExpressions
             .FilterByTableName(tableName)
             .FilterByColumnName(columnName)
-            .Select(x => x.Value)
+            .Where(x => x.Name.IsNormalizeSameAs("MS_Description"))
+            .Select(x => x.Value.NormalizeName())
             .FirstOrDefault(string.Empty);
     }
 }

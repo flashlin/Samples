@@ -10,14 +10,18 @@ public static class DatabaseDescriptionCreator
     {
         var database = new DatabaseDescription
         {
-            DatabaseName = databaseName
+            DatabaseName = databaseName.NormalizeName()
         };
-        var createTables = sqlExpressions.FilterCreateTableExpression();
+        var createTablesSql = sqlExpressions.FilterCreateTableExpression();
+        if(createTablesSql.Count == 0)
+        {
+            return database;
+        }
         var sqlSpAddExtendedPropertyExpressions = sqlExpressions
             .FilterAddExtendedPropertyExpression();
-        foreach (var createTable in createTables)
+        foreach (var createTableSql in createTablesSql)
         {
-            var table = CreateTableDescription(createTable, sqlSpAddExtendedPropertyExpressions);
+            var table = CreateTableDescription(createTableSql, sqlSpAddExtendedPropertyExpressions);
             database.Tables.Add(table);
         }
         return database;
@@ -26,14 +30,14 @@ public static class DatabaseDescriptionCreator
     public static TableDescription CreateTableDescription(SqlCreateTableExpression createTable, 
         List<SqlSpAddExtendedPropertyExpression> sqlSpAddExtendedPropertyExpressions)
     {
-        var tableName = createTable.TableName;
+        var tableName = createTable.TableName.NormalizeName();
         var columns = createTable.Columns
             .Where(x => x.SqlType == SqlType.ColumnDefinition)
             .Cast<SqlColumnDefinition>()
             .ToList();
         var table = new TableDescription()
         {
-            TableName = createTable.TableName,
+            TableName = tableName,
             Columns = columns.Select(column =>
             {
                 var columnDescription = CreateColumnDescription(column);
@@ -50,7 +54,7 @@ public static class DatabaseDescriptionCreator
     {
         return new ColumnDescription()
         {
-            ColumnName = column.ColumnName,
+            ColumnName = column.ColumnName.NormalizeName(),
             DataType = CreateColumnDataType(column),
             IsNullable = column.IsNullable,
             IsIdentity = IsIdentity(column.Identity),
