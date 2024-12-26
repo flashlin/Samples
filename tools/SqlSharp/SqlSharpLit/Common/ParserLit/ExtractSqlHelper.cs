@@ -78,7 +78,7 @@ public class ExtractSqlHelper
         return (string.Empty, 0);
     }
     
-    public void GenerateDatabasesDescriptionFileFromFolder(string createTablesSqlFolder, string outputFolder)
+    public void GenerateDatabasesDescriptionJsonFileFromFolder(string createTablesSqlFolder, string outputFolder)
     {
         if (!Directory.Exists(createTablesSqlFolder))
         {

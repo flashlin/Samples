@@ -25,7 +25,7 @@ public class ExtractCreateTableSqlFromFolderCommand : ISpecificationAsync<SqlSha
         var extractSqlHelper = new ExtractSqlHelper(new CustomDatabaseNameProvider());
 
         extractSqlHelper.SetDatabaseNameDeep(args.DatabaseNamePathDeep);
-        extractSqlHelper.GenerateDatabasesDescriptionFileFromFolder(sourceFolder, outputFolder);
+        extractSqlHelper.GenerateDatabasesDescriptionJsonFileFromFolder(sourceFolder, outputFolder);
         extractSqlHelper.MergeUserDatabasesDescription(outputFolder);
         //extractSqlHelper.GenerateDatabasesDescriptionJonsFileFromFolder(sourceFolder, outputFolder);
         return Task.FromResult(Task.CompletedTask);
