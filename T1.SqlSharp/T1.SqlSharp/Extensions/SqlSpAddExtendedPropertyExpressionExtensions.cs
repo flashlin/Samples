@@ -8,7 +8,7 @@ public static class SqlSpAddExtendedPropertyExpressionExtensions
         this List<SqlSpAddExtendedPropertyExpression> spAddExtendedPropertyExpressions, string tableName)
     {
         return spAddExtendedPropertyExpressions
-            .Where(x => x.Name.Contains("MS_Description") && x.Level1Name.IsSameAs(tableName))
+            .Where(x => x.Name.Contains("MS_Description") && x.Level1Name.IsNormalizeSameAs(tableName))
             .ToList();
     }
 
@@ -16,7 +16,7 @@ public static class SqlSpAddExtendedPropertyExpressionExtensions
         this List<SqlSpAddExtendedPropertyExpression> spAddExtendedPropertyExpressions, string columnName)
     {
         return spAddExtendedPropertyExpressions
-            .Where(x => x.Name.Contains("MS_Description") && x.Level2Name.IsSameAs(columnName))
+            .Where(x => x.Name.Contains("MS_Description") && x.Level2Name.IsNormalizeSameAs(columnName))
             .ToList();
     }
     

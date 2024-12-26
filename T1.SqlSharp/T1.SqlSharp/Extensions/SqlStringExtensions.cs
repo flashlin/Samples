@@ -15,4 +15,9 @@ public static class SqlStringExtensions
         tableName = Regex.Replace(tableName, @"\[(.*?)\]", "$1");
         return tableName;
     }
+    
+    public static bool IsNormalizeSameAs(this string text, string other)
+    {
+        return NormalizeName(text).IsSameAs(NormalizeName(other));
+    }
 }
