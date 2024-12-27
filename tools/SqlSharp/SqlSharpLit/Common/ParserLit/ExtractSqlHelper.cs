@@ -146,7 +146,6 @@ public class ExtractSqlHelper
         var sqlFileContents = GetSqlContentsFromFolder(folder)
             .ToList();
         var databasesDesc = CreateDatabasesDescription(sqlFileContents);
-        NormalizeDatabaseDescriptions(databasesDesc);
         foreach (var db in databasesDesc)
         {
             var tables = db.Tables

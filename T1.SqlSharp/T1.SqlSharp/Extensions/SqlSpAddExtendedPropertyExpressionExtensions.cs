@@ -22,11 +22,22 @@ public static class SqlSpAddExtendedPropertyExpressionExtensions
     
     public static string GetColumnDescription(this List<SqlSpAddExtendedPropertyExpression> spAddExtendedPropertyExpressions, string tableName, string columnName)
     {
-        return spAddExtendedPropertyExpressions
-            .FilterByTableName(tableName)
+        var allSpAddExtendedProperties = spAddExtendedPropertyExpressions
+            .FilterByTableName(tableName);
+        var msDescription = allSpAddExtendedProperties
             .FilterByColumnName(columnName)
             .Where(x => x.Name.IsNormalizeSameAs("MS_Description"))
             .Select(x => x.Value.NormalizeName())
             .FirstOrDefault(string.Empty);
+        if (!string.IsNullOrEmpty(msDescription))
+        {
+            return msDescription;
+        }
+
+        var description = allSpAddExtendedProperties
+            .Where(x => string.IsNullOrEmpty(x.Level2Type) && x.Name.IsNormalizeSameAs(columnName))
+            .Select(x => x.Value.NormalizeName())
+            .FirstOrDefault(string.Empty);
+        return description;
     }
 }
