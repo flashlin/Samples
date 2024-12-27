@@ -616,19 +616,20 @@ public class SqlParser
 
     public ParseResult<SqlSpAddExtendedPropertyExpression> ParseExecSpAddExtendedProperty()
     {
+        var startPosition = _text.Position; 
         if (!IsAny(Keywords("EXECUTE"), Keywords("EXEC")))
         {
             return NoneResult<SqlSpAddExtendedPropertyExpression>();
         }
-        
-        if (!TryKeywords(["SP_AddExtendedProperty"], out var startSpan))
-        {
-            if (!Try([Keywords("SYS"), Symbol("."), Keywords("SP_AddExtendedProperty")], out startSpan))
-            {
-                return NoneResult<SqlSpAddExtendedPropertyExpression>();
-            }
-        }
 
+        var p1 = Match(Keywords("SP_AddExtendedProperty"));
+        var p2 = Match(Keywords("SYS"), Symbol("."), Keywords("SP_AddExtendedProperty"));
+        if (!IsAny(()=>p1, ()=>p2))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlSpAddExtendedPropertyExpression>();
+        }
+        
         var parameters = ParseWithComma(ParseParameterValueOrAssignValue);
         if (parameters.HasError)
         {
@@ -638,7 +639,7 @@ public class SqlParser
         var p = parameters.ResultValue;
         var sqlSpAddExtendedProperty = new SqlSpAddExtendedPropertyExpression
         {
-            Span = _text.CreateSpan(startSpan),
+            Span = _text.CreateSpan(startPosition),
             Name =  p[0].Value,
             Value = p[1].Value,
             Level0Type = GetParameterValue(2),
@@ -1215,7 +1216,36 @@ public class SqlParser
         result = localResult;
         return true;
     }
-
+    
+    public ParseResult<SqlToken> Match(params Func<ParseResult<SqlToken>>[] parseFuncList)
+    {
+        var startPositon = _text.Position;
+        var tokens = new List<string>();
+        foreach (var parseFunc in parseFuncList)
+        {
+            var localResult = parseFunc();
+            if (localResult.HasError)
+            {
+                _text.Position = startPositon;
+                return localResult;
+            }
+            if (localResult.Result == null && tokens.Count == 0)
+            {
+                _text.Position = startPositon;
+                return localResult;
+            }
+            if (localResult.Result == null && tokens.Count > 0)
+            {
+                return CreateParseError("match not expected");
+            }
+            tokens.Add(localResult.ResultValue.Value);
+        }
+        return CreateParseResult(new SqlToken
+        {
+            Value = string.Join(" ", tokens),
+            Span = _text.CreateSpan(startPositon),
+        });
+    }
 
     public bool Try(Func<ParseResult<SqlToken>>[] parseFuncList, out TextSpan result)
     {

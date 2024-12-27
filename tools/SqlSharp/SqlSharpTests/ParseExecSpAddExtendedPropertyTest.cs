@@ -9,7 +9,7 @@ namespace SqlSharpTests;
 public class ParseExecSpAddExtendedPropertyTest
 {
     [Test]
-    public void SysSpAddExtendedPRoperty()
+    public void SysSpAddExtendedProperty()
     {
         var sql = $"""
                    EXEC sys.sp_addextendedproperty @name=N'CreatedBy', @value=N'created by', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'Customer'
