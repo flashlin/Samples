@@ -28,11 +28,24 @@ public class TableDescription
 
     public void UpdateColumnsDescription(TableDescription userTable)
     {
-        var columns = Columns;
+        var columns = Columns.ToList();
         foreach (var column in columns)
         {
-            var userColumn = userTable.Columns.FirstOrDefault(x => x.ColumnName.IsSameAs(column.ColumnName)) ?? new ColumnDescription();
+            var userColumn = userTable.Columns.FirstOrDefault(x => x.ColumnName.IsSameAs(column.ColumnName));
+            if(userColumn == null)
+            {
+                Columns.Remove(column);
+                continue;
+            }
             column.Description = string.IsNullOrEmpty(userColumn.Description) ? column.Description : userColumn.Description;
+        }
+        foreach (var userColumn in userTable.Columns)
+        {
+            var column = Columns.FirstOrDefault(x => x.ColumnName.IsSameAs(userColumn.ColumnName));
+            if(column == null)
+            {
+                Columns.Add(userColumn);
+            }
         }
     }
 }

@@ -29,7 +29,7 @@ public class ColumnDescription
         }
         if (!string.IsNullOrEmpty(Description))
         {
-            text.Append($"-- {Description}");
+            text.Append($" -- {Description}");
         }
         return text.ToString();
     }

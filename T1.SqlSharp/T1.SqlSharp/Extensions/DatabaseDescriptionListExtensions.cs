@@ -8,29 +8,49 @@ public static class DatabaseDescriptionListExtensions
     public static void UpdateDatabaseDescription(this List<DatabaseDescription> databasesDesc,
         List<DatabaseDescription> userDatabaseDesc)
     {
-        foreach (var database in databasesDesc)
+        var tmpDatabases = databasesDesc.ToList();
+        foreach (var database in tmpDatabases)
         {
-            var userDatabase = userDatabaseDesc.FirstOrDefault(x => x.DatabaseName.IsSameAs(database.DatabaseName)) ??
-                               new DatabaseDescription()
-                               {
-                                   DatabaseName = database.DatabaseName,
-                               };
+            var userDatabase = userDatabaseDesc.FirstOrDefault(x => x.DatabaseName.IsSameAs(database.DatabaseName));
+            if (userDatabase == null)
+            {
+                databasesDesc.Remove(database);
+                continue;
+            }
             database.Description = string.IsNullOrEmpty(userDatabase.Description) ? database.Description : userDatabase.Description;
             database.Tables.UpdateTableColumnsDescription(userDatabase.Tables);
+        }
+        foreach (var userDatabase in userDatabaseDesc)
+        {
+            var database = databasesDesc.FirstOrDefault(x => x.DatabaseName.IsSameAs(userDatabase.DatabaseName));
+            if (database == null)
+            {
+                databasesDesc.Add(userDatabase);
+            }
         }
     }
 
     public static void UpdateTableColumnsDescription(this List<TableDescription> tables,
         List<TableDescription> userTables)
     {
-        foreach (var table in tables)
+        var tmpTables = tables.ToList();
+        foreach (var table in tmpTables)
         {
-            var userTable = userTables.FirstOrDefault(x => x.TableName.IsSameAs(table.TableName)) ??
-                            new TableDescription()
-                            {
-                                TableName = table.TableName,
-                            };
+            var userTable = userTables.FirstOrDefault(x => x.TableName.IsSameAs(table.TableName));
+            if (userTable == null)
+            {
+                tables.Remove(table);
+                continue;
+            }
             table.UpdateColumnsDescription(userTable);
+        }
+        foreach (var userTable in userTables)
+        {
+            var table = tables.FirstOrDefault(x => x.TableName.IsSameAs(userTable.TableName));
+            if (table == null)
+            {
+                tables.Add(userTable);
+            }
         }
     }
 }
