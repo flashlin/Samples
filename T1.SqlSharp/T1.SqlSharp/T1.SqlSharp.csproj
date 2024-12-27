@@ -8,10 +8,11 @@
         <Title>SqlSharp</Title>
         <Authors>Mr.Brain</Authors>
         <Description>Parse TSQL</Description>
-        <PackageLicenseUrl>https://opensource.org/license/MIT</PackageLicenseUrl>
+        <PackageLicense>https://opensource.org/licenses/MIT</PackageLicense>
         <PackageTags>T1</PackageTags>
         <Version>1.0.6</Version>
         <PackageReleaseNotes>add UpdateDatabasesDescription</PackageReleaseNotes>
+        <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
