@@ -95,16 +95,14 @@ public class ExtractSqlHelper
         var userDatabase = GetUserDatabaseDescription(userDatabaseDescriptionYamlFile);
         
         var databasesDescriptionFromSqlFilesJsonFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
-        if (File.Exists(databasesDescriptionFromSqlFilesJsonFile))
+        if (!File.Exists(databasesDescriptionFromSqlFilesJsonFile))
         {
             return;
         }
         var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesJsonFile);
 
         databases.UpdateDatabaseDescription(userDatabase);
-        UpdateTableDescription(databases, userDatabase);
-        var databasesDescriptionFinishFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_User.json");
-        SaveDatabasesDescriptionJsonFile(databases, databasesDescriptionFinishFile);
+        SaveDatabasesDescriptionJsonFile(databases, databasesDescriptionFromSqlFilesJsonFile);
     }
 
     private static List<DatabaseDescription> LoadDatabasesDescriptionJsonFile(string databasesDescriptionFromSqlFilesOfJsonFile)
@@ -119,25 +117,6 @@ public class ExtractSqlHelper
         var outputFolder = Path.GetDirectoryName(databaseDescriptionsFile)!;
         using var databaseSchemaQaWriter = new DatabaseSchemaQaWriter(outputFolder);
         var databases = LoadDatabasesDescriptionJsonFile(databaseDescriptionsFile);
-        databaseSchemaQaWriter.GenerateQaMdFile(databases);
-    }
-
-    public void GenerateDatabasesDescriptionJonsFileFromFolder(string createTablesSqlFolder, string outputFolder)
-    {
-        if (!Directory.Exists(createTablesSqlFolder))
-        {
-            return;
-        }
-
-        var outputParentFolder = Path.GetDirectoryName(outputFolder)!;
-        var userDatabase = GetUserDatabaseDescription(Path.Combine(outputParentFolder, "DatabasesDescription.yaml"));
-        var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
-
-        databases.UpdateDatabaseDescription(userDatabase);
-        UpdateTableDescription(databases, userDatabase);
-        SaveDatabasesDescriptionJsonFile(databases, Path.Combine(outputFolder, "DatabasesDescription.json"));
-
-        using var databaseSchemaQaWriter = new DatabaseSchemaQaWriter(outputFolder);
         databaseSchemaQaWriter.GenerateQaMdFile(databases);
     }
 
@@ -659,30 +638,6 @@ public class ExtractSqlHelper
     private void SaveDatabasesDescriptionJsonFile(List<DatabaseDescription> databasesDesc, string outputFile)
     {
         _jsonDocSerializer.WriteToJsonFile(databasesDesc, outputFile);
-    }
-
-    private static void UpdateTableDescription(List<DatabaseDescription> databasesDesc,
-        List<DatabaseDescription> userDatabaseDesc)
-    {
-        foreach (var database in databasesDesc)
-        {
-            var tables = database.Tables;
-            var userTables = userDatabaseDesc.FirstOrDefault(x => x.DatabaseName.IsSameAs(database.DatabaseName))?.Tables ??
-                             [];
-            var updatedTables = tables.LeftOuterJoin(userTables,
-                    ut => ut.TableName,
-                    t => t.TableName,
-                    ut => ut,
-                    (t, ut) => new TableDescription()
-                    {
-                        TableName = t.TableName,
-                        Description = string.IsNullOrEmpty(ut.Description) ? t.Description : ut.Description,
-                        Columns = t.Columns
-                    })
-                .ToList();
-            database.Tables = updatedTables;
-            tables.UpdateTableColumnsDescription(userTables);
-        }
     }
 
     private static void WriteAllDatabaseTableNames(DatabaseDescription database)
