@@ -94,8 +94,12 @@ public class ExtractSqlHelper
         var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, $"../{DatabasesDescriptionName}.yaml");
         var userDatabase = GetUserDatabaseDescription(userDatabaseDescriptionYamlFile);
         
-        var databasesDescriptionFromSqlFilesOfJsonFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
-        var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesOfJsonFile);
+        var databasesDescriptionFromSqlFilesJsonFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
+        if (File.Exists(databasesDescriptionFromSqlFilesJsonFile))
+        {
+            return;
+        }
+        var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesJsonFile);
 
         databases.UpdateDatabaseDescription(userDatabase);
         UpdateTableDescription(databases, userDatabase);
