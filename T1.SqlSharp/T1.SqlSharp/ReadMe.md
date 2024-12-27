@@ -1,6 +1,6 @@
 
-# SqlParser 
-namespace: T1.SqlSharp
+# T1.SqlSharp
+## SqlParser 
 
 ```csharp
 var sql = "SELECT * FROM table WHERE column = 'value'";
