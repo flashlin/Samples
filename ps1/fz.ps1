@@ -84,58 +84,94 @@ function filter_list {
     return $result
 }
 
+function Search-FilterItems {
+    param(
+        [Parameter(Mandatory)]
+        [string[]]$SearchList
+    )
+
+    $result = search_folder -searchTerm $SearchList[0]
+    #Write-Host "First: " $result $result.Count
+    
+    if ($result.Count -eq 1) {
+        return $result[0]
+    }
+    
+    $index = 1
+    while ($result.Count -gt 1 -and $index -lt $SearchList.Count) {
+        #Write-Host "Search: " $SearchList[$index]
+        $result = filter_list -input_list $result -searchTerm $SearchList[$index]
+        #Write-Host "Search: " $result $result.Count
+        if ($result.Count -eq 1) {
+            return $result[0]
+        }
+        $index++
+    }
+
+    return $result
+}
+
 Write-Host "Fast jump to location: $search_list"
 
 $count = 0
 $selected = $null
 $file_list = @()
-$search_list | ForEach-Object { 
-    $count++
-    $searchTerm = $_
-    if (-not $file_list) {
-        # 呼叫搜尋
-        # Write-Host "搜尋 $searchTerm"
-        $file_list = search_folder -searchTerm $searchTerm
-        # Write-Host $file_list.GetType()
-        if( $file_list -eq $null ) {
-            # Write-Host "找不到"
-            $file_list = @()
-            $selected = $null
-            return
-        }
-        if( "string" -eq "$($file_list.GetType())" ) {
-            # Write-Host "只有一個"
-            $selected = $file_list
-            return
-        }
-        if( $file_list.Count -eq 0 ) {
-            return
-        }
-        # 找到很多個 
-        Write-Host "找到 $($file_list.Count) 個"
-    }
 
-    if ( $count -eq $search_list.Count ) {
-        # 最後一個
-        # Write-Host $file_list
-        # Write-Host "最後過濾 $searchTerm"
-        $result = filter_list -input_list $file_list -searchTerm $searchTerm
-        # Write-Host "最後過濾結果 $($result.Count)"
-        if( $result.Count -gt 1  ) {
-            $selected = show_menu -input_list $result
-        }  
-        if( $result.Count -eq 1  ) {
-            $selected = $result[0]
-        }  
-    } else {
-        # 還有更多的條件
-        # Write-Host "呼叫過濾 $searchTerm"
-        $result = filter_list -input_list $file_list -searchTerm $searchTerm
-        if( $result.Count -ne 0  ) {
-            $file_list = $result
-        } 
-    }
-}
+$result = Search-FilterItems -SearchList $search_list
+if( $result.Count -gt 1  ) {
+    $selected = show_menu -input_list $result
+}  
+if( $result.Count -eq 1  ) {
+    $selected = $result[0]
+}  
+
+# $search_list | ForEach-Object { 
+#     $count++
+#     $searchTerm = $_
+#     if (-not $file_list) {
+#         # 呼叫搜尋
+#         Write-Host "搜尋 $searchTerm"
+#         $file_list = search_folder -searchTerm $searchTerm
+#         # Write-Host $file_list.GetType()
+#         if( $file_list -eq $null ) {
+#             # Write-Host "找不到"
+#             $file_list = @()
+#             $selected = $null
+#             return
+#         }
+#         if( "string" -eq "$($file_list.GetType())" ) {
+#             # Write-Host "只有一個"
+#             $selected = $file_list
+#             return
+#         }
+#         if( $file_list.Count -eq 0 ) {
+#             return
+#         }
+#         # 找到很多個 
+#         Write-Host "找到 $($file_list.Count) 個"
+#     }
+
+#     if ( $count -eq $search_list.Count ) {
+#         # 最後一個
+#         # Write-Host $file_list
+#         # Write-Host "最後過濾 $searchTerm"
+#         $result = filter_list -input_list $file_list -searchTerm $searchTerm
+#         # Write-Host "最後過濾結果 $($result.Count)"
+#         if( $result.Count -gt 1  ) {
+#             $selected = show_menu -input_list $result
+#         }  
+#         if( $result.Count -eq 1  ) {
+#             $selected = $result[0]
+#         }  
+#     } else {
+#         # 還有更多的條件
+#         Write-Host "呼叫過濾 $searchTerm"
+#         $result = filter_list -input_list $file_list -searchTerm $searchTerm
+#         if( $result.Count -ne 0  ) {
+#             $file_list = $result
+#         } 
+#     }
+# }
 
 # 輸出選擇的結果
 if ($null -ne $selected) {
