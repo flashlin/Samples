@@ -94,7 +94,7 @@ function Search-FilterItems {
     #Write-Host "First: " $result $result.Count
     
     if ($result.Count -eq 1) {
-        return $result[0]
+        return $result
     }
     
     $index = 1
@@ -122,7 +122,7 @@ if( $result.Count -gt 1  ) {
     $selected = show_menu -input_list $result
 }  
 if( $result.Count -eq 1  ) {
-    $selected = $result[0]
+    $selected = $result
 }  
 
 # $search_list | ForEach-Object { 
