@@ -60,7 +60,7 @@ public class ExtractSqlHelper
         return (createTableSql, remainingText);
     }
 
-    public void ExtractSelectSqlFromFolder(string folder, string outputFile)
+    public void TestExtractSelectSqlFromFolder(string folder, string outputFile)
     {
         if (File.Exists(outputFile))
         {
@@ -371,7 +371,7 @@ public class ExtractSqlHelper
         return databasesDesc;
     }
 
-    private IEnumerable<string> ExtractSelectSqlFromText(string text, int startOffset = 0)
+    private IEnumerable<string> ExtractStartSelectSqlTextFromText(string text, int startOffset = 0)
     {
         var select = "SELECT";
         var startSelectIndex = text.IndexOf(select, startOffset, StringComparison.OrdinalIgnoreCase);
@@ -384,7 +384,7 @@ public class ExtractSqlHelper
         var nextChar = startSelectSql[select.Length];
         if (!char.IsWhiteSpace(nextChar))
         {
-            foreach (var subSelectSql in ExtractSelectSqlFromText(text, startOffset + select.Length))
+            foreach (var subSelectSql in ExtractStartSelectSqlTextFromText(text, startOffset + select.Length))
             {
                 yield return subSelectSql;
             }
@@ -393,7 +393,7 @@ public class ExtractSqlHelper
         }
 
         yield return startSelectSql;
-        foreach (var subSelectSql in ExtractSelectSqlFromText(text, startOffset + startSelectSql.Length))
+        foreach (var subSelectSql in ExtractStartSelectSqlTextFromText(text, startOffset + startSelectSql.Length))
         {
             yield return subSelectSql;
         }
@@ -424,7 +424,7 @@ public class ExtractSqlHelper
         {
             var sql = ExcludeSqlComments(sqlFile.Sql);
             sql = ExcludeNonSelectSql(sql);
-            foreach (var startSelectSql in ExtractSelectSqlFromText(sql))
+            foreach (var startSelectSql in ExtractStartSelectSqlTextFromText(sql))
             {
                 yield return (sqlFile.FileName, startSelectSql);
             }
