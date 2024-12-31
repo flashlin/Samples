@@ -194,6 +194,7 @@ map zrc :action RearrangeCode<CR>
 nmap [ :action MethodUp<CR>
 nmap ] :action MethodDown<CR>
 nmap [[ ?class<CR>:action MethodDown<CR>
+nmap {{ ?interface<CR>:action MethodDown<CR>
 map <A-[> :action MoveStatementUp<CR>
 map <A-]> :action MoveStatementDown<CR>
 
