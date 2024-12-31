@@ -431,7 +431,7 @@ public class ExtractSqlHelper
             }
             if(currentSqlFile.FileName != sqlFile)
             {
-                if(currentSqlFile != SqlSelectContent.Empty && currentSqlFile.Statements.Count > 0)
+                if(currentSqlFile.HasSelectSql())
                 {
                     yield return currentSqlFile;
                 }
@@ -442,7 +442,7 @@ public class ExtractSqlHelper
             }
             currentSqlFile.Statements.Add(result.ResultValue);
         }
-        if(currentSqlFile != SqlSelectContent.Empty && currentSqlFile.Statements.Count > 0)
+        if(currentSqlFile.HasSelectSql())
         {
             yield return currentSqlFile;
         }
@@ -750,26 +750,4 @@ public class ExtractSqlHelper
         writer.WriteLine();
         writer.WriteLine();
     }
-}
-
-public class SqlSelectContent
-{
-    public static SqlSelectContent Empty => new();
-    public string FileName { get; set; } = string.Empty;
-    public List<SelectStatement> Statements { get; set; } = [];
-}
-
-public class SqlFileContent
-{
-    public static SqlFileContent Empty => new();
-    public string FileName { get; set; } = string.Empty;
-    public string Sql { get; set; } = string.Empty;
-    public List<ISqlExpression> SqlExpressions { get; set; } = [];
-}
-
-public class SqlCreateTablesSqlFiles
-{
-    public SqlFileContent File { get; set; } = SqlFileContent.Empty;
-    public List<string> CreateTables { get; set; } = [];
-    public string DatabaseName { get; set; } = string.Empty;
 }
