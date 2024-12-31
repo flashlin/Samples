@@ -13,15 +13,47 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace SqlSharpLit.Common.ParserLit;
 
+public class ExtractSqlFileHelper
+{
+    public ExtractSqlFileHelper()
+    {
+    }
+
+    public IEnumerable<string> GetSqlFiles(string folder)
+    {
+        if (!Directory.Exists(folder))
+        {
+            yield break;
+        }
+
+        var files = Directory.GetFiles(folder, "*.sql");
+        foreach (var file in files)
+        {
+            yield return file;
+        }
+
+        var subFolders = Directory.GetDirectories(folder);
+        foreach (var subFolder in subFolders)
+        {
+            foreach (var file in GetSqlFiles(subFolder))
+            {
+                yield return file;
+            }
+        }
+    }
+}
+
 public class ExtractSqlHelper
 {
     private readonly IDatabaseNameProvider _databaseNameProvider;
     private readonly JsonDocSerializer _jsonDocSerializer = new();
+    private readonly ExtractSqlFileHelper _extractSqlFileHelper;
     private const string DatabasesDescriptionName = "DatabasesDescription";
 
     public ExtractSqlHelper(IDatabaseNameProvider databaseNameProvider)
     {
         _databaseNameProvider = databaseNameProvider;
+        _extractSqlFileHelper = new ExtractSqlFileHelper();
     }
 
     public IEnumerable<string> ExtractAllCreateTableFromText(string text)
@@ -455,7 +487,7 @@ public class ExtractSqlHelper
 
     public IEnumerable<SqlFileContent> GetSqlTextFromFolder(string folder)
     {
-        foreach (var sqlFile in GetSqlFiles(folder))
+        foreach (var sqlFile in _extractSqlFileHelper.GetSqlFiles(folder))
         {
             var sql = File.ReadAllText(sqlFile);
             yield return new SqlFileContent
@@ -468,7 +500,7 @@ public class ExtractSqlHelper
 
     public IEnumerable<SqlFileContent> GetSqlContentsFromFolder(string folder)
     {
-        foreach (var sqlFile in GetSqlFiles(folder))
+        foreach (var sqlFile in _extractSqlFileHelper.GetSqlFiles(folder))
         {
             Console.WriteLine($"Parsing {sqlFile}");
             var sql = File.ReadAllText(sqlFile);
@@ -490,29 +522,6 @@ public class ExtractSqlHelper
                 Sql = sql,
                 SqlExpressions = sqlExpressions
             };
-        }
-    }
-
-    public IEnumerable<string> GetSqlFiles(string folder)
-    {
-        if (!Directory.Exists(folder))
-        {
-            yield break;
-        }
-
-        var files = Directory.GetFiles(folder, "*.sql");
-        foreach (var file in files)
-        {
-            yield return file;
-        }
-
-        var subFolders = Directory.GetDirectories(folder);
-        foreach (var subFolder in subFolders)
-        {
-            foreach (var file in GetSqlFiles(subFolder))
-            {
-                yield return file;
-            }
         }
     }
 
