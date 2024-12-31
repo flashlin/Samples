@@ -431,7 +431,7 @@ public class ExtractSqlHelper
             }
             if(currentSqlFile.FileName != sqlFile)
             {
-                if(currentSqlFile != SqlSelectContent.Empty)
+                if(currentSqlFile != SqlSelectContent.Empty && currentSqlFile.Statements.Count > 0)
                 {
                     yield return currentSqlFile;
                 }
@@ -442,7 +442,7 @@ public class ExtractSqlHelper
             }
             currentSqlFile.Statements.Add(result.ResultValue);
         }
-        if(currentSqlFile != SqlSelectContent.Empty)
+        if(currentSqlFile != SqlSelectContent.Empty && currentSqlFile.Statements.Count > 0)
         {
             yield return currentSqlFile;
         }
