@@ -13,36 +13,6 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace SqlSharpLit.Common.ParserLit;
 
-public class ExtractSqlFileHelper
-{
-    public ExtractSqlFileHelper()
-    {
-    }
-
-    public IEnumerable<string> GetSqlFiles(string folder)
-    {
-        if (!Directory.Exists(folder))
-        {
-            yield break;
-        }
-
-        var files = Directory.GetFiles(folder, "*.sql");
-        foreach (var file in files)
-        {
-            yield return file;
-        }
-
-        var subFolders = Directory.GetDirectories(folder);
-        foreach (var subFolder in subFolders)
-        {
-            foreach (var file in GetSqlFiles(subFolder))
-            {
-                yield return file;
-            }
-        }
-    }
-}
-
 public class ExtractSqlHelper
 {
     private readonly IDatabaseNameProvider _databaseNameProvider;
@@ -90,7 +60,7 @@ public class ExtractSqlHelper
         return (createTableSql, remainingText);
     }
 
-    public (string truncatedText, int length) FindCreateTableStart(string text)
+    private (string truncatedText, int length) FindCreateTableStart(string text)
     {
         var pattern = @"\bCREATE\s+TABLE\b";
         var regex = new Regex(pattern, RegexOptions.IgnoreCase);
@@ -388,7 +358,7 @@ public class ExtractSqlHelper
 
     private IEnumerable<(string FileName, string startSelectSql)> ExtractStartSelectSqlString(string folder)
     {
-        foreach (var sqlFile in GetSqlTextFromFolder(folder))
+        foreach (var sqlFile in _extractSqlFileHelper.GetSqlTextFromFolder(folder))
         {
             var sql = ExcludeSqlComments(sqlFile.Sql);
             sql = ExcludeNonSelectSql(sql);
@@ -482,19 +452,6 @@ public class ExtractSqlHelper
         foreach (var subSelectSql in ExtractSelectSqlFromText(text, startOffset + startSelectSql.Length))
         {
             yield return subSelectSql;
-        }
-    }
-
-    public IEnumerable<SqlFileContent> GetSqlTextFromFolder(string folder)
-    {
-        foreach (var sqlFile in _extractSqlFileHelper.GetSqlFiles(folder))
-        {
-            var sql = File.ReadAllText(sqlFile);
-            yield return new SqlFileContent
-            {
-                FileName = sqlFile,
-                Sql = sql,
-            };
         }
     }
 
