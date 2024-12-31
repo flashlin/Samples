@@ -124,7 +124,7 @@ public class ExtractSqlHelper
 
     private List<DatabaseDescription> ExtractDatabasesDescriptionFromFolder(string folder)
     {
-        var sqlFileContents = GetSqlContentsFromFolder(folder)
+        var sqlFileContents = _extractSqlFileHelper.GetSqlContentsFromFolder(folder)
             .ToList();
         var databasesDesc = CreateDatabasesDescription(sqlFileContents);
         foreach (var db in databasesDesc)
@@ -155,7 +155,7 @@ public class ExtractSqlHelper
 
     public void GenerateRagFiles(string sqlFolder)
     {
-        var sqlFileContents = GetSqlContentsFromFolder(sqlFolder);
+        var sqlFileContents = _extractSqlFileHelper.GetSqlContentsFromFolder(sqlFolder);
         GenerateRagFilesFromSqlContents(sqlFileContents, "outputs");
     }
 
@@ -455,33 +455,6 @@ public class ExtractSqlHelper
         }
     }
 
-    public IEnumerable<SqlFileContent> GetSqlContentsFromFolder(string folder)
-    {
-        foreach (var sqlFile in _extractSqlFileHelper.GetSqlFiles(folder))
-        {
-            Console.WriteLine($"Parsing {sqlFile}");
-            var sql = File.ReadAllText(sqlFile);
-            List<ISqlExpression> sqlExpressions;
-            try
-            {
-                sqlExpressions = new SqlParser(sql).Extract().ToList();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error parsing {sqlFile}");
-                Console.WriteLine(e.Message);
-                continue;
-            }
-
-            yield return new SqlFileContent
-            {
-                FileName = sqlFile,
-                Sql = sql,
-                SqlExpressions = sqlExpressions
-            };
-        }
-    }
-
     public void WriteCreateTablesFromFolder(string createTablesSqlFolder, string outputFolder)
     {
         if (!Directory.Exists(createTablesSqlFolder))
@@ -489,7 +462,7 @@ public class ExtractSqlHelper
             return;
         }
         using var writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "CreateTables.sql"));
-        var sqlFileContents = GetSqlContentsFromFolder(createTablesSqlFolder)
+        var sqlFileContents = _extractSqlFileHelper.GetSqlContentsFromFolder(createTablesSqlFolder)
             .ToList();
         WriteCreateTablesTo(sqlFileContents, writer);
         GenerateRagFilesFromSqlContents(sqlFileContents, outputFolder);

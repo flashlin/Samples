@@ -1,3 +1,5 @@
+using T1.SqlSharp.Expressions;
+
 namespace SqlSharpLit.Common.ParserLit;
 
 public class ExtractSqlFileHelper
@@ -34,6 +36,33 @@ public class ExtractSqlFileHelper
             {
                 FileName = sqlFile,
                 Sql = sql,
+            };
+        }
+    }
+
+    public IEnumerable<SqlFileContent> GetSqlContentsFromFolder(string folder)
+    {
+        foreach (var sqlFile in GetSqlFiles(folder))
+        {
+            Console.WriteLine($"Parsing {sqlFile}");
+            var sql = File.ReadAllText(sqlFile);
+            List<ISqlExpression> sqlExpressions;
+            try
+            {
+                sqlExpressions = new SqlParser(sql).Extract().ToList();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error parsing {sqlFile}");
+                Console.WriteLine(e.Message);
+                continue;
+            }
+
+            yield return new SqlFileContent
+            {
+                FileName = sqlFile,
+                Sql = sql,
+                SqlExpressions = sqlExpressions
             };
         }
     }
