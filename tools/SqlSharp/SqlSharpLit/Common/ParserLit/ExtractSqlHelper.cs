@@ -15,10 +15,10 @@ namespace SqlSharpLit.Common.ParserLit;
 
 public class ExtractSqlHelper
 {
-    private readonly IDatabaseNameProvider _databaseNameProvider;
-    private readonly JsonDocSerializer _jsonDocSerializer = new();
-    private readonly ExtractSqlFileHelper _extractSqlFileHelper;
     private const string DatabasesDescriptionName = "DatabasesDescription";
+    private readonly IDatabaseNameProvider _databaseNameProvider;
+    private readonly ExtractSqlFileHelper _extractSqlFileHelper;
+    private readonly JsonDocSerializer _jsonDocSerializer = new();
 
     public ExtractSqlHelper(IDatabaseNameProvider databaseNameProvider)
     {
@@ -58,149 +58,6 @@ public class ExtractSqlHelper
         var createTableSql = truncatedText.Substring(0, createTableEnd + 1);
         var remainingText = truncatedText.Substring(createTableEnd);
         return (createTableSql, remainingText);
-    }
-
-    private (string truncatedText, int length) FindCreateTableStart(string text)
-    {
-        var pattern = @"\bCREATE\s+TABLE\b";
-        var regex = new Regex(pattern, RegexOptions.IgnoreCase);
-        var match = regex.Match(text);
-        if (match.Success)
-        {
-            var offset = match.Index;
-            var prevLineContent = FindPreviousLineContent(text, offset);
-            if (ContainsComment(prevLineContent))
-            {
-                return (string.Empty, 0);
-            }
-
-            return (text.Substring(offset), match.Value.Length);
-        }
-
-        return (string.Empty, 0);
-    }
-    
-    public void GenerateDatabasesDescriptionJsonFileFromFolder(string createTablesSqlFolder, string outputFolder)
-    {
-        if (!Directory.Exists(createTablesSqlFolder))
-        {
-            return;
-        }
-        var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
-        var outputFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
-        SaveDatabasesDescriptionJsonFile(databases, outputFile);
-    }
-    
-    public void MergeUserDatabasesDescription(string outputFolder)
-    {
-        var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, $"../{DatabasesDescriptionName}.yaml");
-        var userDatabase = GetUserDatabaseDescription(userDatabaseDescriptionYamlFile);
-        
-        var databasesDescriptionFromSqlFilesJsonFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
-        if (!File.Exists(databasesDescriptionFromSqlFilesJsonFile))
-        {
-            return;
-        }
-        var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesJsonFile);
-
-        databases.UpdateDatabaseDescription(userDatabase);
-        SaveDatabasesDescriptionJsonFile(databases, databasesDescriptionFromSqlFilesJsonFile);
-    }
-
-    private static List<DatabaseDescription> LoadDatabasesDescriptionJsonFile(string databasesDescriptionFromSqlFilesOfJsonFile)
-    {
-        var json = File.ReadAllText(databasesDescriptionFromSqlFilesOfJsonFile);
-        var databases = JsonSerializer.Deserialize<List<DatabaseDescription>>(json)!;
-        return databases;
-    }
-    
-    public void GenerateDatabaseDescriptionsQaMdFile(string databaseDescriptionsFile)
-    {
-        var outputFolder = Path.GetDirectoryName(databaseDescriptionsFile)!;
-        using var databaseSchemaQaWriter = new DatabaseSchemaQaWriter(outputFolder);
-        var databases = LoadDatabasesDescriptionJsonFile(databaseDescriptionsFile);
-        databaseSchemaQaWriter.GenerateQaMdFile(databases);
-    }
-
-    private List<DatabaseDescription> ExtractDatabasesDescriptionFromFolder(string folder)
-    {
-        var sqlFileContents = _extractSqlFileHelper.GetSqlContentsFromFolder(folder)
-            .ToList();
-        var databasesDesc = CreateDatabasesDescription(sqlFileContents);
-        foreach (var db in databasesDesc)
-        {
-            var tables = db.Tables
-                .Where(x => !x.TableName.StartsWith("#"))
-                .ToList();
-            db.Tables = tables;
-        }
-        return databasesDesc;
-    }
-
-    private void NormalizeDatabaseDescriptions(List<DatabaseDescription> databasesDesc)
-    {
-        foreach (var database in databasesDesc)
-        {
-            foreach (var table in database.Tables)
-            {
-                var tableName = table.TableName.NormalizeName();
-                table.TableName = tableName;
-                foreach (var column in table.Columns)
-                {
-                    column.ColumnName = column.ColumnName.NormalizeName();
-                }
-            }
-        }
-    }
-
-    public void GenerateRagFiles(string sqlFolder)
-    {
-        var sqlFileContents = _extractSqlFileHelper.GetSqlContentsFromFolder(sqlFolder);
-        GenerateRagFilesFromSqlContents(sqlFileContents, "outputs");
-    }
-
-    public void GenerateRagFilesFromSqlContents(IEnumerable<SqlFileContent> sqlFileContents, string outputsFolder)
-    {
-        var databaseDescriptions = ExtractDatabaseDescriptions(sqlFileContents)
-            .Where(x => x.Tables.Count > 0)
-            .ToList();
-
-        databaseDescriptions = databaseDescriptions.GroupBy(x => x.DatabaseName)
-            .Select(x => new DatabaseDescription()
-            {
-                DatabaseName = x.Key,
-                Tables = x.SelectMany(y => y.Tables).ToList()
-            })
-            .OrderBy(x => x.DatabaseName)
-            .ToList();
-
-
-        GenerateDatabasesJsonFile(databaseDescriptions, Path.Combine("outputs", "Databases.json"));
-        //writer.WriteLine("The following is a detailed description of all databases and table structures of Titan Company.");
-        foreach (var database in databaseDescriptions)
-        {
-            WriteAllTableDescriptions(database, outputsFolder);
-            WriteAllDatabaseTableNames(database);
-        }
-
-        WriteDatabaseNamesDesc(databaseDescriptions);
-        WriteDatabaseTableNamesDesc(databaseDescriptions);
-    }
-
-    public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(
-        IEnumerable<SqlFileContent> sqlContents)
-    {
-        foreach (var sqlFileContent in sqlContents)
-        {
-            Console.WriteLine($"{sqlFileContent.FileName}");
-            var createTablesSql = ExtractAllCreateTableFromText(sqlFileContent.Sql).ToList();
-            yield return new SqlCreateTablesSqlFiles
-            {
-                File = sqlFileContent,
-                DatabaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName),
-                CreateTables = createTablesSql,
-            };
-        }
     }
 
     public void ExtractSelectSqlFromFolder(string folder, string outputFile)
@@ -259,59 +116,6 @@ public class ExtractSqlHelper
         }
     }
 
-    private IEnumerable<SqlSelectContent> ExtractSelectStatement(string folder)
-    {
-        foreach (var (sqlFile, selectSql) in ExtractStartSelectSqlString(folder))
-        {
-            var sqlParser = new SqlParser(selectSql);
-            var result = sqlParser.ParseSelectStatement();
-            if (result.HasError)
-            {
-                throw result.Error;
-            }
-
-            yield return new SqlSelectContent
-            {
-                FileName = sqlFile,
-                Statement = result.ResultValue
-            };
-        }
-    }
-
-    public void GenerateSelectStatementQaMdFile(string folder, string outputFile)
-    {
-        var selectContents = ExtractSelectStatement(folder);
-        using var writer = new StreamWriter(outputFile, true, Encoding.UTF8);
-        foreach (var selectContent in selectContents)
-        {
-            Console.WriteLine($"Processing {selectContent.FileName}");
-            writer.WriteLine($"## {selectContent.FileName}");
-            writer.WriteLine(selectContent.Statement.ToSql());
-            writer.WriteLine();
-            writer.Flush();
-        }
-    }
-
-    private void WriteErrorSqlFile(string sqlFile, SqlParser sqlParser)
-    {
-        var errorFile = Path.Combine("outputs", "error.sql");
-        var sql = sqlParser.GetPreviousText(0);
-        var msg = $"{sqlFile}\n";
-        msg += sql + "\n";
-        msg += "----------------\n";
-        msg += sqlParser.GetRemainingText();
-        File.WriteAllText(errorFile, msg);
-    }
-
-    private string GetErrorMessage(string sqlFile, SqlParser sqlParser)
-    {
-        var msg = $"{sqlFile}:\n";
-        var positionSql = sqlParser.GetRemainingText();
-        msg += $"GetRemainingText:\n{positionSql}\n";
-        msg += $"----------\n{sqlParser.GetPreviousText(0)}";
-        return msg;
-    }
-
     public static bool FindOccurrences(string text, int n)
     {
         if (string.IsNullOrEmpty(text) || n <= 0)
@@ -336,6 +140,152 @@ public class ExtractSqlHelper
         return false;
     }
 
+    public void GenerateDatabaseDescriptionsQaMdFile(string databaseDescriptionsFile)
+    {
+        var outputFolder = Path.GetDirectoryName(databaseDescriptionsFile)!;
+        using var databaseSchemaQaWriter = new DatabaseSchemaQaWriter(outputFolder);
+        var databases = LoadDatabasesDescriptionJsonFile(databaseDescriptionsFile);
+        databaseSchemaQaWriter.GenerateQaMdFile(databases);
+    }
+
+    public void GenerateDatabasesDescriptionJsonFileFromFolder(string createTablesSqlFolder, string outputFolder)
+    {
+        if (!Directory.Exists(createTablesSqlFolder))
+        {
+            return;
+        }
+        var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
+        var outputFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
+        SaveDatabasesDescriptionJsonFile(databases, outputFile);
+    }
+
+    public void GenerateRagFiles(string sqlFolder)
+    {
+        var sqlFileContents = _extractSqlFileHelper.GetSqlContentsFromFolder(sqlFolder);
+        GenerateRagFilesFromSqlContents(sqlFileContents, "outputs");
+    }
+
+    public void GenerateRagFilesFromSqlContents(IEnumerable<SqlFileContent> sqlFileContents, string outputsFolder)
+    {
+        var databaseDescriptions = ExtractDatabaseDescriptions(sqlFileContents)
+            .Where(x => x.Tables.Count > 0)
+            .ToList();
+
+        databaseDescriptions = databaseDescriptions.GroupBy(x => x.DatabaseName)
+            .Select(x => new DatabaseDescription()
+            {
+                DatabaseName = x.Key,
+                Tables = x.SelectMany(y => y.Tables).ToList()
+            })
+            .OrderBy(x => x.DatabaseName)
+            .ToList();
+
+
+        GenerateDatabasesJsonFile(databaseDescriptions, Path.Combine("outputs", "Databases.json"));
+        //writer.WriteLine("The following is a detailed description of all databases and table structures of Titan Company.");
+        foreach (var database in databaseDescriptions)
+        {
+            WriteAllTableDescriptions(database, outputsFolder);
+            WriteAllDatabaseTableNames(database);
+        }
+
+        WriteDatabaseNamesDesc(databaseDescriptions);
+        WriteDatabaseTableNamesDesc(databaseDescriptions);
+    }
+
+    public void GenerateSelectStatementQaMdFile(string folder, string outputFile)
+    {
+        var selectContents = ExtractSelectStatement(folder);
+        using var writer = new StreamWriter(outputFile, true, Encoding.UTF8);
+        foreach (var selectContent in selectContents)
+        {
+            Console.WriteLine($"Processing {selectContent.FileName}");
+            writer.WriteLine($"## {selectContent.FileName}");
+            writer.WriteLine(selectContent.Statement.ToSql());
+            writer.WriteLine();
+            writer.Flush();
+        }
+    }
+
+    public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(
+        IEnumerable<SqlFileContent> sqlContents)
+    {
+        foreach (var sqlFileContent in sqlContents)
+        {
+            Console.WriteLine($"{sqlFileContent.FileName}");
+            var createTablesSql = ExtractAllCreateTableFromText(sqlFileContent.Sql).ToList();
+            yield return new SqlCreateTablesSqlFiles
+            {
+                File = sqlFileContent,
+                DatabaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName),
+                CreateTables = createTablesSql,
+            };
+        }
+    }
+
+    public void MergeUserDatabasesDescription(string outputFolder)
+    {
+        var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, $"../{DatabasesDescriptionName}.yaml");
+        var userDatabase = GetUserDatabaseDescription(userDatabaseDescriptionYamlFile);
+        
+        var databasesDescriptionFromSqlFilesJsonFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
+        if (!File.Exists(databasesDescriptionFromSqlFilesJsonFile))
+        {
+            return;
+        }
+        var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesJsonFile);
+
+        databases.UpdateDatabaseDescription(userDatabase);
+        SaveDatabasesDescriptionJsonFile(databases, databasesDescriptionFromSqlFilesJsonFile);
+    }
+
+    public void SetDatabaseNameDeep(int deep)
+    {
+        _databaseNameProvider.SetDeep(deep);
+    }
+
+    public void WriteCreateTablesFromFolder(string createTablesSqlFolder, string outputFolder)
+    {
+        if (!Directory.Exists(createTablesSqlFolder))
+        {
+            return;
+        }
+        using var writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "CreateTables.sql"));
+        var sqlFileContents = _extractSqlFileHelper.GetSqlContentsFromFolder(createTablesSqlFolder)
+            .ToList();
+        WriteCreateTablesTo(sqlFileContents, writer);
+        GenerateRagFilesFromSqlContents(sqlFileContents, outputFolder);
+    }
+
+    private static bool ContainsComment(string lineContent)
+    {
+        return lineContent.Contains("--") || lineContent.Contains("/*");
+    }
+
+    private List<DatabaseDescription> CreateDatabasesDescription(List<SqlFileContent> sqlFileContents)
+    {
+        var databases = new EnsureKeyDictionary<string, DatabaseDescription>(databaseName => new DatabaseDescription()
+        {
+            DatabaseName = databaseName
+        });
+        foreach (var sqlFileContent in sqlFileContents)
+        {
+            Console.WriteLine($"Processing {sqlFileContent.FileName}");
+            var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
+            var newDb = DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName, sqlFileContent.SqlExpressions);
+            
+            var db = databases[databaseName];
+            db.Tables.AddRange(newDb.Tables);
+            databases[databaseName] = db;
+        }
+        return databases.Values.ToList();
+    }
+
+    private static StreamWriter CreateWriter(string filename)
+    {
+        return new StreamWriter(Path.Combine("outputs", filename), false, Encoding.UTF8);
+    }
+
     private string ExcludeNonSelectSql(string text)
     {
         if (text.Contains("'''"))
@@ -354,36 +304,6 @@ public class ExtractSqlHelper
         }
 
         return text;
-    }
-
-    private IEnumerable<(string FileName, string startSelectSql)> ExtractStartSelectSqlString(string folder)
-    {
-        foreach (var sqlFile in _extractSqlFileHelper.GetSqlTextFromFolder(folder))
-        {
-            var sql = ExcludeSqlComments(sqlFile.Sql);
-            sql = ExcludeNonSelectSql(sql);
-            foreach (var startSelectSql in ExtractSelectSqlFromText(sql))
-            {
-                yield return (sqlFile.FileName, startSelectSql);
-            }
-        }
-    }
-
-    private string GetPreviousLine(string text, int offset)
-    {
-        var lastNewLineIndex = text.LastIndexOf('\n', offset - 1);
-        if (lastNewLineIndex < 0)
-        {
-            return string.Empty;
-        }
-
-        var line = text.Substring(lastNewLineIndex + 1, offset - lastNewLineIndex - 1);
-        return line;
-    }
-
-    private bool IsCommentLine(string line)
-    {
-        return line.StartsWith("/*") || line.StartsWith("--");
     }
 
 
@@ -427,6 +347,30 @@ public class ExtractSqlHelper
         return result.ToString();
     }
 
+    private IEnumerable<DatabaseDescription> ExtractDatabaseDescriptions(IEnumerable<SqlFileContent> sqlContents)
+    {
+        foreach (var sqlFileContent in sqlContents)
+        {
+            var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
+            yield return DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName, sqlFileContent.SqlExpressions);
+        }
+    }
+
+    private List<DatabaseDescription> ExtractDatabasesDescriptionFromFolder(string folder)
+    {
+        var sqlFileContents = _extractSqlFileHelper.GetSqlContentsFromFolder(folder)
+            .ToList();
+        var databasesDesc = CreateDatabasesDescription(sqlFileContents);
+        foreach (var db in databasesDesc)
+        {
+            var tables = db.Tables
+                .Where(x => !x.TableName.StartsWith("#"))
+                .ToList();
+            db.Tables = tables;
+        }
+        return databasesDesc;
+    }
+
     private IEnumerable<string> ExtractSelectSqlFromText(string text, int startOffset = 0)
     {
         var select = "SELECT";
@@ -455,35 +399,35 @@ public class ExtractSqlHelper
         }
     }
 
-    public void WriteCreateTablesFromFolder(string createTablesSqlFolder, string outputFolder)
+    private IEnumerable<SqlSelectContent> ExtractSelectStatement(string folder)
     {
-        if (!Directory.Exists(createTablesSqlFolder))
+        foreach (var (sqlFile, selectSql) in ExtractStartSelectSqlString(folder))
         {
-            return;
+            var sqlParser = new SqlParser(selectSql);
+            var result = sqlParser.ParseSelectStatement();
+            if (result.HasError)
+            {
+                throw result.Error;
+            }
+
+            yield return new SqlSelectContent
+            {
+                FileName = sqlFile,
+                Statement = result.ResultValue
+            };
         }
-        using var writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "CreateTables.sql"));
-        var sqlFileContents = _extractSqlFileHelper.GetSqlContentsFromFolder(createTablesSqlFolder)
-            .ToList();
-        WriteCreateTablesTo(sqlFileContents, writer);
-        GenerateRagFilesFromSqlContents(sqlFileContents, outputFolder);
     }
 
-    private static bool ContainsComment(string lineContent)
+    private IEnumerable<(string FileName, string startSelectSql)> ExtractStartSelectSqlString(string folder)
     {
-        return lineContent.Contains("--") || lineContent.Contains("/*");
-    }
-
-    private static StreamWriter CreateWriter(string filename)
-    {
-        return new StreamWriter(Path.Combine("outputs", filename), false, Encoding.UTF8);
-    }
-
-    private IEnumerable<DatabaseDescription> ExtractDatabaseDescriptions(IEnumerable<SqlFileContent> sqlContents)
-    {
-        foreach (var sqlFileContent in sqlContents)
+        foreach (var sqlFile in _extractSqlFileHelper.GetSqlTextFromFolder(folder))
         {
-            var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
-            yield return DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName, sqlFileContent.SqlExpressions);
+            var sql = ExcludeSqlComments(sqlFile.Sql);
+            sql = ExcludeNonSelectSql(sql);
+            foreach (var startSelectSql in ExtractSelectSqlFromText(sql))
+            {
+                yield return (sqlFile.FileName, startSelectSql);
+            }
         }
     }
 
@@ -519,6 +463,26 @@ public class ExtractSqlHelper
         return -1;
     }
 
+    private (string truncatedText, int length) FindCreateTableStart(string text)
+    {
+        var pattern = @"\bCREATE\s+TABLE\b";
+        var regex = new Regex(pattern, RegexOptions.IgnoreCase);
+        var match = regex.Match(text);
+        if (match.Success)
+        {
+            var offset = match.Index;
+            var prevLineContent = FindPreviousLineContent(text, offset);
+            if (ContainsComment(prevLineContent))
+            {
+                return (string.Empty, 0);
+            }
+
+            return (text.Substring(offset), match.Value.Length);
+        }
+
+        return (string.Empty, 0);
+    }
+
     private static string FindPreviousLineContent(string text, int offset)
     {
         if (offset == 0)
@@ -544,23 +508,25 @@ public class ExtractSqlHelper
         File.WriteAllText(outputJsonFile, json);
     }
 
-    private List<DatabaseDescription> CreateDatabasesDescription(List<SqlFileContent> sqlFileContents)
+    private string GetErrorMessage(string sqlFile, SqlParser sqlParser)
     {
-        var databases = new EnsureKeyDictionary<string, DatabaseDescription>(databaseName => new DatabaseDescription()
+        var msg = $"{sqlFile}:\n";
+        var positionSql = sqlParser.GetRemainingText();
+        msg += $"GetRemainingText:\n{positionSql}\n";
+        msg += $"----------\n{sqlParser.GetPreviousText(0)}";
+        return msg;
+    }
+
+    private string GetPreviousLine(string text, int offset)
+    {
+        var lastNewLineIndex = text.LastIndexOf('\n', offset - 1);
+        if (lastNewLineIndex < 0)
         {
-            DatabaseName = databaseName
-        });
-        foreach (var sqlFileContent in sqlFileContents)
-        {
-            Console.WriteLine($"Processing {sqlFileContent.FileName}");
-            var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
-            var newDb = DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName, sqlFileContent.SqlExpressions);
-            
-            var db = databases[databaseName];
-            db.Tables.AddRange(newDb.Tables);
-            databases[databaseName] = db;
+            return string.Empty;
         }
-        return databases.Values.ToList();
+
+        var line = text.Substring(lastNewLineIndex + 1, offset - lastNewLineIndex - 1);
+        return line;
     }
 
     private static List<DatabaseDescription> GetUserDatabaseDescription(string userDatabaseDescriptionYamlFile)
@@ -572,6 +538,18 @@ public class ExtractSqlHelper
         var yamlSerializer = new YamlSerializer();
         var yaml = File.ReadAllText(userDatabaseDescriptionYamlFile);
         return yamlSerializer.Deserialize<List<DatabaseDescription>>(yaml);
+    }
+
+    private bool IsCommentLine(string line)
+    {
+        return line.StartsWith("/*") || line.StartsWith("--");
+    }
+
+    private static List<DatabaseDescription> LoadDatabasesDescriptionJsonFile(string databasesDescriptionFromSqlFilesOfJsonFile)
+    {
+        var json = File.ReadAllText(databasesDescriptionFromSqlFilesOfJsonFile);
+        var databases = JsonSerializer.Deserialize<List<DatabaseDescription>>(json)!;
+        return databases;
     }
 
     private void SaveDatabasesDescriptionJsonFile(List<DatabaseDescription> databasesDesc, string outputFile)
@@ -685,6 +663,17 @@ public class ExtractSqlHelper
         writer.WriteLine();
     }
 
+    private void WriteErrorSqlFile(string sqlFile, SqlParser sqlParser)
+    {
+        var errorFile = Path.Combine("outputs", "error.sql");
+        var sql = sqlParser.GetPreviousText(0);
+        var msg = $"{sqlFile}\n";
+        msg += sql + "\n";
+        msg += "----------------\n";
+        msg += sqlParser.GetRemainingText();
+        File.WriteAllText(errorFile, msg);
+    }
+
     private static void WriteTableDescription(StreamWriter writer,
         DatabaseDescription database, TableDescription table)
     {
@@ -730,11 +719,6 @@ public class ExtractSqlHelper
 
         writer.WriteLine();
         writer.WriteLine();
-    }
-
-    public void SetDatabaseNameDeep(int deep)
-    {
-        _databaseNameProvider.SetDeep(deep);
     }
 }
 
