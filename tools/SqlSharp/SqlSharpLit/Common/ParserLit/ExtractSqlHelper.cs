@@ -195,16 +195,35 @@ public class ExtractSqlHelper
 
     public void GenerateSelectStatementQaMdFile(string folder, string outputFile)
     {
-        var selectContents = ExtractSelectStatement(folder);
         using var writer = new StreamWriter(outputFile, true, Encoding.UTF8);
-        foreach (var selectContent in selectContents)
+        foreach (var selectContent in ExtractSelectStatement(folder))
         {
             Console.WriteLine($"Processing {selectContent.FileName}");
+            var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(selectContent.FileName);
+            var tableNames = ExtractTableNamesFromTableSources(selectContent.Statements);
             writer.WriteLine($"## {selectContent.FileName}");
-            writer.WriteLine(selectContent.Statement.ToSql());
+            writer.WriteLine($"Database: {databaseName}");
+            var tableNamesStr = string.Join(", ", tableNames);
+            writer.WriteLine($"Tables: {tableNamesStr}");
             writer.WriteLine();
             writer.Flush();
         }
+    }
+
+    private List<string> ExtractTableNamesFromTableSources(List<SelectStatement> selectStatements)
+    {
+        var tableNames = new HashSet<string>();
+        foreach (var selectStatement in selectStatements)
+        {
+            var tableSources= selectStatement.FromSources
+                .Where(x=>x.SqlType == SqlType.TableSource)
+                .Cast<SqlTableSource>()
+                .ToList();
+            var names = tableSources.Select(x=> x.TableName.NormalizeName())
+                .ToList();
+            names.ForEach(x=>tableNames.Add(x));
+        }
+        return tableNames.ToList();
     }
 
     public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(
@@ -401,20 +420,31 @@ public class ExtractSqlHelper
 
     private IEnumerable<SqlSelectContent> ExtractSelectStatement(string folder)
     {
+        var currentSqlFile = SqlSelectContent.Empty;
         foreach (var (sqlFile, selectSql) in ExtractStartSelectSqlString(folder))
         {
             var sqlParser = new SqlParser(selectSql);
             var result = sqlParser.ParseSelectStatement();
             if (result.HasError)
             {
-                throw result.Error;
+                continue;
             }
-
-            yield return new SqlSelectContent
+            if(currentSqlFile.FileName != sqlFile)
             {
-                FileName = sqlFile,
-                Statement = result.ResultValue
-            };
+                if(currentSqlFile != SqlSelectContent.Empty)
+                {
+                    yield return currentSqlFile;
+                }
+                currentSqlFile = new SqlSelectContent
+                {
+                    FileName = sqlFile
+                };
+            }
+            currentSqlFile.Statements.Add(result.ResultValue);
+        }
+        if(currentSqlFile != SqlSelectContent.Empty)
+        {
+            yield return currentSqlFile;
         }
     }
 
@@ -724,8 +754,9 @@ public class ExtractSqlHelper
 
 public class SqlSelectContent
 {
+    public static SqlSelectContent Empty => new();
     public string FileName { get; set; } = string.Empty;
-    public required SelectStatement Statement { get; set; }
+    public List<SelectStatement> Statements { get; set; } = [];
 }
 
 public class SqlFileContent
