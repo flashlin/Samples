@@ -103,7 +103,7 @@ function Search-FilterItems {
         $result = filter_list -input_list $result -searchTerm $SearchList[$index]
         #Write-Host "Search: " $result $result.Count
         if ($result.Count -eq 1) {
-            return $result[0]
+            return $result
         }
         $index++
     }
