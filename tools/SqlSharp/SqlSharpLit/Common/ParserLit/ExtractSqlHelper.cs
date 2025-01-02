@@ -196,10 +196,18 @@ public class ExtractSqlHelper
     public void GenerateSelectStatementQaMdFile(string folder, string outputFolder)
     {
         var databasesDescription = LoadDatabasesDescriptionJsonFile(Path.Combine(outputFolder, $"{DatabasesDescriptionName}_User.json"));
-        foreach (var file in Directory.GetFiles(outputFolder, "*_SelectQa.md"))
+        var outputFile = Path.Combine(outputFolder, $"SelectQa.md");
+        using var writer = new StreamWriter(outputFile, false, Encoding.UTF8);
+        foreach (var prompt in GenerateSelectSqlPrompt(folder, databasesDescription))
         {
-            File.Delete(file);
+            writer.WriteLine(prompt);
+            writer.WriteLine();
+            writer.Flush();
         }
+    }
+
+    private IEnumerable<string> GenerateSelectSqlPrompt(string folder, List<DatabaseDescription> databasesDescription)
+    {
         foreach (var selectContent in ExtractSelectStatement(folder))
         {
             Console.WriteLine($"Processing {selectContent.FileName}");
@@ -213,11 +221,9 @@ public class ExtractSqlHelper
                 continue;
             }
             
-            var outputFile = Path.Combine(outputFolder, $"{db.DatabaseName}_SelectQa.md");
-            using var writer = new StreamWriter(outputFile, true, Encoding.UTF8);
-
             foreach (var selectFromTableSourceStatement in selectFromTableSourceStatements)
             {
+                var writer = new StringWriter();
                 writer.WriteLine($"# {selectContent.FileName}");
                 writer.WriteLine($"## Database: {databaseName}");
                 var tableSources = selectFromTableSourceStatement.FromSources
@@ -225,15 +231,22 @@ public class ExtractSqlHelper
                     .Cast<SqlTableSource>()
                     .ToList();
                 var tableNames = tableSources.Select(x => x.TableName.NormalizeName()).ToList();
+                var foundTables = 0;
                 foreach (var tableName in tableNames)
                 {
-                    var table = db.Tables.FirstOrDefault(x => x.TableName == tableName);
+                    var table = db.Tables.FirstOrDefault(x => x.TableName.IsNormalizeSameAs(tableName));
                     if (table == null)
                     {
                         continue;
                     }
+
+                    foundTables++;
                     writer.WriteLine($"### {tableName}");
                     writer.WriteLine(table.ToDescriptionText());
+                }
+                if(foundTables == 0)
+                {
+                    continue;
                 }
                 writer.WriteLine();
                 writer.WriteLine("以上是關於 table 的描述");
@@ -242,10 +255,8 @@ public class ExtractSqlHelper
                 writer.WriteLine(selectFromTableSourceStatement.ToSql());
                 writer.WriteLine("```");
                 writer.WriteLine();
+                yield return writer.ToString();
             }
-            
-            writer.WriteLine();
-            writer.Flush();
         }
     }
 
