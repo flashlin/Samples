@@ -195,35 +195,84 @@ public class ExtractSqlHelper
 
     public void GenerateSelectStatementQaMdFile(string folder, string outputFile)
     {
+        var outputFolder = Path.GetDirectoryName(outputFile);
+        if (outputFolder == null)
+        {
+            throw new ArgumentException($"{nameof(outputFile)} must have a parent folder");
+        }
+        var databasesDescription = LoadDatabasesDescriptionJsonFile(Path.Combine(outputFolder, $"{DatabasesDescriptionName}_User.json"));
         using var writer = new StreamWriter(outputFile, true, Encoding.UTF8);
         foreach (var selectContent in ExtractSelectStatement(folder))
         {
             Console.WriteLine($"Processing {selectContent.FileName}");
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(selectContent.FileName);
-            var tableNames = ExtractTableNamesFromTableSources(selectContent.Statements);
-            writer.WriteLine($"## {selectContent.FileName}");
-            writer.WriteLine($"Database: {databaseName}");
-            var tableNamesStr = string.Join(", ", tableNames);
-            writer.WriteLine($"Tables: {tableNamesStr}");
+            var selectFromTableSourceStatements = ExtractSelectFromTableSourceSql(selectContent.Statements)
+                .ToList();
+            
+            var db = databasesDescription.FirstOrDefault(x => x.DatabaseName == databaseName);
+            if (db == null)
+            {
+                continue;
+            }
+
+            foreach (var selectFromTableSourceStatement in selectFromTableSourceStatements)
+            {
+                writer.WriteLine($"# {selectContent.FileName}");
+                writer.WriteLine($"## Database: {databaseName}");
+                var tableSources = selectFromTableSourceStatement.FromSources
+                    .Where(x => x.SqlType == SqlType.TableSource)
+                    .Cast<SqlTableSource>()
+                    .ToList();
+                var tableNames = tableSources.Select(x => x.TableName.NormalizeName()).ToList();
+                foreach (var tableName in tableNames)
+                {
+                    var table = db.Tables.FirstOrDefault(x => x.TableName == tableName);
+                    if (table == null)
+                    {
+                        continue;
+                    }
+                    writer.WriteLine($"### {tableName}");
+                    writer.WriteLine(table.ToDescriptionText());
+                }
+                writer.WriteLine();
+                writer.WriteLine("以上是關於 table 的描述");
+                writer.WriteLine("請根據下面的 SQL 內容，推測使用者可能會問什麼問題? SQL 內容是根據使用者的回答生成的.");
+                writer.WriteLine("```sql");
+                writer.WriteLine(selectFromTableSourceStatement.ToSql());
+                writer.WriteLine("```");
+                writer.WriteLine();
+            }
+            
             writer.WriteLine();
             writer.Flush();
         }
     }
 
-    private List<string> ExtractTableNamesFromTableSources(List<SelectStatement> selectStatements)
+    private IEnumerable<(SelectStatement selectFromTableSourceStatement, List<SqlTableSource> tableSources)> ExtractTableNamesFromTableSources(List<SelectStatement> selectStatements)
     {
-        var tableNames = new HashSet<string>();
+        foreach (var selectFromTableSourceStatement in ExtractSelectFromTableSourceSql(selectStatements))
+        {
+            var tableSources= selectFromTableSourceStatement.FromSources
+                .Where(x=>x.SqlType == SqlType.TableSource)
+                .Cast<SqlTableSource>()
+                .ToList();
+            yield return (selectFromTableSourceStatement, tableSources);
+        }
+    }
+
+    private IEnumerable<SelectStatement> ExtractSelectFromTableSourceSql(IEnumerable<SelectStatement> selectStatements)
+    {
         foreach (var selectStatement in selectStatements)
         {
             var tableSources= selectStatement.FromSources
                 .Where(x=>x.SqlType == SqlType.TableSource)
-                .Cast<SqlTableSource>()
                 .ToList();
-            var names = tableSources.Select(x=> x.TableName.NormalizeName())
-                .ToList();
-            names.ForEach(x=>tableNames.Add(x));
+            if( tableSources.Count == 0)
+            {
+                continue;
+            }
+            yield return selectStatement;
         }
-        return tableNames.ToList();
     }
 
     public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(
@@ -424,7 +473,18 @@ public class ExtractSqlHelper
         foreach (var (sqlFile, selectSql) in ExtractStartSelectSqlString(folder))
         {
             var sqlParser = new SqlParser(selectSql);
-            var result = sqlParser.ParseSelectStatement();
+            ParseResult<SelectStatement> result;
+            try
+            {
+                result = sqlParser.ParseSelectStatement();
+            }
+            catch (Exception)
+            {
+                var remainingSql = sqlParser.GetRemainingText();
+                Console.WriteLine($"Exception {sqlFile}:\n{remainingSql}");
+                Console.WriteLine($"----------\n{sqlParser.GetPreviousText(0)}");
+                continue;
+            }
             if (result.HasError)
             {
                 continue;

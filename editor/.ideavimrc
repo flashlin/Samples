@@ -90,6 +90,10 @@ nmap zet :action RiderUnitTestAbortedTestsFilterAction<CR>
 " 跳到標記 a then刪除
 map zdm v`aD
 
+" 關閉所有編輯器
+map zct :action CloseAllEditorsButActive<CR>
+
+
 " 重新 rearrange code layout
 nmap zmc :action RearrangeCode<CR>
 
