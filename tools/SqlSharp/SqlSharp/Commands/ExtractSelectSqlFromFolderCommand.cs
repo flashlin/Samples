@@ -17,7 +17,7 @@ public class ExtractSelectSqlFromFolderCommand : ISpecificationAsync<SqlSharpOpt
         return args.IsActionName(SqlSharpOptions.ExtractSelectSql);
     }
 
-    public Task<Task> ExecuteAsync(SqlSharpOptions args)
+    public async Task<Task> ExecuteAsync(SqlSharpOptions args)
     {
         var sourceFolder = args.Input;
         var outputFolder = args.Output;
@@ -26,7 +26,7 @@ public class ExtractSelectSqlFromFolderCommand : ISpecificationAsync<SqlSharpOpt
         
         //extractSqlHelper.ExtractSelectSqlFromFolder(sourceFolder, outputFolder);
         
-        extractSqlHelper.GenerateSelectStatementQaMdFile(sourceFolder, outputFolder);
+        await extractSqlHelper.GenerateSelectStatementQaMdFileAsync(sourceFolder, outputFolder);
         
         return Task.FromResult(Task.CompletedTask);
     }

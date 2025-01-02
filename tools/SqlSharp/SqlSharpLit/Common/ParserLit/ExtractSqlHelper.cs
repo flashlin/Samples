@@ -1,6 +1,9 @@
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using CsvHelper;
+using CsvHelper.Configuration;
 using T1.SqlSharp;
 using T1.SqlSharp.DatabaseDescriptions;
 using T1.SqlSharp.Expressions;
@@ -193,17 +196,25 @@ public class ExtractSqlHelper
         WriteDatabaseTableNamesDesc(databaseDescriptions);
     }
 
-    public void GenerateSelectStatementQaMdFile(string folder, string outputFolder)
+    public async Task GenerateSelectStatementQaMdFileAsync(string folder, string outputFolder)
     {
         var databasesDescription = LoadDatabasesDescriptionJsonFile(Path.Combine(outputFolder, $"{DatabasesDescriptionName}_User.json"));
-        var outputFile = Path.Combine(outputFolder, $"SelectQa.md");
-        using var writer = new StreamWriter(outputFile, false, Encoding.UTF8);
+        var outputCsvFile = Path.Combine(outputFolder, "SelectQaPrompt.csv");
+        //using var writer = new StreamWriter(outputFile, false, Encoding.UTF8);
+        var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true
+        };
+        await using var writer = new StreamWriter(outputCsvFile, Encoding.UTF8, new FileStreamOptions());
+        await using var csv = new CsvWriter(writer, csvConfig);
         foreach (var prompt in GenerateSelectSqlPrompt(folder, databasesDescription))
         {
-            writer.WriteLine(prompt);
-            writer.WriteLine();
-            writer.Flush();
+            csv.WriteRecord(new CsvSelectQaPrompt
+            {
+                Prompt = prompt
+            });
         }
+        await csv.FlushAsync();
     }
 
     private IEnumerable<string> GenerateSelectSqlPrompt(string folder, List<DatabaseDescription> databasesDescription)
@@ -822,4 +833,9 @@ public class ExtractSqlHelper
         writer.WriteLine();
         writer.WriteLine();
     }
+}
+
+public class CsvSelectQaPrompt
+{
+    public string Prompt { get; set; } = string.Empty;
 }
