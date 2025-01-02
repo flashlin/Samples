@@ -212,6 +212,14 @@ public class ExtractSqlHelper
         foreach (var item in selectSqlList)
         {
             await mdWriter.WriteLineAsync($"# Database: {item.Database.DatabaseName}");
+            var tableNames = string.Join(",", item.Database.Tables.Select(x=>x.TableName).ToList());
+            await mdWriter.WriteLineAsync($"## Tables: {tableNames}");
+            var tableSources = item.SelectSql.FromSources
+                .Where(x => x.SqlType == SqlType.TableSource)
+                .Cast<SqlTableSource>()
+                .ToList();
+            var tableSourceNames = string.Join(",", tableSources.Select(x=>x.TableName).ToList());
+            await mdWriter.WriteLineAsync($"## Table Sources: {tableSourceNames}");
             await mdWriter.WriteLineAsync($"{item.SelectSql.ToSql()}");
         }
         
@@ -290,19 +298,6 @@ public class ExtractSqlHelper
             writer.WriteLine("```");
             writer.WriteLine();
             yield return writer.ToString();
-        }
-    }
-
-    private IEnumerable<(SelectStatement selectFromTableSourceStatement, List<SqlTableSource> tableSources)>
-        ExtractTableNamesFromTableSources(List<SelectStatement> selectStatements)
-    {
-        foreach (var selectFromTableSourceStatement in ExtractSelectFromTableSourceSql(selectStatements))
-        {
-            var tableSources = selectFromTableSourceStatement.FromSources
-                .Where(x => x.SqlType == SqlType.TableSource)
-                .Cast<SqlTableSource>()
-                .ToList();
-            yield return (selectFromTableSourceStatement, tableSources);
         }
     }
 
