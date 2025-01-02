@@ -157,6 +157,7 @@ public class ExtractSqlHelper
         {
             return;
         }
+
         var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
         var outputFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
         SaveDatabasesDescriptionJsonFile(databases, outputFile);
@@ -198,11 +199,25 @@ public class ExtractSqlHelper
 
     public async Task GenerateSelectStatementQaMdFileAsync(string folder, string outputFolder)
     {
-        var databasesDescription = LoadDatabasesDescriptionJsonFile(Path.Combine(outputFolder, $"{DatabasesDescriptionName}_User.json"));
-        var outputCsvFile = Path.Combine(outputFolder, "SelectQaPrompt.csv");
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+        var databasesDescription =
+            LoadDatabasesDescriptionJsonFile(Path.Combine(outputFolder, $"{DatabasesDescriptionName}_User.json"));
+        
+        var selectSqlList = ExtractSelectSql(folder, databasesDescription).ToList();
+        
+        await using var mdWriter = StreamWriterCreator.Create(Path.Combine(outputFolder, "SelectQa.md"));
+        foreach (var item in selectSqlList)
+        {
+            await mdWriter.WriteLineAsync($"# Database: {item.Database.DatabaseName}");
+            await mdWriter.WriteLineAsync($"{item.SelectSql.ToSql()}");
+        }
+        
         using var csv = new CsvSharpWriter();
-        await csv.CreateAsync<CsvSelectQaPrompt>(outputCsvFile);
-        foreach (var prompt in GenerateSelectSqlPrompt(folder, databasesDescription))
+        await csv.CreateAsync<CsvSelectQaPrompt>(Path.Combine(outputFolder, "SelectQaPrompt.csv"));
+        foreach (var prompt in GenerateSelectSqlPrompt(selectSqlList))
         {
             await csv.WriteRecordAsync(new CsvSelectQaPrompt
             {
@@ -211,66 +226,80 @@ public class ExtractSqlHelper
         }
     }
 
-    private IEnumerable<string> GenerateSelectSqlPrompt(string folder, List<DatabaseDescription> databasesDescription)
+
+    private IEnumerable<DatabaseSelectSql> ExtractSelectSql(string folder, List<DatabaseDescription> databasesDescription)
     {
         foreach (var selectContent in ExtractSelectStatement(folder))
         {
             Console.WriteLine($"Processing {selectContent.FileName}");
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(selectContent.FileName);
-            var selectFromTableSourceStatements = ExtractSelectFromTableSourceSql(selectContent.Statements)
-                .ToList();
-            
-            var db = databasesDescription.FirstOrDefault(x => x.DatabaseName == databaseName);
+            var db = databasesDescription.FirstOrDefault(x => x.DatabaseName.IsNormalizeSameAs(databaseName));
             if (db == null)
             {
                 continue;
             }
-            
+            var selectFromTableSourceStatements = ExtractSelectFromTableSourceSql(selectContent.Statements)
+                .ToList();
             foreach (var selectFromTableSourceStatement in selectFromTableSourceStatements)
             {
-                var writer = new StringWriter();
-                writer.WriteLine($"# {selectContent.FileName}");
-                writer.WriteLine($"## Database: {databaseName}");
-                var tableSources = selectFromTableSourceStatement.FromSources
-                    .Where(x => x.SqlType == SqlType.TableSource)
-                    .Cast<SqlTableSource>()
-                    .ToList();
-                var tableNames = tableSources.Select(x => x.TableName.NormalizeName()).ToList();
-                var foundTables = 0;
-                foreach (var tableName in tableNames)
+                yield return new DatabaseSelectSql
                 {
-                    var table = db.Tables.FirstOrDefault(x => x.TableName.IsNormalizeSameAs(tableName));
-                    if (table == null)
-                    {
-                        continue;
-                    }
-
-                    foundTables++;
-                    writer.WriteLine($"### {tableName}");
-                    writer.WriteLine(table.ToDescriptionText());
-                }
-                if(foundTables == 0)
-                {
-                    continue;
-                }
-                writer.WriteLine();
-                writer.WriteLine("以上是關於 table 的描述");
-                writer.WriteLine("以下 SQL 內容是 AI 根據使用者的回答生成的. 請反推出使用者當時是詢問什麼商業業務問題? 用一條疑問句就好, 不要有技術性的內容\n例如: 取得用戶調查的基本資訊以及他們對特定問題的回答");
-                writer.WriteLine("```sql");
-                writer.WriteLine(selectFromTableSourceStatement.ToSql());
-                writer.WriteLine("```");
-                writer.WriteLine();
-                yield return writer.ToString();
+                    Database = db, 
+                    SelectSql = selectFromTableSourceStatement
+                };
             }
         }
     }
 
-    private IEnumerable<(SelectStatement selectFromTableSourceStatement, List<SqlTableSource> tableSources)> ExtractTableNamesFromTableSources(List<SelectStatement> selectStatements)
+    private IEnumerable<string> GenerateSelectSqlPrompt(IEnumerable<DatabaseSelectSql> selectSqlList)
+    {
+        foreach (var item in selectSqlList)
+        {
+            var databaseName = item.Database.DatabaseName;
+            var selectFromTableSourceStatement = item.SelectSql;
+            var writer = new StringWriter();
+            writer.WriteLine($"## Database: {databaseName}");
+            var tableSources = selectFromTableSourceStatement.FromSources
+                .Where(x => x.SqlType == SqlType.TableSource)
+                .Cast<SqlTableSource>()
+                .ToList();
+            var tableNames = tableSources.Select(x => x.TableName.NormalizeName()).ToList();
+            var foundTables = 0;
+            foreach (var tableName in tableNames)
+            {
+                var table = item.Database.Tables.FirstOrDefault(x => x.TableName.IsNormalizeSameAs(tableName));
+                if (table == null)
+                {
+                    continue;
+                }
+                foundTables++;
+                writer.WriteLine($"### {tableName}");
+                writer.WriteLine(table.ToDescriptionText());
+            }
+            if (foundTables == 0)
+            {
+                continue;
+            }
+
+            writer.WriteLine();
+            writer.WriteLine("以上是關於 table 的描述");
+            writer.WriteLine(
+                "以下 SQL 內容是 AI 根據使用者的回答生成的. 請反推出使用者當時是詢問什麼商業業務問題? 用一條疑問句就好, 不要有技術性的內容\n例如: 取得用戶調查的基本資訊以及他們對特定問題的回答");
+            writer.WriteLine("```sql");
+            writer.WriteLine(selectFromTableSourceStatement.ToSql());
+            writer.WriteLine("```");
+            writer.WriteLine();
+            yield return writer.ToString();
+        }
+    }
+
+    private IEnumerable<(SelectStatement selectFromTableSourceStatement, List<SqlTableSource> tableSources)>
+        ExtractTableNamesFromTableSources(List<SelectStatement> selectStatements)
     {
         foreach (var selectFromTableSourceStatement in ExtractSelectFromTableSourceSql(selectStatements))
         {
-            var tableSources= selectFromTableSourceStatement.FromSources
-                .Where(x=>x.SqlType == SqlType.TableSource)
+            var tableSources = selectFromTableSourceStatement.FromSources
+                .Where(x => x.SqlType == SqlType.TableSource)
                 .Cast<SqlTableSource>()
                 .ToList();
             yield return (selectFromTableSourceStatement, tableSources);
@@ -281,12 +310,17 @@ public class ExtractSqlHelper
     {
         foreach (var selectStatement in selectStatements)
         {
-            var tableSources= selectStatement.FromSources
-                .Where(x=>x.SqlType == SqlType.TableSource)
+            var tableSources = selectStatement.FromSources
+                .Where(x => x.SqlType == SqlType.TableSource)
+                .Cast<SqlTableSource>()
                 .ToList();
-            if( tableSources.Count == 0)
+            if (tableSources.Count == 0)
             {
                 continue;
+            }
+            foreach (var tableSource in tableSources)
+            {
+                tableSource.TableName = tableSource.TableName.NormalizeName();
             }
             yield return selectStatement;
         }
@@ -312,12 +346,14 @@ public class ExtractSqlHelper
     {
         var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, $"../{DatabasesDescriptionName}.yaml");
         var userDatabase = GetUserDatabaseDescription(userDatabaseDescriptionYamlFile);
-        
-        var databasesDescriptionFromSqlFilesJsonFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
+
+        var databasesDescriptionFromSqlFilesJsonFile =
+            Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
         if (!File.Exists(databasesDescriptionFromSqlFilesJsonFile))
         {
             return;
         }
+
         var databases = LoadDatabasesDescriptionJsonFile(databasesDescriptionFromSqlFilesJsonFile);
 
         databases.UpdateDatabaseDescription(userDatabase);
@@ -335,6 +371,7 @@ public class ExtractSqlHelper
         {
             return;
         }
+
         using var writer = StreamWriterCreator.Create(Path.Combine(outputFolder, "CreateTables.sql"));
         var sqlFileContents = _extractSqlFileHelper.GetSqlContentsFromFolder(createTablesSqlFolder)
             .ToList();
@@ -357,12 +394,14 @@ public class ExtractSqlHelper
         {
             Console.WriteLine($"Processing {sqlFileContent.FileName}");
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
-            var newDb = DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName, sqlFileContent.SqlExpressions);
-            
+            var newDb = DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName,
+                sqlFileContent.SqlExpressions);
+
             var db = databases[databaseName];
             db.Tables.AddRange(newDb.Tables);
             databases[databaseName] = db;
         }
+
         return databases.Values.ToList();
     }
 
@@ -437,7 +476,8 @@ public class ExtractSqlHelper
         foreach (var sqlFileContent in sqlContents)
         {
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
-            yield return DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName, sqlFileContent.SqlExpressions);
+            yield return DatabaseDescriptionCreator.CreateDatabaseDescription(databaseName,
+                sqlFileContent.SqlExpressions);
         }
     }
 
@@ -453,6 +493,7 @@ public class ExtractSqlHelper
                 .ToList();
             db.Tables = tables;
         }
+
         return databasesDesc;
     }
 
@@ -502,24 +543,29 @@ public class ExtractSqlHelper
                 Console.WriteLine($"----------\n{sqlParser.GetPreviousText(0)}");
                 continue;
             }
+
             if (result.HasError)
             {
                 continue;
             }
-            if(currentSqlFile.FileName != sqlFile)
+
+            if (currentSqlFile.FileName != sqlFile)
             {
-                if(currentSqlFile.HasSelectSql())
+                if (currentSqlFile.HasSelectSql())
                 {
                     yield return currentSqlFile;
                 }
+
                 currentSqlFile = new SqlSelectContent
                 {
                     FileName = sqlFile
                 };
             }
+
             currentSqlFile.Statements.Add(result.ResultValue);
         }
-        if(currentSqlFile.HasSelectSql())
+
+        if (currentSqlFile.HasSelectSql())
         {
             yield return currentSqlFile;
         }
@@ -642,6 +688,7 @@ public class ExtractSqlHelper
         {
             return [];
         }
+
         var yamlSerializer = new YamlSerializer();
         var yaml = File.ReadAllText(userDatabaseDescriptionYamlFile);
         return yamlSerializer.Deserialize<List<DatabaseDescription>>(yaml);
@@ -652,7 +699,8 @@ public class ExtractSqlHelper
         return line.StartsWith("/*") || line.StartsWith("--");
     }
 
-    private static List<DatabaseDescription> LoadDatabasesDescriptionJsonFile(string databasesDescriptionFromSqlFilesOfJsonFile)
+    private static List<DatabaseDescription> LoadDatabasesDescriptionJsonFile(
+        string databasesDescriptionFromSqlFilesOfJsonFile)
     {
         var json = File.ReadAllText(databasesDescriptionFromSqlFilesOfJsonFile);
         var databases = JsonSerializer.Deserialize<List<DatabaseDescription>>(json)!;
@@ -827,6 +875,12 @@ public class ExtractSqlHelper
         writer.WriteLine();
         writer.WriteLine();
     }
+}
+
+public class DatabaseSelectSql
+{
+    public required DatabaseDescription Database { get; set; }
+    public required SelectStatement SelectSql { get; set; }
 }
 
 public class CsvSelectQaPrompt
