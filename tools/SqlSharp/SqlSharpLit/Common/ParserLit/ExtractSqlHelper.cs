@@ -228,7 +228,7 @@ public class ExtractSqlHelper
 
         count = 0;
         using var csv = new CsvSharpWriter();
-        await csv.CreateAsync<CsvSelectQaPrompt>(Path.Combine(outputFolder, "SelectQaPrompt.csv"));
+        await csv.CreateFileAsync<CsvSelectQaPrompt>(Path.Combine(outputFolder, "SelectQaPrompt.csv"));
         foreach (var prompt in GenerateSelectSqlPrompt(selectSqlList))
         {
             await csv.WriteRecordAsync(new CsvSelectQaPrompt

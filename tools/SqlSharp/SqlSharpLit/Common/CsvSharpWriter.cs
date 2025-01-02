@@ -15,7 +15,7 @@ public class CsvSharpWriter : IDisposable
     private CsvWriter? _csv;
     private StreamWriter? _writer;
 
-    public async Task CreateAsync<T>(string csvFile)
+    public async Task CreateFileAsync<T>(string csvFile)
     {
         _isExisted = File.Exists(csvFile);
         _writer = new StreamWriter(csvFile, Encoding.UTF8, new FileStreamOptions
