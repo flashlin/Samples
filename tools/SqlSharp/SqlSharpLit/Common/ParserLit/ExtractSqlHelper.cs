@@ -209,6 +209,7 @@ public class ExtractSqlHelper
         var selectSqlList = ExtractSelectSql(folder, databasesDescription).ToList();
         
         await using var mdWriter = StreamWriterCreator.Create(Path.Combine(outputFolder, "SelectQa.md"));
+        var count = 0;
         foreach (var item in selectSqlList)
         {
             await mdWriter.WriteLineAsync($"# Database: {item.Database.DatabaseName}");
@@ -221,8 +222,11 @@ public class ExtractSqlHelper
             var tableSourceNames = string.Join(",", tableSources.Select(x=>x.TableName).ToList());
             await mdWriter.WriteLineAsync($"## Table Sources: {tableSourceNames}");
             await mdWriter.WriteLineAsync($"{item.SelectSql.ToSql()}");
+            count++;
         }
-        
+        await mdWriter.WriteLineAsync($"Total: {count}");
+
+        count = 0;
         using var csv = new CsvSharpWriter();
         await csv.CreateAsync<CsvSelectQaPrompt>(Path.Combine(outputFolder, "SelectQaPrompt.csv"));
         foreach (var prompt in GenerateSelectSqlPrompt(selectSqlList))
@@ -231,7 +235,10 @@ public class ExtractSqlHelper
             {
                 Prompt = prompt
             });
+            count++;
         }
+        await csv.FlushAsync();
+        Console.WriteLine($"Total: {count}");
     }
 
 

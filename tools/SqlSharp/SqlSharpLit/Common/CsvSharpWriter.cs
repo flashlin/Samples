@@ -13,16 +13,17 @@ public class CsvSharpWriter : IDisposable
     };
     private bool _isExisted;
     private CsvWriter? _csv;
+    private StreamWriter? _writer;
 
     public async Task CreateAsync<T>(string csvFile)
     {
         _isExisted = File.Exists(csvFile);
-        var writer = new StreamWriter(csvFile, Encoding.UTF8, new FileStreamOptions
+        _writer = new StreamWriter(csvFile, Encoding.UTF8, new FileStreamOptions
         {
             Access = FileAccess.Write,
             Mode = _isExisted ? FileMode.Append : FileMode.Create, 
         });
-        _csv = new CsvWriter(writer, _csvConfig);
+        _csv = new CsvWriter(_writer, _csvConfig);
         if (!_isExisted)
         {
             _csv.WriteHeader<T>();
@@ -38,6 +39,14 @@ public class CsvSharpWriter : IDisposable
         }
         _csv.WriteRecord(record);
         await _csv.NextRecordAsync();
+    }
+
+    public async Task FlushAsync()
+    {
+        if (_csv != null)
+        {
+            await _csv.FlushAsync();
+        }
     }
 
     public void Dispose()
