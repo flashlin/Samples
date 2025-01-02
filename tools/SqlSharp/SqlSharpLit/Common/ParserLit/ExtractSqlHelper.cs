@@ -200,21 +200,30 @@ public class ExtractSqlHelper
     {
         var databasesDescription = LoadDatabasesDescriptionJsonFile(Path.Combine(outputFolder, $"{DatabasesDescriptionName}_User.json"));
         var outputCsvFile = Path.Combine(outputFolder, "SelectQaPrompt.csv");
-        //using var writer = new StreamWriter(outputFile, false, Encoding.UTF8);
         var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             HasHeaderRecord = true
         };
-        await using var writer = new StreamWriter(outputCsvFile, Encoding.UTF8, new FileStreamOptions());
+        var isExisted = File.Exists(outputCsvFile);
+        await using var writer = new StreamWriter(outputCsvFile, Encoding.UTF8, new FileStreamOptions
+        {
+            Access = FileAccess.Write,
+            Mode = isExisted ? FileMode.Append : FileMode.Create, 
+        });
         await using var csv = new CsvWriter(writer, csvConfig);
+        if (!isExisted)
+        {
+            csv.WriteHeader<CsvSelectQaPrompt>();
+            await csv.NextRecordAsync();
+        }
         foreach (var prompt in GenerateSelectSqlPrompt(folder, databasesDescription))
         {
             csv.WriteRecord(new CsvSelectQaPrompt
             {
                 Prompt = prompt
             });
+            await csv.NextRecordAsync();
         }
-        await csv.FlushAsync();
     }
 
     private IEnumerable<string> GenerateSelectSqlPrompt(string folder, List<DatabaseDescription> databasesDescription)
