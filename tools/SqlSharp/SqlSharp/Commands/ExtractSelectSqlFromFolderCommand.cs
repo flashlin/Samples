@@ -22,6 +22,7 @@ public class ExtractSelectSqlFromFolderCommand : ISpecificationAsync<SqlSharpOpt
         var sourceFolder = args.Input;
         var outputFolder = args.Output;
         var extractSqlHelper = new ExtractSqlHelper(new CustomDatabaseNameProvider());
+        extractSqlHelper.SetDatabaseNameDeep(args.DatabaseNamePathDeep);
         
         //extractSqlHelper.ExtractSelectSqlFromFolder(sourceFolder, outputFolder);
         

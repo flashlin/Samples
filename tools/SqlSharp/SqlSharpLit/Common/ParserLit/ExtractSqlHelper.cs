@@ -201,7 +201,7 @@ public class ExtractSqlHelper
             throw new ArgumentException($"{nameof(outputFile)} must have a parent folder");
         }
         var databasesDescription = LoadDatabasesDescriptionJsonFile(Path.Combine(outputFolder, $"{DatabasesDescriptionName}_User.json"));
-        using var writer = new StreamWriter(outputFile, true, Encoding.UTF8);
+        using var writer = new StreamWriter(outputFile, false, Encoding.UTF8);
         foreach (var selectContent in ExtractSelectStatement(folder))
         {
             Console.WriteLine($"Processing {selectContent.FileName}");
