@@ -26,8 +26,7 @@ public class ExtractSelectSqlFromFolderCommand : ISpecificationAsync<SqlSharpOpt
         
         //extractSqlHelper.ExtractSelectSqlFromFolder(sourceFolder, outputFolder);
         
-        var selectQaMdFile = Path.Combine(outputFolder, "SelectQa.md");
-        extractSqlHelper.GenerateSelectStatementQaMdFile(sourceFolder, selectQaMdFile);
+        extractSqlHelper.GenerateSelectStatementQaMdFile(sourceFolder, outputFolder);
         
         return Task.FromResult(Task.CompletedTask);
     }

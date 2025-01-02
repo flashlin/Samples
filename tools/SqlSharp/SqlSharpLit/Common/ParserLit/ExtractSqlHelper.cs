@@ -193,15 +193,13 @@ public class ExtractSqlHelper
         WriteDatabaseTableNamesDesc(databaseDescriptions);
     }
 
-    public void GenerateSelectStatementQaMdFile(string folder, string outputFile)
+    public void GenerateSelectStatementQaMdFile(string folder, string outputFolder)
     {
-        var outputFolder = Path.GetDirectoryName(outputFile);
-        if (outputFolder == null)
-        {
-            throw new ArgumentException($"{nameof(outputFile)} must have a parent folder");
-        }
         var databasesDescription = LoadDatabasesDescriptionJsonFile(Path.Combine(outputFolder, $"{DatabasesDescriptionName}_User.json"));
-        using var writer = new StreamWriter(outputFile, false, Encoding.UTF8);
+        foreach (var file in Directory.GetFiles(outputFolder, "*_SelectQa.md"))
+        {
+            File.Delete(file);
+        }
         foreach (var selectContent in ExtractSelectStatement(folder))
         {
             Console.WriteLine($"Processing {selectContent.FileName}");
@@ -214,6 +212,9 @@ public class ExtractSqlHelper
             {
                 continue;
             }
+            
+            var outputFile = Path.Combine(outputFolder, $"{db.DatabaseName}_SelectQa.md");
+            using var writer = new StreamWriter(outputFile, true, Encoding.UTF8);
 
             foreach (var selectFromTableSourceStatement in selectFromTableSourceStatements)
             {
@@ -236,7 +237,7 @@ public class ExtractSqlHelper
                 }
                 writer.WriteLine();
                 writer.WriteLine("以上是關於 table 的描述");
-                writer.WriteLine("請根據下面的 SQL 內容，推測使用者可能會問什麼問題? SQL 內容是根據使用者的回答生成的.");
+                writer.WriteLine("以下 SQL 內容是 AI 根據使用者的回答生成的. 請反推出使用者當時是詢問什麼商業業務問題? 用一條疑問句就好, 不要有技術性的內容\n例如: 取得用戶調查的基本資訊以及他們對特定問題的回答");
                 writer.WriteLine("```sql");
                 writer.WriteLine(selectFromTableSourceStatement.ToSql());
                 writer.WriteLine("```");
