@@ -65,20 +65,20 @@ public static class DatabaseDescriptionListExtensions
         var tmpTables = tables.ToList();
         foreach (var table in tmpTables)
         {
-            var userTable = newestTables.FirstOrDefault(x => x.TableName.IsSameAs(table.TableName));
-            if (userTable == null)
+            var newestTable = newestTables.FirstOrDefault(x => x.TableName.IsSameAs(table.TableName));
+            if (newestTable == null)
             {
                 tables.Remove(table);
                 continue;
             }
-            table.UpdateColumnsDescription(userTable);
+            table.UpdateColumnsDescription(newestTable);
         }
-        foreach (var userTable in newestTables)
+        foreach (var newestTable in newestTables)
         {
-            var table = tables.FirstOrDefault(x => x.TableName.IsSameAs(userTable.TableName));
+            var table = tables.FirstOrDefault(x => x.TableName.IsSameAs(newestTable.TableName));
             if (table == null)
             {
-                tables.Add(userTable);
+                tables.Add(newestTable);
             }
         }
     }
