@@ -36,7 +36,7 @@ public static class DatabaseDescriptionListExtensions
         }
     }
     
-    public static void MergeDatabases(this List<DatabaseDescription> databasesDesc,
+    public static void Merge(this List<DatabaseDescription> databasesDesc,
         List<DatabaseDescription> newestDatabaseDesc)
     {
         var tmpDatabases = databasesDesc.ToList();
@@ -48,7 +48,7 @@ public static class DatabaseDescriptionListExtensions
                 databasesDesc.Remove(database);
                 continue;
             }
-            database.Tables.MergeTables(newDatabase.Tables);
+            database.Tables.Merge(newDatabase.Tables);
         }
         foreach (var userDatabase in newestDatabaseDesc)
         {
@@ -60,7 +60,7 @@ public static class DatabaseDescriptionListExtensions
         }
     }
 
-    public static void MergeTables(this List<TableDescription> tables, List<TableDescription> newestTables)
+    public static void Merge(this List<TableDescription> tables, List<TableDescription> newestTables)
     {
         var tmpTables = tables.ToList();
         foreach (var table in tmpTables)
