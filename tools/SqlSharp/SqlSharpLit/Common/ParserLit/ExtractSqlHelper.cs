@@ -229,12 +229,9 @@ public class ExtractSqlHelper
         count = 0;
         using var csv = new CsvSharpWriter();
         await csv.CreateFileAsync<CsvSelectQaPrompt>(Path.Combine(outputFolder, "SelectQaPrompt.csv"));
-        foreach (var prompt in GenerateSelectSqlPrompt(selectSqlList))
+        foreach (var item in GenerateSelectSqlPrompt(selectSqlList))
         {
-            await csv.WriteRecordAsync(new CsvSelectQaPrompt
-            {
-                Prompt = prompt
-            });
+            await csv.WriteRecordAsync(item);
             count++;
         }
         await csv.FlushAsync();
@@ -277,7 +274,7 @@ public class ExtractSqlHelper
         }
     }
 
-    private IEnumerable<string> GenerateSelectSqlPrompt(IEnumerable<DatabaseSelectSql> selectSqlList)
+    private IEnumerable<CsvSelectQaPrompt> GenerateSelectSqlPrompt(IEnumerable<DatabaseSelectSql> selectSqlList)
     {
         foreach (var item in selectSqlList)
         {
@@ -315,7 +312,11 @@ public class ExtractSqlHelper
             writer.WriteLine(selectFromTableSourceStatement.ToSql());
             writer.WriteLine("```");
             writer.WriteLine();
-            yield return writer.ToString();
+            yield return new CsvSelectQaPrompt
+            {
+                Sql = selectFromTableSourceStatement.ToSql(),
+                Prompt = writer.ToString(),
+            };
         }
     }
 
@@ -900,4 +901,5 @@ public class DatabaseSelectSql
 public class CsvSelectQaPrompt
 {
     public string Prompt { get; set; } = string.Empty;
+    public string Sql { get; set; } = string.Empty;
 }
