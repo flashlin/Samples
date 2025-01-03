@@ -25,18 +25,13 @@ public class CsvSharpReader : IDisposable
         return Task.CompletedTask;
     }
 
-    public async IAsyncEnumerable<T> ReadRecordsAsync<T>(Func<T, T> createRecordFn)
-        where T: class, new()
+    public IAsyncEnumerable<T> ReadRecordsAsync<T>()
     {
         if (_csv == null)
         {
             throw new InvalidOperationException("CsvReader is not opened");
         }
-        var item = new T();
-        await foreach (var data in _csv.EnumerateRecordsAsync<T>(item))
-        {
-            yield return createRecordFn(data);
-        }
+        return _csv.GetRecordsAsync<T>();
     }
 
     public void Close()

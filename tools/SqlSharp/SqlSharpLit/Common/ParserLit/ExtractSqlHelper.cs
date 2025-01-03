@@ -244,7 +244,7 @@ public class ExtractSqlHelper
         using var csvReader = new CsvSharpReader();
         await csvReader.OpenFileAsync<CsvSelectQaPrompt>(Path.Combine(outputFolder, "SelectQaPrompt.csv"));
         count = 0;
-        await foreach (var record in csvReader.ReadRecordsAsync<CsvSelectQaPrompt>(x=>new CsvSelectQaPrompt{Prompt = x.Prompt}))
+        await foreach (var record in csvReader.ReadRecordsAsync<CsvSelectQaPrompt>())
         {
             count++;
         }
