@@ -1,4 +1,4 @@
-Remove-Item \VDisk\Github\qa-pair\qa-files\synthetic\outputs\SelectQaPrompt.csv
+Remove-Item \VDisk\Github\qa-pair\qa-files\synthetic\outputs\SelectQaPrompt.csv -Force -ErrorAction SilentlyContinue
 
 $output_path = "\VDisk\Github\qa-pair\qa-files\synthetic\outputs"
 
