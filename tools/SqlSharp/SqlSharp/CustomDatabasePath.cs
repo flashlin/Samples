@@ -11,7 +11,7 @@ public class CustomDatabaseNameProvider : IDatabaseNameProvider
     {
         _deep = deep;
     }
-    
+
     public string GetDatabaseNameFromPath(string path)
     {
         return GetNthDirectoryName(path, _deep);

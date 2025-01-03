@@ -365,6 +365,7 @@ public class ExtractSqlHelper
 
     public void SetDatabaseNameDeep(int deep)
     {
+        Console.WriteLine($"set deep: {deep}");
         _databaseNameProvider.SetDeep(deep);
     }
 
