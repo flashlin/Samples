@@ -238,7 +238,17 @@ public class ExtractSqlHelper
             count++;
         }
         await csv.FlushAsync();
+        csv.Close();
         Console.WriteLine($"Total: {count}");
+
+        using var csvReader = new CsvSharpReader();
+        await csvReader.OpenFileAsync<CsvSelectQaPrompt>(Path.Combine(outputFolder, "SelectQaPrompt.csv"));
+        count = 0;
+        await foreach (var record in csvReader.ReadRecordsAsync<CsvSelectQaPrompt>(x=>new CsvSelectQaPrompt{Prompt = x.Prompt}))
+        {
+            count++;
+        }
+        Console.WriteLine($"CsvTotal: {count}");
     }
 
 

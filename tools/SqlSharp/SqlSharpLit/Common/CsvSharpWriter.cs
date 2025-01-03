@@ -5,6 +5,54 @@ using CsvHelper.Configuration;
 
 namespace SqlSharpLit.Common;
 
+public class CsvSharpReader : IDisposable 
+{
+    private readonly CsvConfiguration _csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+    {
+        HasHeaderRecord = true
+    };
+    private StreamReader? _reader;
+    private CsvReader? _csv;
+
+    public Task OpenFileAsync<T>(string csvFile)
+    {
+        if (!File.Exists(csvFile))
+        {
+            throw new FileNotFoundException($"{csvFile}");
+        }
+        _reader = new StreamReader(csvFile, Encoding.UTF8);
+        _csv = new CsvReader(_reader, _csvConfig);
+        return Task.CompletedTask;
+    }
+
+    public async IAsyncEnumerable<T> ReadRecordsAsync<T>(Func<T, T> createRecordFn)
+        where T: class, new()
+    {
+        if (_csv == null)
+        {
+            throw new InvalidOperationException("CsvReader is not opened");
+        }
+        var item = new T();
+        await foreach (var data in _csv.EnumerateRecordsAsync<T>(item))
+        {
+            yield return createRecordFn(data);
+        }
+    }
+
+    public void Close()
+    {
+        _csv?.Dispose();
+        _reader?.Dispose();
+        _csv = null;
+        _reader = null;
+    }
+
+    public void Dispose()
+    {
+        Close();
+    }
+}
+
 public class CsvSharpWriter : IDisposable
 {
     private readonly CsvConfiguration _csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -49,8 +97,14 @@ public class CsvSharpWriter : IDisposable
         }
     }
 
-    public void Dispose()
+    public void Close()
     {
         _csv?.Dispose();
+        _csv = null;
+    }
+
+    public void Dispose()
+    {
+        Close();
     }
 }
