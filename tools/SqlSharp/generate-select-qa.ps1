@@ -7,7 +7,7 @@ function GenerateSelectQA {
         [string]$databases_folder,
         [int]$deep
     )
-    $command = ".\SqlSharp\bin\Debug\net8.0\SqlSharp.exe -v extractSelectSql -i $databases_folder -o $output_path -- DatabaseNamePathDeep $deep"
+    $command = ".\SqlSharp\bin\Debug\net8.0\SqlSharp.exe -v extractSelectSql -i $databases_folder -o $output_path --DatabaseNamePathDeep $deep"
     Write-Host $command -ForegroundColor Green
     Invoke-Expression $command
 }
