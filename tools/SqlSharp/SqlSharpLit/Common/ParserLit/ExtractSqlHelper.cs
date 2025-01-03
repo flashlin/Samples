@@ -159,6 +159,7 @@ public class ExtractSqlHelper
         }
 
         var databases = ExtractDatabasesDescriptionFromFolder(createTablesSqlFolder);
+        Console.WriteLine($"Total Databases: {databases.Count}");
         var outputFile = Path.Combine(outputFolder, $"{DatabasesDescriptionName}_FromSqlFiles.json");
         SaveDatabasesDescriptionJsonFile(databases, outputFile);
     }
@@ -356,7 +357,7 @@ public class ExtractSqlHelper
         }
     }
 
-    public void MergeUserDatabasesDescription(string outputFolder)
+    public void UpdateByUserDatabasesDescription(string outputFolder)
     {
         var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, $"../{DatabasesDescriptionName}.yaml");
         var userDatabase = GetUserDatabaseDescription(userDatabaseDescriptionYamlFile);
