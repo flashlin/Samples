@@ -42,13 +42,14 @@ public static class DatabaseDescriptionListExtensions
         var tmpDatabases = databasesDesc.ToList();
         foreach (var database in tmpDatabases)
         {
-            var newDatabase = newestDatabaseDesc.FirstOrDefault(x => x.DatabaseName.IsSameAs(database.DatabaseName));
-            if (newDatabase == null)
+            var newestDatabase = newestDatabaseDesc.FirstOrDefault(x => x.DatabaseName.IsSameAs(database.DatabaseName));
+            if (newestDatabase == null)
             {
                 databasesDesc.Remove(database);
                 continue;
             }
-            database.Tables.Merge(newDatabase.Tables);
+            database.Description = string.IsNullOrEmpty(newestDatabase.Description) ? database.Description : newestDatabase.Description;
+            database.Tables.Merge(newestDatabase.Tables);
         }
         foreach (var userDatabase in newestDatabaseDesc)
         {
