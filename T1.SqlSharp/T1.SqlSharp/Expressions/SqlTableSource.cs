@@ -19,10 +19,26 @@ public class SqlTableSource : ITableSource
     {
         var sql = new IndentStringBuilder();
         sql.Write(TableName);
+        WriteSqlAfterTableName(sql);
+        return TableName;
+    }
+
+    protected void WriteSqlAfterTableName(IndentStringBuilder sql)
+    {
+        WriteAliasSql(sql);
+        WriteWithsSql(sql);
+    }
+
+    private void WriteAliasSql(IndentStringBuilder sql)
+    {
         if (!string.IsNullOrEmpty(Alias))
         {
             sql.Write($" AS {Alias}");
         }
+    }
+
+    private void WriteWithsSql(IndentStringBuilder sql)
+    {
         if (Withs.Count > 0)
         {
             sql.Write(" WITH(");
@@ -36,6 +52,5 @@ public class SqlTableSource : ITableSource
             }
             sql.Write(")");
         }
-        return TableName;
     }
 }

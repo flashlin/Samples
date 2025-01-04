@@ -6,6 +6,55 @@ namespace SqlSharpTests;
 public class ParseSelectSqlJoinTest
 {
     [Test]
+    public void inner_join_func()
+    {
+        var sql = $"""
+                   select id
+                   from customer c
+                   inner join StrSplitMax(@customerIDs, ',') t
+                   on c.id = t.val
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer", Alias = "c" },
+                new SqlJoinTableCondition
+                {
+                    JoinType = JoinType.Inner,
+                    JoinedTable = new SqlFuncTableSource
+                    {
+                        Function = new SqlFunctionExpression()
+                        {
+                            FunctionName = "StrSplitMax",
+                            Parameters =
+                            [
+                                new SqlFieldExpr {  FieldName= "@customerIDs" },
+                                new SqlValue { Value = "','" }
+                            ]
+                        },
+                        Alias = "t"
+                    },
+                    OnCondition = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "c.id" },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlFieldExpr { FieldName = "t.val" }
+                    },
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Left_outer_join()
     {
         var sql = $"""
