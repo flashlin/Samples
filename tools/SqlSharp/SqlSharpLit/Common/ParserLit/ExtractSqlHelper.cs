@@ -213,6 +213,7 @@ public class ExtractSqlHelper
         var count = 0;
         foreach (var item in selectSqlList)
         {
+            await mdWriter.WriteLineAsync($"# SqlFile: {item.SqlFile}");
             await mdWriter.WriteLineAsync($"# Database: {item.Database.DatabaseName}");
             var tableNames = string.Join(",", item.Database.Tables.Select(x=>x.TableName).ToList());
             await mdWriter.WriteLineAsync($"## Tables: {tableNames}");
@@ -268,6 +269,7 @@ public class ExtractSqlHelper
             {
                 yield return new DatabaseSelectSql
                 {
+                    SqlFile = selectContent.FileName,
                     Database = db, 
                     SelectSql = selectFromTableSourceStatement
                 };
@@ -897,6 +899,7 @@ public class DatabaseSelectSql
 {
     public required DatabaseDescription Database { get; set; }
     public required SelectStatement SelectSql { get; set; }
+    public string SqlFile { get; set; } = string.Empty;
 }
 
 public class CsvSelectQaPrompt
