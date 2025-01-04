@@ -259,7 +259,7 @@ public class ExtractSqlHelper
             var db = databasesDescription.FirstOrDefault(x => x.DatabaseName.IsNormalizeSameAs(databaseName));
             if (db == null)
             {
-                throw new KeyNotFoundException($"{selectContent.FileName} Db:{databaseName}");
+                //throw new KeyNotFoundException($"{selectContent.FileName} Db:{databaseName}");
                 continue;
             }
             var selectFromTableSourceStatements = ExtractSelectFromTableSourceSql(selectContent.Statements)
