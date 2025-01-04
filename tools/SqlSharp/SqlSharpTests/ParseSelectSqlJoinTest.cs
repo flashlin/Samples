@@ -6,6 +6,105 @@ namespace SqlSharpTests;
 public class ParseSelectSqlJoinTest
 {
     [Test]
+    public void InnerJoin()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM customer c
+                   INNER JOIN emp e
+                   	ON c.id = e.id
+                   	AND c.name = '123'
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                    Alias = "c",
+                },
+                new SqlJoinTableCondition
+                {
+                    JoinType = JoinType.Inner,
+                    JoinedTable = new SqlTableSource
+                    {
+                        TableName = "emp",
+                        Alias = "e"
+                    },
+                    OnCondition = new SqlSearchCondition
+                    {
+                        Left = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpr { FieldName = "c.id" },
+                            ComparisonOperator = ComparisonOperator.Equal,
+                            Right = new SqlFieldExpr { FieldName = "e.id" }
+                        },
+                        LogicalOperator = LogicalOperator.And,
+                        Right = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpr { FieldName = "c.name" },
+                            ComparisonOperator = ComparisonOperator.Equal,
+                            Right = new SqlValue { Value = "'123'" }
+                        }
+                    }
+                }
+            ]
+        });
+    }
+
+    [Test]
+    public void Join_table()
+    {
+        var sql = $"""
+                   select id from customer c 
+                   join [order] o on c.id = o.customerId
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                    Alias = "c",
+                },
+                new SqlJoinTableCondition
+                {
+                    JoinType = JoinType.Inner,
+                    JoinedTable = new SqlTableSource
+                    {
+                        TableName = "[order]",
+                        Alias = "o"
+                    },
+                    OnCondition = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "c.id" },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlFieldExpr { FieldName = "o.customerId" }
+                    }
+                }
+            ],
+        });
+    }
+    
+    [Test]
     public void Union_select_join_table_on()
     {
         var sql = $"""
