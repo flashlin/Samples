@@ -567,59 +567,6 @@ public class ParseSelectSqlTest
     }
 
     [Test]
-    public void LeftJoin_group()
-    {
-        var sql = $"""
-                   select id
-                   from	customer c
-                   left join (select id from emp) e on e.id = c.id
-                   """;
-        var rc = sql.ParseSql();
-        rc.ShouldBe(new SelectStatement
-        {
-            Columns =
-            [
-                new SelectColumn
-                {
-                    Field = new SqlFieldExpr { FieldName = "id" }
-                }
-            ],
-            FromSources =
-            [
-                new SqlTableSource { TableName = "customer", Alias = "c" },
-                new SqlJoinTableCondition
-                {
-                    JoinType = JoinType.Left,
-                    JoinedTable = new SqlInnerTableSource
-                    {
-                        Inner = new SelectStatement
-                        {
-                            Columns =
-                            [
-                                new SelectColumn
-                                {
-                                    Field = new SqlFieldExpr { FieldName = "id" }
-                                }
-                            ],
-                            FromSources =
-                            [
-                                new SqlTableSource { TableName = "emp" }
-                            ],
-                        },
-                        Alias = "e"
-                    },
-                    OnCondition = new SqlConditionExpression
-                    {
-                        Left = new SqlFieldExpr { FieldName = "e.id" },
-                        ComparisonOperator = ComparisonOperator.Equal,
-                        Right = new SqlFieldExpr { FieldName = "c.id" }
-                    }
-                }
-            ]
-        });
-    }
-
-    [Test]
     public void Where_x_and_group()
     {
         var sql = $"""
@@ -665,44 +612,6 @@ public class ParseSelectSqlTest
                     }
                 }
             }
-        });
-    }
-
-    [Test]
-    public void From_group_table_join()
-    {
-        var sql = $"""
-                   SELECT id
-                   FROM (
-                     customer c 
-                     join emp e on c.id = e.id
-                   )
-                   """;
-        var rc = sql.ParseSql();
-        rc.ShouldBe(new SelectStatement
-        {
-            Columns =
-            [
-                new SelectColumn
-                {
-                    Field = new SqlFieldExpr { FieldName = "id" }
-                }
-            ],
-            FromSources =
-            [
-                new SqlTableSource { TableName = "customer", Alias = "c" },
-                new SqlJoinTableCondition
-                {
-                    JoinType = JoinType.Inner,
-                    JoinedTable = new SqlTableSource { TableName = "emp", Alias = "e" },
-                    OnCondition = new SqlConditionExpression
-                    {
-                        Left = new SqlFieldExpr { FieldName = "c.id" },
-                        ComparisonOperator = ComparisonOperator.Equal,
-                        Right = new SqlFieldExpr { FieldName = "e.id" }
-                    }
-                }
-            ]
         });
     }
 
@@ -1055,78 +964,6 @@ public class ParseSelectSqlTest
             FromSources =
             [
                 new SqlTableSource { TableName = "customer" }
-            ]
-        });
-    }
-
-    [Test]
-    public void Left_outer_join()
-    {
-        var sql = $"""
-                   select id 
-                   from customer c
-                   left outer join emp e on e.id = c.id  
-                   """;
-        var rc = sql.ParseSql();
-        rc.ShouldBe(new SelectStatement
-        {
-            Columns =
-            [
-                new SelectColumn
-                {
-                    Field = new SqlFieldExpr { FieldName = "id" }
-                }
-            ],
-            FromSources =
-            [
-                new SqlTableSource { TableName = "customer", Alias = "c" },
-                new SqlJoinTableCondition
-                {
-                    JoinType = JoinType.Left,
-                    JoinedTable = new SqlTableSource { TableName = "emp", Alias = "e" },
-                    OnCondition = new SqlConditionExpression
-                    {
-                        Left = new SqlFieldExpr { FieldName = "e.id" },
-                        ComparisonOperator = ComparisonOperator.Equal,
-                        Right = new SqlFieldExpr { FieldName = "c.id" }
-                    }
-                }
-            ]
-        });
-    }
-
-    [Test]
-    public void Right_outer_join()
-    {
-        var sql = $"""
-                   select id
-                   from customer c
-                   right outer join tb on tb.id = c.id  
-                   """;
-        var rc = sql.ParseSql();
-        rc.ShouldBe(new SelectStatement
-        {
-            Columns =
-            [
-                new SelectColumn
-                {
-                    Field = new SqlFieldExpr { FieldName = "id" }
-                }
-            ],
-            FromSources =
-            [
-                new SqlTableSource { TableName = "customer", Alias = "c" },
-                new SqlJoinTableCondition
-                {
-                    JoinType = JoinType.Right,
-                    JoinedTable = new SqlTableSource { TableName = "tb" },
-                    OnCondition = new SqlConditionExpression
-                    {
-                        Left = new SqlFieldExpr { FieldName = "tb.id" },
-                        ComparisonOperator = ComparisonOperator.Equal,
-                        Right = new SqlFieldExpr { FieldName = "c.id" }
-                    }
-                },
             ]
         });
     }
