@@ -20,7 +20,7 @@ public class SqlTableSource : ITableSource
         var sql = new IndentStringBuilder();
         sql.Write(TableName);
         WriteSqlAfterTableName(sql);
-        return TableName;
+        return sql.ToString();
     }
 
     protected void WriteSqlAfterTableName(IndentStringBuilder sql)
