@@ -7,94 +7,8 @@ using T1.Standard.DesignPatterns;
 namespace SqlSharpTests;
 
 [TestFixture]
-public class ParseSelectSqlTest
+public class ParseSelectSqlInnerJoinTest
 {
-    [Test]
-    public void From_group_from()
-    {
-        var sql = $"""
-                   SELECT id
-                   FROM 
-                   (
-                   	 SELECT id2 FROM customer2 
-                   ) A,
-                   customer3 M 
-                   WHERE M.id = A.id 
-                   AND 
-                   (
-                   		id = 1
-                   		OR
-                   		id = 0X2
-                   )
-                   """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new SelectStatement
-        {
-            Columns =
-            [
-                new SelectColumn
-                {
-                    Field = new SqlFieldExpr { FieldName = "id" }
-                }
-            ],
-            FromSources =
-            [
-                new SqlInnerTableSource()
-                {
-                    Inner = new SqlParenthesizedExpression()
-                    {
-                        Inner = new SelectStatement
-                        {
-                            Columns =
-                            [
-                                new SelectColumn
-                                {
-                                    Field = new SqlFieldExpr { FieldName = "id2" }
-                                }
-                            ],
-                            FromSources =
-                            [
-                                new SqlTableSource { TableName = "customer2" }
-                            ]
-                        }
-                    },
-                    Alias = "A"
-                },
-                new SqlTableSource { TableName = "customer3", Alias = "M" }
-            ],
-            Where = new SqlSearchCondition
-            {
-                Left = new SqlConditionExpression
-                {
-                    Left = new SqlFieldExpr { FieldName = "M.id" },
-                    ComparisonOperator = ComparisonOperator.Equal,
-                    Right = new SqlFieldExpr { FieldName = "A.id" }
-                },
-                LogicalOperator = LogicalOperator.And,
-                Right = new SqlParenthesizedExpression
-                {
-                    Inner = new SqlSearchCondition
-                    {
-                        Left = new SqlConditionExpression
-                        {
-                            Left = new SqlFieldExpr { FieldName = "id" },
-                            ComparisonOperator = ComparisonOperator.Equal,
-                            Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
-                        },
-                        LogicalOperator = LogicalOperator.Or,
-                        Right = new SqlConditionExpression
-                        {
-                            Left = new SqlFieldExpr { FieldName = "id" },
-                            ComparisonOperator = ComparisonOperator.Equal,
-                            Right = new SqlValue { SqlType = SqlType.HexValue, Value = "0x2" }
-                        }
-                    }
-                }
-            }
-        });
-    }
-        
-    
     [Test]
     public void From_group_select_inner_join()
     {
@@ -108,7 +22,7 @@ public class ParseSelectSqlTest
                     inner join emp e on e.id = T.id3
                    ) as T2 
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -175,6 +89,95 @@ public class ParseSelectSqlTest
             ]
         });
     }
+}
+
+[TestFixture]
+public class ParseSelectSqlTest
+{
+    [Test]
+    public void From_group_from()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM 
+                   (
+                   	 SELECT id2 FROM customer2 
+                   ) A,
+                   customer3 M 
+                   WHERE M.id = A.id 
+                   AND 
+                   (
+                   		id = 1
+                   		OR
+                   		id = 0X2
+                   )
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlInnerTableSource()
+                {
+                    Inner = new SqlParenthesizedExpression()
+                    {
+                        Inner = new SelectStatement
+                        {
+                            Columns =
+                            [
+                                new SelectColumn
+                                {
+                                    Field = new SqlFieldExpr { FieldName = "id2" }
+                                }
+                            ],
+                            FromSources =
+                            [
+                                new SqlTableSource { TableName = "customer2" }
+                            ]
+                        }
+                    },
+                    Alias = "A"
+                },
+                new SqlTableSource { TableName = "customer3", Alias = "M" }
+            ],
+            Where = new SqlSearchCondition
+            {
+                Left = new SqlConditionExpression
+                {
+                    Left = new SqlFieldExpr { FieldName = "M.id" },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlFieldExpr { FieldName = "A.id" }
+                },
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlParenthesizedExpression
+                {
+                    Inner = new SqlSearchCondition
+                    {
+                        Left = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpr { FieldName = "id" },
+                            ComparisonOperator = ComparisonOperator.Equal,
+                            Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                        },
+                        LogicalOperator = LogicalOperator.Or,
+                        Right = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpr { FieldName = "id" },
+                            ComparisonOperator = ComparisonOperator.Equal,
+                            Right = new SqlValue { SqlType = SqlType.HexValue, Value = "0x2" }
+                        }
+                    }
+                }
+            }
+        });
+    }
 
     [Test]
     public void From_multi_group()
@@ -188,7 +191,7 @@ public class ParseSelectSqlTest
                        from customer
                    ) d
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -263,7 +266,7 @@ public class ParseSelectSqlTest
                    		from customer
                    ) Temp
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -347,7 +350,7 @@ public class ParseSelectSqlTest
                    select sum(count(1)) over(partition by id) as [Total]
                    from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -386,7 +389,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    SELECT @id += 1
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -413,7 +416,7 @@ public class ParseSelectSqlTest
                    ROW_NUMBER() OVER(PARTITION BY r.id, r.name ORDER BY ID DESC) AS id2
                    from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -453,7 +456,7 @@ public class ParseSelectSqlTest
                    select id
                    FROM CHANGETABLE (CHANGES Customer, @lastSyncVersion) AS c
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement()
         {
             Columns =
@@ -485,7 +488,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select 1 as ErrorCode, 'Message' + @errorMsg as ErrorMessage  
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -521,7 +524,7 @@ public class ParseSelectSqlTest
                    	as id3
                    FROM customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -577,7 +580,7 @@ public class ParseSelectSqlTest
                        MAX(Permission) for id in ([1],[2])
                    ) p
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -617,7 +620,7 @@ public class ParseSelectSqlTest
                    from customer c 
                    where not exists (select 1 from emp)
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -656,7 +659,7 @@ public class ParseSelectSqlTest
                    from	customer c
                    left join (select id from emp) e on e.id = c.id
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -710,7 +713,7 @@ public class ParseSelectSqlTest
                    where id=1 and 
                    (object_name(b) not like '%1%')
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -760,7 +763,7 @@ public class ParseSelectSqlTest
                      join emp e on c.id = e.id
                    )
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -794,7 +797,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select id from customer with(nolock, index(1))
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -833,7 +836,7 @@ public class ParseSelectSqlTest
                    FROM customer
                    where id BETWEEN @a and DATEADD(d,+1,@b)
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -877,7 +880,7 @@ public class ParseSelectSqlTest
                    FROM  
                    customer c WITH (nolock, index=IX_id)  
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement()
         {
             Columns =
@@ -915,7 +918,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select 0 as OrderID --, @test
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -936,7 +939,7 @@ public class ParseSelectSqlTest
                    Select SUM(a*-1)
                    from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -972,7 +975,7 @@ public class ParseSelectSqlTest
                    SELECT ROW_NUMBER() OVER(ORDER BY Sum(id) desc) AS ROWID
                    from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1020,7 +1023,7 @@ public class ParseSelectSqlTest
                    name
                    FROM customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1050,7 +1053,7 @@ public class ParseSelectSqlTest
                    WHERE id=1
                    HAVING COUNT(1) = 2 
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1094,7 +1097,7 @@ public class ParseSelectSqlTest
                    ROW_NUMBER() OVER (ORDER BY id DESC) AS Row 
                    from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1149,7 +1152,7 @@ public class ParseSelectSqlTest
                    from customer c
                    left outer join emp e on e.id = c.id  
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1185,7 +1188,7 @@ public class ParseSelectSqlTest
                    from customer c
                    right outer join tb on tb.id = c.id  
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1224,7 +1227,7 @@ public class ParseSelectSqlTest
                    	 birth between @startDate-1 and @endDate+1 and
                    	 id = 1
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1298,7 +1301,7 @@ public class ParseSelectSqlTest
                    	where b.id = 1
                    ) b on t.id = b.id
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1371,13 +1374,13 @@ public class ParseSelectSqlTest
     [Test]
     public void Where_for_xml_auto()
     {
-        var sq = $"""
+        var sql = $"""
                   SELECT id
                   FROM customer
                   where id = 1
                   for xml auto, ROOT('customer')
                   """;
-        var rc = ParseSql(sq);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1418,7 +1421,7 @@ public class ParseSelectSqlTest
                    FROM customer
                    for xml auto, ROOT('customer')
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1452,7 +1455,7 @@ public class ParseSelectSqlTest
                    select id from customer
                    for xml path('')
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1480,7 +1483,7 @@ public class ParseSelectSqlTest
                    select id from customer
                    UNPIVOT (id FOR allcols IN (id,rid,mid) ) up
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1518,7 +1521,7 @@ public class ParseSelectSqlTest
                    	select id from emp
                    )
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1566,7 +1569,7 @@ public class ParseSelectSqlTest
                    FROM customer
                    where 2 >= cast(left(id,1) as int)
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1614,7 +1617,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select rank, val from strSplit(@text, ',')
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1650,7 +1653,7 @@ public class ParseSelectSqlTest
                        FROM emp e
                    ) c
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1686,7 +1689,7 @@ public class ParseSelectSqlTest
                    from customer c
                    where CHARINDEX(','+convert(nvarchar(3), p.tid) +',', c.id) > 0 
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
     }
 
     [Test]
@@ -1696,7 +1699,7 @@ public class ParseSelectSqlTest
                    SELECT id
                    from customer as c with(nolock)       
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1725,7 +1728,7 @@ public class ParseSelectSqlTest
                    select id from customer
                    group by id&256
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1761,7 +1764,7 @@ public class ParseSelectSqlTest
                    SELECT ROW_NUMBER() OVER (PARTITION BY id ORDER BY birth desc) AS rn
                    FROM customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1808,7 +1811,7 @@ public class ParseSelectSqlTest
                    	Rank() OVER (PARTITION BY id ORDER BY id) AS Row
                    FROM customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1851,7 +1854,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select ~id from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1879,7 +1882,7 @@ public class ParseSelectSqlTest
                    SELECT id
                    FROM mydb..customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1902,7 +1905,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select id from customer group by name
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -1936,7 +1939,7 @@ public class ParseSelectSqlTest
                    select id from customer2
                    join emp2 on emp2.date = c.date
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2017,7 +2020,7 @@ public class ParseSelectSqlTest
                    union
                    select id from emp
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2066,7 +2069,7 @@ public class ParseSelectSqlTest
                      FROM customer
                    )
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2128,7 +2131,7 @@ public class ParseSelectSqlTest
                    	ON c.id = e.id
                    	AND c.name = '123'
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2181,7 +2184,7 @@ public class ParseSelectSqlTest
                    select id from customer c 
                    join [order] o on c.id = o.customerId
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2223,7 +2226,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select id from (select id from emp)
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement()
         {
             Columns =
@@ -2275,7 +2278,7 @@ public class ParseSelectSqlTest
                    SELECT id FROM customer
                    where id in (select val from [dbo].[strSplit](@text, ','))
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2329,7 +2332,7 @@ public class ParseSelectSqlTest
                    select id
                    from customer with(nolock, INDEX (PK_customer))
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2370,7 +2373,7 @@ public class ParseSelectSqlTest
                    END ) AS id
                    from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2423,7 +2426,7 @@ public class ParseSelectSqlTest
                    WHERE id = 1 
                    AND (@code is null or [code] = @Code)
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2477,7 +2480,7 @@ public class ParseSelectSqlTest
                    	 COUNT(DISTINCT id) AS UserCount
                    FROM customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2516,7 +2519,7 @@ public class ParseSelectSqlTest
                    select id from customer
                    where id > = 1
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2545,7 +2548,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select c.id from customer c
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2570,7 +2573,7 @@ public class ParseSelectSqlTest
                    (select id from customer e with(nolock)) as id2
                    from customer c 
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2611,7 +2614,7 @@ public class ParseSelectSqlTest
                    (select e.id from emp e) as id1 
                    from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2647,7 +2650,7 @@ public class ParseSelectSqlTest
                    select id from customer
                    where id between 1 and 10
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2680,7 +2683,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select (case when n=0 and id > 0 then -id * 100 else 1 end)
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         var selectStatement = (SelectStatement)rc.ResultValue;
         var groupInner = ((SqlParenthesizedExpression)selectStatement.Columns[0].Field).Inner;
         var field = (SqlCaseClause)groupInner;
@@ -2723,7 +2726,7 @@ public class ParseSelectSqlTest
                     (SELECT @name) AS name
                    from customer 
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2759,7 +2762,7 @@ public class ParseSelectSqlTest
                    from customer
                    where gid in (select gid from temp)
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2803,7 +2806,7 @@ public class ParseSelectSqlTest
                    select @id = case id&2 when 2 then 1 else 0 end
                    from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2852,7 +2855,7 @@ public class ParseSelectSqlTest
                             END ) AS balance
                    from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -2935,7 +2938,7 @@ public class ParseSelectSqlTest
                    		(IsNull(name, 0) <15)and 
                    		(id1!=0 or id2!=0)
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement()
         {
             Columns =
@@ -3030,7 +3033,7 @@ public class ParseSelectSqlTest
                    select id from customer
                    where (IsNull(Status, 0) <15)
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         var json = rc.ResultValue.ToSqlJsonString();
         rc.ShouldBe(new SelectStatement
         {
@@ -3090,7 +3093,7 @@ public class ParseSelectSqlTest
                    @a as 'field1',
                    @b as 'field2'
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -3124,7 +3127,7 @@ public class ParseSelectSqlTest
                    WHERE [status] & (123 | 456) = 0
                        AND ISNULL(pp,0) = 0
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Top = new SqlTopClause
@@ -3227,7 +3230,7 @@ public class ParseSelectSqlTest
                    select @a = round(((@b - @b) * RandomNumber + @d), 0)
                    from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
     }
 
     [Test]
@@ -3246,7 +3249,7 @@ public class ParseSelectSqlTest
                    select @upper = count(*) 
                    from customer
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -3290,7 +3293,7 @@ public class ParseSelectSqlTest
                    select @a = @a & b
                    from customer 
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         var json = rc.ResultValue.ToSqlJsonString();
         rc.ShouldBe(new SelectStatement
         {
@@ -3337,7 +3340,7 @@ public class ParseSelectSqlTest
                    from customer 
                    where id in (@b, @c)
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement()
         {
             Columns =
@@ -3388,7 +3391,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select -1 as [result]
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -3414,7 +3417,7 @@ public class ParseSelectSqlTest
                    where BetOption = 
                    cast(@a as nvarchar(2)) + ':' + cast(@b as nvarchar(3))
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         var json = rc.ResultValue.ToSqlJsonString();
         rc.ShouldBe(new SelectStatement()
         {
@@ -3508,7 +3511,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    SELECT * FROM [$(TableName)]
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -3537,7 +3540,7 @@ public class ParseSelectSqlTest
                    where UserName=@username 
                    order by LastDate desc
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Top = new SqlTopClause
@@ -3600,7 +3603,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select top (@batchsize) id from customer with(nolock) where matchid = @matchid and matchType < 39 and createDate <> @eventDate
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         var sqlJson = rc.ResultValue.ToSqlJsonString();
         rc.ShouldBe(new SelectStatement
         {
@@ -3695,7 +3698,7 @@ public class ParseSelectSqlTest
                    WHERE Id = 1;
                    """;
 
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
 
         rc.ShouldBe(new SelectStatement
         {
@@ -3748,7 +3751,7 @@ public class ParseSelectSqlTest
                    where name = DB_NAME()
                    and SUSER_SNAME(owner_sid) = 'sa'
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -3815,7 +3818,7 @@ public class ParseSelectSqlTest
                    from customer
                    where createDate is not null
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -3854,7 +3857,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select id from customer with(nolock)
                    """;
-        var rc = ParseSql(sql);
+        var rc = sql.ParseSql();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -3882,11 +3885,5 @@ public class ParseSelectSqlTest
                 }
             ],
         });
-    }
-
-    private static ParseResult<ISqlExpression> ParseSql(string sql)
-    {
-        var p = new SqlParser(sql);
-        return p.Parse();
     }
 }
