@@ -28,6 +28,6 @@ public class SqlInnerTableSource : SqlTableSource
             }
             sql.Write(")");
         }
-        return TableName;
+        return sql.ToString();
     }
 }
