@@ -284,7 +284,7 @@ public class ExtractSqlHelper
             var databaseName = item.Database.DatabaseName;
             var selectFromTableSourceStatement = item.SelectSql;
             var writer = new StringWriter();
-            writer.WriteLine($"## Database: {databaseName}");
+            writer.WriteLine($"Database: {databaseName}");
             var tableSources = selectFromTableSourceStatement.FromSources
                 .Where(x => x.SqlType == SqlType.TableSource)
                 .Cast<SqlTableSource>()
@@ -299,7 +299,6 @@ public class ExtractSqlHelper
                     continue;
                 }
                 foundTables++;
-                writer.WriteLine($"### {tableName}");
                 writer.WriteLine(table.ToDescriptionText());
             }
             if (foundTables == 0)
@@ -307,7 +306,6 @@ public class ExtractSqlHelper
                 continue;
             }
 
-            writer.WriteLine();
             writer.WriteLine("以上是關於 table 的描述");
             writer.WriteLine(
                 "以下 SQL 內容是 AI 根據使用者的回答生成的. 請反推出使用者當時是詢問什麼商業業務問題? 用一條疑問句就好, 不要有技術性的內容, 用json 格式回答\njson 格式範例:\n{ “answer”: “取得用戶調查的基本資訊以及他們對特定問題的回答” }\n");
