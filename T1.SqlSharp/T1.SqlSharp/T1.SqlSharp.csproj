@@ -10,9 +10,10 @@
         <Description>Parse TSQL</Description>
         <PackageLicense>https://opensource.org/licenses/MIT</PackageLicense>
         <PackageTags>T1</PackageTags>
-        <Version>1.0.7</Version>
+        <Version>1.0.8</Version>
         <PackageReleaseNotes>add UpdateDatabasesDescription</PackageReleaseNotes>
 <!--        <PackageReadmeFile>ReadMd.md</PackageReadmeFile>-->
+        <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -21,10 +22,8 @@
     </ItemGroup>
     
     <ItemGroup>
-        <None Update="ReadMe.md">
-            <Pack>True</Pack>
-            <PackagePath>\</PackagePath>
-        </None>
+        <None Include="ReadMe.md" Pack="true" PackagePath=""/>
+        <None Include="LICENSE.md" Pack="true" PackagePath=""/>
     </ItemGroup>
 
 </Project>
