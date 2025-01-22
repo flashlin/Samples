@@ -1,10 +1,6 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices.JavaScript;
-using System.Text.RegularExpressions;
-using T1.SqlSharp;
 using T1.SqlSharp.Expressions;
 
-namespace SqlSharpLit.Common.ParserLit;
+namespace T1.SqlSharp.ParserLit;
 
 public class SqlParser
 {
@@ -3770,14 +3766,5 @@ public class SqlParser
         }
 
         return true;
-    }
-}
-
-
-public static class ArrayExtensions
-{
-    public static T GetValueOrDefault<T>(this List<T> tokens, int index, Func<T> defaultValue)
-    {
-        return index >= 0 && index < tokens.Count ? tokens[index] : defaultValue();
     }
 }

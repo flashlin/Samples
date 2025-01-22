@@ -2,6 +2,7 @@ using FluentAssertions;
 using SqlSharpLit.Common.ParserLit;
 using T1.SqlSharp;
 using T1.SqlSharp.Expressions;
+using T1.SqlSharp.ParserLit;
 using T1.Standard.DesignPatterns;
 
 namespace SqlSharpTests;

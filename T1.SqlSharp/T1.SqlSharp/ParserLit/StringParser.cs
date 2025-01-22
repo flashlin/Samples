@@ -1,6 +1,4 @@
-using T1.SqlSharp;
-
-namespace SqlSharpLit.Common.ParserLit;
+namespace T1.SqlSharp.ParserLit;
 
 public class StringParser
 {

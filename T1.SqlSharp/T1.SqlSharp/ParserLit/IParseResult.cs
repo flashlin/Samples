@@ -1,6 +1,6 @@
-namespace SqlSharpLit.Common.ParserLit;
+namespace T1.SqlSharp.ParserLit;
 
-interface IParseResult
+public interface IParseResult
 {
     bool HasResult { get; set; }
     ParseError Error { get; set; }

@@ -1,5 +1,6 @@
 using SqlSharpLit.Common.ParserLit;
 using T1.SqlSharp.Expressions;
+using T1.SqlSharp.ParserLit;
 
 namespace SqlSharpTests;
 

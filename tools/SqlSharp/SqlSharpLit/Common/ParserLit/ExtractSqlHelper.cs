@@ -9,6 +9,7 @@ using T1.SqlSharp.DatabaseDescriptions;
 using T1.SqlSharp.Expressions;
 using T1.SqlSharp.Extensions;
 using T1.SqlSharp.Helper;
+using T1.SqlSharp.ParserLit;
 using T1.Standard.Collections.Generics;
 using T1.Standard.Linq;
 using T1.Standard.Serialization;
