@@ -12,7 +12,7 @@
         <PackageTags>T1</PackageTags>
         <Version>1.0.8</Version>
         <PackageReleaseNotes>add UpdateDatabasesDescription</PackageReleaseNotes>
-<!--        <PackageReadmeFile>ReadMd.md</PackageReadmeFile>-->
+        <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
         <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     </PropertyGroup>
 
