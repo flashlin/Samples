@@ -3,8 +3,53 @@ import { ref } from 'vue'
 
 defineProps<{ msg: string }>()
 
-const count = ref(0)
 const code = ref('// 在這裡輸入您的程式碼\nfunction hello() {\n  console.log("Hello, World!");\n}')
+const clipboardError = ref('')
+
+async function copyFromClipboard() {
+  try {
+    // 檢查權限
+    const permissionStatus = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
+    
+    if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') {
+      const text = await navigator.clipboard.readText();
+      code.value = text;
+      clipboardError.value = '';
+    } else {
+      clipboardError.value = '沒有剪貼簿讀取權限';
+      // 替代方案：使用 textarea 和 document.execCommand
+      useAlternativeClipboardMethod();
+    }
+  } catch (error) {
+    console.error('剪貼簿讀取錯誤:', error);
+    clipboardError.value = '讀取剪貼簿失敗，請嘗試手動貼上';
+    // 嘗試替代方案
+    useAlternativeClipboardMethod();
+  }
+}
+
+function useAlternativeClipboardMethod() {
+  // 創建一個臨時的 textarea 元素
+  const textArea = document.createElement('textarea');
+  document.body.appendChild(textArea);
+  textArea.focus();
+  
+  // 嘗試使用 document.execCommand('paste')
+  try {
+    const successful = document.execCommand('paste');
+    if (successful) {
+      code.value = textArea.value;
+      clipboardError.value = '';
+    } else {
+      clipboardError.value = '請使用 Ctrl+V 手動貼上';
+    }
+  } catch (err) {
+    clipboardError.value = '請使用 Ctrl+V 手動貼上';
+  }
+  
+  // 移除臨時元素
+  document.body.removeChild(textArea);
+}
 
 function handleCodeChange(event: Event) {
   const target = event.target as HTMLTextAreaElement
@@ -29,7 +74,8 @@ function runCode() {
   <h1>{{ msg }}</h1>
 
   <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
+    <button type="button" @click="copyFromClipboard">從剪貼簿複製</button>
+    <p v-if="clipboardError" class="error-message">{{ clipboardError }}</p>
     <p>
       Edit
       <code>components/HelloWorld.vue</code> to test HMR
@@ -118,5 +164,11 @@ function runCode() {
 
 .run-button:hover {
   background-color: #45a049;
+}
+
+.error-message {
+  color: #f44336;
+  margin-top: 5px;
+  font-size: 14px;
 }
 </style>
