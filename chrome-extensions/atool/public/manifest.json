@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "我的 Chrome 擴充功能",
+  "version": "1.0",
+  "description": "一個使用 Vue 和 TypeScript 構建的 Chrome 擴充功能",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "js/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["js/content.js"]
+    }
+  ],
+  "permissions": ["storage", "tabs"],
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  }
+} 
