@@ -118,6 +118,7 @@ function runCode() {
 .editor-container {
   margin: 20px 0;
   width: 100%;
+  max-width: 100%;
 }
 
 .editor-container h2 {
@@ -126,7 +127,7 @@ function runCode() {
 
 .code-editor {
   width: 100%;
-  height: 300px;
+  height: 400px;
   font-family: 'Courier New', Courier, monospace;
   font-size: 14px;
   line-height: 1.5;
@@ -167,5 +168,18 @@ function runCode() {
   color: #f44336;
   margin-top: 5px;
   font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  .card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .code-editor {
+    height: 500px;
+  }
 }
 </style>
