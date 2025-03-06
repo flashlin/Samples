@@ -9,6 +9,12 @@ public class VimEditor
     {
     }
 
+    public void Run()
+    {
+        Render();
+        WaitForInput();
+    }
+
     public void Render()
     {
         Context.SetText(0, 0, "Hello, World!");
@@ -18,5 +24,28 @@ public class VimEditor
             Y = 0,
             Text = Context.Texts[0]
         });
+    }
+    
+    public void WaitForInput()
+    {
+        var keyInfo = Console.ReadKey(intercept: true); 
+        if (keyInfo.Key == ConsoleKey.I)
+        {
+            var editor = new VimEditEditor
+            {
+                Context = Context
+            };
+            editor.Run();
+        }
+    }
+}
+
+public class VimEditEditor
+{
+    ConsoleRender _render { get; set; } = new();
+    public ConsoleContext Context { get; set; } = new();
+    public void Run()
+    {
+        
     }
 }

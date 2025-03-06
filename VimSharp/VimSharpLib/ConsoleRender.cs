@@ -11,7 +11,6 @@ public class ConsoleRender
             Console.BackgroundColor = c.BackgroundColor;
             Console.Write(c.Value);
         }
-
         Console.ResetColor();
     }
 }
