@@ -39,13 +39,3 @@ public class VimEditor
         }
     }
 }
-
-public class VimEditEditor
-{
-    ConsoleRender _render { get; set; } = new();
-    public ConsoleContext Context { get; set; } = new();
-    public void Run()
-    {
-        
-    }
-}
