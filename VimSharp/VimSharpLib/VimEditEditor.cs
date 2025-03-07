@@ -222,9 +222,6 @@ public class VimEditEditor
                     // 更新文本
                     currentLine.SetText(0, newText);
                     
-                    // 只渲染新添加的字符
-                    //_render.RenderChar(Context.X, Context.Y, currentLine.Chars[actualIndex]);
-                        
                     // 移動光標（考慮中文字符寬度）
                     Context.X += GetCharWidth(keyInfo.KeyChar);
                 }
