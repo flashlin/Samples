@@ -28,14 +28,27 @@ public class VimEditor
     
     public void WaitForInput()
     {
-        var keyInfo = Console.ReadKey(intercept: true); 
-        if (keyInfo.Key == ConsoleKey.I)
+        while (true)
         {
-            var editor = new VimEditEditor
+            var keyInfo = Console.ReadKey(intercept: true);
+            
+            if (keyInfo.Key == ConsoleKey.I)
             {
-                Context = Context
-            };
-            editor.Run();
+                // 進入編輯模式
+                var editor = new VimEditEditor
+                {
+                    Context = Context
+                };
+                editor.Run();
+                
+                // 編輯模式結束後重新渲染
+                Render();
+            }
+            else if (keyInfo.Key == ConsoleKey.Q)
+            {
+                // 退出編輯器
+                break;
+            }
         }
     }
 }
