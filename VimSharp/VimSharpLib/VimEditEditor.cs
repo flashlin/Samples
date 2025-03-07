@@ -12,14 +12,21 @@ public class VimEditEditor
     
     public void Run()
     {
-        while (_continueEditing)
+        // 初始渲染
+        Console.Clear();
+        if (Context.Texts.Count > 0)
         {
             _render.Render(new RenderArgs
             {
-                X = Context.X,
-                Y = Context.Y,
+                X = 0,
+                Y = 0,
                 Text = Context.Texts[0]
             });
+            Console.SetCursorPosition(Context.X, Context.Y);
+        }
+        
+        while (_continueEditing)
+        {
             WaitForInput();
         }
     }
@@ -104,6 +111,15 @@ public class VimEditEditor
                             
                         // 移動光標（考慮中文字符寬度）
                         Context.X -= GetCharWidth(charToDelete);
+                        
+                        // 清除屏幕並重新渲染整行（對於 Backspace，我們需要重新渲染整行）
+                        Console.Clear();
+                        _render.Render(new RenderArgs
+                        {
+                            X = 0,
+                            Y = Context.Y,
+                            Text = Context.Texts[Context.Y]
+                        });
                     }
                 }
                 break;
@@ -153,6 +169,15 @@ public class VimEditEditor
                     {
                         Context.X = upLineWidth;
                     }
+                    
+                    // 清除屏幕並重新渲染當前行
+                    Console.Clear();
+                    _render.Render(new RenderArgs
+                    {
+                        X = 0,
+                        Y = Context.Y,
+                        Text = Context.Texts[Context.Y]
+                    });
                 }
                 break;
                     
@@ -167,6 +192,15 @@ public class VimEditEditor
                     {
                         Context.X = downLineWidth;
                     }
+                    
+                    // 清除屏幕並重新渲染當前行
+                    Console.Clear();
+                    _render.Render(new RenderArgs
+                    {
+                        X = 0,
+                        Y = Context.Y,
+                        Text = Context.Texts[Context.Y]
+                    });
                 }
                 break;
                     
@@ -187,6 +221,9 @@ public class VimEditEditor
                         
                     // 更新文本
                     currentLine.SetText(0, newText);
+                    
+                    // 只渲染新添加的字符
+                    _render.RenderChar(Context.X, Context.Y, currentLine.Chars[actualIndex]);
                         
                     // 移動光標（考慮中文字符寬度）
                     Context.X += GetCharWidth(keyInfo.KeyChar);
@@ -194,15 +231,7 @@ public class VimEditEditor
                 break;
         }
             
-        // 重新渲染
-        _render.Render(new RenderArgs
-        {
-            X = 0,
-            Y = Context.Y,
-            Text = Context.Texts[Context.Y]
-        });
-            
-        // 設置光標位置
+        // 不需要重新渲染整行，只需設置光標位置
         Console.SetCursorPosition(Context.X, Context.Y);
     }
 }
