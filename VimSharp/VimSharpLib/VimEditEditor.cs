@@ -13,7 +13,9 @@ public class VimEditEditor
     public void Run()
     {
         // 初始渲染
-        Console.Clear();
+        // Console.Clear();
+        
+        
         if (Context.Texts.Count > 0)
         {
             _render.Render(new RenderArgs
