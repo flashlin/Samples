@@ -223,13 +223,20 @@ public class VimEditEditor
                     currentLine.SetText(0, newText);
                     
                     // 只渲染新添加的字符
-                    _render.RenderChar(Context.X, Context.Y, currentLine.Chars[actualIndex]);
+                    //_render.RenderChar(Context.X, Context.Y, currentLine.Chars[actualIndex]);
                         
                     // 移動光標（考慮中文字符寬度）
                     Context.X += GetCharWidth(keyInfo.KeyChar);
                 }
                 break;
         }
+        
+        _render.Render(new RenderArgs()
+        {
+            X = 0, 
+            Y = Context.Y, 
+            Text = Context.Texts[Context.Y]
+        });
             
         // 不需要重新渲染整行，只需設置光標位置
         Console.SetCursorPosition(Context.X, Context.Y);
