@@ -93,7 +93,7 @@ public class VimEditEditor
                     var currentLine = Context.Texts[Context.Y];
                         
                     // 獲取當前文本
-                    string currentText = new string(currentLine.Chars.Select(c => c.Value).ToArray());
+                    string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
                         
                     // 計算實際索引位置
                     int actualIndex = GetStringIndexFromDisplayPosition(currentText, Context.X);
@@ -129,7 +129,7 @@ public class VimEditEditor
                 {
                     // 獲取當前文本
                     var currentLine = Context.Texts[Context.Y];
-                    string currentText = new string(currentLine.Chars.Select(c => c.Value).ToArray());
+                    string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
                         
                     // 計算實際索引位置
                     int actualIndex = GetStringIndexFromDisplayPosition(currentText, Context.X);
@@ -145,7 +145,7 @@ public class VimEditEditor
                     
             case ConsoleKey.RightArrow:
                 var currentLineForRight = Context.Texts[Context.Y];
-                string textForRight = new string(currentLineForRight.Chars.Select(c => c.Value).ToArray());
+                string textForRight = new string(currentLineForRight.Chars.Select(c => c.Char).ToArray());
                     
                 // 計算實際索引位置
                 int actualIndexForRight = GetStringIndexFromDisplayPosition(textForRight, Context.X);
@@ -163,7 +163,7 @@ public class VimEditEditor
                 {
                     Context.Y--;
                     // 確保 X 不超過新行的顯示寬度
-                    string upLineText = new string(Context.Texts[Context.Y].Chars.Select(c => c.Value).ToArray());
+                    string upLineText = new string(Context.Texts[Context.Y].Chars.Select(c => c.Char).ToArray());
                     int upLineWidth = GetStringDisplayWidth(upLineText);
                     if (Context.X > upLineWidth)
                     {
@@ -186,7 +186,7 @@ public class VimEditEditor
                 {
                     Context.Y++;
                     // 確保 X 不超過新行的顯示寬度
-                    string downLineText = new string(Context.Texts[Context.Y].Chars.Select(c => c.Value).ToArray());
+                    string downLineText = new string(Context.Texts[Context.Y].Chars.Select(c => c.Char).ToArray());
                     int downLineWidth = GetStringDisplayWidth(downLineText);
                     if (Context.X > downLineWidth)
                     {
@@ -211,7 +211,7 @@ public class VimEditEditor
                     var currentLine = Context.Texts[Context.Y];
                         
                     // 獲取當前文本
-                    string currentText = new string(currentLine.Chars.Select(c => c.Value).ToArray());
+                    string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
                         
                     // 計算實際索引位置
                     int actualIndex = GetStringIndexFromDisplayPosition(currentText, Context.X);
