@@ -4,6 +4,7 @@ using System.Text;
 public class VimEditEditor
 {
     ConsoleRender _render { get; set; } = new();
+    bool _continueEditing = true;
     public ConsoleContext Context { get; set; } = new();
     
     // 添加一個編碼轉換器用於檢測中文字符
@@ -11,14 +12,16 @@ public class VimEditEditor
     
     public void Run()
     {
-        _render.Render(new RenderArgs
+        while (_continueEditing)
         {
-            X = Context.X,
-            Y = Context.Y,
-            Text = Context.Texts[0]
-        });
-        
-        WaitForInput();
+            _render.Render(new RenderArgs
+            {
+                X = Context.X,
+                Y = Context.Y,
+                Text = Context.Texts[0]
+            });
+            WaitForInput();
+        }
     }
     
     // 檢查字符是否為中文字符（在 Big5 編碼中佔用 2 個字節）
@@ -62,149 +65,144 @@ public class VimEditEditor
     
     public void WaitForInput()
     {
-        bool continueEditing = true;
-        
-        while (continueEditing)
+        var keyInfo = Console.ReadKey(intercept: true);
+            
+        // 確保當前行存在
+        if (Context.Texts.Count <= Context.Y)
         {
-            var keyInfo = Console.ReadKey(intercept: true);
+            Context.Texts.Add(new ConsoleText());
+        }
             
-            // 確保當前行存在
-            if (Context.Texts.Count <= Context.Y)
-            {
-                Context.Texts.Add(new ConsoleText());
-            }
-            
-            switch (keyInfo.Key)
-            {
-                case ConsoleKey.Escape:
-                    continueEditing = false;
-                    break;
+        switch (keyInfo.Key)
+        {
+            case ConsoleKey.Escape:
+                _continueEditing = false;
+                break;
                     
-                case ConsoleKey.Backspace:
-                    if (Context.X > 0)
-                    {
-                        // 獲取當前行
-                        var currentLine = Context.Texts[Context.Y];
+            case ConsoleKey.Backspace:
+                if (Context.X > 0)
+                {
+                    // 獲取當前行
+                    var currentLine = Context.Texts[Context.Y];
                         
-                        // 獲取當前文本
-                        string currentText = new string(currentLine.Chars.Select(c => c.Value).ToArray());
+                    // 獲取當前文本
+                    string currentText = new string(currentLine.Chars.Select(c => c.Value).ToArray());
                         
-                        // 計算實際索引位置
-                        int actualIndex = GetStringIndexFromDisplayPosition(currentText, Context.X);
-                        
-                        if (actualIndex > 0)
-                        {
-                            // 獲取要刪除的字符
-                            char charToDelete = currentText[actualIndex - 1];
-                            
-                            // 刪除字符
-                            string newText = currentText.Remove(actualIndex - 1, 1);
-                            
-                            // 更新文本
-                            currentLine.SetText(0, newText);
-                            
-                            // 移動光標（考慮中文字符寬度）
-                            Context.X -= GetCharWidth(charToDelete);
-                        }
-                    }
-                    break;
-                    
-                case ConsoleKey.LeftArrow:
-                    if (Context.X > 0)
-                    {
-                        // 獲取當前文本
-                        var currentLine = Context.Texts[Context.Y];
-                        string currentText = new string(currentLine.Chars.Select(c => c.Value).ToArray());
-                        
-                        // 計算實際索引位置
-                        int actualIndex = GetStringIndexFromDisplayPosition(currentText, Context.X);
-                        
-                        if (actualIndex > 0)
-                        {
-                            // 獲取前一個字符的寬度
-                            char prevChar = currentText[actualIndex - 1];
-                            Context.X -= GetCharWidth(prevChar);
-                        }
-                    }
-                    break;
-                    
-                case ConsoleKey.RightArrow:
-                    var currentLineForRight = Context.Texts[Context.Y];
-                    string textForRight = new string(currentLineForRight.Chars.Select(c => c.Value).ToArray());
-                    
                     // 計算實際索引位置
-                    int actualIndexForRight = GetStringIndexFromDisplayPosition(textForRight, Context.X);
-                    
-                    if (actualIndexForRight < textForRight.Length)
-                    {
-                        // 獲取當前字符的寬度
-                        char currentChar = textForRight[actualIndexForRight];
-                        Context.X += GetCharWidth(currentChar);
-                    }
-                    break;
-                    
-                case ConsoleKey.UpArrow:
-                    if (Context.Y > 0)
-                    {
-                        Context.Y--;
-                        // 確保 X 不超過新行的顯示寬度
-                        string upLineText = new string(Context.Texts[Context.Y].Chars.Select(c => c.Value).ToArray());
-                        int upLineWidth = GetStringDisplayWidth(upLineText);
-                        if (Context.X > upLineWidth)
-                        {
-                            Context.X = upLineWidth;
-                        }
-                    }
-                    break;
-                    
-                case ConsoleKey.DownArrow:
-                    if (Context.Y < Context.Texts.Count - 1)
-                    {
-                        Context.Y++;
-                        // 確保 X 不超過新行的顯示寬度
-                        string downLineText = new string(Context.Texts[Context.Y].Chars.Select(c => c.Value).ToArray());
-                        int downLineWidth = GetStringDisplayWidth(downLineText);
-                        if (Context.X > downLineWidth)
-                        {
-                            Context.X = downLineWidth;
-                        }
-                    }
-                    break;
-                    
-                default:
-                    // 處理一般字符輸入
-                    if (keyInfo.KeyChar != '\0')
-                    {
-                        var currentLine = Context.Texts[Context.Y];
+                    int actualIndex = GetStringIndexFromDisplayPosition(currentText, Context.X);
                         
-                        // 獲取當前文本
-                        string currentText = new string(currentLine.Chars.Select(c => c.Value).ToArray());
-                        
-                        // 計算實際索引位置
-                        int actualIndex = GetStringIndexFromDisplayPosition(currentText, Context.X);
-                        
-                        // 在實際索引位置插入字符
-                        string newText = currentText.Insert(actualIndex, keyInfo.KeyChar.ToString());
-                        
+                    if (actualIndex > 0)
+                    {
+                        // 獲取要刪除的字符
+                        char charToDelete = currentText[actualIndex - 1];
+                            
+                        // 刪除字符
+                        string newText = currentText.Remove(actualIndex - 1, 1);
+                            
                         // 更新文本
                         currentLine.SetText(0, newText);
-                        
+                            
                         // 移動光標（考慮中文字符寬度）
-                        Context.X += GetCharWidth(keyInfo.KeyChar);
+                        Context.X -= GetCharWidth(charToDelete);
                     }
-                    break;
-            }
-            
-            // 重新渲染
-            _render.Render(new RenderArgs
-            {
-                X = 0,
-                Y = Context.Y,
-                Text = Context.Texts[Context.Y]
-            });
-            
-            // 設置光標位置
-            Console.SetCursorPosition(Context.X, Context.Y);
+                }
+                break;
+                    
+            case ConsoleKey.LeftArrow:
+                if (Context.X > 0)
+                {
+                    // 獲取當前文本
+                    var currentLine = Context.Texts[Context.Y];
+                    string currentText = new string(currentLine.Chars.Select(c => c.Value).ToArray());
+                        
+                    // 計算實際索引位置
+                    int actualIndex = GetStringIndexFromDisplayPosition(currentText, Context.X);
+                        
+                    if (actualIndex > 0)
+                    {
+                        // 獲取前一個字符的寬度
+                        char prevChar = currentText[actualIndex - 1];
+                        Context.X -= GetCharWidth(prevChar);
+                    }
+                }
+                break;
+                    
+            case ConsoleKey.RightArrow:
+                var currentLineForRight = Context.Texts[Context.Y];
+                string textForRight = new string(currentLineForRight.Chars.Select(c => c.Value).ToArray());
+                    
+                // 計算實際索引位置
+                int actualIndexForRight = GetStringIndexFromDisplayPosition(textForRight, Context.X);
+                    
+                if (actualIndexForRight < textForRight.Length)
+                {
+                    // 獲取當前字符的寬度
+                    char currentChar = textForRight[actualIndexForRight];
+                    Context.X += GetCharWidth(currentChar);
+                }
+                break;
+                    
+            case ConsoleKey.UpArrow:
+                if (Context.Y > 0)
+                {
+                    Context.Y--;
+                    // 確保 X 不超過新行的顯示寬度
+                    string upLineText = new string(Context.Texts[Context.Y].Chars.Select(c => c.Value).ToArray());
+                    int upLineWidth = GetStringDisplayWidth(upLineText);
+                    if (Context.X > upLineWidth)
+                    {
+                        Context.X = upLineWidth;
+                    }
+                }
+                break;
+                    
+            case ConsoleKey.DownArrow:
+                if (Context.Y < Context.Texts.Count - 1)
+                {
+                    Context.Y++;
+                    // 確保 X 不超過新行的顯示寬度
+                    string downLineText = new string(Context.Texts[Context.Y].Chars.Select(c => c.Value).ToArray());
+                    int downLineWidth = GetStringDisplayWidth(downLineText);
+                    if (Context.X > downLineWidth)
+                    {
+                        Context.X = downLineWidth;
+                    }
+                }
+                break;
+                    
+            default:
+                // 處理一般字符輸入
+                if (keyInfo.KeyChar != '\0')
+                {
+                    var currentLine = Context.Texts[Context.Y];
+                        
+                    // 獲取當前文本
+                    string currentText = new string(currentLine.Chars.Select(c => c.Value).ToArray());
+                        
+                    // 計算實際索引位置
+                    int actualIndex = GetStringIndexFromDisplayPosition(currentText, Context.X);
+                        
+                    // 在實際索引位置插入字符
+                    string newText = currentText.Insert(actualIndex, keyInfo.KeyChar.ToString());
+                        
+                    // 更新文本
+                    currentLine.SetText(0, newText);
+                        
+                    // 移動光標（考慮中文字符寬度）
+                    Context.X += GetCharWidth(keyInfo.KeyChar);
+                }
+                break;
         }
+            
+        // 重新渲染
+        _render.Render(new RenderArgs
+        {
+            X = 0,
+            Y = Context.Y,
+            Text = Context.Texts[Context.Y]
+        });
+            
+        // 設置光標位置
+        Console.SetCursorPosition(Context.X, Context.Y);
     }
 }
