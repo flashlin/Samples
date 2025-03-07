@@ -28,7 +28,7 @@ public class VimEditEditor
     private bool IsChinese(char c)
     {
         // 使用 Big5 編碼檢查字符的字節長度
-        byte[] bytes = Big5Encoding.GetBytes(new[] { c });
+        var bytes = Encoding.ASCII.GetBytes([c]);
         return bytes.Length > 1;
     }
     

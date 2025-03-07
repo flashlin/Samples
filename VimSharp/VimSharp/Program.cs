@@ -3,6 +3,6 @@ using VimSharpLib;
 
 var editor = new VimEditor();
 editor.Initialize();
-editor.Render();
+editor.Run();
 
 Console.ReadKey();

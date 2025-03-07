@@ -7,6 +7,7 @@ public class VimEditor
 
     public void Initialize()
     {
+        Context.SetText(0, 0, "Hello, World!");
     }
 
     public void Run()
@@ -20,13 +21,13 @@ public class VimEditor
 
     public void Render()
     {
-        Context.SetText(0, 0, "Hello, World!");
         _render.Render(new RenderArgs
         {
             X = 0,
             Y = 0,
             Text = Context.Texts[0]
         });
+        Console.SetCursorPosition(Context.X, Context.Y);
     }
 
     public void WaitForInput()
