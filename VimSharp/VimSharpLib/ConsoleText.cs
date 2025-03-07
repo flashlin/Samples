@@ -1,4 +1,6 @@
-﻿namespace VimSharpLib;
+﻿using System.Text;
+
+namespace VimSharpLib;
 
 public class ConsoleText
 {
@@ -40,5 +42,19 @@ public class ConsoleText
                 BackgroundColor = ConsoleColor.Cyan
             };
         }
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        foreach (var c in Chars)
+        {
+            if (c.Value == '\0')
+            {
+                continue;
+            }
+            sb.Append(c.Value);
+        }
+        return sb.ToString();
     }
 }
