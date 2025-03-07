@@ -11,8 +11,11 @@ public class VimEditor
 
     public void Run()
     {
-        Render();
-        WaitForInput();
+        while (true)
+        {
+            Render();
+            WaitForInput();
+        }
     }
 
     public void Render()
@@ -25,30 +28,19 @@ public class VimEditor
             Text = Context.Texts[0]
         });
     }
-    
+
     public void WaitForInput()
     {
-        while (true)
+        var keyInfo = Console.ReadKey(intercept: true);
+
+        if (keyInfo.Key == ConsoleKey.I)
         {
-            var keyInfo = Console.ReadKey(intercept: true);
-            
-            if (keyInfo.Key == ConsoleKey.I)
+            // 進入編輯模式
+            var editor = new VimEditEditor
             {
-                // 進入編輯模式
-                var editor = new VimEditEditor
-                {
-                    Context = Context
-                };
-                editor.Run();
-                
-                // 編輯模式結束後重新渲染
-                Render();
-            }
-            else if (keyInfo.Key == ConsoleKey.Q)
-            {
-                // 退出編輯器
-                break;
-            }
+                Context = Context
+            };
+            editor.Run();
         }
     }
 }
