@@ -33,7 +33,7 @@ public class VimEditor
         int visibleLines = Math.Min(Context.ViewPort.Height, Context.Texts.Count - Context.OffsetY);
         
         // 只繪製可見區域內的行
-        for (var i = 0; i < visibleLines; i++)
+        for (var i = 0; i < Context.ViewPort.Height; i++)
         {
             // 計算實際要繪製的文本行索引
             int textIndex = Context.OffsetY + i;
@@ -51,6 +51,11 @@ public class VimEditor
                 
                 // 直接繪製文本，考慮 ViewPort 和偏移量
                 RenderText(Context.ViewPort.X, Context.ViewPort.Y + i, text, Context.OffsetX, Context.ViewPort);
+            }
+            else
+            {
+                // 如果索引無效（超出文本範圍），繪製空白行
+                RenderEmptyLine(Context.ViewPort.X, Context.ViewPort.Y + i, Context.ViewPort.Width);
             }
         }
 
@@ -123,6 +128,36 @@ public class VimEditor
             {
                 sb.Append(emptyChar.ToAnsiString());
             }
+        }
+        
+        // 輸出構建好的字符串
+        Console.Write(sb.ToString());
+    }
+
+    /// <summary>
+    /// 繪製空白行
+    /// </summary>
+    private void RenderEmptyLine(int x, int y, int width)
+    {
+        // 檢查 Y 座標是否在控制台範圍內
+        if (y < 0 || y >= Console.WindowHeight)
+        {
+            return; // Y 座標超出範圍，不繪製
+        }
+
+        // 設置光標位置
+        Console.SetCursorPosition(x, y);
+        
+        // 創建 StringBuilder 來構建輸出字符串
+        var sb = new StringBuilder();
+        
+        // 創建一個黑底白字的空格
+        var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);
+        
+        // 填充空白字符
+        for (int i = 0; i < width; i++)
+        {
+            sb.Append(emptyChar.ToAnsiString());
         }
         
         // 輸出構建好的字符串

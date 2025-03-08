@@ -6,7 +6,9 @@ public struct ColoredChar
     public ConsoleColor Foreground { get; set; }
     public ConsoleColor Background { get; set; }
     
-    public ColoredChar(char c, ConsoleColor foreground = ConsoleColor.White, ConsoleColor background = ConsoleColor.Black)
+    public ColoredChar(char c, 
+        ConsoleColor foreground = ConsoleColor.White, 
+        ConsoleColor background = ConsoleColor.DarkGray)
     {
         Char = c;
         Foreground = foreground;
