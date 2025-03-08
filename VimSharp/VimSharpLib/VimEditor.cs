@@ -16,6 +16,10 @@ public class VimEditor
     public void Initialize()
     {
         Context.SetText(0, 0, "Hello, World!");
+        
+        // 設置 ViewPort 的初始值為整個控制台視窗
+        Context.ViewPort = new ConsoleRectangle(0, 0, Console.WindowWidth, Console.WindowHeight);
+        
         Mode = new VimVisualMode { Instance = this };
     }
 
@@ -33,17 +37,21 @@ public class VimEditor
         // 獲取控制台當前寬度和高度
         var width = Console.WindowWidth;
         var height = Console.WindowHeight;
+        
+        // 更新 ViewPort 的大小
+        Context.ViewPort.Width = width;
+        Context.ViewPort.Height = height;
 
         for(var y=0; y<height; y++)
         {
             var text = Context.GetText(y);
-            var textWidth = text.Width;
             text.Width = width;
             _render.Render(new RenderArgs
             {
-                X = 0,
-                Y = y,
-                Text = text
+                X = Context.ViewPort.X,
+                Y = Context.ViewPort.Y + y,
+                Text = text,
+                ViewPort = Context.ViewPort,
             });
         }
 

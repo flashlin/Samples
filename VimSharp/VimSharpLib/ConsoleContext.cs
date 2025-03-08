@@ -5,6 +5,11 @@ public class ConsoleContext
     public int CursorX { get; set; }
     public int CursorY { get; set; }
     public List<ConsoleText> Texts { get; set; } = [];
+    
+    /// <summary>
+    /// 控制台視窗的矩形區域
+    /// </summary>
+    public ConsoleRectangle ViewPort { get; set; } = new ConsoleRectangle();
 
     public void SetText(int x, int y, string text)
     {
