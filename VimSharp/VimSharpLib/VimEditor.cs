@@ -3,6 +3,13 @@ namespace VimSharpLib;
 public class VimEditor
 {
     ConsoleRender _render { get; set; } = new();
+
+    public VimEditor()
+    {
+        Initialize();
+    }
+
+    public bool IsRunning { get; set; } = true;
     public ConsoleContext Context { get; set; } = new();
     public IVimMode Mode { get; set; }
 
@@ -14,7 +21,7 @@ public class VimEditor
 
     public void Run()
     {
-        while (true)
+        while (IsRunning)
         {
             Render();
             WaitForInput();

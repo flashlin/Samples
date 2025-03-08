@@ -9,8 +9,17 @@ public class VimVisualMode : IVimMode
     {
         var keyInfo = Console.ReadKey(intercept: true);
         
-        // 在視覺模式下的按鍵處理邏輯
-        // 這裡可以根據需要實現視覺模式的特定功能
+        if(keyInfo.Key == ConsoleKey.I)
+        {
+            Instance.Mode = new VimNormalMode { Instance = Instance };
+            return;
+        }
+        
+        if(keyInfo.Key == ConsoleKey.Q)
+        {
+            Instance.IsRunning = false;
+            return;
+        }
         
         // 設置光標位置
         Console.SetCursorPosition(Instance.Context.X, Instance.Context.Y);

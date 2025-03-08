@@ -2,7 +2,5 @@
 using VimSharpLib;
 
 var editor = new VimEditor();
-editor.Initialize();
 editor.Run();
 
-Console.ReadKey();
