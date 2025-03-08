@@ -43,5 +43,14 @@ public class VimEditor
             };
             editor.Run();
         }
+        else if (keyInfo.Key == ConsoleKey.V)
+        {
+            // 進入視覺模式
+            var visualMode = new VimVisualMode
+            {
+                Instance = this
+            };
+            visualMode.WaitForInput();
+        }
     }
 }
