@@ -30,12 +30,23 @@ public class VimEditor
 
     public void Render()
     {
-        _render.Render(new RenderArgs
+        // 獲取控制台當前寬度和高度
+        var width = Console.WindowWidth;
+        var height = Console.WindowHeight;
+
+        for(var y=0; y<height; y++)
         {
-            X = 0,
-            Y = 0,
-            Text = Context.Texts[0]
-        });
+            var text = Context.GetText(y);
+            var textWidth = text.Width;
+            text.Width = width;
+            _render.Render(new RenderArgs
+            {
+                X = 0,
+                Y = y,
+                Text = text
+            });
+        }
+
         Console.SetCursorPosition(Context.X, Context.Y);
     }
 
