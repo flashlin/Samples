@@ -1,7 +1,7 @@
 namespace VimSharpLib;
 using System.Text;
 
-public class VimVisualMode
+public class VimVisualMode : IVimMode
 {
     public required VimEditor Instance { get; set; }
     

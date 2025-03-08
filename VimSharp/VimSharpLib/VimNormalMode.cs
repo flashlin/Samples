@@ -2,7 +2,7 @@ namespace VimSharpLib;
 using System.Text;
 using System.Linq;
 
-public class VimNormalMode
+public class VimNormalMode : IVimMode
 {
     public required VimEditor Instance { get; set; }
     private bool _continueEditing = true;

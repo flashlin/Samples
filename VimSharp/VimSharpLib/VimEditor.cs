@@ -4,10 +4,12 @@ public class VimEditor
 {
     ConsoleRender _render { get; set; } = new();
     public ConsoleContext Context { get; set; } = new();
+    public IVimMode Mode { get; set; }
 
     public void Initialize()
     {
         Context.SetText(0, 0, "Hello, World!");
+        Mode = new VimVisualMode { Instance = this };
     }
 
     public void Run()
@@ -32,25 +34,6 @@ public class VimEditor
 
     public void WaitForInput()
     {
-        var keyInfo = Console.ReadKey(intercept: true);
-
-        if (keyInfo.Key == ConsoleKey.I)
-        {
-            // 進入編輯模式
-            var editor = new VimNormalMode
-            {
-                Instance = this
-            };
-            editor.WaitForInput();
-        }
-        else if (keyInfo.Key == ConsoleKey.V)
-        {
-            // 進入視覺模式
-            var visualMode = new VimVisualMode
-            {
-                Instance = this
-            };
-            visualMode.WaitForInput();
-        }
+        Mode.WaitForInput();
     }
 }
