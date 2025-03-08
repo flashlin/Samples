@@ -47,7 +47,7 @@ public class VimEditor
             });
         }
 
-        Console.SetCursorPosition(Context.X, Context.Y);
+        Console.SetCursorPosition(Context.CursorX, Context.CursorY);
     }
 
     public void WaitForInput()

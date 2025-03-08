@@ -22,6 +22,6 @@ public class VimVisualMode : IVimMode
         }
         
         // 設置光標位置
-        Console.SetCursorPosition(Instance.Context.X, Instance.Context.Y);
+        Console.SetCursorPosition(Instance.Context.CursorX, Instance.Context.CursorY);
     }
 } 

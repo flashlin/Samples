@@ -2,8 +2,8 @@
 
 public class ConsoleContext
 {
-    public int X { get; set; }
-    public int Y { get; set; }
+    public int CursorX { get; set; }
+    public int CursorY { get; set; }
     public List<ConsoleText> Texts { get; set; } = [];
 
     public void SetText(int x, int y, string text)
