@@ -42,6 +42,7 @@ public class VimEditor
             if (textIndex >= 0 && textIndex < Context.Texts.Count)
             {
                 var text = Context.Texts[textIndex];
+                
                 // 直接繪製文本，考慮 ViewPort 和偏移量
                 RenderText(Context.ViewPort.X, Context.ViewPort.Y + i, text, Context.OffsetX, Context.ViewPort);
             }
@@ -114,7 +115,7 @@ public class VimEditor
         if (paddingCount > 0)
         {
             // 創建一個黑底白字的空格
-            var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
+            var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);
             
             // 填充空白字符
             for (int i = 0; i < paddingCount; i++)
