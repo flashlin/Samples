@@ -3,7 +3,7 @@ using System.Text;
 
 public class VimVisualMode
 {
-    public VimEditor Instance { get; set; }
+    public required VimEditor Instance { get; set; }
     
     public void WaitForInput()
     {

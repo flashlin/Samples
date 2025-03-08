@@ -37,11 +37,11 @@ public class VimEditor
         if (keyInfo.Key == ConsoleKey.I)
         {
             // 進入編輯模式
-            var editor = new VimEditEditor
+            var editor = new VimNormalMode
             {
-                Context = Context
+                Instance = this
             };
-            editor.Run();
+            editor.WaitForInput();
         }
         else if (keyInfo.Key == ConsoleKey.V)
         {

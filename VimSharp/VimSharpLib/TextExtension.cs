@@ -6,8 +6,6 @@ using System.Text;
 /// </summary>
 public static class TextExtension
 {
-    // 添加一個編碼轉換器用於檢測中文字符
-    private static readonly Encoding Big5Encoding = Encoding.GetEncoding("big5");
     
     /// <summary>
     /// 檢查字符是否為中文字符（在 Big5 編碼中佔用 2 個字節）
@@ -16,8 +14,8 @@ public static class TextExtension
     /// <returns>如果是中文字符則返回 true，否則返回 false</returns>
     public static bool IsChinese(this char c)
     {
-        // 使用 Big5 編碼檢查字符的字節長度
-        var bytes = Big5Encoding.GetBytes(new[] { c });
+        // 使用 ASCII 編碼檢查字符的字節長度
+        var bytes = Encoding.ASCII.GetBytes(new[] { c });
         return bytes.Length > 1;
     }
     
