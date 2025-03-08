@@ -5,7 +5,6 @@ using System.Linq;
 public class VimNormalMode : IVimMode
 {
     public required VimEditor Instance { get; set; }
-    private ConsoleRender _render = new();
 
     public void WaitForInput()
     {
