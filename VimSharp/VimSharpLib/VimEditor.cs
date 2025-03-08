@@ -29,6 +29,9 @@ public class VimEditor
 
     public void Render()
     {
+        // 設定游標不可見
+        Console.Write("\x1b[?25l");
+
         // 計算可見區域的行數
         int visibleLines = Math.Min(Context.ViewPort.Height, Context.Texts.Count - Context.OffsetY);
         
@@ -65,6 +68,9 @@ public class VimEditor
         {
             Console.SetCursorPosition(cursorScreenX, cursorScreenY);
         }
+
+        // 設定游標可見
+        Console.Write("\x1b[?25h");
     }
     
     /// <summary>
