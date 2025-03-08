@@ -156,14 +156,35 @@ public class VimNormalMode : IVimMode
                 break;
 
             case ConsoleKey.Enter:
+                // 獲取當前行
+                var enterCurrentLine = Instance.Context.Texts[Instance.Context.CursorY];
+                string enterCurrentText = new string(enterCurrentLine.Chars.Select(c => c.Char).ToArray());
+                
+                // 計算實際索引位置
+                int enterActualIndex = enterCurrentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+                
+                // 檢查游標後面是否有內容
+                string remainingText = "";
+                if (enterActualIndex < enterCurrentText.Length)
+                {
+                    // 獲取游標後面的內容
+                    remainingText = enterCurrentText.Substring(enterActualIndex);
+                    
+                    // 修改當前行，只保留游標前面的內容
+                    string newCurrentText = enterCurrentText.Substring(0, enterActualIndex);
+                    enterCurrentLine.SetText(0, newCurrentText);
+                }
+
                 // 在當前行後插入新行
                 Instance.Context.CursorY++;
                 Instance.Context.CursorX = 0;
                 
-                // 確保新行存在
-                if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
+                // 如果有剩餘內容，設置到新行
+                if (!string.IsNullOrEmpty(remainingText))
                 {
-                    Instance.Context.Texts.Add(new ConsoleText());
+                    var newLine = new ConsoleText();
+                    newLine.SetText(0, remainingText);
+                    Instance.Context.Texts.Insert(Instance.Context.CursorY, newLine);
                 }
                 
                 // 檢查並調整游標位置和偏移量

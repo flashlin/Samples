@@ -100,21 +100,6 @@ public class VimVisualMode : IVimMode
             Instance.Context.CursorY++;
             AdjustCursorAndOffset();
         }
-        else if (keyInfo.Key == ConsoleKey.Enter)
-        {
-            // 在當前行後插入新行
-            Instance.Context.CursorY++;
-            Instance.Context.CursorX = 0;
-            
-            // 確保新行存在
-            if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
-            {
-                Instance.Context.Texts.Add(new ConsoleText());
-            }
-            
-            // 檢查並調整游標位置和偏移量
-            AdjustCursorAndOffset();
-        }
         
         // 設置光標位置，考慮偏移量但不調整 ViewPort
         int cursorScreenX = Instance.Context.CursorX - Instance.Context.OffsetX + Instance.Context.ViewPort.X;
