@@ -79,31 +79,53 @@ public class VimEditor
             return; // Y 座標超出範圍，不繪製
         }
 
-        // 計算可見的起始和結束位置
-        int startX = Math.Max(0, offset);
-        int endX = Math.Min(text.Chars.Length, offset + viewPort.Width);
-        
-        // 如果起始位置已經超出文本範圍或結束位置小於等於起始位置，則不繪製
-        if (startX >= text.Chars.Length || endX <= startX)
-        {
-            return;
-        }
-        
         // 設置光標位置到可見區域的起始位置
         Console.SetCursorPosition(x, y);
         
-        // 只繪製可見範圍內的文本
+        // 計算可見區域的寬度
+        int visibleWidth = viewPort.Width;
+        
+        // 創建 StringBuilder 來構建輸出字符串
         var sb = new StringBuilder();
-        for (int i = startX; i < endX; i++)
+        
+        // 計算可見的起始和結束位置
+        int startX = Math.Max(0, offset);
+        int endX = Math.Min(text.Chars.Length, offset + visibleWidth);
+        
+        // 計算實際要繪製的字符數量
+        int charsToDraw = endX - startX;
+        
+        // 如果有文本內容在可見範圍內
+        if (startX < text.Chars.Length && charsToDraw > 0)
         {
-            var c = text.Chars[i];
-            if (c.Char == '\0')
+            // 繪製文本內容
+            for (int i = startX; i < endX; i++)
             {
-                continue;
+                var c = text.Chars[i];
+                if (c.Char != '\0')
+                {
+                    sb.Append(c.ToAnsiString());
+                }
             }
-            sb.Append(c.ToAnsiString());
         }
         
+        // 計算需要填充的空白字符數量
+        int paddingCount = visibleWidth - charsToDraw;
+        
+        // 如果需要填充空白字符
+        if (paddingCount > 0)
+        {
+            // 創建一個黑底白字的空格
+            var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
+            
+            // 填充空白字符
+            for (int i = 0; i < paddingCount; i++)
+            {
+                sb.Append(emptyChar.ToAnsiString());
+            }
+        }
+        
+        // 輸出構建好的字符串
         Console.Write(sb.ToString());
     }
 
