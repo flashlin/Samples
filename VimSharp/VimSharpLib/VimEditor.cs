@@ -42,13 +42,6 @@ public class VimEditor
             if (textIndex >= 0 && textIndex < Context.Texts.Count)
             {
                 var text = Context.Texts[textIndex];
-                
-                // 確保文本寬度足夠
-                if (text.Width < Context.ViewPort.Width + Context.OffsetX)
-                {
-                    text.Width = Context.ViewPort.Width + Context.OffsetX;
-                }
-                
                 // 直接繪製文本，考慮 ViewPort 和偏移量
                 RenderText(Context.ViewPort.X, Context.ViewPort.Y + i, text, Context.OffsetX, Context.ViewPort);
             }

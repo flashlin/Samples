@@ -5,45 +5,46 @@ namespace VimSharpLib;
 public class ConsoleText
 {
     public ColoredChar[] Chars { get; set; } = [];
-    
+
     public int Width
     {
         get => Chars.Length;
-        set
+    }
+
+    private void SetWidth(int width)
+    {
+        if (Chars.Length < width)
         {
-            if (Chars.Length < value)
+            var newChars = new ColoredChar[width];
+            Array.Copy(Chars, newChars, Chars.Length);
+            for (var i = Chars.Length; i < width; i++)
             {
-                var newChars = new ColoredChar[value];
-                Array.Copy(Chars, newChars, Chars.Length);
-                for (var i = Chars.Length; i < value; i++)
-                {
-                    newChars[i] = new ColoredChar(' ');
-                }
-                Chars = newChars;
-                return;
+                newChars[i] = new ColoredChar(' ');
             }
-            if (Chars.Length > value)
-            {
-                var newChars = new ColoredChar[value];
-                Array.Copy(Chars, newChars, value);
-                Chars = newChars;
-            }
+            Chars = newChars;
+            return;
+        }
+        if (Chars.Length > width)
+        {
+            var newChars = new ColoredChar[width];
+            Array.Copy(Chars, newChars, width);
+            Chars = newChars;
         }
     }
 
     public void SetText(int x, string text)
     {
-        Width = text.Length + x;
+        SetWidth(text.Length + x);
         for (var i = 0; i < text.Length; i++)
         {
             Chars[x + i] = new ColoredChar(text[i]);
         }
     }
-    
+
     // 設置帶顏色的文字
     public void SetColoredText(int x, string text, ConsoleColor foreground, ConsoleColor background)
     {
-        Width = text.Length + x;
+        SetWidth(text.Length + x);
         for (var i = 0; i < text.Length; i++)
         {
             Chars[x + i] = new ColoredChar(text[i], foreground, background);
@@ -63,7 +64,7 @@ public class ConsoleText
         }
         return sb.ToString();
     }
-    
+
     // 獲取帶顏色的字串表示
     public string ToColoredString()
     {

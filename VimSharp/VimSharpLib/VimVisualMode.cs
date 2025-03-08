@@ -1,5 +1,6 @@
 namespace VimSharpLib;
 using System.Text;
+using System.Linq;
 
 public class VimVisualMode : IVimMode
 {
@@ -68,8 +69,26 @@ public class VimVisualMode : IVimMode
         }
         else if (keyInfo.Key == ConsoleKey.RightArrow)
         {
-            Instance.Context.CursorX++;
-            AdjustCursorAndOffset();
+            // 檢查當前行是否存在
+            if (Instance.Context.CursorY < Instance.Context.Texts.Count)
+            {
+                var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+                
+                // 獲取當前文本
+                string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+                
+                // 計算實際索引位置
+                int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+                
+                // 檢查是否已經到達文本尾部
+                if (actualIndex < currentText.Length)
+                {
+                    // 獲取當前字符的寬度
+                    char currentChar = currentText[actualIndex];
+                    Instance.Context.CursorX += currentChar.GetCharWidth();
+                    AdjustCursorAndOffset();
+                }
+            }
         }
         else if (keyInfo.Key == ConsoleKey.UpArrow && Instance.Context.CursorY > 0)
         {
