@@ -1,8 +1,10 @@
 namespace VimSharpLib;
+using System.Text;
 
 public class VimEditor
 {
-    ConsoleRender _render { get; set; } = new();
+    // 移除 ConsoleRender 依賴
+    // ConsoleRender _render { get; set; } = new();
 
     public VimEditor()
     {
@@ -13,13 +15,9 @@ public class VimEditor
     public ConsoleContext Context { get; set; } = new();
     public IVimMode Mode { get; set; }
 
+    // 初始化 VimEditor, 修改程式碼的時候不要動這個地方
     public void Initialize()
     {
-        Context.SetText(0, 0, "Hello, World!");
-        
-        // 設置 ViewPort 的初始值為部分控制台視窗
-        Context.ViewPort = new ConsoleRectangle(10, 10, Console.WindowWidth - 20, Console.WindowHeight - 20);
-        
         Mode = new VimVisualMode { Instance = this };
     }
 
@@ -37,24 +35,116 @@ public class VimEditor
         // 獲取控制台當前寬度和高度
         var width = Console.WindowWidth;
         var height = Console.WindowHeight;
-        for(var y=0; y<height; y++)
+        
+        // 計算可見區域的行數
+        int visibleLines = Math.Min(Context.ViewPort.Height, Context.Texts.Count - Context.OffsetY);
+        
+        // 只繪製可見區域內的行
+        for (var i = 0; i < visibleLines; i++)
         {
-            var text = Context.GetText(y);
-            text.Width = width;
-            _render.Render(new RenderArgs
+            // 計算實際要繪製的文本行索引
+            int textIndex = Context.OffsetY + i;
+            
+            // 確保索引有效
+            if (textIndex >= 0 && textIndex < Context.Texts.Count)
             {
-                X = Context.ViewPort.X,
-                Y = Context.ViewPort.Y + y,
-                Text = text,
-                ViewPort = Context.ViewPort,
-            });
+                var text = Context.Texts[textIndex];
+                
+                // 確保文本寬度足夠
+                if (text.Width < Context.ViewPort.Width + Context.OffsetX)
+                {
+                    text.Width = Context.ViewPort.Width + Context.OffsetX;
+                }
+                
+                // 直接繪製文本，考慮 ViewPort 和偏移量
+                RenderText(Context.ViewPort.X, Context.ViewPort.Y + i, text, Context.OffsetX, Context.ViewPort);
+            }
         }
 
-        Console.SetCursorPosition(Context.CursorX, Context.CursorY);
+        // 設置光標位置，考慮偏移量
+        int cursorScreenX = Context.CursorX - Context.OffsetX + Context.ViewPort.X;
+        int cursorScreenY = Context.CursorY - Context.OffsetY + Context.ViewPort.Y;
+        
+        // 確保光標在可見區域內
+        if (cursorScreenX >= Context.ViewPort.X && 
+            cursorScreenX < Context.ViewPort.X + Context.ViewPort.Width &&
+            cursorScreenY >= Context.ViewPort.Y && 
+            cursorScreenY < Context.ViewPort.Y + Context.ViewPort.Height)
+        {
+            Console.SetCursorPosition(cursorScreenX, cursorScreenY);
+        }
+    }
+    
+    /// <summary>
+    /// 繪製文本，考慮 ViewPort 和偏移量
+    /// </summary>
+    private void RenderText(int x, int y, ConsoleText text, int offset, ConsoleRectangle viewPort)
+    {
+        // 檢查 Y 座標是否在 ViewPort 範圍內
+        if (y < viewPort.Y || y >= viewPort.Y + viewPort.Height)
+        {
+            return; // Y 座標超出範圍，不繪製
+        }
+
+        // 計算可見的起始和結束位置
+        int startX = Math.Max(0, offset);
+        int endX = Math.Min(text.Chars.Length, offset + viewPort.Width);
+        
+        // 如果起始位置已經超出文本範圍或結束位置小於等於起始位置，則不繪製
+        if (startX >= text.Chars.Length || endX <= startX)
+        {
+            return;
+        }
+        
+        // 設置光標位置到可見區域的起始位置
+        Console.SetCursorPosition(x, y);
+        
+        // 只繪製可見範圍內的文本
+        var sb = new StringBuilder();
+        for (int i = startX; i < endX; i++)
+        {
+            var c = text.Chars[i];
+            if (c.Char == '\0')
+            {
+                continue;
+            }
+            sb.Append(c.ToAnsiString());
+        }
+        
+        Console.Write(sb.ToString());
     }
 
     public void WaitForInput()
     {
         Mode.WaitForInput();
+    }
+
+    /// <summary>
+    /// 手動調整水平偏移量
+    /// </summary>
+    /// <param name="offsetX">要設置的水平偏移量</param>
+    public void SetHorizontalOffset(int offsetX)
+    {
+        Context.OffsetX = Math.Max(0, offsetX);
+    }
+    
+    /// <summary>
+    /// 手動調整垂直偏移量
+    /// </summary>
+    /// <param name="offsetY">要設置的垂直偏移量</param>
+    public void SetVerticalOffset(int offsetY)
+    {
+        Context.OffsetY = Math.Max(0, offsetY);
+    }
+    
+    /// <summary>
+    /// 手動滾動視圖
+    /// </summary>
+    /// <param name="deltaX">水平滾動量</param>
+    /// <param name="deltaY">垂直滾動量</param>
+    public void Scroll(int deltaX, int deltaY)
+    {
+        Context.OffsetX = Math.Max(0, Context.OffsetX + deltaX);
+        Context.OffsetY = Math.Max(0, Context.OffsetY + deltaY);
     }
 }

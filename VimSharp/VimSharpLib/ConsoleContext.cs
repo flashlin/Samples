@@ -11,7 +11,14 @@ public class ConsoleContext
     /// </summary>
     public ConsoleRectangle ViewPort { get; set; } = new ConsoleRectangle();
 
+    /// <summary>
+    /// 文本內容的水平偏移量
+    /// </summary>
     public int OffsetX { get; set; } = 0;
+    
+    /// <summary>
+    /// 文本內容的垂直偏移量
+    /// </summary>
     public int OffsetY { get; set; } = 0;
 
     public void SetText(int x, int y, string text)
@@ -31,5 +38,17 @@ public class ConsoleContext
             Texts.Add(new ConsoleText());
         }
         return Texts[y];
+    }
+
+    /// <summary>
+    /// 設置視窗的矩形區域
+    /// </summary>
+    /// <param name="x">視窗左上角的 X 座標</param>
+    /// <param name="y">視窗左上角的 Y 座標</param>
+    /// <param name="width">視窗的寬度</param>
+    /// <param name="height">視窗的高度</param>
+    public void SetViewPort(int x, int y, int width, int height)
+    {
+        ViewPort = new ConsoleRectangle(x, y, width, height);
     }
 }
