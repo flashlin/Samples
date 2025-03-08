@@ -61,7 +61,7 @@ public class VimVisualMode : IVimMode
             return;
         }
         
-        // 處理方向鍵
+        // 處理方向鍵和特殊鍵
         if (keyInfo.Key == ConsoleKey.LeftArrow && Instance.Context.CursorX > 0)
         {
             Instance.Context.CursorX--;
@@ -98,6 +98,21 @@ public class VimVisualMode : IVimMode
         else if (keyInfo.Key == ConsoleKey.DownArrow && Instance.Context.CursorY < Instance.Context.Texts.Count - 1)
         {
             Instance.Context.CursorY++;
+            AdjustCursorAndOffset();
+        }
+        else if (keyInfo.Key == ConsoleKey.Enter)
+        {
+            // 在當前行後插入新行
+            Instance.Context.CursorY++;
+            Instance.Context.CursorX = 0;
+            
+            // 確保新行存在
+            if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
+            {
+                Instance.Context.Texts.Add(new ConsoleText());
+            }
+            
+            // 檢查並調整游標位置和偏移量
             AdjustCursorAndOffset();
         }
         

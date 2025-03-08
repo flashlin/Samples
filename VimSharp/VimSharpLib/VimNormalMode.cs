@@ -5,8 +5,7 @@ using System.Linq;
 public class VimNormalMode : IVimMode
 {
     public required VimEditor Instance { get; set; }
-
-
+    
     /// <summary>
     /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
     /// </summary>
@@ -48,7 +47,6 @@ public class VimNormalMode : IVimMode
         // 設置為垂直線游標 (DECSCUSR 6)
         Console.Write("\x1b[6 q");
         
-
         var keyInfo = Console.ReadKey(intercept: true);
 
         // 確保當前行存在
@@ -162,6 +160,21 @@ public class VimNormalMode : IVimMode
                 }
                 break;
 
+            case ConsoleKey.Enter:
+                // 在當前行後插入新行
+                Instance.Context.CursorY++;
+                Instance.Context.CursorX = 0;
+                
+                // 確保新行存在
+                if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
+                {
+                    Instance.Context.Texts.Add(new ConsoleText());
+                }
+                
+                // 檢查並調整游標位置和偏移量
+                AdjustCursorAndOffset();
+                break;
+
             default:
                 // 處理一般字符輸入
                 if (char.IsLetterOrDigit(keyInfo.KeyChar) || char.IsPunctuation(keyInfo.KeyChar) || char.IsWhiteSpace(keyInfo.KeyChar))
@@ -190,6 +203,5 @@ public class VimNormalMode : IVimMode
 
         // 渲染當前行
         Instance.Render();
-
     }
 }
