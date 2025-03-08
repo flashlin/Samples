@@ -81,7 +81,7 @@ public class VimVisualMode : IVimMode
                 int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
                 
                 // 檢查是否已經到達文本尾部
-                if (actualIndex < currentText.Length)
+                if (actualIndex < currentText.Length - 1)
                 {
                     // 獲取當前字符的寬度
                     char currentChar = currentText[actualIndex];
