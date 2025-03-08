@@ -49,11 +49,6 @@ public class VimNormalMode : IVimMode
         
         var keyInfo = Console.ReadKey(intercept: true);
 
-        // 確保當前行存在
-        if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
-        {
-            Instance.Context.Texts.Add(new ConsoleText());
-        }
 
         switch (keyInfo.Key)
         {
