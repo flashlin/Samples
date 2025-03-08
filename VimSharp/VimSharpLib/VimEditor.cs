@@ -3,8 +3,6 @@ using System.Text;
 
 public class VimEditor
 {
-    // 移除 ConsoleRender 依賴
-    // ConsoleRender _render { get; set; } = new();
 
     public VimEditor()
     {
@@ -15,7 +13,6 @@ public class VimEditor
     public ConsoleContext Context { get; set; } = new();
     public IVimMode Mode { get; set; }
 
-    // 初始化 VimEditor, 修改程式碼的時候不要動這個地方
     public void Initialize()
     {
         Mode = new VimVisualMode { Instance = this };
@@ -32,10 +29,6 @@ public class VimEditor
 
     public void Render()
     {
-        // 獲取控制台當前寬度和高度
-        var width = Console.WindowWidth;
-        var height = Console.WindowHeight;
-        
         // 計算可見區域的行數
         int visibleLines = Math.Min(Context.ViewPort.Height, Context.Texts.Count - Context.OffsetY);
         
