@@ -252,6 +252,37 @@ public class VimVisualMode : IVimMode
                 SwitchToNormalMode();
                 break;
                 
+            case ConsoleKey.A:
+                // 先向右移動游標，然後切換到普通模式
+                
+                // 獲取當前行信息
+                var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+                string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+                
+                // 計算實際索引位置
+                int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+                
+                // 如果不是在文本末尾，則向右移動一個位置
+                if (actualIndex < currentText.Length)
+                {
+                    // 獲取當前字符的寬度
+                    char currentChar = currentText[actualIndex];
+                    Instance.Context.CursorX += currentChar.GetCharWidth();
+                }
+                else
+                {
+                    // 如果已經在文本末尾，則確保游標位於文本末尾
+                    Instance.Context.CursorX = currentText.GetStringDisplayWidth();
+                }
+                
+                // 切換到普通模式
+                var normalMode = new VimNormalMode { Instance = Instance };
+                Instance.Mode = normalMode;
+                
+                // 調整偏移量
+                AdjustCursorAndOffset();
+                break;
+                
             case ConsoleKey.Q:
                 QuitEditor();
                 break;
