@@ -119,9 +119,10 @@ public class VimVisualMode : IVimMode
             // 保存當前行信息
             var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
             string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            int currentActualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
             
             // 檢查游標是否在當前行的最後一個字符上
+            // 在視覺模式下，判斷游標是否在文本結束位置是通過檢查它是否在最後一個字符上
+            int currentActualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
             bool isAtEndOfCurrentLine = (currentActualIndex == currentText.Length - 1);
             
             // 移動到上一行
@@ -163,9 +164,10 @@ public class VimVisualMode : IVimMode
             // 保存當前行信息
             var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
             string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            int currentActualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
             
             // 檢查游標是否在當前行的最後一個字符上
+            // 在視覺模式下，判斷游標是否在文本結束位置是通過檢查它是否在最後一個字符上
+            int currentActualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
             bool isAtEndOfCurrentLine = (currentActualIndex == currentText.Length - 1);
             
             // 移動到下一行

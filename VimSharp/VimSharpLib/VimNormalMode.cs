@@ -155,10 +155,10 @@ public class VimNormalMode : IVimMode
             // 保存當前行信息
             var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
             string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            int currentActualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
             
-            // 檢查游標是否在當前行的最後一個字符上
-            bool isAtEndOfCurrentLine = (currentActualIndex == currentText.Length - 1);
+            // 檢查游標是否在當前行的文本結束位置
+            // 在普通模式下，判斷游標是否在文本結束位置是通過檢查它是否在文本的末尾
+            bool isAtEndOfCurrentLine = (Instance.Context.CursorX >= currentText.GetStringDisplayWidth());
             
             // 移動到上一行
             Instance.Context.CursorY--;
@@ -167,16 +167,10 @@ public class VimNormalMode : IVimMode
             var upLine = Instance.Context.Texts[Instance.Context.CursorY];
             string upLineText = new string(upLine.Chars.Select(c => c.Char).ToArray());
             
-            // 如果游標在當前行的最後一個字符上，則移動到上一行的最後一個字符上
-            if (isAtEndOfCurrentLine && upLineText.Length > 0)
+            // 如果游標在當前行的文本結束位置，則移動到上一行的文本結束位置
+            if (isAtEndOfCurrentLine)
             {
-                // 計算上一行最後一個字符的顯示位置
-                int displayPosition = 0;
-                for (int i = 0; i < upLineText.Length; i++)
-                {
-                    displayPosition += upLineText[i].GetCharWidth();
-                }
-                Instance.Context.CursorX = displayPosition;
+                Instance.Context.CursorX = upLineText.GetStringDisplayWidth();
             }
             // 否則，如果游標X位置超過上一行的長度，則調整到上一行的末尾
             else if (Instance.Context.CursorX > upLineText.GetStringDisplayWidth())
@@ -200,10 +194,10 @@ public class VimNormalMode : IVimMode
             // 保存當前行信息
             var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
             string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            int currentActualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
             
-            // 檢查游標是否在當前行的最後一個字符上
-            bool isAtEndOfCurrentLine = (currentActualIndex == currentText.Length - 1);
+            // 檢查游標是否在當前行的文本結束位置
+            // 在普通模式下，判斷游標是否在文本結束位置是通過檢查它是否在文本的末尾
+            bool isAtEndOfCurrentLine = (Instance.Context.CursorX >= currentText.GetStringDisplayWidth());
             
             // 移動到下一行
             Instance.Context.CursorY++;
@@ -212,16 +206,10 @@ public class VimNormalMode : IVimMode
             var downLine = Instance.Context.Texts[Instance.Context.CursorY];
             string downLineText = new string(downLine.Chars.Select(c => c.Char).ToArray());
             
-            // 如果游標在當前行的最後一個字符上，則移動到下一行的最後一個字符上
-            if (isAtEndOfCurrentLine && downLineText.Length > 0)
+            // 如果游標在當前行的文本結束位置，則移動到下一行的文本結束位置
+            if (isAtEndOfCurrentLine)
             {
-                // 計算下一行最後一個字符的顯示位置
-                int displayPosition = 0;
-                for (int i = 0; i < downLineText.Length; i++)
-                {
-                    displayPosition += downLineText[i].GetCharWidth();
-                }
-                Instance.Context.CursorX = displayPosition;
+                Instance.Context.CursorX = downLineText.GetStringDisplayWidth();
             }
             // 否則，如果游標X位置超過下一行的長度，則調整到下一行的末尾
             else if (Instance.Context.CursorX > downLineText.GetStringDisplayWidth())

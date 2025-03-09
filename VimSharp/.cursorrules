@@ -33,7 +33,13 @@
 - Apply cursor styling using `Console.Write("\x1b[2 q");` for a block cursor consistently across all platforms.
 - No platform-specific conditional checks are needed for cursor styling.
 
+## Rule : Cursor Movement and End Detection in Vim Modes
+
+- **VimVisualMode:**
+  - When moving the cursor, determine if it is at the end by checking if it's on the last character of the text.
+
+- **VimNormalMode:**
+  - When moving the cursor, determine if it is at the end by checking if it's simply at the end of the text.
 
 ## Rule: Cursor Positioning at End of Document
 - When the cursor reaches the end of the document, keep it positioned on the last character, not merely beyond the text's end.
-
