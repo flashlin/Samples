@@ -58,3 +58,8 @@
 ## Rule 14: Approach for Test Failures
 - When a test fails, prioritize modifying the code logic to meet test acceptance criteria.
 - Do not modify the acceptance results of tests unless specifically instructed by the user.
+
+
+## Rule 15: Avoid Hardcoding in Code Modifications
+- When adjusting application logic to meet test acceptance criteria, refrain from using hardcoded values or solutions.
+- Ensure that code changes promote flexibility, maintainability, and adherence to best practices.
