@@ -318,9 +318,9 @@ public class VimNormalMode : IVimMode
     public void WaitForInput()
     {
         // 設置為垂直線游標 (DECSCUSR 6)
-        Console.Write("\x1b[6 q");
+        Instance.GetConsoleDevice().Write("\x1b[6 q");
         
-        var keyInfo = Console.ReadKey(intercept: true);
+        var keyInfo = Instance.GetConsoleDevice().ReadKey(intercept: true);
 
         // 確保當前行存在
         if (Instance.Context.Texts.Count <= Instance.Context.CursorY)

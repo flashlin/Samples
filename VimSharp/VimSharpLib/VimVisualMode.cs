@@ -235,7 +235,7 @@ public class VimVisualMode : IVimMode
             cursorScreenY >= Instance.Context.ViewPort.Y && 
             cursorScreenY < Instance.Context.ViewPort.Y + Instance.Context.ViewPort.Height)
         {
-            Console.SetCursorPosition(cursorScreenX, cursorScreenY);
+            Instance.GetConsoleDevice().SetCursorPosition(cursorScreenX, cursorScreenY);
         }
     }
     
@@ -275,9 +275,9 @@ public class VimVisualMode : IVimMode
     public void WaitForInput()
     {
         // 設置為方塊游標 (DECSCUSR 2)
-        Console.Write("\x1b[2 q");
+        Instance.GetConsoleDevice().Write("\x1b[2 q");
         
-        var keyInfo = Console.ReadKey(intercept: true);
+        var keyInfo = Instance.GetConsoleDevice().ReadKey(intercept: true);
         
         switch (keyInfo.Key)
         {

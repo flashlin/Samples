@@ -3,6 +3,8 @@ using System.Text;
 
 public class VimEditor
 {
+    private readonly IConsoleDevice _console;
+    
     public bool IsRunning { get; set; } = true;
     public ConsoleContext Context { get; set; } = new();
     public IVimMode Mode { get; set; } = null!;
@@ -11,8 +13,13 @@ public class VimEditor
     public bool IsStatusBarVisible { get; set; } = false;
     public string StatusBarText { get; set; } = "";
 
-    public VimEditor()
+    public VimEditor() : this(new ConsoleDevice())
     {
+    }
+    
+    public VimEditor(IConsoleDevice console)
+    {
+        _console = console;
         // 初始化 Mode
         Mode = new VimVisualMode { Instance = this };
         Initialize();
@@ -26,7 +33,7 @@ public class VimEditor
         // 默認使用整個控制台視窗，但可以由使用者自定義
         if (Context.ViewPort.Width == 0 || Context.ViewPort.Height == 0)
         {
-            Context.ViewPort = new ConsoleRectangle(0, 0, Console.WindowWidth, Console.WindowHeight);
+            Context.ViewPort = new ConsoleRectangle(0, 0, _console.WindowWidth, _console.WindowHeight);
         }
     }
 
@@ -41,9 +48,6 @@ public class VimEditor
 
     public void Render()
     {
-        // 設定游標不可見
-        Console.Write("\x1b[?25l");
-        
         // 計算可見區域的行數
         int visibleLines = Math.Min(Context.ViewPort.Height, Context.Texts.Count - Context.OffsetY);
         
@@ -87,11 +91,8 @@ public class VimEditor
             cursorScreenY >= Context.ViewPort.Y && 
             cursorScreenY < Context.ViewPort.Y + Context.ViewPort.Height)
         {
-            Console.SetCursorPosition(cursorScreenX, cursorScreenY);
+            _console.SetCursorPosition(cursorScreenX, cursorScreenY);
         }
-
-        // 設定游標可見
-        Console.Write("\x1b[?25h");
     }
     
     /// <summary>
@@ -106,7 +107,7 @@ public class VimEditor
         }
 
         // 設置光標位置到可見區域的起始位置
-        Console.SetCursorPosition(x, y);
+        _console.SetCursorPosition(x, y);
         
         // 計算可見區域的寬度
         int visibleWidth = viewPort.Width;
@@ -128,7 +129,12 @@ public class VimEditor
             for (int i = startX; i < endX; i++)
             {
                 var c = text.Chars[i];
-                if (c.Char != '\0')
+                if (c.Char == '\0')
+                {
+                    // 如果是空字符，添加一個空格（黑底白字）
+                    sb.Append(new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black).ToAnsiString());
+                }
+                else
                 {
                     sb.Append(c.ToAnsiString());
                 }
@@ -142,7 +148,7 @@ public class VimEditor
         if (paddingCount > 0)
         {
             // 創建一個黑底白字的空格
-            var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);
+            var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
             
             // 填充空白字符
             for (int i = 0; i < paddingCount; i++)
@@ -152,28 +158,28 @@ public class VimEditor
         }
         
         // 輸出構建好的字符串
-        Console.Write(sb.ToString());
+        _console.Write(sb.ToString());
     }
-
+    
     /// <summary>
     /// 繪製空白行
     /// </summary>
     private void RenderEmptyLine(int x, int y, int width)
     {
         // 檢查 Y 座標是否在控制台範圍內
-        if (y < 0 || y >= Console.WindowHeight)
+        if (y < 0 || y >= _console.WindowHeight)
         {
             return; // Y 座標超出範圍，不繪製
         }
 
         // 設置光標位置
-        Console.SetCursorPosition(x, y);
+        _console.SetCursorPosition(x, y);
         
         // 創建 StringBuilder 來構建輸出字符串
         var sb = new StringBuilder();
         
         // 創建一個黑底白字的空格
-        var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);
+        var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
         
         // 填充空白字符
         for (int i = 0; i < width; i++)
@@ -182,9 +188,9 @@ public class VimEditor
         }
         
         // 輸出構建好的字符串
-        Console.Write(sb.ToString());
+        _console.Write(sb.ToString());
     }
-
+    
     /// <summary>
     /// 繪製狀態欄
     /// </summary>
@@ -194,7 +200,7 @@ public class VimEditor
         int statusBarY = Context.ViewPort.Y + Context.ViewPort.Height - 1;
         
         // 設置光標位置到狀態欄
-        Console.SetCursorPosition(Context.ViewPort.X, statusBarY);
+        _console.SetCursorPosition(Context.ViewPort.X, statusBarY);
         
         // 創建狀態欄文本
         string statusText = StatusBarText;
@@ -235,7 +241,7 @@ public class VimEditor
     {
         Mode.WaitForInput();
     }
-
+    
     /// <summary>
     /// 手動調整水平偏移量
     /// </summary>
@@ -263,5 +269,14 @@ public class VimEditor
     {
         Context.OffsetX = Math.Max(0, Context.OffsetX + deltaX);
         Context.OffsetY = Math.Max(0, Context.OffsetY + deltaY);
+    }
+    
+    /// <summary>
+    /// 獲取控制台設備
+    /// </summary>
+    /// <returns>控制台設備</returns>
+    public IConsoleDevice GetConsoleDevice()
+    {
+        return _console;
     }
 }
