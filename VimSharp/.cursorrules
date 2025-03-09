@@ -44,8 +44,12 @@
 ## Rule 11: Cursor Positioning at End of Document
 - When the cursor reaches the end of the document, keep it positioned on the last character, not merely beyond the text's end.
 
-# .cursorrules
 
 ## Rule 12: Cursor Visibility in Render
 - At the start of `VimEditor::Render()`, use ASCII codes to set the cursor as invisible.
 - After completing the render process, ensure the cursor is made visible again.
+
+
+## Rule 13: Preserve Existing Test Code
+- Prohibit modifications to existing test code.
+- Only allow changes if explicitly requested by the user.

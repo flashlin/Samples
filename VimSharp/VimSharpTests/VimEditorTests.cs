@@ -190,5 +190,31 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(13); // 游標應該在 '!' 上面
             _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換到 VimVisualMode
         }
+
+        [Test]
+        public void WhenInVisualMode_PressA_ThenPressEsc_CursorShouldMoveBackOnePosition()
+        {
+            // Given
+            _editor.Context.SetText(0, 0, "Hello, World!");
+            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
+            _editor.Context.CursorX = 13; // 設置游標位置在 '!' 上
+            _editor.Mode = new VimVisualMode { Instance = _editor };
+            
+            // 模擬按下 'a' 鍵，切換到 NormalMode 並將游標向右移動一格
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false));
+            _editor.WaitForInput();
+            
+            // 此時游標應該在 '!' 後面，模式應該是 NormalMode
+            _editor.Context.CursorX.Should().Be(14);
+            _editor.Mode.Should().BeOfType<VimNormalMode>();
+            
+            // 模擬按下 Esc 鍵，切換回 VisualMode 並將游標向左移動一格
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.Escape, false, false, false));
+            _editor.WaitForInput();
+            
+            // Then
+            _editor.Context.CursorX.Should().Be(13); // 游標應該向左移動一格
+            _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換回 VimVisualMode
+        }
     }
 } 

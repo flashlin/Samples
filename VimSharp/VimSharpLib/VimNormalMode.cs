@@ -47,6 +47,26 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void SwitchToVisualMode()
     {
+        // 如果游標不在行首，則向左移動一格
+        if (Instance.Context.CursorX > 0)
+        {
+            // 獲取當前行
+            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+            
+            // 計算實際索引位置
+            int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+            
+            // 如果不是在行首，則向左移動一格
+            if (actualIndex > 0)
+            {
+                // 獲取前一個字符的寬度
+                char prevChar = currentText[actualIndex - 1];
+                Instance.Context.CursorX -= prevChar.GetCharWidth();
+            }
+        }
+        
+        // 切換到視覺模式
         Instance.Mode = new VimVisualMode { Instance = Instance };
     }
     
