@@ -53,3 +53,8 @@
 ## Rule 13: Preserve Existing Test Code
 - Prohibit modifications to existing test code.
 - Only allow changes if explicitly requested by the user.
+
+
+## Rule 14: Approach for Test Failures
+- When a test fails, prioritize modifying the code logic to meet test acceptance criteria.
+- Do not modify the acceptance results of tests unless specifically instructed by the user.

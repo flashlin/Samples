@@ -216,5 +216,32 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(13); // 游標應該向左移動一格
             _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換回 VimVisualMode
         }
+
+        [Test]
+        public void WhenPressDownArrow_CursorShouldMoveToNextLine()
+        {
+            // Given
+            _editor.Context.SetText(0, 0, "Hello, World!");
+            _editor.Context.SetText(0, 1, "123");
+            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
+            
+            // 模擬按下向右鍵 12 次
+            for (int i = 0; i < 13; i++)
+            {
+                _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
+                _editor.WaitForInput();
+            }
+
+            
+            // 模擬按下向下鍵
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.DownArrow, false, false, false));
+            
+            // When
+            _editor.WaitForInput();
+            
+            // Then
+            _editor.Context.CursorY.Should().Be(1); // 游標應該在 "Hello, World!" 的下一行
+            _editor.Context.CursorX.Should().Be(3); // 游標應該在 '3' 上面
+        }
     }
 } 

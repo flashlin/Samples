@@ -3,6 +3,7 @@ using VimSharpLib;
 
 var editor1 = new VimEditor();
 editor1.Context.SetText(0, 0, "Hello, World!");
+editor1.Context.SetText(0, 1, "123");
 editor1.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
 editor1.IsStatusBarVisible = true;
 
