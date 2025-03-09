@@ -3,23 +3,31 @@ using System.Text;
 
 public class VimEditor
 {
-
-    public VimEditor()
-    {
-        Initialize();
-    }
-
     public bool IsRunning { get; set; } = true;
     public ConsoleContext Context { get; set; } = new();
-    public IVimMode Mode { get; set; }
+    public IVimMode Mode { get; set; } = null!;
 
     // 添加狀態欄相關屬性
     public bool IsStatusBarVisible { get; set; } = false;
     public string StatusBarText { get; set; } = "";
 
+    public VimEditor()
+    {
+        // 初始化 Mode
+        Mode = new VimVisualMode { Instance = this };
+        Initialize();
+    }
+
     public void Initialize()
     {
-        Mode = new VimVisualMode { Instance = this };
+        Context.SetText(0, 0, "Hello, World!");
+        
+        // 設置 ViewPort 的初始值
+        // 默認使用整個控制台視窗，但可以由使用者自定義
+        if (Context.ViewPort.Width == 0 || Context.ViewPort.Height == 0)
+        {
+            Context.ViewPort = new ConsoleRectangle(0, 0, Console.WindowWidth, Console.WindowHeight);
+        }
     }
 
     public void Run()
@@ -33,6 +41,9 @@ public class VimEditor
 
     public void Render()
     {
+        // 設定游標不可見
+        Console.Write("\x1b[?25l");
+        
         // 計算可見區域的行數
         int visibleLines = Math.Min(Context.ViewPort.Height, Context.Texts.Count - Context.OffsetY);
         
