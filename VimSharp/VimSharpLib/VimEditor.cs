@@ -132,7 +132,7 @@ public class VimEditor
                 if (c.Char == '\0')
                 {
                     // 如果是空字符，添加一個空格（黑底白字）
-                    sb.Append(new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black).ToAnsiString());
+                    sb.Append(ColoredChar.Empty.ToAnsiString());
                 }
                 else
                 {
@@ -147,13 +147,10 @@ public class VimEditor
         // 如果需要填充空白字符
         if (paddingCount > 0)
         {
-            // 創建一個黑底白字的空格
-            var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);
-            
             // 填充空白字符
             for (int i = 0; i < paddingCount; i++)
             {
-                sb.Append(emptyChar.ToAnsiString());
+                sb.Append(ColoredChar.Empty.ToAnsiString());
             }
         }
         
@@ -178,13 +175,10 @@ public class VimEditor
         // 創建 StringBuilder 來構建輸出字符串
         var sb = new StringBuilder();
         
-        // 創建一個黑底白字的空格
-        var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);
-        
         // 填充空白字符
         for (int i = 0; i < width; i++)
         {
-            sb.Append(emptyChar.ToAnsiString());
+            sb.Append(ColoredChar.Empty.ToAnsiString());
         }
         
         // 輸出構建好的字符串
