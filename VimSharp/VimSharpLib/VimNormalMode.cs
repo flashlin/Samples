@@ -252,17 +252,7 @@ public class VimNormalMode : IVimMode
     public void WaitForInput()
     {
         // 設置為垂直線游標 (DECSCUSR 6)
-        if (OperatingSystem.IsWindows())
-        {
-            // Windows 平台使用 Console.CursorSize
-            Console.CursorSize = 25; // 普通大小的游標
-        }
-        else
-        {
-            // Linux/Unix/macOS 平台使用 ANSI 轉義序列
-            // 設置為垂直線游標 (DECSCUSR 6)
-            Console.Write("\x1b[6 q");
-        }
+        Console.Write("\x1b[6 q");
         
         var keyInfo = Console.ReadKey(intercept: true);
 
@@ -306,6 +296,5 @@ public class VimNormalMode : IVimMode
                 HandleCharInput(keyInfo.KeyChar);
                 break;
         }
-
     }
 }

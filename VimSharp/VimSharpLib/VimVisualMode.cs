@@ -163,18 +163,8 @@ public class VimVisualMode : IVimMode
     
     public void WaitForInput()
     {
-        // 設置游標形狀
-        if (OperatingSystem.IsWindows())
-        {
-            // Windows 平台使用 Console.CursorSize
-            Console.CursorSize = 100;
-        }
-        else
-        {
-            // Linux/Unix/macOS 平台使用 ANSI 轉義序列
-            // 設置為方塊游標 (DECSCUSR 2)
-            Console.Write("\x1b[2 q");
-        }
+        // 設置為方塊游標 (DECSCUSR 2)
+        Console.Write("\x1b[2 q");
         
         var keyInfo = Console.ReadKey(intercept: true);
         

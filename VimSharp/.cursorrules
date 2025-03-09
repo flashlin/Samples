@@ -29,3 +29,9 @@
 - In `VimVisualMode::WaitForInput()` and `VimNormalMode::WaitForInput()`, refrain from calling `Instance.Render()` at the conclusion.
 - Delegate rendering control to `VimEditor`.
 
+## Rule: Uniform Cursor Style Settings
+- Apply cursor styling using `Console.Write("\x1b[6 q");` for a vertical line cursor consistently across all platforms.
+- Apply cursor styling using `Console.Write("\x1b[2 q");` for a block cursor consistently across all platforms.
+- No platform-specific conditional checks are needed for cursor styling.
+
+
