@@ -42,65 +42,111 @@ public class VimVisualMode : IVimMode
         }
     }
     
-    public void WaitForInput()
+    /// <summary>
+    /// 切換到普通模式
+    /// </summary>
+    private void SwitchToNormalMode()
     {
-        // 設置游標形狀
-        Console.Write("\x1b[2 q");
-        
-        var keyInfo = Console.ReadKey(intercept: true);
-        
-        if(keyInfo.Key == ConsoleKey.I)
-        {
-            Instance.Mode = new VimNormalMode { Instance = Instance };
-            return;
-        }
-        
-        if(keyInfo.Key == ConsoleKey.Q)
-        {
-            Instance.IsRunning = false;
-            return;
-        }
-        
-        // 處理方向鍵和特殊鍵
-        if (keyInfo.Key == ConsoleKey.LeftArrow && Instance.Context.CursorX > 0)
+        Instance.Mode = new VimNormalMode { Instance = Instance };
+    }
+    
+    /// <summary>
+    /// 退出編輯器
+    /// </summary>
+    private void QuitEditor()
+    {
+        Instance.IsRunning = false;
+    }
+    
+    /// <summary>
+    /// 向左移動游標
+    /// </summary>
+    private void MoveCursorLeft()
+    {
+        if (Instance.Context.CursorX > 0)
         {
             Instance.Context.CursorX--;
             AdjustCursorAndOffset();
         }
-        else if (keyInfo.Key == ConsoleKey.RightArrow)
+    }
+    
+    /// <summary>
+    /// 向右移動游標
+    /// </summary>
+    private void MoveCursorRight()
+    {
+        // 檢查當前行是否存在
+        if (Instance.Context.CursorY < Instance.Context.Texts.Count)
         {
-            // 檢查當前行是否存在
-            if (Instance.Context.CursorY < Instance.Context.Texts.Count)
+            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+            
+            // 獲取當前文本
+            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+            
+            // 計算實際索引位置
+            int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+            
+            // 檢查是否已經到達文本尾部
+            if (actualIndex < currentText.Length)
             {
-                var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
-                
-                // 獲取當前文本
-                string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-                
-                // 計算實際索引位置
-                int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
-                
-                // 檢查是否已經到達文本尾部
-                if (actualIndex < currentText.Length - 1)
-                {
-                    // 獲取當前字符的寬度
-                    char currentChar = currentText[actualIndex];
-                    Instance.Context.CursorX += currentChar.GetCharWidth();
-                    AdjustCursorAndOffset();
-                }
+                // 獲取當前字符的寬度
+                char currentChar = currentText[actualIndex];
+                Instance.Context.CursorX += currentChar.GetCharWidth();
+                AdjustCursorAndOffset();
             }
         }
-        else if (keyInfo.Key == ConsoleKey.UpArrow && Instance.Context.CursorY > 0)
+    }
+    
+    /// <summary>
+    /// 向上移動游標
+    /// </summary>
+    private void MoveCursorUp()
+    {
+        if (Instance.Context.CursorY > 0)
         {
             Instance.Context.CursorY--;
             AdjustCursorAndOffset();
         }
-        else if (keyInfo.Key == ConsoleKey.DownArrow && Instance.Context.CursorY < Instance.Context.Texts.Count - 1)
+    }
+    
+    /// <summary>
+    /// 向下移動游標
+    /// </summary>
+    private void MoveCursorDown()
+    {
+        if (Instance.Context.CursorY < Instance.Context.Texts.Count - 1)
         {
             Instance.Context.CursorY++;
             AdjustCursorAndOffset();
         }
+    }
+    
+    /// <summary>
+    /// 處理 Enter 鍵
+    /// </summary>
+    private void HandleEnterKey()
+    {
+        // 在視覺模式下，Enter 鍵只移動游標，不修改文本
+        // 移動到下一行的開頭
+        Instance.Context.CursorY++;
+        Instance.Context.CursorX = 0;
         
+        // 雖然視覺模式是僅讀取模式，但我們仍然允許添加空行以便瀏覽
+        // 這不會修改現有文本內容，只是為了確保游標可以移動到文本末尾之後
+        if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
+        {
+            Instance.Context.Texts.Add(new ConsoleText());
+        }
+        
+        // 檢查並調整游標位置和偏移量
+        AdjustCursorAndOffset();
+    }
+    
+    /// <summary>
+    /// 設置游標位置
+    /// </summary>
+    private void SetCursorPosition()
+    {
         // 設置光標位置，考慮偏移量但不調整 ViewPort
         int cursorScreenX = Instance.Context.CursorX - Instance.Context.OffsetX + Instance.Context.ViewPort.X;
         int cursorScreenY = Instance.Context.CursorY - Instance.Context.OffsetY + Instance.Context.ViewPort.Y;
@@ -113,5 +159,56 @@ public class VimVisualMode : IVimMode
         {
             Console.SetCursorPosition(cursorScreenX, cursorScreenY);
         }
+    }
+    
+    public void WaitForInput()
+    {
+        // 設置游標形狀
+        if (OperatingSystem.IsWindows())
+        {
+            // Windows 平台使用 Console.CursorSize
+            Console.CursorSize = 100;
+        }
+        else
+        {
+            // Linux/Unix/macOS 平台使用 ANSI 轉義序列
+            // 設置為方塊游標 (DECSCUSR 2)
+            Console.Write("\x1b[2 q");
+        }
+        
+        var keyInfo = Console.ReadKey(intercept: true);
+        
+        switch (keyInfo.Key)
+        {
+            case ConsoleKey.I:
+                SwitchToNormalMode();
+                break;
+                
+            case ConsoleKey.Q:
+                QuitEditor();
+                break;
+                
+            case ConsoleKey.LeftArrow:
+                MoveCursorLeft();
+                break;
+                
+            case ConsoleKey.RightArrow:
+                MoveCursorRight();
+                break;
+                
+            case ConsoleKey.UpArrow:
+                MoveCursorUp();
+                break;
+                
+            case ConsoleKey.DownArrow:
+                MoveCursorDown();
+                break;
+                
+            case ConsoleKey.Enter:
+                HandleEnterKey();
+                break;
+        }
+        
+        SetCursorPosition();
     }
 } 

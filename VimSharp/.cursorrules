@@ -1,0 +1,27 @@
+# https://cursorrules.agnt.one/chat
+
+## Rule 1: Default color configuration
+- Set the default foreground color to white.
+- Set the default background color to DarkGray for `ColoredChar` instances.
+
+## Rule 2: Handle ASCII characters with specific length
+- If `Chars[n].Char` has an ASCII length of 2, ensure that the next character is '\0'.
+
+## Rule 3: Automatic handling of multi-byte characters
+- If setting `Chars[n].Char` to a character like '中' that exceeds 2 bytes, automatically set `Chars[n+1].Char` to `'\0'`.
+
+## Rule 4: Handle left/up/down cursor movement
+- When the cursor moves left, up, or down to position `n`, if `Chars[n].Char` is `'\0'`, move further left or up/down until a non-`'\0'` character is found.
+
+## Rule 5: Handle right cursor movement
+- When the cursor moves right to position `n`, if `Chars[n].Char` is `'\0'`, continue moving right until a non-`'\0'` character is encountered.
+
+## Rule 6: Simplified Switch Case Statements
+- Ensure each case statement within a switch only calls one method followed by a `break`.
+- Extract logic from lengthy case statements into distinct methods.
+
+
+## Rule: Simplify VimNormalMode
+- Exclude `private bool _continueEditing = true;` from `VimNormalMode`.
+- Allow `VimEditor` to independently handle looping through `WaitForInput`.
+
