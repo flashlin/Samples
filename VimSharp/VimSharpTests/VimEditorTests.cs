@@ -226,7 +226,7 @@ namespace VimSharpTests
             _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
             
             // 模擬按下向右鍵 12 次
-            for (int i = 0; i < 13; i++)
+            for (int i = 0; i < 12; i++)
             {
                 _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
                 _editor.WaitForInput();
