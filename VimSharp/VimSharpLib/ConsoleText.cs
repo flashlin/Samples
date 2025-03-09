@@ -11,7 +11,7 @@ public class ConsoleText
         get => Chars.Length;
     }
 
-    private void SetWidth(int width)
+    public void SetWidth(int width)
     {
         if (Chars.Length < width)
         {

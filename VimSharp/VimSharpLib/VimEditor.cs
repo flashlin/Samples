@@ -13,6 +13,10 @@ public class VimEditor
     public ConsoleContext Context { get; set; } = new();
     public IVimMode Mode { get; set; }
 
+    // 添加狀態欄相關屬性
+    public bool IsStatusBarVisible { get; set; } = false;
+    public string StatusBarText { get; set; } = "";
+
     public void Initialize()
     {
         Mode = new VimVisualMode { Instance = this };
@@ -29,14 +33,14 @@ public class VimEditor
 
     public void Render()
     {
-        // 設定游標不可見
-        Console.Write("\x1b[?25l");
-
         // 計算可見區域的行數
         int visibleLines = Math.Min(Context.ViewPort.Height, Context.Texts.Count - Context.OffsetY);
         
+        // 如果狀態欄可見，則減少一行用於顯示狀態欄
+        int maxLines = IsStatusBarVisible ? Context.ViewPort.Height - 1 : Context.ViewPort.Height;
+        
         // 只繪製可見區域內的行
-        for (var i = 0; i < Context.ViewPort.Height; i++)
+        for (var i = 0; i < maxLines; i++)
         {
             // 計算實際要繪製的文本行索引
             int textIndex = Context.OffsetY + i;
@@ -54,6 +58,12 @@ public class VimEditor
                 // 如果索引無效（超出文本範圍），繪製空白行
                 RenderEmptyLine(Context.ViewPort.X, Context.ViewPort.Y + i, Context.ViewPort.Width);
             }
+        }
+        
+        // 如果狀態欄可見，則繪製狀態欄
+        if (IsStatusBarVisible)
+        {
+            RenderStatusBar();
         }
 
         // 設置光標位置，考慮偏移量
@@ -162,6 +172,52 @@ public class VimEditor
         
         // 輸出構建好的字符串
         Console.Write(sb.ToString());
+    }
+
+    /// <summary>
+    /// 繪製狀態欄
+    /// </summary>
+    private void RenderStatusBar()
+    {
+        // 計算狀態欄的位置
+        int statusBarY = Context.ViewPort.Y + Context.ViewPort.Height - 1;
+        
+        // 設置光標位置到狀態欄
+        Console.SetCursorPosition(Context.ViewPort.X, statusBarY);
+        
+        // 創建狀態欄文本
+        string statusText = StatusBarText;
+        if (string.IsNullOrEmpty(statusText))
+        {
+            // 如果沒有設置狀態欄文本，則顯示默認信息
+            string modeName = Mode.GetType().Name.Replace("Vim", "").Replace("Mode", "");
+            statusText = $" {modeName} | Line: {Context.CursorY + 1} | Col: {Context.CursorX + 1} ";
+        }
+        
+        // 確保狀態欄文本不超過視窗寬度
+        if (statusText.Length > Context.ViewPort.Width)
+        {
+            statusText = statusText.Substring(0, Context.ViewPort.Width);
+        }
+        else if (statusText.Length < Context.ViewPort.Width)
+        {
+            // 如果狀態欄文本不夠長，則用空格填充
+            statusText = statusText.PadRight(Context.ViewPort.Width);
+        }
+        
+        // 創建狀態欄的 ConsoleText
+        var statusBarText = new ConsoleText();
+        statusBarText.SetWidth(statusText.Length);
+        
+        // 填充狀態欄文本
+        for (int i = 0; i < statusText.Length; i++)
+        {
+            // 使用反色顯示狀態欄
+            statusBarText.Chars[i] = new ColoredChar(statusText[i], ConsoleColor.Black, ConsoleColor.White);
+        }
+        
+        // 繪製狀態欄
+        RenderText(Context.ViewPort.X, statusBarY, statusBarText, 0, Context.ViewPort);
     }
 
     public void WaitForInput()

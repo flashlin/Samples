@@ -11,6 +11,9 @@ public class ConsoleContext
     /// </summary>
     public ConsoleRectangle ViewPort { get; set; } = new ConsoleRectangle();
 
+    public bool IsStatusBarVisible { get; set; } = false;
+    public ConsoleText StatusBar { get; set; } = new ConsoleText();
+
     /// <summary>
     /// 文本內容的水平偏移量
     /// </summary>
