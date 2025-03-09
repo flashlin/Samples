@@ -140,7 +140,7 @@ namespace VimSharpTests
             // Given
             _editor.Context.SetText(0, 0, "Hello, World!");
             _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
-            _editor.Context.CursorX = 14; // 設置游標位置
+            _editor.Context.CursorX = 13; // 設置游標位置在 '!' 上
             
             // 模擬按下向右鍵
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
@@ -149,7 +149,26 @@ namespace VimSharpTests
             _editor.WaitForInput();
             
             // Then
-            _editor.Context.CursorX.Should().Be(14); // 游標位置應該保持不變
+            _editor.Context.CursorX.Should().Be(13); // 游標位置應該保持不變
+        }
+
+        [Test]
+        public void WhenInNormalMode_PressRightArrow_CursorShouldMove()
+        {
+            // Given
+            _editor.Context.SetText(0, 0, "Hello, World!");
+            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
+            _editor.Context.CursorX = 13; // 設置游標位置在 '!' 上
+            _editor.Mode = new VimNormalMode { Instance = _editor };
+            
+            // 模擬按下向右鍵
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
+            
+            // When
+            _editor.WaitForInput();
+            
+            // Then
+            _editor.Context.CursorX.Should().Be(14); // 游標位置應該向右移動一格
         }
     }
 } 
