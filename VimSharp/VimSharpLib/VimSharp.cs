@@ -55,12 +55,16 @@ public class VimSharp
             // 渲染所有編輯器
             foreach (var editor in _editors)
             {
+                if( editor == _currentEditor){
+                    continue;
+                }
                 editor.Render();
             }
 
             // 處理當前編輯器的輸入
             if (_currentEditor != null)
             {
+                _currentEditor.Render();
                 _currentEditor.WaitForInput();
                 
                 // 檢查當前編輯器是否還在運行
