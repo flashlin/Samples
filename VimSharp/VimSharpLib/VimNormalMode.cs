@@ -129,7 +129,7 @@ public class VimNormalMode : IVimMode
             char currentChar = textForRight[actualIndexForRight];
             
             // 檢查是否是最後一個字符
-            if (actualIndexForRight == textForRight.Length - 1)
+            if (actualIndexForRight == textForRight.Length)
             {
                 // 如果是最後一個字符，游標應該停在這個字符上，而不是超出
                 // 不需要移動游標
