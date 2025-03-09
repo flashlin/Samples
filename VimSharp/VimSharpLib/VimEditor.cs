@@ -148,7 +148,7 @@ public class VimEditor
         if (paddingCount > 0)
         {
             // 創建一個黑底白字的空格
-            var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
+            var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);
             
             // 填充空白字符
             for (int i = 0; i < paddingCount; i++)
@@ -179,7 +179,7 @@ public class VimEditor
         var sb = new StringBuilder();
         
         // 創建一個黑底白字的空格
-        var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
+        var emptyChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);
         
         // 填充空白字符
         for (int i = 0; i < width; i++)

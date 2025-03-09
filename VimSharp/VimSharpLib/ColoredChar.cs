@@ -2,6 +2,8 @@ namespace VimSharpLib;
 
 public struct ColoredChar
 {
+    public static readonly ColoredChar Empty = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);
+
     public char Char { get; set; }
     public ConsoleColor Foreground { get; set; }
     public ConsoleColor Background { get; set; }
