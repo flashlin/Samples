@@ -25,3 +25,7 @@
 - Exclude `private bool _continueEditing = true;` from `VimNormalMode`.
 - Allow `VimEditor` to independently handle looping through `WaitForInput`.
 
+## Rule: Control Rendering in Vim Modes
+- In `VimVisualMode::WaitForInput()` and `VimNormalMode::WaitForInput()`, refrain from calling `Instance.Render()` at the conclusion.
+- Delegate rendering control to `VimEditor`.
+

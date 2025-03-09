@@ -307,7 +307,5 @@ public class VimNormalMode : IVimMode
                 break;
         }
 
-        // 渲染當前行
-        Instance.Render();
     }
 }
