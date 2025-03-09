@@ -116,7 +116,39 @@ public class VimVisualMode : IVimMode
     {
         if (Instance.Context.CursorY > 0)
         {
+            // 保存當前行信息
+            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+            int currentActualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+            
+            // 檢查游標是否在當前行的最後一個字符上
+            bool isAtEndOfCurrentLine = (currentActualIndex == currentText.Length - 1);
+            
+            // 移動到上一行
             Instance.Context.CursorY--;
+            
+            // 獲取上一行信息
+            var upLine = Instance.Context.Texts[Instance.Context.CursorY];
+            string upLineText = new string(upLine.Chars.Select(c => c.Char).ToArray());
+            
+            // 如果游標在當前行的最後一個字符上，則移動到上一行的最後一個字符上
+            if (isAtEndOfCurrentLine && upLineText.Length > 0)
+            {
+                // 計算上一行最後一個字符的顯示位置
+                int displayPosition = 0;
+                for (int i = 0; i < upLineText.Length; i++)
+                {
+                    displayPosition += upLineText[i].GetCharWidth();
+                }
+                Instance.Context.CursorX = displayPosition;
+            }
+            // 否則，如果游標X位置超過上一行的長度，則調整到上一行的末尾
+            else if (Instance.Context.CursorX > upLineText.GetStringDisplayWidth())
+            {
+                Instance.Context.CursorX = upLineText.GetStringDisplayWidth();
+            }
+            // 否則保持游標X位置不變
+            
             AdjustCursorAndOffset();
         }
     }
@@ -128,7 +160,39 @@ public class VimVisualMode : IVimMode
     {
         if (Instance.Context.CursorY < Instance.Context.Texts.Count - 1)
         {
+            // 保存當前行信息
+            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+            int currentActualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+            
+            // 檢查游標是否在當前行的最後一個字符上
+            bool isAtEndOfCurrentLine = (currentActualIndex == currentText.Length - 1);
+            
+            // 移動到下一行
             Instance.Context.CursorY++;
+            
+            // 獲取下一行信息
+            var downLine = Instance.Context.Texts[Instance.Context.CursorY];
+            string downLineText = new string(downLine.Chars.Select(c => c.Char).ToArray());
+            
+            // 如果游標在當前行的最後一個字符上，則移動到下一行的最後一個字符上
+            if (isAtEndOfCurrentLine && downLineText.Length > 0)
+            {
+                // 計算下一行最後一個字符的顯示位置
+                int displayPosition = 0;
+                for (int i = 0; i < downLineText.Length; i++)
+                {
+                    displayPosition += downLineText[i].GetCharWidth();
+                }
+                Instance.Context.CursorX = displayPosition;
+            }
+            // 否則，如果游標X位置超過下一行的長度，則調整到下一行的末尾
+            else if (Instance.Context.CursorX > downLineText.GetStringDisplayWidth())
+            {
+                Instance.Context.CursorX = downLineText.GetStringDisplayWidth();
+            }
+            // 否則保持游標X位置不變
+            
             AdjustCursorAndOffset();
         }
     }
