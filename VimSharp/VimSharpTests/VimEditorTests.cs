@@ -175,9 +175,9 @@ namespace VimSharpTests
         public void WhenInNormalMode_PressEsc_ShouldSwitchToVisualModeAndMoveCursorBack()
         {
             // Given
-            _editor.Context.SetText(0, 0, "Hello, World!");
+            _editor.Context.SetText(0, 0, "World!");
             _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
-            _editor.Context.CursorX = 14; // 設置游標位置在 '!'後面
+            _editor.Context.CursorX = 7; // 設置游標位置在 '!'後面
             _editor.Mode = new VimNormalMode { Instance = _editor };
             
             // 模擬按下 Esc 鍵
@@ -187,7 +187,7 @@ namespace VimSharpTests
             _editor.WaitForInput();
             
             // Then
-            _editor.Context.CursorX.Should().Be(13); // 游標應該在 '!' 上面
+            _editor.Context.CursorX.Should().Be(6); // 游標應該在 '!' 上面
             _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換到 VimVisualMode
         }
 
