@@ -91,7 +91,19 @@ public class VimVisualMode : IVimMode
             {
                 // 獲取當前字符的寬度
                 char currentChar = currentText[actualIndex];
-                Instance.Context.CursorX += currentChar.GetCharWidth();
+                
+                // 檢查是否是最後一個字符
+                if (actualIndex == currentText.Length - 1)
+                {
+                    // 如果是最後一個字符，游標應該停在這個字符上，而不是超出
+                    // 不需要移動游標
+                }
+                else
+                {
+                    // 如果不是最後一個字符，正常移動游標
+                    Instance.Context.CursorX += currentChar.GetCharWidth();
+                }
+                
                 AdjustCursorAndOffset();
             }
         }

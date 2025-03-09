@@ -127,7 +127,18 @@ public class VimNormalMode : IVimMode
         {
             // 獲取當前字符的寬度
             char currentChar = textForRight[actualIndexForRight];
-            Instance.Context.CursorX += currentChar.GetCharWidth();
+            
+            // 檢查是否是最後一個字符
+            if (actualIndexForRight == textForRight.Length - 1)
+            {
+                // 如果是最後一個字符，游標應該停在這個字符上，而不是超出
+                // 不需要移動游標
+            }
+            else
+            {
+                // 如果不是最後一個字符，正常移動游標
+                Instance.Context.CursorX += currentChar.GetCharWidth();
+            }
         }
         
         // 檢查並調整游標位置和偏移量
@@ -243,6 +254,25 @@ public class VimNormalMode : IVimMode
             
             // 移動光標（考慮中文字符寬度）
             Instance.Context.CursorX += keyChar.GetCharWidth();
+            
+            // 如果游標位於文本末尾，確保它停在最後一個字符上
+            string updatedText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+            int updatedActualIndex = updatedText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+            
+            if (updatedActualIndex > updatedText.Length)
+            {
+                // 調整游標位置到最後一個字符
+                int lastCharIndex = updatedText.Length - 1;
+                if (lastCharIndex >= 0)
+                {
+                    int displayPosition = 0;
+                    for (int i = 0; i <= lastCharIndex; i++)
+                    {
+                        displayPosition += updatedText[i].GetCharWidth();
+                    }
+                    Instance.Context.CursorX = displayPosition;
+                }
+            }
         }
         
         // 檢查並調整游標位置和偏移量
