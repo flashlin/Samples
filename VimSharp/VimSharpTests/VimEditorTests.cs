@@ -133,5 +133,23 @@ namespace VimSharpTests
             // 驗證是否調用了 ReadKey 方法
             _mockConsole.Received().ReadKey(Arg.Any<bool>());
         }
+
+        [Test]
+        public void WhenCursorAtEndOfText_PressRightArrow_CursorShouldNotMove()
+        {
+            // Given
+            _editor.Context.SetText(0, 0, "Hello, World!");
+            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
+            _editor.Context.CursorX = 14; // 設置游標位置
+            
+            // 模擬按下向右鍵
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
+            
+            // When
+            _editor.WaitForInput();
+            
+            // Then
+            _editor.Context.CursorX.Should().Be(14); // 游標位置應該保持不變
+        }
     }
 } 
