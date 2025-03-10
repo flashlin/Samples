@@ -137,7 +137,7 @@ public class VimVisualMode : IVimMode
             {
                 // 計算上一行最後一個字符的顯示位置
                 int displayPosition = 0;
-                for (int i = 0; i < upLineText.Length; i++)
+                for (int i = 0; i < upLineText.Length - 1; i++)
                 {
                     displayPosition += upLineText[i].GetCharWidth();
                 }
@@ -147,6 +147,20 @@ public class VimVisualMode : IVimMode
             else if (Instance.Context.CursorX > upLineText.GetStringDisplayWidth())
             {
                 Instance.Context.CursorX = upLineText.GetStringDisplayWidth();
+                // 確保游標不會超出實際文本
+                if (upLineText.Length > 0)
+                {
+                    int adjustedIndex = upLineText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+                    if (adjustedIndex >= upLineText.Length)
+                    {
+                        adjustedIndex = upLineText.Length - 1;
+                        Instance.Context.CursorX = 0;
+                        for (int i = 0; i <= adjustedIndex; i++)
+                        {
+                            Instance.Context.CursorX += upLineText[i].GetCharWidth();
+                        }
+                    }
+                }
             }
             // 否則保持游標X位置不變
             
