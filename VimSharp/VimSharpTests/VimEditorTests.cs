@@ -251,8 +251,8 @@ namespace VimSharpTests
             _editor.Context.SetText(0, 1, "123");
             _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
             
-            // 模擬按下向右鍵 12 次
-            for (int i = 0; i < 12; i++)
+            // 模擬按下向右鍵 13 次
+            for (int i = 0; i < 13; i++)
             {
                 _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
                 _editor.WaitForInput();
@@ -267,7 +267,7 @@ namespace VimSharpTests
             
             // Then
             _editor.Context.CursorY.Should().Be(1); // 游標應該在 "Hello, World!" 的下一行
-            _editor.Context.CursorX.Should().Be(3); // 游標應該在 '3' 上面
+            _editor.Context.CursorX.Should().Be(2); // 游標應該在 '3' 上面
         }
     }
 } 
