@@ -269,5 +269,25 @@ namespace VimSharpTests
             _editor.Context.CursorY.Should().Be(1); // 游標應該在 "Hello, World!" 的下一行
             _editor.Context.CursorX.Should().Be(2); // 游標應該在 '3' 上面
         }
+
+        [Test]
+        public void WhenInVisualMode_PressUpArrow_CursorShouldMoveToUpperLine()
+        {
+            // Given
+            _editor.Context.SetText(0, 0, "Hello");
+            _editor.Context.SetText(0, 1, "ab");
+            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
+            _editor.Context.CursorY = 1;
+            _editor.Context.CursorX = 1; // 設置游標位置在本文最後一個字上, 例如 "ab" 的 'b' 上
+            _editor.Mode = new VimVisualMode { Instance = _editor };
+            
+            // 模擬按下 UpArrow 鍵
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.UpArrow, false, false, false));
+            _editor.WaitForInput();
+            
+            // Then
+            _editor.Context.CursorX.Should().Be(4); // 游標應該在 'o' 
+            _editor.Mode.Should().BeOfType<VimVisualMode>(); 
+        }
     }
 } 
