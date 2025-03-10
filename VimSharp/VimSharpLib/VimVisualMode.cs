@@ -251,6 +251,12 @@ public class VimVisualMode : IVimMode
         // 計算實際索引位置
         int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
         
+        // 檢查並跳過 '\0' 字符
+        while (actualIndex < currentText.Length && currentText[actualIndex] == '\0')
+        {
+            actualIndex++;
+        }
+
         // 如果不是在文本末尾，則向右移動一個位置
         if (actualIndex < currentText.Length)
         {
@@ -258,10 +264,10 @@ public class VimVisualMode : IVimMode
             char currentChar = currentText[actualIndex];
             Instance.Context.CursorX += currentChar.GetCharWidth();
         }
-        else
+        else if (actualIndex == currentText.Length)
         {
-            // 如果已經在文本末尾，則確保游標位於文本末尾
-            Instance.Context.CursorX = currentText.GetStringDisplayWidth();
+            // 允許游標移動到最後一個字符後面
+            Instance.Context.CursorX = currentText.GetStringDisplayWidth() + 1;
         }
         
         // 切換到普通模式
