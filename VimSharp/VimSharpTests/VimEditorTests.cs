@@ -340,6 +340,52 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(12); // 游標應該在 '!' 上
             _editor.Context.CursorY.Should().Be(0);
         }
+
+        [Test]
+        public void WhenPressDollarSign_CursorShouldMoveToEndOfLine2()
+        {
+            // 初始化 VimEditor
+            _editor.Context.Texts.Clear();
+            _editor.Context.Texts.Add(new ConsoleText());
+            _editor.Context.Texts[0].SetText(0, "Hello, World!");
+            
+            // 設置初始游標位置
+            _editor.Context.CursorX = 0;
+            _editor.Context.CursorY = 0;
+
+            _editor.IsRelativeLineNumber = true;
+            
+            // 按下 '$' 按鍵
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false));
+            _editor.WaitForInput();
+            
+            // 驗證游標位置
+            _editor.Context.CursorX.Should().Be(14); // 游標應該在 '!' 上
+            _editor.Context.CursorY.Should().Be(0);
+        }
+
+        [Test]
+        public void WhenPressDollarSign_CursorShouldMoveToEndOfLine3()
+        {
+            // 初始化 VimEditor
+            _editor.Context.Texts.Clear();
+            _editor.Context.Texts.Add(new ConsoleText());
+            _editor.Context.Texts[0].SetText(0, "Hello, World!");
+            
+            // 設置初始游標位置
+            _editor.Context.CursorX = 10;
+            _editor.Context.CursorY = 0;
+
+            _editor.IsRelativeLineNumber = true;
+            
+            // 按下 '^' 按鍵
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('^', ConsoleKey.D6, true, false, false));
+            _editor.WaitForInput();
+            
+            // 驗證游標位置
+            _editor.Context.CursorX.Should().Be(2); // 游標應該在 'H' 上
+            _editor.Context.CursorY.Should().Be(0);
+        }
         
         [Test]
         public void WhenPressCaretSign_CursorShouldMoveToStartOfLine()
