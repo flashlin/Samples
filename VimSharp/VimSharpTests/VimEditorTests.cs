@@ -289,5 +289,35 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(4); // 游標應該在 'o' 
             _editor.Mode.Should().BeOfType<VimVisualMode>(); 
         }
+
+        [Test]
+        public void WhenMoveCursorToW_ThenPressDownArrow_CursorShouldMoveToSamePositionInNextLine()
+        {
+            // 初始化 VimEditor
+            _editor.Context.Texts.Clear();
+            _editor.Context.Texts.Add(new ConsoleText());
+            _editor.Context.Texts.Add(new ConsoleText());
+            _editor.Context.Texts[0].SetText(0, "Hello, World!");
+            _editor.Context.Texts[1].SetText(0, "Ex");
+            
+            // 設置初始游標位置
+            _editor.Context.CursorX = 0;
+            _editor.Context.CursorY = 0;
+            
+            // 按下右鍵按鈕7次，移動到 "W" 的位置
+            for (int i = 0; i < 7; i++)
+            {
+                _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
+                _editor.WaitForInput();
+            }
+            
+            // 按下向下按鈕1次
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.DownArrow, false, false, false));
+            _editor.WaitForInput();
+            
+            // 驗證游標位置
+            _editor.Context.CursorX.Should().Be(2);
+            _editor.Context.CursorY.Should().Be(1);
+        }
     }
 } 
