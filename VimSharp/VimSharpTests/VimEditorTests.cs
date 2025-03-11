@@ -134,6 +134,9 @@ namespace VimSharpTests
             _mockConsole.Received().ReadKey(Arg.Any<bool>());
         }
 
+        /// <summary>
+        /// 測試當游標在文本末尾時，按下向右鍵，游標位置應該保持不變
+        /// </summary>
         [Test]
         public void WhenCursorAtEndOfText_PressRightArrow_CursorShouldNotMove()
         {
@@ -152,6 +155,9 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(13); // 游標位置應該保持不變
         }
 
+        /// <summary>
+        /// 測試在普通模式下，按下向右鍵，游標應該向右移動
+        /// </summary>
         [Test]
         public void WhenInNormalMode_PressRightArrow_CursorShouldMove()
         {
@@ -171,6 +177,9 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(14); // 游標位置應該向右移動一格
         }
 
+        /// <summary>
+        /// 測試在普通模式下，按下 Esc 鍵，應該切換到視覺模式並將游標向後移動一格
+        /// </summary>
         [Test]
         public void WhenInNormalMode_PressEsc_ShouldSwitchToVisualModeAndMoveCursorBack()
         {
@@ -191,6 +200,9 @@ namespace VimSharpTests
             _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換到 VimVisualMode
         }
 
+        /// <summary>
+        /// 測試在視覺模式下，按下 a 鍵然後按下 Esc 鍵，游標應該向後移動一格
+        /// </summary>
         [Test]
         public void WhenInVisualMode_PressA_ThenPressEsc_CursorShouldMoveBackOnePosition()
         {
@@ -217,6 +229,9 @@ namespace VimSharpTests
             _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換回 VimVisualMode
         }
 
+        /// <summary>
+        /// 測試在視覺模式下，按下 a 鍵然後按下 Esc 鍵，游標應該向後移動一格（第二種情況）
+        /// </summary>
         [Test]
         public void WhenInVisualMode_PressA_ThenPressEsc_CursorShouldMoveBackOnePositionCase2()
         {
@@ -243,6 +258,9 @@ namespace VimSharpTests
             _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換回 VimVisualMode
         }
 
+        /// <summary>
+        /// 測試按下向下鍵時，游標應該移動到下一行
+        /// </summary>
         [Test]
         public void WhenPressDownArrow_CursorShouldMoveToNextLine()
         {
@@ -270,6 +288,9 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(2); // 游標應該在 '3' 上面
         }
 
+        /// <summary>
+        /// 測試在視覺模式下，按下向上鍵時，游標應該移動到上一行
+        /// </summary>
         [Test]
         public void WhenInVisualMode_PressUpArrow_CursorShouldMoveToUpperLine()
         {
@@ -290,6 +311,9 @@ namespace VimSharpTests
             _editor.Mode.Should().BeOfType<VimVisualMode>(); 
         }
 
+        /// <summary>
+        /// 測試將游標移動到 'W' 位置，然後按下向下鍵，游標應該移動到下一行的相同位置
+        /// </summary>
         [Test]
         public void WhenMoveCursorToW_ThenPressDownArrow_CursorShouldMoveToSamePositionInNextLine()
         {
@@ -320,6 +344,9 @@ namespace VimSharpTests
             _editor.Context.CursorY.Should().Be(1);
         }
 
+        /// <summary>
+        /// 測試在普通模式下按下 $ 鍵時，游標應該移動到行尾
+        /// </summary>
         [Test]
         public void WhenPressDollarSign_CursorShouldMoveToEndOfLine()
         {
@@ -341,6 +368,9 @@ namespace VimSharpTests
             _editor.Context.CursorY.Should().Be(0);
         }
 
+        /// <summary>
+        /// 測試在啟用相對行號時按下 $ 鍵，游標應該移動到行尾，並考慮相對行號區域的寬度
+        /// </summary>
         [Test]
         public void WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLine()
         {
@@ -408,6 +438,9 @@ namespace VimSharpTests
             _editor.Context.CursorY.Should().Be(0);
         }
         
+        /// <summary>
+        /// 測試在按下 10J 時，游標應該跳轉到第 10 行
+        /// </summary>
         [Test]
         public void WhenPress10J_CursorShouldJumpToLine10()
         {
@@ -471,6 +504,9 @@ namespace VimSharpTests
             _editor.Context.CursorY.Should().Be(1); // 游標應該在第2行
         }
         
+        /// <summary>
+        /// 測試在啟用相對行號時，調用 Render 方法不應該改變游標位置
+        /// </summary>
         [Test]
         public void WhenRelativeLineNumberEnabled_RenderShouldNotChangeCursorPosition()
         {
