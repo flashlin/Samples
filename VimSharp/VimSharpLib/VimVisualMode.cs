@@ -31,6 +31,8 @@ public class VimVisualMode : IVimMode
             { new ConsoleKeyPattern(ConsoleKey.Enter), HandleEnterKey },
             { new ConsoleKeyPattern(ConsoleKey.V), SwitchToMarkMode },
             { new ConsoleKeyPattern(ConsoleKey.P), HandlePasteAfterCursor },
+            { new CharKeyPattern('$'), MoveCursorToEndOfLine },
+            { new CharKeyPattern('^'), MoveCursorToStartOfLine },
         };
     }
     
@@ -488,6 +490,56 @@ public class VimVisualMode : IVimMode
         Instance.IsStatusBarVisible = true;
     }
     
+    /// <summary>
+    /// 將游標移動到當前行的最後一個字符上
+    /// </summary>
+    private void MoveCursorToEndOfLine()
+    {
+        // 確保當前行存在
+        if (Instance.Context.CursorY < Instance.Context.Texts.Count)
+        {
+            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+            
+            // 如果當前行有內容
+            if (currentText.Length > 0)
+            {
+                // 計算最後一個字符的顯示位置
+                int lastCharPosition = 0;
+                for (int i = 0; i < currentText.Length - 1; i++)
+                {
+                    if (currentText[i] != '\0')
+                    {
+                        lastCharPosition += currentText[i].GetCharWidth();
+                    }
+                }
+                Instance.Context.CursorX = lastCharPosition;
+            }
+            else
+            {
+                // 如果當前行為空，將游標設置為0
+                Instance.Context.CursorX = 0;
+            }
+            
+            AdjustCursorAndOffset();
+        }
+    }
+    
+    /// <summary>
+    /// 將游標移動到當前行的第一個字符上
+    /// </summary>
+    private void MoveCursorToStartOfLine()
+    {
+        // 確保當前行存在
+        if (Instance.Context.CursorY < Instance.Context.Texts.Count)
+        {
+            // 將游標設置為行首
+            Instance.Context.CursorX = 0;
+            
+            AdjustCursorAndOffset();
+        }
+    }
+    
     public void WaitForInput()
     {
         // 設置為方塊游標 (DECSCUSR 2)
@@ -518,13 +570,14 @@ public class VimVisualMode : IVimMode
             _keyBuffer.Clear();
         }
         // 如果沒有模式匹配，但緩衝區已經達到一定長度，清除緩衝區
-        // 這裡我們設置一個合理的最大長度，例如 5
-        else if (matchCount == 0 && _keyBuffer.Count >= 5)
+        else if (matchCount == 0 && _keyBuffer.Count >= 3)
         {
             _keyBuffer.Clear();
         }
-        // 如果有多個模式匹配，不執行任何操作，等待更多按鍵輸入
         
+        // 如果有多個模式匹配，等待更多按鍵輸入
+        
+        // 設置游標位置
         SetCursorPosition();
     }
 } 
