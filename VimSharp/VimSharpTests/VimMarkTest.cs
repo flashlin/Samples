@@ -69,5 +69,57 @@ namespace VimSharpTests
             string clipboardContent = new string(_editor.ClipboardBuffers[0].Chars.Select(c => c.Char).ToArray());
             clipboardContent.Should().Be("World!");
         }
+
+        [Test]
+        public void WhenInVisualMode_CopyText_MoveDown_PressPKey_ShouldPasteText()
+        {
+            // 初始化 VimEditor
+            _editor.Context.Texts.Clear();
+            _editor.Context.Texts.Add(new ConsoleText());
+            _editor.Context.Texts.Add(new ConsoleText());
+            _editor.Context.Texts[0].SetText(0, "Hello, World!");
+            _editor.Context.Texts[1].SetText(0, "Example.");
+            
+            // 設置初始游標位置
+            _editor.Context.CursorX = 0;
+            _editor.Context.CursorY = 0;
+            
+            // 按下右鍵按鈕7次，移動到 "W" 的位置
+            for (int i = 0; i < 7; i++)
+            {
+                _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
+                _editor.WaitForInput();
+            }
+            
+            // 按下V按鈕一次，進入標記模式
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('v', ConsoleKey.V, false, false, false));
+            _editor.WaitForInput();
+            
+            // 按下右鍵按鈕5次，移動到 "!" 的位置
+            for (int i = 0; i < 5; i++)
+            {
+                _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
+                _editor.WaitForInput();
+            }
+            
+            // 按下 y 按鍵一次，複製選中的文本
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('y', ConsoleKey.Y, false, false, false));
+            _editor.WaitForInput();
+            
+            // 按下向下按鈕1次，移動到下一行
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.DownArrow, false, false, false));
+            _editor.WaitForInput();
+            
+            // 按下 p 按鍵一次，粘貼文本
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('p', ConsoleKey.P, false, false, false));
+            _editor.WaitForInput();
+            
+            // 驗證 _editor.Context.Texts[1] 應該是 "Example.World!"
+            string secondLineText = new string(_editor.Context.Texts[1].Chars.Select(c => c.Char).ToArray());
+            secondLineText.Should().Be("Example.World!");
+            
+            // 驗證 _editor.Mode 應該是 VimNormalMode 物件
+            _editor.Mode.Should().BeOfType<VimNormalMode>();
+        }
     }
 } 
