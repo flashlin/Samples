@@ -316,7 +316,7 @@ namespace VimSharpTests
             _editor.WaitForInput();
             
             // 驗證游標位置
-            _editor.Context.CursorX.Should().Be(2);
+            _editor.Context.CursorX.Should().Be(1);
             _editor.Context.CursorY.Should().Be(1);
         }
     }

@@ -203,14 +203,8 @@ public class VimVisualMode : IVimMode
     {
         if (Instance.Context.CursorY < Instance.Context.Texts.Count - 1)
         {
-            // 保存當前行信息
-            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
-            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            
-            // 檢查游標是否在當前行的最後一個字符上
-            // 在視覺模式下，判斷游標是否在文本結束位置是通過檢查它是否在最後一個字符上
-            int currentActualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
-            bool isAtEndOfCurrentLine = (currentActualIndex == currentText.Length - 1);
+            // 保存當前行信息和游標位置
+            int originalCursorX = Instance.Context.CursorX;
             
             // 移動到下一行
             Instance.Context.CursorY++;
@@ -219,34 +213,31 @@ public class VimVisualMode : IVimMode
             var downLine = Instance.Context.Texts[Instance.Context.CursorY];
             string downLineText = new string(downLine.Chars.Select(c => c.Char).ToArray());
             
-            // 如果游標在當前行的最後一個字符上，則移動到下一行的最後一個字符上
-            if (isAtEndOfCurrentLine && downLineText.Length > 0)
+            // 如果下一行是空的，將游標設置為0
+            if (downLineText.Length == 0)
             {
-                // 計算下一行最後一個字符的顯示位置
-                int displayPosition = 0;
-                for (int i = 0; i < downLineText.Length - 1; i++)
-                {
-                    displayPosition += downLineText[i].GetCharWidth();
-                }
-                Instance.Context.CursorX = displayPosition;
+                Instance.Context.CursorX = 0;
             }
-            // 否則，如果游標X位置超過下一行的長度，則調整到下一行的末尾
-            else if (Instance.Context.CursorX > downLineText.GetStringDisplayWidth())
+            // 如果游標X位置超過下一行的長度，則調整到下一行的末尾
+            else if (originalCursorX > downLineText.GetStringDisplayWidth())
             {
-                Instance.Context.CursorX = downLineText.GetStringDisplayWidth();
-                // 確保游標不會超出實際文本
+                // 如果下一行有內容，將游標設置到最後一個字符上
                 if (downLineText.Length > 0)
                 {
-                    int adjustedIndex = downLineText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
-                    if (adjustedIndex >= downLineText.Length)
+                    // 計算最後一個字符的顯示位置
+                    int lastCharPosition = 0;
+                    for (int i = 0; i < downLineText.Length - 1; i++)
                     {
-                        adjustedIndex = downLineText.Length - 1;
-                        Instance.Context.CursorX = 0;
-                        for (int i = 0; i <= adjustedIndex; i++)
+                        if (downLineText[i] != '\0')
                         {
-                            Instance.Context.CursorX += downLineText[i].GetCharWidth();
+                            lastCharPosition += downLineText[i].GetCharWidth();
                         }
                     }
+                    Instance.Context.CursorX = lastCharPosition;
+                }
+                else
+                {
+                    Instance.Context.CursorX = 0;
                 }
             }
             // 否則保持游標X位置不變
@@ -370,6 +361,13 @@ public class VimVisualMode : IVimMode
         // 計算實際索引位置
         int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
         
+        // 確保索引不超出範圍
+        actualIndex = Math.Min(actualIndex, currentText.Length - 1);
+        if (actualIndex < 0 && currentText.Length > 0)
+        {
+            actualIndex = 0;
+        }
+        
         // 如果剪貼簿只有一行內容
         if (Instance.ClipboardBuffers.Count == 1)
         {
@@ -378,12 +376,26 @@ public class VimVisualMode : IVimMode
             string clipboardContent = new string(clipboardText.Chars.Select(c => c.Char).ToArray());
             
             // 在當前位置插入剪貼簿內容
-            string newText = currentText.Insert(actualIndex + 1, clipboardContent);
+            string newText;
+            if (currentText.Length == 0)
+            {
+                newText = clipboardContent;
+            }
+            else if (actualIndex >= currentText.Length - 1)
+            {
+                newText = currentText + clipboardContent;
+            }
+            else
+            {
+                newText = currentText.Insert(actualIndex + 1, clipboardContent);
+            }
+            
             currentLine.SetText(0, newText);
             
             // 移動游標到插入內容的結尾
             int newCursorX = 0;
-            for (int i = 0; i < actualIndex + 1 + clipboardContent.Length; i++)
+            int targetIndex = (currentText.Length == 0) ? clipboardContent.Length : (actualIndex + 1 + clipboardContent.Length);
+            for (int i = 0; i < targetIndex; i++)
             {
                 if (i < newText.Length)
                 {
