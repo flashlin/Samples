@@ -30,6 +30,7 @@ public class VimVisualMode : IVimMode
             { new ConsoleKeyPattern(ConsoleKey.DownArrow), MoveCursorDown },
             { new ConsoleKeyPattern(ConsoleKey.Enter), HandleEnterKey },
             { new ConsoleKeyPattern(ConsoleKey.V), SwitchToMarkMode },
+            { new ConsoleKeyPattern(ConsoleKey.P), HandlePasteAfterCursor },
         };
     }
     
@@ -341,6 +342,138 @@ public class VimVisualMode : IVimMode
         var markMode = new VimMarkMode { Instance = Instance };
         markMode.SetStartPosition(Instance.Context.CursorX, Instance.Context.CursorY);
         Instance.Mode = markMode;
+    }
+    
+    /// <summary>
+    /// 處理小寫 p 鍵：從游標右邊位置插入剪貼簿內容
+    /// </summary>
+    private void HandlePasteAfterCursor()
+    {
+        // 檢查剪貼簿是否有內容
+        if (Instance.ClipboardBuffers == null || Instance.ClipboardBuffers.Count == 0)
+        {
+            Instance.StatusBarText = "剪貼簿為空";
+            Instance.IsStatusBarVisible = true;
+            return;
+        }
+
+        // 確保當前行存在
+        if (Instance.Context.CursorY >= Instance.Context.Texts.Count)
+        {
+            Instance.Context.Texts.Add(new ConsoleText());
+        }
+
+        // 獲取當前行
+        var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+        string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+        
+        // 計算實際索引位置
+        int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+        
+        // 如果剪貼簿只有一行內容
+        if (Instance.ClipboardBuffers.Count == 1)
+        {
+            // 獲取剪貼簿內容
+            var clipboardText = Instance.ClipboardBuffers[0];
+            string clipboardContent = new string(clipboardText.Chars.Select(c => c.Char).ToArray());
+            
+            // 在當前位置插入剪貼簿內容
+            string newText = currentText.Insert(actualIndex, clipboardContent);
+            currentLine.SetText(0, newText);
+            
+            // 移動游標到插入內容的結尾
+            int newCursorX = 0;
+            for (int i = 0; i < actualIndex + clipboardContent.Length; i++)
+            {
+                if (i < newText.Length)
+                {
+                    newCursorX += newText[i].GetCharWidth();
+                }
+            }
+            Instance.Context.CursorX = newCursorX;
+        }
+        else
+        {
+            // 如果剪貼簿有多行內容
+            
+            // 處理第一行：將剪貼簿第一行插入到當前行游標位置後
+            var firstClipboardLine = Instance.ClipboardBuffers[0];
+            string firstClipboardContent = new string(firstClipboardLine.Chars.Select(c => c.Char).ToArray());
+            
+            // 分割當前行
+            string beforeCursor = currentText.Substring(0, actualIndex);
+            string afterCursor = actualIndex < currentText.Length ? currentText.Substring(actualIndex) : "";
+            
+            // 更新當前行：前半部分 + 剪貼簿第一行
+            string newCurrentLineText = beforeCursor + firstClipboardContent;
+            currentLine.SetText(0, newCurrentLineText);
+            
+            // 插入剪貼簿中間行
+            for (int i = 1; i < Instance.ClipboardBuffers.Count - 1; i++)
+            {
+                var clipboardLine = Instance.ClipboardBuffers[i];
+                string clipboardContent = new string(clipboardLine.Chars.Select(c => c.Char).ToArray());
+                
+                // 在當前行後插入新行
+                Instance.Context.CursorY++;
+                
+                // 確保新行存在
+                if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
+                {
+                    Instance.Context.Texts.Add(new ConsoleText());
+                }
+                else
+                {
+                    // 在當前位置插入新行
+                    Instance.Context.Texts.Insert(Instance.Context.CursorY, new ConsoleText());
+                }
+                
+                // 設置新行內容
+                Instance.Context.Texts[Instance.Context.CursorY].SetText(0, clipboardContent);
+            }
+            
+            // 處理最後一行：剪貼簿最後一行 + 當前行游標後的內容
+            if (Instance.ClipboardBuffers.Count > 1)
+            {
+                var lastClipboardLine = Instance.ClipboardBuffers[Instance.ClipboardBuffers.Count - 1];
+                string lastClipboardContent = new string(lastClipboardLine.Chars.Select(c => c.Char).ToArray());
+                
+                // 在當前行後插入新行
+                Instance.Context.CursorY++;
+                
+                // 確保新行存在
+                if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
+                {
+                    Instance.Context.Texts.Add(new ConsoleText());
+                }
+                else
+                {
+                    // 在當前位置插入新行
+                    Instance.Context.Texts.Insert(Instance.Context.CursorY, new ConsoleText());
+                }
+                
+                // 設置新行內容：剪貼簿最後一行 + 原游標後的內容
+                string newLastLineText = lastClipboardContent + afterCursor;
+                Instance.Context.Texts[Instance.Context.CursorY].SetText(0, newLastLineText);
+                
+                // 設置游標位置到最後一行的剪貼簿內容結尾處
+                Instance.Context.CursorX = 0;
+                for (int i = 0; i < lastClipboardContent.Length; i++)
+                {
+                    Instance.Context.CursorX += lastClipboardContent[i].GetCharWidth();
+                }
+            }
+        }
+        
+        // 調整游標位置和偏移量
+        AdjustCursorAndOffset();
+        
+        // 切換到普通模式
+        Instance.Mode = new VimNormalMode { Instance = Instance };
+        
+        // 顯示狀態欄消息
+        Instance.StatusBarText = "已貼上剪貼簿內容";
+        Instance.IsStatusBarVisible = true;
     }
     
     public void WaitForInput()
