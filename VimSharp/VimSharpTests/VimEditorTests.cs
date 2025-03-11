@@ -455,5 +455,40 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(2); 
             _editor.Context.CursorY.Should().Be(0); 
         }
+        
+        [Test]
+        public void WhenRelativeLineNumberEnabled_PressLeftArrowTwice_CursorShouldStayAtPosition2()
+        {
+            // 初始化 VimEditor
+            _editor.Context.Texts.Clear();
+            
+            // 設置5行文本
+            for (int i = 0; i < 5; i++)
+            {
+                _editor.Context.Texts.Add(new ConsoleText());
+                _editor.Context.Texts[i].SetText(0, $"line{i+1}");
+            }
+            
+            // 設置視口
+            _editor.Context.ViewPort = new ConsoleRectangle(0, 0, 40, 5);
+            
+            // 設置初始游標位置
+            _editor.Context.CursorX = 0;
+            _editor.Context.CursorY = 0;
+            
+            // 啟用相對行號
+            _editor.IsRelativeLineNumber = true;
+            
+            // 按下向左鍵兩次
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.LeftArrow, false, false, false));
+            _editor.WaitForInput();
+            
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.LeftArrow, false, false, false));
+            _editor.WaitForInput();
+            
+            // 驗證游標位置
+            _editor.Context.CursorX.Should().Be(2); // 游標X位置應該保持在2
+            _editor.Context.CursorY.Should().Be(0); // 游標Y位置應該保持不變
+        }
     }
 } 
