@@ -560,7 +560,7 @@ public class VimVisualMode : IVimMode
     private void JumpToLine()
     {
         // 將按鍵緩衝區轉換為字符串
-        string input = ConvertKeyBufferToString(_keyBuffer);
+        string input = string.Join("", _keyBuffer.Select(k => k.ToChar()).Where(c => c != '\0'));
         
         // 使用正則表達式提取數字部分
         var match = Regex.Match(input, @"(\d+)J");
@@ -597,54 +597,6 @@ public class VimVisualMode : IVimMode
                 // 調整視口以顯示游標所在行
                 AdjustCursorAndOffset();
             }
-        }
-    }
-    
-    /// <summary>
-    /// 將按鍵緩衝區轉換為字符串
-    /// </summary>
-    private string ConvertKeyBufferToString(List<ConsoleKey> keyBuffer)
-    {
-        var sb = new StringBuilder();
-        
-        foreach (var key in keyBuffer)
-        {
-            char keyChar = GetCharFromKey(key);
-            if (keyChar != '\0')
-            {
-                sb.Append(keyChar);
-            }
-        }
-        
-        return sb.ToString();
-    }
-    
-    /// <summary>
-    /// 將ConsoleKey轉換為字符
-    /// </summary>
-    private char GetCharFromKey(ConsoleKey key)
-    {
-        // 處理特殊字符
-        switch (key)
-        {
-            case ConsoleKey.D0: return '0';
-            case ConsoleKey.D1: return '1';
-            case ConsoleKey.D2: return '2';
-            case ConsoleKey.D3: return '3';
-            case ConsoleKey.D4: return '4';
-            case ConsoleKey.D5: return '5';
-            case ConsoleKey.D6: return '6';
-            case ConsoleKey.D7: return '7';
-            case ConsoleKey.D8: return '8';
-            case ConsoleKey.D9: return '9';
-            case ConsoleKey.J: return 'J';
-            // 處理字母
-            default:
-                if (key >= ConsoleKey.A && key <= ConsoleKey.Z)
-                {
-                    return (char)('a' + (key - ConsoleKey.A));
-                }
-                return '\0';
         }
     }
     
