@@ -342,7 +342,7 @@ namespace VimSharpTests
         }
 
         [Test]
-        public void WhenPressDollarSign_CursorShouldMoveToEndOfLine2()
+        public void WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLine()
         {
             // 初始化 VimEditor
             _editor.Context.Texts.Clear();
@@ -365,7 +365,7 @@ namespace VimSharpTests
         }
 
         [Test]
-        public void WhenPressDollarSign_CursorShouldMoveToEndOfLine3()
+        public void WhenRelativeLineNumberEnabled_PressCaretSign_CursorShouldMoveToStartOfLine()
         {
             // 初始化 VimEditor
             _editor.Context.Texts.Clear();
