@@ -282,16 +282,8 @@ public class VimMarkMode : IVimMode
         // 確保起始位置和結束位置有序
         int startY = Math.Min(_startCursorY, _endCursorY);
         int endY = Math.Max(_startCursorY, _endCursorY);
-        int startX = _startCursorY == startY ? _startCursorX : _endCursorX;
-        int endX = _startCursorY == endY ? _startCursorX : _endCursorX;
-        
-        if (_startCursorY == _endCursorY && _startCursorX > _endCursorX)
-        {
-            // 如果在同一行，但起始X大於結束X，則交換
-            int temp = startX;
-            startX = endX;
-            endX = temp;
-        }
+        int startX = _startCursorY < _endCursorY ? _startCursorX : (_startCursorY > _endCursorY ? _endCursorX : Math.Min(_startCursorX, _endCursorX));
+        int endX = _startCursorY < _endCursorY ? _endCursorX : (_startCursorY > _endCursorY ? _startCursorX : Math.Max(_startCursorX, _endCursorX));
         
         // 創建剪貼簿緩衝區，如果不存在
         if (Instance.ClipboardBuffers == null)
@@ -309,8 +301,10 @@ public class VimMarkMode : IVimMode
             var line = Instance.Context.Texts[startY];
             var text = new ConsoleText();
             
-            // 計算實際索引位置
+            // 獲取當前行的文本
             string lineText = new string(line.Chars.Select(c => c.Char).ToArray());
+            
+            // 計算實際索引位置
             int startIndex = lineText.GetStringIndexFromDisplayPosition(startX);
             int endIndex = lineText.GetStringIndexFromDisplayPosition(endX);
             
@@ -318,15 +312,11 @@ public class VimMarkMode : IVimMode
             startIndex = Math.Max(0, startIndex);
             endIndex = Math.Min(lineText.Length - 1, endIndex);
             
-            // 複製選取的字符
-            for (int i = startIndex; i <= endIndex; i++)
-            {
-                if (i < line.Chars.Length)
-                {
-                    text.Chars = text.Chars.Append(line.Chars[i]).ToArray();
-                }
-            }
+            // 直接從原始文本中提取選中的部分
+            string selectedText = lineText.Substring(startIndex, endIndex - startIndex + 1);
             
+            // 設置到剪貼簿
+            text.SetText(0, selectedText);
             Instance.ClipboardBuffers.Add(text);
         }
         else
@@ -337,34 +327,33 @@ public class VimMarkMode : IVimMode
                 var line = Instance.Context.Texts[y];
                 var text = new ConsoleText();
                 
+                // 獲取當前行的文本
+                string lineText = new string(line.Chars.Select(c => c.Char).ToArray());
+                
                 if (y == startY)
                 {
                     // 第一行：從起始位置到行尾
-                    string lineText = new string(line.Chars.Select(c => c.Char).ToArray());
                     int startIndex = lineText.GetStringIndexFromDisplayPosition(startX);
                     startIndex = Math.Max(0, startIndex);
                     
-                    for (int i = startIndex; i < line.Chars.Length; i++)
-                    {
-                        text.Chars = text.Chars.Append(line.Chars[i]).ToArray();
-                    }
+                    // 提取選中的部分
+                    string selectedText = lineText.Substring(startIndex);
+                    text.SetText(0, selectedText);
                 }
                 else if (y == endY)
                 {
                     // 最後一行：從行首到結束位置
-                    string lineText = new string(line.Chars.Select(c => c.Char).ToArray());
                     int endIndex = lineText.GetStringIndexFromDisplayPosition(endX);
                     endIndex = Math.Min(lineText.Length - 1, endIndex);
                     
-                    for (int i = 0; i <= endIndex; i++)
-                    {
-                        text.Chars = text.Chars.Append(line.Chars[i]).ToArray();
-                    }
+                    // 提取選中的部分
+                    string selectedText = lineText.Substring(0, endIndex + 1);
+                    text.SetText(0, selectedText);
                 }
                 else
                 {
                     // 中間行：整行複製
-                    text.Chars = line.Chars.ToArray();
+                    text.SetText(0, lineText);
                 }
                 
                 Instance.ClipboardBuffers.Add(text);
