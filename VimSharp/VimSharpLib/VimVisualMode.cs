@@ -540,13 +540,31 @@ public class VimVisualMode : IVimMode
                             lastCharPosition += text[i].GetCharWidth();
                         }
                     }
-                    Instance.Context.CursorX = lastCharPosition;
+                    
+                    // 如果啟用了相對行號，則需要考慮行號區域的寬度
+                    if (Instance.IsRelativeLineNumber)
+                    {
+                        int lineNumberWidth = Instance.CalculateLineNumberWidth();
+                        Instance.Context.CursorX = lastCharPosition + lineNumberWidth;
+                    }
+                    else
+                    {
+                        Instance.Context.CursorX = lastCharPosition;
+                    }
                 }
             }
             else
             {
-                // 如果當前行為空，將游標設置為0
-                Instance.Context.CursorX = 0;
+                // 如果當前行為空，將游標設置為行首位置
+                if (Instance.IsRelativeLineNumber)
+                {
+                    int lineNumberWidth = Instance.CalculateLineNumberWidth();
+                    Instance.Context.CursorX = lineNumberWidth;
+                }
+                else
+                {
+                    Instance.Context.CursorX = 0;
+                }
             }
             
             AdjustCursorAndOffset();
@@ -561,8 +579,17 @@ public class VimVisualMode : IVimMode
         // 確保當前行存在
         if (Instance.Context.CursorY < Instance.Context.Texts.Count)
         {
-            // 將游標設置為行首
-            Instance.Context.CursorX = 0;
+            // 如果啟用了相對行號，則將游標設置為行號區域之後的位置
+            if (Instance.IsRelativeLineNumber)
+            {
+                int lineNumberWidth = Instance.CalculateLineNumberWidth();
+                Instance.Context.CursorX = lineNumberWidth;
+            }
+            else
+            {
+                // 將游標設置為行首
+                Instance.Context.CursorX = 0;
+            }
             
             AdjustCursorAndOffset();
         }
