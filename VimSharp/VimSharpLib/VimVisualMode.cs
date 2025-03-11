@@ -8,7 +8,7 @@ public class VimVisualMode : IVimMode
 {
     public required VimEditor Instance { get; set; }
     
-    private Dictionary<IKeyPattern, Action> _keyPatterns;
+    private Dictionary<IKeyPattern, Action> _keyPatterns = new();
     private List<ConsoleKey> _keyBuffer;
     
     public VimVisualMode()
@@ -21,14 +21,14 @@ public class VimVisualMode : IVimMode
     {
         _keyPatterns = new Dictionary<IKeyPattern, Action>
         {
-            { new RegexKeyPattern("I"), SwitchToNormalMode },
-            { new RegexKeyPattern("A"), HandleAKey },
-            { new RegexKeyPattern("Q"), QuitEditor },
-            { new RegexKeyPattern("Left"), MoveCursorLeft },
-            { new RegexKeyPattern("Right"), MoveCursorRight },
-            { new RegexKeyPattern("Up"), MoveCursorUp },
-            { new RegexKeyPattern("Down"), MoveCursorDown },
-            { new RegexKeyPattern("Enter"), HandleEnterKey }
+            { new RegexKeyPattern(ConsoleKey.I), SwitchToNormalMode },
+            { new RegexKeyPattern(ConsoleKey.A), HandleAKey },
+            { new RegexKeyPattern(ConsoleKey.Q), QuitEditor },
+            { new RegexKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
+            { new RegexKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },
+            { new RegexKeyPattern(ConsoleKey.UpArrow), MoveCursorUp },
+            { new RegexKeyPattern(ConsoleKey.DownArrow), MoveCursorDown },
+            { new RegexKeyPattern(ConsoleKey.Enter), HandleEnterKey }
         };
     }
     
@@ -344,7 +344,7 @@ public class VimVisualMode : IVimMode
         
         // 計算匹配的模式數量
         int matchCount = 0;
-        IKeyPattern matchedPattern = null;
+        IKeyPattern? matchedPattern = null;
         
         foreach (var pattern in _keyPatterns.Keys)
         {
@@ -356,7 +356,7 @@ public class VimVisualMode : IVimMode
         }
         
         // 如果只有一個模式匹配，執行對應的操作
-        if (matchCount == 1)
+        if (matchCount == 1 && matchedPattern != null)
         {
             _keyPatterns[matchedPattern].Invoke();
             _keyBuffer.Clear();
