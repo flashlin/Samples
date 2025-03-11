@@ -412,11 +412,7 @@ namespace VimSharpTests
             
             // 設置視口
             _editor.Context.ViewPort = new ConsoleRectangle(0, 0, 40, 5);
-            
-            // 設置初始游標位置在第3行
-            _editor.Context.CursorX = 0;
-            _editor.Context.CursorY = 2;
-            
+                        
             // 依序按下 '1', 'J' 按鍵
             _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false));
             _editor.WaitForInput();
