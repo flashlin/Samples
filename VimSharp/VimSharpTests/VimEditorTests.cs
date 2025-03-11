@@ -361,5 +361,40 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(0); // 游標應該在 'H' 上
             _editor.Context.CursorY.Should().Be(0);
         }
+        
+        [Test]
+        public void WhenPress10J_CursorShouldJumpToLine10()
+        {
+            // 初始化 VimEditor
+            _editor.Context.Texts.Clear();
+            
+            // 設置11行文本
+            for (int i = 0; i < 11; i++)
+            {
+                _editor.Context.Texts.Add(new ConsoleText());
+                _editor.Context.Texts[i].SetText(0, $"line{i+1}");
+            }
+            
+            // 設置視口
+            _editor.Context.ViewPort = new ConsoleRectangle(0, 0, 40, 5);
+            
+            // 設置初始游標位置
+            _editor.Context.CursorX = 0;
+            _editor.Context.CursorY = 0;
+            
+            // 依序按下 '1', '0', 'J' 按鍵
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false));
+            _editor.WaitForInput();
+            
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('0', ConsoleKey.D0, false, false, false));
+            _editor.WaitForInput();
+            
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('J', ConsoleKey.J, false, false, false));
+            _editor.WaitForInput();
+            
+            // 驗證游標位置
+            _editor.Context.CursorX.Should().Be(0); // 游標應該在行首
+            _editor.Context.CursorY.Should().Be(4); // 游標應該在視窗的第5行
+        }
     }
 } 
