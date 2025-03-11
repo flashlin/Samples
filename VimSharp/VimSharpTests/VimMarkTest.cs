@@ -59,7 +59,7 @@ namespace VimSharpTests
             }
             
             // 按下p按鍵一次
-            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('p', ConsoleKey.P, false, false, false));
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('y', ConsoleKey.P, false, false, false));
             _editor.WaitForInput();
             
             // 驗證 ClipboardBuffers 的內容
