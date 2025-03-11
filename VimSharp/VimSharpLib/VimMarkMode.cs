@@ -29,8 +29,6 @@ public class VimMarkMode : IVimMode
     {
         _keyPatterns = new Dictionary<IKeyPattern, Action>
         {
-            { new ConsoleKeyPattern(ConsoleKey.I), SwitchToNormalMode },
-            { new ConsoleKeyPattern(ConsoleKey.Q), QuitEditor },
             { new ConsoleKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
             { new ConsoleKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },
             { new ConsoleKeyPattern(ConsoleKey.UpArrow), MoveCursorUp },
@@ -105,14 +103,6 @@ public class VimMarkMode : IVimMode
     private void SwitchToVisualMode()
     {
         Instance.Mode = new VimVisualMode { Instance = Instance };
-    }
-    
-    /// <summary>
-    /// 退出編輯器
-    /// </summary>
-    private void QuitEditor()
-    {
-        Instance.IsRunning = false;
     }
     
     /// <summary>
