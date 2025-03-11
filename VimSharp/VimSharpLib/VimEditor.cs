@@ -1,5 +1,6 @@
 namespace VimSharpLib;
 using System.Text;
+using System.Collections.Generic;
 
 public class VimEditor
 {
@@ -12,6 +13,9 @@ public class VimEditor
     // 添加狀態欄相關屬性
     public bool IsStatusBarVisible { get; set; } = false;
     public string StatusBarText { get; set; } = "";
+    
+    // 添加剪貼簿緩衝區
+    public List<ConsoleText> ClipboardBuffers { get; set; } = [];
 
     public VimEditor() : this(new ConsoleDevice())
     {
@@ -48,6 +52,9 @@ public class VimEditor
 
     public void Render()
     {
+        // 隱藏游標
+        _console.Write("\x1b[?25l");
+        
         // 計算可見區域的行數
         int visibleLines = Math.Min(Context.ViewPort.Height, Context.Texts.Count - Context.OffsetY);
         
@@ -93,6 +100,9 @@ public class VimEditor
         {
             _console.SetCursorPosition(cursorScreenX, cursorScreenY);
         }
+        
+        // 顯示游標
+        _console.Write("\x1b[?25h");
     }
     
     /// <summary>
