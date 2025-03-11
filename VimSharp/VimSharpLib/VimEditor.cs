@@ -14,7 +14,51 @@ public class VimEditor
     public bool IsStatusBarVisible { get; set; } = false;
     public string StatusBarText { get; set; } = "";
 
-    public bool IsRelativeLineNumber { get; set; } = false;
+    private bool _isRelativeLineNumber = false;
+    public bool IsRelativeLineNumber
+    {
+        get => _isRelativeLineNumber;
+        set
+        {
+            // 如果值沒有變化，則不需要處理
+            if (_isRelativeLineNumber == value)
+                return;
+                
+            // 保存當前游標位置
+            int originalCursorX = Context.CursorX;
+            int originalCursorY = Context.CursorY;
+            
+            // 更新屬性值
+            _isRelativeLineNumber = value;
+            
+            // 如果啟用了相對行號，則需要調整游標位置
+            if (value)
+            {
+                // 計算文本總行數
+                int totalLines = Context.Texts.Count;
+                
+                // 計算相對行號的最大值（上下行數的最大值）
+                int maxRelativeLineNumber = Math.Max(Context.CursorY, totalLines - Context.CursorY - 1);
+                
+                // 計算行號區域寬度所需的位數
+                int lineNumberDigits = maxRelativeLineNumber > 0 ? (int)Math.Log10(maxRelativeLineNumber) + 1 : 1;
+                
+                // 行號區域寬度 = 位數 + 1 (用於間隔)
+                int lineNumberWidth = lineNumberDigits + 1;
+                
+                // 調整游標位置
+                Context.CursorX = 2;
+            }
+            else
+            {
+                // 恢復原始游標位置
+                Context.CursorX = originalCursorX;
+            }
+            
+            // 確保游標Y位置不變
+            Context.CursorY = originalCursorY;
+        }
+    }
     
     // 添加剪貼簿緩衝區
     public List<ConsoleText> ClipboardBuffers { get; set; } = [];
@@ -54,6 +98,10 @@ public class VimEditor
 
     public void Render()
     {
+        // 保存原始游標位置
+        int originalCursorX = Context.CursorX;
+        int originalCursorY = Context.CursorY;
+        
         // 隱藏游標
         _console.Write("\x1b[?25l");
         
@@ -145,8 +193,8 @@ public class VimEditor
         RenderFrame();
 
         // 設置光標位置，考慮偏移量和行號區域
-        int cursorScreenX = Context.CursorX - Context.OffsetX + Context.ViewPort.X + lineNumberWidth;
-        int cursorScreenY = Context.CursorY - Context.OffsetY + Context.ViewPort.Y;
+        int cursorScreenX = originalCursorX - Context.OffsetX + Context.ViewPort.X + lineNumberWidth;
+        int cursorScreenY = originalCursorY - Context.OffsetY + Context.ViewPort.Y;
         
         // 確保光標在可見區域內，且不在行號區域
         if (cursorScreenX >= Context.ViewPort.X + lineNumberWidth && 
@@ -154,11 +202,16 @@ public class VimEditor
             cursorScreenY >= Context.ViewPort.Y && 
             cursorScreenY < Context.ViewPort.Y + Context.ViewPort.Height)
         {
+            // 只設置控制台游標位置，不修改 Context.CursorX 和 Context.CursorY
             _console.SetCursorPosition(cursorScreenX, cursorScreenY);
         }
         
         // 顯示游標
         _console.Write("\x1b[?25h");
+        
+        // 恢復原始游標位置
+        Context.CursorX = originalCursorX;
+        Context.CursorY = originalCursorY;
     }
     
     /// <summary>
