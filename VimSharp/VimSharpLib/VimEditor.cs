@@ -55,6 +55,18 @@ public class VimEditor
         // 隱藏游標
         _console.Write("\x1b[?25l");
         
+        // 計算文本總行數
+        int totalLines = Context.Texts.Count;
+        
+        // 計算相對行號的最大值（上下行數的最大值）
+        int maxRelativeLineNumber = Math.Max(Context.CursorY, totalLines - Context.CursorY - 1);
+        
+        // 計算行號區域寬度所需的位數
+        int lineNumberDigits = maxRelativeLineNumber > 0 ? (int)Math.Log10(maxRelativeLineNumber) + 1 : 1;
+        
+        // 行號區域寬度 = 位數 + 1 (用於間隔)
+        int lineNumberWidth = lineNumberDigits + 1;
+        
         // 計算可見區域的行數
         int visibleLines = Math.Min(Context.ViewPort.Height, Context.Texts.Count - Context.OffsetY);
         
@@ -72,13 +84,29 @@ public class VimEditor
             {
                 var text = Context.Texts[textIndex];
                 
-                // 直接繪製文本，考慮 ViewPort 和偏移量
-                RenderText(Context.ViewPort.X, Context.ViewPort.Y + i, text, Context.OffsetX, Context.ViewPort);
+                // 計算相對行號
+                int relativeLineNumber = 0;
+                bool isCurrentLine = (textIndex == Context.CursorY);
+                
+                if (!isCurrentLine)
+                {
+                    // 如果不是當前行，計算相對行號
+                    relativeLineNumber = Math.Abs(textIndex - Context.CursorY);
+                }
+                
+                // 繪製行號
+                RenderLineNumber(Context.ViewPort.X, Context.ViewPort.Y + i, relativeLineNumber, lineNumberDigits, isCurrentLine);
+                
+                // 直接繪製文本，考慮 ViewPort、偏移量和行號區域
+                RenderText(Context.ViewPort.X + lineNumberWidth, Context.ViewPort.Y + i, text, Context.OffsetX, Context.ViewPort, lineNumberWidth);
             }
             else
             {
-                // 如果索引無效（超出文本範圍），繪製空白行
-                RenderEmptyLine(Context.ViewPort.X, Context.ViewPort.Y + i, Context.ViewPort.Width);
+                // 如果索引無效（超出文本範圍），繪製空白行號區域
+                RenderEmptyLineNumber(Context.ViewPort.X, Context.ViewPort.Y + i, lineNumberDigits);
+                
+                // 繪製空白行
+                RenderEmptyLine(Context.ViewPort.X + lineNumberWidth, Context.ViewPort.Y + i, Context.ViewPort.Width - lineNumberWidth);
             }
         }
         
@@ -88,12 +116,12 @@ public class VimEditor
             RenderStatusBar();
         }
 
-        // 設置光標位置，考慮偏移量
-        int cursorScreenX = Context.CursorX - Context.OffsetX + Context.ViewPort.X;
+        // 設置光標位置，考慮偏移量和行號區域
+        int cursorScreenX = Context.CursorX - Context.OffsetX + Context.ViewPort.X + lineNumberWidth;
         int cursorScreenY = Context.CursorY - Context.OffsetY + Context.ViewPort.Y;
         
-        // 確保光標在可見區域內
-        if (cursorScreenX >= Context.ViewPort.X && 
+        // 確保光標在可見區域內，且不在行號區域
+        if (cursorScreenX >= Context.ViewPort.X + lineNumberWidth && 
             cursorScreenX < Context.ViewPort.X + Context.ViewPort.Width &&
             cursorScreenY >= Context.ViewPort.Y && 
             cursorScreenY < Context.ViewPort.Y + Context.ViewPort.Height)
@@ -106,9 +134,104 @@ public class VimEditor
     }
     
     /// <summary>
+    /// 繪製行號
+    /// </summary>
+    private void RenderLineNumber(int x, int y, int lineNumber, int digits, bool isCurrentLine)
+    {
+        // 檢查 Y 座標是否在 ViewPort 範圍內
+        if (y < Context.ViewPort.Y || y >= Context.ViewPort.Y + Context.ViewPort.Height)
+        {
+            return; // Y 座標超出範圍，不繪製
+        }
+
+        // 設置光標位置到行號區域的起始位置
+        _console.SetCursorPosition(x, y);
+        
+        // 創建 StringBuilder 來構建行號字符串
+        var sb = new StringBuilder();
+        
+        if (isCurrentLine)
+        {
+            // 當前行顯示空格
+            for (int i = 0; i < digits; i++)
+            {
+                var coloredChar = new ColoredChar
+                {
+                    Char = ' ',
+                    Foreground = ConsoleColor.White,
+                    Background = ConsoleColor.DarkGray
+                };
+                sb.Append(coloredChar.ToAnsiString());
+            }
+        }
+        else
+        {
+            // 格式化行號，靠右對齊
+            string lineNumberStr = lineNumber.ToString().PadLeft(digits);
+            
+            // 添加行號
+            foreach (char c in lineNumberStr)
+            {
+                var coloredChar = new ColoredChar
+                {
+                    Char = c,
+                    Foreground = ConsoleColor.Yellow,
+                    Background = ConsoleColor.DarkGray
+                };
+                sb.Append(coloredChar.ToAnsiString());
+            }
+        }
+        
+        // 添加一個空格作為間隔
+        var spaceChar = new ColoredChar
+        {
+            Char = ' ',
+            Foreground = ConsoleColor.White,
+            Background = ConsoleColor.DarkGray
+        };
+        sb.Append(spaceChar.ToAnsiString());
+        
+        // 輸出構建好的字符串
+        _console.Write(sb.ToString());
+    }
+    
+    /// <summary>
+    /// 繪製空白行號區域
+    /// </summary>
+    private void RenderEmptyLineNumber(int x, int y, int digits)
+    {
+        // 檢查 Y 座標是否在 ViewPort 範圍內
+        if (y < Context.ViewPort.Y || y >= Context.ViewPort.Y + Context.ViewPort.Height)
+        {
+            return; // Y 座標超出範圍，不繪製
+        }
+
+        // 設置光標位置到行號區域的起始位置
+        _console.SetCursorPosition(x, y);
+        
+        // 創建 StringBuilder 來構建空白行號字符串
+        var sb = new StringBuilder();
+        
+        // 添加空白字符，寬度等於行號區域寬度
+        for (int i = 0; i < digits + 1; i++)
+        {
+            var coloredChar = new ColoredChar
+            {
+                Char = ' ',
+                Foreground = ConsoleColor.White,
+                Background = ConsoleColor.DarkGray
+            };
+            sb.Append(coloredChar.ToAnsiString());
+        }
+        
+        // 輸出構建好的字符串
+        _console.Write(sb.ToString());
+    }
+    
+    /// <summary>
     /// 繪製文本，考慮 ViewPort 和偏移量
     /// </summary>
-    private void RenderText(int x, int y, ConsoleText text, int offset, ConsoleRectangle viewPort)
+    private void RenderText(int x, int y, ConsoleText text, int offset, ConsoleRectangle viewPort, int lineNumberWidth = 0)
     {
         // 檢查 Y 座標是否在 ViewPort 範圍內
         if (y < viewPort.Y || y >= viewPort.Y + viewPort.Height)
@@ -119,8 +242,8 @@ public class VimEditor
         // 設置光標位置到可見區域的起始位置
         _console.SetCursorPosition(x, y);
         
-        // 計算可見區域的寬度
-        int visibleWidth = viewPort.Width;
+        // 計算可見區域的寬度，考慮行號區域
+        int visibleWidth = viewPort.Width - lineNumberWidth;
         
         // 創建 StringBuilder 來構建輸出字符串
         var sb = new StringBuilder();
