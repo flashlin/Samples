@@ -58,8 +58,8 @@ namespace VimSharpTests
                 _editor.WaitForInput();
             }
             
-            // 按下p按鍵一次
-            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('y', ConsoleKey.P, false, false, false));
+            // 按下 y 按鍵一次
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('y', ConsoleKey.Y, false, false, false));
             _editor.WaitForInput();
             
             // 驗證 ClipboardBuffers 的內容
