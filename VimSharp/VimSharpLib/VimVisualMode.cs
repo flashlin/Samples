@@ -21,14 +21,14 @@ public class VimVisualMode : IVimMode
     {
         _keyPatterns = new Dictionary<IKeyPattern, Action>
         {
-            { new RegexKeyPattern(ConsoleKey.I), SwitchToNormalMode },
-            { new RegexKeyPattern(ConsoleKey.A), HandleAKey },
-            { new RegexKeyPattern(ConsoleKey.Q), QuitEditor },
-            { new RegexKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
-            { new RegexKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },
-            { new RegexKeyPattern(ConsoleKey.UpArrow), MoveCursorUp },
-            { new RegexKeyPattern(ConsoleKey.DownArrow), MoveCursorDown },
-            { new RegexKeyPattern(ConsoleKey.Enter), HandleEnterKey }
+            { new ConsoleKeyPattern(ConsoleKey.I), SwitchToNormalMode },
+            { new ConsoleKeyPattern(ConsoleKey.A), HandleAKey },
+            { new ConsoleKeyPattern(ConsoleKey.Q), QuitEditor },
+            { new ConsoleKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
+            { new ConsoleKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },
+            { new ConsoleKeyPattern(ConsoleKey.UpArrow), MoveCursorUp },
+            { new ConsoleKeyPattern(ConsoleKey.DownArrow), MoveCursorDown },
+            { new ConsoleKeyPattern(ConsoleKey.Enter), HandleEnterKey }
         };
     }
     

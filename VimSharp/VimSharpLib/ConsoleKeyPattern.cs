@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
 
-public class RegexKeyPattern : IKeyPattern
+public class ConsoleKeyPattern : IKeyPattern
 {
     private readonly ConsoleKey _key;
 
-    public RegexKeyPattern(ConsoleKey key)
+    public ConsoleKeyPattern(ConsoleKey key)
     {
         _key = key;
     }
