@@ -28,7 +28,8 @@ public class VimVisualMode : IVimMode
             { new ConsoleKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },
             { new ConsoleKeyPattern(ConsoleKey.UpArrow), MoveCursorUp },
             { new ConsoleKeyPattern(ConsoleKey.DownArrow), MoveCursorDown },
-            { new ConsoleKeyPattern(ConsoleKey.Enter), HandleEnterKey }
+            { new ConsoleKeyPattern(ConsoleKey.Enter), HandleEnterKey },
+            { new ConsoleKeyPattern(new[] { ConsoleKey.H, ConsoleKey.L }), MoveCursorLeft }
         };
     }
     
@@ -361,8 +362,9 @@ public class VimVisualMode : IVimMode
             _keyPatterns[matchedPattern].Invoke();
             _keyBuffer.Clear();
         }
-        // 如果沒有模式匹配，清除緩衝區
-        else if (matchCount == 0)
+        // 如果沒有模式匹配，但緩衝區已經達到一定長度，清除緩衝區
+        // 這裡我們設置一個合理的最大長度，例如 5
+        else if (matchCount == 0 && _keyBuffer.Count >= 5)
         {
             _keyBuffer.Clear();
         }

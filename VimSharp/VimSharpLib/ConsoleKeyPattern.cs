@@ -6,11 +6,16 @@ using System.Linq;
 
 public class ConsoleKeyPattern : IKeyPattern
 {
-    private readonly ConsoleKey _key;
+    private readonly IEnumerable<ConsoleKey> _keys;
 
-    public ConsoleKeyPattern(ConsoleKey key)
+    public ConsoleKeyPattern(IEnumerable<ConsoleKey> keys)
     {
-        _key = key;
+        _keys = keys ?? throw new ArgumentNullException(nameof(keys));
+    }
+    
+    public ConsoleKeyPattern(ConsoleKey key)
+        : this(new[] { key })
+    {
     }
 
     public bool IsMatch(List<ConsoleKey> keyBuffer)
@@ -18,7 +23,19 @@ public class ConsoleKeyPattern : IKeyPattern
         if (keyBuffer == null || keyBuffer.Count == 0)
             return false;
 
-        // 檢查按鍵緩衝區中是否包含指定的按鍵
-        return keyBuffer.Contains(_key);
+        // 完全比對：檢查按鍵緩衝區是否與指定的按鍵序列完全匹配
+        // 首先檢查長度是否相同
+        var keysList = _keys.ToList();
+        if (keyBuffer.Count != keysList.Count)
+            return false;
+
+        // 然後檢查每個位置的按鍵是否相同
+        for (int i = 0; i < keyBuffer.Count; i++)
+        {
+            if (keyBuffer[i] != keysList[i])
+                return false;
+        }
+
+        return true;
     }
 } 
