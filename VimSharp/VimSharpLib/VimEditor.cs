@@ -116,6 +116,9 @@ public class VimEditor
             RenderStatusBar();
         }
 
+        // 繪製顯示框
+        RenderFrame();
+
         // 設置光標位置，考慮偏移量和行號區域
         int cursorScreenX = Context.CursorX - Context.OffsetX + Context.ViewPort.X + lineNumberWidth;
         int cursorScreenY = Context.CursorY - Context.OffsetY + Context.ViewPort.Y;
@@ -362,6 +365,126 @@ public class VimEditor
         
         // 繪製狀態欄
         RenderText(Context.ViewPort.X, statusBarY, statusBarText, 0, Context.ViewPort);
+    }
+
+    /// <summary>
+    /// 繪製顯示框
+    /// </summary>
+    private void RenderFrame()
+    {
+        // 定義框架字符
+        char topLeft = '┌';
+        char topRight = '┐';
+        char bottomLeft = '└';
+        char bottomRight = '┘';
+        char horizontal = '─';
+        char vertical = '│';
+        
+        // 設置框架顏色
+        ConsoleColor frameColor = ConsoleColor.Cyan;
+        ConsoleColor backgroundColor = ConsoleColor.Black;
+        
+        // 計算框架的位置
+        int frameX = Context.ViewPort.X - 1;
+        int frameY = Context.ViewPort.Y - 1;
+        int frameWidth = Context.ViewPort.Width + 2;
+        int frameHeight = Context.ViewPort.Height + 2;
+        
+        // 繪製頂部邊框
+        _console.SetCursorPosition(frameX, frameY);
+        var sbTop = new StringBuilder();
+        
+        // 添加左上角
+        var topLeftChar = new ColoredChar
+        {
+            Char = topLeft,
+            Foreground = frameColor,
+            Background = backgroundColor
+        };
+        sbTop.Append(topLeftChar.ToAnsiString());
+        
+        // 添加頂部水平線
+        for (int i = 0; i < Context.ViewPort.Width; i++)
+        {
+            var horizontalChar = new ColoredChar
+            {
+                Char = horizontal,
+                Foreground = frameColor,
+                Background = backgroundColor
+            };
+            sbTop.Append(horizontalChar.ToAnsiString());
+        }
+        
+        // 添加右上角
+        var topRightChar = new ColoredChar
+        {
+            Char = topRight,
+            Foreground = frameColor,
+            Background = backgroundColor
+        };
+        sbTop.Append(topRightChar.ToAnsiString());
+        
+        _console.Write(sbTop.ToString());
+        
+        // 繪製左右邊框
+        for (int i = 0; i < Context.ViewPort.Height; i++)
+        {
+            // 左邊框
+            _console.SetCursorPosition(frameX, frameY + 1 + i);
+            var leftVerticalChar = new ColoredChar
+            {
+                Char = vertical,
+                Foreground = frameColor,
+                Background = backgroundColor
+            };
+            _console.Write(leftVerticalChar.ToAnsiString());
+            
+            // 右邊框
+            _console.SetCursorPosition(frameX + frameWidth - 1, frameY + 1 + i);
+            var rightVerticalChar = new ColoredChar
+            {
+                Char = vertical,
+                Foreground = frameColor,
+                Background = backgroundColor
+            };
+            _console.Write(rightVerticalChar.ToAnsiString());
+        }
+        
+        // 繪製底部邊框
+        _console.SetCursorPosition(frameX, frameY + frameHeight - 1);
+        var sbBottom = new StringBuilder();
+        
+        // 添加左下角
+        var bottomLeftChar = new ColoredChar
+        {
+            Char = bottomLeft,
+            Foreground = frameColor,
+            Background = backgroundColor
+        };
+        sbBottom.Append(bottomLeftChar.ToAnsiString());
+        
+        // 添加底部水平線
+        for (int i = 0; i < Context.ViewPort.Width; i++)
+        {
+            var horizontalChar = new ColoredChar
+            {
+                Char = horizontal,
+                Foreground = frameColor,
+                Background = backgroundColor
+            };
+            sbBottom.Append(horizontalChar.ToAnsiString());
+        }
+        
+        // 添加右下角
+        var bottomRightChar = new ColoredChar
+        {
+            Char = bottomRight,
+            Foreground = frameColor,
+            Background = backgroundColor
+        };
+        sbBottom.Append(bottomRightChar.ToAnsiString());
+        
+        _console.Write(sbBottom.ToString());
     }
 
     public void WaitForInput()
