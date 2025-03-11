@@ -378,12 +378,12 @@ public class VimVisualMode : IVimMode
             string clipboardContent = new string(clipboardText.Chars.Select(c => c.Char).ToArray());
             
             // 在當前位置插入剪貼簿內容
-            string newText = currentText.Insert(actualIndex, clipboardContent);
+            string newText = currentText.Insert(actualIndex + 1, clipboardContent);
             currentLine.SetText(0, newText);
             
             // 移動游標到插入內容的結尾
             int newCursorX = 0;
-            for (int i = 0; i < actualIndex + clipboardContent.Length; i++)
+            for (int i = 0; i < actualIndex + 1 + clipboardContent.Length; i++)
             {
                 if (i < newText.Length)
                 {
