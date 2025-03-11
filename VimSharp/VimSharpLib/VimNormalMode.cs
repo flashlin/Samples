@@ -111,6 +111,19 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void MoveCursorLeft()
     {
+        // 如果啟用了相對行號，則游標的 X 位置不能小於行號區域的寬度
+        if (Instance.IsRelativeLineNumber)
+        {
+            // 計算相對行號區域的寬度
+            int lineNumberWidth = Instance.CalculateLineNumberWidth();
+            
+            // 如果游標已經在最左邊（相對行號區域的右側），則不再向左移動
+            if (Instance.Context.CursorX <= lineNumberWidth)
+            {
+                return;
+            }
+        }
+        
         if (Instance.Context.CursorX > 0)
         {
             // 獲取當前文本
@@ -124,7 +137,25 @@ public class VimNormalMode : IVimMode
             {
                 // 獲取前一個字符的寬度
                 char prevChar = currentText[actualIndex - 1];
-                Instance.Context.CursorX -= prevChar.GetCharWidth();
+                int newCursorX = Instance.Context.CursorX - prevChar.GetCharWidth();
+                
+                // 如果啟用了相對行號，確保游標的 X 位置不會小於行號區域的寬度
+                if (Instance.IsRelativeLineNumber)
+                {
+                    int lineNumberWidth = Instance.CalculateLineNumberWidth();
+                    if (newCursorX < lineNumberWidth)
+                    {
+                        Instance.Context.CursorX = lineNumberWidth;
+                    }
+                    else
+                    {
+                        Instance.Context.CursorX = newCursorX;
+                    }
+                }
+                else
+                {
+                    Instance.Context.CursorX = newCursorX;
+                }
             }
         }
         

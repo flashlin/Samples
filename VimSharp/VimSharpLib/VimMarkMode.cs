@@ -110,6 +110,19 @@ public class VimMarkMode : IVimMode
     /// </summary>
     private void MoveCursorLeft()
     {
+        // 如果啟用了相對行號，則游標的 X 位置不能小於行號區域的寬度
+        if (Instance.IsRelativeLineNumber)
+        {
+            // 計算相對行號區域的寬度
+            int lineNumberWidth = Instance.CalculateLineNumberWidth();
+            
+            // 如果游標已經在最左邊（相對行號區域的右側），則不再向左移動
+            if (Instance.Context.CursorX <= lineNumberWidth)
+            {
+                return;
+            }
+        }
+        
         if (Instance.Context.CursorX > 0)
         {
             Instance.Context.CursorX--;
