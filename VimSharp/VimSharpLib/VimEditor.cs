@@ -13,6 +13,8 @@ public class VimEditor
     // 添加狀態欄相關屬性
     public bool IsStatusBarVisible { get; set; } = false;
     public string StatusBarText { get; set; } = "";
+
+    public bool IsRelativeLineNumber { get; set; } = false;
     
     // 添加剪貼簿緩衝區
     public List<ConsoleText> ClipboardBuffers { get; set; } = [];
@@ -58,11 +60,20 @@ public class VimEditor
         // 計算文本總行數
         int totalLines = Context.Texts.Count;
         
-        // 計算相對行號的最大值（上下行數的最大值）
-        int maxRelativeLineNumber = Math.Max(Context.CursorY, totalLines - Context.CursorY - 1);
-        
         // 計算行號區域寬度所需的位數
-        int lineNumberDigits = maxRelativeLineNumber > 0 ? (int)Math.Log10(maxRelativeLineNumber) + 1 : 1;
+        int lineNumberDigits;
+        
+        if (IsRelativeLineNumber)
+        {
+            // 相對行號模式：計算相對行號的最大值（上下行數的最大值）
+            int maxRelativeLineNumber = Math.Max(Context.CursorY, totalLines - Context.CursorY - 1);
+            lineNumberDigits = maxRelativeLineNumber > 0 ? (int)Math.Log10(maxRelativeLineNumber) + 1 : 1;
+        }
+        else
+        {
+            // 絕對行號模式：計算總行數所需的位數
+            lineNumberDigits = totalLines > 0 ? (int)Math.Log10(totalLines) + 1 : 1;
+        }
         
         // 行號區域寬度 = 位數 + 1 (用於間隔)
         int lineNumberWidth = lineNumberDigits + 1;
@@ -84,18 +95,32 @@ public class VimEditor
             {
                 var text = Context.Texts[textIndex];
                 
-                // 計算相對行號
-                int relativeLineNumber = 0;
+                // 計算行號
+                int lineNumber;
                 bool isCurrentLine = (textIndex == Context.CursorY);
                 
-                if (!isCurrentLine)
+                if (IsRelativeLineNumber)
                 {
-                    // 如果不是當前行，計算相對行號
-                    relativeLineNumber = Math.Abs(textIndex - Context.CursorY);
+                    // 相對行號模式
+                    if (isCurrentLine)
+                    {
+                        // 當前行顯示絕對行號
+                        lineNumber = textIndex + 1; // 顯示給用戶的行號從1開始
+                    }
+                    else
+                    {
+                        // 其他行顯示相對行號
+                        lineNumber = Math.Abs(textIndex - Context.CursorY);
+                    }
+                }
+                else
+                {
+                    // 絕對行號模式
+                    lineNumber = textIndex + 1; // 顯示給用戶的行號從1開始
                 }
                 
                 // 繪製行號
-                RenderLineNumber(Context.ViewPort.X, Context.ViewPort.Y + i, relativeLineNumber, lineNumberDigits, isCurrentLine);
+                RenderLineNumber(Context.ViewPort.X, Context.ViewPort.Y + i, lineNumber, lineNumberDigits, isCurrentLine, IsRelativeLineNumber);
                 
                 // 直接繪製文本，考慮 ViewPort、偏移量和行號區域
                 RenderText(Context.ViewPort.X + lineNumberWidth, Context.ViewPort.Y + i, text, Context.OffsetX, Context.ViewPort, lineNumberWidth);
@@ -139,7 +164,7 @@ public class VimEditor
     /// <summary>
     /// 繪製行號
     /// </summary>
-    private void RenderLineNumber(int x, int y, int lineNumber, int digits, bool isCurrentLine)
+    private void RenderLineNumber(int x, int y, int lineNumber, int digits, bool isCurrentLine, bool isRelativeLineNumber)
     {
         // 檢查 Y 座標是否在 ViewPort 範圍內
         if (y < Context.ViewPort.Y || y >= Context.ViewPort.Y + Context.ViewPort.Height)
@@ -155,13 +180,15 @@ public class VimEditor
         
         if (isCurrentLine)
         {
-            // 當前行顯示空格
-            for (int i = 0; i < digits; i++)
+            // 當前行顯示絕對行號，使用不同顏色
+            string lineNumberStr = lineNumber.ToString().PadLeft(digits);
+            
+            foreach (char c in lineNumberStr)
             {
                 var coloredChar = new ColoredChar
                 {
-                    Char = ' ',
-                    Foreground = ConsoleColor.White,
+                    Char = c,
+                    Foreground = ConsoleColor.White, // 當前行使用白色
                     Background = ConsoleColor.DarkGray
                 };
                 sb.Append(coloredChar.ToAnsiString());
@@ -178,7 +205,7 @@ public class VimEditor
                 var coloredChar = new ColoredChar
                 {
                     Char = c,
-                    Foreground = ConsoleColor.Yellow,
+                    Foreground = isRelativeLineNumber ? ConsoleColor.Yellow : ConsoleColor.Gray, // 相對行號使用黃色，絕對行號使用灰色
                     Background = ConsoleColor.DarkGray
                 };
                 sb.Append(coloredChar.ToAnsiString());
