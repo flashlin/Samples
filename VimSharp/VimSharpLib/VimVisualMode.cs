@@ -32,6 +32,7 @@ public class VimVisualMode : IVimMode
             { new ConsoleKeyPattern(ConsoleKey.Enter), HandleEnterKey },
             { new ConsoleKeyPattern(ConsoleKey.V), SwitchToMarkMode },
             { new ConsoleKeyPattern(ConsoleKey.P), HandlePasteAfterCursor },
+            { new ConsoleKeyPattern(ConsoleKey.Escape), ClearKeyBuffer },
             { new CharKeyPattern('$'), MoveCursorToEndOfLine },
             { new CharKeyPattern('^'), MoveCursorToStartOfLine },
             { new RegexPattern(@"\d+J"), JumpToLine },
@@ -615,6 +616,14 @@ public class VimVisualMode : IVimMode
             
         return inTestFramework || 
                Instance.Context.ViewPort.Width == 40 && Instance.Context.ViewPort.Height == 5; // 測試視口的特定大小
+    }
+    
+    /// <summary>
+    /// 清除按鍵緩衝區
+    /// </summary>
+    private void ClearKeyBuffer()
+    {
+        _keyBuffer.Clear();
     }
     
     public void WaitForInput()
