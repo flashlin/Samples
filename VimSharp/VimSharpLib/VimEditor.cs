@@ -233,7 +233,7 @@ public class VimEditor
                 {
                     Char = c,
                     Foreground = ConsoleColor.White, // 當前行使用白色
-                    Background = ConsoleColor.DarkGray
+                    Background = ConsoleColor.Black
                 };
                 sb.Append(coloredChar.ToAnsiString());
             }
@@ -250,7 +250,7 @@ public class VimEditor
                 {
                     Char = c,
                     Foreground = isRelativeLineNumber ? ConsoleColor.Yellow : ConsoleColor.Gray, // 相對行號使用黃色，絕對行號使用灰色
-                    Background = ConsoleColor.DarkGray
+                    Background = ConsoleColor.Black
                 };
                 sb.Append(coloredChar.ToAnsiString());
             }
@@ -261,7 +261,7 @@ public class VimEditor
         {
             Char = ' ',
             Foreground = ConsoleColor.White,
-            Background = ConsoleColor.DarkGray
+            Background = ConsoleColor.Black
         };
         sb.Append(spaceChar.ToAnsiString());
         
@@ -293,7 +293,7 @@ public class VimEditor
             {
                 Char = ' ',
                 Foreground = ConsoleColor.White,
-                Background = ConsoleColor.DarkGray
+                Background = ConsoleColor.Black
             };
             sb.Append(coloredChar.ToAnsiString());
         }
