@@ -29,7 +29,6 @@ public class VimVisualMode : IVimMode
             { new ConsoleKeyPattern(ConsoleKey.UpArrow), MoveCursorUp },
             { new ConsoleKeyPattern(ConsoleKey.DownArrow), MoveCursorDown },
             { new ConsoleKeyPattern(ConsoleKey.Enter), HandleEnterKey },
-            { new ConsoleKeyPattern(new[] { ConsoleKey.H, ConsoleKey.L }), MoveCursorLeft }
         };
     }
     

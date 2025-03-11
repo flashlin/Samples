@@ -63,3 +63,11 @@
 ## Rule 15: Avoid Hardcoding in Code Modifications
 - When adjusting application logic to meet test acceptance criteria, refrain from using hardcoded values or solutions.
 - Ensure that code changes promote flexibility, maintainability, and adherence to best practices.
+
+
+rules:
+  - description: Replace 'new[] { }' syntax with the '[]' syntax
+    find: '`new[] { $KEYS$ }`'
+    replace: '[$KEYS$]'
+    file_globs:
+      - "**/*.cs"  # Assuming you're working with C# files
