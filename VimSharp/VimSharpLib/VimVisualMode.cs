@@ -1,10 +1,36 @@
 namespace VimSharpLib;
 using System.Text;
 using System.Linq;
+using System;
+using System.Collections.Generic;
 
 public class VimVisualMode : IVimMode
 {
     public required VimEditor Instance { get; set; }
+    
+    private Dictionary<IKeyPattern, Action> _keyPatterns;
+    private List<ConsoleKey> _keyBuffer;
+    
+    public VimVisualMode()
+    {
+        _keyBuffer = new List<ConsoleKey>();
+        InitializeKeyPatterns();
+    }
+    
+    private void InitializeKeyPatterns()
+    {
+        _keyPatterns = new Dictionary<IKeyPattern, Action>
+        {
+            { new RegexKeyPattern("I"), SwitchToNormalMode },
+            { new RegexKeyPattern("A"), HandleAKey },
+            { new RegexKeyPattern("Q"), QuitEditor },
+            { new RegexKeyPattern("Left"), MoveCursorLeft },
+            { new RegexKeyPattern("Right"), MoveCursorRight },
+            { new RegexKeyPattern("Up"), MoveCursorUp },
+            { new RegexKeyPattern("Down"), MoveCursorDown },
+            { new RegexKeyPattern("Enter"), HandleEnterKey }
+        };
+    }
     
     /// <summary>
     /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
@@ -313,40 +339,34 @@ public class VimVisualMode : IVimMode
         
         var keyInfo = Instance.GetConsoleDevice().ReadKey(intercept: true);
         
-        switch (keyInfo.Key)
+        // 將按鍵添加到緩衝區
+        _keyBuffer.Add(keyInfo.Key);
+        
+        // 計算匹配的模式數量
+        int matchCount = 0;
+        IKeyPattern matchedPattern = null;
+        
+        foreach (var pattern in _keyPatterns.Keys)
         {
-            case ConsoleKey.I:
-                SwitchToNormalMode();
-                break;
-                
-            case ConsoleKey.A:
-                HandleAKey();
-                break;
-                
-            case ConsoleKey.Q:
-                QuitEditor();
-                break;
-                
-            case ConsoleKey.LeftArrow:
-                MoveCursorLeft();
-                break;
-                
-            case ConsoleKey.RightArrow:
-                MoveCursorRight();
-                break;
-                
-            case ConsoleKey.UpArrow:
-                MoveCursorUp();
-                break;
-                
-            case ConsoleKey.DownArrow:
-                MoveCursorDown();
-                break;
-                
-            case ConsoleKey.Enter:
-                HandleEnterKey();
-                break;
+            if (pattern.IsMatch(_keyBuffer))
+            {
+                matchCount++;
+                matchedPattern = pattern;
+            }
         }
+        
+        // 如果只有一個模式匹配，執行對應的操作
+        if (matchCount == 1)
+        {
+            _keyPatterns[matchedPattern].Invoke();
+            _keyBuffer.Clear();
+        }
+        // 如果沒有模式匹配，清除緩衝區
+        else if (matchCount == 0)
+        {
+            _keyBuffer.Clear();
+        }
+        // 如果有多個模式匹配，不執行任何操作，等待更多按鍵輸入
         
         SetCursorPosition();
     }
