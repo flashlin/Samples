@@ -32,13 +32,12 @@ namespace VimSharpTests
         {
             // Given
             _editor.Context.SetText(0, 0, "Hello, World!");
-            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
+            _editor.SetViewPort(10, 1, 40, 10);
             _editor.Context.CursorX = 13; // 設置游標位置在 '!' 上
+            _editor.Mode = new VimVisualMode { Instance = _editor };
             
             // 模擬按下向右鍵
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
-            
-            // When
             _editor.WaitForInput();
             
             // Then
@@ -52,15 +51,15 @@ namespace VimSharpTests
         public void WhenInNormalMode_PressRightArrow_CursorShouldMove()
         {
             // Given
-            _editor.Context.SetText(0, 0, "Hello, World!");
-            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
+            _editor.Context.Texts.Clear();
+            _editor.Context.Texts.Add(new ConsoleText());
+            _editor.Context.Texts[0].SetText(0, "Hello, World!");
+            _editor.SetViewPort(10, 1, 40, 10);
             _editor.Context.CursorX = 13; // 設置游標位置在 '!' 上
             _editor.Mode = new VimNormalMode { Instance = _editor };
             
             // 模擬按下向右鍵
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
-            
-            // When
             _editor.WaitForInput();
             
             // Then
@@ -74,19 +73,19 @@ namespace VimSharpTests
         public void WhenInNormalMode_PressEsc_ShouldSwitchToVisualModeAndMoveCursorBack()
         {
             // Given
-            _editor.Context.SetText(0, 0, "World!");
-            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
-            _editor.Context.CursorX = 6; // 設置游標位置在 '!'後面
+            _editor.Context.Texts.Clear();
+            _editor.Context.Texts.Add(new ConsoleText());
+            _editor.Context.Texts[0].SetText(0, "Hello, World!");
+            _editor.SetViewPort(10, 1, 40, 10);
+            _editor.Context.CursorX = 14; // 設置游標位置在 '!'後面
             _editor.Mode = new VimNormalMode { Instance = _editor };
             
             // 模擬按下 Esc 鍵
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.Escape, false, false, false));
-            
-            // When
             _editor.WaitForInput();
             
             // Then
-            _editor.Context.CursorX.Should().Be(5); // 游標應該在 '!' 上面
+            _editor.Context.CursorX.Should().Be(13); // 游標應該在 '!' 上面
             _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換到 VimVisualMode
         }
 
@@ -97,8 +96,10 @@ namespace VimSharpTests
         public void WhenInVisualMode_PressA_ThenPressEsc_CursorShouldMoveBackOnePosition()
         {
             // Given
+            _editor.Context.Texts.Clear();
+            _editor.Context.Texts.Add(new ConsoleText());
             _editor.Context.SetText(0, 0, "Hello, World!");
-            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
+            _editor.SetViewPort(10, 1, 40, 10);
             _editor.Context.CursorX = 13; // 設置游標位置在本文最後一個字上, 例如 "Hello, World!" 的 '!' 上
             _editor.Mode = new VimVisualMode { Instance = _editor };
             
@@ -155,9 +156,13 @@ namespace VimSharpTests
         public void WhenPressDownArrow_CursorShouldMoveToNextLine()
         {
             // Given
-            _editor.Context.SetText(0, 0, "Hello, World!");
-            _editor.Context.SetText(0, 1, "123");
-            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
+            _editor.Context.Texts.Clear();
+            _editor.Context.Texts.Add(new ConsoleText());
+            _editor.Context.Texts.Add(new ConsoleText());
+            _editor.Context.Texts[0].SetText(0, "Hello, World!");
+            _editor.Context.Texts[1].SetText(0, "123");
+            _editor.SetViewPort(10, 1, 40, 10);
+            _editor.Mode = new VimVisualMode { Instance = _editor };
             
             // 模擬按下向右鍵 13 次
             for (int i = 0; i < 13; i++)
@@ -165,17 +170,14 @@ namespace VimSharpTests
                 _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
                 _editor.WaitForInput();
             }
-
             
             // 模擬按下向下鍵
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.DownArrow, false, false, false));
-            
-            // When
             _editor.WaitForInput();
             
             // Then
-            _editor.Context.CursorY.Should().Be(1); // 游標應該在 "Hello, World!" 的下一行
-            _editor.Context.CursorX.Should().Be(2); // 游標應該在 '3' 上面
+            _editor.Context.CursorY.Should().Be(2); // 游標應該在 "Hello, World!" 的下一行
+            _editor.Context.CursorX.Should().Be(3); // 游標應該在 '3' 上面
         }
 
         /// <summary>
@@ -185,12 +187,16 @@ namespace VimSharpTests
         public void WhenInVisualMode_PressUpArrow_CursorShouldMoveToUpperLine()
         {
             // Given
+            _editor.Context.Texts.Clear();
+            _editor.Context.Texts.Add(new ConsoleText());
+            _editor.Context.Texts.Add(new ConsoleText());
             _editor.Context.SetText(0, 0, "Hello");
             _editor.Context.SetText(0, 1, "ab");
             _editor.SetViewPort(10, 1, 40, 10);
             _editor.Context.CursorY = 2;
-            _editor.Context.CursorX = 11; 
-            
+            _editor.Context.CursorX = 2; 
+            _editor.Mode = new VimVisualMode { Instance = _editor };
+
             // 模擬按下 UpArrow 鍵
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.UpArrow, false, false, false));
             _editor.WaitForInput();
@@ -240,10 +246,7 @@ namespace VimSharpTests
             _editor.Context.Texts.Clear();
             _editor.Context.Texts.Add(new ConsoleText());
             _editor.Context.Texts[0].SetText(0, "Hello, World!");
-            
-            // 設置初始游標位置
-            _editor.Context.CursorX = 0;
-            _editor.Context.CursorY = 0;
+            _editor.SetViewPort(0, 0, 40, 10);
             
             // 按下 '$' 按鍵
             _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false));
@@ -264,6 +267,7 @@ namespace VimSharpTests
             _editor.Context.Texts.Clear();
             _editor.Context.Texts.Add(new ConsoleText());
             _editor.Context.Texts[0].SetText(0, "Hello, World!");
+            _editor.SetViewPort(0, 0, 40, 10);
             
             // 設置初始游標位置
             _editor.Context.CursorX = 0;
@@ -287,6 +291,7 @@ namespace VimSharpTests
             _editor.Context.Texts.Clear();
             _editor.Context.Texts.Add(new ConsoleText());
             _editor.Context.Texts[0].SetText(0, "Hello, World!");
+            _editor.SetViewPort(0, 0, 40, 10);
             
             // 設置初始游標位置
             _editor.Context.CursorX = 10;
@@ -310,6 +315,7 @@ namespace VimSharpTests
             _editor.Context.Texts.Clear();
             _editor.Context.Texts.Add(new ConsoleText());
             _editor.Context.Texts[0].SetText(0, "Hello, World!");
+            _editor.SetViewPort(0, 0, 40, 10);
             
             // 設置初始游標位置在行尾
             _editor.Context.CursorX = 12;
@@ -341,11 +347,7 @@ namespace VimSharpTests
             }
             
             // 設置視口
-            _editor.Context.ViewPort = new ConsoleRectangle(0, 0, 40, 5);
-            
-            // 設置初始游標位置
-            _editor.Context.CursorX = 0;
-            _editor.Context.CursorY = 0;
+            _editor.SetViewPort(0, 0, 40, 5);
             
             // 依序按下 '1', '0', 'J' 按鍵
             _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false));
