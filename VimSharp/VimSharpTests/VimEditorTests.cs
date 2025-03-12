@@ -23,6 +23,12 @@ namespace VimSharpTests
             _editor = new VimEditor(_mockConsole);
         }
 
+        private void InitializeEditor(string text)
+        {
+            _editor.SetText(text);
+            _editor.SetViewPort(10, 1, 40, 10);
+            _editor.Mode = new VimVisualMode { Instance = _editor };
+        }
 
         /// <summary>
         /// 測試當游標在文本末尾時，按下向右鍵，游標位置應該保持不變
