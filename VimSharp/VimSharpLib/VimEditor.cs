@@ -629,4 +629,76 @@ public class VimEditor
         // 行號區域寬度 = 位數 + 1 (用於間隔)
         return lineNumberDigits + 1;
     }
+    
+    /// <summary>
+    /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
+    /// </summary>
+    public void AdjustCursorAndOffset()
+    {
+        // 計算行號區域寬度
+        int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
+        
+        // 考慮行號區域寬度的有效游標水平位置
+        int effectiveCursorX = Context.CursorX;
+        
+        // 確保游標 X 不低於行號區域寬度
+        if (IsRelativeLineNumber && effectiveCursorX < lineNumberWidth)
+        {
+            Context.CursorX = lineNumberWidth;
+            effectiveCursorX = lineNumberWidth;
+        }
+        
+        // 計算游標在屏幕上的位置
+        int cursorScreenX = effectiveCursorX - Context.OffsetX;
+        int cursorScreenY = Context.CursorY - Context.OffsetY;
+        
+        // 計算可見區域的有效高度（考慮狀態欄）
+        int effectiveViewPortHeight = Context.IsStatusBarVisible
+            ? Context.ViewPort.Height - 1
+            : Context.ViewPort.Height;
+        
+        // 檢查游標是否超出右邊界
+        if (cursorScreenX >= Context.ViewPort.Width)
+        {
+            // 調整水平偏移量，使游標位於可見區域的右邊界
+            Context.OffsetX = effectiveCursorX - Context.ViewPort.Width + 1;
+        }
+        // 檢查游標是否超出左邊界
+        else if (cursorScreenX < 0)
+        {
+            // 調整水平偏移量，使游標位於可見區域的左邊界
+            Context.OffsetX = effectiveCursorX;
+        }
+        
+        // 檢查游標是否超出下邊界
+        if (cursorScreenY >= effectiveViewPortHeight)
+        {
+            // 調整垂直偏移量，使游標位於可見區域的下邊界
+            Context.OffsetY = Context.CursorY - effectiveViewPortHeight + 1;
+        }
+        // 檢查游標是否超出上邊界
+        else if (cursorScreenY < 0)
+        {
+            // 調整垂直偏移量，使游標位於可見區域的上邊界
+            Context.OffsetY = Context.CursorY;
+        }
+        
+        // 確保游標在文本範圍內
+        Context.CursorY = Math.Min(Context.CursorY, Context.Texts.Count - 1);
+        Context.CursorY = Math.Max(0, Context.CursorY);
+        
+        // 確保當前行存在
+        if (Context.Texts.Count == 0)
+        {
+            Context.Texts.Add(new ConsoleText());
+        }
+        
+        // 確保游標水平位置在當前行文本範圍內
+        var currentLine = Context.Texts[Context.CursorY];
+        string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+        int textWidth = currentText.GetStringDisplayWidth();
+        
+        // 游標可以停在最後一個字符上或行號區域寬度處
+        Context.CursorX = Math.Min(Context.CursorX, Math.Max(lineNumberWidth, textWidth));
+    }
 }
