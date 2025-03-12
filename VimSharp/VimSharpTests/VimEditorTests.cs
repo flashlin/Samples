@@ -26,7 +26,7 @@ namespace VimSharpTests
         private void InitializeEditor(string text)
         {
             _editor.SetText(text);
-            _editor.SetViewPort(10, 1, 40, 10);
+            _editor.SetViewPort(0, 0, 40, 10);
             _editor.Mode = new VimVisualMode { Instance = _editor };
         }
 
@@ -60,13 +60,13 @@ namespace VimSharpTests
             // Given
             InitializeEditor("Hello, World!");
             _editor.Mode = new VimNormalMode { Instance = _editor };
-            _editor.Context.CursorX = 13; // 設置游標位置在 '!' 上
+            _editor.Context.CursorX = 12; // 設置游標位置在 '!' 上
 
             // 模擬按下向右鍵
             PressKey(ConsoleKey.RightArrow);
 
             // Then
-            _editor.Context.CursorX.Should().Be(14); // 游標位置應該向右移動一格
+            _editor.Context.CursorX.Should().Be(13); // 游標位置應該向右移動一格
         }
 
         private void PressKey(ConsoleKey key)
@@ -103,21 +103,21 @@ namespace VimSharpTests
             // Given
             InitializeEditor("Hello, World!");
             _editor.Mode = new VimVisualMode { Instance = _editor };
-            _editor.Context.CursorX = 13; // 設置游標位置在本文最後一個字上, 例如 "Hello, World!" 的 '!' 上
+            _editor.Context.CursorX = 12; // 設置游標位置在本文最後一個字上, 例如 "Hello, World!" 的 '!' 上
 
             // 模擬按下 'a' 鍵，切換到 NormalMode 並將游標向右移動一格
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false));
             _editor.WaitForInput();
 
             // 此時游標應該在 '!' 後面，模式應該是 NormalMode
-            _editor.Context.CursorX.Should().Be(14);
+            _editor.Context.CursorX.Should().Be(13);
             _editor.Mode.Should().BeOfType<VimNormalMode>();
 
             // 模擬按下 Esc 鍵，切換回 VisualMode 並將游標向左移動一格
             PressKey(ConsoleKey.Escape);
 
             // Then
-            _editor.Context.CursorX.Should().Be(13); // 游標應該向左移動一格
+            _editor.Context.CursorX.Should().Be(12); // 游標應該向左移動一格
             _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換回 VimVisualMode
         }
 
@@ -158,30 +158,20 @@ namespace VimSharpTests
         public void WhenPressDownArrow_CursorShouldMoveToNextLine()
         {
             // Given
-            _editor.Context.Texts.Clear();
-            _editor.Context.Texts.Add(new ConsoleText());
-            _editor.Context.Texts.Add(new ConsoleText());
-            _editor.Context.Texts[0].SetText(0, "Hello, World!");
-            _editor.Context.Texts[1].SetText(0, "123");
-            _editor.SetViewPort(10, 1, 40, 10);
-            _editor.Mode = new VimVisualMode { Instance = _editor };
+            InitializeEditor("Hello, World!\r\n123");
 
             // 模擬按下向右鍵 13 次
             for (int i = 0; i < 13; i++)
             {
-                _mockConsole.ReadKey(Arg.Any<bool>())
-                    .Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
-                _editor.WaitForInput();
+                PressKey(ConsoleKey.RightArrow);
             }
 
             // 模擬按下向下鍵
-            _mockConsole.ReadKey(Arg.Any<bool>())
-                .Returns(new ConsoleKeyInfo('\0', ConsoleKey.DownArrow, false, false, false));
-            _editor.WaitForInput();
+            PressKey(ConsoleKey.DownArrow);
 
             // Then
-            _editor.Context.CursorY.Should().Be(2); // 游標應該在 "Hello, World!" 的下一行
-            _editor.Context.CursorX.Should().Be(3); // 游標應該在 '3' 上面
+            _editor.Context.CursorY.Should().Be(1); // 游標應該在 "Hello, World!" 的下一行
+            _editor.Context.CursorX.Should().Be(2); // 游標應該在 '3' 上面
         }
 
         /// <summary>
@@ -191,23 +181,15 @@ namespace VimSharpTests
         public void WhenInVisualMode_PressUpArrow_CursorShouldMoveToUpperLine()
         {
             // Given
-            _editor.Context.Texts.Clear();
-            _editor.Context.Texts.Add(new ConsoleText());
-            _editor.Context.Texts.Add(new ConsoleText());
-            _editor.Context.SetText(0, 0, "Hello");
-            _editor.Context.SetText(0, 1, "ab");
-            _editor.SetViewPort(10, 1, 40, 10);
-            _editor.Context.CursorY = 2;
-            _editor.Context.CursorX = 2;
-            _editor.Mode = new VimVisualMode { Instance = _editor };
+            InitializeEditor("Hello\r\nab");
+            _editor.Context.CursorY = 1;
+            _editor.Context.CursorX = 1;
 
             // 模擬按下 UpArrow 鍵
-            _mockConsole.ReadKey(Arg.Any<bool>())
-                .Returns(new ConsoleKeyInfo('\0', ConsoleKey.UpArrow, false, false, false));
-            _editor.WaitForInput();
+            PressKey(ConsoleKey.UpArrow);
 
             // Then
-            _editor.Context.CursorX.Should().Be(5); // 游標應該在 'o' 
+            _editor.Context.CursorX.Should().Be(4); // 游標應該在 'o' 
             _editor.Mode.Should().BeOfType<VimVisualMode>();
         }
 
@@ -218,17 +200,12 @@ namespace VimSharpTests
         public void WhenMoveCursorToW_ThenPressDownArrow_CursorShouldMoveToSamePositionInNextLine()
         {
             // 初始化 VimEditor
-            _editor.Context.Texts.Clear();
-            _editor.Context.Texts.Add(new ConsoleText());
-            _editor.Context.Texts.Add(new ConsoleText());
-            _editor.Context.Texts[0].SetText(0, "Hello, World!");
-            _editor.Context.Texts[1].SetText(0, "Ex");
-            _editor.SetViewPort(0, 0, 40, 10);
+            InitializeEditor("Hello, World!\r\nEx");
 
             // 按下右鍵按鈕7次，移動到 "W" 的位置
             for (int i = 0; i < 7; i++)
             {
-                PressKey(ConsoleKey.Escape);
+                PressKey(ConsoleKey.RightArrow);
             }
 
             // 按下向下按鈕1次
@@ -246,10 +223,7 @@ namespace VimSharpTests
         public void WhenPressDollarSign_CursorShouldMoveToEndOfLine()
         {
             // 初始化 VimEditor
-            _editor.Context.Texts.Clear();
-            _editor.Context.Texts.Add(new ConsoleText());
-            _editor.Context.Texts[0].SetText(0, "Hello, World!");
-            _editor.SetViewPort(0, 0, 40, 10);
+            InitializeEditor("Hello, World!");
 
             // 按下 '$' 按鍵
             _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false));
