@@ -197,20 +197,8 @@ public class VimEditor
         // 繪製顯示框
         RenderFrame();
 
-        // 直接使用 Context.CursorX 和 Context.CursorY 設置游標位置
-        // 考慮視口位置、偏移量和行號區域寬度
-        int cursorScreenX = Context.CursorX - Context.OffsetX + Context.ViewPort.X;
-        int cursorScreenY = Context.CursorY - Context.OffsetY + Context.ViewPort.Y;
-        
-        // 如果啟用了相對行號，則需要考慮行號區域的寬度
-        if (IsRelativeLineNumber)
-        {
-            cursorScreenX += lineNumberWidth;
-        }
-        
         // 設置控制台游標位置
-        _console.SetCursorPosition(cursorScreenX, cursorScreenY);
-        
+        _console.SetCursorPosition(Context.CursorX, Context.CursorY);
         // 顯示游標
         _console.Write("\x1b[?25h");
     }
