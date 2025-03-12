@@ -584,24 +584,26 @@ namespace VimSharpTests
                 _editor.Context.Texts[i].SetText(0, $"Line {i + 1}");
             }
             
-            // 設置 ViewPort 和初始游標位置
+            // 設置 ViewPort 
             _editor.Context.ViewPort = new ConsoleRectangle(0, 1, 40, 5);
-            _editor.Context.CursorX = 0;
-            _editor.Context.CursorY = 0;
             _editor.IsStatusBarVisible = true;
+            
+            // 設定完 ViewPort 後，游標應該在第1行
+            _editor.Context.CursorX.Should().Be(0);
+            _editor.Context.CursorY.Should().Be(1);
             
             // 確保使用 VimVisualMode
             _editor.Mode = new VimVisualMode { Instance = _editor };
             
             // 按下向下按鍵 5 次
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 15; i++)
             {
                 _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.DownArrow, false, false, false));
                 _editor.WaitForInput();
             }
 
             _editor.Render();
-            
+
             // 最終驗證：游標應該停在最後一個可見行（索引為 4）
             _editor.Context.CursorY.Should().Be(4);
         }
