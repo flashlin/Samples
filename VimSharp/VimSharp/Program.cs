@@ -9,12 +9,14 @@ using VimSharpLib;
 
 var editor1 = new VimEditor();
 editor1.IsRelativeLineNumber = true;
-editor1.Context.SetText(0, 0, "Hello, World!");
-editor1.Context.SetText(0, 1, "123");
-editor1.Context.SetText(0, 2, "Say Hello");
-editor1.Context.SetText(0, 3, "Example 3, Title.");
-editor1.Context.SetText(0, 4, "Your name is ?");
-editor1.SetViewPort(10, 1, 40, 5);
+editor1.SetText($"""
+Hello, World!
+123
+Say Hello
+Example 3, Title.
+Your name is ?
+""");
+editor1.SetViewPort(1, 1, 40, 5);
 editor1.IsStatusBarVisible = true;
 
 var editor2 = new VimEditor();
