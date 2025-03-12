@@ -88,12 +88,7 @@ public class VimEditor
     public void SetViewPort(int x, int y, int width, int height)
     {
         Context.ViewPort = new ConsoleRectangle(x, y, width, height);
-        
-        // 如果 ViewPort 的 Y 座標大於 0，則將游標的 Y 位置設置為 ViewPort.Y
-        if (y > 0)
-        {
-            Context.CursorY = y;
-        }
+        Context.CursorY = y;
     }
 
     public void Run()

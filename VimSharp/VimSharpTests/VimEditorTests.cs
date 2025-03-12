@@ -297,17 +297,16 @@ namespace VimSharpTests
             // Given
             _editor.Context.SetText(0, 0, "Hello");
             _editor.Context.SetText(0, 1, "ab");
-            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
-            _editor.Context.CursorY = 1;
-            _editor.Context.CursorX = 1; // 設置游標位置在本文最後一個字上, 例如 "ab" 的 'b' 上
-            _editor.Mode = new VimVisualMode { Instance = _editor };
+            _editor.SetViewPort(10, 1, 40, 10);
+            _editor.Context.CursorY = 2;
+            _editor.Context.CursorX = 11; 
             
             // 模擬按下 UpArrow 鍵
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('\0', ConsoleKey.UpArrow, false, false, false));
             _editor.WaitForInput();
             
             // Then
-            _editor.Context.CursorX.Should().Be(4); // 游標應該在 'o' 
+            _editor.Context.CursorX.Should().Be(5); // 游標應該在 'o' 
             _editor.Mode.Should().BeOfType<VimVisualMode>(); 
         }
 

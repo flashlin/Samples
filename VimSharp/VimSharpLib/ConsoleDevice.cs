@@ -22,6 +22,10 @@ public class ConsoleDevice : IConsoleDevice
     /// <param name="top">上邊距</param>
     public void SetCursorPosition(int left, int top)
     {
+        if(left < 0 || left >= WindowWidth || top < 0 || top >= WindowHeight)
+        {
+            return;
+        }
         Console.SetCursorPosition(left, top);
     }
     
