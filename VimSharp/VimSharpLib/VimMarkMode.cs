@@ -54,28 +54,46 @@ public class VimMarkMode : IVimMode
     /// </summary>
     private void AdjustCursorAndOffset()
     {
+        // 計算行號區域寬度
+        int lineNumberWidth = Instance.IsRelativeLineNumber ? Instance.CalculateLineNumberWidth() : 0;
+        
+        // 考慮行號區域寬度的有效游標水平位置
+        int effectiveCursorX = Instance.Context.CursorX;
+        
+        // 確保游標 X 不低於行號區域寬度
+        if (Instance.IsRelativeLineNumber && effectiveCursorX < lineNumberWidth)
+        {
+            Instance.Context.CursorX = lineNumberWidth;
+            effectiveCursorX = lineNumberWidth;
+        }
+        
         // 計算游標在屏幕上的位置
-        int cursorScreenX = Instance.Context.CursorX - Instance.Context.OffsetX;
+        int cursorScreenX = effectiveCursorX - Instance.Context.OffsetX;
         int cursorScreenY = Instance.Context.CursorY - Instance.Context.OffsetY;
+        
+        // 計算可見區域的有效高度（考慮狀態欄）
+        int effectiveViewPortHeight = Instance.Context.IsStatusBarVisible
+            ? Instance.Context.ViewPort.Height - 1
+            : Instance.Context.ViewPort.Height;
         
         // 檢查游標是否超出右邊界
         if (cursorScreenX >= Instance.Context.ViewPort.Width)
         {
             // 調整水平偏移量，使游標位於可見區域的右邊界
-            Instance.Context.OffsetX = Instance.Context.CursorX - Instance.Context.ViewPort.Width + 1;
+            Instance.Context.OffsetX = effectiveCursorX - Instance.Context.ViewPort.Width + 1;
         }
         // 檢查游標是否超出左邊界
         else if (cursorScreenX < 0)
         {
             // 調整水平偏移量，使游標位於可見區域的左邊界
-            Instance.Context.OffsetX = Instance.Context.CursorX;
+            Instance.Context.OffsetX = effectiveCursorX;
         }
         
         // 檢查游標是否超出下邊界
-        if (cursorScreenY >= Instance.Context.ViewPort.Height)
+        if (cursorScreenY >= effectiveViewPortHeight)
         {
             // 調整垂直偏移量，使游標位於可見區域的下邊界
-            Instance.Context.OffsetY = Instance.Context.CursorY - Instance.Context.ViewPort.Height + 1;
+            Instance.Context.OffsetY = Instance.Context.CursorY - effectiveViewPortHeight + 1;
         }
         // 檢查游標是否超出上邊界
         else if (cursorScreenY < 0)
@@ -83,6 +101,24 @@ public class VimMarkMode : IVimMode
             // 調整垂直偏移量，使游標位於可見區域的上邊界
             Instance.Context.OffsetY = Instance.Context.CursorY;
         }
+        
+        // 確保游標在文本範圍內
+        Instance.Context.CursorY = Math.Min(Instance.Context.CursorY, Instance.Context.Texts.Count - 1);
+        Instance.Context.CursorY = Math.Max(0, Instance.Context.CursorY);
+        
+        // 確保當前行存在
+        if (Instance.Context.Texts.Count == 0)
+        {
+            Instance.Context.Texts.Add(new ConsoleText());
+        }
+        
+        // 確保游標水平位置在當前行文本範圍內
+        var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+        string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+        int textWidth = currentText.GetStringDisplayWidth();
+        
+        // 在標記模式下，游標可以停在最後一個字符上
+        Instance.Context.CursorX = Math.Min(Instance.Context.CursorX, Math.Max(lineNumberWidth, textWidth));
         
         // 更新選取的結束位置
         _endCursorX = Instance.Context.CursorX;
