@@ -585,7 +585,7 @@ namespace VimSharpTests
             }
             
             // 設置 ViewPort 和初始游標位置
-            _editor.Context.ViewPort = new ConsoleRectangle(0, 0, 40, 4);
+            _editor.Context.ViewPort = new ConsoleRectangle(0, 1, 40, 5);
             _editor.Context.CursorX = 0;
             _editor.Context.CursorY = 0;
             _editor.IsStatusBarVisible = true;
@@ -599,9 +599,11 @@ namespace VimSharpTests
                 _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.DownArrow, false, false, false));
                 _editor.WaitForInput();
             }
+
+            _editor.Render();
             
-            // 最終驗證：游標應該停在最後一個可見行（索引為 3）
-            _editor.Context.CursorY.Should().Be(3);
+            // 最終驗證：游標應該停在最後一個可見行（索引為 4）
+            _editor.Context.CursorY.Should().Be(4);
         }
     }
 } 
