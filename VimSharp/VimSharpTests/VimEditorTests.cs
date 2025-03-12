@@ -572,5 +572,36 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(2); // 游標X位置應該保持在2
             _editor.Context.CursorY.Should().Be(0); // 游標Y位置應該保持不變
         }
+
+        [Test]
+        public void WhenStatusBarVisible_PressDownArrow_CursorShouldStopAtLastVisibleLine()
+        {
+            // 初始化 _editor Texts 10 行內容
+            _editor.Context.Texts.Clear();
+            for (int i = 0; i < 10; i++)
+            {
+                _editor.Context.Texts.Add(new ConsoleText());
+                _editor.Context.Texts[i].SetText(0, $"Line {i + 1}");
+            }
+            
+            // 設置 ViewPort 和初始游標位置
+            _editor.Context.ViewPort = new ConsoleRectangle(0, 0, 40, 4);
+            _editor.Context.CursorX = 0;
+            _editor.Context.CursorY = 0;
+            _editor.IsStatusBarVisible = true;
+            
+            // 確保使用 VimVisualMode
+            _editor.Mode = new VimVisualMode { Instance = _editor };
+            
+            // 按下向下按鍵 5 次
+            for (int i = 0; i < 5; i++)
+            {
+                _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.DownArrow, false, false, false));
+                _editor.WaitForInput();
+            }
+            
+            // 最終驗證：游標應該停在最後一個可見行（索引為 3）
+            _editor.Context.CursorY.Should().Be(3);
+        }
     }
 } 
