@@ -89,3 +89,30 @@ rules:
     instructions: >
       Application logic should calculate and set values for CursorX and CursorY as needed before rendering.
 
+  - name: ControlCursorPosition
+    targets:
+      - variables:
+          - Context.CursorX
+          - Context.CursorY
+    instructions: >
+      Use Context.CursorX and Context.CursorY to control the cursor's position on the screen.
+      Ensure all cursor movements and placements strictly use these Context variables.
+
+# Rule for using Context.OffsetX and Context.OffsetY
+  - name: TextBlockDisplayPosition
+    targets:
+      - variables:
+          - Context.OffsetX
+          - Context.OffsetY
+    instructions: >
+      Use Context.OffsetX and Context.OffsetY to set the starting display position for text blocks (Texts).
+      Ensure the display logic adheres to these offset values.
+
+# Rule for defining Context.ViewPort
+  - name: DefineVisibleRange
+    targets:
+      - variables:
+          - Context.ViewPort
+    instructions: >
+      Context.ViewPort should define the visible range, including the screen's coordinate position, width, and height.
+      Specify all rendering within these constraints.
