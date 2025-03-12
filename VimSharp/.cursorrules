@@ -72,8 +72,6 @@ rules:
     file_globs:
       - "**/*.cs"  # Assuming you're working with C# files
 
-# Rule to ensure VimEditor::Render uses direct cursor values
-rules:
   - name: DirectCursorUse
     targets:
       - methods: 
