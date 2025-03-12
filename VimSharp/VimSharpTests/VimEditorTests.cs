@@ -58,17 +58,12 @@ namespace VimSharpTests
         public void WhenInNormalMode_PressRightArrow_CursorShouldMove()
         {
             // Given
-            _editor.Context.Texts.Clear();
-            _editor.Context.Texts.Add(new ConsoleText());
-            _editor.Context.Texts[0].SetText(0, "Hello, World!");
-            _editor.SetViewPort(10, 1, 40, 10);
-            _editor.Context.CursorX = 13; // 設置游標位置在 '!' 上
+            InitializeEditor("Hello, World!");
             _editor.Mode = new VimNormalMode { Instance = _editor };
+            _editor.Context.CursorX = 13; // 設置游標位置在 '!' 上
 
             // 模擬按下向右鍵
-            _mockConsole.ReadKey(Arg.Any<bool>())
-                .Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
-            _editor.WaitForInput();
+            PressKey(ConsoleKey.RightArrow);
 
             // Then
             _editor.Context.CursorX.Should().Be(14); // 游標位置應該向右移動一格
@@ -106,12 +101,9 @@ namespace VimSharpTests
         public void WhenInVisualMode_PressA_ThenPressEsc_CursorShouldMoveBackOnePosition()
         {
             // Given
-            _editor.Context.Texts.Clear();
-            _editor.Context.Texts.Add(new ConsoleText());
-            _editor.Context.SetText(0, 0, "Hello, World!");
-            _editor.SetViewPort(10, 1, 40, 10);
-            _editor.Context.CursorX = 13; // 設置游標位置在本文最後一個字上, 例如 "Hello, World!" 的 '!' 上
+            InitializeEditor("Hello, World!");
             _editor.Mode = new VimVisualMode { Instance = _editor };
+            _editor.Context.CursorX = 13; // 設置游標位置在本文最後一個字上, 例如 "Hello, World!" 的 '!' 上
 
             // 模擬按下 'a' 鍵，切換到 NormalMode 並將游標向右移動一格
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false));
@@ -122,9 +114,7 @@ namespace VimSharpTests
             _editor.Mode.Should().BeOfType<VimNormalMode>();
 
             // 模擬按下 Esc 鍵，切換回 VisualMode 並將游標向左移動一格
-            _mockConsole.ReadKey(Arg.Any<bool>())
-                .Returns(new ConsoleKeyInfo('\0', ConsoleKey.Escape, false, false, false));
-            _editor.WaitForInput();
+            PressKey(ConsoleKey.Escape);
 
             // Then
             _editor.Context.CursorX.Should().Be(13); // 游標應該向左移動一格
@@ -238,14 +228,11 @@ namespace VimSharpTests
             // 按下右鍵按鈕7次，移動到 "W" 的位置
             for (int i = 0; i < 7; i++)
             {
-                _mockConsole.ReadKey(true)
-                    .Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
-                _editor.WaitForInput();
+                PressKey(ConsoleKey.Escape);
             }
 
             // 按下向下按鈕1次
-            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.DownArrow, false, false, false));
-            _editor.WaitForInput();
+            PressKey(ConsoleKey.DownArrow);
 
             // 驗證游標位置
             _editor.Context.CursorX.Should().Be(1);
