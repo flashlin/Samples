@@ -71,3 +71,23 @@ rules:
     replace: '[$KEYS$]'
     file_globs:
       - "**/*.cs"  # Assuming you're working with C# files
+
+# Rule to ensure VimEditor::Render uses direct cursor values
+rules:
+  - name: DirectCursorUse
+    targets:
+      - methods: 
+          - VimEditor::Render
+    instructions: >
+      Always use Content.CursorX and Content.CursorY directly for cursor positions in VimEditor::Render.
+      Do not compute logic in this function.
+
+# Rule for calculating logic before setting cursor position
+  - name: PreCalculateCursorLogic
+    targets:
+      - variables:
+          - CursorX
+          - CursorY
+    instructions: >
+      Application logic should calculate and set values for CursorX and CursorY as needed before rendering.
+
