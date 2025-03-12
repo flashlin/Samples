@@ -91,6 +91,18 @@ public class VimEditor
         Context.CursorY = y;
     }
 
+    public void SetText(string text)
+    {
+        Context.Texts.Clear();
+        // 將文本按照換行符分割並添加到 Texts 集合中
+        string[] lines = text.Split(["\r\n", "\n"], StringSplitOptions.None);
+        foreach (var line in lines)
+        {
+            Context.Texts.Add(new ConsoleText());
+            Context.Texts[Context.Texts.Count - 1].SetText(0, line);
+        }
+    }
+
     public void Run()
     {
         while (IsRunning)
