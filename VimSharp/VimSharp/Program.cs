@@ -8,7 +8,7 @@ editor1.Context.SetText(0, 1, "123");
 editor1.Context.SetText(0, 2, "Say Hello");
 editor1.Context.SetText(0, 3, "Example 3, Title.");
 editor1.Context.SetText(0, 4, "Your name is ?");
-editor1.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 5);
+editor1.SetViewPort(10, 1, 40, 5);
 editor1.IsStatusBarVisible = true;
 
 var editor2 = new VimEditor();
