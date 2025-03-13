@@ -2,6 +2,7 @@ using NUnit.Framework;
 using FluentAssertions;
 using NSubstitute;
 using VimSharpLib;
+using System.Text;
 
 namespace VimSharpTests
 {
@@ -275,6 +276,23 @@ namespace VimSharpTests
         }
 
         [Test]
+        public void WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLineWithLongerText()
+        {
+            // 初始化 VimEditor
+            InitializeEditor(GenerateText(20));
+
+            _editor.IsRelativeLineNumber = true;
+
+            // 按下 '$' 按鍵
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false));
+            _editor.WaitForInput();
+
+            // 驗證游標位置
+            _editor.Context.CursorX.Should().Be(21); 
+            _editor.Context.CursorY.Should().Be(0);
+        }
+
+        [Test]
         public void WhenRelativeLineNumberEnabled_PressCaretSign_CursorShouldMoveToStartOfLine()
         {
             // 初始化 VimEditor
@@ -477,6 +495,20 @@ namespace VimSharpTests
 
             // 最終驗證：游標應該停在最後一個可見行（索引為 4）
             _editor.Context.CursorY.Should().Be(4);
+        }
+
+        private string GenerateText(int textWidth)
+        {
+            var text = new StringBuilder();
+            var random = new Random();
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
+            for (int i = 0; i < textWidth; i++)
+            {
+                var index = random.Next(chars.Length);
+                var c = chars[index];
+                text.Append(c);
+            }
+            return text.ToString();
         }
     }
 }
