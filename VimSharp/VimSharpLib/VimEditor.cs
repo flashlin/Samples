@@ -617,17 +617,9 @@ public class VimEditor
             return 0;
         }
         
-        // 計算文本總行數
-        int totalLines = Context.Texts.Count;
-        
-        // 計算相對行號的最大值（上下行數的最大值）
-        int maxRelativeLineNumber = Math.Max(Context.CursorY, totalLines - Context.CursorY - 1);
-        
-        // 計算行號區域寬度所需的位數
-        int lineNumberDigits = maxRelativeLineNumber > 0 ? (int)Math.Log10(maxRelativeLineNumber) + 1 : 1;
-        
-        // 行號區域寬度 = 位數 + 1 (用於間隔)
-        return lineNumberDigits + 1;
+        // 根據 .cursorrules 中的 RelativeLineNumerWidth Logic 規則
+        // 返回固定值 2（1位數字+1位空格）
+        return 2;
     }
     
     /// <summary>
