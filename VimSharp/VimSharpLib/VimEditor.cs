@@ -702,59 +702,19 @@ public class VimEditor
 
     public void MoveCursorUp()
     {
-        // 檢查是否已經到達第一行
         var textY = GetActualTextY() - 1;
         if (textY < 0)
         {
             return;
         }
-        
-        // 計算游標目標位置
         var targetCursorY = Context.CursorY - 1;
-        
-        // 獲取當前行和上一行
-        var currentLine = GetCurrentLine();
-        var previousLine = Context.Texts[textY];
-        
-        // 保存當前游標 X 位置
-        var currentX = Context.CursorX;
-        
-        // 檢查上一行是否存在
-        if (previousLine != null)
+        if (targetCursorY < Context.ViewPort.Y)
         {
-            // 獲取文本實際 X 坐標
-            var actualTextX = GetActualTextX();
-            
-            // 如果上一行比較短，需要調整游標 X 位置
-            if (actualTextX >= previousLine.Width)
-            {
-                // 計算上一行的最後一個位置
-                int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
-                
-                // 如果上一行是空的，將游標設置在行號後
-                if (previousLine.Width == 0)
-                {
-                    Context.CursorX = Context.ViewPort.X + lineNumberWidth;
-                }
-                else
-                {
-                    // 否則設置到上一行的末尾
-                    var previousLineDisplayWidth = previousLine.Width + lineNumberWidth;
-                    Context.CursorX = Context.ViewPort.X + Math.Min(previousLineDisplayWidth - 1, Context.ViewPort.Width - 1);
-                }
-            }
-            
-            // 檢查是否需要滾動
-            if (targetCursorY < Context.ViewPort.Y)
-            {
-                // 需要向上滾動
-                Scroll(0, -1);
-            }
-            else
-            {
-                // 不需要滾動，直接更新游標 Y 位置
-                Context.CursorY = targetCursorY;
-            }
+            Scroll(0, -1);
+        }
+        else
+        {
+            Context.CursorY = targetCursorY;
         }
     }
 
