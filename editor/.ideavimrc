@@ -32,8 +32,10 @@ Plug 'machakann/vim-highlightedyank'
 " https://github.com/AlexPl291/IdeaVim-EasyMotion#supported-commands
 Plug 'vim-easymotion'
 set easymotion
-map <leader>f <Plug>(easymotion-s)
-map <leader>e <Plug>(easymotion-f)
+" 全螢幕jump 
+map f <Plug>(easymotion-s)
+" 游標後jump
+map F <Plug>(easymotion-f)
 
 
 """ surround --------------------------------
