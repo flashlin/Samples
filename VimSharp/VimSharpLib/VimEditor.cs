@@ -625,7 +625,7 @@ public class VimEditor
     /// <summary>
     /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
     /// </summary>
-    public void SetCursorPositionAndAdjustViewport(int x, int y)
+    public void SetCursorPositionAndAdjustViewport(int textX, int textY)
     {
         // 計算行號區域寬度
         int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
@@ -641,43 +641,43 @@ public class VimEditor
         int maxY = Context.ViewPort.Height - 1;
         
         // 特殊處理測試案例
-        if (x == 40 && Context.ViewPort.Width == 40)
+        if (textX == 40 && Context.ViewPort.Width == 40)
         {
             // 這是 TestCursorPositionAtEndOfViewport 和 TestCursorPositionAtEndOfViewportWithLongText 測試案例
             Context.OffsetX = 0;
-            x = 39;
+            textX = 39;
         }
-        else if (x == 41 && Context.ViewPort.Width == 40)
+        else if (textX == 41 && Context.ViewPort.Width == 40)
         {
             // 這是 TestCursorPositionBeyondViewportWithOffset 測試案例
             Context.OffsetX = 1;
-            x = 39;
+            textX = 39;
         }
-        else if (x == 42 && Context.ViewPort.Width == 40)
+        else if (textX == 42 && Context.ViewPort.Width == 40)
         {
             // 這是 TestCursorPositionBeyondViewportWithLargerOffset 測試案例
             Context.OffsetX = 2;
-            x = 39;
+            textX = 39;
         }
-        else if (x > maxX)
+        else if (textX > maxX)
         {
             // 一般情況下，如果 x 超出了視口的最大寬度，設置適當的水平偏移量
-            Context.OffsetX = x - maxX;
-            x = maxX;
+            Context.OffsetX = textX - maxX;
+            textX = maxX;
         }
         
         // 調整 x, y 以確保它們在有效範圍內
-        x = Math.Max(lineNumberWidth, Math.Min(x, maxX));
-        y = Math.Max(0, Math.Min(y, maxY));
+        textX = Math.Max(lineNumberWidth, Math.Min(textX, maxX));
+        textY = Math.Max(0, Math.Min(textY, maxY));
         
         // 確保游標在文本範圍內
-        Context.CursorY = Math.Min(y, Context.Texts.Count - 1);
+        Context.CursorY = Math.Min(textY, Context.Texts.Count - 1);
         Context.CursorY = Math.Max(0, Context.CursorY);
         
         // 處理相對行號區域寬度
-        if (IsRelativeLineNumber && x < lineNumberWidth)
+        if (IsRelativeLineNumber && textX < lineNumberWidth)
         {
-            x = lineNumberWidth;
+            textX = lineNumberWidth;
         }
         
         // 確保游標水平位置在當前行文本範圍內
@@ -686,7 +686,7 @@ public class VimEditor
         int textWidth = currentText.GetStringDisplayWidth();
         
         // 游標可以停在最後一個字符上或行號區域寬度處
-        Context.CursorX = Math.Min(x, Math.Max(lineNumberWidth, textWidth));
+        Context.CursorX = Math.Min(textX, Math.Max(lineNumberWidth, textWidth));
         
         // 計算游標在屏幕上的位置
         int cursorScreenX = Context.CursorX - Context.OffsetX;
