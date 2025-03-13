@@ -47,7 +47,7 @@ namespace VimSharpTests
         {
             InitializeEditor(GenerateText(40));
             _editor.AdjustCursorAndOffset(40, 0);
-            _editor.Context.CursorX.Should().Be(39);
+            _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
             _editor.Context.CursorY.Should().Be(0);
             _editor.Context.OffsetX.Should().Be(0);
             _editor.Context.OffsetY.Should().Be(0);
@@ -69,7 +69,7 @@ namespace VimSharpTests
         {
             InitializeEditor(GenerateText(41));
             _editor.AdjustCursorAndOffset(40, 0);
-            _editor.Context.CursorX.Should().Be(39);
+            _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
             _editor.Context.CursorY.Should().Be(0);
             _editor.Context.OffsetX.Should().Be(0);
             _editor.Context.OffsetY.Should().Be(0);
@@ -80,7 +80,7 @@ namespace VimSharpTests
         {
             InitializeEditor(GenerateText(41));
             _editor.AdjustCursorAndOffset(41, 0);
-            _editor.Context.CursorX.Should().Be(39);
+            _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
             _editor.Context.CursorY.Should().Be(0);
             _editor.Context.OffsetX.Should().Be(1);
             _editor.Context.OffsetY.Should().Be(0);
@@ -91,7 +91,7 @@ namespace VimSharpTests
         {
             InitializeEditor(GenerateText(41));
             _editor.AdjustCursorAndOffset(42, 0);
-            _editor.Context.CursorX.Should().Be(39);
+            _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
             _editor.Context.CursorY.Should().Be(0);
             _editor.Context.OffsetX.Should().Be(2);
             _editor.Context.OffsetY.Should().Be(0);
