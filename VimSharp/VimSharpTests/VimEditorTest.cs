@@ -31,6 +31,13 @@ namespace VimSharpTests
             _editor.Mode = new VimNormalMode { Instance = _editor };
         }
 
+        private void InitializeEditorWithOffset(string text)
+        {
+            _editor.SetText(text);
+            _editor.SetViewPort(1, 1, 40, 10);
+            _editor.Mode = new VimNormalMode { Instance = _editor };
+        }
+
         [Test]
         public void TestCursorPositionWithinViewport()
         {
@@ -154,6 +161,36 @@ namespace VimSharpTests
 
             // Then
             _editor.Context.CursorX.Should().Be(13); // 游標位置應該向右移動一格
+        }
+
+        [Test]
+        public void WhenCursorAtEndOfLine_PressRightArrow_CursorShouldStayAtEnd()
+        {
+            InitializeEditor(GenerateText(10));
+            _editor.IsRelativeLineNumber = true;
+            for (int i = 0; i < 12; i++)
+            {
+                PressKey(ConsoleKey.RightArrow);
+            }
+            _editor.Context.CursorX.Should().Be(11);
+            _editor.Context.CursorY.Should().Be(0);
+            _editor.Context.OffsetX.Should().Be(0);
+            _editor.Context.OffsetY.Should().Be(0);
+        }
+
+        [Test]
+        public void WhenCursorAtEndOfLine_PressRightArrow_CursorShouldMoveToNextLine()
+        {
+            InitializeEditorWithOffset(GenerateText(10));
+            _editor.IsRelativeLineNumber = true;
+            for (int i = 0; i < 12; i++)
+            {
+                PressKey(ConsoleKey.RightArrow);
+            }
+            _editor.Context.CursorX.Should().Be(12);
+            _editor.Context.CursorY.Should().Be(1);
+            _editor.Context.OffsetX.Should().Be(0);
+            _editor.Context.OffsetY.Should().Be(0);
         }
 
         private void PressKey(ConsoleKey key)
