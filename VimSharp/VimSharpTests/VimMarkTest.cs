@@ -119,7 +119,7 @@ namespace VimSharpTests
             secondLineText.Should().Be("Example.World!");
             
             // 驗證 _editor.Mode 應該是 VimNormalMode 物件
-            _editor.Mode.Should().BeOfType<VimNormalMode>();
+            _editor.Mode.Should().BeOfType<VimInsertMode>();
         }
     }
 } 

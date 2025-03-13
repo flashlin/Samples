@@ -28,7 +28,7 @@ namespace VimSharpTests
         {
             _editor.SetText(text);
             _editor.SetViewPort(0, 0, 40, 10);
-            _editor.Mode = new VimVisualMode { Instance = _editor };
+            _editor.Mode = new VimNormalMode { Instance = _editor };
         }
 
         [Test]
@@ -127,7 +127,7 @@ namespace VimSharpTests
             _editor.Context.SetText(0, 0, "Hello, World!");
             _editor.SetViewPort(10, 1, 40, 10);
             _editor.Context.CursorX = 13; // 設置游標位置在 '!' 上
-            _editor.Mode = new VimVisualMode { Instance = _editor };
+            _editor.Mode = new VimNormalMode { Instance = _editor };
 
             // 模擬按下向右鍵
             _mockConsole.ReadKey(Arg.Any<bool>())
@@ -146,7 +146,7 @@ namespace VimSharpTests
         {
             // Given
             InitializeEditor("Hello, World!");
-            _editor.Mode = new VimNormalMode { Instance = _editor };
+            _editor.Mode = new VimInsertMode { Instance = _editor };
             _editor.Context.CursorX = 12; // 設置游標位置在 '!' 上
 
             // 模擬按下向右鍵
@@ -170,7 +170,7 @@ namespace VimSharpTests
         {
             // Given
             InitializeEditor("Hello, World!");
-            _editor.Mode = new VimNormalMode { Instance = _editor };
+            _editor.Mode = new VimInsertMode { Instance = _editor };
             _editor.Context.CursorX = 14; // 設置游標位置在 '!'後面
 
             // 模擬按下 Esc 鍵
@@ -178,7 +178,7 @@ namespace VimSharpTests
 
             // Then
             _editor.Context.CursorX.Should().Be(13); // 游標應該在 '!' 上面
-            _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換到 VimVisualMode
+            _editor.Mode.Should().BeOfType<VimNormalMode>(); // 模式應該切換到 VimVisualMode
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace VimSharpTests
         {
             // Given
             InitializeEditor("Hello, World!");
-            _editor.Mode = new VimVisualMode { Instance = _editor };
+            _editor.Mode = new VimNormalMode { Instance = _editor };
             _editor.Context.CursorX = 12; // 設置游標位置在本文最後一個字上, 例如 "Hello, World!" 的 '!' 上
 
             // 模擬按下 'a' 鍵，切換到 NormalMode 並將游標向右移動一格
@@ -198,14 +198,14 @@ namespace VimSharpTests
 
             // 此時游標應該在 '!' 後面，模式應該是 NormalMode
             _editor.Context.CursorX.Should().Be(13);
-            _editor.Mode.Should().BeOfType<VimNormalMode>();
+            _editor.Mode.Should().BeOfType<VimInsertMode>();
 
             // 模擬按下 Esc 鍵，切換回 VisualMode 並將游標向左移動一格
             PressKey(ConsoleKey.Escape);
 
             // Then
             _editor.Context.CursorX.Should().Be(12); // 游標應該向左移動一格
-            _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換回 VimVisualMode
+            _editor.Mode.Should().BeOfType<VimNormalMode>(); // 模式應該切換回 VimVisualMode
         }
 
         /// <summary>
@@ -218,7 +218,7 @@ namespace VimSharpTests
             _editor.Context.SetText(0, 0, "Hello");
             _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
             _editor.Context.CursorX = 4; // 設置游標位置在本文最後一個字上, 例如 "Hello" 的 'o' 上
-            _editor.Mode = new VimVisualMode { Instance = _editor };
+            _editor.Mode = new VimNormalMode { Instance = _editor };
 
             // 模擬按下 'a' 鍵，切換到 NormalMode 並將游標向右移動一格
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false));
@@ -226,7 +226,7 @@ namespace VimSharpTests
 
             // 此時游標應該在 'o' 後面，模式應該是 NormalMode
             _editor.Context.CursorX.Should().Be(5);
-            _editor.Mode.Should().BeOfType<VimNormalMode>();
+            _editor.Mode.Should().BeOfType<VimInsertMode>();
 
             // 模擬按下 Esc 鍵，切換回 VisualMode 並將游標向左移動一格
             _mockConsole.ReadKey(Arg.Any<bool>())
@@ -235,7 +235,7 @@ namespace VimSharpTests
 
             // Then
             _editor.Context.CursorX.Should().Be(4); // 游標應該向左移動一格
-            _editor.Mode.Should().BeOfType<VimVisualMode>(); // 模式應該切換回 VimVisualMode
+            _editor.Mode.Should().BeOfType<VimNormalMode>(); // 模式應該切換回 VimVisualMode
         }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace VimSharpTests
 
             // Then
             _editor.Context.CursorX.Should().Be(4); // 游標應該在 'o' 
-            _editor.Mode.Should().BeOfType<VimVisualMode>();
+            _editor.Mode.Should().BeOfType<VimNormalMode>();
         }
 
         /// <summary>
@@ -567,7 +567,7 @@ namespace VimSharpTests
             _editor.Context.CursorY.Should().Be(1);
 
             // 確保使用 VimVisualMode
-            _editor.Mode = new VimVisualMode { Instance = _editor };
+            _editor.Mode = new VimNormalMode { Instance = _editor };
 
             // 按下向下按鍵 5 次
             for (int i = 0; i < 15; i++)

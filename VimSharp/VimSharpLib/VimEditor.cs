@@ -62,7 +62,7 @@ public class VimEditor
     {
         _console = console;
         // 初始化 Mode
-        Mode = new VimVisualMode { Instance = this };
+        Mode = new VimNormalMode { Instance = this };
         Initialize();
     }
 
