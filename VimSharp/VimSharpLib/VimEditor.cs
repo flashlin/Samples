@@ -729,4 +729,14 @@ public class VimEditor
             Context.OffsetY += 1;
         }
     }
+
+    public int GetActualTextY()
+    {
+        return this.Context.CursorY - this.Context.ViewPort.Y + this.Context.OffsetY;
+    }
+
+    public ConsoleText GetCurrentLine()
+    {
+        return this.Context.Texts[this.GetActualTextY()];
+    }
 }

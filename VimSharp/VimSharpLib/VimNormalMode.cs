@@ -94,40 +94,17 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void MoveCursorRight()
     {
-        // 檢查當前行是否存在
-        if (Instance.Context.CursorY < Instance.Context.Texts.Count)
+        var currentLine = Instance.GetCurrentLine(); 
+        // 計算實際索引位置
+        var actualIndex = Instance.GetActualTextY();
+        // 檢查是否已經到達文本尾部
+        if (actualIndex < currentLine.Width)
         {
-            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
-            
-            // 獲取當前文本
-            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            
-            // 計算實際索引位置
-            int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
-            
-            // 檢查是否已經到達文本尾部
-            if (actualIndex < currentText.Length)
-            {
-                // 獲取當前字符的寬度
-                char currentChar = currentText[actualIndex];
-                
-                // 檢查是否是最後一個字符
-                if (actualIndex == currentText.Length - 1)
-                {
-                    // 如果是最後一個字符，游標應該停在這個字符上，而不是超出
-                    // 不需要移動游標
-                }
-                else
-                {
-                    // 如果不是最後一個字符，正常移動游標
-                    Instance.Context.CursorX += currentChar.GetCharWidth();
-                }
-                
-                AdjustCursorAndOffset();
-            }
+            var cursorX = Instance.Context.CursorX + 1;
+            Instance.AdjustCursorPositionAndOffset(cursorX, Instance.Context.CursorY);
         }
     }
-    
+
     /// <summary>
     /// 向上移動游標
     /// </summary>
