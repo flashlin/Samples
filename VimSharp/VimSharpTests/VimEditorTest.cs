@@ -168,6 +168,10 @@ namespace VimSharpTests
         {
             InitializeEditor(GenerateText(10));
             _editor.IsRelativeLineNumber = true;
+
+            _editor.Context.CursorX.Should().Be(2);
+            _editor.Context.CursorY.Should().Be(0);
+
             for (int i = 0; i < 12; i++)
             {
                 PressKey(ConsoleKey.RightArrow);
