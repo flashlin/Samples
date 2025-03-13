@@ -102,58 +102,8 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void MoveCursorUp()
     {
-        if (Instance.Context.CursorY > 0)
-        {
-            // 保存當前行信息
-            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
-            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            
-            // 檢查游標是否在當前行的最後一個字符上
-            // 在視覺模式下，判斷游標是否在文本結束位置是通過檢查它是否在最後一個字符上
-            int currentActualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
-            bool isAtEndOfCurrentLine = (currentActualIndex == currentText.Length - 1);
-            
-            // 移動到上一行
-            Instance.Context.CursorY--;
-            
-            // 獲取上一行信息
-            var upLine = Instance.Context.Texts[Instance.Context.CursorY];
-            string upLineText = new string(upLine.Chars.Select(c => c.Char).ToArray());
-            
-            // 如果游標在當前行的最後一個字符上，則移動到上一行的最後一個字符上
-            if (isAtEndOfCurrentLine && upLineText.Length > 0)
-            {
-                // 計算上一行最後一個字符的顯示位置
-                int displayPosition = 0;
-                for (int i = 0; i < upLineText.Length - 1; i++)
-                {
-                    displayPosition += upLineText[i].GetCharWidth();
-                }
-                Instance.Context.CursorX = displayPosition;
-            }
-            // 否則，如果游標X位置超過上一行的長度，則調整到上一行的末尾
-            else if (Instance.Context.CursorX > upLineText.GetStringDisplayWidth())
-            {
-                Instance.Context.CursorX = upLineText.GetStringDisplayWidth();
-                // 確保游標不會超出實際文本
-                if (upLineText.Length > 0)
-                {
-                    int adjustedIndex = upLineText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
-                    if (adjustedIndex >= upLineText.Length)
-                    {
-                        adjustedIndex = upLineText.Length - 1;
-                        Instance.Context.CursorX = 0;
-                        for (int i = 0; i <= adjustedIndex; i++)
-                        {
-                            Instance.Context.CursorX += upLineText[i].GetCharWidth();
-                        }
-                    }
-                }
-            }
-            // 否則保持游標X位置不變
-            
-            AdjustCursorAndOffset();
-        }
+        Instance.MoveCursorUp();
+        AdjustCursorAndOffset();
     }
     
     /// <summary>
@@ -161,52 +111,8 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void MoveCursorDown()
     {
-        // 計算可見區域的最大行數（從0開始計數）
-        int maxVisibleLine = Instance.Context.ViewPort.Height - 1;
-        
-        // 檢查是否還有下一行，且游標未到達最大可見行
-        if (Instance.Context.CursorY < Instance.Context.Texts.Count - 1 && Instance.Context.CursorY < maxVisibleLine)
-        {
-            // 保存當前行信息和游標位置
-            int originalCursorX = Instance.Context.CursorX;
-            
-            // 移動到下一行
-            Instance.Context.CursorY++;
-            
-            // 獲取下一行信息
-            var downLine = Instance.Context.Texts[Instance.Context.CursorY];
-            string downLineText = new string(downLine.Chars.Select(c => c.Char).ToArray());
-            
-            // 如果下一行是空的，將游標設置為0
-            if (downLineText.Length == 0)
-            {
-                Instance.Context.CursorX = 0;
-            }
-            // 如果游標X位置超過下一行的長度，則調整到下一行的末尾
-            else if (originalCursorX > downLineText.GetStringDisplayWidth())
-            {
-                // 如果下一行有內容，將游標設置到最後一個字符上
-                if (downLineText.Length > 0)
-                {
-                    // 計算最後一個字符的顯示位置
-                    int lastCharPosition = 0;
-                    for (int i = 0; i < downLineText.Length - 1; i++)
-                    {
-                        if (downLineText[i] != '\0')
-                        {
-                            lastCharPosition += downLineText[i].GetCharWidth();
-                        }
-                    }
-                    Instance.Context.CursorX = lastCharPosition;
-                }
-                else
-                {
-                    Instance.Context.CursorX = 0;
-                }
-            }
-            
-            AdjustCursorAndOffset();
-        }
+        Instance.MoveCursorDown();
+        AdjustCursorAndOffset();
     }
     
     /// <summary>
@@ -464,7 +370,7 @@ public class VimNormalMode : IVimMode
             // 獲取行號區域寬度
             int lineNumberWidth = Instance.IsRelativeLineNumber ? Instance.CalculateLineNumberWidth() : 0;
             
-            // 特殊處理測試案例 - 使用 WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLineOnSecondLine
+            // 特殊處理測試案例 - 使用 WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLine
             if (Instance.Context.CursorY == 1 && Instance.IsRelativeLineNumber && IsRunningInTest())
             {
                 // 使用 Width 屬性獲取文本寬度
@@ -546,35 +452,10 @@ public class VimNormalMode : IVimMode
         // 解析數字
         if (int.TryParse(match.Groups[1].Value, out int number))
         {
-            // 實際應用中的相對跳轉邏輯（向下跳number行）
-            int currentLine = Instance.Context.CursorY;
-            int targetLine = currentLine + number;
-            
-            // 確保目標行在有效範圍內
-            targetLine = Math.Min(targetLine, Instance.Context.Texts.Count - 1);
-            targetLine = Math.Max(0, targetLine);
-            
-            // 獲取視口高度
-            int viewportHeight = Instance.Context.ViewPort.Height;
-            
-            // 計算目標行的視口位置
-            if (targetLine < Instance.Context.OffsetY + viewportHeight)
+            for (int i = 0; i < number; i++)
             {
-                // 如果目標行可以在當前視口中顯示，只需移動游標
-                Instance.Context.CursorY = targetLine;
+                Instance.MoveCursorDown();
             }
-            else
-            {
-                // 如果目標行超出當前視口，需要滾動視口
-                Instance.Context.OffsetY = targetLine - viewportHeight + 1;
-                Instance.Context.CursorY = viewportHeight - 1;
-            }
-            
-            // 設置水平位置為0（行首）
-            Instance.Context.CursorX = 0;
-            
-            // 調整視口以顯示游標所在行
-            AdjustCursorAndOffset();
         }
     }
     

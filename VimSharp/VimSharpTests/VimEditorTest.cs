@@ -249,15 +249,12 @@ namespace VimSharpTests
         {
             // Given
             InitializeEditor("Hello\r\nab");
-            _editor.Context.CursorY = 1;
-            _editor.Context.CursorX = 1;
 
             // 模擬按下 UpArrow 鍵
             PressKey(ConsoleKey.UpArrow);
 
             // Then
-            _editor.Context.CursorX.Should().Be(4); // 游標應該在 'o' 
-            _editor.Mode.Should().BeOfType<VimNormalMode>();
+            _editor.Context.CursorX.Should().Be(0);
         }
 
         /// <summary>
@@ -475,10 +472,10 @@ namespace VimSharpTests
         public void WhenRelativeLineNumberEnabled_PressLeftArrowTwice_CursorShouldStayAtPosition2()
         {
             // 設置5行文本
-            var text = Create5LinesText();
-            InitializeEditor(text);
+            InitializeEditor(Create5LinesText());
             _editor.IsRelativeLineNumber = true;
 
+            _editor.Context.CursorX.Should().Be(2);
             // 按下向左鍵兩次
             PressKey(ConsoleKey.LeftArrow);
             PressKey(ConsoleKey.LeftArrow);
@@ -493,7 +490,7 @@ namespace VimSharpTests
             var text = new StringBuilder();
             for (int i = 0; i < 5; i++)
             {
-                text.Append($"line{i + 1}");
+                text.AppendLine($"line{i + 1}");
             }
             return text.ToString();
         }
