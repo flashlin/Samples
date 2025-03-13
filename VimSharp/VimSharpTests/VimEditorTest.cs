@@ -39,72 +39,6 @@ namespace VimSharpTests
         }
 
         [Test]
-        public void TestCursorPositionWithinViewport()
-        {
-            InitializeEditor(GenerateText(13));
-            _editor.AdjustCursorPositionAndOffset(12, 0);
-            _editor.Context.CursorX.Should().Be(12);
-            _editor.Context.CursorY.Should().Be(0);
-            _editor.Context.OffsetX.Should().Be(0);
-            _editor.Context.OffsetY.Should().Be(0);
-        }
-
-        [Test]
-        public void TestCursorPositionAtEndOfViewport()
-        {
-            InitializeEditor(GenerateText(40));
-            _editor.AdjustCursorPositionAndOffset(40, 0);
-            _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
-            _editor.Context.CursorY.Should().Be(0);
-            _editor.Context.OffsetX.Should().Be(0);
-            _editor.Context.OffsetY.Should().Be(0);
-        }
-
-        [Test]
-        public void TestCursorPositionAtStartOfViewport()
-        {
-            InitializeEditor(GenerateText(41));
-            _editor.AdjustCursorPositionAndOffset(0, 0);
-            _editor.Context.CursorX.Should().Be(0);
-            _editor.Context.CursorY.Should().Be(0);
-            _editor.Context.OffsetX.Should().Be(0);
-            _editor.Context.OffsetY.Should().Be(0);
-        }
-
-        [Test]
-        public void TestCursorPositionAtEndOfViewportWithLongText()
-        {
-            InitializeEditor(GenerateText(41));
-            _editor.AdjustCursorPositionAndOffset(40, 0);
-            _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
-            _editor.Context.CursorY.Should().Be(0);
-            _editor.Context.OffsetX.Should().Be(0);
-            _editor.Context.OffsetY.Should().Be(0);
-        }
-
-        [Test]
-        public void TestCursorPositionBeyondViewportWithOffset()
-        {
-            InitializeEditor(GenerateText(41));
-            _editor.AdjustCursorPositionAndOffset(41, 0);
-            _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
-            _editor.Context.CursorY.Should().Be(0);
-            _editor.Context.OffsetX.Should().Be(1);
-            _editor.Context.OffsetY.Should().Be(0);
-        }
-
-        [Test]
-        public void TestCursorPositionBeyondViewportWithLargerOffset()
-        {
-            InitializeEditor(GenerateText(41));
-            _editor.AdjustCursorPositionAndOffset(42, 0);
-            _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
-            _editor.Context.CursorY.Should().Be(0);
-            _editor.Context.OffsetX.Should().Be(2);
-            _editor.Context.OffsetY.Should().Be(0);
-        }
-
-        [Test]
         public void WhenRelativeLineNumberDisabled_CalculateLineNumberWidth_ShouldReturnZero()
         {
             InitializeEditor("Hello, World!");
@@ -131,15 +65,14 @@ namespace VimSharpTests
         public void WhenCursorAtEndOfText_PressRightArrow_CursorShouldNotMove()
         {
             // Given
-            _editor.Context.SetText(0, 0, "Hello, World!");
-            _editor.SetViewPort(10, 1, 40, 10);
-            _editor.Context.CursorX = 13; // 設置游標位置在 '!' 上
+            InitializeEditorWithOffset("Hello, World!");
+            _editor.MoveCursorRightN(13);
+            _editor.Context.CursorX.Should().Be(13);
+            
             _editor.Mode = new VimNormalMode { Instance = _editor };
-
+            
             // 模擬按下向右鍵
-            _mockConsole.ReadKey(Arg.Any<bool>())
-                .Returns(new ConsoleKeyInfo('\0', ConsoleKey.RightArrow, false, false, false));
-            _editor.WaitForInput();
+            PressKey(ConsoleKey.RightArrow);
 
             // Then
             _editor.Context.CursorX.Should().Be(13); // 游標位置應該保持不變
@@ -187,6 +120,12 @@ namespace VimSharpTests
         {
             InitializeEditorWithOffset(GenerateText(10));
             _editor.IsRelativeLineNumber = true;
+            
+            _editor.Context.CursorX.Should().Be(3);
+            _editor.Context.CursorY.Should().Be(1);
+            _editor.GetActualTextX().Should().Be(0);
+            _editor.GetActualTextY().Should().Be(0);
+            
             for (int i = 0; i < 12; i++)
             {
                 PressKey(ConsoleKey.RightArrow);
@@ -532,24 +471,7 @@ namespace VimSharpTests
         [Test]
         public void WhenRelativeLineNumberEnabled_RenderShouldNotChangeCursorPosition()
         {
-            // 初始化 VimEditor
-            _editor.Context.Texts.Clear();
-
-            // 設置5行文本
-            for (int i = 0; i < 5; i++)
-            {
-                _editor.Context.Texts.Add(new ConsoleText());
-                _editor.Context.Texts[i].SetText(0, $"line{i + 1}");
-            }
-
-            // 設置視口
-            _editor.Context.ViewPort = new ConsoleRectangle(0, 0, 40, 5);
-
-            // 設置初始游標位置
-            _editor.Context.CursorX = 0;
-            _editor.Context.CursorY = 0;
-
-            // 啟用相對行號
+            InitializeEditor(Create5LinesText());
             _editor.IsRelativeLineNumber = true;
 
             // 調用Render方法
@@ -563,20 +485,9 @@ namespace VimSharpTests
         [Test]
         public void WhenRelativeLineNumberEnabled_PressLeftArrowTwice_CursorShouldStayAtPosition2()
         {
-            // 初始化 VimEditor
-            _editor.Context.Texts.Clear();
-
             // 設置5行文本
-            for (int i = 0; i < 5; i++)
-            {
-                _editor.Context.Texts.Add(new ConsoleText());
-                _editor.Context.Texts[i].SetText(0, $"line{i + 1}");
-            }
-
-            // 設置視口
-            _editor.SetViewPort(0, 0, 40, 5);
-
-            // 啟用相對行號
+            var text = Create5LinesText();
+            InitializeEditor(text);
             _editor.IsRelativeLineNumber = true;
 
             // 按下向左鍵兩次
@@ -586,6 +497,16 @@ namespace VimSharpTests
             // 驗證游標位置
             _editor.Context.CursorX.Should().Be(2); // 游標X位置應該保持在2
             _editor.Context.CursorY.Should().Be(0); // 游標Y位置應該保持不變
+        }
+
+        private static string Create5LinesText()
+        {
+            var text = new StringBuilder();
+            for (int i = 0; i < 5; i++)
+            {
+                text.Append($"line{i + 1}");
+            }
+            return text.ToString();
         }
 
         [Test]

@@ -94,15 +94,7 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void MoveCursorRight()
     {
-        var currentLine = Instance.GetCurrentLine(); 
-        // 計算實際索引位置
-        var actualIndex = Instance.GetActualTextY();
-        // 檢查是否已經到達文本尾部
-        if (actualIndex < currentLine.Width)
-        {
-            var cursorX = Instance.Context.CursorX + 1;
-            Instance.AdjustCursorPositionAndOffset(cursorX, Instance.Context.CursorY);
-        }
+        Instance.MoveCursorRight();
     }
 
     /// <summary>
