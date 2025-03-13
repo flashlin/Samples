@@ -1,6 +1,6 @@
 ---
 description: VimSharp Rules
-globs: 
+globs: *.cs
 alwaysApply: false
 ---
 ## Rule 1: Default color configuration
