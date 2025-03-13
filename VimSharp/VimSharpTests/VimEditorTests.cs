@@ -241,14 +241,7 @@ namespace VimSharpTests
         public void WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLine()
         {
             // 初始化 VimEditor
-            _editor.Context.Texts.Clear();
-            _editor.Context.Texts.Add(new ConsoleText());
-            _editor.Context.Texts[0].SetText(0, "Hello, World!");
-            _editor.SetViewPort(0, 0, 40, 10);
-
-            // 設置初始游標位置
-            _editor.Context.CursorX = 0;
-            _editor.Context.CursorY = 0;
+            InitializeEditor("Hello, World!");
 
             _editor.IsRelativeLineNumber = true;
 
@@ -417,21 +410,14 @@ namespace VimSharpTests
             }
 
             // 設置視口
-            _editor.Context.ViewPort = new ConsoleRectangle(0, 0, 40, 5);
-
-            // 設置初始游標位置
-            _editor.Context.CursorX = 0;
-            _editor.Context.CursorY = 0;
+            _editor.SetViewPort(0, 0, 40, 5);
 
             // 啟用相對行號
             _editor.IsRelativeLineNumber = true;
 
             // 按下向左鍵兩次
-            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.LeftArrow, false, false, false));
-            _editor.WaitForInput();
-
-            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('\0', ConsoleKey.LeftArrow, false, false, false));
-            _editor.WaitForInput();
+            PressKey(ConsoleKey.LeftArrow);
+            PressKey(ConsoleKey.LeftArrow);
 
             // 驗證游標位置
             _editor.Context.CursorX.Should().Be(2); // 游標X位置應該保持在2

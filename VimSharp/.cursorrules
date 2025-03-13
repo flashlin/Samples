@@ -72,6 +72,10 @@ rules:
     file_globs:
       - "**/*.cs"  # Assuming you're working with C# files
 
+  - name: RelativeLineNumerWidth Logic
+    instructions: |
+      Configure Vim to adjust the relative line number area width to match the number of digits in the total number of lines, with an added spacing of 1.
+
   - name: DirectCursorUse
     targets:
       - methods: 
