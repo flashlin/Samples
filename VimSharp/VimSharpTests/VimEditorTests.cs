@@ -35,6 +35,7 @@ namespace VimSharpTests
         {
             InitializeEditor("Hello, World!");
             _editor.IsRelativeLineNumber = false;
+            _editor.Context.CursorY = 1000;
             var width = _editor.CalculateLineNumberWidth();
             width.Should().Be(0);
         }
@@ -44,6 +45,7 @@ namespace VimSharpTests
         {
             InitializeEditor("Hello, World!");
             _editor.IsRelativeLineNumber = true;
+            _editor.Context.CursorY = 1000;
             var width = _editor.CalculateLineNumberWidth();
             width.Should().Be(2);
         }
