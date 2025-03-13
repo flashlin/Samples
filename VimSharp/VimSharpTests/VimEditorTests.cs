@@ -30,6 +30,24 @@ namespace VimSharpTests
             _editor.Mode = new VimVisualMode { Instance = _editor };
         }
 
+        [Test]
+        public void WhenRelativeLineNumberDisabled_CalculateLineNumberWidth_ShouldReturnZero()
+        {
+            InitializeEditor("Hello, World!");
+            _editor.IsRelativeLineNumber = false;
+            var width = _editor.CalculateLineNumberWidth();
+            width.Should().Be(0);
+        }
+
+        [Test]
+        public void WhenRelativeLineNumberEnabled_CalculateLineNumberWidth_ShouldReturnTwo()
+        {
+            InitializeEditor("Hello, World!");
+            _editor.IsRelativeLineNumber = true;
+            var width = _editor.CalculateLineNumberWidth();
+            width.Should().Be(2);
+        }
+
         /// <summary>
         /// 測試當游標在文本末尾時，按下向右鍵，游標位置應該保持不變
         /// </summary>
