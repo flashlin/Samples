@@ -55,7 +55,7 @@ public class VimVisualMode : IVimMode
     private void AdjustCursorAndOffset()
     {
         // 調用 VimEditor 中的 AdjustCursorAndOffset 方法
-        Instance.SetCursorPositionAndAdjustViewport(Instance.Context.CursorX, Instance.Context.CursorY);
+        Instance.AdjustCursorPositionAndOffset(Instance.Context.CursorX, Instance.Context.CursorY);
         
         // 更新選取的結束位置
         _endCursorX = Instance.Context.CursorX;

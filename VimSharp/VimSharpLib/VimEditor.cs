@@ -625,7 +625,7 @@ public class VimEditor
     /// <summary>
     /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
     /// </summary>
-    public void SetCursorPositionAndAdjustViewport(int textX, int textY)
+    public void AdjustCursorPositionAndOffset(int textX, int textY)
     {
         // 計算行號區域寬度
         int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;

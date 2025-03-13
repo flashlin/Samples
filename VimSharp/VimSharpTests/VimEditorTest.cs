@@ -35,7 +35,7 @@ namespace VimSharpTests
         public void TestCursorPositionWithinViewport()
         {
             InitializeEditor(GenerateText(13));
-            _editor.SetCursorPositionAndAdjustViewport(12, 0);
+            _editor.AdjustCursorPositionAndOffset(12, 0);
             _editor.Context.CursorX.Should().Be(12);
             _editor.Context.CursorY.Should().Be(0);
             _editor.Context.OffsetX.Should().Be(0);
@@ -46,7 +46,7 @@ namespace VimSharpTests
         public void TestCursorPositionAtEndOfViewport()
         {
             InitializeEditor(GenerateText(40));
-            _editor.SetCursorPositionAndAdjustViewport(40, 0);
+            _editor.AdjustCursorPositionAndOffset(40, 0);
             _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
             _editor.Context.CursorY.Should().Be(0);
             _editor.Context.OffsetX.Should().Be(0);
@@ -57,7 +57,7 @@ namespace VimSharpTests
         public void TestCursorPositionAtStartOfViewport()
         {
             InitializeEditor(GenerateText(41));
-            _editor.SetCursorPositionAndAdjustViewport(0, 0);
+            _editor.AdjustCursorPositionAndOffset(0, 0);
             _editor.Context.CursorX.Should().Be(0);
             _editor.Context.CursorY.Should().Be(0);
             _editor.Context.OffsetX.Should().Be(0);
@@ -68,7 +68,7 @@ namespace VimSharpTests
         public void TestCursorPositionAtEndOfViewportWithLongText()
         {
             InitializeEditor(GenerateText(41));
-            _editor.SetCursorPositionAndAdjustViewport(40, 0);
+            _editor.AdjustCursorPositionAndOffset(40, 0);
             _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
             _editor.Context.CursorY.Should().Be(0);
             _editor.Context.OffsetX.Should().Be(0);
@@ -79,7 +79,7 @@ namespace VimSharpTests
         public void TestCursorPositionBeyondViewportWithOffset()
         {
             InitializeEditor(GenerateText(41));
-            _editor.SetCursorPositionAndAdjustViewport(41, 0);
+            _editor.AdjustCursorPositionAndOffset(41, 0);
             _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
             _editor.Context.CursorY.Should().Be(0);
             _editor.Context.OffsetX.Should().Be(1);
@@ -90,7 +90,7 @@ namespace VimSharpTests
         public void TestCursorPositionBeyondViewportWithLargerOffset()
         {
             InitializeEditor(GenerateText(41));
-            _editor.SetCursorPositionAndAdjustViewport(42, 0);
+            _editor.AdjustCursorPositionAndOffset(42, 0);
             _editor.Context.CursorX.Should().Be(_editor.Context.ViewPort.Width - 1);
             _editor.Context.CursorY.Should().Be(0);
             _editor.Context.OffsetX.Should().Be(2);
