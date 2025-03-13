@@ -7,7 +7,7 @@ using System.Text;
 namespace VimSharpTests
 {
     [TestFixture]
-    public class VimEditorTests
+    public class VimEditorTest
     {
         [SetUp]
         public void Setup()
