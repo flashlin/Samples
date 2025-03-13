@@ -440,18 +440,7 @@ namespace VimSharpTests
         [Test]
         public void WhenPress1J_CursorShouldJumpToLine1()
         {
-            // 初始化 VimEditor
-            _editor.Context.Texts.Clear();
-
-            // 設置5行文本
-            for (int i = 0; i < 5; i++)
-            {
-                _editor.Context.Texts.Add(new ConsoleText());
-                _editor.Context.Texts[i].SetText(0, $"line{i + 1}");
-            }
-
-            // 設置視口
-            _editor.Context.ViewPort = new ConsoleRectangle(0, 0, 40, 5);
+            InitializeEditor(Create5LinesText());
 
             // 依序按下 '1', 'J' 按鍵
             _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false));
