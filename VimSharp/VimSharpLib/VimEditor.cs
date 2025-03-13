@@ -625,7 +625,7 @@ public class VimEditor
     /// <summary>
     /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
     /// </summary>
-    public void AdjustCursorAndOffset()
+    public void AdjustCursorAndOffset(int x, int y)
     {
         // 計算行號區域寬度
         int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
@@ -636,14 +636,22 @@ public class VimEditor
             Context.Texts.Add(new ConsoleText());
         }
         
+        // 檢查 x, y 是否在 ViewPort 範圍內
+        int maxX = Context.ViewPort.Width - 1;
+        int maxY = Context.ViewPort.Height - 1;
+        
+        // 調整 x, y 以確保它們在有效範圍內
+        x = Math.Max(lineNumberWidth, Math.Min(x, maxX));
+        y = Math.Max(0, Math.Min(y, maxY));
+        
         // 確保游標在文本範圍內
-        Context.CursorY = Math.Min(Context.CursorY, Context.Texts.Count - 1);
+        Context.CursorY = Math.Min(y, Context.Texts.Count - 1);
         Context.CursorY = Math.Max(0, Context.CursorY);
         
         // 處理相對行號區域寬度
-        if (IsRelativeLineNumber && Context.CursorX < lineNumberWidth)
+        if (IsRelativeLineNumber && x < lineNumberWidth)
         {
-            Context.CursorX = lineNumberWidth;
+            x = lineNumberWidth;
         }
         
         // 確保游標水平位置在當前行文本範圍內
@@ -652,16 +660,14 @@ public class VimEditor
         int textWidth = currentText.GetStringDisplayWidth();
         
         // 游標可以停在最後一個字符上或行號區域寬度處
-        Context.CursorX = Math.Min(Context.CursorX, Math.Max(lineNumberWidth, textWidth));
+        Context.CursorX = Math.Min(x, Math.Max(lineNumberWidth, textWidth));
         
         // 計算游標在屏幕上的位置
         int cursorScreenX = Context.CursorX - Context.OffsetX;
         int cursorScreenY = Context.CursorY - Context.OffsetY;
         
         // 計算可見區域的有效高度（考慮狀態欄）
-        int effectiveViewPortHeight = Context.IsStatusBarVisible
-            ? Context.ViewPort.Height - 1
-            : Context.ViewPort.Height;
+        int effectiveViewPortHeight = Context.ViewPort.Height;
         
         // 檢查游標是否超出右邊界
         if (cursorScreenX >= Context.ViewPort.Width)
@@ -690,8 +696,8 @@ public class VimEditor
         }
         
         // 處理狀態欄顯示
-        if (Context.IsStatusBarVisible && Context.CursorY == Context.Texts.Count - 1 && 
-            Context.CursorY - Context.OffsetY >= effectiveViewPortHeight)
+        if (IsStatusBarVisible && Context.CursorY == Context.Texts.Count - 1 && 
+            Context.CursorY - Context.OffsetY >= effectiveViewPortHeight - 1)
         {
             // 如果游標在最後一行，且該行會被狀態欄覆蓋，則調整偏移量
             Context.OffsetY += 1;

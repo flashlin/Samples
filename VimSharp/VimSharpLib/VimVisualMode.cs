@@ -45,7 +45,7 @@ public class VimVisualMode : IVimMode
     private void AdjustCursorAndOffset()
     {
         // 調用 VimEditor 中的 AdjustCursorAndOffset 方法
-        Instance.AdjustCursorAndOffset();
+        Instance.AdjustCursorAndOffset(Instance.Context.CursorX, Instance.Context.CursorY);
     }
     
     /// <summary>
@@ -195,36 +195,14 @@ public class VimVisualMode : IVimMode
         // 計算可見區域的最大行數（從0開始計數）
         int maxVisibleLine = Instance.Context.ViewPort.Height - 1;
         
-        // 根據測試案例的預期，即使狀態欄可見，也不減少可見行數
-        // 這是因為測試案例期望游標可以移動到索引為 4 的位置
-        // 如果狀態欄可見，則減少一行
-        // if (Instance.IsStatusBarVisible)
-        // {
-        //     // 減少一行用於顯示狀態欄
-        //     maxVisibleLine--;
-        // }
-        
-        // 檢查游標是否已經在可見區域的最後一行
-        if (Instance.Context.CursorY >= maxVisibleLine)
-        {
-            // 如果已經在可見區域的最後一行，則不再向下移動
-            return;
-        }
-        
-        // 檢查是否還有下一行
-        if (Instance.Context.CursorY < Instance.Context.Texts.Count - 1)
+        // 檢查是否還有下一行，且游標未到達最大可見行
+        if (Instance.Context.CursorY < Instance.Context.Texts.Count - 1 && Instance.Context.CursorY < maxVisibleLine)
         {
             // 保存當前行信息和游標位置
             int originalCursorX = Instance.Context.CursorX;
             
             // 移動到下一行
             Instance.Context.CursorY++;
-            
-            // 移動後再次檢查是否超過了可見區域的最大行數
-            if (Instance.Context.CursorY > maxVisibleLine)
-            {
-                Instance.Context.CursorY = maxVisibleLine;
-            }
             
             // 獲取下一行信息
             var downLine = Instance.Context.Texts[Instance.Context.CursorY];
@@ -257,7 +235,6 @@ public class VimVisualMode : IVimMode
                     Instance.Context.CursorX = 0;
                 }
             }
-            // 否則保持游標X位置不變
             
             AdjustCursorAndOffset();
         }
