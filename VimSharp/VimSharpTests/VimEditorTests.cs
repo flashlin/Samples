@@ -293,6 +293,25 @@ namespace VimSharpTests
         }
 
         [Test]
+        public void WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLineOnSecondLine()
+        {
+            // 初始化 VimEditor
+            InitializeEditor(GenerateText(20)+"\r\n"+GenerateText(5));
+
+            _editor.IsRelativeLineNumber = true;
+
+            PressKey(ConsoleKey.DownArrow);
+
+            // 按下 '$' 按鍵
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false));
+            _editor.WaitForInput();
+
+            // 驗證游標位置
+            _editor.Context.CursorX.Should().Be(6); 
+            _editor.Context.CursorY.Should().Be(1);
+        }
+
+        [Test]
         public void WhenRelativeLineNumberEnabled_PressCaretSign_CursorShouldMoveToStartOfLine()
         {
             // 初始化 VimEditor
