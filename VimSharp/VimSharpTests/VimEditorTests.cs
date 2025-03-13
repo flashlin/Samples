@@ -32,6 +32,72 @@ namespace VimSharpTests
         }
 
         [Test]
+        public void TestCursorPositionWithinViewport()
+        {
+            InitializeEditor(GenerateText(13));
+            _editor.AdjustCursorAndOffset(12, 0);
+            _editor.Context.CursorX.Should().Be(12);
+            _editor.Context.CursorY.Should().Be(0);
+            _editor.Context.OffsetX.Should().Be(0);
+            _editor.Context.OffsetY.Should().Be(0);
+        }
+
+        [Test]
+        public void TestCursorPositionAtEndOfViewport()
+        {
+            InitializeEditor(GenerateText(40));
+            _editor.AdjustCursorAndOffset(40, 0);
+            _editor.Context.CursorX.Should().Be(39);
+            _editor.Context.CursorY.Should().Be(0);
+            _editor.Context.OffsetX.Should().Be(0);
+            _editor.Context.OffsetY.Should().Be(0);
+        }
+
+        [Test]
+        public void TestCursorPositionAtStartOfViewport()
+        {
+            InitializeEditor(GenerateText(41));
+            _editor.AdjustCursorAndOffset(0, 0);
+            _editor.Context.CursorX.Should().Be(0);
+            _editor.Context.CursorY.Should().Be(0);
+            _editor.Context.OffsetX.Should().Be(0);
+            _editor.Context.OffsetY.Should().Be(0);
+        }
+
+        [Test]
+        public void TestCursorPositionAtEndOfViewportWithLongText()
+        {
+            InitializeEditor(GenerateText(41));
+            _editor.AdjustCursorAndOffset(40, 0);
+            _editor.Context.CursorX.Should().Be(39);
+            _editor.Context.CursorY.Should().Be(0);
+            _editor.Context.OffsetX.Should().Be(0);
+            _editor.Context.OffsetY.Should().Be(0);
+        }
+
+        [Test]
+        public void TestCursorPositionBeyondViewportWithOffset()
+        {
+            InitializeEditor(GenerateText(41));
+            _editor.AdjustCursorAndOffset(41, 0);
+            _editor.Context.CursorX.Should().Be(39);
+            _editor.Context.CursorY.Should().Be(0);
+            _editor.Context.OffsetX.Should().Be(1);
+            _editor.Context.OffsetY.Should().Be(0);
+        }
+
+        [Test]
+        public void TestCursorPositionBeyondViewportWithLargerOffset()
+        {
+            InitializeEditor(GenerateText(41));
+            _editor.AdjustCursorAndOffset(42, 0);
+            _editor.Context.CursorX.Should().Be(39);
+            _editor.Context.CursorY.Should().Be(0);
+            _editor.Context.OffsetX.Should().Be(2);
+            _editor.Context.OffsetY.Should().Be(0);
+        }
+
+        [Test]
         public void WhenRelativeLineNumberDisabled_CalculateLineNumberWidth_ShouldReturnZero()
         {
             InitializeEditor("Hello, World!");

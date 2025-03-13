@@ -72,6 +72,10 @@ rules:
     file_globs:
       - "**/*.cs"  # Assuming you're working with C# files
 
+  - name: Get Text Width Logic
+    - Use the `ConsoleText::Width` method to obtain the length of any text line.
+    - Do not calculate the length manually or use any other methods.
+
   - name: RelativeLineNumerWidth Logic
     instructions: |
       Configure Vim to adjust the relative line number area width to match the number of digits in the total number of lines, with an added spacing of 1.
