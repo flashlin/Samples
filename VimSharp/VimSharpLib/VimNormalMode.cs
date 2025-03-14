@@ -98,7 +98,6 @@ public class VimNormalMode : IVimMode
     private void MoveCursorUp()
     {
         Instance.MoveCursorUp();
-        AdjustCursorAndOffset();
     }
     
     /// <summary>
@@ -107,7 +106,6 @@ public class VimNormalMode : IVimMode
     private void MoveCursorDown()
     {
         Instance.MoveCursorDown();
-        AdjustCursorAndOffset();
     }
     
     /// <summary>
