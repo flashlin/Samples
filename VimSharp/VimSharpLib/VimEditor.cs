@@ -104,13 +104,13 @@ public class VimEditor
 
     public void Render()
     {
-        // 隱藏游標
+        // 隱藏游標 (符合 Rule 12)
         _console.Write("\x1b[?25l");
 
         // 計算文本總行數
         int totalLines = Context.Texts.Count;
 
-        // 計算行號區域寬度所需的位數
+        // 計算行號區域寬度所需的位數 (符合 RelativeLineNumerWidth Logic)
         int lineNumberDigits;
 
         if (IsRelativeLineNumber)
@@ -127,9 +127,6 @@ public class VimEditor
 
         // 行號區域寬度 = 位數 + 1 (用於間隔)
         int lineNumberWidth = lineNumberDigits + 1;
-
-        // 計算可見區域的行數
-        int visibleLines = Math.Min(Context.ViewPort.Height, Context.Texts.Count - Context.OffsetY);
 
         // 如果狀態欄可見，則減少一行用於顯示狀態欄
         int maxLines = IsStatusBarVisible ? Context.ViewPort.Height - 1 : Context.ViewPort.Height;
@@ -173,7 +170,7 @@ public class VimEditor
                 RenderLineNumber(Context.ViewPort.X, Context.ViewPort.Y + i, lineNumber, lineNumberDigits,
                     isCurrentLine, IsRelativeLineNumber);
 
-                // 直接繪製文本，考慮 ViewPort、偏移量和行號區域
+                // 直接繪製文本，考慮 ViewPort、偏移量和行號區域 (符合 DirectCursorUse 和 TextBlockDisplayPosition)
                 RenderText(Context.ViewPort.X + lineNumberWidth, Context.ViewPort.Y + i, text, Context.OffsetX,
                     Context.ViewPort, lineNumberWidth);
             }
@@ -197,9 +194,10 @@ public class VimEditor
         // 繪製顯示框
         RenderFrame();
 
-        // 設置控制台游標位置
+        // 設置控制台游標位置 (直接使用 Context.CursorX 和 Context.CursorY，符合 DirectCursorUse)
         _console.SetCursorPosition(Context.CursorX, Context.CursorY);
-        // 顯示游標
+        
+        // 顯示游標 (符合 Rule 12)
         _console.Write("\x1b[?25h");
     }
 
@@ -324,13 +322,13 @@ public class VimEditor
 
         // 計算可見的起始和結束位置
         int startX = Math.Max(0, offset);
-        int endX = Math.Min(text.Chars.Length, offset + visibleWidth);
+        int endX = Math.Min(text.Width, offset + visibleWidth);
 
         // 計算實際要繪製的字符數量
         int charsToDraw = endX - startX;
 
         // 如果有文本內容在可見範圍內
-        if (startX < text.Chars.Length && charsToDraw > 0)
+        if (startX < text.Width && charsToDraw > 0)
         {
             // 繪製文本內容
             for (int i = startX; i < endX; i++)
@@ -631,16 +629,16 @@ public class VimEditor
     private int HandleNullCharForRightMovement(ConsoleText line, int textX)
     {
         // 確保 textX 在有效範圍內
-        if (textX >= 0 && textX < line.Chars.Length)
+        if (textX >= 0 && textX < line.Width)
         {
             // 檢查是否遇到 '\0' 字符，如果是則繼續向右移動直到遇到非 '\0' 字符
-            while (textX < line.Width && textX < line.Chars.Length && line.Chars[textX].Char == '\0')
+            while (textX < line.Width && line.Chars[textX].Char == '\0')
             {
                 textX++;
             }
             
             // 如果已經到達行尾，則返回原始值
-            if (textX >= line.Width || textX >= line.Chars.Length)
+            if (textX >= line.Width)
             {
                 return -1; // 表示已到達行尾
             }
@@ -692,7 +690,7 @@ public class VimEditor
     private void HandleNullCharAndAdjustCursor(ConsoleText line, int actualTextX)
     {
         // 確保 actualTextX 在有效範圍內
-        if (actualTextX >= 0 && actualTextX < line.Chars.Length)
+        if (actualTextX >= 0 && actualTextX < line.Width)
         {
             // 檢查目標位置是否為 '\0'，如果是則向左移動直到找到非 '\0' 字符
             if (line.Chars[actualTextX].Char == '\0')

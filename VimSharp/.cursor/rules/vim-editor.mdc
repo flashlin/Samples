@@ -1,6 +1,6 @@
 ---
 description: 
-globs: **/VimEditor.cs
+globs: VimEditor.cs
 alwaysApply: false
 ---
     private readonly IConsoleDevice _console;

@@ -1,6 +1,6 @@
 ---
 description: console-context.cs
-globs: **/ConsoleContext.cs
+globs: ConsoleContext.cs
 alwaysApply: false
 ---
 rules:
