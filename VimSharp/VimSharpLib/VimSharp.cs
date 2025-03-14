@@ -49,6 +49,8 @@ public class VimSharp
             editor.Initialize();
         }
 
+        var screenBuffer = _editors[0].CreateScreenBuffer();
+
         // 主循環
         while (_isRunning)
         {
@@ -58,13 +60,14 @@ public class VimSharp
                 if( editor == _currentEditor){
                     continue;
                 }
-                editor.Render();
+                editor.Render(screenBuffer);
             }
 
             // 處理當前編輯器的輸入
             if (_currentEditor != null)
             {
-                _currentEditor.Render();
+                _currentEditor.Render(screenBuffer);
+                _currentEditor.RenderToConsole(screenBuffer);
                 _currentEditor.WaitForInput();
                 
                 // 檢查當前編輯器是否還在運行

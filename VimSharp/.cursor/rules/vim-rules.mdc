@@ -1,7 +1,7 @@
 ---
 description: VimSharp Rules
 globs: *.cs
-alwaysApply: false
+alwaysApply: true
 ---
 ## Rule 1: Default color configuration
 - Set the default foreground color to white.
