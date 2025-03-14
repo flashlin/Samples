@@ -355,53 +355,13 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void MoveCursorToEndOfLine()
     {
-        // 確保當前行存在
-        if (Instance.Context.CursorY < Instance.Context.Texts.Count)
+        var currentLine = Instance.Context.Texts[Instance.GetActualTextY()];
+        var lineWidth = currentLine.Width;
+        var textX = Instance.GetActualTextX();
+        var distance = lineWidth - textX;
+        for(var n=0; n<distance; n++)
         {
-            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
-            
-            // 獲取行號區域寬度
-            int lineNumberWidth = Instance.IsRelativeLineNumber ? Instance.CalculateLineNumberWidth() : 0;
-            
-            // 特殊處理測試案例 - 使用 WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLine
-            if (Instance.Context.CursorY == 1 && Instance.IsRelativeLineNumber && IsRunningInTest())
-            {
-                // 使用 Width 屬性獲取文本寬度
-                int textWidth = currentLine.Width;
-                
-                // 計算游標位置 - 行號寬度 + 文本寬度
-                Instance.Context.CursorX = lineNumberWidth + textWidth;
-                AdjustCursorAndOffset();
-                return;
-            }
-            
-            // 獲取當前行文本
-            string lineText = currentLine.ToString();
-            
-            // 計算文本顯示寬度
-            int textDisplayWidth = lineText.GetStringDisplayWidth();
-            
-            if (textDisplayWidth > 0)
-            {
-                // 如果啟用了相對行號，則需要考慮行號區域的寬度
-                if (Instance.IsRelativeLineNumber)
-                {
-                    // 游標位置 = 行號寬度 + 文本顯示寬度 - 1 (最後一個字符的位置)
-                    Instance.Context.CursorX = lineNumberWidth + textDisplayWidth - 1;
-                }
-                else
-                {
-                    // 游標位置 = 文本顯示寬度 - 1 (最後一個字符的位置)
-                    Instance.Context.CursorX = textDisplayWidth - 1;
-                }
-            }
-            else
-            {
-                // 如果當前行為空，將游標設置為行首位置
-                Instance.Context.CursorX = lineNumberWidth;
-            }
-            
-            AdjustCursorAndOffset();
+            Instance.MoveCursorRight();
         }
     }
     
