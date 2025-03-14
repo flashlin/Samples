@@ -467,6 +467,22 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(2);
             _editor.Context.CursorY.Should().Be(0);
         }
+        
+        [Test]
+        public void WhenRelativeLineNumberEnabled_PressLeftArrowTwice_CursorShouldStayAtPosition3()
+        {
+            _editor.IsRelativeLineNumber = true;
+            InitializeEditorWithOffset(Create5LinesText());
+
+            _editor.Render();
+            _editor.Context.CursorX.Should().Be(3);
+            
+            PressKey(ConsoleKey.LeftArrow);
+            PressKey(ConsoleKey.LeftArrow);
+
+            _editor.Context.CursorX.Should().Be(3);
+            _editor.Context.CursorY.Should().Be(1);
+        }
 
         [Test]
         public void WhenRelativeLineNumberEnabled_PressLeftArrowTwice_CursorShouldStayAtPosition2()
