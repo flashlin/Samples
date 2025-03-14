@@ -15,30 +15,7 @@ public class VimEditor
     public bool IsStatusBarVisible { get; set; } = false;
     public string StatusBarText { get; set; } = "";
 
-    private bool _isRelativeLineNumber = false;
-
-    public bool IsRelativeLineNumber
-    {
-        get => _isRelativeLineNumber;
-        set
-        {
-            if (_isRelativeLineNumber == value)
-            {
-                return;
-            }
-
-            _isRelativeLineNumber = value;
-            var lineNumberWidth = CalculateLineNumberWidth();
-            if (value)
-            {
-                Context.CursorX += lineNumberWidth;
-            }
-            else
-            {
-                Context.CursorX -= lineNumberWidth;
-            }
-        }
-    }
+    public bool IsRelativeLineNumber { get; set; }
 
     // 添加剪貼簿緩衝區
     public List<ConsoleText> ClipboardBuffers { get; set; } = [];

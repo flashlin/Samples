@@ -135,4 +135,12 @@ The function AdjustCursorPositionAndOffset(int textX, int textY) in [VimEditor.c
 
 # 修改程式碼之後，尋找是否有重複的邏輯? 有的話就重構為一個方法，不要有重複的程式碼的壞味道。
 
+建立新物件時，不要使用 new Class(只是 assign data) 的方式。
+請改用以下格式：
+```csharp
+new Class {
+    屬性 = value,
+}
+```
+
 
