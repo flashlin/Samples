@@ -43,12 +43,6 @@ public class VimSharp
     /// </summary>
     public void Run()
     {
-        // 初始化所有編輯器
-        foreach (var editor in _editors)
-        {
-            editor.Initialize();
-        }
-
         var screenBuffer = _editors[0].CreateScreenBuffer();
 
         // 主循環

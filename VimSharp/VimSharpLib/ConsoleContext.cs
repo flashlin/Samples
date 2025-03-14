@@ -9,11 +9,11 @@ public class ConsoleContext
     /// <summary>
     /// 控制台視窗的可視矩形區域
     /// </summary>
-    public ConsoleRectangle ViewPort { get; set; } = new ConsoleRectangle();
+    public ConsoleRectangle ViewPort { get; set; } = new();
 
     public bool IsStatusBarVisible { get; set; } = false;
     public string StatusBarText { get; set; } = "";
-    public ConsoleText StatusBar { get; set; } = new ConsoleText();
+    public ConsoleText StatusBar { get; set; } = new();
 
     /// <summary>
     /// 文本內容的水平偏移量
@@ -42,17 +42,5 @@ public class ConsoleContext
             Texts.Add(new ConsoleText());
         }
         return Texts[y];
-    }
-
-    /// <summary>
-    /// 設置視窗的矩形區域
-    /// </summary>
-    /// <param name="x">視窗左上角的 X 座標</param>
-    /// <param name="y">視窗左上角的 Y 座標</param>
-    /// <param name="width">視窗的寬度</param>
-    /// <param name="height">視窗的高度</param>
-    public void SetViewPort(int x, int y, int width, int height)
-    {
-        ViewPort = new ConsoleRectangle(x, y, width, height);
     }
 }

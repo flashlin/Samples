@@ -8,7 +8,6 @@ using VimSharpLib;
 // Environment.Exit(0);
 
 var editor1 = new VimEditor();
-editor1.IsRelativeLineNumber = true;
 editor1.SetText($"""
 Hello, World!
 123
@@ -16,8 +15,9 @@ Say Hello
 Example 3, Title.
 Your name is ?
 """);
-editor1.SetViewPort(1, 1, 40, 5);
+editor1.IsRelativeLineNumber = true;
 editor1.Context.IsStatusBarVisible = true;
+editor1.SetViewPort(1, 1, 40, 5);
 
 var editor2 = new VimEditor();
 editor2.Context.SetText(0, 0, "Example2: Editor2!");

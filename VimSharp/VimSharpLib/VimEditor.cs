@@ -23,21 +23,13 @@ public class VimEditor
     public VimEditor(IConsoleDevice console)
     {
         _console = console;
-        // 初始化 Mode
         Mode = new VimNormalMode { Instance = this };
         Initialize();
     }
 
     public void Initialize()
     {
-        Context.SetText(0, 0, "Hello, World!");
-
-        // 設置 ViewPort 的初始值
-        // 默認使用整個控制台視窗，但可以由使用者自定義
-        if (Context.ViewPort.Width == 0 || Context.ViewPort.Height == 0)
-        {
-            SetViewPort(0, 0, _console.WindowWidth, _console.WindowHeight);
-        }
+        SetViewPort(0, 0, _console.WindowWidth, _console.WindowHeight);
     }
 
     /// <summary>
@@ -50,7 +42,7 @@ public class VimEditor
     public void SetViewPort(int x, int y, int width, int height)
     {
         Context.ViewPort = new ConsoleRectangle(x, y, width, height);
-        Context.CursorX = x;
+        Context.CursorX = x + CalculateLineNumberWidth();
         Context.CursorY = y;
     }
 
@@ -85,10 +77,9 @@ public class VimEditor
 
         // 計算行號區域寬度
         int lineNumberDigits = CalculateLineNumberDigits();
-        int lineNumberWidth = lineNumberDigits + 1;
 
         // 繪製內容區域
-        RenderContentArea(screenBuffer, lineNumberDigits, lineNumberWidth);
+        RenderContentArea(screenBuffer, lineNumberDigits, CalculateLineNumberWidth());
 
         // 如果狀態欄可見，則繪製狀態欄到 screenBuffer
         if (Context.IsStatusBarVisible)
@@ -129,7 +120,7 @@ public class VimEditor
         RenderBufferToConsole(screenBuffer, outputBuffer);
 
         // 設置控制台游標位置
-        outputBuffer.Append($"\x1b[{Context.CursorY + 1};{Context.CursorX + 1}H");
+        outputBuffer.Append($"\x1b[{Context.CursorY};{Context.CursorX}H");
         
         // 顯示游標
         outputBuffer.Append("\x1b[?25h");
@@ -589,7 +580,7 @@ public class VimEditor
         {
             return 0;
         }
-        return (int)Math.Floor(Math.Log10(Context.Texts.Count)) + 2;
+        return Context.Texts.Count.ToString().Length + 1;
     }
 
     public void MoveCursorRightN(int n)

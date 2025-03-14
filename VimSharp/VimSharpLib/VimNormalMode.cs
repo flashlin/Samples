@@ -485,15 +485,7 @@ public class VimNormalMode : IVimMode
     public void WaitForInput()
     {
         // 設置游標位置
-        var cursorScreenX = Instance.Context.CursorX - Instance.Context.OffsetX;
-        var cursorScreenY = Instance.Context.CursorY - Instance.Context.OffsetY;
-        
-        // 計算實際的游標位置
-        int actualX = Instance.Context.ViewPort.X + cursorScreenX;
-        int actualY = Instance.Context.ViewPort.Y + cursorScreenY;
-        
-        // 設置游標位置
-        Instance.GetConsoleDevice().SetCursorPosition(actualX, actualY);
+        Instance.GetConsoleDevice().SetCursorPosition(Instance.Context.CursorX,  Instance.Context.CursorY);
 
         // 設置為方塊游標 (DECSCUSR 2)
         Instance.GetConsoleDevice().Write("\x1b[2 q");
