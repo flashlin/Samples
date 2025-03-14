@@ -132,3 +132,7 @@ rules:
 # AdjustCursorPositionAndOffset(int textX,int textY) 
 The function AdjustCursorPositionAndOffset(int textX, int textY) in [VimEditor.cs](mdc:VimSharpLib/VimEditor.cs) is responsible for positioning the cursor at the desired coordinates within Texts. It then adjusts the CursorX and CursorY coordinates displayed on the screen accordingly, while also modifying OffsetX and OffsetY to determine the starting display position of Texts.
 
+
+# 修改程式碼之後，尋找是否有重複的邏輯? 有的話就重構為一個方法，不要有重複的程式碼的壞味道。
+
+

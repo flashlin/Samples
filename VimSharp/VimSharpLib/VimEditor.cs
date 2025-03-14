@@ -622,6 +622,37 @@ public class VimEditor
         }
     }
 
+    /// <summary>
+    /// 處理向右移動時遇到的 '\0' 字符
+    /// </summary>
+    /// <param name="line">要處理的文本行</param>
+    /// <param name="textX">起始 X 坐標</param>
+    /// <returns>調整後的 X 坐標</returns>
+    private int HandleNullCharForRightMovement(ConsoleText line, int textX)
+    {
+        // 確保 textX 在有效範圍內
+        if (textX >= 0 && textX < line.Chars.Length)
+        {
+            // 檢查是否遇到 '\0' 字符，如果是則繼續向右移動直到遇到非 '\0' 字符
+            while (textX < line.Width && textX < line.Chars.Length && line.Chars[textX].Char == '\0')
+            {
+                textX++;
+            }
+            
+            // 如果已經到達行尾，則返回原始值
+            if (textX >= line.Width || textX >= line.Chars.Length)
+            {
+                return -1; // 表示已到達行尾
+            }
+        }
+        else
+        {
+            return -1; // 表示索引無效
+        }
+        
+        return textX;
+    }
+
     public void MoveCursorRight()
     {
         var textX = GetActualTextX() + 1;
@@ -631,30 +662,17 @@ public class VimEditor
             return;
         }
         
-        // 確保 textX 在有效範圍內
-        if (textX >= 0 && textX < currentLine.Chars.Length)
-        {
-            // 檢查是否遇到 '\0' 字符，如果是則繼續向右移動直到遇到非 '\0' 字符
-            while (textX < currentLine.Width && textX < currentLine.Chars.Length && currentLine.Chars[textX].Char == '\0')
-            {
-                textX++;
-            }
-            
-            // 如果已經到達行尾，則返回
-            if (textX >= currentLine.Width || textX >= currentLine.Chars.Length)
-            {
-                return;
-            }
-        }
-        else
+        // 處理 '\0' 字符
+        int adjustedTextX = HandleNullCharForRightMovement(currentLine, textX);
+        if (adjustedTextX == -1)
         {
             return;
         }
         
         // 計算需要移動的實際步數
-        int stepsToMove = textX - GetActualTextX();
+        int stepsToMove = adjustedTextX - GetActualTextX();
         var targetCursorX = Context.CursorX + stepsToMove;
-        var remainingX = currentLine.Width - textX;
+        var remainingX = currentLine.Width - adjustedTextX;
         
         if (targetCursorX > Context.ViewPort.X + Context.ViewPort.Width - 1)
         {
@@ -663,6 +681,93 @@ public class VimEditor
         else
         {
             Context.CursorX = targetCursorX;
+        }
+    }
+
+    /// <summary>
+    /// 處理 '\0' 字符並調整游標位置
+    /// </summary>
+    /// <param name="line">要處理的文本行</param>
+    /// <param name="actualTextX">實際文本 X 坐標</param>
+    private void HandleNullCharAndAdjustCursor(ConsoleText line, int actualTextX)
+    {
+        // 確保 actualTextX 在有效範圍內
+        if (actualTextX >= 0 && actualTextX < line.Chars.Length)
+        {
+            // 檢查目標位置是否為 '\0'，如果是則向左移動直到找到非 '\0' 字符
+            if (line.Chars[actualTextX].Char == '\0')
+            {
+                int newTextX = actualTextX;
+                
+                // 向左移動直到找到非 '\0' 字符
+                while (newTextX > 0 && line.Chars[newTextX].Char == '\0')
+                {
+                    newTextX--;
+                }
+                
+                // 調整游標 X 位置
+                int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
+                Context.CursorX = Context.ViewPort.X + newTextX + lineNumberWidth - Context.OffsetX;
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 調整游標位置以適應行寬度
+    /// </summary>
+    /// <param name="line">要處理的文本行</param>
+    /// <param name="actualTextX">實際文本 X 坐標</param>
+    private void AdjustCursorForLineWidth(ConsoleText line, int actualTextX)
+    {
+        // 如果行比較短，需要調整游標 X 位置
+        if (actualTextX >= line.Width)
+        {
+            // 計算行的最後一個位置
+            int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
+            
+            // 如果行是空的，將游標設置在行號後
+            if (line.Width == 0)
+            {
+                Context.CursorX = Context.ViewPort.X + lineNumberWidth;
+            }
+            else
+            {
+                // 否則設置到行的末尾
+                var lineDisplayWidth = line.Width + lineNumberWidth;
+                Context.CursorX = Context.ViewPort.X + Math.Min(lineDisplayWidth - 1, Context.ViewPort.Width - 1);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 處理垂直滾動並更新游標 Y 位置
+    /// </summary>
+    /// <param name="targetCursorY">目標游標 Y 位置</param>
+    /// <param name="scrollDirection">滾動方向，1 表示向下，-1 表示向上</param>
+    private void HandleVerticalScrollAndUpdateCursor(int targetCursorY, int scrollDirection)
+    {
+        bool needScroll = false;
+        
+        if (scrollDirection > 0)
+        {
+            // 向下滾動
+            needScroll = targetCursorY > Context.ViewPort.Y + Context.ViewPort.Height - 1;
+        }
+        else
+        {
+            // 向上滾動
+            needScroll = targetCursorY < Context.ViewPort.Y;
+        }
+        
+        if (needScroll)
+        {
+            // 需要滾動
+            Scroll(0, scrollDirection);
+        }
+        else
+        {
+            // 不需要滾動，直接更新游標 Y 位置
+            Context.CursorY = targetCursorY;
         }
     }
 
@@ -691,56 +796,14 @@ public class VimEditor
             // 獲取文本實際 X 坐標
             var actualTextX = GetActualTextX();
             
-            // 確保 actualTextX 在有效範圍內
-            if (actualTextX >= 0 && actualTextX < nextLine.Chars.Length)
-            {
-                // 檢查下一行中的目標位置是否為 '\0'，如果是則向左移動直到找到非 '\0' 字符
-                if (nextLine.Chars[actualTextX].Char == '\0')
-                {
-                    int newTextX = actualTextX;
-                    
-                    // 向左移動直到找到非 '\0' 字符
-                    while (newTextX > 0 && nextLine.Chars[newTextX].Char == '\0')
-                    {
-                        newTextX--;
-                    }
-                    
-                    // 調整游標 X 位置
-                    int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
-                    Context.CursorX = Context.ViewPort.X + newTextX + lineNumberWidth - Context.OffsetX;
-                }
-            }
+            // 處理 '\0' 字符並調整游標位置
+            HandleNullCharAndAdjustCursor(nextLine, actualTextX);
             
-            // 如果下一行比較短，需要調整游標 X 位置
-            if (actualTextX >= nextLine.Width)
-            {
-                // 計算下一行的最後一個位置
-                int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
-                
-                // 如果下一行是空的，將游標設置在行號後
-                if (nextLine.Width == 0)
-                {
-                    Context.CursorX = Context.ViewPort.X + lineNumberWidth;
-                }
-                else
-                {
-                    // 否則設置到下一行的末尾
-                    var nextLineDisplayWidth = nextLine.Width + lineNumberWidth;
-                    Context.CursorX = Context.ViewPort.X + Math.Min(nextLineDisplayWidth - 1, Context.ViewPort.Width - 1);
-                }
-            }
+            // 調整游標位置以適應行寬度
+            AdjustCursorForLineWidth(nextLine, actualTextX);
             
-            // 檢查是否需要滾動
-            if (targetCursorY > Context.ViewPort.Y + Context.ViewPort.Height - 1)
-            {
-                // 需要向下滾動
-                Scroll(0, 1);
-            }
-            else
-            {
-                // 不需要滾動，直接更新游標 Y 位置
-                Context.CursorY = targetCursorY;
-            }
+            // 處理垂直滾動並更新游標 Y 位置
+            HandleVerticalScrollAndUpdateCursor(targetCursorY, 1);
         }
     }
 
@@ -758,54 +821,15 @@ public class VimEditor
         // 獲取文本實際 X 坐標
         var actualTextX = GetActualTextX();
         
-        // 確保 actualTextX 在有效範圍內
-        if (actualTextX >= 0 && actualTextX < prevLine.Chars.Length)
-        {
-            // 檢查上一行中的目標位置是否為 '\0'，如果是則向左移動直到找到非 '\0' 字符
-            if (prevLine.Chars[actualTextX].Char == '\0')
-            {
-                int newTextX = actualTextX;
-                
-                // 向左移動直到找到非 '\0' 字符
-                while (newTextX > 0 && prevLine.Chars[newTextX].Char == '\0')
-                {
-                    newTextX--;
-                }
-                
-                // 調整游標 X 位置
-                int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
-                Context.CursorX = Context.ViewPort.X + newTextX + lineNumberWidth - Context.OffsetX;
-            }
-        }
+        // 處理 '\0' 字符並調整游標位置
+        HandleNullCharAndAdjustCursor(prevLine, actualTextX);
         
-        // 如果上一行比較短，需要調整游標 X 位置
-        if (actualTextX >= prevLine.Width)
-        {
-            // 計算上一行的最後一個位置
-            int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
-            
-            // 如果上一行是空的，將游標設置在行號後
-            if (prevLine.Width == 0)
-            {
-                Context.CursorX = Context.ViewPort.X + lineNumberWidth;
-            }
-            else
-            {
-                // 否則設置到上一行的末尾
-                var prevLineDisplayWidth = prevLine.Width + lineNumberWidth;
-                Context.CursorX = Context.ViewPort.X + Math.Min(prevLineDisplayWidth - 1, Context.ViewPort.Width - 1);
-            }
-        }
+        // 調整游標位置以適應行寬度
+        AdjustCursorForLineWidth(prevLine, actualTextX);
         
+        // 處理垂直滾動並更新游標 Y 位置
         var targetCursorY = Context.CursorY - 1;
-        if (targetCursorY < Context.ViewPort.Y)
-        {
-            Scroll(0, -1);
-        }
-        else
-        {
-            Context.CursorY = targetCursorY;
-        }
+        HandleVerticalScrollAndUpdateCursor(targetCursorY, -1);
     }
 
     /// <summary>
