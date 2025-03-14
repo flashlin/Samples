@@ -483,7 +483,7 @@ namespace VimSharpTests
             _editor.Context.CursorX.Should().Be(3);
             _editor.Context.CursorY.Should().Be(1);
         }
-
+        
         [Test]
         public void WhenRelativeLineNumberEnabled_PressLeftArrowTwice_CursorShouldStayAtPosition2()
         {

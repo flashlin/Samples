@@ -69,35 +69,19 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void MoveCursorLeft()
     {
-        // 如果啟用了相對行號，則游標的 X 位置不能小於 ViewPort.X + 行號區域的寬度
-        if (Instance.IsRelativeLineNumber)
+        var lineNumberWidth = Instance.CalculateLineNumberWidth();
+        // 計算最小允許的 X 座標（ViewPort 的左邊界 + 行號區域的寬度）
+        var minAllowedX = Instance.Context.ViewPort.X + lineNumberWidth;
+        // 如果游標已經在最左邊（ViewPort 左邊界 + 行號區域的寬度），則不再向左移動
+        if (Instance.Context.CursorX <= minAllowedX)
         {
-            // 計算相對行號區域的寬度
-            int lineNumberWidth = Instance.CalculateLineNumberWidth();
-            
-            // 計算最小允許的 X 座標（ViewPort 的左邊界 + 行號區域的寬度）
-            int minAllowedX = Instance.Context.ViewPort.X + lineNumberWidth;
-            
-            // 如果游標已經在最左邊（ViewPort 左邊界 + 行號區域的寬度），則不再向左移動
-            if (Instance.Context.CursorX <= minAllowedX)
+            if (Instance.Context.OffsetX > 0)
             {
-                return;
+                Instance.Context.OffsetX--;
             }
+            return;
         }
-        else
-        {
-            // 如果沒有啟用相對行號，則游標的 X 位置不能小於 ViewPort.X
-            if (Instance.Context.CursorX <= Instance.Context.ViewPort.X)
-            {
-                return;
-            }
-        }
-        
-        if (Instance.Context.CursorX > 0)
-        {
-            Instance.Context.CursorX--;
-            AdjustCursorAndOffset();
-        }
+        Instance.Context.CursorX--;
     }
     
     /// <summary>
