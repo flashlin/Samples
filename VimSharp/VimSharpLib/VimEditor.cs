@@ -104,11 +104,17 @@ public class VimEditor
 
     public void Render()
     {
+        // 創建一個緩衝區用於收集所有輸出
+        var outputBuffer = new StringBuilder();
+
         // 隱藏游標 (符合 Rule 12)
-        _console.Write("\x1b[?25l");
+        outputBuffer.Append("\x1b[?25l");
 
         // 計算文本總行數
         int totalLines = Context.Texts.Count;
+
+        // 獲取游標在文本中的實際 Y 坐標
+        int cursorTextY = GetActualTextY();
 
         // 計算行號區域寬度所需的位數 (符合 RelativeLineNumerWidth Logic)
         int lineNumberDigits;
@@ -116,7 +122,7 @@ public class VimEditor
         if (IsRelativeLineNumber)
         {
             // 相對行號模式：計算相對行號的最大值（上下行數的最大值）
-            int maxRelativeLineNumber = Math.Max(Context.CursorY, totalLines - Context.CursorY - 1);
+            int maxRelativeLineNumber = Math.Max(cursorTextY, totalLines - cursorTextY - 1);
             lineNumberDigits = maxRelativeLineNumber > 0 ? (int)Math.Log10(maxRelativeLineNumber) + 1 : 1;
         }
         else
@@ -144,7 +150,7 @@ public class VimEditor
 
                 // 計算行號
                 int lineNumber;
-                bool isCurrentLine = (textIndex == Context.CursorY);
+                bool isCurrentLine = (textIndex == cursorTextY);
 
                 if (IsRelativeLineNumber)
                 {
@@ -157,7 +163,7 @@ public class VimEditor
                     else
                     {
                         // 其他行顯示相對行號
-                        lineNumber = Math.Abs(textIndex - Context.CursorY);
+                        lineNumber = Math.Abs(textIndex - cursorTextY);
                     }
                 }
                 else
@@ -166,45 +172,48 @@ public class VimEditor
                     lineNumber = textIndex + 1; // 顯示給用戶的行號從1開始
                 }
 
-                // 繪製行號
-                RenderLineNumber(Context.ViewPort.X, Context.ViewPort.Y + i, lineNumber, lineNumberDigits,
+                // 繪製行號，將輸出添加到緩衝區
+                RenderLineNumber(outputBuffer, Context.ViewPort.X, Context.ViewPort.Y + i, lineNumber, lineNumberDigits,
                     isCurrentLine, IsRelativeLineNumber);
 
-                // 直接繪製文本，考慮 ViewPort、偏移量和行號區域 (符合 DirectCursorUse 和 TextBlockDisplayPosition)
-                RenderText(Context.ViewPort.X + lineNumberWidth, Context.ViewPort.Y + i, text, Context.OffsetX,
+                // 直接繪製文本，考慮 ViewPort、偏移量和行號區域，將輸出添加到緩衝區
+                RenderText(outputBuffer, Context.ViewPort.X + lineNumberWidth, Context.ViewPort.Y + i, text, Context.OffsetX,
                     Context.ViewPort, lineNumberWidth);
             }
             else
             {
-                // 如果索引無效（超出文本範圍），繪製空白行號區域
-                RenderEmptyLineNumber(Context.ViewPort.X, Context.ViewPort.Y + i, lineNumberDigits);
+                // 如果索引無效（超出文本範圍），繪製空白行號區域，將輸出添加到緩衝區
+                RenderEmptyLineNumber(outputBuffer, Context.ViewPort.X, Context.ViewPort.Y + i, lineNumberDigits);
 
-                // 繪製空白行
-                RenderEmptyLine(Context.ViewPort.X + lineNumberWidth, Context.ViewPort.Y + i,
+                // 繪製空白行，將輸出添加到緩衝區
+                RenderEmptyLine(outputBuffer, Context.ViewPort.X + lineNumberWidth, Context.ViewPort.Y + i,
                     Context.ViewPort.Width - lineNumberWidth);
             }
         }
 
-        // 如果狀態欄可見，則繪製狀態欄
+        // 如果狀態欄可見，則繪製狀態欄，將輸出添加到緩衝區
         if (IsStatusBarVisible)
         {
-            RenderStatusBar();
+            RenderStatusBar(outputBuffer);
         }
 
-        // 繪製顯示框
-        RenderFrame();
+        // 繪製顯示框，輸出添加到緩衝區
+        RenderFrame(outputBuffer);
 
-        // 設置控制台游標位置 (直接使用 Context.CursorX 和 Context.CursorY，符合 DirectCursorUse)
-        _console.SetCursorPosition(Context.CursorX, Context.CursorY);
+        // 設置控制台游標位置
+        outputBuffer.Append($"\x1b[{Context.CursorY + 1};{Context.CursorX + 1}H");
         
-        // 顯示游標 (符合 Rule 12)
-        _console.Write("\x1b[?25h");
+        // 顯示游標
+        outputBuffer.Append("\x1b[?25h");
+
+        // 一次性輸出所有內容到控制台
+        _console.Write(outputBuffer.ToString());
     }
 
     /// <summary>
-    /// 繪製行號
+    /// 繪製行號，輸出添加到緩衝區
     /// </summary>
-    private void RenderLineNumber(int x, int y, int lineNumber, int digits, bool isCurrentLine,
+    private void RenderLineNumber(StringBuilder buffer, int x, int y, int lineNumber, int digits, bool isCurrentLine,
         bool isRelativeLineNumber)
     {
         // 檢查 Y 座標是否在 ViewPort 範圍內
@@ -214,9 +223,9 @@ public class VimEditor
         }
 
         // 設置光標位置到行號區域的起始位置
-        _console.SetCursorPosition(x, y);
+        buffer.Append($"\x1b[{y + 1};{x + 1}H");
 
-        // 創建 StringBuilder 來構建行號字符串
+        // 創建臨時緩衝區來構建行號字符串
         var sb = new StringBuilder();
 
         if (isCurrentLine)
@@ -262,14 +271,14 @@ public class VimEditor
         };
         sb.Append(spaceChar.ToAnsiString());
 
-        // 輸出構建好的字符串
-        _console.Write(sb.ToString());
+        // 將行號字符串添加到主緩衝區
+        buffer.Append(sb.ToString());
     }
 
     /// <summary>
-    /// 繪製空白行號區域
+    /// 繪製空白行號區域，輸出添加到緩衝區
     /// </summary>
-    private void RenderEmptyLineNumber(int x, int y, int digits)
+    private void RenderEmptyLineNumber(StringBuilder buffer, int x, int y, int digits)
     {
         // 檢查 Y 座標是否在 ViewPort 範圍內
         if (y < Context.ViewPort.Y || y >= Context.ViewPort.Y + Context.ViewPort.Height)
@@ -278,9 +287,9 @@ public class VimEditor
         }
 
         // 設置光標位置到行號區域的起始位置
-        _console.SetCursorPosition(x, y);
+        buffer.Append($"\x1b[{y + 1};{x + 1}H");
 
-        // 創建 StringBuilder 來構建空白行號字符串
+        // 創建臨時緩衝區來構建空白行號字符串
         var sb = new StringBuilder();
 
         // 添加空白字符，寬度等於行號區域寬度
@@ -295,14 +304,14 @@ public class VimEditor
             sb.Append(coloredChar.ToAnsiString());
         }
 
-        // 輸出構建好的字符串
-        _console.Write(sb.ToString());
+        // 將空白行號字符串添加到主緩衝區
+        buffer.Append(sb.ToString());
     }
 
     /// <summary>
-    /// 繪製文本，考慮 ViewPort 和偏移量
+    /// 繪製文本，考慮 ViewPort 和偏移量，輸出添加到緩衝區
     /// </summary>
-    private void RenderText(int x, int y, ConsoleText text, int offset, ConsoleRectangle viewPort,
+    private void RenderText(StringBuilder buffer, int x, int y, ConsoleText text, int offset, ConsoleRectangle viewPort,
         int lineNumberWidth = 0)
     {
         // 檢查 Y 座標是否在 ViewPort 範圍內
@@ -312,15 +321,15 @@ public class VimEditor
         }
 
         // 設置光標位置到可見區域的起始位置
-        _console.SetCursorPosition(x, y);
+        buffer.Append($"\x1b[{y + 1};{x + 1}H");
 
         // 計算可見區域的寬度，考慮行號區域
         int visibleWidth = viewPort.Width - lineNumberWidth;
 
-        // 創建 StringBuilder 來構建輸出字符串
+        // 創建臨時緩衝區來構建輸出字符串
         var sb = new StringBuilder();
 
-        // 計算可見的起始和結束位置
+        // 計算可見的起始和結束位置 (使用 text.Width 屬性)
         int startX = Math.Max(0, offset);
         int endX = Math.Min(text.Width, offset + visibleWidth);
 
@@ -359,14 +368,14 @@ public class VimEditor
             }
         }
 
-        // 輸出構建好的字符串
-        _console.Write(sb.ToString());
+        // 將文本字符串添加到主緩衝區
+        buffer.Append(sb.ToString());
     }
 
     /// <summary>
-    /// 繪製空白行
+    /// 繪製空白行，輸出添加到緩衝區
     /// </summary>
-    private void RenderEmptyLine(int x, int y, int width)
+    private void RenderEmptyLine(StringBuilder buffer, int x, int y, int width)
     {
         // 檢查 Y 座標是否在控制台範圍內
         if (y < 0 || y >= _console.WindowHeight)
@@ -375,9 +384,9 @@ public class VimEditor
         }
 
         // 設置光標位置
-        _console.SetCursorPosition(x, y);
+        buffer.Append($"\x1b[{y + 1};{x + 1}H");
 
-        // 創建 StringBuilder 來構建輸出字符串
+        // 創建臨時緩衝區來構建輸出字符串
         var sb = new StringBuilder();
 
         // 填充空白字符
@@ -386,20 +395,20 @@ public class VimEditor
             sb.Append(ColoredChar.Empty.ToAnsiString());
         }
 
-        // 輸出構建好的字符串
-        _console.Write(sb.ToString());
+        // 將空白行字符串添加到主緩衝區
+        buffer.Append(sb.ToString());
     }
 
     /// <summary>
-    /// 繪製狀態欄
+    /// 繪製狀態欄，輸出添加到緩衝區
     /// </summary>
-    private void RenderStatusBar()
+    private void RenderStatusBar(StringBuilder buffer)
     {
         // 計算狀態欄的位置
         int statusBarY = Context.ViewPort.Y + Context.ViewPort.Height - 1;
 
         // 設置光標位置到狀態欄
-        _console.SetCursorPosition(Context.ViewPort.X, statusBarY);
+        buffer.Append($"\x1b[{statusBarY + 1};{Context.ViewPort.X + 1}H");
 
         // 創建狀態欄文本
         string statusText = StatusBarText;
@@ -432,14 +441,23 @@ public class VimEditor
             statusBarText.Chars[i] = new ColoredChar(statusText[i], ConsoleColor.Black, ConsoleColor.White);
         }
 
+        // 創建臨時緩衝區來構建狀態欄字符串
+        var sb = new StringBuilder();
+
         // 繪製狀態欄
-        RenderText(Context.ViewPort.X, statusBarY, statusBarText, 0, Context.ViewPort);
+        for (int i = 0; i < statusBarText.Width; i++)
+        {
+            sb.Append(statusBarText.Chars[i].ToAnsiString());
+        }
+
+        // 將狀態欄字符串添加到主緩衝區
+        buffer.Append(sb.ToString());
     }
 
     /// <summary>
-    /// 繪製顯示框
+    /// 繪製顯示框，輸出添加到緩衝區
     /// </summary>
-    private void RenderFrame()
+    private void RenderFrame(StringBuilder buffer)
     {
         // 定義框架字符
         char topLeft = '┌';
@@ -460,7 +478,7 @@ public class VimEditor
         int frameHeight = Context.ViewPort.Height + 2;
 
         // 繪製頂部邊框
-        _console.SetCursorPosition(frameX, frameY);
+        buffer.Append($"\x1b[{frameY + 1};{frameX + 1}H");
         var sbTop = new StringBuilder();
 
         // 添加左上角
@@ -493,34 +511,34 @@ public class VimEditor
         };
         sbTop.Append(topRightChar.ToAnsiString());
 
-        _console.Write(sbTop.ToString());
+        buffer.Append(sbTop.ToString());
 
         // 繪製左右邊框
         for (int i = 0; i < Context.ViewPort.Height; i++)
         {
             // 左邊框
-            _console.SetCursorPosition(frameX, frameY + 1 + i);
+            buffer.Append($"\x1b[{frameY + 1 + i + 1};{frameX + 1}H");
             var leftVerticalChar = new ColoredChar
             {
                 Char = vertical,
                 Foreground = frameColor,
                 Background = backgroundColor
             };
-            _console.Write(leftVerticalChar.ToAnsiString());
+            buffer.Append(leftVerticalChar.ToAnsiString());
 
             // 右邊框
-            _console.SetCursorPosition(frameX + frameWidth - 1, frameY + 1 + i);
+            buffer.Append($"\x1b[{frameY + 1 + i + 1};{frameX + frameWidth}H");
             var rightVerticalChar = new ColoredChar
             {
                 Char = vertical,
                 Foreground = frameColor,
                 Background = backgroundColor
             };
-            _console.Write(rightVerticalChar.ToAnsiString());
+            buffer.Append(rightVerticalChar.ToAnsiString());
         }
 
         // 繪製底部邊框
-        _console.SetCursorPosition(frameX, frameY + frameHeight - 1);
+        buffer.Append($"\x1b[{frameY + frameHeight};{frameX + 1}H");
         var sbBottom = new StringBuilder();
 
         // 添加左下角
@@ -553,7 +571,7 @@ public class VimEditor
         };
         sbBottom.Append(bottomRightChar.ToAnsiString());
 
-        _console.Write(sbBottom.ToString());
+        buffer.Append(sbBottom.ToString());
     }
 
     public void WaitForInput()
