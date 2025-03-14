@@ -17,7 +17,7 @@ Example 3, Title.
 Your name is ?
 """);
 editor1.SetViewPort(1, 1, 40, 5);
-editor1.IsStatusBarVisible = true;
+editor1.Context.IsStatusBarVisible = true;
 
 var editor2 = new VimEditor();
 editor2.Context.SetText(0, 0, "Example2: Editor2!");

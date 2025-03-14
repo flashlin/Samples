@@ -508,7 +508,7 @@ namespace VimSharpTests
 
             // 設置 ViewPort 
             _editor.SetViewPort(0, 1, 40, 5);
-            _editor.IsStatusBarVisible = true;
+            _editor.Context.IsStatusBarVisible = true;
 
             // 設定完 ViewPort 後，游標應該在第1行
             _editor.Context.CursorX.Should().Be(0);

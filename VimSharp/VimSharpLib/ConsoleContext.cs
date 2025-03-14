@@ -12,6 +12,7 @@ public class ConsoleContext
     public ConsoleRectangle ViewPort { get; set; } = new ConsoleRectangle();
 
     public bool IsStatusBarVisible { get; set; } = false;
+    public string StatusBarText { get; set; } = "";
     public ConsoleText StatusBar { get; set; } = new ConsoleText();
 
     /// <summary>

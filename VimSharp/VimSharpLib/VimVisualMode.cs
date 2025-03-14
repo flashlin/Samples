@@ -347,8 +347,8 @@ public class VimVisualMode : IVimMode
         }
         
         // 複製完成後切換回視覺模式
-        Instance.StatusBarText = "已複製選取的文本";
-        Instance.IsStatusBarVisible = true;
+        Instance.Context.StatusBarText = "已複製選取的文本";
+        Instance.Context.IsStatusBarVisible = true;
         SwitchToVisualMode();
     }
     
