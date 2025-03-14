@@ -14,7 +14,7 @@ public class ConsoleKeyPattern : IKeyPattern
     }
     
     public ConsoleKeyPattern(ConsoleKey key)
-        : this(new[] { key })
+        : this([key])
     {
     }
 

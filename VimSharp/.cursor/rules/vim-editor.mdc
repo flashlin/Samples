@@ -1,0 +1,25 @@
+---
+description: 
+globs: **/VimEditor.cs
+alwaysApply: false
+---
+    private readonly IConsoleDevice _console;
+
+    public bool IsRunning { get; set; } = true;
+    public ConsoleContext Context { get; set; } = new();
+    public IVimMode Mode { get; set; } = null!;
+
+    public bool IsStatusBarVisible { get; set; } = false;
+    public string StatusBarText { get; set; } = "";
+
+    // 添加剪貼簿緩衝區
+    public List<ConsoleText> ClipboardBuffers { get; set; } = [];
+
+- void Render()
+  準備一個 Console 全區域的 buffer 變數
+  繪製行號區域到 buffer
+  繪製本文到 buffer
+  繪製狀態列到 buffer
+  繪製顯示框到 buffer
+  將 buffer 全部輸出到 Console
+  設置控制台游標位置, 顯示游標

@@ -15,7 +15,7 @@ public static class TextExtension
     public static bool IsChinese(this char c)
     {
         // 使用 ASCII 編碼檢查字符的字節長度
-        var bytes = Encoding.ASCII.GetBytes(new[] { c });
+        var bytes = Encoding.ASCII.GetBytes([c]);
         return bytes.Length > 1;
     }
     

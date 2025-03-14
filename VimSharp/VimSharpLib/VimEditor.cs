@@ -630,8 +630,32 @@ public class VimEditor
         {
             return;
         }
-        var targetCursorX = Context.CursorX + 1;
+        
+        // 確保 textX 在有效範圍內
+        if (textX >= 0 && textX < currentLine.Chars.Length)
+        {
+            // 檢查是否遇到 '\0' 字符，如果是則繼續向右移動直到遇到非 '\0' 字符
+            while (textX < currentLine.Width && textX < currentLine.Chars.Length && currentLine.Chars[textX].Char == '\0')
+            {
+                textX++;
+            }
+            
+            // 如果已經到達行尾，則返回
+            if (textX >= currentLine.Width || textX >= currentLine.Chars.Length)
+            {
+                return;
+            }
+        }
+        else
+        {
+            return;
+        }
+        
+        // 計算需要移動的實際步數
+        int stepsToMove = textX - GetActualTextX();
+        var targetCursorX = Context.CursorX + stepsToMove;
         var remainingX = currentLine.Width - textX;
+        
         if (targetCursorX > Context.ViewPort.X + Context.ViewPort.Width - 1)
         {
             Scroll(remainingX, 0);
@@ -666,6 +690,26 @@ public class VimEditor
         {
             // 獲取文本實際 X 坐標
             var actualTextX = GetActualTextX();
+            
+            // 確保 actualTextX 在有效範圍內
+            if (actualTextX >= 0 && actualTextX < nextLine.Chars.Length)
+            {
+                // 檢查下一行中的目標位置是否為 '\0'，如果是則向左移動直到找到非 '\0' 字符
+                if (nextLine.Chars[actualTextX].Char == '\0')
+                {
+                    int newTextX = actualTextX;
+                    
+                    // 向左移動直到找到非 '\0' 字符
+                    while (newTextX > 0 && nextLine.Chars[newTextX].Char == '\0')
+                    {
+                        newTextX--;
+                    }
+                    
+                    // 調整游標 X 位置
+                    int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
+                    Context.CursorX = Context.ViewPort.X + newTextX + lineNumberWidth - Context.OffsetX;
+                }
+            }
             
             // 如果下一行比較短，需要調整游標 X 位置
             if (actualTextX >= nextLine.Width)
@@ -707,6 +751,52 @@ public class VimEditor
         {
             return;
         }
+        
+        // 獲取上一行
+        var prevLine = Context.Texts[textY];
+        
+        // 獲取文本實際 X 坐標
+        var actualTextX = GetActualTextX();
+        
+        // 確保 actualTextX 在有效範圍內
+        if (actualTextX >= 0 && actualTextX < prevLine.Chars.Length)
+        {
+            // 檢查上一行中的目標位置是否為 '\0'，如果是則向左移動直到找到非 '\0' 字符
+            if (prevLine.Chars[actualTextX].Char == '\0')
+            {
+                int newTextX = actualTextX;
+                
+                // 向左移動直到找到非 '\0' 字符
+                while (newTextX > 0 && prevLine.Chars[newTextX].Char == '\0')
+                {
+                    newTextX--;
+                }
+                
+                // 調整游標 X 位置
+                int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
+                Context.CursorX = Context.ViewPort.X + newTextX + lineNumberWidth - Context.OffsetX;
+            }
+        }
+        
+        // 如果上一行比較短，需要調整游標 X 位置
+        if (actualTextX >= prevLine.Width)
+        {
+            // 計算上一行的最後一個位置
+            int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
+            
+            // 如果上一行是空的，將游標設置在行號後
+            if (prevLine.Width == 0)
+            {
+                Context.CursorX = Context.ViewPort.X + lineNumberWidth;
+            }
+            else
+            {
+                // 否則設置到上一行的末尾
+                var prevLineDisplayWidth = prevLine.Width + lineNumberWidth;
+                Context.CursorX = Context.ViewPort.X + Math.Min(prevLineDisplayWidth - 1, Context.ViewPort.Width - 1);
+            }
+        }
+        
         var targetCursorY = Context.CursorY - 1;
         if (targetCursorY < Context.ViewPort.Y)
         {
