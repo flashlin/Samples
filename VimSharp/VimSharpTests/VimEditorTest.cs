@@ -99,8 +99,8 @@ namespace VimSharpTests
         [Test]
         public void WhenCursorAtEndOfLine_PressRightArrow_CursorShouldStayAtEnd()
         {
-            InitializeEditor(GenerateText(10));
             _editor.IsRelativeLineNumber = true;
+            InitializeEditor(GenerateText(10));
 
             _editor.Context.CursorX.Should().Be(2);
             _editor.Context.CursorY.Should().Be(0);
@@ -118,8 +118,8 @@ namespace VimSharpTests
         [Test]
         public void WhenCursorAtEndOfLine_PressRightArrow_CursorShouldMoveToNextLine()
         {
-            InitializeEditorWithOffset(GenerateText(10));
             _editor.IsRelativeLineNumber = true;
+            InitializeEditorWithOffset(GenerateText(10));
             
             _editor.Context.CursorX.Should().Be(3);
             _editor.Context.CursorY.Should().Be(1);
@@ -457,8 +457,8 @@ namespace VimSharpTests
         [Test]
         public void WhenRelativeLineNumberEnabled_RenderShouldNotChangeCursorPosition()
         {
-            InitializeEditor(Create5LinesText());
             _editor.IsRelativeLineNumber = true;
+            InitializeEditor(Create5LinesText());
 
             // 調用Render方法
             _editor.Render();
@@ -471,9 +471,9 @@ namespace VimSharpTests
         [Test]
         public void WhenRelativeLineNumberEnabled_PressLeftArrowTwice_CursorShouldStayAtPosition2()
         {
+            _editor.IsRelativeLineNumber = true;
             // 設置5行文本
             InitializeEditor(Create5LinesText());
-            _editor.IsRelativeLineNumber = true;
 
             _editor.Context.CursorX.Should().Be(2);
             // 按下向左鍵兩次
