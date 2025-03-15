@@ -29,6 +29,7 @@ namespace VimSharp
             
             // 初始化編輯器的模式
             editor.Mode = new VimNormalMode { Instance = editor };
+            editor.SetViewPort(10, 10, 20, 5);
             
             Console.Clear();
             Console.CursorVisible = true;

@@ -72,5 +72,23 @@ namespace VimSharp.Tests
             Assert.Equal(expectedX, _editor.CursorX);
             Assert.Equal(1, _editor.CursorY); // Y 應該不變
         }
+
+        [Fact]
+        public void TestSetViewPort()
+        {
+            // 設置新的 ViewPort
+            int newX = 5;
+            int newY = 2;
+            int newWidth = 60;
+            int newHeight = 20;
+            
+            _editor.SetViewPort(newX, newY, newWidth, newHeight);
+            
+            // 驗證 ViewPort 是否已正確設置
+            Assert.Equal(newX, _editor.ViewPort.X);
+            Assert.Equal(newY, _editor.ViewPort.Y);
+            Assert.Equal(newWidth, _editor.ViewPort.Width);
+            Assert.Equal(newHeight, _editor.ViewPort.Height);
+        }
     }
 } 

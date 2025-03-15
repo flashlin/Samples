@@ -225,4 +225,9 @@ public void MoveCursorToEndOfLine()
 # 測試專案程式碼規範
 * 驗收輸出結果一律從 `ColoredChar[,] screenBuffer` 驗收結果
 * IConsoleDevice 的 MockConsoleDevice 只需使用 Substitute 模擬其方法。
+* 在測試 VimEditor 的新增案例時，需要特別考慮以下兩種 SetViewPort 的不同情境：
+- SetViewPort(0, 0, 20, 5)
+- SetViewPort(1, 1, 20, 5)
+這兩種設定可能會導致不同的顯示結果，因此應確保測試涵蓋這些情況。
+
 

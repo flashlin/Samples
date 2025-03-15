@@ -252,6 +252,19 @@ namespace VimSharpLib
             AdjustViewPortOffset();
         }
 
+        /// <summary>
+        /// 設置視口區域
+        /// </summary>
+        /// <param name="x">視口的 X 座標</param>
+        /// <param name="y">視口的 Y 座標</param>
+        /// <param name="width">視口的寬度</param>
+        /// <param name="height">視口的高度</param>
+        public void SetViewPort(int x, int y, int width, int height)
+        {
+            ViewPort = new ViewArea(x, y, width, height);
+            AdjustViewPortOffset(); // 調整偏移量以確保游標在可視範圍內
+        }
+
         // 獲取實際的文本坐標
         public int GetActualTextX()
         {
