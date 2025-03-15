@@ -120,7 +120,7 @@ public class VimEditor
         RenderBufferToConsole(screenBuffer, outputBuffer);
 
         // 設置控制台游標位置
-        outputBuffer.Append($"\x1b[{Context.CursorY};{Context.CursorX}H");
+        outputBuffer.Append($"\x1b[{Context.CursorY+1};{Context.CursorX+1}H");
         
         // 顯示游標
         outputBuffer.Append("\x1b[?25h");
