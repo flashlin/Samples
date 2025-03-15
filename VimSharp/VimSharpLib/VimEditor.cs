@@ -27,21 +27,7 @@ public class VimEditor
 
     public void Initialize()
     {
-        SetViewPort(0, 0, Console.WindowWidth, Console.WindowHeight);
-    }
-
-    /// <summary>
-    /// 設置視窗的矩形區域並調整游標位置
-    /// </summary>
-    /// <param name="x">視窗左上角的 X 座標</param>
-    /// <param name="y">視窗左上角的 Y 座標</param>
-    /// <param name="width">視窗的寬度</param>
-    /// <param name="height">視窗的高度</param>
-    public void SetViewPort(int x, int y, int width, int height)
-    {
-        Context.ViewPort = new ViewArea(x, y, width, height);
-        Context.CursorX = x + CalculateLineNumberWidth();
-        Context.CursorY = y;
+        Context.SetViewPort(0, 0, Console.WindowWidth, Console.WindowHeight, CalculateLineNumberWidth());
     }
 
     public void SetText(string text)
