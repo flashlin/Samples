@@ -154,7 +154,7 @@ public class VimNormalMode : IVimMode
     private void HandleAKey()
     {
         // 獲取當前行信息
-        var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+        var currentLine = Instance.Context.GetText(Instance.Context.CursorY);
         string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
         
         // 計算實際索引位置
