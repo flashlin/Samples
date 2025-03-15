@@ -47,6 +47,21 @@ namespace VimSharpLib
             OffsetY = 0;
         }
 
+        public void OpenText(string text)
+        {
+            Texts.Clear();
+            foreach (var line in text.Split('\n'))
+            {
+                // 移除每行末尾的 \r 字符
+                string cleanLine = line.TrimEnd('\r');
+                Texts.Add(new ConsoleText(cleanLine));
+            }
+            CursorX = 0;
+            CursorY = 0;
+            OffsetX = 0;
+            OffsetY = 0;
+        }
+
         public void Render(ColoredChar[,]? screenBuffer = null)
         {
             int width = Console.WindowWidth;
