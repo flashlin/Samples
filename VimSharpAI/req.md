@@ -60,6 +60,20 @@
   - `ColoredChar[] Chars`：每行的字元陣列。
   - `int Width`：字元陣列長度 (`Chars.Length`)。
 
+
+### 方法
+  - `string GetText()`
+```csharp  
+public string GetText()
+{
+    return new string(editor.StatusBar.Chars
+        .Where(c => c.Char != '\0')
+        .Select(c => c.Char)
+        .ToArray());
+}
+```
+說明：此方法用於獲取 editor.StatusBar 中的有效文字內容。
+
 ---
 
 ## `ColoredChar` 類別
@@ -67,9 +81,23 @@
   - `char Char`：字元內容。
   - `ConsoleColor Foreground`：前景色。
   - `ConsoleColor Background`：背景色。
+
 - 預設常數：
   - `static readonly ColoredChar ViewEmpty = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);`
   - `static readonly ColoredChar Empty = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);`
+
+### 方法
+public string ToAnsiString()
+{
+    if( Char=='\0' ) {
+        return string.Empty;
+    }
+    // 格式為 ESC[<背景色>;<前景色>m<字符>
+    return $"\u001b[{Background};{Foreground}m{Char}";
+}
+
+- 注意事項:
+記錄時，若 Chars[n].Char 的 ASCII 長度為 2，則確保下一個字元為 '\0'
 
 ---
 
