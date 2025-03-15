@@ -148,14 +148,14 @@ namespace VimSharpTests
             {
                 case 'a':
                     _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo(key, ConsoleKey.A, false, false, false));
-                    _editor.WaitForInput();
                     break;
                 case '$':
                     _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo(key, ConsoleKey.D4, true, false, false));
-                    _editor.WaitForInput();
                     break;
+                default:
+                    throw new Exception("Invalid key");
             }
-            throw new Exception("Invalid key");
+            _editor.WaitForInput();
         }
 
         /// <summary>
