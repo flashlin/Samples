@@ -241,7 +241,29 @@ namespace VimSharpLib
             int actualY = GetActualTextY();
             if (actualY < Texts.Count)
             {
-                CursorX = Math.Max(0, Texts[actualY].Width - 1);
+                // 獲取當前行的文本
+                var text = Texts[actualY];
+                
+                if (text.Width > 0)
+                {
+                    // 檢查最後一個字符是否為中文字符（ASCII > 127）
+                    if (text.Chars[text.Width - 1].Char > 127)
+                    {
+                        // 如果最後一個字符是中文字符，使用 Width - 2
+                        CursorX = Math.Max(0, text.Width - 2);
+                    }
+                    else
+                    {
+                        // 如果最後一個字符不是中文字符，使用 Width - 1
+                        CursorX = Math.Max(0, text.Width - 1);
+                    }
+                }
+                else
+                {
+                    // 空行，將游標設為 0
+                    CursorX = 0;
+                }
+                
                 AdjustViewPortOffset();
             }
         }
