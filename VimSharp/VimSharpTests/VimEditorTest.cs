@@ -214,11 +214,11 @@ namespace VimSharpTests
             // Given
             _editor.Context.SetText(0, 0, "Hello");
             _editor.Context.SetViewPort(10, 1, 40, 10);
-            _editor.Context.CursorX = 4; // 設置游標位置在本文最後一個字上, 例如 "Hello" 的 'o' 上
+            _editor.Context.CursorX = 14; // 設置游標位置在本文最後一個字上, 例如 "Hello" 的 'o' 上
 
             // 模擬按下 'a' 鍵，切換到 NormalMode 並將游標向右移動一格
             PressKey('a');
-            _editor.Context.CursorX.Should().Be(5);
+            _editor.Context.CursorX.Should().Be(15);
             
             // 此時游標應該在 'o' 後面，模式應該是 InsertMode
             _editor.Mode.Should().BeOfType<VimInsertMode>();
@@ -227,7 +227,7 @@ namespace VimSharpTests
             PressKey(ConsoleKey.Escape);
 
             // Then
-            _editor.Context.CursorX.Should().Be(4); // 游標應該向左移動一格
+            _editor.Context.CursorX.Should().Be(14); // 游標應該向左移動一格
             _editor.Mode.Should().BeOfType<VimNormalMode>(); // 模式應該切換回 VimVisualMode
         }
 

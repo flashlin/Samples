@@ -137,7 +137,7 @@ public class VimNormalMode : IVimMode
     private void HandleAKey(List<ConsoleKey> keys)
     {
         Instance.Mode = new VimInsertMode(Instance);
-        Instance.Mode.PressKey(ConsoleKey.RightArrow);
+        Instance.MoveCursorRight();
     }
 
     private bool WhenInNormalMode_PressRightArrow_CursorShouldMove_IsRunning()

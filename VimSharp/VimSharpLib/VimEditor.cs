@@ -598,7 +598,7 @@ public class VimEditor
     {
         var textX = GetActualTextX();
         var currentLine = GetCurrentLine();
-        if (textX >= currentLine.Width - 1)
+        if (textX >= currentLine.Width)
         {
             return;
         }
@@ -612,6 +612,10 @@ public class VimEditor
             {
                 Context.CursorX = Context.ViewPort.Right;
                 Context.OffsetX = Math.Min(Context.OffsetX + 1, currentLine.Width - Context.ViewPort.Width); 
+            }
+            if(textX >= currentLine.Width)
+            {
+                break;
             }
             ch = currentLine.Chars[textX];
         }while(ch.Char == '\0' && textX < currentLine.Width - 1);
