@@ -246,6 +246,12 @@ namespace VimSharpLib
             }
         }
 
+        public void MoveCursorToStartOfLine()
+        {
+            CursorX = 0;
+            AdjustViewPortOffset();
+        }
+
         // 獲取實際的文本坐標
         public int GetActualTextX()
         {

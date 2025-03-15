@@ -23,6 +23,7 @@ namespace VimSharpLib
             _keyPatterns[new SingleKeyPattern(ConsoleKey.I)] = () => EnterInsertMode();
             _keyPatterns[new SingleKeyPattern(ConsoleKey.V)] = () => EnterVisualMode();
             _keyPatterns[new SingleKeyPattern(ConsoleKey.D4)] = () => Instance.MoveCursorToEndOfLine(); // $ 符號對應 Shift+4 (D4)
+            _keyPatterns[new SingleKeyPattern(ConsoleKey.D6)] = () => Instance.MoveCursorToStartOfLine(); // ^ 符號對應 Shift+6 (D6)
         }
 
         private void EnterInsertMode()
