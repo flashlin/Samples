@@ -42,7 +42,7 @@ namespace VimSharpTests
         public void WhenRelativeLineNumberDisabled_CalculateLineNumberWidth_ShouldReturnZero()
         {
             InitializeEditor("Hello, World!");
-            _editor.IsRelativeLineNumber = false;
+            _editor.Context.IsRelativeLineNumber = false;
             _editor.Context.CursorY = 1000;
             var width = _editor.CalculateLineNumberWidth();
             width.Should().Be(0);
@@ -52,7 +52,7 @@ namespace VimSharpTests
         public void WhenRelativeLineNumberEnabled_CalculateLineNumberWidth_ShouldReturnTwo()
         {
             InitializeEditor("Hello, World!");
-            _editor.IsRelativeLineNumber = true;
+            _editor.Context.IsRelativeLineNumber = true;
             _editor.Context.CursorY = 1000;
             var width = _editor.CalculateLineNumberWidth();
             width.Should().Be(2);
@@ -99,7 +99,7 @@ namespace VimSharpTests
         [Test]
         public void WhenCursorAtEndOfLine_PressRightArrow_CursorShouldStayAtEnd()
         {
-            _editor.IsRelativeLineNumber = true;
+            _editor.Context.IsRelativeLineNumber = true;
             InitializeEditor(GenerateText(10));
 
             _editor.Context.CursorX.Should().Be(2);
@@ -118,7 +118,7 @@ namespace VimSharpTests
         [Test]
         public void WhenCursorAtEndOfLine_PressRightArrow_CursorShouldMoveToNextLine()
         {
-            _editor.IsRelativeLineNumber = true;
+            _editor.Context.IsRelativeLineNumber = true;
             InitializeEditorWithOffset(GenerateText(10));
             
             _editor.Context.CursorX.Should().Be(3);
@@ -307,7 +307,7 @@ namespace VimSharpTests
             // 初始化 VimEditor
             InitializeEditor("Hello, World!");
 
-            _editor.IsRelativeLineNumber = true;
+            _editor.Context.IsRelativeLineNumber = true;
 
             // 按下 '$' 按鍵
             _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false));
@@ -324,7 +324,7 @@ namespace VimSharpTests
             // 初始化 VimEditor
             InitializeEditor(GenerateText(20));
 
-            _editor.IsRelativeLineNumber = true;
+            _editor.Context.IsRelativeLineNumber = true;
 
             // 按下 '$' 按鍵
             _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false));
@@ -341,7 +341,7 @@ namespace VimSharpTests
             // 初始化 VimEditor
             InitializeEditor(GenerateText(20)+"\r\n"+GenerateText(5));
 
-            _editor.IsRelativeLineNumber = true;
+            _editor.Context.IsRelativeLineNumber = true;
 
             PressKey(ConsoleKey.DownArrow);
 
@@ -367,7 +367,7 @@ namespace VimSharpTests
             _editor.Context.CursorX = 10;
             _editor.Context.CursorY = 0;
 
-            _editor.IsRelativeLineNumber = true;
+            _editor.Context.IsRelativeLineNumber = true;
 
             // 按下 '^' 按鍵
             _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('^', ConsoleKey.D6, true, false, false));
@@ -457,7 +457,7 @@ namespace VimSharpTests
         [Test]
         public void WhenRelativeLineNumberEnabled_RenderShouldNotChangeCursorPosition()
         {
-            _editor.IsRelativeLineNumber = true;
+            _editor.Context.IsRelativeLineNumber = true;
             InitializeEditor(Create5LinesText());
 
             // 調用Render方法
@@ -471,7 +471,7 @@ namespace VimSharpTests
         [Test]
         public void WhenRelativeLineNumberEnabled_PressLeftArrowTwice_CursorShouldStayAtPosition3()
         {
-            _editor.IsRelativeLineNumber = true;
+            _editor.Context.IsRelativeLineNumber = true;
             InitializeEditorWithOffset(Create5LinesText());
 
             _editor.Render();
@@ -487,7 +487,7 @@ namespace VimSharpTests
         [Test]
         public void WhenRelativeLineNumberEnabled_PressLeftArrowTwice_CursorShouldStayAtPosition2()
         {
-            _editor.IsRelativeLineNumber = true;
+            _editor.Context.IsRelativeLineNumber = true;
             // 設置5行文本
             InitializeEditor(Create5LinesText());
 

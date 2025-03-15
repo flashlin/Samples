@@ -14,8 +14,6 @@ public class VimEditor
     // 添加剪貼簿緩衝區
     public List<ConsoleText> ClipboardBuffers { get; set; } = [];
 
-    public bool IsRelativeLineNumber { get; set; }
-
     public VimEditor() : this(new ConsoleDevice())
     {
     }
@@ -140,7 +138,7 @@ public class VimEditor
         int cursorTextY = GetActualTextY();
 
         // 計算行號區域寬度所需的位數
-        if (IsRelativeLineNumber)
+        if (Context.IsRelativeLineNumber)
         {
             // 相對行號模式：計算相對行號的最大值（上下行數的最大值）
             int maxRelativeLineNumber = Math.Max(cursorTextY, totalLines - cursorTextY - 1);
@@ -182,7 +180,7 @@ public class VimEditor
                 int lineNumber;
                 bool isCurrentLine = (textIndex == cursorTextY);
 
-                if (IsRelativeLineNumber)
+                if (Context.IsRelativeLineNumber)
                 {
                     // 相對行號模式
                     if (isCurrentLine)
@@ -204,7 +202,7 @@ public class VimEditor
 
                 // 繪製行號到 screenBuffer
                 RenderLineNumber(screenBuffer, Context.ViewPort.X, Context.ViewPort.Y + i, lineNumber, lineNumberDigits,
-                    isCurrentLine, IsRelativeLineNumber);
+                    isCurrentLine, Context.IsRelativeLineNumber);
 
                 // 繪製文本到 screenBuffer，考慮 ViewPort、偏移量和行號區域
                 RenderText(screenBuffer, Context.ViewPort.X + lineNumberWidth, Context.ViewPort.Y + i, text, Context.OffsetX,
@@ -567,7 +565,7 @@ public class VimEditor
     /// <returns>相對行號區域的寬度</returns>
     public int CalculateLineNumberWidth()
     {
-        if (!IsRelativeLineNumber)
+        if (!Context.IsRelativeLineNumber)
         {
             return 0;
         }
@@ -666,7 +664,7 @@ public class VimEditor
                 }
                 
                 // 調整游標 X 位置
-                int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
+                int lineNumberWidth = Context.IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
                 Context.CursorX = Context.ViewPort.X + newTextX + lineNumberWidth - Context.OffsetX;
             }
         }
@@ -683,7 +681,7 @@ public class VimEditor
         if (actualTextX >= line.Width)
         {
             // 計算行的最後一個位置
-            int lineNumberWidth = IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
+            int lineNumberWidth = Context.IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
             
             // 如果行是空的，將游標設置在行號後
             if (line.Width == 0)
@@ -826,7 +824,7 @@ public class VimEditor
         Context.CursorY = Math.Max(0, Context.CursorY);
 
         // 處理相對行號區域寬度
-        if (IsRelativeLineNumber && textX < lineNumberWidth)
+        if (Context.IsRelativeLineNumber && textX < lineNumberWidth)
         {
             textX = lineNumberWidth;
         }

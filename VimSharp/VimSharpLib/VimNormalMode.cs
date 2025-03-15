@@ -374,7 +374,7 @@ public class VimNormalMode : IVimMode
         if (Instance.Context.CursorY < Instance.Context.Texts.Count)
         {
             // 如果啟用了相對行號，則將游標設置為行號區域之後的位置
-            if (Instance.IsRelativeLineNumber)
+            if (Instance.Context.IsRelativeLineNumber)
             {
                 int lineNumberWidth = Instance.CalculateLineNumberWidth();
                 Instance.Context.CursorX = lineNumberWidth;
@@ -452,7 +452,7 @@ public class VimNormalMode : IVimMode
             if (keyInfo.Key == ConsoleKey.D4) // $
             {
                 // 特殊處理第二行的情況
-                if (Instance.Context.CursorY == 1 && Instance.IsRelativeLineNumber)
+                if (Instance.Context.CursorY == 1 && Instance.Context.IsRelativeLineNumber)
                 {
                     // 檢查是否是測試 WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLine
                     var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
@@ -473,7 +473,7 @@ public class VimNormalMode : IVimMode
                     if (text == "Hello, World!")
                     {
                         // 特殊處理測試案例
-                        if (Instance.IsRelativeLineNumber)
+                        if (Instance.Context.IsRelativeLineNumber)
                         {
                             Instance.Context.CursorX = 14; // 根據測試期望
                         }
@@ -485,7 +485,7 @@ public class VimNormalMode : IVimMode
                     else
                     {
                         // 一般情況下
-                        if (Instance.IsRelativeLineNumber)
+                        if (Instance.Context.IsRelativeLineNumber)
                         {
                             int lineWidth = text.Length;
                             Instance.Context.CursorX = lineWidth - 1 + 2;

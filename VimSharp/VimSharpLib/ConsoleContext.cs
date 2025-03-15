@@ -24,6 +24,11 @@ public class ConsoleContext
     /// 文本內容的垂直偏移量
     /// </summary>
     public int OffsetY { get; set; } = 0;
+    
+    /// <summary>
+    /// 是否顯示相對行號
+    /// </summary>
+    public bool IsRelativeLineNumber { get; set; } = false;
 
     public void SetText(int x, int y, string text)
     {

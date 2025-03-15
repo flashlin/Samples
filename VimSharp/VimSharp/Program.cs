@@ -15,13 +15,13 @@ Say Hello
 Example 3, Title.
 Your name is ?
 """);
-editor1.IsRelativeLineNumber = true;
+editor1.Context.IsRelativeLineNumber = true;
 editor1.Context.IsStatusBarVisible = true;
 editor1.SetViewPort(1, 1, 40, 5);
 
 var editor2 = new VimEditor();
 editor2.Context.SetText(0, 0, "Example2: Editor2!");
-editor2.Context.ViewPort = new ViewArea(20, 12, 40, 10);
+editor2.SetViewPort(20, 12, 40, 10);
 
 var vim = new VimSharp();
 vim.AddEditor(editor1);

@@ -84,7 +84,7 @@ public class VimVisualMode : IVimMode
     private void MoveCursorLeft()
     {
         // 如果啟用了相對行號，則游標的 X 位置不能小於行號區域的寬度
-        if (Instance.IsRelativeLineNumber)
+        if (Instance.Context.IsRelativeLineNumber)
         {
             // 計算相對行號區域的寬度
             int lineNumberWidth = Instance.CalculateLineNumberWidth();
