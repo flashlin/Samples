@@ -54,5 +54,50 @@ namespace VimSharp.Tests
             // 第10個字符應該是 '\0'
             Assert.Equal('\0', _editor.Texts[0].Chars[9].Char);
         }
+        
+        [Fact]
+        public void TestCursorMovementAndViewPortOffset()
+        {
+            // 設置測試參數
+            _editor.IsStatusBarVisible = true;
+            _editor.SetViewPort(0, 0, 10, 4);
+            
+            // 創建五行測試文本
+            string[] fiveLines = {
+                "第一行",
+                "第二行",
+                "第三行",
+                "第四行",
+                "第五行"
+            };
+            
+            // 使用 OpenText 方法載入文本
+            _editor.OpenText(string.Join("\n", fiveLines));
+            
+            // 初始化 VimNormalMode
+            var normalMode = new VimNormalMode { Instance = _editor };
+            _editor.Mode = normalMode;
+            
+            // 驗證初始狀態
+            Assert.Equal(0, _editor.CursorY);
+            Assert.Equal(0, _editor.OffsetY);
+            
+            // 模擬按下 J 鍵四次
+            for (int i = 0; i < 4; i++)
+            {
+                _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('j', ConsoleKey.J, false, false, false));
+                normalMode.WaitForInput();
+            }
+            
+            // 驗證游標位置和視口偏移
+            Assert.Equal(3, _editor.CursorY); // 因為 ViewPort Height 規定只能顯示四行, 又有 StatusBar 用掉一行, 所以游標應該在第三行
+            Assert.Equal(2, _editor.OffsetY); // 視口偏移應該是 2
+            
+            // 額外驗證 ViewPort 大小設置是否正確
+            Assert.Equal(0, _editor.ViewPort.X);
+            Assert.Equal(0, _editor.ViewPort.Y);
+            Assert.Equal(10, _editor.ViewPort.Width);
+            Assert.Equal(4, _editor.ViewPort.Height);
+        }
     }
 } 
