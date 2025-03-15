@@ -38,11 +38,15 @@ alwaysApply: true
 
 ### 方法
 - `void OpenFile(string file)`：載入檔案內容至 `Texts`。
+  - 放置本文的時候, 用 new ColoredChar(?, 白色, DrakGray), 空白字元則用 ColoredChar.ViewEmpty 
+
 - `void Render(ColoredChar[,]? screenBuffer=null)`
   - 若 `screenBuffer` 為 `null`，則依 `Console.WindowWidth` 和 `Console.WindowHeight` 建立緩衝區，初始化為 `ColoredChar.Empty`。
   - 依 `ViewPort` 位置輸出 `Texts`。
   - 若 `IsStatusBarVisible`，則輸出 `StatusBar` 至 `ViewPort` 底部。
   - 若 `IsRelativeNumberVisible`，則顯示相對行數區域。
+
+
 - `void WriteToConsole(ColoredChar[,]? screenBuffer)`
   - 將 `screenBuffer` 內容完整輸出至螢幕，無需額外邏輯。
 - 游標移動方法：
