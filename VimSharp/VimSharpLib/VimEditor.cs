@@ -124,7 +124,7 @@ public class VimEditor
         int cursorTextY = GetActualTextY();
 
         // 計算行號區域寬度所需的位數
-        if (Context.IsRelativeLineNumber)
+        if (Context.IsLineNumberVisible)
         {
             // 相對行號模式：計算相對行號的最大值（上下行數的最大值）
             int maxRelativeLineNumber = Math.Max(cursorTextY, totalLines - cursorTextY - 1);
@@ -166,7 +166,7 @@ public class VimEditor
                 int lineNumber;
                 bool isCurrentLine = (textIndex == cursorTextY);
 
-                if (Context.IsRelativeLineNumber)
+                if (Context.IsLineNumberVisible)
                 {
                     // 相對行號模式
                     if (isCurrentLine)
@@ -188,7 +188,7 @@ public class VimEditor
 
                 // 繪製行號到 screenBuffer
                 RenderLineNumber(screenBuffer, Context.ViewPort.X, Context.ViewPort.Y + i, lineNumber, lineNumberDigits,
-                    isCurrentLine, Context.IsRelativeLineNumber);
+                    isCurrentLine, Context.IsLineNumberVisible);
 
                 // 繪製文本到 screenBuffer，考慮 ViewPort、偏移量和行號區域
                 RenderText(screenBuffer, Context.ViewPort.X + lineNumberWidth, Context.ViewPort.Y + i, text, Context.OffsetX,
@@ -637,7 +637,7 @@ public class VimEditor
                 }
                 
                 // 調整游標 X 位置
-                int lineNumberWidth = Context.IsRelativeLineNumber ? Context.GetLineNumberWidth() : 0;
+                int lineNumberWidth = Context.IsLineNumberVisible ? Context.GetLineNumberWidth() : 0;
                 Context.CursorX = Context.ViewPort.X + newTextX + lineNumberWidth - Context.OffsetX;
             }
         }
@@ -654,7 +654,7 @@ public class VimEditor
         if (actualTextX >= line.Width)
         {
             // 計算行的最後一個位置
-            int lineNumberWidth = Context.IsRelativeLineNumber ? Context.GetLineNumberWidth() : 0;
+            int lineNumberWidth = Context.IsLineNumberVisible ? Context.GetLineNumberWidth() : 0;
             
             // 如果行是空的，將游標設置在行號後
             if (line.Width == 0)
@@ -797,7 +797,7 @@ public class VimEditor
         Context.CursorY = Math.Max(0, Context.CursorY);
 
         // 處理相對行號區域寬度
-        if (Context.IsRelativeLineNumber && textX < lineNumberWidth)
+        if (Context.IsLineNumberVisible && textX < lineNumberWidth)
         {
             textX = lineNumberWidth;
         }

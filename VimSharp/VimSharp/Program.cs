@@ -15,7 +15,7 @@ Say Hello
 Example 3, Title.
 Your name is ?
 """);
-editor1.Context.IsRelativeLineNumber = true;
+editor1.Context.IsLineNumberVisible = true;
 editor1.Context.IsStatusBarVisible = true;
 editor1.Context.SetViewPort(1, 1, 40, 5);
 

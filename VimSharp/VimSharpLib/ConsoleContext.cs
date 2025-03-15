@@ -28,7 +28,7 @@ public class ConsoleContext
     /// <summary>
     /// 是否顯示相對行號
     /// </summary>
-    public bool IsRelativeLineNumber { get; set; } = false;
+    public bool IsLineNumberVisible { get; set; } = false;
     
     /// <summary>
     /// 設置視窗的矩形區域並調整游標位置
@@ -50,7 +50,7 @@ public class ConsoleContext
     /// <returns>相對行號區域的寬度</returns>
     public int GetLineNumberWidth()
     {
-        if (!IsRelativeLineNumber)
+        if (!IsLineNumberVisible)
         {
             return 0;
         }

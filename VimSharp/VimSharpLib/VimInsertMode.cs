@@ -84,7 +84,7 @@ public class VimInsertMode : IVimMode
     private void MoveCursorLeft()
     {
         // 如果啟用了相對行號，則游標的 X 位置不能小於行號區域的寬度
-        if (Instance.Context.IsRelativeLineNumber)
+        if (Instance.Context.IsLineNumberVisible)
         {
             // 計算相對行號區域的寬度
             int lineNumberWidth = Instance.Context.GetLineNumberWidth();
@@ -112,7 +112,7 @@ public class VimInsertMode : IVimMode
                 int newCursorX = Instance.Context.CursorX - prevChar.GetCharWidth();
                 
                 // 如果啟用了相對行號，確保游標的 X 位置不會小於行號區域的寬度
-                if (Instance.Context.IsRelativeLineNumber)
+                if (Instance.Context.IsLineNumberVisible)
                 {
                     int lineNumberWidth = Instance.Context.GetLineNumberWidth();
                     if (newCursorX < lineNumberWidth)
