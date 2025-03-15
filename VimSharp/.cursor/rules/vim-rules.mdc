@@ -82,27 +82,6 @@ VimSharpLib 專案應包含以下類別與介面：
 
 ---
 
-## `ConsoleText` 類別
-- 屬性：
-  - `ColoredChar[] Chars`：每行的字元陣列。
-  - `int Width`：字元陣列長度 (`Chars.Length`)。
-
-
-### 方法
-  - `string GetText()`
-```csharp  
-public string GetText()
-{
-    return new string(editor.StatusBar.Chars
-        .Where(c => c.Char != '\0')
-        .Select(c => c.Char)
-        .ToArray());
-}
-```
-說明：此方法用於獲取 editor.StatusBar 中的有效文字內容。
-
----
-
 ## `ColoredChar` 類別
 - 屬性：
   - `char Char`：字元內容。
@@ -110,8 +89,8 @@ public string GetText()
   - `ConsoleColor Background`：背景色。
 
 - 預設常數：
-  - `static readonly ColoredChar ViewEmpty = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);`
-  - `static readonly ColoredChar Empty = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);`
+  - `static readonly ColoredChar Empty = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);`
+  - `static readonly ColoredChar None = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);`
 
 ### 方法
 public string ToAnsiString()
@@ -173,7 +152,7 @@ public interface IKeyPattern
 
 ---
 
-## `VimNormalMode::WaitForInput()`
+## `KeyHandler::WaitForInput()`
 核心邏輯不可更改。
 
 ```csharp
@@ -204,8 +183,6 @@ public void WaitForInput()
     }
 }
 ```
-
----
 
 ## 其他核心功能
 - 取得目前游標的文本座標：
