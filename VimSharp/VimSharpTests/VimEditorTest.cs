@@ -27,14 +27,14 @@ namespace VimSharpTests
         private void InitializeEditor(string text)
         {
             _editor.SetText(text);
-            _editor.Context.SetViewPort(0, 0, 40, 10, _editor.GetLineNumberWidth());
+            _editor.Context.SetViewPort(0, 0, 40, 10);
             _editor.Mode = new VimNormalMode { Instance = _editor };
         }
 
         private void InitializeEditorWithOffset(string text)
         {
             _editor.SetText(text);
-            _editor.Context.SetViewPort(1, 1, 40, 10, _editor.GetLineNumberWidth());
+            _editor.Context.SetViewPort(1, 1, 40, 10);
             _editor.Mode = new VimNormalMode { Instance = _editor };
         }
 
@@ -44,7 +44,7 @@ namespace VimSharpTests
             InitializeEditor("Hello, World!");
             _editor.Context.IsRelativeLineNumber = false;
             _editor.Context.CursorY = 1000;
-            var width = _editor.GetLineNumberWidth();
+            var width = _editor.Context.GetLineNumberWidth();
             width.Should().Be(0);
         }
 
@@ -54,7 +54,7 @@ namespace VimSharpTests
             InitializeEditor("Hello, World!");
             _editor.Context.IsRelativeLineNumber = true;
             _editor.Context.CursorY = 1000;
-            var width = _editor.GetLineNumberWidth();
+            var width = _editor.Context.GetLineNumberWidth();
             width.Should().Be(2);
         }
 
@@ -196,7 +196,7 @@ namespace VimSharpTests
         {
             // Given
             _editor.Context.SetText(0, 0, "Hello");
-            _editor.Context.SetViewPort(10, 1, 40, 10, _editor.GetLineNumberWidth());
+            _editor.Context.SetViewPort(10, 1, 40, 10);
             _editor.Context.CursorX = 4; // 設置游標位置在本文最後一個字上, 例如 "Hello" 的 'o' 上
             _editor.Mode = new VimNormalMode { Instance = _editor };
 
@@ -361,7 +361,7 @@ namespace VimSharpTests
             _editor.Context.Texts.Clear();
             _editor.Context.Texts.Add(new ConsoleText());
             _editor.Context.Texts[0].SetText(0, "Hello, World!");
-            _editor.Context.SetViewPort(0, 0, 40, 10, _editor.GetLineNumberWidth());
+            _editor.Context.SetViewPort(0, 0, 40, 10);
 
             // 設置初始游標位置
             _editor.Context.CursorX = 10;
@@ -385,7 +385,7 @@ namespace VimSharpTests
             _editor.Context.Texts.Clear();
             _editor.Context.Texts.Add(new ConsoleText());
             _editor.Context.Texts[0].SetText(0, "Hello, World!");
-            _editor.Context.SetViewPort(0, 0, 40, 10, _editor.GetLineNumberWidth());
+            _editor.Context.SetViewPort(0, 0, 40, 10);
 
             // 設置初始游標位置在行尾
             _editor.Context.CursorX = 12;
@@ -417,7 +417,7 @@ namespace VimSharpTests
             }
 
             // 設置視口
-            _editor.Context.SetViewPort(0, 0, 40, 5, _editor.GetLineNumberWidth());
+            _editor.Context.SetViewPort(0, 0, 40, 5);
 
             // 依序按下 '1', '0', 'J' 按鍵
             _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false));
@@ -523,7 +523,7 @@ namespace VimSharpTests
             }
 
             // 設置 ViewPort 
-            _editor.Context.SetViewPort(0, 1, 40, 5, _editor.GetLineNumberWidth());
+            _editor.Context.SetViewPort(0, 1, 40, 5);
             _editor.Context.IsStatusBarVisible = true;
 
             // 設定完 ViewPort 後，游標應該在第1行

@@ -39,22 +39,22 @@ public class ConsoleContext
     /// <param name="height">視窗的高度</param>
     public void SetViewPort(int x, int y, int width, int height)
     {
-        SetViewPort(x, y, width, height, 0);
+        ViewPort = new ViewArea(x, y, width, height);
+        CursorX = x + GetLineNumberWidth();
+        CursorY = y;
     }
 
     /// <summary>
-    /// 設置視窗的矩形區域並調整游標位置
+    /// 計算相對行號區域的寬度
     /// </summary>
-    /// <param name="x">視窗左上角的 X 座標</param>
-    /// <param name="y">視窗左上角的 Y 座標</param>
-    /// <param name="width">視窗的寬度</param>
-    /// <param name="height">視窗的高度</param>
-    /// <param name="lineNumberWidth">行號區域的寬度</param>
-    public void SetViewPort(int x, int y, int width, int height, int lineNumberWidth)
+    /// <returns>相對行號區域的寬度</returns>
+    public int GetLineNumberWidth()
     {
-        ViewPort = new ViewArea(x, y, width, height);
-        CursorX = x + lineNumberWidth;
-        CursorY = y;
+        if (!IsRelativeLineNumber)
+        {
+            return 0;
+        }
+        return Texts.Count.ToString().Length + 1;
     }
 
     public void SetText(int x, int y, string text)

@@ -69,7 +69,7 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void MoveCursorLeft()
     {
-        var lineNumberWidth = Instance.GetLineNumberWidth();
+        var lineNumberWidth = Instance.Context.GetLineNumberWidth();
         // 計算最小允許的 X 座標（ViewPort 的左邊界 + 行號區域的寬度）
         var minAllowedX = Instance.Context.ViewPort.X + lineNumberWidth;
         // 如果游標已經在最左邊（ViewPort 左邊界 + 行號區域的寬度），則不再向左移動
@@ -376,7 +376,7 @@ public class VimNormalMode : IVimMode
             // 如果啟用了相對行號，則將游標設置為行號區域之後的位置
             if (Instance.Context.IsRelativeLineNumber)
             {
-                int lineNumberWidth = Instance.GetLineNumberWidth();
+                int lineNumberWidth = Instance.Context.GetLineNumberWidth();
                 Instance.Context.CursorX = lineNumberWidth;
             }
             else

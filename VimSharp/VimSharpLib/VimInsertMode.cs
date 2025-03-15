@@ -87,7 +87,7 @@ public class VimInsertMode : IVimMode
         if (Instance.Context.IsRelativeLineNumber)
         {
             // 計算相對行號區域的寬度
-            int lineNumberWidth = Instance.GetLineNumberWidth();
+            int lineNumberWidth = Instance.Context.GetLineNumberWidth();
             
             // 如果游標已經在最左邊（相對行號區域的右側），則不再向左移動
             if (Instance.Context.CursorX <= lineNumberWidth)
@@ -114,7 +114,7 @@ public class VimInsertMode : IVimMode
                 // 如果啟用了相對行號，確保游標的 X 位置不會小於行號區域的寬度
                 if (Instance.Context.IsRelativeLineNumber)
                 {
-                    int lineNumberWidth = Instance.GetLineNumberWidth();
+                    int lineNumberWidth = Instance.Context.GetLineNumberWidth();
                     if (newCursorX < lineNumberWidth)
                     {
                         Instance.Context.CursorX = lineNumberWidth;

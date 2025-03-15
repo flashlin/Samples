@@ -17,11 +17,11 @@ Your name is ?
 """);
 editor1.Context.IsRelativeLineNumber = true;
 editor1.Context.IsStatusBarVisible = true;
-editor1.Context.SetViewPort(1, 1, 40, 5, editor1.GetLineNumberWidth());
+editor1.Context.SetViewPort(1, 1, 40, 5);
 
 var editor2 = new VimEditor();
 editor2.Context.SetText(0, 0, "Example2: Editor2!");
-editor2.Context.SetViewPort(20, 12, 40, 10, editor2.GetLineNumberWidth());
+editor2.Context.SetViewPort(20, 12, 40, 10);
 
 var vim = new VimSharp();
 vim.AddEditor(editor1);
