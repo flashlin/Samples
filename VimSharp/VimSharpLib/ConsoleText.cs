@@ -37,17 +37,12 @@ public class ConsoleText
         SetWidth(text.Length + x);
         for (var i = 0; i < text.Length; i++)
         {
-            Chars[x + i] = new ColoredChar(text[i]);
-        }
-    }
-
-    // 設置帶顏色的文字
-    public void SetColoredText(int x, string text, ConsoleColor foreground, ConsoleColor background)
-    {
-        SetWidth(text.Length + x);
-        for (var i = 0; i < text.Length; i++)
-        {
-            Chars[x + i] = new ColoredChar(text[i], foreground, background);
+            var coloredChar = new ColoredChar(text[i]);
+            Chars[x + i] = coloredChar;
+            if (coloredChar.Char > 127)
+            {
+                Chars[x + i + 1] = ColoredChar.None;
+            }
         }
     }
 
@@ -65,8 +60,7 @@ public class ConsoleText
         return sb.ToString();
     }
 
-    // 獲取帶顏色的字串表示
-    public string ToColoredString()
+    public string ToAnsiString()
     {
         var sb = new StringBuilder();
         foreach (var c in Chars)
