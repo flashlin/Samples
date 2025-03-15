@@ -325,8 +325,8 @@ public class VimEditor
         var lineNumberChars = new ConsoleText();
         if (isRelativeLineNumber)
         {
-            var foreground = ConsoleColor.Yellow;
-            var background = ConsoleColor.Black;
+            var foreground = ConsoleColor.White;
+            var background = ConsoleColor.Blue;
             lineNumberChars.SetText(0, lineNumber.ToString().PadLeft(digits));
             lineNumberChars.SetColor(foreground, background);
             // 添加一個空格作為間隔
@@ -335,7 +335,7 @@ public class VimEditor
         else
         {
             var foreground = ConsoleColor.Black;
-            var background = ConsoleColor.Yellow;
+            var background = ConsoleColor.Blue;
             lineNumberChars.SetText(0, lineNumber.ToString().PadRight(digits));
             lineNumberChars.SetColor(foreground, background);
             // 添加一個空格作為間隔

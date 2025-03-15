@@ -22,36 +22,60 @@ public class ColoredChar
         BackgroundColor = backgroundColor;
     }
 
-    public int ToAnsiColor(ConsoleColor color)
+    public int ToAnsiForegroundColor(ConsoleColor color)
     {
         return color switch
         {
-            ConsoleColor.Black => 0,
-            ConsoleColor.DarkBlue => 4,
-            ConsoleColor.DarkGreen => 2, 
-            ConsoleColor.DarkCyan => 6,
-            ConsoleColor.DarkRed => 1,
-            ConsoleColor.DarkMagenta => 5,
-            ConsoleColor.DarkYellow => 3,
-            ConsoleColor.Gray => 7,
-            ConsoleColor.DarkGray => 8,
-            ConsoleColor.Blue => 12,
-            ConsoleColor.Green => 10,
-            ConsoleColor.Cyan => 14,
-            ConsoleColor.Red => 9,
-            ConsoleColor.Magenta => 13,
-            ConsoleColor.Yellow => 11,
-            ConsoleColor.White => 15,
-            _ => 7 // 默認為灰色
+            ConsoleColor.Black => 30,
+            ConsoleColor.DarkBlue => 34,
+            ConsoleColor.DarkGreen => 32, 
+            ConsoleColor.DarkCyan => 36,
+            ConsoleColor.DarkRed => 31,
+            ConsoleColor.DarkMagenta => 35,
+            ConsoleColor.DarkYellow => 33,
+            ConsoleColor.Gray => 37,
+            ConsoleColor.DarkGray => 90,
+            ConsoleColor.Blue => 94,
+            ConsoleColor.Green => 92,
+            ConsoleColor.Cyan => 96,
+            ConsoleColor.Red => 91,
+            ConsoleColor.Magenta => 95,
+            ConsoleColor.Yellow => 93,
+            ConsoleColor.White => 97,
+            _ => 37 // 默認為灰色
         };
     }
-    
+
+    public int ToAnsiBackgroundColor(ConsoleColor color)
+    {
+        return color switch
+        {
+            ConsoleColor.Black => 40,
+            ConsoleColor.DarkBlue => 44,
+            ConsoleColor.DarkGreen => 42, 
+            ConsoleColor.DarkCyan => 46,
+            ConsoleColor.DarkRed => 41,
+            ConsoleColor.DarkMagenta => 45,
+            ConsoleColor.DarkYellow => 43,
+            ConsoleColor.Gray => 47,
+            ConsoleColor.DarkGray => 100,
+            ConsoleColor.Blue => 104,
+            ConsoleColor.Green => 102,
+            ConsoleColor.Cyan => 106,
+            ConsoleColor.Red => 101,
+            ConsoleColor.Magenta => 105,
+            ConsoleColor.Yellow => 103,
+            ConsoleColor.White => 107,
+            _ => 47 // 默認為灰色背景
+        };
+    }
+
     // 轉換為 ANSI 控制碼字串
     public string ToAnsiString()
     {
-        var foreground = ToAnsiColor(ForegroundColor);
-        var background = ToAnsiColor(BackgroundColor);
-        return $"\u001b[38;5;{foreground}m\u001b[48;5;{background}m{Char}\u001b[0m";
+        var foreground = ToAnsiForegroundColor(ForegroundColor);
+        var background = ToAnsiBackgroundColor(BackgroundColor);
+        return $"\u001b[{foreground}m\u001b[{background}m{Char}\u001b[0m";
     }
     
     // 隱式轉換為 char
