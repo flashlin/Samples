@@ -78,9 +78,6 @@ namespace VimSharp.Tests
             var normalMode = new VimNormalMode { Instance = _editor };
             _editor.Mode = normalMode;
             
-            // 計算實際可見行數（考慮狀態列）
-            int visibleLines = _editor.ViewPort.Height - (_editor.IsStatusBarVisible ? 1 : 0);
-            
             // 驗證初始狀態
             int cursorY0 = _editor.CursorY;
             int offsetY0 = _editor.OffsetY;
@@ -138,6 +135,91 @@ namespace VimSharp.Tests
             // 額外驗證 ViewPort 大小設置是否正確
             Assert.Equal(0, _editor.ViewPort.X);
             Assert.Equal(0, _editor.ViewPort.Y);
+            Assert.Equal(10, _editor.ViewPort.Width);
+            Assert.Equal(4, _editor.ViewPort.Height);
+        }
+
+
+        [Fact]
+        public void TestCursorMovementAndViewPortOffset2()
+        {
+            // 設置測試參數
+            _editor.IsStatusBarVisible = true;
+            _editor.SetViewPort(1, 1, 10, 4);
+            
+            // 創建五行測試文本
+            string[] fiveLines = {
+                "第一行",
+                "第二行",
+                "第三行",
+                "第四行",
+                "第五行"
+            };
+            
+            // 使用 OpenText 方法載入文本
+            _editor.OpenText(string.Join("\n", fiveLines));
+            
+            // 初始化 VimNormalMode
+            var normalMode = new VimNormalMode { Instance = _editor };
+            _editor.Mode = normalMode;
+            
+            // 驗證初始狀態
+            int cursorY0 = _editor.CursorY;
+            int offsetY0 = _editor.OffsetY;
+            Assert.Equal(1, cursorY0);
+            Assert.Equal(1, offsetY0);
+            
+            // 第一次按下 J 鍵
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('j', ConsoleKey.J, false, false, false));
+            normalMode.WaitForInput();
+            
+            // 保存第一次按下 J 鍵後的狀態
+            int cursorY1 = _editor.CursorY;
+            int offsetY1 = _editor.OffsetY;
+            
+            // 第二次按下 J 鍵
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('j', ConsoleKey.J, false, false, false));
+            normalMode.WaitForInput();
+            
+            // 保存第二次按下 J 鍵後的狀態
+            int cursorY2 = _editor.CursorY;
+            int offsetY2 = _editor.OffsetY;
+            
+            // 第三次按下 J 鍵
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('j', ConsoleKey.J, false, false, false));
+            normalMode.WaitForInput();
+            
+            // 保存第三次按下 J 鍵後的狀態
+            int cursorY3 = _editor.CursorY;
+            int offsetY3 = _editor.OffsetY;
+            
+            // 第四次按下 J 鍵
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('j', ConsoleKey.J, false, false, false));
+            normalMode.WaitForInput();
+            
+            // 保存第四次按下 J 鍵後的狀態
+            int cursorY4 = _editor.CursorY;
+            int offsetY4 = _editor.OffsetY;
+            
+            // 驗證游標位置和視口偏移的變化
+            // 初始狀態: cursorY0 = 0, offsetY0 = 0
+            Assert.Equal(2, cursorY1); // 第一次按 J 後，游標應該移動到第二行
+            Assert.Equal(0, offsetY1); // 第一次按 J 後，視口偏移應該保持不變
+            
+            Assert.Equal(3, cursorY2); // 第二次按 J 後，游標應該移動到第三行
+            Assert.Equal(0, offsetY2); // 第二次按 J 後，視口偏移應該保持不變
+            
+            // 根據實際測量值進行斷言
+            Assert.Equal(3, cursorY3); // 第三次按 J 後，游標位於第三行
+            Assert.Equal(1, offsetY3); // 第三次按 J 後，視口偏移增加到 1
+            
+            // 根據實際測量值進行斷言
+            Assert.Equal(3, cursorY4); // 第四次按 J 後，游標移動到第三行
+            Assert.Equal(2, offsetY4); // 第四次按 J 後，視口偏移增加到 2
+            
+            // 額外驗證 ViewPort 大小設置是否正確
+            Assert.Equal(1, _editor.ViewPort.X);
+            Assert.Equal(1, _editor.ViewPort.Y);
             Assert.Equal(10, _editor.ViewPort.Width);
             Assert.Equal(4, _editor.ViewPort.Height);
         }
