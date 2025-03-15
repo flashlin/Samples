@@ -90,5 +90,36 @@ namespace VimSharp.Tests
             Assert.Equal(newWidth, _editor.ViewPort.Width);
             Assert.Equal(newHeight, _editor.ViewPort.Height);
         }
+
+        [Fact]
+        public void TestMoveCursorToEndOfLineWithChineseChars()
+        {
+            // 準備包含中文字符的文本
+            // 由於中文字符在控制台中佔據雙寬度，這是測試游標定位的重要案例
+            _editor.Texts.Clear();
+            _editor.Texts.Add(new ConsoleText("Hello 閃電"));
+            
+            // 設置初始游標位置（非行尾）
+            _editor.CursorX = 2; // 在 'l' 字符上
+            _editor.CursorY = 0;
+            
+            // 模擬按下 '$' 鍵 (Shift+4, 對應 ConsoleKey.D4)
+            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false));
+            
+            // 執行按鍵處理
+            _normalMode.WaitForInput();
+            
+            // 獲取第一行的長度以進行驗證
+            int expectedX = _editor.Texts[0].Width - 2;
+            
+            // 驗證游標是否移動到行尾 ('電' 字符上)
+            // 確保 VimEditor 在處理中文混合文本時能正確計算字符位置
+            Assert.Equal(expectedX, _editor.CursorX);
+            Assert.Equal(0, _editor.CursorY);
+            
+            // 注意：在 ConsoleText 的實現中，Width 屬性返回 Chars.Length
+            // 即字符數量，而不考慮字符在顯示時的寬度
+            // 對於中文字符而言，這確保了游標能正確定位到最後一個字符
+        }
     }
 } 
