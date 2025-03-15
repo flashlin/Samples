@@ -7,20 +7,24 @@ using System.Text.RegularExpressions;
 
 public class VimNormalMode : IVimMode
 {
-    public required VimEditor Instance { get; set; }
-    
-    private Dictionary<IKeyPattern, Action> _keyPatterns = new();
-    private readonly List<ConsoleKey> _keyBuffer;
-    
-    public VimNormalMode()
+    private readonly KeyHandler _keyHandler;
+    public VimNormalMode(VimEditor instance)
     {
-        _keyBuffer = new List<ConsoleKey>();
+        Instance = instance;
+        _keyHandler = new KeyHandler(instance.Console);
         InitializeKeyPatterns();
     }
     
+    public VimEditor Instance { get; set; }
+    
+    public void PressKey(ConsoleKey key)
+    {
+        _keyHandler.PressKey(key);
+    }
+
     private void InitializeKeyPatterns()
     {
-        _keyPatterns = new Dictionary<IKeyPattern, Action>
+        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action>
         {
             { new ConsoleKeyPattern(ConsoleKey.I), SwitchToNormalMode },
             { new ConsoleKeyPattern(ConsoleKey.A), HandleAKey },
@@ -36,16 +40,7 @@ public class VimNormalMode : IVimMode
             { new CharKeyPattern('$'), MoveCursorToEndOfLine },
             { new CharKeyPattern('^'), MoveCursorToStartOfLine },
             { new RegexPattern(@"\d+J"), JumpToLine },
-        };
-    }
-    
-    /// <summary>
-    /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
-    /// </summary>
-    private void AdjustCursorAndOffset()
-    {
-        // 調用 VimEditor 中的 AdjustCursorAndOffset 方法
-        Instance.AdjustCursorPositionAndOffset(Instance.Context.CursorX, Instance.Context.CursorY);
+        });
     }
     
     /// <summary>
@@ -113,20 +108,8 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void HandleEnterKey()
     {
-        // 在視覺模式下，Enter 鍵只移動游標，不修改文本
-        // 移動到下一行的開頭
-        Instance.Context.CursorY++;
-        Instance.Context.CursorX = 0;
-        
-        // 雖然視覺模式是僅讀取模式，但我們仍然允許添加空行以便瀏覽
-        // 這不會修改現有文本內容，只是為了確保游標可以移動到文本末尾之後
-        if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
-        {
-            Instance.Context.Texts.Add(new ConsoleText());
-        }
-        
-        // 檢查並調整游標位置和偏移量
-        AdjustCursorAndOffset();
+        MoveCursorDown();
+        MoveCursorToStartOfLine();
     }
     
     /// <summary>
@@ -153,38 +136,9 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void HandleAKey()
     {
-        // 獲取當前行信息
-        var currentLine = Instance.Context.GetText(Instance.Context.CursorY);
-        string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-        
-        // 計算實際索引位置
-        int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
-        
-        // 檢查並跳過 '\0' 字符
-        while (actualIndex < currentText.Length && currentText[actualIndex] == '\0')
-        {
-            actualIndex++;
-        }
-
-        // 如果不是在文本末尾，則向右移動一個位置
-        if (actualIndex < currentText.Length)
-        {
-            // 獲取當前字符的寬度
-            char currentChar = currentText[actualIndex];
-            Instance.Context.CursorX += currentChar.GetCharWidth();
-        }
-        else if (actualIndex == currentText.Length)
-        {
-            // 允許游標移動到最後一個字符後面
-            Instance.Context.CursorX = currentText.GetStringDisplayWidth() + 1;
-        }
-        
-        // 切換到普通模式
-        var normalMode = new VimInsertMode { Instance = Instance };
-        Instance.Mode = normalMode;
-        
-        // 調整偏移量
-        AdjustCursorAndOffset();
+        // 切換到插入模式
+        Instance.Mode = new VimInsertMode { Instance = Instance };
+        Instance.Mode.PressKey(ConsoleKey.RightArrow);
     }
     
     /// <summary>
@@ -192,7 +146,7 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void SwitchToVisualMode()
     {
-        var mode = new VimVisualMode { Instance = Instance };
+        var mode = new VimVisualMode(Instance);
         mode.SetStartPosition(Instance.Context.CursorX, Instance.Context.CursorY);
         Instance.Mode = mode;
     }
@@ -339,9 +293,6 @@ public class VimNormalMode : IVimMode
             }
         }
         
-        // 調整游標位置和偏移量
-        AdjustCursorAndOffset();
-        
         // 切換到普通模式
         Instance.Mode = new VimInsertMode { Instance = Instance };
         
@@ -370,23 +321,14 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void MoveCursorToStartOfLine()
     {
-        // 確保當前行存在
-        if (Instance.Context.CursorY < Instance.Context.Texts.Count)
+        var currentLine = Instance.Context.Texts[Instance.GetActualTextY()];
+        var firstChar = currentLine.Chars.FirstOrDefault(c => c.Char != '\0' && c.Char != ' ');
+        if (firstChar == null)
         {
-            // 如果啟用了相對行號，則將游標設置為行號區域之後的位置
-            if (Instance.Context.IsLineNumberVisible)
-            {
-                int lineNumberWidth = Instance.Context.GetLineNumberWidth();
-                Instance.Context.CursorX = lineNumberWidth;
-            }
-            else
-            {
-                // 將游標設置為行首
-                Instance.Context.CursorX = 0;
-            }
-            
-            AdjustCursorAndOffset();
+            return;
         }
+        var textX = Array.IndexOf(currentLine.Chars, firstChar);
+        Instance.SetActualTextX(textX);
     }
     
     /// <summary>
@@ -395,7 +337,7 @@ public class VimNormalMode : IVimMode
     private void JumpToLine()
     {
         // 將按鍵緩衝區轉換為字符串
-        string input = string.Join("", _keyBuffer.Select(k => k.ToChar()).Where(c => c != '\0'));
+        var input = _keyHandler.GetKeyBufferString();
         
         // 使用正則表達式提取數字部分
         var match = Regex.Match(input, @"(\d+)J");
@@ -432,114 +374,15 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void ClearKeyBuffer()
     {
-        _keyBuffer.Clear();
+        _keyHandler.Clear();
     }
     
     public void WaitForInput()
     {
         // 設置游標位置
         Instance.Console.SetCursorPosition(Instance.Context.CursorX,  Instance.Context.CursorY);
-
         // 設置為方塊游標 (DECSCUSR 2)
         Instance.Console.Write("\x1b[2 q");
-        
-        var keyInfo = Instance.Console.ReadKey(intercept: true);
-        
-        // 特殊處理Shift修飾鍵下的特殊符號
-        if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift))
-        {
-            // 處理 Shift+4 ($) 和 Shift+6 (^)
-            if (keyInfo.Key == ConsoleKey.D4) // $
-            {
-                // 特殊處理第二行的情況
-                if (Instance.Context.CursorY == 1 && Instance.Context.IsLineNumberVisible)
-                {
-                    // 檢查是否是測試 WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLine
-                    var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
-                    string text = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-                    
-                    if (text.Length == 5)
-                    {
-                        // 這是測試案例的特殊情況
-                        Instance.Context.CursorX = 6;
-                        return;
-                    }
-                }
-                
-                // 處理第一行的情況
-                if (Instance.Context.CursorY == 0)
-                {
-                    string text = Instance.Context.Texts[0].ToString();
-                    if (text == "Hello, World!")
-                    {
-                        // 特殊處理測試案例
-                        if (Instance.Context.IsLineNumberVisible)
-                        {
-                            Instance.Context.CursorX = 14; // 根據測試期望
-                        }
-                        else
-                        {
-                            Instance.Context.CursorX = 12; // 根據測試期望
-                        }
-                    }
-                    else
-                    {
-                        // 一般情況下
-                        if (Instance.Context.IsLineNumberVisible)
-                        {
-                            int lineWidth = text.Length;
-                            Instance.Context.CursorX = lineWidth - 1 + 2;
-                        }
-                        else
-                        {
-                            int lineWidth = text.Length;
-                            Instance.Context.CursorX = lineWidth - 1;
-                        }
-                    }
-                }
-                else
-                {
-                    // 一般情況下，調用 MoveCursorToEndOfLine 方法
-                    MoveCursorToEndOfLine();
-                }
-                
-                return;
-            }
-            else if (keyInfo.Key == ConsoleKey.D6) // ^
-            {
-                MoveCursorToStartOfLine();
-                return;
-            }
-        }
-        
-        // 將按鍵添加到緩衝區
-        _keyBuffer.Add(keyInfo.Key);
-        
-        // 計算匹配的模式數量
-        int matchCount = 0;
-        IKeyPattern? matchedPattern = null;
-        
-        foreach (var pattern in _keyPatterns.Keys)
-        {
-            if (pattern.IsMatch(_keyBuffer))
-            {
-                matchCount++;
-                matchedPattern = pattern;
-            }
-        }
-        
-        // 如果只有一個模式匹配，執行對應的操作
-        if (matchCount == 1 && matchedPattern != null)
-        {
-            _keyPatterns[matchedPattern].Invoke();
-            _keyBuffer.Clear();
-        }
-        // 如果沒有模式匹配，但緩衝區已經達到一定長度，清除緩衝區
-        else if (matchCount == 0 && _keyBuffer.Count >= 3)
-        {
-            _keyBuffer.Clear();
-        }
-        
-        // 如果有多個模式匹配，等待更多按鍵輸入
+        _keyHandler.WaitForInput();
     }
 } 

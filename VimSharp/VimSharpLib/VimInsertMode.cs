@@ -5,7 +5,11 @@ using System.Linq;
 public class VimInsertMode : IVimMode
 {
     public required VimEditor Instance { get; set; }
-    
+    public void PressKey(ConsoleKey rightArrow)
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
     /// </summary>
@@ -39,7 +43,7 @@ public class VimInsertMode : IVimMode
             }
         }
         
-        Instance.Mode = new VimNormalMode { Instance = Instance };
+        Instance.Mode = new VimNormalMode(Instance);
     }
     
     /// <summary>

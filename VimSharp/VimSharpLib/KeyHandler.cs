@@ -15,6 +15,16 @@ public class KeyHandler
     {
         _keyPatterns = keyPatterns;
     }
+    
+    public string GetKeyBufferString()
+    {
+        return string.Join("", _keyBuffer.Select(k => k.ToChar()).Where(c => c != '\0'));
+    }
+
+    public void Clear()
+    {
+        _keyBuffer.Clear();
+    }
 
     public void PressKey(ConsoleKey key)
     {

@@ -21,7 +21,7 @@ public class VimEditor
     public VimEditor(IConsoleDevice console)
     {
         Console = console;
-        Mode = new VimNormalMode { Instance = this };
+        Mode = new VimNormalMode(this);
         Initialize();
     }
 
@@ -666,10 +666,23 @@ public class VimEditor
     {
         bool needScroll = false;
         
+        // 計算可見區域的有效高度（考慮狀態欄）
+        int effectiveViewPortHeight = Context.IsStatusBarVisible ? 
+            Context.ViewPort.Height - 1 : Context.ViewPort.Height;
+        
         if (scrollDirection > 0)
         {
             // 向下滾動
-            needScroll = targetCursorY > Context.ViewPort.Y + Context.ViewPort.Height - 1;
+            needScroll = targetCursorY > Context.ViewPort.Y + effectiveViewPortHeight - 1;
+            
+            // 如果狀態欄可見，確保游標不會超出有效視口高度
+            if (Context.IsStatusBarVisible && 
+                targetCursorY >= Context.ViewPort.Y + effectiveViewPortHeight &&
+                !needScroll)
+            {
+                // 將目標游標位置限制在有效視口範圍內
+                targetCursorY = Context.ViewPort.Y + effectiveViewPortHeight - 1;
+            }
         }
         else
         {
@@ -847,6 +860,21 @@ public class VimEditor
     public int GetActualTextY()
     {
         return Context.CursorY - Context.ViewPort.Y + Context.OffsetY;
+    }
+
+    public void SetActualTextX(int actualTextX)
+    {
+        var viewWidth = Context.ViewPort.X + Context.ViewPort.Width - Context.GetLineNumberWidth();
+        var cursorX = Context.ViewPort.X + actualTextX + Context.GetLineNumberWidth() - Context.OffsetX;
+        Context.CursorX = cursorX;
+        if (cursorX > viewWidth)
+        {
+            if (actualTextX - viewWidth > 0)
+            {
+                Context.CursorX = Context.ViewPort.X + actualTextX;
+            }
+            Context.OffsetX = Math.Max(0, actualTextX - viewWidth);
+        }
     }
 
     public ConsoleText GetCurrentLine()

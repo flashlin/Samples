@@ -6,10 +6,7 @@ using System.Collections.Generic;
 
 public class VimVisualMode : IVimMode
 {
-    public required VimEditor Instance { get; set; }
-    
-    private Dictionary<IKeyPattern, Action> _keyPatterns = new();
-    private List<ConsoleKey> _keyBuffer;
+    private readonly KeyHandler _keyHandler;
     
     // 記錄選取的起始位置
     private int _startCursorX;
@@ -19,15 +16,22 @@ public class VimVisualMode : IVimMode
     private int _endCursorX;
     private int _endCursorY;
     
-    public VimVisualMode()
+    public VimVisualMode(VimEditor instance)
     {
-        _keyBuffer = new List<ConsoleKey>();
+        Instance = instance;
+        _keyHandler = new KeyHandler(instance.Console);
         InitializeKeyPatterns();
     }
+    public VimEditor Instance { get; set; }
     
+    public void PressKey(ConsoleKey key)
+    {
+        _keyHandler.PressKey(key);
+    }
+
     private void InitializeKeyPatterns()
     {
-        _keyPatterns = new Dictionary<IKeyPattern, Action>
+        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action>
         {
             { new ConsoleKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
             { new ConsoleKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },
@@ -35,7 +39,7 @@ public class VimVisualMode : IVimMode
             { new ConsoleKeyPattern(ConsoleKey.DownArrow), MoveCursorDown },
             { new ConsoleKeyPattern(ConsoleKey.Y), CopySelectedText },
             { new ConsoleKeyPattern(ConsoleKey.Escape), SwitchToVisualMode }
-        };
+        });
     }
     
     /// <summary>
@@ -75,7 +79,7 @@ public class VimVisualMode : IVimMode
     /// </summary>
     private void SwitchToVisualMode()
     {
-        Instance.Mode = new VimNormalMode { Instance = Instance };
+        Instance.Mode = new VimNormalMode(Instance);
     }
     
     /// <summary>
@@ -365,42 +369,9 @@ public class VimVisualMode : IVimMode
     {
         // 設置為方塊游標 (DECSCUSR 2)
         Instance.Console.Write("\x1b[2 q");
-        
         // 高亮顯示選取的文本
         HighlightSelectedText();
-        
-        var keyInfo = Instance.Console.ReadKey(intercept: true);
-        
-        // 將按鍵添加到緩衝區
-        _keyBuffer.Add(keyInfo.Key);
-        
-        // 計算匹配的模式數量
-        int matchCount = 0;
-        IKeyPattern? matchedPattern = null;
-        
-        foreach (var pattern in _keyPatterns.Keys)
-        {
-            if (pattern.IsMatch(_keyBuffer))
-            {
-                matchCount++;
-                matchedPattern = pattern;
-            }
-        }
-        
-        // 如果只有一個模式匹配，執行對應的操作
-        if (matchCount == 1 && matchedPattern != null)
-        {
-            _keyPatterns[matchedPattern].Invoke();
-            _keyBuffer.Clear();
-        }
-        // 如果沒有模式匹配，但緩衝區已經達到一定長度，清除緩衝區
-        // 這裡我們設置一個合理的最大長度，例如 5
-        else if (matchCount == 0 && _keyBuffer.Count >= 5)
-        {
-            _keyBuffer.Clear();
-        }
-        // 如果有多個模式匹配，不執行任何操作，等待更多按鍵輸入
-        
+        _keyHandler.WaitForInput();
         SetCursorPosition();
     }
     

@@ -28,14 +28,14 @@ namespace VimSharpTests
         {
             _editor.SetText(text);
             _editor.Context.SetViewPort(0, 0, 40, 10);
-            _editor.Mode = new VimNormalMode { Instance = _editor };
+            _editor.Mode = new VimNormalMode(_editor);
         }
 
         private void InitializeEditorWithOffset(string text)
         {
             _editor.SetText(text);
             _editor.Context.SetViewPort(1, 1, 40, 10);
-            _editor.Mode = new VimNormalMode { Instance = _editor };
+            _editor.Mode = new VimNormalMode (_editor);
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace VimSharpTests
             _editor.MoveCursorRightN(13);
             _editor.Context.CursorX.Should().Be(13);
             
-            _editor.Mode = new VimNormalMode { Instance = _editor };
+            _editor.Mode = new VimNormalMode (_editor);
             
             // 模擬按下向右鍵
             PressKey(ConsoleKey.RightArrow);
@@ -169,7 +169,7 @@ namespace VimSharpTests
         {
             // Given
             InitializeEditor("Hello, World!");
-            _editor.Mode = new VimNormalMode { Instance = _editor };
+            _editor.Mode = new VimNormalMode (_editor);
             _editor.Context.CursorX = 12; // 設置游標位置在本文最後一個字上, 例如 "Hello, World!" 的 '!' 上
 
             // 模擬按下 'a' 鍵，切換到 NormalMode 並將游標向右移動一格
@@ -198,7 +198,7 @@ namespace VimSharpTests
             _editor.Context.SetText(0, 0, "Hello");
             _editor.Context.SetViewPort(10, 1, 40, 10);
             _editor.Context.CursorX = 4; // 設置游標位置在本文最後一個字上, 例如 "Hello" 的 'o' 上
-            _editor.Mode = new VimNormalMode { Instance = _editor };
+            _editor.Mode = new VimNormalMode (_editor);
 
             // 模擬按下 'a' 鍵，切換到 NormalMode 並將游標向右移動一格
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false));
@@ -531,7 +531,7 @@ namespace VimSharpTests
             _editor.Context.CursorY.Should().Be(1);
 
             // 確保使用 VimVisualMode
-            _editor.Mode = new VimNormalMode { Instance = _editor };
+            _editor.Mode = new VimNormalMode (_editor);
 
             // 按下向下按鍵 5 次
             for (int i = 0; i < 15; i++)
