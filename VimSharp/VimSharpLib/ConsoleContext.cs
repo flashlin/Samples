@@ -68,6 +68,11 @@ public class ConsoleContext
 
     public ConsoleText GetText(int textY)
     {
+        // 確保 textY 在有效範圍內
+        while (textY >= Texts.Count)
+        {
+            Texts.Add(new ConsoleText());
+        }
         return Texts[textY];
     }
 }

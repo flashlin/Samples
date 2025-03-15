@@ -34,12 +34,13 @@ public class ConsoleText
 
     public void SetText(int x, string text)
     {
-        SetWidth(text.Length + x);
+        SetWidth(text.GetTextWidth());
         for (var i = 0; i < text.Length; i++)
         {
             var coloredChar = new ColoredChar(text[i]);
             Chars[x + i] = coloredChar;
-            if (coloredChar.Char > 127)
+            
+            if (coloredChar.Char > 127 && x + i + 1 < Chars.Length)
             {
                 Chars[x + i + 1] = ColoredChar.None;
             }
