@@ -319,13 +319,11 @@ namespace VimSharpTests
         public void WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLine()
         {
             // 初始化 VimEditor
+            _editor.Context.IsLineNumberVisible = true;
             InitializeEditor("Hello, World!");
 
-            _editor.Context.IsLineNumberVisible = true;
-
             // 按下 '$' 按鍵
-            _mockConsole.ReadKey(true).Returns(new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false));
-            _editor.WaitForInput();
+            PressKey('$');
 
             // 驗證游標位置
             _editor.Context.CursorX.Should().Be(14); // 游標應該在 '!' 上
@@ -353,9 +351,8 @@ namespace VimSharpTests
         public void WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLineOnSecondLine()
         {
             // 初始化 VimEditor
-            InitializeEditor(GenerateText(20)+"\r\n"+GenerateText(5));
-
             _editor.Context.IsLineNumberVisible = true;
+            InitializeEditor(GenerateText(20)+"\r\n"+GenerateText(5));
 
             PressKey(ConsoleKey.DownArrow);
 

@@ -201,6 +201,13 @@ public void WaitForInput()
 * 所有與控制台相關的操作（隱藏/顯示游標、輸出文字）都必須透過 IConsoleDevice，不得直接使用 Console。
 
 ---
+# 在 VimInsertMode 下
+- 按下 Esc 按鍵之前, 假如 GetActualX() 位置 n 等於 currentLine 的結尾位置, 按下 Esc 之後, GetActualX() 應該是 n - 1,
+  然後 CursorX - 1, 假如 CursorX 小於 ViewPort.X - GetLineNumberWidth(), CursorX 應該等於 ViewPort.X - GetLineNumberWidth(), 並且 OffsetX - 1, 假如 OffsetX - 1 小於 0, 然後 OffsetX = 0
+  最後 Instance.Mode 應該是 VimNormalMode
+
+
+---
 
 ## 簡潔程式碼規範
 - **避免重複程式碼**，利用共用函式來簡化邏輯。
