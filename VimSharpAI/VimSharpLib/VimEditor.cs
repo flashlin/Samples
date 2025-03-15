@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace VimSharp
+namespace VimSharpLib
 {
     public class VimEditor
     {

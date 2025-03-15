@@ -1,4 +1,4 @@
-namespace VimSharp
+namespace VimSharpLib
 {
     public interface IKeyPattern
     {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace VimSharp
+namespace VimSharpLib
 {
     public class VimNormalMode : IVimMode
     {
