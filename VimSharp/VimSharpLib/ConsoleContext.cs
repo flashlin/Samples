@@ -67,12 +67,8 @@ public class ConsoleContext
         consoleText.SetText(x, text);
     }
 
-    public ConsoleText GetText(int y)
+    public ConsoleText GetText(int textY)
     {
-        if (Texts.Count <= y)
-        {
-            Texts.Add(new ConsoleText());
-        }
-        return Texts[y];
+        return Texts[textY];
     }
 }
