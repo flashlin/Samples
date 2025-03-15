@@ -14,7 +14,7 @@ alwaysApply: true
 建立一個 C# Console 專案，實作 `VimEditor`，並使用 `Host.CreateApplicationBuilder(args)` 啟動編輯器。
 
 ## 必要類別
-專案應包含以下類別與介面：
+VimSharpLib 專案應包含以下類別與介面：
 - `VimEditor`
 - `ConsoleText`
 - `ColoredChar`
@@ -152,12 +152,13 @@ public interface IVimMode
 {
     void WaitForInput();
     VimEditor Instance { get; set; }
+    void PressKey(ConsoleKey key);
 }
 ```
 
 模式切換時，應使用以下方式：
 ```csharp
-Instance.Mode = new VimVisualMode { Instance = Instance };
+Instance.Mode = new VimVisualMode(Instance);
 ```
 
 ---
