@@ -205,7 +205,7 @@ public class VimNormalMode : IVimMode
         // 檢查剪貼簿是否有內容
         if (Instance.ClipboardBuffers.Count == 0)
         {
-            Instance.Context.StatusBarText = "剪貼簿為空";
+            Instance.Context.StatusBar.SetText(0, "剪貼簿為空");
             Instance.Context.IsStatusBarVisible = true;
             return;
         }
@@ -346,7 +346,7 @@ public class VimNormalMode : IVimMode
         Instance.Mode = new VimInsertMode { Instance = Instance };
         
         // 顯示狀態欄消息
-        Instance.Context.StatusBarText = "已貼上剪貼簿內容";
+        Instance.Context.StatusBar.SetText(0, "已貼上剪貼簿內容");
         Instance.Context.IsStatusBarVisible = true;
     }
     

@@ -12,7 +12,6 @@ public class ConsoleContext
     public ViewArea ViewPort { get; set; } = new();
 
     public bool IsStatusBarVisible { get; set; } = false;
-    public string StatusBarText { get; set; } = "";
     public ConsoleText StatusBar { get; set; } = new();
 
     /// <summary>

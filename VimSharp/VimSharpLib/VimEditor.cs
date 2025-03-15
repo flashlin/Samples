@@ -220,43 +220,80 @@ public class VimEditor
             return; // Y 座標超出範圍，不繪製
         }
 
-        // 創建狀態欄文本
-        string statusText = Context.StatusBarText;
-        if (string.IsNullOrEmpty(statusText))
+        // 獲取狀態欄文本
+        string statusText = "";
+        if (Context.StatusBar.Chars.Length == 0 || Context.StatusBar.Chars.All(c => c.Char == '\0'))
         {
             // 如果沒有設置狀態欄文本，則顯示默認信息
             string modeName = Mode.GetType().Name.Replace("Vim", "").Replace("Mode", "");
             statusText = $" {modeName} | Line: {Context.CursorY + 1} | Col: {Context.CursorX + 1} ";
+
+            // 更新 StatusBar
+            Context.StatusBar = new ConsoleText();
+            Context.StatusBar.SetText(0, statusText);
+
+            // 設置反色顯示
+            for (int i = 0; i < Context.StatusBar.Chars.Length; i++)
+            {
+                if (Context.StatusBar.Chars[i].Char != '\0')
+                {
+                    Context.StatusBar.Chars[i] = new ColoredChar(Context.StatusBar.Chars[i].Char, ConsoleColor.Black, ConsoleColor.White);
+                }
+            }
+        }
+        else
+        {
+            // 使用已有的狀態欄文本
+            statusText = new string(Context.StatusBar.Chars.Select(c => c.Char).ToArray());
         }
 
         // 確保狀態欄文本不超過視窗寬度
         if (statusText.Length > Context.ViewPort.Width)
         {
             statusText = statusText.Substring(0, Context.ViewPort.Width);
+            
+            // 更新 StatusBar 長度
+            var newStatusBar = new ConsoleText();
+            newStatusBar.SetText(0, statusText);
+            
+            // 設置反色顯示
+            for (int i = 0; i < newStatusBar.Chars.Length; i++)
+            {
+                if (newStatusBar.Chars[i].Char != '\0')
+                {
+                    newStatusBar.Chars[i] = new ColoredChar(newStatusBar.Chars[i].Char, ConsoleColor.Black, ConsoleColor.White);
+                }
+            }
+            
+            Context.StatusBar = newStatusBar;
         }
         else if (statusText.Length < Context.ViewPort.Width)
         {
             // 如果狀態欄文本不夠長，則用空格填充
             statusText = statusText.PadRight(Context.ViewPort.Width);
-        }
-
-        // 創建狀態欄的 ConsoleText
-        var statusBarText = new ConsoleText();
-        statusBarText.SetWidth(statusText.Length);
-
-        // 填充狀態欄文本
-        for (int i = 0; i < statusText.Length; i++)
-        {
-            // 使用反色顯示狀態欄
-            statusBarText.Chars[i] = new ColoredChar(statusText[i], ConsoleColor.Black, ConsoleColor.White);
+            
+            // 更新 StatusBar
+            var newStatusBar = new ConsoleText();
+            newStatusBar.SetText(0, statusText);
+            
+            // 設置反色顯示
+            for (int i = 0; i < newStatusBar.Chars.Length; i++)
+            {
+                if (newStatusBar.Chars[i].Char != '\0')
+                {
+                    newStatusBar.Chars[i] = new ColoredChar(newStatusBar.Chars[i].Char, ConsoleColor.Black, ConsoleColor.White);
+                }
+            }
+            
+            Context.StatusBar = newStatusBar;
         }
 
         // 繪製狀態欄到 screenBuffer
-        for (int i = 0; i < statusBarText.Width; i++)
+        for (int i = 0; i < Context.StatusBar.Width; i++)
         {
-            if (Context.ViewPort.X + i >= 0 && Context.ViewPort.X + i < screenBuffer.GetLength(0))
+            if (Context.ViewPort.X + i >= 0 && Context.ViewPort.X + i < screenBuffer.GetLength(0) && i < Context.StatusBar.Chars.Length)
             {
-                screenBuffer[Context.ViewPort.X + i, statusBarY] = statusBarText.Chars[i];
+                screenBuffer[Context.ViewPort.X + i, statusBarY] = Context.StatusBar.Chars[i];
             }
         }
     }
