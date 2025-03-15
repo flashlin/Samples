@@ -570,6 +570,29 @@ public class VimEditor
         
         return textX;
     }
+    
+    public void MoveCursorLeft()
+    {
+        var textX = GetActualTextX();
+        if (textX <= 0)
+        {
+            return;
+        }
+
+        var currentLine = GetCurrentLine();
+        ColoredChar ch;
+        do
+        {
+            textX--;
+            Context.CursorX--;
+            if (Context.CursorX < 0)
+            {
+                Context.CursorX = 0;
+                Context.OffsetX = Math.Max(0, Context.OffsetX - 1); 
+            }
+            ch = currentLine.Chars[textX];
+        }while(ch.Char == '\0' && textX > 0);
+    }
 
     public void MoveCursorRight()
     {
@@ -860,6 +883,13 @@ public class VimEditor
     public int GetActualTextY()
     {
         return Context.CursorY - Context.ViewPort.Y + Context.OffsetY;
+    }
+
+    public ColoredChar GetActualTextColoredChar()
+    {
+        var currentLine = GetCurrentLine();
+        var actualTextX = GetActualTextX();
+        return currentLine.Chars[actualTextX];
     }
 
     public void SetActualTextX(int actualTextX)

@@ -67,26 +67,15 @@ public class VimInsertMode : IVimMode
     /// </summary>
     private void SwitchToNormalMode(List<ConsoleKey> keys)
     {
-        // 如果游標不在行首，則向左移動一格
-        if (Instance.Context.CursorX > 0)
-        {
-            // 獲取當前行
-            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
-            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            
-            // 計算實際索引位置
-            int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
-            
-            // 如果不是在行首，則向左移動一格
-            if (actualIndex > 0)
-            {
-                // 獲取前一個字符的寬度
-                char prevChar = currentText[actualIndex - 1];
-                Instance.Context.CursorX -= prevChar.GetCharWidth();
-            }
-        }
-        
+        // 獲取當前行
+        var currentLine = Instance.GetCurrentLine();
+        var textX = Instance.GetActualTextX();
+        var isEndOfLine = textX > currentLine.Chars.Length;
         Instance.Mode = new VimNormalMode(Instance);
+        if (isEndOfLine)
+        {
+            Instance.MoveCursorLeft();
+        }
     }
     
     /// <summary>
