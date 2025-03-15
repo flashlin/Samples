@@ -10,10 +10,10 @@ using VimSharpLib;
 var editor1 = new VimEditor();
 editor1.SetText($"""
 Hello, World!
-123
-Say Hello
-Example 3, Title.
-Your name is ?
+123 
+Say Hello, 閃電!
+Example
+Your name is 閃電俠
 """);
 editor1.Context.IsLineNumberVisible = true;
 editor1.Context.IsStatusBarVisible = true;
