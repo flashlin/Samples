@@ -92,16 +92,6 @@ VimSharpLib 專案應包含以下類別與介面：
   - `static readonly ColoredChar Empty = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);`
   - `static readonly ColoredChar None = new ColoredChar('\0', ConsoleColor.White, ConsoleColor.Black);`
 
-### 方法
-public string ToAnsiString()
-{
-    if( Char=='\0' ) {
-        return string.Empty;
-    }
-    // 格式為 ESC[<背景色>;<前景色>m<字符>
-    return $"\u001b[{Background};{Foreground}m{Char}";
-}
-
 - 注意事項:
 記錄時，若 Chars[n].Char 的 ASCII > 127，則確保下一個 Chars[n+1] 為 ColoredChar.None
 
@@ -199,14 +189,6 @@ public void WaitForInput()
   Instance.MoveCursorRight();
   ```
 
-### `MoveCursorToEndOfLine()` 優化
-```csharp
-public void MoveCursorToEndOfLine()
-{
-    Instance.CursorX = Instance.Texts[Instance.GetActualTextY()].Width - 1;
-}
-```
-
 ### VimEditor::RenderToConsole() 輸出規範
 1. 隱藏游標：開始輸出前，先隱藏游標。
 2. ColoredChar 轉 ANSI 字串：
@@ -230,8 +212,12 @@ public void MoveCursorToEndOfLine()
 # 測試專案程式碼規範
 * 驗收輸出結果一律從 `ColoredChar[,] screenBuffer` 驗收結果
 * IConsoleDevice 的 MockConsoleDevice 只需使用 Substitute 模擬其方法。
-* 在測試 VimEditor 的新增案例時，需要特別考慮以下兩種 SetViewPort iewPort(0, 0, 20, 5)
+* 在測試 VimEditor 的新增案例時，需要特別考慮以下兩種案例 
+- SetViewPort iewPort(0, 0, 20, 5)
 - SetViewPort(1, 1, 20, 5)
+
 這兩種設定可能會導致不同的顯示結果，因此應確保測試涵蓋這些情況。
+
+
 
 
