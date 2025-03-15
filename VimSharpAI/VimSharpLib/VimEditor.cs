@@ -153,15 +153,34 @@ namespace VimSharpLib
                     {
                         int lineNumber = textY;
                         string lineNumberText = lineNumber.ToString().PadLeft(3);
-                        for (int nx = 0; nx < lineNumberText.Length; nx++)
+                        
+                        // 判斷是否為當前行
+                        bool isCurrentLine = textY == CursorY;
+                        
+                        for (int nx = 0; nx < relativeNumberWidth; nx++)
                         {
-                            if (nx < relativeNumberWidth && ViewPort.X + nx < width)
+                            if (ViewPort.X + nx < width)
                             {
-                                screenBuffer[ViewPort.X + nx, ViewPort.Y + y] = new ColoredChar(
-                                    lineNumberText[nx],
-                                    ConsoleColor.Gray,
-                                    ConsoleColor.Black
-                                );
+                                char displayChar = nx < lineNumberText.Length ? lineNumberText[nx] : ' ';
+                                
+                                if (isCurrentLine)
+                                {
+                                    // 當前行使用黑色前景和暗綠色背景
+                                    screenBuffer[ViewPort.X + nx, ViewPort.Y + y] = new ColoredChar(
+                                        displayChar,
+                                        ConsoleColor.Black,
+                                        ConsoleColor.DarkGreen
+                                    );
+                                }
+                                else
+                                {
+                                    // 其他行使用白色前景和藍色背景
+                                    screenBuffer[ViewPort.X + nx, ViewPort.Y + y] = new ColoredChar(
+                                        displayChar,
+                                        ConsoleColor.White,
+                                        ConsoleColor.Blue
+                                    );
+                                }
                             }
                         }
                     }
