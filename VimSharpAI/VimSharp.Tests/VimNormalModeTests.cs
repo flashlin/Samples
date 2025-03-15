@@ -109,8 +109,9 @@ namespace VimSharp.Tests
             // 執行按鍵處理
             _normalMode.WaitForInput();
             
-            // 獲取第一行的長度以進行驗證
-            int expectedX = _editor.Texts[0].Width - 2;
+            // 根據新的實現，中文字符後面有 '\0'，所以 "Hello 閃電" 的寬度是 10
+            // "電" 字符的索引是 8，所以游標應該在索引 8 的位置
+            int expectedX = 8;
             
             // 驗證游標是否移動到行尾 ('電' 字符上)
             // 確保 VimEditor 在處理中文混合文本時能正確計算字符位置

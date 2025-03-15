@@ -261,17 +261,15 @@ namespace VimSharpLib
                 
                 if (text.Width > 0)
                 {
-                    // 檢查最後一個字符是否為中文字符（ASCII > 127）
-                    if (text.Chars[text.Width - 1].Char > 127)
+                    // 從後往前查找最後一個有效字符（非 '\0'）
+                    int lastValidCharIndex = text.Width - 1;
+                    while (lastValidCharIndex >= 0 && text.Chars[lastValidCharIndex].Char == '\0')
                     {
-                        // 如果最後一個字符是中文字符，使用 Width - 2
-                        CursorX = Math.Max(0, text.Width - 2);
+                        lastValidCharIndex--;
                     }
-                    else
-                    {
-                        // 如果最後一個字符不是中文字符，使用 Width - 1
-                        CursorX = Math.Max(0, text.Width - 1);
-                    }
+                    
+                    // 將游標位置設為最後一個有效字符的位置
+                    CursorX = Math.Max(0, lastValidCharIndex);
                 }
                 else
                 {
