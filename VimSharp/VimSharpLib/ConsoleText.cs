@@ -79,6 +79,14 @@ public class ConsoleText
     {
         foreach (var c in Chars)
         {
+            if( c == ColoredChar.None)
+            {
+                continue;
+            }
+            if( c == ColoredChar.Empty)
+            {
+                continue;
+            }
             c.ForegroundColor = foregroundColor;
             c.BackgroundColor = backgroundColor;
         }

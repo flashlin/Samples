@@ -85,12 +85,12 @@ VimSharpLib 專案應包含以下類別與介面：
 ## `ColoredChar` 類別
 - 屬性：
   - `char Char`：字元內容。
-  - `ConsoleColor Foreground`：前景色。
-  - `ConsoleColor Background`：背景色。
+  - `ConsoleColor ForegroundColor`：前景色。
+  - `ConsoleColor BackgroundColor`：背景色。
 
 - 預設常數：
   - `static readonly ColoredChar Empty = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);`
-  - `static readonly ColoredChar None = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);`
+  - `static readonly ColoredChar None = new ColoredChar('\0', ConsoleColor.White, ConsoleColor.Black);`
 
 ### 方法
 public string ToAnsiString()
@@ -103,7 +103,7 @@ public string ToAnsiString()
 }
 
 - 注意事項:
-記錄時，若 Chars[n].Char 的 ASCII 長度為 2，則確保下一個字元為 '\0'
+記錄時，若 Chars[n].Char 的 ASCII > 127，則確保下一個 Chars[n+1] 為 ColoredChar.None
 
 ---
 
