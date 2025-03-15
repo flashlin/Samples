@@ -462,8 +462,8 @@ public class VimVisualMode : IVimMode
                         // 反轉前景色和背景色
                         line.Chars[i] = new ColoredChar(
                             line.Chars[i].Char,
-                            line.Chars[i].Background,
-                            line.Chars[i].Foreground
+                            line.Chars[i].BackgroundColor,
+                            line.Chars[i].ForegroundColor
                         );
                     }
                 }

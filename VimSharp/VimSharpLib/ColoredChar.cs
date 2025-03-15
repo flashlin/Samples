@@ -1,6 +1,6 @@
 namespace VimSharpLib;
 
-public struct ColoredChar
+public class ColoredChar
 {
     /// <summary>
     /// 空字符（黑底白字的空格）
@@ -10,22 +10,22 @@ public struct ColoredChar
         
 
     public char Char { get; set; }
-    public ConsoleColor Foreground { get; set; }
-    public ConsoleColor Background { get; set; }
+    public ConsoleColor ForegroundColor { get; set; }
+    public ConsoleColor BackgroundColor { get; set; }
     
     public ColoredChar(char c, 
-        ConsoleColor foreground = ConsoleColor.White, 
-        ConsoleColor background = ConsoleColor.DarkGray)
+        ConsoleColor foregroundColor = ConsoleColor.White, 
+        ConsoleColor backgroundColor = ConsoleColor.DarkGray)
     {
         Char = c;
-        Foreground = foreground;
-        Background = background;
+        ForegroundColor = foregroundColor;
+        BackgroundColor = backgroundColor;
     }
     
     // 轉換為 ANSI 控制碼字串
     public string ToAnsiString()
     {
-        return $"\u001b[38;5;{(int)Foreground}m\u001b[48;5;{(int)Background}m{Char}\u001b[0m";
+        return $"\u001b[38;5;{(int)ForegroundColor}m\u001b[48;5;{(int)BackgroundColor}m{Char}\u001b[0m";
     }
     
     // 隱式轉換為 char

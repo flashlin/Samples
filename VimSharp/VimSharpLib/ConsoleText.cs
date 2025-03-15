@@ -73,4 +73,13 @@ public class ConsoleText
         }
         return sb.ToString();
     }
+
+    public void SetColor(ConsoleColor foregroundColor, ConsoleColor backgroundColor)
+    {
+        foreach (var c in Chars)
+        {
+            c.ForegroundColor = foregroundColor;
+            c.BackgroundColor = backgroundColor;
+        }
+    }
 }
