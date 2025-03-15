@@ -181,7 +181,7 @@ public class VimEditor
                 }
 
                 // 繪製行號到 screenBuffer
-                RenderLineNumber(screenBuffer, Context.ViewPort.X, Context.ViewPort.Y + i, lineNumber, Context.IsLineNumberVisible);
+                RenderLineNumber(screenBuffer, Context.ViewPort.X, Context.ViewPort.Y + i, lineNumber, !isCurrentLine);
 
                 // 繪製文本到 screenBuffer，考慮 ViewPort、偏移量和行號區域
                 RenderText(screenBuffer, Context.ViewPort.X + lineNumberWidth, Context.ViewPort.Y + i, text, Context.OffsetX,
@@ -334,8 +334,8 @@ public class VimEditor
         }
         else
         {
-            var foreground = ConsoleColor.Black;
-            var background = ConsoleColor.Blue;
+            var foreground = ConsoleColor.Blue;
+            var background = ConsoleColor.Black;
             lineNumberChars.SetText(0, lineNumber.ToString().PadRight(digits));
             lineNumberChars.SetColor(foreground, background);
             // 添加一個空格作為間隔
