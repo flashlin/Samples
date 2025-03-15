@@ -79,11 +79,71 @@ namespace VimSharpLib
                 }
             }
 
+            // 繪製外框字符
+            char topLeft = '┌';
+            char topRight = '┐';
+            char bottomLeft = '└';
+            char bottomRight = '┘';
+            char horizontal = '─';
+            char vertical = '│';
+
+            // 從 ViewPort.X-1, ViewPort.Y-1 開始繪製外框
+            int frameStartX = Math.Max(0, ViewPort.X - 1);
+            int frameStartY = Math.Max(0, ViewPort.Y - 1);
+            int frameEndX = Math.Min(width - 1, ViewPort.X + ViewPort.Width);
+            int frameEndY = Math.Min(height - 1, ViewPort.Y + ViewPort.Height);
+
+            // 繪製頂部邊框
+            for (int x = frameStartX; x <= frameEndX; x++)
+            {
+                if (frameStartY < height)
+                {
+                    if (x == frameStartX)
+                        screenBuffer[x, frameStartY] = new ColoredChar(topLeft, ConsoleColor.White, ConsoleColor.DarkGray);
+                    else if (x == frameEndX)
+                        screenBuffer[x, frameStartY] = new ColoredChar(topRight, ConsoleColor.White, ConsoleColor.DarkGray);
+                    else
+                        screenBuffer[x, frameStartY] = new ColoredChar(horizontal, ConsoleColor.White, ConsoleColor.DarkGray);
+                }
+            }
+
+            // 繪製底部邊框
+            for (int x = frameStartX; x <= frameEndX; x++)
+            {
+                if (frameEndY < height)
+                {
+                    if (x == frameStartX)
+                        screenBuffer[x, frameEndY] = new ColoredChar(bottomLeft, ConsoleColor.White, ConsoleColor.DarkGray);
+                    else if (x == frameEndX)
+                        screenBuffer[x, frameEndY] = new ColoredChar(bottomRight, ConsoleColor.White, ConsoleColor.DarkGray);
+                    else
+                        screenBuffer[x, frameEndY] = new ColoredChar(horizontal, ConsoleColor.White, ConsoleColor.DarkGray);
+                }
+            }
+
+            // 繪製左側邊框
+            for (int y = frameStartY + 1; y < frameEndY; y++)
+            {
+                if (frameStartX < width && y < height)
+                {
+                    screenBuffer[frameStartX, y] = new ColoredChar(vertical, ConsoleColor.White, ConsoleColor.DarkGray);
+                }
+            }
+
+            // 繪製右側邊框
+            for (int y = frameStartY + 1; y < frameEndY; y++)
+            {
+                if (frameEndX < width && y < height)
+                {
+                    screenBuffer[frameEndX, y] = new ColoredChar(vertical, ConsoleColor.White, ConsoleColor.DarkGray);
+                }
+            }
+
             // 根據 ViewPort 繪製 Texts 內容
             int relativeNumberWidth = IsRelativeNumberVisible ? 4 : 0;
-            int textStartX = ViewPort.X + relativeNumberWidth;
+            int textStartX = ViewPort.X + relativeNumberWidth; // 文本起始位置調整回 ViewPort.X + relativeNumberWidth
             
-            for (int y = 0; y < ViewPort.Height; y++)
+            for (int y = 0; y < ViewPort.Height; y++) // 調整回使用完整的 ViewPort.Height
             {
                 int textY = y + OffsetY;
                 if (textY >= 0 && textY < Texts.Count)

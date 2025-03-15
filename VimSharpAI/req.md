@@ -38,6 +38,16 @@
   - 依 `ViewPort` 位置輸出 `Texts`。
   - 若 `IsStatusBarVisible`，則輸出 `StatusBar` 至 `ViewPort` 底部。
   - 若 `IsRelativeNumberVisible`，則顯示相對行數區域。
+  - 繪製方法用 `繪製相對行數區域` `繪製本文內容` `繪製狀態列` `繪製 ViewFrame 外框` 不要有超長的程式碼
+  - 繪製外框用    
+    char topLeft = '┌';
+    char topRight = '┐';
+    char bottomLeft = '└';
+    char bottomRight = '┘';
+    char horizontal = '─';
+    char vertical = '│';
+    繪製從 ViewPort.X-1, ViewPort.Y-1 開始繪製外框
+
 - `void WriteToConsole(ColoredChar[,]? screenBuffer)`
   - 將 `screenBuffer` 內容完整輸出至螢幕，無需額外邏輯。
 - 游標移動方法：

@@ -38,14 +38,20 @@ alwaysApply: true
 
 ### 方法
 - `void OpenFile(string file)`：載入檔案內容至 `Texts`。
-  - 放置本文的時候, 用 new ColoredChar(?, 白色, DrakGray), 空白字元則用 ColoredChar.ViewEmpty 
-
 - `void Render(ColoredChar[,]? screenBuffer=null)`
   - 若 `screenBuffer` 為 `null`，則依 `Console.WindowWidth` 和 `Console.WindowHeight` 建立緩衝區，初始化為 `ColoredChar.Empty`。
   - 依 `ViewPort` 位置輸出 `Texts`。
   - 若 `IsStatusBarVisible`，則輸出 `StatusBar` 至 `ViewPort` 底部。
   - 若 `IsRelativeNumberVisible`，則顯示相對行數區域。
-
+  - 繪製方法用 `繪製相對行數區域` `繪製本文內容` `繪製狀態列` `繪製 ViewFrame 外框` 不要有超長的程式碼
+  - 繪製外框用    
+    char topLeft = '┌';
+    char topRight = '┐';
+    char bottomLeft = '└';
+    char bottomRight = '┘';
+    char horizontal = '─';
+    char vertical = '│';
+    繪製從 ViewPort.X-1, ViewPort.Y-1 開始繪製外框
 
 - `void WriteToConsole(ColoredChar[,]? screenBuffer)`
   - 將 `screenBuffer` 內容完整輸出至螢幕，無需額外邏輯。
@@ -107,16 +113,6 @@ public string ToAnsiString()
 
 - 注意事項:
 記錄時，若 Chars[n].Char 的 ASCII 長度為 2，則確保下一個字元為 '\0'
-例如：
-* 文字："中文"
-  - Chars 內容：Chars[0] = '中', Chars[1] = '\0', Chars[2] = '文', Chars[3] = '\0'
-  - Width 應為 4。
-* 文字："ab"
-  - Chars 內容：Chars[0] = 'a', Chars[1] = 'b'
-  - Width 應為 2。
-* 文字："a中文b"
-  - Chars 內容：'a', '中', '\0', '文', '\0', 'b'
-  - Width 應為 6。
 
 ---
 
@@ -248,4 +244,5 @@ public void MoveCursorToEndOfLine()
 - SetViewPort(0, 0, 20, 5)
 - SetViewPort(1, 1, 20, 5)
 這兩種設定可能會導致不同的顯示結果，因此應確保測試涵蓋這些情況。
+
 
