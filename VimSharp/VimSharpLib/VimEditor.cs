@@ -82,7 +82,7 @@ public class VimEditor
         {
             for (int x = 0; x < width; x++)
             {
-                screenBuffer[x, y] = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
+                screenBuffer.Set(x, y, new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black));
             }
         }
         return screenBuffer;
@@ -105,31 +105,6 @@ public class VimEditor
         outputBuffer.Append("\x1b[?25h");
         // 一次性輸出所有內容到控制台
         Console.Write(outputBuffer.ToString());
-    }
-
-    /// <summary>
-    /// 計算行號區域所需的位數
-    /// </summary>
-    private int CalculateLineNumberDigits()
-    {
-        // 計算文本總行數
-        int totalLines = Context.Texts.Count;
-
-        // 獲取游標在文本中的實際 Y 坐標
-        int cursorTextY = GetActualTextY();
-
-        // 計算行號區域寬度所需的位數
-        if (Context.IsLineNumberVisible)
-        {
-            // 相對行號模式：計算相對行號的最大值（上下行數的最大值）
-            int maxRelativeLineNumber = Math.Max(cursorTextY, totalLines - cursorTextY - 1);
-            return maxRelativeLineNumber > 0 ? (int)Math.Log10(maxRelativeLineNumber) + 1 : 1;
-        }
-        else
-        {
-            // 絕對行號模式：計算總行數所需的位數
-            return totalLines > 0 ? (int)Math.Log10(totalLines) + 1 : 1;
-        }
     }
 
     /// <summary>
@@ -284,7 +259,7 @@ public class VimEditor
         {
             if (Context.ViewPort.X + i >= 0 && Context.ViewPort.X + i < screenBuffer.GetLength(0) && i < Context.StatusBar.Chars.Length)
             {
-                screenBuffer[Context.ViewPort.X + i, statusBarY] = Context.StatusBar.Chars[i];
+                screenBuffer.Set(Context.ViewPort.X + i, statusBarY, Context.StatusBar.Chars[i]);
             }
         }
     }
@@ -325,7 +300,7 @@ public class VimEditor
             lineNumberChars.SetText(0, lineNumber.ToString().PadLeft(digits));
             lineNumberChars.SetColor(foreground, background);
             // 添加一個空格作為間隔
-            screenBuffer[x + digits, y] = new ColoredChar(' ', foreground, background);
+            screenBuffer.Set(x + digits, y, new ColoredChar(' ', foreground, background));
         }
         else
         {
@@ -334,7 +309,7 @@ public class VimEditor
             lineNumberChars.SetText(0, lineNumber.ToString().PadRight(digits));
             lineNumberChars.SetColor(foreground, background);
             // 添加一個空格作為間隔
-            screenBuffer[x + digits, y] = new ColoredChar(' ', foreground, background);
+            screenBuffer.Set(x + digits, y, new ColoredChar(' ', foreground, background));
         }
         screenBuffer.SetText(x, y, lineNumberChars);
     }
@@ -353,7 +328,7 @@ public class VimEditor
         // 添加空白字符，寬度等於行號區域寬度
         for (int i = 0; i < lineNumbderWidth; i++)
         {
-            screenBuffer[x + i, y] = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
+            screenBuffer.Set(x + i, y, new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black));
         }
     }
 
@@ -392,11 +367,11 @@ public class VimEditor
                     if (c.Char == '\0')
                     {
                         // 如果是空字符，添加一個空格（黑底白字）
-                        screenBuffer[x + i, y] = ColoredChar.Empty;
+                        screenBuffer.Set(x + i, y, ColoredChar.Empty);
                     }
                     else
                     {
-                        screenBuffer[x + i, y] = c;
+                        screenBuffer.Set(x + i, y, c);
                     }
                 }
             }
@@ -414,7 +389,7 @@ public class VimEditor
                 int pos = x + charsToDraw + i;
                 if (pos >= 0 && pos < screenBuffer.GetLength(0) && y >= 0 && y < screenBuffer.GetLength(1))
                 {
-                    screenBuffer[pos, y] = ColoredChar.Empty;
+                    screenBuffer.Set(pos, y, ColoredChar.Empty);
                 }
             }
         }
@@ -436,7 +411,7 @@ public class VimEditor
         {
             if (x + i >= 0 && x + i < screenBuffer.GetLength(0) && y >= 0 && y < screenBuffer.GetLength(1))
             {
-                screenBuffer[x + i, y] = ColoredChar.Empty;
+                screenBuffer.Set(x + i, y, ColoredChar.Empty);
             }
         }
     }
@@ -480,7 +455,7 @@ public class VimEditor
                 if (x == frameX) c = topLeft; // 左上角
                 else if (x == frameX + frameWidth - 1) c = topRight; // 右上角
                 
-                screenBuffer[x, startY] = new ColoredChar(c, frameColor, backgroundColor);
+                screenBuffer.Set(x, startY, new ColoredChar(c, frameColor, backgroundColor));
             }
         }
 
@@ -494,7 +469,7 @@ public class VimEditor
                 if (x == frameX) c = bottomLeft; // 左下角
                 else if (x == frameX + frameWidth - 1) c = bottomRight; // 右下角
                 
-                screenBuffer[x, endY] = new ColoredChar(c, frameColor, backgroundColor);
+                screenBuffer.Set(x, endY, new ColoredChar(c, frameColor, backgroundColor));
             }
         }
 
@@ -507,7 +482,7 @@ public class VimEditor
                 // 跳過已經繪製的角落
                 if (y != frameY && y != frameY + frameHeight - 1)
                 {
-                    screenBuffer[startX, y] = new ColoredChar(vertical, frameColor, backgroundColor);
+                    screenBuffer.Set(startX, y, new ColoredChar(vertical, frameColor, backgroundColor));
                 }
             }
 
@@ -517,7 +492,7 @@ public class VimEditor
                 // 跳過已經繪製的角落
                 if (y != frameY && y != frameY + frameHeight - 1)
                 {
-                    screenBuffer[endX, y] = new ColoredChar(vertical, frameColor, backgroundColor);
+                    screenBuffer.Set(endX, y, new ColoredChar(vertical, frameColor, backgroundColor));
                 }
             }
         }
