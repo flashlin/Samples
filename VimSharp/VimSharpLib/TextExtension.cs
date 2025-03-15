@@ -62,4 +62,18 @@ public static class TextExtension
         }
         return text.Length;
     }
+    
+    public static int GetTextWidth(this string text)
+    {
+        int width = 0;
+        foreach (var c in text)
+        {
+            width += 1;
+            if (c > 127)
+            {
+                width += 1;
+            }
+        }
+        return width;
+    }
 } 
