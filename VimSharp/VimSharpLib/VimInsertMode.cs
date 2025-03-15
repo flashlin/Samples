@@ -71,7 +71,11 @@ public class VimInsertMode : IVimMode
         var currentLine = Instance.GetCurrentLine();
         var textX = Instance.GetActualTextX();
         var isEndOfLine = textX >= currentLine.Chars.Length;
+        
+        // 切換到普通模式
         Instance.Mode = new VimNormalMode(Instance);
+        
+        // 如果游標在行尾，則向左移動一格
         if (isEndOfLine)
         {
             Instance.MoveCursorLeft();

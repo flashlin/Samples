@@ -206,6 +206,12 @@ public void WaitForInput()
   然後 CursorX - 1, 假如 CursorX 小於 ViewPort.X - GetLineNumberWidth(), CursorX 應該等於 ViewPort.X - GetLineNumberWidth(), 並且 OffsetX - 1, 假如 OffsetX - 1 小於 0, 然後 OffsetX = 0
   最後 Instance.Mode 應該是 VimNormalMode
 
+---
+# 在 VimNormalMode 下
+- 按下 'a' 按鍵時候, 假如 GetActualX() 位置 n, 按下 'a' 按鍵之後, GetActualX() 應該等於 n + 1,
+  CursorX + 1, 假如 CursorX 大於 ViewPort.Right, CursorX = ViewPort.Right, OffsetX + 1
+  Instance.Mode 應該是 VimInsertMode
+
 
 ---
 
