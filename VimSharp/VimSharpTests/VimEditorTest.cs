@@ -142,6 +142,20 @@ namespace VimSharpTests
             _editor.WaitForInput();
         }
 
+        private void PressKey(char key)
+        {
+            switch (key)
+            {
+                case 'a':
+                    _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo(key, ConsoleKey.A, false, false, false));
+                    break;
+                case '$':
+                    _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo(key, ConsoleKey.D4, true, false, false));
+                    break;
+            }
+            throw new Exception("Invalid key");
+        }
+
         /// <summary>
         /// 測試在普通模式下，按下 Esc 鍵，應該切換到視覺模式並將游標向後移動一格
         /// </summary>
@@ -151,13 +165,14 @@ namespace VimSharpTests
             // Given
             InitializeEditor("Hello, World!");
             _editor.Mode = new VimInsertMode(_editor);
-            _editor.Context.CursorX = 14; // 設置游標位置在 '!'後面
+            
+            _editor.Context.CursorX = 13;
 
             // 模擬按下 Esc 鍵
             PressKey(ConsoleKey.Escape);
 
             // Then
-            _editor.Context.CursorX.Should().Be(13); // 游標應該在 '!' 上面
+            _editor.Context.CursorX.Should().Be(12); // 游標應該在 '!' 上面
             _editor.Mode.Should().BeOfType<VimNormalMode>(); // 模式應該切換到 VimVisualMode
         }
 

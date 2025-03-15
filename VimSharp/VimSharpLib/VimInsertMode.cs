@@ -30,7 +30,7 @@ public class VimInsertMode : IVimMode
         _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKey>>>
         {
             // 註冊基本功能鍵
-            { new ConsoleKeyPattern(ConsoleKey.Escape), SwitchToNormalMode },
+            { new ConsoleKeyPattern(ConsoleKey.Escape), HandleEscape },
             { new ConsoleKeyPattern(ConsoleKey.Backspace), HandleBackspace },
             { new ConsoleKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
             { new ConsoleKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },
@@ -65,12 +65,12 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 切換到視覺模式
     /// </summary>
-    private void SwitchToNormalMode(List<ConsoleKey> keys)
+    private void HandleEscape(List<ConsoleKey> keys)
     {
         // 獲取當前行
         var currentLine = Instance.GetCurrentLine();
         var textX = Instance.GetActualTextX();
-        var isEndOfLine = textX > currentLine.Chars.Length;
+        var isEndOfLine = textX >= currentLine.Chars.Length;
         Instance.Mode = new VimNormalMode(Instance);
         if (isEndOfLine)
         {

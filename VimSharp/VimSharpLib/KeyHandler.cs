@@ -44,6 +44,7 @@ public class KeyHandler
         // 計算匹配的模式數量
         var matchCount = 0;
         IKeyPattern? matchedPattern = null;
+        List<IKeyPattern> matchedPatterns = new();
         
         foreach (var pattern in _keyPatterns.Keys)
         {
@@ -51,7 +52,16 @@ public class KeyHandler
             {
                 matchCount++;
                 matchedPattern = pattern;
+                matchedPatterns.Add(pattern);
             }
+        }
+
+        if (matchCount == 2 && matchedPattern is AnyKeyPattern)
+        {
+            var nonAnyKeyPattern = matchedPatterns.First(x => x is not AnyKeyPattern);
+            _keyPatterns[nonAnyKeyPattern].Invoke(_keyBuffer.ToList());
+            _keyBuffer.Clear();
+            return;
         }
         
         // 如果只有一個模式匹配，執行對應的操作
@@ -60,7 +70,6 @@ public class KeyHandler
             _keyPatterns[matchedPattern].Invoke(_keyBuffer.ToList());
             _keyBuffer.Clear();
         }
-        // 如果沒有模式匹配，但緩衝區已經達到一定長度，清除緩衝區
         else if (matchCount == 0 && _keyBuffer.Count >= 3)
         {
             _keyBuffer.Clear();
