@@ -196,7 +196,7 @@ namespace VimSharpTests
         {
             // Given
             _editor.Context.SetText(0, 0, "Hello");
-            _editor.Context.ViewPort = new ConsoleRectangle(10, 1, 40, 10);
+            _editor.Context.ViewPort = new ViewArea(10, 1, 40, 10);
             _editor.Context.CursorX = 4; // 設置游標位置在本文最後一個字上, 例如 "Hello" 的 'o' 上
             _editor.Mode = new VimNormalMode { Instance = _editor };
 

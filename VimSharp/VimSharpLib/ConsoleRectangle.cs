@@ -3,7 +3,7 @@ namespace VimSharpLib;
 /// <summary>
 /// 表示控制台中的矩形區域
 /// </summary>
-public class ConsoleRectangle
+public class ViewArea
 {
     /// <summary>
     /// 矩形左上角的 X 座標
@@ -28,7 +28,7 @@ public class ConsoleRectangle
     /// <summary>
     /// 建立一個新的 ConsoleRectangle 實例
     /// </summary>
-    public ConsoleRectangle()
+    public ViewArea()
     {
     }
     
@@ -39,7 +39,7 @@ public class ConsoleRectangle
     /// <param name="y">矩形左上角的 Y 座標</param>
     /// <param name="width">矩形的寬度</param>
     /// <param name="height">矩形的高度</param>
-    public ConsoleRectangle(int x, int y, int width, int height)
+    public ViewArea(int x, int y, int width, int height)
     {
         X = x;
         Y = y;
@@ -63,7 +63,7 @@ public class ConsoleRectangle
     /// </summary>
     /// <param name="other">要檢查的另一個矩形</param>
     /// <returns>如果矩形相交，則為 true；否則為 false</returns>
-    public bool Intersects(ConsoleRectangle other)
+    public bool Intersects(ViewArea other)
     {
         return X < other.X + other.Width && X + Width > other.X &&
                Y < other.Y + other.Height && Y + Height > other.Y;

@@ -41,7 +41,7 @@ public class VimEditor
     /// <param name="height">視窗的高度</param>
     public void SetViewPort(int x, int y, int width, int height)
     {
-        Context.ViewPort = new ConsoleRectangle(x, y, width, height);
+        Context.ViewPort = new ViewArea(x, y, width, height);
         Context.CursorX = x + CalculateLineNumberWidth();
         Context.CursorY = y;
     }
@@ -364,7 +364,7 @@ public class VimEditor
     /// <summary>
     /// 繪製文本到 screenBuffer，考慮 ViewPort 和偏移量
     /// </summary>
-    private void RenderText(ColoredChar[,] screenBuffer, int x, int y, ConsoleText text, int offset, ConsoleRectangle viewPort,
+    private void RenderText(ColoredChar[,] screenBuffer, int x, int y, ConsoleText text, int offset, ViewArea viewPort,
         int lineNumberWidth = 0)
     {
         // 檢查 Y 座標是否在 ViewPort 範圍內

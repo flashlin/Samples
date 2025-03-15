@@ -9,7 +9,7 @@ public class ConsoleContext
     /// <summary>
     /// 控制台視窗的可視矩形區域
     /// </summary>
-    public ConsoleRectangle ViewPort { get; set; } = new();
+    public ViewArea ViewPort { get; set; } = new();
 
     public bool IsStatusBarVisible { get; set; } = false;
     public string StatusBarText { get; set; } = "";
