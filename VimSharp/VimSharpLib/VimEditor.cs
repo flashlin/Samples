@@ -74,10 +74,9 @@ public class VimEditor
 
     public ColoredChar[,] CreateScreenBuffer()
     {
-        ColoredChar[,] screenBuffer;
         int width = Console.WindowWidth;
         int height = Console.WindowHeight;
-        screenBuffer = new ColoredChar[width, height];
+        var screenBuffer = new ColoredChar[width, height];
         // 初始化整個 screenBuffer
         for (int y = 0; y < height; y++)
         {
@@ -86,7 +85,6 @@ public class VimEditor
                 screenBuffer[x, y] = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
             }
         }
-
         return screenBuffer;
     }
 
@@ -310,8 +308,7 @@ public class VimEditor
     /// <summary>
     /// 繪製行號到 screenBuffer
     /// </summary>
-    private void RenderLineNumber(ColoredChar[,] screenBuffer, int x, int y, int lineNumber,
-        bool isRelativeLineNumber)
+    private void RenderLineNumber(ColoredChar[,] screenBuffer, int x, int y, int lineNumber, bool isRelativeLineNumber)
     {
         // 檢查 Y 座標是否在 ViewPort 範圍內
         if (y < Context.ViewPort.Y || y >= Context.ViewPort.Y + Context.ViewPort.Height)
@@ -319,9 +316,7 @@ public class VimEditor
             return;
         }
 
-        // 創建臨時緩衝區來構建行號字符串
         var digits = Context.Texts.Count.ToString().Length;
-
         var lineNumberChars = new ConsoleText();
         if (isRelativeLineNumber)
         {

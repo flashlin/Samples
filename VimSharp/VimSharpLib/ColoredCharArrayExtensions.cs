@@ -10,4 +10,13 @@ public static class ColoredCharArrayExtensions
             chars[x + i, y] = coloredChar;
         }
     }
+    
+    public static void Set(this ColoredChar[,] chars, int x, int y, ColoredChar character)
+    {
+        if(x < 0 || x >= chars.GetLength(0) || y < 0 || y >= chars.GetLength(1))
+        {
+            return;
+        }
+        chars[x, y] = character;
+    }
 }
