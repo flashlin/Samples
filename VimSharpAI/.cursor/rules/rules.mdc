@@ -61,6 +61,10 @@ alwaysApply: true
   - `void MoveCursorUp()`
   - `void MoveCursorDown()`
   - 移動前需檢查 `ViewPort` 範圍，超出則調整 `OffsetX` 或 `OffsetY`。
+  - 當 CursorY 位於 ViewPort 底部 減去 StatusLine 的位置時，也有可能不會顯示 StatusLine，此時應改為判斷游標是否位於 ViewPort 底部。
+    如果嘗試向下移動 CursorY，需要先確認檔案內容是否已經完全顯示在畫面上。
+    若 檔案內容尚未全部顯示，則應 增加 OffsetY + 1，以便滾動畫面。
+    若 檔案內容已經完全顯示，則 保持 CursorY 不變，避免超出可視範圍。
 
 ---
 
