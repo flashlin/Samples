@@ -325,17 +325,21 @@ public class VimEditor
         var lineNumberChars = new ConsoleText();
         if (isRelativeLineNumber)
         {
+            var foreground = ConsoleColor.Yellow;
+            var background = ConsoleColor.Black;
             lineNumberChars.SetText(0, lineNumber.ToString().PadLeft(digits));
-            lineNumberChars.SetColor(ConsoleColor.Yellow, ConsoleColor.Black);
+            lineNumberChars.SetColor(foreground, background);
             // 添加一個空格作為間隔
-            screenBuffer[x + digits, y] = new ColoredChar(' ', ConsoleColor.Yellow, ConsoleColor.Black);
+            screenBuffer[x + digits, y] = new ColoredChar(' ', foreground, background);
         }
         else
         {
+            var foreground = ConsoleColor.Black;
+            var background = ConsoleColor.Yellow;
             lineNumberChars.SetText(0, lineNumber.ToString().PadRight(digits));
-            lineNumberChars.SetColor(ConsoleColor.Black, ConsoleColor.Yellow);
+            lineNumberChars.SetColor(foreground, background);
             // 添加一個空格作為間隔
-            screenBuffer[x + digits, y] = new ColoredChar(' ', ConsoleColor.Black, ConsoleColor.Yellow);
+            screenBuffer[x + digits, y] = new ColoredChar(' ', foreground, background);
         }
         screenBuffer.SetText(x, y, lineNumberChars);
     }

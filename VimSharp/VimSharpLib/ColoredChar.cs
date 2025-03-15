@@ -21,11 +21,37 @@ public class ColoredChar
         ForegroundColor = foregroundColor;
         BackgroundColor = backgroundColor;
     }
+
+    public int ToAnsiColor(ConsoleColor color)
+    {
+        return color switch
+        {
+            ConsoleColor.Black => 0,
+            ConsoleColor.DarkBlue => 4,
+            ConsoleColor.DarkGreen => 2, 
+            ConsoleColor.DarkCyan => 6,
+            ConsoleColor.DarkRed => 1,
+            ConsoleColor.DarkMagenta => 5,
+            ConsoleColor.DarkYellow => 3,
+            ConsoleColor.Gray => 7,
+            ConsoleColor.DarkGray => 8,
+            ConsoleColor.Blue => 12,
+            ConsoleColor.Green => 10,
+            ConsoleColor.Cyan => 14,
+            ConsoleColor.Red => 9,
+            ConsoleColor.Magenta => 13,
+            ConsoleColor.Yellow => 11,
+            ConsoleColor.White => 15,
+            _ => 7 // 默認為灰色
+        };
+    }
     
     // 轉換為 ANSI 控制碼字串
     public string ToAnsiString()
     {
-        return $"\u001b[38;5;{(int)ForegroundColor}m\u001b[48;5;{(int)BackgroundColor}m{Char}\u001b[0m";
+        var foreground = ToAnsiColor(ForegroundColor);
+        var background = ToAnsiColor(BackgroundColor);
+        return $"\u001b[38;5;{foreground}m\u001b[48;5;{background}m{Char}\u001b[0m";
     }
     
     // 隱式轉換為 char
