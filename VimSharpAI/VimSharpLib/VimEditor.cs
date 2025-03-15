@@ -320,11 +320,27 @@ namespace VimSharpLib
 
         public void MoveCursorDown()
         {
+            // 計算實際可見行數（考慮狀態列）
+            int visibleLines = ViewPort.Height;
+            if (IsStatusBarVisible)
+            {
+                visibleLines--; // 狀態列占用一行，減少可顯示的行數
+            }
+            
             if (CursorY < Texts.Count - 1)
             {
-                CursorY++;
-                int lineWidth = Texts[GetActualTextY()].Width;
-                CursorX = Math.Min(CursorX, Math.Max(0, lineWidth - 1));
+                // 檢查游標移動是否會超出可顯示區域
+                if (!IsStatusBarVisible || CursorY < visibleLines + OffsetY - 1)
+                {
+                    CursorY++;
+                    int lineWidth = Texts[GetActualTextY()].Width;
+                    CursorX = Math.Min(CursorX, Math.Max(0, lineWidth - 1));
+                }
+                else
+                {
+                    // 如果狀態列可見且游標已經在最大顯示行，只增加偏移而不移動游標
+                    OffsetY++;
+                }
             }
 
             AdjustViewPortOffset();
@@ -405,14 +421,21 @@ namespace VimSharpLib
                 OffsetX = CursorX - effectiveWidth + 1;
             }
 
+            // 計算實際可見行數（考慮狀態列）
+            int visibleLines = ViewPort.Height;
+            if (IsStatusBarVisible)
+            {
+                visibleLines--; // 狀態列占用一行，減少可顯示的行數
+            }
+
             // 調整 Y 偏移量
             if (CursorY < OffsetY)
             {
                 OffsetY = CursorY;
             }
-            else if (CursorY >= OffsetY + ViewPort.Height)
+            else if (CursorY >= OffsetY + visibleLines)
             {
-                OffsetY = CursorY - ViewPort.Height + 1;
+                OffsetY = CursorY - visibleLines + 1;
             }
         }
     }
