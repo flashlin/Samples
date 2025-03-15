@@ -174,6 +174,17 @@ public void MoveCursorToEndOfLine()
 }
 ```
 
+### VimEditor::WriteToConsole() 輸出規範
+1. 隱藏游標：開始輸出前，先隱藏游標。
+2. ColoredChar 轉 ANSI 字串：
+*  ColoredChar 需要提供 ToAnsiString() 方法，將自身轉換為 ANSI 格式的字串。
+3. 使用 StringBuilder 優化輸出：
+* 建立 StringBuilder，將 screenBuffer 中所有 ColoredChar 轉換後逐一 append 進 StringBuilder。
+* 最後一次性將完整字串傳給 IConsoleDevice.Write()，避免多次輸出造成效能影響。
+4. 顯示游標：輸出完成後，重新顯示游標。
+5. 完全透過 IConsoleDevice 操作：
+* 所有與控制台相關的操作（隱藏/顯示游標、輸出文字）都必須透過 IConsoleDevice，不得直接使用 Console。
+
 ---
 
 ## 簡潔程式碼規範
