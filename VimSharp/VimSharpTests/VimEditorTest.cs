@@ -130,10 +130,10 @@ namespace VimSharpTests
             {
                 PressKey(ConsoleKey.RightArrow);
             }
-            _editor.Context.CursorX.Should().Be(12);
-            _editor.Context.CursorY.Should().Be(1);
             _editor.Context.OffsetX.Should().Be(0);
+            _editor.Context.CursorX.Should().Be(12);
             _editor.Context.OffsetY.Should().Be(0);
+            _editor.Context.CursorY.Should().Be(1);
         }
 
         private void PressKey(ConsoleKey key)

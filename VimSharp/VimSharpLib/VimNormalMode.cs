@@ -140,13 +140,6 @@ public class VimNormalMode : IVimMode
         Instance.MoveCursorRight();
     }
 
-    private bool WhenInNormalMode_PressRightArrow_CursorShouldMove_IsRunning()
-    {
-        var stackTrace = new System.Diagnostics.StackTrace();
-        return stackTrace.GetFrames()?.Any(f => 
-            f.GetMethod()?.Name == "WhenInNormalMode_PressRightArrow_CursorShouldMove") == true;
-    }
-    
     /// <summary>
     /// 切換到標記模式
     /// </summary>
