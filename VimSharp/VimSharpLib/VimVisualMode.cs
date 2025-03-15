@@ -31,7 +31,7 @@ public class VimVisualMode : IVimMode
 
     private void InitializeKeyPatterns()
     {
-        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action>
+        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKey>>>
         {
             { new ConsoleKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
             { new ConsoleKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },
@@ -69,15 +69,15 @@ public class VimVisualMode : IVimMode
     /// <summary>
     /// 切換到普通模式
     /// </summary>
-    private void SwitchToNormalMode()
+    private void SwitchToNormalMode(List<ConsoleKey> keys)
     {
-        Instance.Mode = new VimInsertMode { Instance = Instance };
+        Instance.Mode = new VimInsertMode(Instance);
     }
     
     /// <summary>
     /// 切換到視覺模式
     /// </summary>
-    private void SwitchToVisualMode()
+    private void SwitchToVisualMode(List<ConsoleKey> keys)
     {
         Instance.Mode = new VimNormalMode(Instance);
     }
@@ -85,7 +85,7 @@ public class VimVisualMode : IVimMode
     /// <summary>
     /// 向左移動游標
     /// </summary>
-    private void MoveCursorLeft()
+    private void MoveCursorLeft(List<ConsoleKey> keys)
     {
         // 如果啟用了相對行號，則游標的 X 位置不能小於行號區域的寬度
         if (Instance.Context.IsLineNumberVisible)
@@ -110,7 +110,7 @@ public class VimVisualMode : IVimMode
     /// <summary>
     /// 向右移動游標
     /// </summary>
-    private void MoveCursorRight()
+    private void MoveCursorRight(List<ConsoleKey> keys)
     {
         // 檢查當前行是否存在
         if (Instance.Context.CursorY < Instance.Context.Texts.Count)
@@ -149,7 +149,7 @@ public class VimVisualMode : IVimMode
     /// <summary>
     /// 向上移動游標
     /// </summary>
-    private void MoveCursorUp()
+    private void MoveCursorUp(List<ConsoleKey> keys)
     {
         if (Instance.Context.CursorY > 0)
         {
@@ -208,7 +208,7 @@ public class VimVisualMode : IVimMode
     /// <summary>
     /// 向下移動游標
     /// </summary>
-    private void MoveCursorDown()
+    private void MoveCursorDown(List<ConsoleKey> keys)
     {
         if (Instance.Context.CursorY < Instance.Context.Texts.Count - 1)
         {
@@ -267,7 +267,7 @@ public class VimVisualMode : IVimMode
     /// <summary>
     /// 複製選取的文本
     /// </summary>
-    private void CopySelectedText()
+    private void CopySelectedText(List<ConsoleKey> keys)
     {
         // 確保起始位置和結束位置有序
         int startY = Math.Min(_startCursorY, _endCursorY);
@@ -353,7 +353,7 @@ public class VimVisualMode : IVimMode
         // 複製完成後切換回視覺模式
         Instance.Context.StatusBar.SetText(0, "已複製選取的文本");
         Instance.Context.IsStatusBarVisible = true;
-        SwitchToVisualMode();
+        SwitchToVisualMode(keys);
     }
     
     /// <summary>

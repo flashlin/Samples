@@ -4,6 +4,14 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
 
+public class AnyKeyPattern : IKeyPattern
+{
+    public bool IsMatch(List<ConsoleKey> keyBuffer)
+    {
+        return true;
+    }
+}
+
 public class ConsoleKeyPattern : IKeyPattern
 {
     private readonly IEnumerable<ConsoleKey> _keys;

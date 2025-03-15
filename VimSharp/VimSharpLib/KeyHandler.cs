@@ -3,7 +3,7 @@ namespace VimSharpLib;
 public class KeyHandler
 {
     private readonly IConsoleDevice _consoleDevice;
-    private Dictionary<IKeyPattern, Action> _keyPatterns = new();
+    private Dictionary<IKeyPattern, Action<List<ConsoleKey>>> _keyPatterns = new();
     private readonly List<ConsoleKey> _keyBuffer = new();
     
     public KeyHandler(IConsoleDevice consoleDevice)
@@ -11,7 +11,7 @@ public class KeyHandler
         _consoleDevice = consoleDevice;
     }
 
-    public void InitializeKeyPatterns(Dictionary<IKeyPattern, Action> keyPatterns)
+    public void InitializeKeyPatterns(Dictionary<IKeyPattern, Action<List<ConsoleKey>>> keyPatterns)
     {
         _keyPatterns = keyPatterns;
     }
@@ -57,7 +57,7 @@ public class KeyHandler
         // 如果只有一個模式匹配，執行對應的操作
         if (matchCount == 1 && matchedPattern != null)
         {
-            _keyPatterns[matchedPattern].Invoke();
+            _keyPatterns[matchedPattern].Invoke(_keyBuffer.ToList());
             _keyBuffer.Clear();
         }
         // 如果沒有模式匹配，但緩衝區已經達到一定長度，清除緩衝區
