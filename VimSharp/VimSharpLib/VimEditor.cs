@@ -27,7 +27,7 @@ public class VimEditor
 
     public void Initialize()
     {
-        Context.SetViewPort(0, 0, Console.WindowWidth, Console.WindowHeight, CalculateLineNumberWidth());
+        Context.SetViewPort(0, 0, Console.WindowWidth, Console.WindowHeight, GetLineNumberWidth());
     }
 
     public void SetText(string text)
@@ -63,7 +63,7 @@ public class VimEditor
         int lineNumberDigits = CalculateLineNumberDigits();
 
         // 繪製內容區域
-        RenderContentArea(screenBuffer, lineNumberDigits, CalculateLineNumberWidth());
+        RenderContentArea(screenBuffer, lineNumberDigits, GetLineNumberWidth());
 
         // 如果狀態欄可見，則繪製狀態欄到 screenBuffer
         if (Context.IsStatusBarVisible)
@@ -549,7 +549,7 @@ public class VimEditor
     /// 計算相對行號區域的寬度
     /// </summary>
     /// <returns>相對行號區域的寬度</returns>
-    public int CalculateLineNumberWidth()
+    public int GetLineNumberWidth()
     {
         if (!Context.IsRelativeLineNumber)
         {
@@ -650,7 +650,7 @@ public class VimEditor
                 }
                 
                 // 調整游標 X 位置
-                int lineNumberWidth = Context.IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
+                int lineNumberWidth = Context.IsRelativeLineNumber ? GetLineNumberWidth() : 0;
                 Context.CursorX = Context.ViewPort.X + newTextX + lineNumberWidth - Context.OffsetX;
             }
         }
@@ -667,7 +667,7 @@ public class VimEditor
         if (actualTextX >= line.Width)
         {
             // 計算行的最後一個位置
-            int lineNumberWidth = Context.IsRelativeLineNumber ? CalculateLineNumberWidth() : 0;
+            int lineNumberWidth = Context.IsRelativeLineNumber ? GetLineNumberWidth() : 0;
             
             // 如果行是空的，將游標設置在行號後
             if (line.Width == 0)
@@ -782,7 +782,7 @@ public class VimEditor
     public void AdjustCursorPositionAndOffset(int textX, int textY)
     {
         // 計算行號區域寬度
-        int lineNumberWidth = CalculateLineNumberWidth();
+        int lineNumberWidth = GetLineNumberWidth();
 
         // 確保當前行存在
         if (Context.Texts.Count == 0)
@@ -867,7 +867,7 @@ public class VimEditor
     
     public int GetActualTextX()
     {
-        return Context.CursorX - Context.ViewPort.X + Context.OffsetX - CalculateLineNumberWidth();
+        return Context.CursorX - Context.ViewPort.X + Context.OffsetX - GetLineNumberWidth();
     }
 
     public int GetActualTextY()

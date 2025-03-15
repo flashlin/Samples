@@ -87,7 +87,7 @@ public class VimVisualMode : IVimMode
         if (Instance.Context.IsRelativeLineNumber)
         {
             // 計算相對行號區域的寬度
-            int lineNumberWidth = Instance.CalculateLineNumberWidth();
+            int lineNumberWidth = Instance.GetLineNumberWidth();
             
             // 如果游標已經在最左邊（相對行號區域的右側），則不再向左移動
             if (Instance.Context.CursorX <= lineNumberWidth)
