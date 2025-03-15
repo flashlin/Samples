@@ -343,9 +343,9 @@ public class VimInsertMode : IVimMode
     public void WaitForInput()
     {
         // 設置為垂直線游標 (DECSCUSR 6)
-        Instance.GetConsoleDevice().Write("\x1b[6 q");
+        Instance.Console.Write("\x1b[6 q");
         
-        var keyInfo = Instance.GetConsoleDevice().ReadKey(intercept: true);
+        var keyInfo = Instance.Console.ReadKey(intercept: true);
 
         // 確保當前行存在
         if (Instance.Context.Texts.Count <= Instance.Context.CursorY)

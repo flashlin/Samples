@@ -24,6 +24,11 @@ public class ConsoleDevice : IConsoleDevice
     {
         Console.Write($"\x1b[{top+1};{left+1}H");
     }
+
+    public void SetBlockCursor()
+    {
+        Console.Write("\x1b[2 q");
+    }
     
     /// <summary>
     /// 寫入文本到控制台

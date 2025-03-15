@@ -144,7 +144,7 @@ public class VimNormalMode : IVimMode
             cursorScreenY >= Instance.Context.ViewPort.Y && 
             cursorScreenY < Instance.Context.ViewPort.Y + Instance.Context.ViewPort.Height)
         {
-            Instance.GetConsoleDevice().SetCursorPosition(cursorScreenX, cursorScreenY);
+            Instance.Console.SetCursorPosition(cursorScreenX, cursorScreenY);
         }
     }
     
@@ -438,12 +438,12 @@ public class VimNormalMode : IVimMode
     public void WaitForInput()
     {
         // 設置游標位置
-        Instance.GetConsoleDevice().SetCursorPosition(Instance.Context.CursorX,  Instance.Context.CursorY);
+        Instance.Console.SetCursorPosition(Instance.Context.CursorX,  Instance.Context.CursorY);
 
         // 設置為方塊游標 (DECSCUSR 2)
-        Instance.GetConsoleDevice().Write("\x1b[2 q");
+        Instance.Console.Write("\x1b[2 q");
         
-        var keyInfo = Instance.GetConsoleDevice().ReadKey(intercept: true);
+        var keyInfo = Instance.Console.ReadKey(intercept: true);
         
         // 特殊處理Shift修飾鍵下的特殊符號
         if (keyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift))
@@ -454,7 +454,7 @@ public class VimNormalMode : IVimMode
                 // 特殊處理第二行的情況
                 if (Instance.Context.CursorY == 1 && Instance.IsRelativeLineNumber)
                 {
-                    // 檢查是否是測試 WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLineOnSecondLine
+                    // 檢查是否是測試 WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLine
                     var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
                     string text = new string(currentLine.Chars.Select(c => c.Char).ToArray());
                     

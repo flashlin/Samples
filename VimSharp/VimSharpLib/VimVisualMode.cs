@@ -358,18 +358,18 @@ public class VimVisualMode : IVimMode
     private void SetCursorPosition()
     {
         // 設置為方塊游標 (DECSCUSR 2)
-        Instance.GetConsoleDevice().Write("\x1b[2 q");
+        Instance.Console.Write("\x1b[2 q");
     }
     
     public void WaitForInput()
     {
         // 設置為方塊游標 (DECSCUSR 2)
-        Instance.GetConsoleDevice().Write("\x1b[2 q");
+        Instance.Console.Write("\x1b[2 q");
         
         // 高亮顯示選取的文本
         HighlightSelectedText();
         
-        var keyInfo = Instance.GetConsoleDevice().ReadKey(intercept: true);
+        var keyInfo = Instance.Console.ReadKey(intercept: true);
         
         // 將按鍵添加到緩衝區
         _keyBuffer.Add(keyInfo.Key);

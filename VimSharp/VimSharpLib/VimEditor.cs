@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class VimEditor
 {
-    private readonly IConsoleDevice _console;
+    public IConsoleDevice Console { get; private set; }
 
     public bool IsRunning { get; set; } = true;
     public ConsoleContext Context { get; set; } = new();
@@ -22,14 +22,14 @@ public class VimEditor
 
     public VimEditor(IConsoleDevice console)
     {
-        _console = console;
+        Console = console;
         Mode = new VimNormalMode { Instance = this };
         Initialize();
     }
 
     public void Initialize()
     {
-        SetViewPort(0, 0, _console.WindowWidth, _console.WindowHeight);
+        SetViewPort(0, 0, Console.WindowWidth, Console.WindowHeight);
     }
 
     /// <summary>
@@ -94,8 +94,8 @@ public class VimEditor
     public ColoredChar[,] CreateScreenBuffer()
     {
         ColoredChar[,] screenBuffer;
-        int width = _console.WindowWidth;
-        int height = _console.WindowHeight;
+        int width = Console.WindowWidth;
+        int height = Console.WindowHeight;
         screenBuffer = new ColoredChar[width, height];
         // 初始化整個 screenBuffer
         for (int y = 0; y < height; y++)
@@ -125,7 +125,7 @@ public class VimEditor
         // 顯示游標
         outputBuffer.Append("\x1b[?25h");
         // 一次性輸出所有內容到控制台
-        _console.Write(outputBuffer.ToString());
+        Console.Write(outputBuffer.ToString());
     }
 
     /// <summary>
@@ -559,15 +559,6 @@ public class VimEditor
     {
         Context.OffsetX += deltaX;
         Context.OffsetY = Math.Max(0, Context.OffsetY + deltaY);
-    }
-
-    /// <summary>
-    /// 獲取控制台設備
-    /// </summary>
-    /// <returns>控制台設備</returns>
-    public IConsoleDevice GetConsoleDevice()
-    {
-        return _console;
     }
 
     /// <summary>
