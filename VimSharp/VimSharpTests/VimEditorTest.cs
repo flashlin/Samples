@@ -148,9 +148,11 @@ namespace VimSharpTests
             {
                 case 'a':
                     _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo(key, ConsoleKey.A, false, false, false));
+                    _editor.WaitForInput();
                     break;
                 case '$':
                     _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo(key, ConsoleKey.D4, true, false, false));
+                    _editor.WaitForInput();
                     break;
             }
             throw new Exception("Invalid key");
@@ -213,20 +215,16 @@ namespace VimSharpTests
             _editor.Context.SetText(0, 0, "Hello");
             _editor.Context.SetViewPort(10, 1, 40, 10);
             _editor.Context.CursorX = 4; // 設置游標位置在本文最後一個字上, 例如 "Hello" 的 'o' 上
-            _editor.Mode = new VimNormalMode (_editor);
 
             // 模擬按下 'a' 鍵，切換到 NormalMode 並將游標向右移動一格
-            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false));
-            _editor.WaitForInput();
-
-            // 此時游標應該在 'o' 後面，模式應該是 NormalMode
+            PressKey('a');
             _editor.Context.CursorX.Should().Be(5);
+            
+            // 此時游標應該在 'o' 後面，模式應該是 InsertMode
             _editor.Mode.Should().BeOfType<VimInsertMode>();
 
-            // 模擬按下 Esc 鍵，切換回 VisualMode 並將游標向左移動一格
-            _mockConsole.ReadKey(Arg.Any<bool>())
-                .Returns(new ConsoleKeyInfo('\0', ConsoleKey.Escape, false, false, false));
-            _editor.WaitForInput();
+            // 模擬按下 Esc 鍵，切換回 NormalMode 並將游標向左移動一格
+            PressKey(ConsoleKey.Escape);
 
             // Then
             _editor.Context.CursorX.Should().Be(4); // 游標應該向左移動一格
