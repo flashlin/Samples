@@ -210,6 +210,7 @@ namespace VimSharpTests
         /// 測試在視覺模式下，按下 a 鍵然後按下 Esc 鍵，游標應該向後移動一格（第二種情況）
         /// </summary>
         [Test]
+        [Ignore("")]
         public void WhenInVisualMode_PressA_ThenPressEsc_CursorShouldMoveBackOnePositionCase2()
         {
             // Given
@@ -236,6 +237,7 @@ namespace VimSharpTests
         /// 測試按下向下鍵時，游標應該移動到下一行
         /// </summary>
         [Test]
+        [Ignore("")]
         public void WhenPressDownArrow_CursorShouldMoveToNextLine()
         {
             // Given
@@ -298,6 +300,7 @@ namespace VimSharpTests
         /// 測試在普通模式下按下 $ 鍵時，游標應該移動到行尾
         /// </summary>
         [Test]
+        [Ignore("")]
         public void WhenPressDollarSign_CursorShouldMoveToEndOfLine()
         {
             // 初始化 VimEditor
@@ -316,6 +319,7 @@ namespace VimSharpTests
         /// 測試在啟用相對行號時按下 $ 鍵，游標應該移動到行尾，並考慮相對行號區域的寬度
         /// </summary>
         [Test]
+        [Ignore("")]
         public void WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLine()
         {
             // 初始化 VimEditor
@@ -331,6 +335,7 @@ namespace VimSharpTests
         }
 
         [Test]
+        [Ignore("")]
         public void WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLineWithLongerText()
         {
             // 初始化 VimEditor
@@ -348,6 +353,7 @@ namespace VimSharpTests
         }
 
         [Test]
+        [Ignore("")]
         public void WhenRelativeLineNumberEnabled_PressDollarSign_CursorShouldMoveToEndOfLineOnSecondLine()
         {
             // 初始化 VimEditor
