@@ -103,6 +103,16 @@ public string ToAnsiString()
 
 - 注意事項:
 記錄時，若 Chars[n].Char 的 ASCII 長度為 2，則確保下一個字元為 '\0'
+例如：
+* 文字："中文"
+  - Chars 內容：Chars[0] = '中', Chars[1] = '\0', Chars[2] = '文', Chars[3] = '\0'
+  - Width 應為 4。
+* 文字："ab"
+  - Chars 內容：Chars[0] = 'a', Chars[1] = 'b'
+  - Width 應為 2。
+* 文字："a中文b"
+  - Chars 內容：'a', '中', '\0', '文', '\0', 'b'
+  - Width 應為 6。
 
 ---
 
