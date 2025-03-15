@@ -222,5 +222,7 @@ public void MoveCursorToEndOfLine()
 
 ---
 
-這樣的規範讓 `VimEditor` 更易於擴展與維護，確保符合 Vim 模式切換、游標移動與內容顯示的核心需求。
+# 測試專案程式碼規範
+* 驗收輸出結果一律從 `ColoredChar[,] screenBuffer` 驗收結果
+* IConsoleDevice 的 MockConsoleDevice 只需使用 Substitute 模擬其方法。
 
