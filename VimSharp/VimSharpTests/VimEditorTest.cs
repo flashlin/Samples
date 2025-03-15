@@ -189,12 +189,10 @@ namespace VimSharpTests
         {
             // Given
             InitializeEditor("Hello, World!");
-            _editor.Mode = new VimNormalMode (_editor);
             _editor.Context.CursorX = 12; // 設置游標位置在本文最後一個字上, 例如 "Hello, World!" 的 '!' 上
 
             // 模擬按下 'a' 鍵，切換到 NormalMode 並將游標向右移動一格
-            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false));
-            _editor.WaitForInput();
+            PressKey('a');
 
             // 此時游標應該在 '!' 後面，模式應該是 NormalMode
             _editor.Context.CursorX.Should().Be(13);
