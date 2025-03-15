@@ -25,6 +25,9 @@ public class ViewArea
     /// </summary>
     public int Height { get; set; }
     
+    public int Right => X + Width - 1;
+    public int Bottom => Y + Height - 1;
+    
     /// <summary>
     /// 建立一個新的 ConsoleRectangle 實例
     /// </summary>
