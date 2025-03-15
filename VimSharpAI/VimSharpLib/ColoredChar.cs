@@ -63,6 +63,12 @@ namespace VimSharpLib
         /// <returns>格式化的 ANSI 字符串</returns>
         public string ToAnsiString()
         {
+            // 若字符為 '\0'，則返回空字符串
+            if (Char == '\0')
+            {
+                return string.Empty;
+            }
+            
             string foreCode = ForegroundColors.TryGetValue(Foreground, out var fore) ? fore : "37"; // 默認白色
             string backCode = BackgroundColors.TryGetValue(Background, out var back) ? back : "40"; // 默認黑色
             

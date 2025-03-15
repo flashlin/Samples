@@ -16,15 +16,20 @@ namespace VimSharpLib
             int index = 0;
             foreach (char c in text)
             {
-                // 對於中文字符（ASCII 值大於 127 的字符），添加一個 '\0' 字符
-                if (c > 127)
+                // 對於空白字符，使用 ColoredChar.Empty
+                if (c == ' ')
                 {
-                    Chars[index++] = new ColoredChar(c, ConsoleColor.White, ConsoleColor.Black);
-                    Chars[index++] = new ColoredChar('\0', ConsoleColor.White, ConsoleColor.Black);
+                    Chars[index++] = ColoredChar.ViewEmpty;
+                }
+                // 對於中文字符（ASCII 值大於 127 的字符），添加一個 '\0' 字符
+                else if (c > 127)
+                {
+                    Chars[index++] = new ColoredChar(c, ConsoleColor.White, ConsoleColor.DarkGray);
+                    Chars[index++] = new ColoredChar('\0', ConsoleColor.White, ConsoleColor.DarkGray);
                 }
                 else
                 {
-                    Chars[index++] = new ColoredChar(c, ConsoleColor.White, ConsoleColor.Black);
+                    Chars[index++] = new ColoredChar(c, ConsoleColor.White, ConsoleColor.DarkGray);
                 }
             }
         }
