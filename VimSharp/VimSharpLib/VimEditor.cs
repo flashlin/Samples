@@ -532,14 +532,6 @@ public class VimEditor
         Context.OffsetY = Math.Max(0, Context.OffsetY + deltaY);
     }
 
-    public void MoveCursorRightN(int n)
-    {
-        for (int i = 0; i < n; i++)
-        {
-            MoveCursorRight();
-        }
-    }
-
     /// <summary>
     /// 處理向右移動時遇到的 '\0' 字符
     /// </summary>
@@ -592,33 +584,6 @@ public class VimEditor
             }
             ch = currentLine.Chars[textX];
         }while(ch.Char == '\0' && textX > 0);
-    }
-
-    public void MoveCursorRight()
-    {
-        var textX = GetActualTextX();
-        var currentLine = GetCurrentLine();
-        if (textX >= currentLine.Width)
-        {
-            return;
-        }
-
-        ColoredChar ch;
-        do
-        {
-            textX++;
-            Context.CursorX++;
-            if (Context.CursorX > Context.ViewPort.Right)
-            {
-                Context.CursorX = Context.ViewPort.Right;
-                Context.OffsetX = Math.Min(Context.OffsetX + 1, currentLine.Width - Context.ViewPort.Width); 
-            }
-            if(textX >= currentLine.Width)
-            {
-                break;
-            }
-            ch = currentLine.Chars[textX];
-        }while(ch.Char == '\0' && textX < currentLine.Width - 1);
     }
 
     /// <summary>

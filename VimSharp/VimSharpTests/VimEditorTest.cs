@@ -66,7 +66,10 @@ namespace VimSharpTests
         {
             // Given
             InitializeEditorWithOffset("Hello, World!");
-            _editor.MoveCursorRightN(13);
+            for(var i = 0; i < 13; i++)
+            {
+                PressKey(ConsoleKey.RightArrow);
+            }
             _editor.Context.CursorX.Should().Be(13);
             
             _editor.Mode = new VimNormalMode (_editor);

@@ -84,7 +84,24 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void MoveCursorRight(List<ConsoleKey> keys)
     {
-        Instance.MoveCursorRight();
+        var textX = Instance.GetActualTextX();
+        var currentLine = Instance.GetCurrentLine();
+        ColoredChar ch;
+        do
+        {
+            textX++;
+            Instance.Context.CursorX++;
+            if (Instance.Context.CursorX > Instance.Context.ViewPort.Right)
+            {
+                Instance.Context.CursorX = Instance.Context.ViewPort.Right;
+                Instance.Context.OffsetX = Math.Min(Instance.Context.OffsetX + 1, currentLine.Width - Instance.Context.ViewPort.Width); 
+            }
+            if(textX >= currentLine.Width)
+            {
+                break;
+            }
+            ch = currentLine.Chars[textX];
+        }while(ch.Char == '\0' && textX < currentLine.Width - 1);
     }
 
     /// <summary>
@@ -136,8 +153,8 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void HandleAKey(List<ConsoleKey> keys)
     {
+        MoveCursorRight(keys);
         Instance.Mode = new VimInsertMode(Instance);
-        Instance.MoveCursorRight();
     }
 
     /// <summary>
