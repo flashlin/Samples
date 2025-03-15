@@ -86,7 +86,7 @@ namespace VimSharpTests
         {
             // Given
             InitializeEditor("Hello, World!");
-            _editor.Mode = new VimInsertMode { Instance = _editor };
+            _editor.Mode = new VimInsertMode(_editor);
             _editor.Context.CursorX = 12; // 設置游標位置在 '!' 上
 
             // 模擬按下向右鍵
@@ -150,7 +150,7 @@ namespace VimSharpTests
         {
             // Given
             InitializeEditor("Hello, World!");
-            _editor.Mode = new VimInsertMode { Instance = _editor };
+            _editor.Mode = new VimInsertMode(_editor);
             _editor.Context.CursorX = 14; // 設置游標位置在 '!'後面
 
             // 模擬按下 Esc 鍵
