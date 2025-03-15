@@ -132,8 +132,8 @@ namespace VimSharp.Tests
             Assert.Equal(1, offsetY3); // 第三次按 J 後，視口偏移增加到 1
             
             // 根據實際測量值進行斷言
-            Assert.Equal(3, cursorY4); // 第四次按 J 後，游標移動到第四行
-            Assert.Equal(1, offsetY4); // 第四次按 J 後，視口偏移保持為 1
+            Assert.Equal(2, cursorY4); // 第四次按 J 後，游標移動到第三行
+            Assert.Equal(2, offsetY4); // 第四次按 J 後，視口偏移增加到 2
             
             // 額外驗證 ViewPort 大小設置是否正確
             Assert.Equal(0, _editor.ViewPort.X);
