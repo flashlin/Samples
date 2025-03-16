@@ -1,0 +1,260 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+### `ConsoleContext` 類別  
+`ConsoleContext` 負責管理 Vim 編輯器的畫面內容和游標狀態。  
+
+**屬性**：  
+- `List<ConsoleText> Texts`：儲存檔案內容，每行對應一個 `ConsoleText`。  
+- `int CursorX` / `int CursorY`：游標當前在螢幕上的 X/Y 位置。  
+- `int OffsetX` / `int OffsetY`：內容的 X/Y 偏移量，決定 `Texts` 在 `ViewPort` 中的起始顯示位置。  
+- `ViewArea ViewPort`：定義 `Texts` 在螢幕上的顯示範圍。  
+- `bool IsStatusBarVisible`：是否顯示狀態列。  
+- `ConsoleText StatusBar`：狀態列的內容。  
+- `bool IsRelativeNumberVisible`：是否顯示相對行號。  
+
+---  
+
+### `ViewArea` 類別  
+`ViewArea` 負責定義內容顯示的範圍。  
+
+**屬性**：  
+- `int X, Y`：顯示區域的起始位置（左上角座標，從 0 開始計算）。  
+- `int Width, Height`：顯示區域的寬度與高度。  
+- `int Right`：右下角 X 座標，計算方式為 `X + Width - 1`。  
+- `int Bottom`：右下角 Y 座標，計算方式為 `Y + Height - 1`。  
+
+### `ConsoleText` 類別 
+**屬性**
+- ColoredChar[] Chars
+
+若 Chars[n].Char 的 ASCII > 127，則確保下一個 Chars[n+1] 為 ColoredChar.None
+例如: 存放 "1中文2" 的時候, Chars 結構會是 ['1', '中', '\0', '文', '\0', '2']
+
+
+### `ColoredChar` 類別  
+`ColoredChar` 表示具有顏色屬性的單一字元。  
+
+**屬性**：  
+- `char Char`：字元內容。  
+- `ConsoleColor ForegroundColor`：前景色。  
+- `ConsoleColor BackgroundColor`：背景色。  
+- static ColoredChar None = new ColoredChar('\0')
+
+**方法**:
+public string ToAnsiString()
+{
+   var foreground = ToAnsiForegroundColor(ForegroundColor);
+   var background = ToAnsiBackgroundColor(BackgroundColor);
+   return $"\u001b[{foreground}m\u001b[{background}m{Char}\u001b[0m";
+}
+
+---  
+
+#### `VimEditor` 類別  
+`VimEditor` 負責 Vim 編輯器的核心邏輯與顯示渲染。  
+
+**屬性**：  
+- `IConsoleDevice Console { get; private set; }`：控制台裝置介面。  
+- `ConsoleContext Context { get; private set; } = new();`：當前編輯器的內容與狀態。  
+- `IVimMode Mode { get; set; } = null!;`：目前的 Vim 模式。  
+- `List<string> ClipboardBuffers { get; set; } = [];`：剪貼簿緩衝區，存儲複製的內容。  
+
+**方法**:
+- void Init()
+Context.CursorX = Context.ViewPort.X + lineNumberWidth
+Context.CursorY = Context.ViewPort.Y
+
+- void OpenText(string text)
+依照 text 內容一一將每一行內容放入 Context.Texts 中
+
+- ColoredChar[,] CreateScreenBuffer()
+依照目前 Console 的 Width, Height 建立二維大小的 ColoredChar[,]
+並初始化 new ColoredChar(' ')
+return 
+
+- void Render(ColoredChar[,] screenBuffer)
+依照 Context 屬性內容
+將 Context.Texts 依照 Context.ViewPort 規定範圍
+從 Context.OffsetX, Context.OffsetY 開始擷取 Context.Texts
+var lineRelativeWidth = IsRelativeNumberVisible ? Context.Texts.Count.ToString() + 1 : 0; 
+
+從 Context.ViewPort.X + lineRelativeWidth, Context.ViewPort.Y 
+開示放入 screenBuffer = Texts[?,?]
+假如 IsStatusBarVisible Texts 就少一行放入 screenBuffer, 把 StatusBar 內容放入 screenBuffer
+
+Col = Context.CursorX - Context.ViewPort.X + Context.OffsetX + 1
+Row = Context.CursorY - Context.ViewPort.Y + Context.OffsetY + 1
+currentLineNumber = Row
+從 Context.ViewPort.X,Context.ViewPort.Y 開始計算 
+lineNumber = Math.Abs(絕對lineNumber - Row) == 0 ? Row : Math.Abs(絕對lineNumber - Row)
+再將 lineNumber 內容 (例如: lineNumber 123 = [new ColoredChar('1'), new ColoredChar('2'), new ColoredChar('3'), new ColoredChar(' ')]) 到 screenBuffer[?,?]
+
+Pseudo Code 流程:
+Function Render(screenBuffer: 2D array of ColoredChar)
+    // 1. 計算行號顯示區寬度 (如果啟用相對行號)
+    if Context.IsRelativeNumberVisible then
+        // 取得總行數字串長度，並加 1（例如：378 → 寬度為 3+1=4）
+        lineRelativeWidth = length(toString(Context.Texts.Count)) + 1
+    else
+        lineRelativeWidth = 0
+
+    // 2. 若狀態列要顯示，文本顯示區高度需減 1
+    if Context.IsStatusBarVisible then
+        textAreaHeight = Context.ViewPort.Height - 1
+    else
+        textAreaHeight = Context.ViewPort.Height
+
+    // 3. 依照 ViewPort 顯示每一行文本
+    for row from 0 to textAreaHeight - 1 do
+        // 計算要擷取的文本行索引 (根據內容 Y 偏移量)
+        textLineIndex = Context.OffsetY + row
+        
+        // 取得該行文本 (若超出範圍則視為空白行)
+        if textLineIndex < Context.Texts.Count then
+            currentText = Context.Texts[textLineIndex]
+        else
+            currentText = (空白的 ConsoleText)
+        
+        // 4. 如果啟用相對行號，則先計算並放置行號
+        if Context.IsRelativeNumberVisible then
+            // 計算游標所在的文本行（以 ViewPort 與 Offset 調整後）
+            cursorTextLine = Context.CursorY - Context.ViewPort.Y + Context.OffsetY
+            // 計算顯示行號：
+            // 若當前行就是游標所在行，則顯示其絕對行號
+            // 否則顯示與游標行的絕對差值
+            if textLineIndex == cursorTextLine then
+                displayLineNumber = textLineIndex + 1
+            else
+                displayLineNumber = abs(textLineIndex - cursorTextLine)
+            // 將數字轉字串並補足寬度 (不足部分以空白填充)
+            lineNumberString = PadRight(toString(displayLineNumber), lineRelativeWidth)
+            
+            // 從 ViewPort.X 開始，依序將 lineNumberString 放入 screenBuffer 對應列
+            for numCol from 0 to lineRelativeWidth - 1 do
+                screenBuffer[Context.ViewPort.Y + row, Context.ViewPort.X + numCol] =
+                    new ColoredChar(char = lineNumberString[numCol], ForegroundColor = (適當行號色), BackgroundColor = (適當背景))
+            end for
+        end if
+
+        // 5. 顯示文本內容：
+        // 從 ViewPort.X + lineRelativeWidth 開始填入，對應當前文本行從 OffsetX 開始的部分
+        for col from 0 to (Context.ViewPort.Width - lineRelativeWidth) - 1 do
+            textColIndex = Context.OffsetX + col
+            // 取得該位置字元，若超出則用空白字元補足
+            if textColIndex < currentText.Length then
+                c = currentText[textColIndex]  // c 為一個 ColoredChar
+            else
+                c = new ColoredChar(char = ' ', ForegroundColor = default, BackgroundColor = default)
+            end if
+
+            // 計算實際的屏幕位置
+            screenX = Context.ViewPort.X + lineRelativeWidth + col
+            screenY = Context.ViewPort.Y + row
+            screenBuffer[screenY, screenX] = c
+        end for
+    end for
+
+    // 6. 顯示狀態列 (若啟用)
+    if Context.IsStatusBarVisible then
+        statusBarRow = Context.ViewPort.Y + Context.ViewPort.Height - 1  // 最底一行
+        // 假設 Context.StatusBar 為一整行的 ConsoleText (包含 ColoredChar 陣列)
+        for col from 0 to Context.ViewPort.Width - 1 do
+            if col < Context.StatusBar.Length then
+                c = Context.StatusBar[col]
+            else
+                c = new ColoredChar(char = ' ', ForegroundColor = default, BackgroundColor = default)
+            end if
+            screenBuffer[statusBarRow, Context.ViewPort.X + col] = c
+        end for
+    end if
+
+    // 7. 計算並設定游標位置 (用於後續更新游標顯示)
+    cursorScreenX = Context.CursorX - Context.ViewPort.X + Context.OffsetX + 1
+    cursorScreenY = Context.CursorY - Context.ViewPort.Y + Context.OffsetY + 1
+    // (此處可呼叫 Console 或其他機制設定實際游標位置)
+
+End Function
+
+上述 Render 方法的實作應分為三個部分，以保持程式碼簡潔且易讀：
+* 繪製行號區域：若啟用了相對行號，則計算並顯示每行的行號。
+* 繪製文字內容：根據 ViewPort 的範圍，擷取並渲染 Texts 內容。
+* 繪製狀態列：若啟用了狀態列，則將其狀態內容顯示在 ViewPort 的最底部。
+
+
+
+
+幫忙寫 VimEditor::Render(ColoredChar[,] screenBuffer) 測試案例
+每一種狀況要考慮 (邊界,IsRelativeNumberVisible,IsStatusBarVisible)
+editor = new VimEditor()
+ColoredChar[,] screenBuffer = editor.CreateScreenBuffer();
+editor.IsRelativeNumberVisible = true / false
+editor.IsStatusBarVisible = true / false
+editor.Context.ViewPort = new ViewArea(10, 10, 20, 5)
+editor.Context.OffsetX = ?
+editor.Context.OffsetY = ?
+editor.Init()
+editor.OpenText(???)
+動作 editor.Render()
+驗收 screenBuffer 內容是否正確?
+
+
+
+
+
+
+
+
+- void MoveCursorRight()
+將 Context.CursorX += 1 時候
+考慮是否超過 Context.ViewPort.Right ? 超過就遞增 Context.OffsetX  
+遞增 Context.OffsetX 的時候要考慮 Context.OffsetX + Context.Width 不能超過 Context.Right + 1
+
+Pseudo Code 流程:
+Function MoveCursorRight()
+    // 1. 將游標位置右移一格
+    Context.CursorX = Context.CursorX + 1
+
+    // 2. 如果游標超出 ViewPort 的右邊界，則需要平移顯示內容
+    if Context.CursorX > Context.ViewPort.Right then
+        // 3. 在平移前，先檢查是否還有足夠的內容可以顯示
+        //    確保新的 OffsetX + ViewPort.Width 不會超過內容最右邊 (Context.Right + 1)
+        if Context.OffsetX + Context.ViewPort.Width < Context.Right + 1 then
+            // 4. 平移內容，即增加 OffsetX
+            Context.OffsetX = Context.OffsetX + 1
+        else
+            // 5. 如果已達到內容最右邊，則限制游標位置不再超出 ViewPort
+            Context.CursorX = Context.ViewPort.Right
+        end if
+    end if
+End Function
+
+- void MoveCursorLeft()
+將 Context.CursorX -= 1 時候
+考慮是否小於 Context.ViewPort.X + lineNumberWidth  ? 小於就遞減 Context.OffsetX  
+遞減 Context.OffsetX 的時候要考慮 Context.OffsetX 不能小於 0
+
+Pseudo Code 流程:
+Function MoveCursorLeft()
+    // 1. 將游標位置左移一格
+    Context.CursorX = Context.CursorX - 1
+
+    // 2. 如果游標超出 ViewPort 的左邊界，則需要平移顯示內容
+    if Context.CursorX < Context.ViewPort.X then
+        // 3. 在平移前，先檢查是否還有足夠的內容可以顯示：
+        //    確保新的 OffsetX 不會小於 0
+        if Context.OffsetX > 0 then
+            // 4. 平移內容，即減少 OffsetX
+            Context.OffsetX = Context.OffsetX - 1
+        else
+            // 5. 如果已達到內容最左邊，則限制游標位置不再超出 ViewPort
+            Context.CursorX = Context.ViewPort.X + lineNumberWidth
+        end if
+    end if
+End Function
+
+- void MoveCursorUp()
+將 Context.CursorY -= 1 時候
+

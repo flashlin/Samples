@@ -1,0 +1,78 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+## 測試案例 1：相對行號啟用 + 狀態列啟用
+### Given
+* 建立一個 VimEditor 實例，並將以下屬性設定：
+  - IsRelativeNumberVisible 設為 true
+  - IsStatusBarVisible 設為 true
+* 設定 ViewPort 為從螢幕座標 (10, 10) 開始，寬度 20、長度 5 的區域。
+* 設定偏移量 OffsetX 與 OffsetY 為 0（表示從檔案第一個字元開始顯示）。
+* 呼叫 Init() 方法
+* 利用 OpenText() 載入多行文字（例如：6 行簡單文字，每行內容不同）。
+* 設定 StatusBar 的內容（例如：一段補滿 20 個字元的文字）。
+### When
+* 呼叫 Render(screenBuffer) 方法，其中 screenBuffer 為已建立好的二維 ColoredChar 陣列（大小至少要能覆蓋整個 ViewPort 區域）。
+### Then
+* 螢幕緩衝區 (screenBuffer) 中 ViewPort 區域內的前 4 行（由於啟用狀態列時，內容區域高度會減 1）應該依序顯示：
+  * 左側區域（寬度依照「檔案總行數字串長度+1」計算）填入行號。其中：
+    - 若該行正是游標所在行，則行號顯示為該行的絕對行號（1-based）。
+    - 其他行則顯示與游標行差值（絕對值），並且補足固定寬度。
+  * 右側文字區則顯示對應該行的文字內容，從 OffsetX 開始取值；若該行文字不足 ViewPort 的寬度，則以空白字元補足。
+* 最後一行（ViewPort 最底行）應完全填入 StatusBar 的內容，若 StatusBar 長度不足 ViewPort 寬度，也會以空白字元補足。
+* 此外，游標的最終位置也必須正確對應到 screenBuffer 中計算出的位置（考慮了 ViewPort、偏移量以及行號區寬度）。
+
+## 測試案例 2：相對行號關閉 + 狀態列關閉
+### Given
+* 建立 VimEditor 實例，設定：
+  - IsRelativeNumberVisible 設為 false
+  - IsStatusBarVisible 設為 false
+* ViewPort 依然設定為 (10, 10) 開始，寬度 20、高度 5。
+* OffsetX 與 OffsetY 設為 0。
+* 呼叫 Init()
+* 載入相同的多行文字資料。
+### When
+* 呼叫 Render(screenBuffer) 方法，使用同一個或新建立的 screenBuffer。
+### Then
+* 螢幕緩衝區中，從 ViewPort 的 (10,10) 起始區域，應直接顯示文字內容，因為不啟用相對行號，畫面最左側不需要保留行號區。
+* 檢查每一行：若該行在檔案內容範圍內，則對應的文字內容正確出現在畫面中；若超出文字內容則以空白補足。
+* 由於不啟用狀態列，整個 ViewPort 區域（高度 5 行）都應該屬於文字內容顯示區，並且游標位置的計算不需考慮狀態列的存在。
+
+## 測試案例 3：相對行號啟用 + 狀態列關閉
+### Given
+* 建立 VimEditor 實例，設定：
+  - IsRelativeNumberVisible 設為 true
+  - IsStatusBarVisible 設為 false
+* 同樣的 ViewPort 設定 (10,10,20,5) 與偏移量 (0,0)。
+* 呼叫 Init() 
+* 載入多行文字（可用與前面相同的範例資料）。
+### When
+* 執行 Render(screenBuffer)。
+### Then
+* 渲染時，整個 ViewPort 高度（5 行）都用於顯示文字內容，但每行左側仍要預留行號區。
+* 行號的寬度依然根據檔案總行數計算，並在每一行的左側依規則顯示相對行號。
+* 文字內容則從 ViewPort.X + 行號區寬度開始顯示，並正確對應檔案中的內容。
+* 由於狀態列未啟用，最底行不應顯示任何額外的狀態內容。
+
+## 測試案例 4：相對行號關閉 + 狀態列啟用
+### Given
+* 建立 VimEditor 實例，設定：
+  - IsRelativeNumberVisible 設為 false
+  - IsStatusBarVisible 設為 true
+* 同樣設定 ViewPort 為 (10,10,20,5) 與 Offset 為 (0,0)。
+* 呼叫 Init() 並載入多行文字資料。
+* 設定 StatusBar 的內容（補滿 20 個字元）。
+### When
+* 執行 Render(screenBuffer)。
+## Then
+* 由於不啟用相對行號，整個文字內容直接從 ViewPort.X 起始顯示，無行號區域。
+* 但因為啟用狀態列，ViewPort 區域的高度實際上只有 4 行用來顯示文字內容，最底行用於呈現狀態列。
+* 測試需檢查：
+  - 前 4 行的文字內容是否正確從 OffsetX 取出，超出部分以空白補足；
+  - 最底行是否完整顯示 StatusBar 內容；
+  - 游標位置的計算也應反映出狀態列的存在（例如，游標在文字區內不會誤入狀態列）。
+
+
+
