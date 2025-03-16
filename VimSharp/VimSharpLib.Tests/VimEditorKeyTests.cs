@@ -209,11 +209,6 @@ namespace VimSharpLib.Tests
             mockConsole.WindowWidth.Returns(80);
             mockConsole.WindowHeight.Returns(25);
             
-            // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
-            mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false)
-            );
-            
             // 創建編輯器並使用模擬控制台
             var editor = new VimEditor(mockConsole);
             
@@ -227,6 +222,10 @@ namespace VimSharpLib.Tests
             editor.Mode = new VimNormalMode(editor);
             
             // Act
+            // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
+            mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false)
+            );
             // 調用 WaitForInput 方法，這將觸發模擬的 ReadKey 方法
             editor.WaitForInput();
             
