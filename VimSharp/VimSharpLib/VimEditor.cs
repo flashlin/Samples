@@ -138,13 +138,14 @@ public class VimEditor
         }
 
         // 確保行號不超過分配的空間
-        for (int j = 0; j < lineNumber.Length && j < lineNumberWidth; j++)
+        for (int j = 0; j < lineNumberWidth; j++)
         {
             if (Context.ViewPort.X + j < bufferWidth)
             {
                 var color = (textIndex == cursorTextY) ? ConsoleColor.Yellow : ConsoleColor.DarkGray;
+                char charToRender = (j < lineNumber.Length) ? lineNumber[j] : ' ';
                 screenBuffer[Context.ViewPort.Y + viewY, Context.ViewPort.X + j] = 
-                    new ColoredChar(lineNumber[j], color, ConsoleColor.Black);
+                    new ColoredChar(charToRender, color, ConsoleColor.Black);
             }
         }
     }
