@@ -17,7 +17,7 @@ namespace VimSharpLib.Tests
             {
                 for (int x = 0; x < width; x++)
                 {
-                    screenBuffer[y, x] = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
+                    screenBuffer[y, x] = new ColoredChar('.', ConsoleColor.White, ConsoleColor.Black);
                 }
             }
             return screenBuffer;
@@ -55,6 +55,11 @@ namespace VimSharpLib.Tests
             // 另外檢查第一個中文字符的顏色
             Assert.Equal(ConsoleColor.White, screenBuffer[0, 1].ForegroundColor);
             Assert.Equal(ConsoleColor.DarkGray, screenBuffer[0, 1].BackgroundColor);
+
+            // 檢查 ViewPort 以外的內容
+            Assert.Equal('.', screenBuffer[0, 11].Char);
+            Assert.Equal('.', screenBuffer[1, 11].Char);
+            Assert.Equal('.', screenBuffer[2, 11].Char);
         }
 
         [Fact]
