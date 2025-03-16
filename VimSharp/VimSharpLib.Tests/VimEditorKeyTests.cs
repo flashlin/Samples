@@ -162,6 +162,13 @@ namespace VimSharpLib.Tests
             // Assert
             // 驗證 CursorX 應該是 2（因為中文字符"閃"佔用兩個字符寬度）
             Assert.Equal(2, editor.Context.CursorX);
+
+            // 按下向左按鍵 1 次
+            editor.Mode.PressKey(ConsoleKey.LeftArrow);
+
+            // Assert
+            // 驗證 CursorX 應該是 0
+            Assert.Equal(0, editor.Context.CursorX);
         }
     }
 } 
