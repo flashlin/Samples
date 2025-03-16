@@ -41,6 +41,7 @@ public class VimEditor
             consoleText.SetText(0, line);
             Context.Texts.Add(consoleText);
         }
+        Init();
     }
 
     public void Init()
