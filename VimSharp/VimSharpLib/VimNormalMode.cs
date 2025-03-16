@@ -379,14 +379,15 @@ public class VimNormalMode : IVimMode
         int lastCharIndex = -1;
         for (int i = currentLine.Width - 1; i >= 0; i--)
         {
-            if (currentLine.Chars[i].Char != '\0' && currentLine.Chars[i].Char != ' ')
+            char currentChar = currentLine.Chars[i].Char;
+            if (currentChar != ' ' && currentChar != '\0')
             {
                 lastCharIndex = i;
                 break;
             }
         }
         
-        // 如果行為空或只有空格，直接返回
+        // 如果行為空或只有空格和 '\0'，直接返回
         if (lastCharIndex == -1)
             return;
             
@@ -394,33 +395,16 @@ public class VimNormalMode : IVimMode
         int lineNumberWidth = Instance.Context.GetLineNumberWidth();
         
         // 計算游標的顯示位置
-        int cursorX;
+        int cursorX = lineNumberWidth + lastCharIndex;
         
-        // 根據規則：
-        // 1. 當按下向右鍵並且已經到達行尾時，CursorY 游標將不再自動移動到下一行
-        // 2. 游標移動到本行最後一個字上的判斷, 假設最後一個字的位置是 x, 
-        //    要先判斷最後一個字是否為 '\0'? 如果是的話, x 要再往前移動一次(-1), 如果不是, 則就是 x.
-
-        // 檢查最後一個字符是否為 '\0'
-        if (currentLine.Chars[lastCharIndex].Char == '\0')
+        // 如果最後一個字符是中文字符的第二個字節（'\0'），則向前移動一位
+        if (currentLine.Chars[lastCharIndex].Char == '\0' && lastCharIndex > 0)
         {
-            lastCharIndex--;
-        }
-        
-        if (Instance.Context.IsLineNumberVisible)
-        {
-            cursorX = lineNumberWidth + lastCharIndex;
-        }
-        else
-        {
-            cursorX = lastCharIndex;
+            cursorX--;
         }
         
         // 更新游標位置
         Instance.Context.CursorX = cursorX;
-        
-        // 檢查並調整游標位置和偏移量
-        Instance.AdjustCursorPositionAndOffset(Instance.Context.CursorX, Instance.Context.CursorY);
     }
     
     /// <summary>
