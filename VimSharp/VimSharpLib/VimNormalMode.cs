@@ -383,14 +383,17 @@ public class VimNormalMode : IVimMode
         // 獲取行號區域寬度
         int lineNumberWidth = Instance.Context.IsLineNumberVisible ? Instance.Context.GetLineNumberWidth() : 0;
         
-        // 設置游標位置
+        // 設置游標位置到最後一個字符上，而不是超過最後一個字符
+        int lastCharWidth = lineText[lineLength - 1].GetCharWidth();
         if (Instance.Context.IsLineNumberVisible)
         {
-            Instance.Context.CursorX = lineNumberWidth + lineDisplayWidth;
+            // 將游標設置在最後一個字符上，而不是超過它
+            Instance.Context.CursorX = lineNumberWidth + lineDisplayWidth - 1;
         }
         else
         {
-            Instance.Context.CursorX = lineDisplayWidth;
+            // 將游標設置在最後一個字符上，而不是超過它
+            Instance.Context.CursorX = lineDisplayWidth - 1;
         }
         
         // 檢查並調整游標位置和偏移量
