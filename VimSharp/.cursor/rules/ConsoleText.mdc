@@ -7,3 +7,4 @@ alwaysApply: false
 * public void SetText(int x, string text) 
 * public void SetWidth(int width)
 * public string ToAnsiString() 
+* public string ToString()

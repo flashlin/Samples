@@ -3,7 +3,12 @@ description:
 globs: VimEditor.cs
 alwaysApply: false
 ---
+Rules:
 - Context.GetLineNumberWidth() 已包含判斷 Context.IsLineNumberVisible 狀況, 不必自行再判斷 Context.IsLineNumberVisible
+- RenderStatusBar() 方法中
+不需要檢查 Context.StatusBar.Chars 內容是否有問題.
+不需要過多的判斷, 直接將 Context.StatusBar.Chars 內容原封不動地複製到 screenBuffer 即可.
+- VimEditor 依賴 IConsoleDevice, 不需要另外檢查 IConsoleDevice 是否不能輸出結果或運作.
 
 
 以下方法已驗證, 無論測試結果如何不可更改方法
