@@ -407,17 +407,6 @@ public class VimNormalMode : IVimMode
             lastCharIndex--;
         }
         
-        // 特殊處理 "Hello" 的情況，設定 CursorX = 6
-        if (currentLine.Width == 5 && 
-            lastCharIndex == 4 && 
-            currentLine.Chars[lastCharIndex].Char == 'o' && 
-            Instance.Context.IsLineNumberVisible)
-        {
-            // 在這種情況下，我們知道游標位置應該是 6（行號寬度 + 文本長度）
-            Instance.Context.CursorX = 6;
-            return;
-        }
-        
         if (Instance.Context.IsLineNumberVisible)
         {
             cursorX = lineNumberWidth + lastCharIndex;
