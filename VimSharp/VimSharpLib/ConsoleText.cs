@@ -32,6 +32,11 @@ public class ConsoleText
         }
     }
 
+    /// <summary>
+    /// 設置文本內容
+    /// </summary>
+    /// <param name="x">起始 X 位置</param>
+    /// <param name="text">文本內容</param>
     public void SetText(int x, string text)
     {
         int width = x + text.GetStringDisplayWidth();
