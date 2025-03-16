@@ -14,9 +14,10 @@ public static class TextExtension
     /// <returns>如果是中文字符則返回 true，否則返回 false</returns>
     public static bool IsChinese(this char c)
     {
-        // 使用 ASCII 編碼檢查字符的字節長度
-        var bytes = Encoding.ASCII.GetBytes([c]);
-        return bytes.Length > 1;
+        // 使用字符編碼範圍檢查是否為中文字符
+        // 中文字符的 Unicode 編碼範圍通常在 0x4E00 到 0x9FFF 之間
+        // 也可以直接檢查字符值是否大於 127 (ASCII範圍)
+        return c > 127;
     }
     
     /// <summary>
@@ -65,15 +66,6 @@ public static class TextExtension
     
     public static int GetTextWidth(this string text)
     {
-        int width = 0;
-        foreach (var c in text)
-        {
-            width += 1;
-            if (c > 127)
-            {
-                width += 1;
-            }
-        }
-        return width;
+        return text.GetStringDisplayWidth();
     }
 } 

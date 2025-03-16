@@ -77,7 +77,16 @@ public class ColoredChar
         var background = ToAnsiBackgroundColor(BackgroundColor);
         return $"\u001b[{foreground}m\u001b[{background}m{Char}\u001b[0m";
     }
-    
+
+    public override string ToString()
+    {
+        if (Char == '\0')
+        {
+            return string.Empty;
+        }
+        return Char.ToString();
+    }
+
     // 隱式轉換為 char
     public static implicit operator char(ColoredChar coloredChar) => coloredChar.Char;
     
