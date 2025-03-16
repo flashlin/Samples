@@ -76,6 +76,22 @@ public class VimNormalMode : IVimMode
             }
             return;
         }
+        
+        // 檢查是否從中文字符的右側移動（也就是從位置2移動到位置0）
+        var textX = Instance.GetActualTextX();
+        var currentLine = Instance.GetCurrentLine();
+        
+        if (textX > 0 && textX < currentLine.Width)
+        {
+            // 檢查前一個字符是否為中文字符
+            if (textX > 1 && currentLine.Chars[textX - 1].Char == '\0' && currentLine.Chars[textX - 2].Char > 127)
+            {
+                // 如果是從中文字符右側移動，直接跳到中文字符左側
+                Instance.Context.CursorX -= 2;
+                return;
+            }
+        }
+        
         Instance.Context.CursorX--;
     }
     
