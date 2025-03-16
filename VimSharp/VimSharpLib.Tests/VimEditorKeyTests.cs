@@ -1,6 +1,7 @@
 using Xunit;
 using NSubstitute;
 using System;
+using System.Collections.Generic;
 
 namespace VimSharpLib.Tests
 {
@@ -247,6 +248,31 @@ namespace VimSharpLib.Tests
             // "Hi " 佔 3 個字符寬度，"閃" 佔 2 個字符寬度，"電" 佔 2 個字符寬度
             // 最後一個字, 原本是6, 但因為是中文字, 所以游標位置是 5
             Assert.Equal(5, _editor.Context.CursorX);
+            
+            // 確認模擬的 ReadKey 方法被調用了一次
+            _mockConsole.Received(1).ReadKey(Arg.Any<bool>());
+        }
+
+        [Fact]
+        public void TestDollarKeyWithLineNumbersVisible()
+        {
+            // Arrange
+            // 設置行號可見
+            _editor.Context.IsLineNumberVisible = true;
+            // 加載文本 "Hello"
+            _editor.OpenText("Hello");
+            
+            // 確保行號寬度被正確計算為 2
+            Assert.Equal(2, _editor.Context.GetLineNumberWidth());
+            
+            // Act
+            // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
+            SetReadKey('$');
+            
+            // Assert
+            // 驗證 CursorX 應該是 6
+            // 因為行號寬度為 2，加上 "Hello" 的最後一個字符位置 4，所以總共是 6
+            Assert.Equal(6, _editor.Context.CursorX);
             
             // 確認模擬的 ReadKey 方法被調用了一次
             _mockConsole.Received(1).ReadKey(Arg.Any<bool>());
