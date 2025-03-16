@@ -6,6 +6,18 @@ namespace VimSharpLib.Tests
 {
     public class VimEditorKeyTests
     {
+        private IConsoleDevice _mockConsole;
+        private VimEditor _editor;
+
+        public VimEditorKeyTests()
+        {
+            _mockConsole = Substitute.For<IConsoleDevice>();
+            _mockConsole.WindowWidth.Returns(80);
+            _mockConsole.WindowHeight.Returns(25);
+            _editor = new VimEditor(_mockConsole);
+            _editor.Context.SetViewPort(0, 0, 10, 5);
+        }
+
         [Fact]
         public void TestRightArrowKey()
         {
@@ -202,39 +214,36 @@ namespace VimSharpLib.Tests
         public void TestDollarKeyAndWaitForInput()
         {
             // Arrange
-            // 創建模擬的 IConsoleDevice
-            var mockConsole = Substitute.For<IConsoleDevice>();
-            
-            // 設置模擬控制台的窗口大小
-            mockConsole.WindowWidth.Returns(80);
-            mockConsole.WindowHeight.Returns(25);
-            
-            // 創建編輯器並使用模擬控制台
-            var editor = new VimEditor(mockConsole);
-            
-            // 設置 ViewPort = 0, 0, 10, 5
-            editor.Context.SetViewPort(0, 0, 10, 5);
-            
             // 加載文本 "Hello"
-            editor.OpenText("Hello");
-            
-            // 確保編輯器處於正常模式
-            editor.Mode = new VimNormalMode(editor);
+            _editor.OpenText("Hello");
             
             // Act
             // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
-            mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false)
-            );
-            // 調用 WaitForInput 方法，這將觸發模擬的 ReadKey 方法
-            editor.WaitForInput();
+            SetReadKey('$');
             
             // Assert
             // 驗證 CursorX 應該是 4（"Hello" 的最後一個字符位置）
-            Assert.Equal(4, editor.Context.CursorX);
+            Assert.Equal(4, _editor.Context.CursorX);
             
             // 確認模擬的 ReadKey 方法被調用了一次
-            mockConsole.Received(1).ReadKey(Arg.Any<bool>());
+            _mockConsole.Received(1).ReadKey(Arg.Any<bool>());
+        }
+
+        private void SetReadKey(char key)
+        {
+            switch(key)
+            {
+                case '$':
+                    _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                        new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false)
+                    );
+                    break;
+                default:
+                    throw new ArgumentException($"Unsupported key: {key}");
+            }
+            // 調用 WaitForInput 方法，這將觸發模擬的 ReadKey 方法
+            _editor.WaitForInput();
         }
     }
 } 
+
