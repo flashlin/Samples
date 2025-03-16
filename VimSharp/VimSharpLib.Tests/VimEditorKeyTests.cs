@@ -278,6 +278,36 @@ namespace VimSharpLib.Tests
             _mockConsole.Received(1).ReadKey(Arg.Any<bool>());
         }
 
+        [Fact]
+        public void TestDollarKeyWithLineNumbersAndStatusBarVisible()
+        {
+            // Arrange
+            // 設置行號和狀態欄可見
+            _editor.Context.IsLineNumberVisible = true;
+            _editor.Context.IsStatusBarVisible = true;
+            
+            // 加載文本 "Hello"
+            _editor.OpenText("Hello");
+            
+            // 確保行號寬度被正確計算為 2
+            Assert.Equal(2, _editor.Context.GetLineNumberWidth());
+            
+            // 驗證狀態欄顯示內容
+            Assert.Equal(" Normal | Line: 1 | Col: 1", _editor.Context.StatusBar.ToString());
+            
+            // Act
+            // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
+            SetReadKey('$');
+            
+            // Assert
+            // 驗證 CursorX 應該是 6
+            // 因為行號寬度為 2，加上 "Hello" 的最後一個字符位置 4，所以總共是 6
+            Assert.Equal(6, _editor.Context.CursorX);
+            
+            // 確認模擬的 ReadKey 方法被調用了一次
+            _mockConsole.Received(1).ReadKey(Arg.Any<bool>());
+        }
+
         private void SetReadKey(char key)
         {
             switch(key)
