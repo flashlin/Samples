@@ -56,7 +56,7 @@ namespace VimSharpLib.Tests
             Assert.Equal(ConsoleColor.White, screenBuffer[0, 1].ForegroundColor);
             Assert.Equal(ConsoleColor.DarkGray, screenBuffer[0, 1].BackgroundColor);
 
-            // 檢查 ViewPort 以外的內容, 不應該被改變
+            // 檢查 ViewPort 以外的內容, 不應該被改變. 也就是要求 Render 不會改變 ViewPort 以外的內容
             Assert.Equal('.', screenBuffer[0, 11].Char);
             Assert.Equal('.', screenBuffer[1, 11].Char);
             Assert.Equal('.', screenBuffer[2, 11].Char);
