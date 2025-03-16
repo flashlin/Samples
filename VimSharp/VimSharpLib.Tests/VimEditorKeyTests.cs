@@ -292,6 +292,7 @@ namespace VimSharpLib.Tests
             // 確保行號寬度被正確計算為 2
             Assert.Equal(2, _editor.Context.GetLineNumberWidth());
             
+            _editor.Render();
             // 驗證狀態欄顯示內容
             Assert.Equal(" Normal | Line: 1 | Col: 1", _editor.Context.StatusBar.ToString());
             
