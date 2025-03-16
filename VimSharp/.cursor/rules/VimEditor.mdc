@@ -3,5 +3,8 @@ description:
 globs: VimEditor.cs
 alwaysApply: false
 ---
+- Context.GetLineNumberWidth() 已包含判斷 Context.IsLineNumberVisible 狀況, 不必自行再判斷 Context.IsLineNumberVisible
+
+
 以下方法已驗證, 無論測試結果如何不可更改方法
 * public void OpenText(string text)
