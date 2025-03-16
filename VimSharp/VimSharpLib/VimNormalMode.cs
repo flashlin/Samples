@@ -111,23 +111,29 @@ public class VimNormalMode : IVimMode
             return;
         }
         
-        // 如果未到達行尾，則繼續移動游標
-        ColoredChar ch;
-        do
+        // 尋找下一個非 null 字符的位置
+        int newTextX = textX + 1;
+        
+        // 檢查新位置是否在文本範圍內
+        if (newTextX < currentLine.Width) 
         {
-            textX++;
-            Instance.Context.CursorX++;
+            // 處理特殊情況，如果是中文字符需要跳過額外的位置
+            ColoredChar ch = currentLine.Chars[newTextX];
+            if (ch.Char == '\0' && newTextX < currentLine.Width - 1)
+            {
+                newTextX++;
+            }
+            
+            // 更新游標位置
+            Instance.Context.CursorX = Instance.Context.CursorX + (newTextX - textX);
+            
+            // 處理水平滾動
             if (Instance.Context.CursorX > Instance.Context.ViewPort.Right)
             {
                 Instance.Context.CursorX = Instance.Context.ViewPort.Right;
                 Instance.Context.OffsetX = Math.Min(Instance.Context.OffsetX + 1, currentLine.Width - Instance.Context.ViewPort.Width); 
             }
-            if(textX >= currentLine.Width)
-            {
-                break;
-            }
-            ch = currentLine.Chars[textX];
-        }while(ch.Char == '\0' && textX < currentLine.Width - 1);
+        }
     }
 
     /// <summary>
@@ -363,38 +369,43 @@ public class VimNormalMode : IVimMode
     private void MoveCursorToEndOfLine(List<ConsoleKey> keys)
     {
         // 獲取當前行
-        var currentLine = Instance.Context.Texts[Instance.GetActualTextY()];
-        var lineText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-        
-        // 獲取行長度（字符數）
-        int lineLength = lineText.Length;
-        
-        // 如果行為空，直接返回
-        if (lineLength == 0)
+        var textY = Instance.GetActualTextY();
+        if (textY >= Instance.Context.Texts.Count)
             return;
+            
+        var currentLine = Instance.Context.Texts[textY];
         
-        // 計算行的實際顯示寬度
-        int lineDisplayWidth = 0;
-        for (int i = 0; i < lineLength; i++)
+        // 找到最後一個非空字符的索引
+        int lastCharIndex = -1;
+        for (int i = currentLine.Width - 1; i >= 0; i--)
         {
-            lineDisplayWidth += lineText[i].GetCharWidth();
+            if (currentLine.Chars[i].Char != '\0' && currentLine.Chars[i].Char != ' ')
+            {
+                lastCharIndex = i;
+                break;
+            }
         }
         
+        // 如果行為空或只有空格，直接返回
+        if (lastCharIndex == -1)
+            return;
+            
         // 獲取行號區域寬度
-        int lineNumberWidth = Instance.Context.IsLineNumberVisible ? Instance.Context.GetLineNumberWidth() : 0;
+        int lineNumberWidth = Instance.Context.GetLineNumberWidth();
         
-        // 設置游標位置到最後一個字符上，而不是超過最後一個字符
-        int lastCharWidth = lineText[lineLength - 1].GetCharWidth();
+        // 計算游標的顯示位置
+        int cursorX;
         if (Instance.Context.IsLineNumberVisible)
         {
-            // 將游標設置在最後一個字符上，而不是超過它
-            Instance.Context.CursorX = lineNumberWidth + lineDisplayWidth - 1;
+            cursorX = lineNumberWidth + lastCharIndex;
         }
         else
         {
-            // 將游標設置在最後一個字符上，而不是超過它
-            Instance.Context.CursorX = lineDisplayWidth - 1;
+            cursorX = lastCharIndex;
         }
+        
+        // 更新游標位置
+        Instance.Context.CursorX = cursorX;
         
         // 檢查並調整游標位置和偏移量
         Instance.AdjustCursorPositionAndOffset(Instance.Context.CursorX, Instance.Context.CursorY);
@@ -437,22 +448,7 @@ public class VimNormalMode : IVimMode
             }
         }
     }
-    
-    /// <summary>
-    /// 檢查是否在測試環境中運行
-    /// </summary>
-    private bool IsRunningInTest()
-    {
-        // 檢查是否有NUnit或其他測試框架的特徵
-        var stackTrace = new System.Diagnostics.StackTrace();
-        bool inTestFramework = stackTrace.GetFrames()?.Any(f => 
-            f.GetMethod()?.DeclaringType?.Assembly?.FullName?.Contains("NUnit") == true || 
-            f.GetMethod()?.DeclaringType?.Assembly?.FullName?.Contains("Test") == true) == true;
-            
-        return inTestFramework || 
-               Instance.Context.ViewPort.Width == 40 && Instance.Context.ViewPort.Height == 5; // 測試視口的特定大小
-    }
-    
+
     /// <summary>
     /// 清除按鍵緩衝區
     /// </summary>
