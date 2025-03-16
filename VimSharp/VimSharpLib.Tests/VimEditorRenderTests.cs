@@ -91,5 +91,50 @@ namespace VimSharpLib.Tests
             Assert.Equal(ConsoleColor.White, screenBuffer[0, 2].ForegroundColor);
             Assert.Equal(ConsoleColor.DarkGray, screenBuffer[0, 2].BackgroundColor);
         }
+
+        [Fact]
+        public void TestChineseCharacterRenderingWithLineNumbers()
+        {
+            // Arrange
+            var mockConsole = new MockConsoleDevice { WindowWidth = 80, WindowHeight = 25 };
+            var editor = new VimEditor(mockConsole);
+            editor.Context.IsLineNumberVisible = true; // 開啟行號顯示
+            editor.Context.IsStatusBarVisible = false; // 關閉狀態欄以簡化測試
+            editor.Context.ViewPort = new ViewArea(0, 0, 10, 5); // 設置 ViewPort 為 (0,0,10,5)
+            editor.Context.OffsetX = 0;
+            editor.Context.OffsetY = 0;
+            
+            // 設置測試文本，包含中文字符
+            string text = "1中2";
+            editor.OpenText(text);
+            
+            // 創建自定義大小的 screenBuffer
+            var screenBuffer = CreateScreenBuffer();
+            
+            // Act
+            editor.Render(screenBuffer);
+            
+            // Assert
+            // 行號寬度為 1 + 1 = 2 (1位數字 + 1位空格)
+            int lineNumberWidth = 2;
+            
+            // 檢查行號是否正確渲染
+            Assert.Equal('1', screenBuffer[0, 0].Char);
+            Assert.Equal(' ', screenBuffer[0, 1].Char);
+            
+            // 檢查中文字符的渲染，中文字符應該佔用兩個位置，並且應該在行號之後
+            Assert.Equal('1', screenBuffer[0, lineNumberWidth].Char);
+            Assert.Equal('中', screenBuffer[0, lineNumberWidth + 1].Char);
+            Assert.Equal('\0', screenBuffer[0, lineNumberWidth + 2].Char);
+            Assert.Equal('2', screenBuffer[0, lineNumberWidth + 3].Char);
+            
+            // 檢查行號顏色
+            Assert.Equal(ConsoleColor.Yellow, screenBuffer[0, 0].ForegroundColor);
+            Assert.Equal(ConsoleColor.Black, screenBuffer[0, 0].BackgroundColor);
+            
+            // 檢查中文字符的顏色
+            Assert.Equal(ConsoleColor.White, screenBuffer[0, lineNumberWidth + 1].ForegroundColor);
+            Assert.Equal(ConsoleColor.DarkGray, screenBuffer[0, lineNumberWidth + 1].BackgroundColor);
+        }
     }
 } 

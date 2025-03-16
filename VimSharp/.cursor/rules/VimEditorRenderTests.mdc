@@ -1,0 +1,6 @@
+---
+description: 
+globs: VimEditorRenderTests.cs
+alwaysApply: false
+---
+VimEditorRenderTests 所有測試案例已檢查過, 無論測試結果如何不能更改, 請修改應用程式邏輯
