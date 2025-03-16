@@ -820,6 +820,37 @@ public class VimEditor
         }
     }
     
+    /// <summary>
+    /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
+    /// </summary>
+    public void AdjustCursorXAndOffsetX(int textX)
+    {
+        // 計算行號欄位寬度
+        int lineNumberWidth = Context.GetLineNumberWidth();
+
+        // 計算 ViewPort 的有效可視範圍
+        int viewLeft = Context.OffsetX + lineNumberWidth;
+        int viewRight = Context.ViewPort.Right;
+
+        if (textX < viewLeft)
+        {
+            // textX 在可視範圍左側外部，將 OffsetX 左移，使其可見
+            Context.OffsetX = Math.Max(0, textX - lineNumberWidth);
+            Context.CursorX = Context.ViewPort.X + lineNumberWidth;
+        }
+        else if (textX > viewRight)
+        {
+            // textX 在可視範圍右側外部，將 OffsetX 右移，使其可見
+            Context.OffsetX = textX - (Context.ViewPort.Width - 1);
+            Context.CursorX = Context.ViewPort.Width - 1;
+        }
+        else
+        {
+            // textX 在可視範圍內
+            Context.CursorX = textX - Context.OffsetX + lineNumberWidth;
+        }
+    }
+    
     public int GetActualTextX()
     {
         return Context.CursorX - Context.ViewPort.X + Context.OffsetX - Context.GetLineNumberWidth();
