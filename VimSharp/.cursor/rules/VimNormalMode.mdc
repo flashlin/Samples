@@ -1,0 +1,7 @@
+---
+description: 
+globs: VimNormalMode.cs
+alwaysApply: false
+---
+規則:
+- 當按下向右鍵並且已經到達行尾時，CursorY 游標將不再自動移動到下一行
