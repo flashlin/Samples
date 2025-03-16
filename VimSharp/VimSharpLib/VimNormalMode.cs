@@ -397,12 +397,6 @@ public class VimNormalMode : IVimMode
         // 計算游標的顯示位置
         int cursorX = lineNumberWidth + lastCharIndex;
         
-        // 如果最後一個字符是中文字符的第二個字節（'\0'），則向前移動一位
-        if (currentLine.Chars[lastCharIndex].Char == '\0' && lastCharIndex > 0)
-        {
-            cursorX--;
-        }
-        
         // 更新游標位置
         Instance.Context.CursorX = cursorX;
     }
