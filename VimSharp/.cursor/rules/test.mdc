@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: *Test
 alwaysApply: false
 ---
 ## 測試案例 1：相對行號啟用 + 狀態列啟用

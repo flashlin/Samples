@@ -63,7 +63,7 @@ public class VimInsertMode : IVimMode
     }
     
     /// <summary>
-    /// 切換到視覺模式
+    /// 切換到普通模式
     /// </summary>
     private void HandleEscape(List<ConsoleKey> keys)
     {
@@ -72,13 +72,36 @@ public class VimInsertMode : IVimMode
         var textX = Instance.GetActualTextX();
         var isEndOfLine = textX >= currentLine.Chars.Length;
         
+        // 記錄當前游標位置和偏移量
+        int cursorX = Instance.Context.CursorX;
+        int offsetX = Instance.Context.OffsetX;
+        
         // 切換到普通模式
         Instance.Mode = new VimNormalMode(Instance);
         
-        // 如果游標在行尾，則向左移動一格
+        // 如果游標在行尾，則處理游標位置
         if (isEndOfLine)
         {
-            Instance.MoveCursorLeft();
+            // 1. 減少 GetActualX()，即 textX - 1
+            // 2. 減少 CursorX
+            Instance.Context.CursorX = cursorX - 1;
+            
+            // 3. 檢查 CursorX 是否小於 ViewPort.X - GetLineNumberWidth()
+            int minX = Instance.Context.ViewPort.X - Instance.Context.GetLineNumberWidth();
+            if (Instance.Context.CursorX < minX)
+            {
+                // 設置 CursorX 為最小允許值
+                Instance.Context.CursorX = minX;
+                
+                // 減少 OffsetX
+                Instance.Context.OffsetX = offsetX - 1;
+                
+                // 確保 OffsetX 不小於 0
+                if (Instance.Context.OffsetX < 0)
+                {
+                    Instance.Context.OffsetX = 0;
+                }
+            }
         }
     }
     
