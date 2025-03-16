@@ -82,6 +82,8 @@ public class VimEditor
         {
             RenderStatusBar(screenBuffer);
         }
+
+        RenderFrame(screenBuffer);
     }
     
     /// <summary>
