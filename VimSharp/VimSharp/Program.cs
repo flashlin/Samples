@@ -10,7 +10,7 @@ using VimSharpLib;
 var editor1 = new VimEditor();
 editor1.OpenText($"""
 Hello, World!
-123 
+123
 Say Hello, 閃電!
 Example
 Your name is 閃電俠
