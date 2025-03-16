@@ -294,7 +294,7 @@ namespace VimSharpLib.Tests
             
             _editor.Render();
             // 驗證狀態欄顯示內容
-            Assert.Equal(" Normal | Line: 1 | Col: 1", _editor.Context.StatusBar.ToString());
+            Assert.Equal(" Normal | Line: 1 | Col: 1 ", _editor.Context.StatusBar.ToString());
             
             // Act
             // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
