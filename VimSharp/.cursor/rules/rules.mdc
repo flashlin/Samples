@@ -13,7 +13,7 @@ alwaysApply: false
 - `ViewArea ViewPort`：定義 `Texts` 在螢幕上的顯示範圍。  
 - `bool IsStatusBarVisible`：是否顯示狀態列。  
 - `ConsoleText StatusBar`：狀態列的內容。  
-- `bool IsRelativeNumberVisible`：是否顯示相對行號。  
+- `bool IsNumberVisible`：是否顯示行號。  
 
 ---  
 
@@ -92,10 +92,12 @@ currentLineNumber = Row
 lineNumber = Math.Abs(絕對lineNumber - Row) == 0 ? Row : Math.Abs(絕對lineNumber - Row)
 再將 lineNumber 內容 (例如: lineNumber 123 = [new ColoredChar('1'), new ColoredChar('2'), new ColoredChar('3'), new ColoredChar(' ')]) 到 screenBuffer[?,?]
 
+注意存放 x,y 位置到 screenBuffer[y, x] 存放
+
 Pseudo Code 流程:
 Function Render(screenBuffer: 2D array of ColoredChar)
     // 1. 計算行號顯示區寬度 (如果啟用相對行號)
-    if Context.IsRelativeNumberVisible then
+    if Context.IsNumberVisible then
         // 取得總行數字串長度，並加 1（例如：378 → 寬度為 3+1=4）
         lineRelativeWidth = length(toString(Context.Texts.Count)) + 1
     else
@@ -119,7 +121,7 @@ Function Render(screenBuffer: 2D array of ColoredChar)
             currentText = (空白的 ConsoleText)
         
         // 4. 如果啟用相對行號，則先計算並放置行號
-        if Context.IsRelativeNumberVisible then
+        if Context.IsNumberVisible then
             // 計算游標所在的文本行（以 ViewPort 與 Offset 調整後）
             cursorTextLine = Context.CursorY - Context.ViewPort.Y + Context.OffsetY
             // 計算顯示行號：

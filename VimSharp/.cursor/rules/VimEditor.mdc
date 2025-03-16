@@ -1,0 +1,7 @@
+---
+description: 
+globs: VimEditor.cs
+alwaysApply: false
+---
+以下方法已驗證, 無論測試結果如何不可更改方法
+* public void OpenText(string text)

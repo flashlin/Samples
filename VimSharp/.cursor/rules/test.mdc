@@ -1,6 +1,6 @@
 ---
 description: 
-globs: *Test
+globs: 
 alwaysApply: false
 ---
 ## 測試案例 1：相對行號啟用 + 狀態列啟用
@@ -73,6 +73,10 @@ alwaysApply: false
   - 前 4 行的文字內容是否正確從 OffsetX 取出，超出部分以空白補足；
   - 最底行是否完整顯示 StatusBar 內容；
   - 游標位置的計算也應反映出狀態列的存在（例如，游標在文字區內不會誤入狀態列）。
+
+注意驗收 screenBuffer[y, x]   
+
+寫測試案例的 Test 方法名稱要用英文
 
 
 

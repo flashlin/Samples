@@ -8,7 +8,7 @@ using VimSharpLib;
 // Environment.Exit(0);
 
 var editor1 = new VimEditor();
-editor1.SetText($"""
+editor1.OpenText($"""
 Hello, World!
 123 
 Say Hello, 閃電!

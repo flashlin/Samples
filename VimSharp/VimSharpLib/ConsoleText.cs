@@ -19,7 +19,7 @@ public class ConsoleText
             Array.Copy(Chars, newChars, Chars.Length);
             for (var i = Chars.Length; i < width; i++)
             {
-                newChars[i] = new ColoredChar(' ');
+                newChars[i] = ColoredChar.Empty;
             }
             Chars = newChars;
             return;
@@ -34,15 +34,21 @@ public class ConsoleText
 
     public void SetText(int x, string text)
     {
-        SetWidth(text.GetTextWidth());
+        int width = x + text.GetStringDisplayWidth();
+        SetWidth(width);
+        int pos = x;
         for (var i = 0; i < text.Length; i++)
         {
             var coloredChar = new ColoredChar(text[i]);
-            Chars[x + i] = coloredChar;
-            
-            if (coloredChar.Char > 127 && x + i + 1 < Chars.Length)
+            Chars[pos] = coloredChar;
+            if (coloredChar.Char > 127)
             {
-                Chars[x + i + 1] = ColoredChar.None;
+                Chars[pos + 1] = ColoredChar.None;
+                pos += 2; // 中文字符佔用兩個位置
+            }
+            else
+            {
+                pos += 1; // ASCII 字符佔用一個位置
             }
         }
     }
