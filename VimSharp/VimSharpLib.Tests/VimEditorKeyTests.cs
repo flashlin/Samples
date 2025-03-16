@@ -192,7 +192,7 @@ namespace VimSharpLib.Tests
             editor.Mode.PressKey(ConsoleKey.D4); // '$' 對應 Shift+4
             
             // Assert
-            // 驗證 CursorX 應該是 4（"Hello" 的最後一個字符位置）
+            // 驗證 CursorX 應該是 4（"Hello" 的長度，游標位於最後一個字符上面）
             Assert.Equal(4, editor.Context.CursorX);
         }
     }
