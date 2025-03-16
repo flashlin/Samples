@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- 獲取行號區域寬度: Instance.Context.GetLineNumberWidth() 已驗收過, 不會有錯誤.
