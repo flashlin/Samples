@@ -94,5 +94,33 @@ namespace VimSharpLib.Tests
             // 驗證 CursorY 應該是 1（第二行）
             Assert.Equal(1, editor.Context.CursorY);
         }
+        
+        [Fact]
+        public void TestInitWithLineNumbers()
+        {
+            // Arrange
+            var mockConsole = new MockConsoleDevice { WindowWidth = 80, WindowHeight = 25 };
+            var editor = new VimEditor(mockConsole);
+            
+            // 設置 ViewPort = 0, 0, 10, 5
+            editor.Context.SetViewPort(0, 0, 10, 5);
+            
+            // 啟用行號顯示
+            editor.Context.IsLineNumberVisible = true;
+            
+            // 加載多行文本 "Hello\r\nHi"
+            editor.OpenText("Hello\r\nHi");
+            
+            // Assert
+            // 驗證初始游標位置
+            // 由於有兩行文本，行號寬度為 1 位數字 + 1 位空格 = 2
+            int expectedLineNumberWidth = 2;
+            
+            // 驗證 CursorX 應該是 ViewPort.X + 行號寬度
+            Assert.Equal(editor.Context.ViewPort.X + expectedLineNumberWidth, editor.Context.CursorX);
+            
+            // 驗證 CursorY 應該是 ViewPort.Y
+            Assert.Equal(editor.Context.ViewPort.Y, editor.Context.CursorY);
+        }
     }
 } 
