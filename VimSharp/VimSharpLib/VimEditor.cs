@@ -67,7 +67,7 @@ public class VimEditor
         }
 
         // 計算行號寬度
-        int lineNumberWidth = Context.IsLineNumberVisible ? Context.GetLineNumberWidth() : 0;
+        int lineNumberWidth = Context.GetLineNumberWidth();
         
         // 獲取游標在文本中的實際位置
         int cursorTextY = GetActualTextY();
