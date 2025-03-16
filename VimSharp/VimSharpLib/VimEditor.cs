@@ -66,8 +66,6 @@ public class VimEditor
             return;
         }
 
-        InitializeScreenBuffer(screenBuffer);
-        
         // 計算行號寬度
         int lineNumberWidth = Context.IsLineNumberVisible ? Context.GetLineNumberWidth() : 0;
         
@@ -84,24 +82,6 @@ public class VimEditor
         }
 
         RenderFrame(screenBuffer);
-    }
-    
-    /// <summary>
-    /// 初始化螢幕緩衝區
-    /// </summary>
-    private void InitializeScreenBuffer(ColoredChar[,] screenBuffer)
-    {
-        int bufferHeight = screenBuffer.GetLength(0);
-        int bufferWidth = screenBuffer.GetLength(1);
-
-        // 清空螢幕緩衝區
-        for (int i = 0; i < bufferHeight; i++)
-        {
-            for (int j = 0; j < bufferWidth; j++)
-            {
-                screenBuffer[i, j] = ColoredChar.Empty;
-            }
-        }
     }
 
     /// <summary>
