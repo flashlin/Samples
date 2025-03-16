@@ -138,5 +138,30 @@ namespace VimSharpLib.Tests
             // 驗證 CursorY 應該是 1（第二行）
             Assert.Equal(1, editor.Context.CursorY);
         }
+        
+        [Fact]
+        public void TestRightArrowKeyWithChineseCharacter()
+        {
+            // Arrange
+            var mockConsole = new MockConsoleDevice { WindowWidth = 80, WindowHeight = 25 };
+            var editor = new VimEditor(mockConsole);
+            
+            // 設置 ViewPort = 0, 0, 10, 5
+            editor.Context.SetViewPort(0, 0, 10, 5);
+            
+            // 加載包含中文字符的文本 "閃1"
+            editor.OpenText("閃1");
+            
+            // 確保編輯器處於正常模式
+            editor.Mode = new VimNormalMode(editor);
+            
+            // Act
+            // 按下向右按鍵 1 次
+            editor.Mode.PressKey(ConsoleKey.RightArrow);
+            
+            // Assert
+            // 驗證 CursorX 應該是 2（因為中文字符"閃"佔用兩個字符寬度）
+            Assert.Equal(2, editor.Context.CursorX);
+        }
     }
 } 
