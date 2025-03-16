@@ -1,12 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using VimSharpLib;
 
-// Console.SetCursorPosition(10,2);
-// // 使用控制碼顯示游標
-// Console.Write("\x1b[?25h");
-// Console.ReadKey();
-// Environment.Exit(0);
-
 var editor1 = new VimEditor();
 editor1.OpenText($"""
 Hello, World!
