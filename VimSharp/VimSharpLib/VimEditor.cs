@@ -2,6 +2,7 @@ namespace VimSharpLib;
 
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 
 public class VimEditor
 {
@@ -64,7 +65,6 @@ public class VimEditor
         if (screenBuffer == null)
         {
             screenBuffer = CreateScreenBuffer();
-            return;
         }
 
         // 計算行號寬度
@@ -77,12 +77,11 @@ public class VimEditor
         RenderContentArea(screenBuffer, lineNumberWidth, cursorTextY);
         
         // 繪製狀態欄
-        if (Context.IsStatusBarVisible)
-        {
-            RenderStatusBar(screenBuffer);
-        }
+        RenderStatusBar(screenBuffer);
 
         RenderFrame(screenBuffer);
+        
+        RenderToConsole(screenBuffer);
     }
 
     /// <summary>
@@ -286,38 +285,26 @@ public class VimEditor
             return; // Y 座標超出範圍，不繪製
         }
 
-        // 獲取狀態欄文本
-        string statusText = "";
-        if (Context.StatusBar.Chars.Length == 0 || Context.StatusBar.Chars.All(c => c.Char == '\0'))
-        {
-            // 如果沒有設置狀態欄文本，則顯示默認信息
-            string modeName = Mode.GetType().Name.Replace("Vim", "").Replace("Mode", "");
-            statusText = $" {modeName} | Line: {Context.CursorY + 1} | Col: {Context.CursorX + 1} ";
+        // 準備狀態欄文本
+        string modeName = Mode.GetType().Name.Replace("Vim", "").Replace("Mode", "");
+        string statusText = $" {modeName} | Line: {GetActualTextY() + 1} | Col: {GetActualTextX() + 1}";
 
-            // 更新 StatusBar
-            UpdateStatusBarText(statusText);
-        }
-        else
+        // 更新 StatusBar
+        Context.StatusBar = new ConsoleText();
+        Context.StatusBar.SetText(0, statusText);
+        
+        // 設置反色顯示
+        for (int i = 0; i < Context.StatusBar.Chars.Length; i++)
         {
-            // 使用已有的狀態欄文本
-            statusText = new string(Context.StatusBar.Chars.Select(c => c.Char).ToArray());
-        }
-
-        // 確保狀態欄文本不超過視窗寬度
-        if (statusText.Length > Context.ViewPort.Width)
-        {
-            statusText = statusText.Substring(0, Context.ViewPort.Width);
+            var c = Context.StatusBar.Chars[i];
+            if (c == ColoredChar.None) 
+            {
+                continue; // 跳過中文字符的第二個位置標記
+            }
             
-            // 更新 StatusBar 長度
-            UpdateStatusBarText(statusText);
-        }
-        else if (statusText.Length < Context.ViewPort.Width)
-        {
-            // 如果狀態欄文本不夠長，則用空格填充
-            statusText = statusText.PadRight(Context.ViewPort.Width);
-            
-            // 更新 StatusBar
-            UpdateStatusBarText(statusText);
+            // 如果是空字符，使用空格替代，確保顯示寬度正確
+            char displayChar = (c.Char == '\0') ? ' ' : c.Char;
+            Context.StatusBar.Chars[i] = new ColoredChar(displayChar, ConsoleColor.Black, ConsoleColor.White);
         }
 
         // 繪製狀態欄到 screenBuffer
@@ -330,24 +317,6 @@ public class VimEditor
         }
     }
     
-    /// <summary>
-    /// 更新狀態欄文本並設置顏色
-    /// </summary>
-    private void UpdateStatusBarText(string text)
-    {
-        Context.StatusBar = new ConsoleText();
-        Context.StatusBar.SetText(0, text);
-        
-        // 設置反色顯示
-        for (int i = 0; i < Context.StatusBar.Chars.Length; i++)
-        {
-            if (Context.StatusBar.Chars[i].Char != '\0')
-            {
-                Context.StatusBar.Chars[i] = new ColoredChar(Context.StatusBar.Chars[i].Char, ConsoleColor.Black, ConsoleColor.White);
-            }
-        }
-    }
-
     /// <summary>
     /// 將 screenBuffer 轉換為 ANSI 控制碼並輸出到 outputBuffer
     /// </summary>
