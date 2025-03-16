@@ -15,6 +15,8 @@ namespace VimSharpLib.Tests
             _mockConsole.WindowWidth.Returns(80);
             _mockConsole.WindowHeight.Returns(25);
             _editor = new VimEditor(_mockConsole);
+            _editor.Context.IsLineNumberVisible = false;
+            _editor.Context.IsStatusBarVisible = false;
             _editor.Context.SetViewPort(0, 0, 10, 5);
         }
 
@@ -224,6 +226,27 @@ namespace VimSharpLib.Tests
             // Assert
             // 驗證 CursorX 應該是 4（"Hello" 的最後一個字符位置）
             Assert.Equal(4, _editor.Context.CursorX);
+            
+            // 確認模擬的 ReadKey 方法被調用了一次
+            _mockConsole.Received(1).ReadKey(Arg.Any<bool>());
+        }
+
+        [Fact]
+        public void TestDollarKeyWithChineseCharacters()
+        {
+            // Arrange
+            // 加載包含中文字符的文本 "Hi 閃電"
+            _editor.OpenText("Hi 閃電");
+            
+            // Act
+            // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
+            SetReadKey('$');
+            
+            // Assert
+            // 驗證 CursorX 應該是 8
+            // "Hi " 佔 3 個字符寬度，"閃" 佔 2 個字符寬度，"電" 佔 2 個字符寬度
+            // 最後一個字, 原本是6, 但因為是中文字, 所以游標位置是 5
+            Assert.Equal(5, _editor.Context.CursorX);
             
             // 確認模擬的 ReadKey 方法被調用了一次
             _mockConsole.Received(1).ReadKey(Arg.Any<bool>());
