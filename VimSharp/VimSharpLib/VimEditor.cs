@@ -287,7 +287,7 @@ public class VimEditor
 
         // 準備狀態欄文本
         string modeName = Mode.GetType().Name.Replace("Vim", "").Replace("Mode", "");
-        string statusText = $" {modeName} | Line: {GetActualTextY() + 1} | Col: {GetActualTextX() + 1}";
+        string statusText = $" {modeName} | Line: {GetActualTextY() + 1} | Col: {GetActualTextX() + 1} ";
 
         // 更新 StatusBar
         Context.StatusBar = new ConsoleText();
