@@ -1,4 +1,6 @@
 using Xunit;
+using NSubstitute;
+using System;
 
 namespace VimSharpLib.Tests
 {
@@ -194,6 +196,46 @@ namespace VimSharpLib.Tests
             // Assert
             // 驗證 CursorX 應該是 4（"Hello" 的長度，游標位於最後一個字符上面）
             Assert.Equal(4, editor.Context.CursorX);
+        }
+
+        [Fact]
+        public void TestDollarKeyAndWaitForInput()
+        {
+            // Arrange
+            // 創建模擬的 IConsoleDevice
+            var mockConsole = Substitute.For<IConsoleDevice>();
+            
+            // 設置模擬控制台的窗口大小
+            mockConsole.WindowWidth.Returns(80);
+            mockConsole.WindowHeight.Returns(25);
+            
+            // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
+            mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false)
+            );
+            
+            // 創建編輯器並使用模擬控制台
+            var editor = new VimEditor(mockConsole);
+            
+            // 設置 ViewPort = 0, 0, 10, 5
+            editor.Context.SetViewPort(0, 0, 10, 5);
+            
+            // 加載文本 "Hello"
+            editor.OpenText("Hello");
+            
+            // 確保編輯器處於正常模式
+            editor.Mode = new VimNormalMode(editor);
+            
+            // Act
+            // 調用 WaitForInput 方法，這將觸發模擬的 ReadKey 方法
+            editor.WaitForInput();
+            
+            // Assert
+            // 驗證 CursorX 應該是 4（"Hello" 的最後一個字符位置）
+            Assert.Equal(4, editor.Context.CursorX);
+            
+            // 確認模擬的 ReadKey 方法被調用了一次
+            mockConsole.Received(1).ReadKey(Arg.Any<bool>());
         }
     }
 } 
