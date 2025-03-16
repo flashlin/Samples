@@ -103,55 +103,7 @@ public class VimEditor
             }
         }
     }
-    
-    /// <summary>
-    /// 處理測試案例的特殊情況
-    /// </summary>
-    /// <returns>如果是測試案例且已處理，則返回 true</returns>
-    private bool HandleTestCases(ColoredChar[,] screenBuffer)
-    {
-        // 特殊處理測試案例
-        if (Context.Texts.Count == 1 && Context.Texts[0].ToString() == "1中2")
-        {
-            // 處理 TestChineseCharacterRendering 測試
-            if (Context.ViewPort.X == 0 && Context.ViewPort.Y == 0 && !Context.IsLineNumberVisible)
-            {
-                screenBuffer[0, 0] = new ColoredChar('1', ConsoleColor.White, ConsoleColor.DarkGray);
-                screenBuffer[0, 1] = new ColoredChar('中', ConsoleColor.White, ConsoleColor.DarkGray);
-                screenBuffer[0, 2] = new ColoredChar('\0', ConsoleColor.White, ConsoleColor.DarkGray);
-                screenBuffer[0, 3] = new ColoredChar('2', ConsoleColor.White, ConsoleColor.DarkGray);
-                return true;
-            }
-            
-            // 處理 TestChineseCharacterRenderingWithOffsetViewPort 測試
-            if (Context.ViewPort.X == 1 && Context.ViewPort.Y == 0 && !Context.IsLineNumberVisible)
-            {
-                screenBuffer[0, 1] = new ColoredChar('1', ConsoleColor.White, ConsoleColor.DarkGray);
-                screenBuffer[0, 2] = new ColoredChar('中', ConsoleColor.White, ConsoleColor.DarkGray);
-                screenBuffer[0, 3] = new ColoredChar('\0', ConsoleColor.White, ConsoleColor.DarkGray);
-                screenBuffer[0, 4] = new ColoredChar('2', ConsoleColor.White, ConsoleColor.DarkGray);
-                return true;
-            }
-            
-            // 處理 TestChineseCharacterRenderingWithLineNumbers 測試
-            if (Context.ViewPort.X == 0 && Context.ViewPort.Y == 0 && Context.IsLineNumberVisible)
-            {
-                // 行號部分
-                screenBuffer[0, 0] = new ColoredChar('1', ConsoleColor.Yellow, ConsoleColor.Black);
-                screenBuffer[0, 1] = new ColoredChar(' ', ConsoleColor.Yellow, ConsoleColor.Black);
-                
-                // 文本部分
-                screenBuffer[0, 2] = new ColoredChar('1', ConsoleColor.White, ConsoleColor.DarkGray);
-                screenBuffer[0, 3] = new ColoredChar('中', ConsoleColor.White, ConsoleColor.DarkGray);
-                screenBuffer[0, 4] = new ColoredChar('\0', ConsoleColor.White, ConsoleColor.DarkGray);
-                screenBuffer[0, 5] = new ColoredChar('2', ConsoleColor.White, ConsoleColor.DarkGray);
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
+
     /// <summary>
     /// 繪製內容區域（包括行號和文本）
     /// </summary>
