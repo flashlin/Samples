@@ -121,6 +121,22 @@ namespace VimSharpLib.Tests
             
             // 驗證 CursorY 應該是 ViewPort.Y
             Assert.Equal(editor.Context.ViewPort.Y, editor.Context.CursorY);
+
+            // Act
+            // 按下向右按鍵 6 次
+            for (int i = 0; i < 6; i++)
+            {
+                editor.Mode.PressKey(ConsoleKey.RightArrow);
+            }
+            
+            // 按下向下按鍵 1 次
+            editor.Mode.PressKey(ConsoleKey.DownArrow);
+
+            // Assert
+             // 驗證 CursorX 應該是 3
+            Assert.Equal(3, editor.Context.CursorX);
+            // 驗證 CursorY 應該是 1（第二行）
+            Assert.Equal(1, editor.Context.CursorY);
         }
     }
 } 
