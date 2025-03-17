@@ -87,5 +87,36 @@ namespace VimSharpLib.Tests
             Assert.Equal('\0', consoleText.Chars[2].Char); // 中文字符佔用兩個位置，第二個應該是特殊標記
             Assert.Equal('2', consoleText.Chars[3].Char);
         }
+        
+        [Fact]
+        public void TestFindLastCharIndex()
+        {
+            // 創建新的 ConsoleText 實例
+            var consoleText = new ConsoleText();
+            
+            // 設置文本 "Hello "
+            consoleText.SetText(0, "Hello ");
+            
+            // 調用 FindLastCharIndex 方法
+            var lastIndex = consoleText.FindLastCharIndex();
+            
+            // 驗證 lastIndex 等於 4（最後一個非空字符 'o' 的索引）
+            Assert.Equal(4, lastIndex);
+        }
+        
+        [Fact]
+        public void TestFindLastCharIndex2()
+        {
+            // 創建新的 ConsoleText 實例
+            var consoleText = new ConsoleText();
+            
+            // 設置文本 "Hello "
+            consoleText.SetText(0, "Hello 閃電");
+            
+            // 調用 FindLastCharIndex 方法
+            var lastIndex = consoleText.FindLastCharIndex();
+            
+            Assert.Equal(8, lastIndex);
+        }
     }
 } 
