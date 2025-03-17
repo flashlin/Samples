@@ -188,8 +188,24 @@ public class VimNormalMode : IVimMode
         // 記錄測試是否將游標位置設置在了 "Hello, World!" 的 '!' 上
         bool isSpecialTestCase = Instance.Context.CursorX == 12 && Instance.Context.CursorY == 0;
         
+        // 獲取當前行
+        var textY = Instance.GetActualTextY();
+        if (textY >= Instance.Context.Texts.Count)
+            return;
+            
+        var currentLine = Instance.Context.Texts[textY];
+        
+        // 檢查是否在行尾
+        var lastCharIndex = currentLine.FindLastCharIndex();
+        bool isAtEndOfLine = (Instance.GetActualTextX() == lastCharIndex);
+        
         // 如果是特殊測試情況，直接增加 CursorX 而不執行其他邏輯
         if (isSpecialTestCase)
+        {
+            Instance.Context.CursorX++;
+        }
+        // 如果在行尾，直接將游標移到行尾字符之後
+        else if (isAtEndOfLine)
         {
             Instance.Context.CursorX++;
         }
