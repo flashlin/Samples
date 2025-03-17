@@ -385,8 +385,8 @@ public class VimNormalMode : IVimMode
         // 獲取行號區域寬度
         int lineNumberWidth = Instance.Context.GetLineNumberWidth();
         
-        // 計算游標的顯示位置
-        int cursorX = lineNumberWidth + lastCharIndex;
+        // 計算游標的顯示位置，需要加上 ViewPort.X
+        int cursorX = Instance.Context.ViewPort.X + lineNumberWidth + lastCharIndex;
         
         // 更新游標位置
         Instance.Context.CursorX = cursorX;
