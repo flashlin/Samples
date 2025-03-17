@@ -311,6 +311,54 @@ namespace VimSharpLib.Tests
             _mockConsole.Received(1).ReadKey(Arg.Any<bool>());
         }
 
+        [Fact]
+        public void TestDollarKeyFollowedByAKeyAndInsert()
+        {
+            // Arrange
+            // 加載文本 "Hello"
+            _editor.OpenText("Hello");
+            
+            // Act
+            // 設置並按下 $ 按鍵 (Shift+4)，將游標移動到行尾
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false)
+            );
+            _editor.WaitForInput();
+            
+            // 驗證 $ 按鍵後游標位置 (應該在最後一個字符上)
+            Assert.Equal(4, _editor.Context.CursorX);
+            
+            // 設置並按下 a 按鍵，切換到插入模式並將游標移到最後一個字符之後
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false)
+            );
+            _editor.WaitForInput();
+            
+            // 驗證 a 按鍵後游標位置和模式
+            Assert.Equal(5, _editor.Context.CursorX);
+            Assert.IsType<VimInsertMode>(_editor.Mode);
+            
+            // 設置並按下 1 按鍵，在文本末尾插入 1
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false)
+            );
+            _editor.WaitForInput();
+            
+            // 驗證插入 1 後的文本和游標位置
+            Assert.Equal("Hello1", _editor.GetCurrentLine().ToString());
+            Assert.Equal(6, _editor.Context.CursorX);
+            
+            // 設置並按下 Esc 按鍵，切換回普通模式
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                new ConsoleKeyInfo('\0', ConsoleKey.Escape, false, false, false)
+            );
+            _editor.WaitForInput();
+            
+            // 驗證 Esc 按鍵後游標位置和模式
+            Assert.Equal(5, _editor.Context.CursorX);
+            Assert.IsType<VimNormalMode>(_editor.Mode);
+        }
+
         private void SetReadKey(char key)
         {
             switch(key)
