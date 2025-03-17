@@ -377,6 +377,23 @@ namespace VimSharpLib.Tests
             // 驗證插入 1 後的文本和游標位置
             Assert.Equal("Hello1", _editor.GetCurrentLine().ToString());
             Assert.Equal(7, _editor.Context.CursorX); // 6 + ViewPort.X(1)
+
+            // 設置並按下 2 按鍵，在文本末尾插入 2
+            SetReadKey('2');
+
+            // 驗證插入 2 後的文本和游標位置
+            Assert.Equal("Hello12", _editor.GetCurrentLine().ToString());
+            Assert.Equal(8, _editor.Context.CursorX); // 7 + ViewPort.X(1)
+            
+            // 設置並按下 Backspace 按鍵，刪除最後一個字符
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                new ConsoleKeyInfo('\b', ConsoleKey.Backspace, false, false, false)
+            );
+            _editor.WaitForInput();
+            
+            // 驗證刪除後的文本和游標位置
+            Assert.Equal("Hello1", _editor.GetCurrentLine().ToString());
+            Assert.Equal(7, _editor.Context.CursorX); // 6 + ViewPort.X(1)
             
             // 設置並按下 Esc 按鍵，切換回普通模式
             SetReadKey((char)27); // Escape 的 ASCII 碼是 27
@@ -401,8 +418,9 @@ namespace VimSharpLib.Tests
                     );
                     break;
                 case '1':
+                case '2':
                     _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                        new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false)
+                        new ConsoleKeyInfo(key, ConsoleKey.D1, false, false, false)
                     );
                     break;
                 case (char)27: // Escape
