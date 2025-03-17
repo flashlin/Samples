@@ -48,8 +48,33 @@ public class VimInsertMode : IVimMode
     {
         if (keys.Count > 0)
         {
-            var keyInfo = new ConsoleKeyInfo((char)keys[0], keys[0], false, false, false);
-            HandleCharInput(keyInfo.KeyChar);
+            var key = keys[0];
+            char keyChar;
+            
+            // 處理數字鍵
+            if (key >= ConsoleKey.D0 && key <= ConsoleKey.D9)
+            {
+                keyChar = (char)('0' + (key - ConsoleKey.D0));
+                HandleCharInput(keyChar);
+            }
+            // 處理字母鍵
+            else if (key >= ConsoleKey.A && key <= ConsoleKey.Z)
+            {
+                keyChar = (char)('a' + (key - ConsoleKey.A));
+                HandleCharInput(keyChar);
+            }
+            else
+            {
+                // 對於其他按鍵，使用默認轉換
+                keyChar = key.ToChar();
+                if (keyChar != '\0')
+                {
+                    HandleCharInput(keyChar);
+                }
+            }
+            
+            // 清空按鍵緩衝區以準備下一次輸入
+            _keyHandler.Clear();
         }
     }
 
@@ -384,13 +409,28 @@ public class VimInsertMode : IVimMode
     {
         if (char.IsLetterOrDigit(keyChar) || char.IsPunctuation(keyChar) || char.IsWhiteSpace(keyChar))
         {
-            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+            // 獲取當前行
+            var currentLine = Instance.GetCurrentLine();
             
             // 獲取當前文本
-            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+            string currentText = new string(currentLine.Chars.Select(c => c.Char).Where(c => c != '\0').ToArray());
             
             // 計算實際索引位置
-            int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+            int actualIndex;
+            
+            // 獲取實際文本位置
+            int actualTextX = Instance.GetActualTextX();
+            
+            // 如果在行尾，直接添加到文本末尾
+            if (actualTextX >= currentText.Length)
+            {
+                actualIndex = currentText.Length;
+            }
+            else
+            {
+                // 否則插入到指定位置
+                actualIndex = actualTextX;
+            }
             
             // 在實際索引位置插入字符
             string newText = currentText.Insert(actualIndex, keyChar.ToString());
@@ -399,30 +439,10 @@ public class VimInsertMode : IVimMode
             currentLine.SetText(0, newText);
             
             // 移動光標（考慮中文字符寬度）
-            Instance.Context.CursorX += keyChar.GetCharWidth();
-            
-            // 如果游標位於文本末尾，確保它停在最後一個字符上
-            string updatedText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            int updatedActualIndex = updatedText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
-            
-            if (updatedActualIndex > updatedText.Length)
-            {
-                // 調整游標位置到最後一個字符
-                int lastCharIndex = updatedText.Length - 1;
-                if (lastCharIndex >= 0)
-                {
-                    int displayPosition = 0;
-                    for (int i = 0; i <= lastCharIndex; i++)
-                    {
-                        displayPosition += updatedText[i].GetCharWidth();
-                    }
-                    Instance.Context.CursorX = displayPosition;
-                }
-            }
+            // 不要直接修改 CursorX，而是通過 SetActualTextX 方法設置，它會考慮 ViewPort 和偏移量
+            int newActualTextX = actualTextX + keyChar.GetCharWidth();
+            Instance.SetActualTextX(newActualTextX);
         }
-        
-        // 檢查並調整游標位置和偏移量
-        AdjustCursorAndOffset();
     }
 
     public void WaitForInput()
