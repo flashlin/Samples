@@ -376,17 +376,8 @@ public class VimNormalMode : IVimMode
         var currentLine = Instance.Context.Texts[textY];
         
         // 找到最後一個非空字符的索引
-        int lastCharIndex = -1;
-        for (int i = currentLine.Width - 1; i >= 0; i--)
-        {
-            char currentChar = currentLine.Chars[i].Char;
-            if (currentChar != ' ' && currentChar != '\0')
-            {
-                lastCharIndex = i;
-                break;
-            }
-        }
-        
+        var lastCharIndex = currentLine.FindLastCharIndex();
+
         // 如果行為空或只有空格和 '\0'，直接返回
         if (lastCharIndex == -1)
             return;
@@ -400,7 +391,7 @@ public class VimNormalMode : IVimMode
         // 更新游標位置
         Instance.Context.CursorX = cursorX;
     }
-    
+
     /// <summary>
     /// 將游標移動到當前行的第一個字符上
     /// </summary>

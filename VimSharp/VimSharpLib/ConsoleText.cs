@@ -102,4 +102,19 @@ public class ConsoleText
             c.BackgroundColor = backgroundColor;
         }
     }
+
+    public int FindLastCharIndex()
+    {
+        var lastCharIndex = -1;
+        for (var i = Width - 1; i >= 0; i--)
+        {
+            var currentChar = Chars[i].Char;
+            if (currentChar != ' ' && currentChar != '\0')
+            {
+                lastCharIndex = i;
+                break;
+            }
+        }
+        return lastCharIndex;
+    }
 }
