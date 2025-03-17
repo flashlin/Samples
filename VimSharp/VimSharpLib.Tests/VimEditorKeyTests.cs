@@ -320,39 +320,27 @@ namespace VimSharpLib.Tests
             
             // Act
             // 設置並按下 $ 按鍵 (Shift+4)，將游標移動到行尾
-            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false)
-            );
-            _editor.WaitForInput();
+            SetReadKey('$');
             
             // 驗證 $ 按鍵後游標位置 (應該在最後一個字符上)
             Assert.Equal(4, _editor.Context.CursorX);
             
             // 設置並按下 a 按鍵，切換到插入模式並將游標移到最後一個字符之後
-            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false)
-            );
-            _editor.WaitForInput();
+            SetReadKey('a');
             
             // 驗證 a 按鍵後游標位置和模式
             Assert.Equal(5, _editor.Context.CursorX);
             Assert.IsType<VimInsertMode>(_editor.Mode);
             
             // 設置並按下 1 按鍵，在文本末尾插入 1
-            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false)
-            );
-            _editor.WaitForInput();
+            SetReadKey('1');
             
             // 驗證插入 1 後的文本和游標位置
             Assert.Equal("Hello1", _editor.GetCurrentLine().ToString());
             Assert.Equal(6, _editor.Context.CursorX);
             
             // 設置並按下 Esc 按鍵，切換回普通模式
-            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                new ConsoleKeyInfo('\0', ConsoleKey.Escape, false, false, false)
-            );
-            _editor.WaitForInput();
+            SetReadKey((char)27); // Escape 的 ASCII 碼是 27
             
             // 驗證 Esc 按鍵後游標位置和模式
             Assert.Equal(5, _editor.Context.CursorX);
@@ -368,8 +356,23 @@ namespace VimSharpLib.Tests
                         new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false)
                     );
                     break;
+                case 'a':
+                    _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                        new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false)
+                    );
+                    break;
+                case '1':
+                    _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                        new ConsoleKeyInfo('1', ConsoleKey.D1, false, false, false)
+                    );
+                    break;
+                case (char)27: // Escape
+                    _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                        new ConsoleKeyInfo('\0', ConsoleKey.Escape, false, false, false)
+                    );
+                    break;
                 default:
-                    throw new ArgumentException($"Unsupported key: {key}");
+                    throw new ArgumentException($"不支援的按鍵: {key}");
             }
             // 調用 WaitForInput 方法，這將觸發模擬的 ReadKey 方法
             _editor.WaitForInput();
