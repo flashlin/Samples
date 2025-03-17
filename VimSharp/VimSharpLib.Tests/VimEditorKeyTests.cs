@@ -347,6 +347,45 @@ namespace VimSharpLib.Tests
             Assert.IsType<VimNormalMode>(_editor.Mode);
         }
 
+        [Fact]
+        public void TestDollarKeyFollowedByAKeyAndInsertWithCustomViewPort()
+        {
+            // Arrange
+            // 設置自定義 ViewPort
+            _editor.Context.SetViewPort(1, 1, 40, 5);
+            
+            // 加載文本 "Hello"
+            _editor.OpenText("Hello");
+            
+            // Act
+            // 設置並按下 $ 按鍵 (Shift+4)，將游標移動到行尾
+            SetReadKey('$');
+            
+            // 驗證 $ 按鍵後游標位置 (應該在最後一個字符上)
+            Assert.Equal(5, _editor.Context.CursorX); // 4 + ViewPort.X(1)
+            
+            // 設置並按下 a 按鍵，切換到插入模式並將游標移到最後一個字符之後
+            SetReadKey('a');
+            
+            // 驗證 a 按鍵後游標位置和模式
+            Assert.Equal(6, _editor.Context.CursorX); // 5 + ViewPort.X(1)
+            Assert.IsType<VimInsertMode>(_editor.Mode);
+            
+            // 設置並按下 1 按鍵，在文本末尾插入 1
+            SetReadKey('1');
+            
+            // 驗證插入 1 後的文本和游標位置
+            Assert.Equal("Hello1", _editor.GetCurrentLine().ToString());
+            Assert.Equal(7, _editor.Context.CursorX); // 6 + ViewPort.X(1)
+            
+            // 設置並按下 Esc 按鍵，切換回普通模式
+            SetReadKey((char)27); // Escape 的 ASCII 碼是 27
+            
+            // 驗證 Esc 按鍵後游標位置和模式
+            Assert.Equal(6, _editor.Context.CursorX); // 5 + ViewPort.X(1)
+            Assert.IsType<VimNormalMode>(_editor.Mode);
+        }
+
         private void SetReadKey(char key)
         {
             switch(key)
