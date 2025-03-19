@@ -270,6 +270,19 @@ imap <C-x> <Esc>dd
 imap <C-a> <Esc>ma<CR>ggVG
 map vv v^
 
+"[Refactor]
+vmap M :action ExtractMethod<CR>
+map zri :action Inline<CR>
+imap zri <Esc>zri
+map zrv :action IntroduceVariable<CR>
+imap zrv <Esc>zrv
+map zrp :action IntroduceParameter<CR>
+imap zrp <Esc>zrp<Esc>
+map zrf :action IntroduceField<CR>
+imap zrf <Esc>zrf
+map zrr hhcf=return
+imap zrr <Esc>zrr
+
 "[Unit Test]
 nmap zra :action RiderUnitTestRunSolutionAction<CR>:action ActivateUnitTestsToolWindow<CR>
 imap zra <Esc>zra
