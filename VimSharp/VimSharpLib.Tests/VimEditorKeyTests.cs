@@ -405,32 +405,29 @@ namespace VimSharpLib.Tests
 
         private void SetReadKey(char key)
         {
-            switch(key)
+            var keyMapping = new Dictionary<char, ConsoleKey>
             {
-                case '$':
-                    _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                        new ConsoleKeyInfo('$', ConsoleKey.D4, true, false, false)
-                    );
-                    break;
-                case 'a':
-                    _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                        new ConsoleKeyInfo('a', ConsoleKey.A, false, false, false)
-                    );
-                    break;
-                case '1':
-                case '2':
-                    _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                        new ConsoleKeyInfo(key, ConsoleKey.D1, false, false, false)
-                    );
-                    break;
-                case (char)27: // Escape
-                    _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                        new ConsoleKeyInfo('\0', ConsoleKey.Escape, false, false, false)
-                    );
-                    break;
-                default:
-                    throw new ArgumentException($"不支援的按鍵: {key}");
+                { '$', ConsoleKey.D4 },
+                { 'a', ConsoleKey.A },
+                { '1', ConsoleKey.D1 },
+                { '2', ConsoleKey.D2 },
+                { (char)27, ConsoleKey.Escape } // Escape
+            };
+
+            if (keyMapping.ContainsKey(key))
+            {
+                var consoleKey = keyMapping[key];
+                bool shift = key == '$'; // 只有 $ 需要按下 Shift 鍵
+
+                _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
+                    new ConsoleKeyInfo(key, consoleKey, shift, false, false)
+                );
             }
+            else
+            {
+                throw new ArgumentException($"不支援的按鍵: {key}");
+            }
+
             // 調用 WaitForInput 方法，這將觸發模擬的 ReadKey 方法
             _editor.WaitForInput();
         }
