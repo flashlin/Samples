@@ -386,10 +386,7 @@ namespace VimSharpLib.Tests
             Assert.Equal(8, _editor.Context.CursorX); // 7 + ViewPort.X(1)
             
             // 設置並按下 Backspace 按鍵，刪除最後一個字符
-            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                new ConsoleKeyInfo('\b', ConsoleKey.Backspace, false, false, false)
-            );
-            _editor.WaitForInput();
+            SetReadKey('\b');
             
             // 驗證刪除後的文本和游標位置
             Assert.Equal("Hello1", _editor.GetCurrentLine().ToString());
