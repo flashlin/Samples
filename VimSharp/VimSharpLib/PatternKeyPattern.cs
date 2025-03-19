@@ -28,9 +28,9 @@ public class PatternKeyPattern : IKeyPattern
     /// </summary>
     /// <param name="keyBuffer">要檢查的按鍵緩衝區</param>
     /// <returns>如果匹配則返回 true，否則返回 false</returns>
-    public bool IsMatch(List<ConsoleKey> keyBuffer)
+    public bool IsMatch(List<ConsoleKeyInfo> keyBuffer)
     {
-        if (keyBuffer == null || keyBuffer.Count == 0)
+        if (keyBuffer.Count == 0)
             return false;
 
         // 將按鍵緩衝區轉換為字符串
@@ -45,18 +45,18 @@ public class PatternKeyPattern : IKeyPattern
     /// </summary>
     /// <param name="keyBuffer">要轉換的按鍵緩衝區</param>
     /// <returns>表示按鍵序列的字符串</returns>
-    private string ConvertKeyBufferToString(List<ConsoleKey> keyBuffer)
+    private string ConvertKeyBufferToString(List<ConsoleKeyInfo> keyBuffer)
     {
         var sb = new StringBuilder();
         
-        foreach (var key in keyBuffer)
+        foreach (var keyInfo in keyBuffer)
         {
             // 將 ConsoleKey 轉換為字符串表示
-            string keyString = key.ToString();
+            string keyString = keyInfo.Key.ToString();
             
             // 對於特殊按鍵，可以使用特定的表示方式
             // 例如，將方向鍵轉換為特定的字符
-            switch (key)
+            switch (keyInfo.Key)
             {
                 case ConsoleKey.LeftArrow:
                     sb.Append("←");
@@ -102,13 +102,13 @@ public class PatternKeyPattern : IKeyPattern
                     break;
                 default:
                     // 對於字母和數字按鍵，直接使用其字符表示
-                    if (key >= ConsoleKey.A && key <= ConsoleKey.Z)
+                    if (keyInfo.Key >= ConsoleKey.A && keyInfo.Key <= ConsoleKey.Z)
                     {
-                        sb.Append((char)('A' + (key - ConsoleKey.A)));
+                        sb.Append((char)('A' + (keyInfo.Key - ConsoleKey.A)));
                     }
-                    else if (key >= ConsoleKey.D0 && key <= ConsoleKey.D9)
+                    else if (keyInfo.Key >= ConsoleKey.D0 && keyInfo.Key <= ConsoleKey.D9)
                     {
-                        sb.Append((char)('0' + (key - ConsoleKey.D0)));
+                        sb.Append((char)('0' + (keyInfo.Key - ConsoleKey.D0)));
                     }
                     else
                     {

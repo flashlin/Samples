@@ -12,13 +12,13 @@ public class CharKeyPattern : IKeyPattern
         _char = c;
     }
 
-    public bool IsMatch(List<ConsoleKey> keyBuffer)
+    public bool IsMatch(List<ConsoleKeyInfo> keyBuffer)
     {
-        if (keyBuffer == null || keyBuffer.Count == 0)
+        if (keyBuffer.Count == 0)
             return false;
 
         // 檢查按鍵緩衝區的最後一個按鍵是否對應於指定的字符
-        var lastKey = keyBuffer.Last();
+        var lastKey = keyBuffer.Last().Key;
         
         // 將 ConsoleKey 轉換為字符
         char keyChar;

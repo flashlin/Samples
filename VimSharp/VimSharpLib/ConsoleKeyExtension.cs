@@ -9,6 +9,12 @@ using System.Linq;
 /// </summary>
 public static class ConsoleKeyExtension
 {
+    public static bool IsSame(this ConsoleKeyInfo keyInfo, ConsoleKeyInfo otherKey)
+    {
+        return keyInfo.Key == otherKey.Key
+            && keyInfo.Modifiers == otherKey.Modifiers;
+    }
+    
     /// <summary>
     /// 將ConsoleKey轉換為可讀的字符串表示
     /// </summary>
@@ -146,5 +152,17 @@ public static class ConsoleKeyExtension
                 }
                 return '\0';
         }
+    }
+    
+    public static ConsoleKeyInfo ToConsoleKeyInfo(this ConsoleKey key)
+    {
+        // 創建一個基本的 ConsoleKeyInfo 對象
+        return new ConsoleKeyInfo(
+            '\0',  // 默認字符
+            key,   // 按鍵碼
+            false, // Shift 狀態
+            false, // Alt 狀態
+            false  // Ctrl 狀態
+        );
     }
 } 

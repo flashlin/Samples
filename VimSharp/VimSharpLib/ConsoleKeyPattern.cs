@@ -4,31 +4,23 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
 
-public class AnyKeyPattern : IKeyPattern
-{
-    public bool IsMatch(List<ConsoleKey> keyBuffer)
-    {
-        return true;
-    }
-}
-
 public class ConsoleKeyPattern : IKeyPattern
 {
-    private readonly IEnumerable<ConsoleKey> _keys;
+    private readonly IEnumerable<ConsoleKeyInfo> _keys;
 
-    public ConsoleKeyPattern(IEnumerable<ConsoleKey> keys)
+    public ConsoleKeyPattern(IEnumerable<ConsoleKeyInfo> keys)
     {
         _keys = keys ?? throw new ArgumentNullException(nameof(keys));
     }
     
     public ConsoleKeyPattern(ConsoleKey key)
-        : this([key])
+        : this([key.ToConsoleKeyInfo()])
     {
     }
 
-    public bool IsMatch(List<ConsoleKey> keyBuffer)
+    public bool IsMatch(List<ConsoleKeyInfo> keyBuffer)
     {
-        if (keyBuffer == null || keyBuffer.Count == 0)
+        if (keyBuffer.Count == 0)
             return false;
 
         // 完全比對：檢查按鍵緩衝區是否與指定的按鍵序列完全匹配
@@ -40,7 +32,7 @@ public class ConsoleKeyPattern : IKeyPattern
         // 然後檢查每個位置的按鍵是否相同
         for (int i = 0; i < keyBuffer.Count; i++)
         {
-            if (keyBuffer[i] != keysList[i])
+            if (!keyBuffer[i].IsSame(keysList[i]))
                 return false;
         }
 

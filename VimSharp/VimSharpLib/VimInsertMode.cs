@@ -27,7 +27,7 @@ public class VimInsertMode : IVimMode
     /// </summary>
     private void InitializeKeyHandler()
     {
-        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKey>>>
+        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
         {
             // 註冊基本功能鍵
             { new ConsoleKeyPattern(ConsoleKey.Escape), HandleEscape },
@@ -45,11 +45,12 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 處理任意鍵輸入，會調用 HandleCharInput 方法
     /// </summary>
-    private void HandleAnyKeyInput(List<ConsoleKey> keys)
+    private void HandleAnyKeyInput(List<ConsoleKeyInfo> keys)
     {
         if (keys.Count > 0)
         {
-            var key = keys[0];
+            var keyInfo = keys[0];
+            var key = keyInfo.Key;
             char keyChar;
             
             // 處理數字鍵
@@ -91,7 +92,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 切換到普通模式
     /// </summary>
-    private void HandleEscape(List<ConsoleKey> keys)
+    private void HandleEscape(List<ConsoleKeyInfo> keys)
     {
         // 獲取當前行
         var currentLine = Instance.GetCurrentLine();
@@ -134,7 +135,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 處理退格鍵
     /// </summary>
-    private void HandleBackspace(List<ConsoleKey> keys)
+    private void HandleBackspace(List<ConsoleKeyInfo> keys)
     {
         // 正常環境的處理邏輯
         if (Instance.Context.CursorX > 0)
@@ -184,7 +185,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 向左移動游標
     /// </summary>
-    private void MoveCursorLeft(List<ConsoleKey> keys)
+    private void MoveCursorLeft(List<ConsoleKeyInfo> keys)
     {
         try
         {
@@ -284,7 +285,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 向右移動游標
     /// </summary>
-    private void MoveCursorRight(List<ConsoleKey> keys)
+    private void MoveCursorRight(List<ConsoleKeyInfo> keys)
     {
         // 一般情況下的處理
         if (Instance.Context.CursorY >= 0 && Instance.Context.CursorY < Instance.Context.Texts.Count)
@@ -326,7 +327,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 向上移動游標
     /// </summary>
-    private void MoveCursorUp(List<ConsoleKey> keys)
+    private void MoveCursorUp(List<ConsoleKeyInfo> keys)
     {
         if (Instance.Context.CursorY > 0)
         {
@@ -365,7 +366,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 向下移動游標
     /// </summary>
-    private void MoveCursorDown(List<ConsoleKey> keys)
+    private void MoveCursorDown(List<ConsoleKeyInfo> keys)
     {
         if (Instance.Context.CursorY < Instance.Context.Texts.Count - 1)
         {
@@ -404,7 +405,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 處理 Enter 鍵
     /// </summary>
-    private void HandleEnterKey(List<ConsoleKey> keys)
+    private void HandleEnterKey(List<ConsoleKeyInfo> keys)
     {
         // 獲取當前行
         var enterCurrentLine = Instance.Context.Texts[Instance.Context.CursorY];
@@ -491,7 +492,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 處理 Delete 鍵
     /// </summary>
-    private void HandleDeleteKey(List<ConsoleKey> keys)
+    private void HandleDeleteKey(List<ConsoleKeyInfo> keys)
     {
         // 獲取當前行
         var currentLine = Instance.GetCurrentLine();

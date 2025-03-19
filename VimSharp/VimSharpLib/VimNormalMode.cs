@@ -24,7 +24,7 @@ public class VimNormalMode : IVimMode
 
     private void InitializeKeyPatterns()
     {
-        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKey>>>
+        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
         {
             { new ConsoleKeyPattern(ConsoleKey.I), SwitchToNormalMode },
             { new ConsoleKeyPattern(ConsoleKey.A), HandleAKey },
@@ -46,7 +46,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 切換到普通模式
     /// </summary>
-    private void SwitchToNormalMode(List<ConsoleKey> keys)
+    private void SwitchToNormalMode(List<ConsoleKeyInfo> keys)
     {
         Instance.Mode = new VimInsertMode(Instance);
     }
@@ -54,7 +54,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 退出編輯器
     /// </summary>
-    private void QuitEditor(List<ConsoleKey> keys)
+    private void QuitEditor(List<ConsoleKeyInfo> keys)
     {
         Instance.IsRunning = false;
     }
@@ -62,7 +62,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 向左移動游標
     /// </summary>
-    private void MoveCursorLeft(List<ConsoleKey> keys)
+    private void MoveCursorLeft(List<ConsoleKeyInfo> keys)
     {
         var lineNumberWidth = Instance.Context.GetLineNumberWidth();
         // 計算最小允許的 X 座標（ViewPort 的左邊界 + 行號區域的寬度）
@@ -98,7 +98,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 向右移動游標
     /// </summary>
-    private void MoveCursorRight(List<ConsoleKey> keys)
+    private void MoveCursorRight(List<ConsoleKeyInfo> keys)
     {
         var textX = Instance.GetActualTextX();
         var textY = Instance.GetActualTextY();
@@ -139,7 +139,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 向上移動游標
     /// </summary>
-    private void MoveCursorUp(List<ConsoleKey> keys)
+    private void MoveCursorUp(List<ConsoleKeyInfo> keys)
     {
         Instance.MoveCursorUp();
     }
@@ -147,7 +147,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 向下移動游標
     /// </summary>
-    private void MoveCursorDown(List<ConsoleKey> keys)
+    private void MoveCursorDown(List<ConsoleKeyInfo> keys)
     {
         Instance.MoveCursorDown();
     }
@@ -155,7 +155,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 處理 Enter 鍵
     /// </summary>
-    private void HandleEnterKey(List<ConsoleKey> keys)
+    private void HandleEnterKey(List<ConsoleKeyInfo> keys)
     {
         MoveCursorDown(keys);
         MoveCursorToStartOfLine(keys);
@@ -183,7 +183,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 處理 A 鍵：向右移動游標後切換到普通模式
     /// </summary>
-    private void HandleAKey(List<ConsoleKey> keys)
+    private void HandleAKey(List<ConsoleKeyInfo> keys)
     {
         // 記錄測試是否將游標位置設置在了 "Hello, World!" 的 '!' 上
         bool isSpecialTestCase = Instance.Context.CursorX == 12 && Instance.Context.CursorY == 0;
@@ -222,7 +222,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 切換到標記模式
     /// </summary>
-    private void SwitchToVisualMode(List<ConsoleKey> keys)
+    private void SwitchToVisualMode(List<ConsoleKeyInfo> keys)
     {
         var mode = new VimVisualMode(Instance);
         mode.SetStartPosition(Instance.Context.CursorX, Instance.Context.CursorY);
@@ -232,7 +232,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 處理小寫 p 鍵：從游標右邊位置插入剪貼簿內容
     /// </summary>
-    private void HandlePasteAfterCursor(List<ConsoleKey> keys)
+    private void HandlePasteAfterCursor(List<ConsoleKeyInfo> keys)
     {
         // 檢查剪貼簿是否有內容
         if (Instance.ClipboardBuffers.Count == 0)
@@ -382,7 +382,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 將游標移動到當前行的最後一個字符上
     /// </summary>
-    private void MoveCursorToEndOfLine(List<ConsoleKey> keys)
+    private void MoveCursorToEndOfLine(List<ConsoleKeyInfo> keys)
     {
         // 獲取當前行
         var textY = Instance.GetActualTextY();
@@ -411,7 +411,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 將游標移動到當前行的第一個字符上
     /// </summary>
-    private void MoveCursorToStartOfLine(List<ConsoleKey> keys)
+    private void MoveCursorToStartOfLine(List<ConsoleKeyInfo> keys)
     {
         var currentLine = Instance.Context.Texts[Instance.GetActualTextY()];
         var firstChar = currentLine.Chars.FirstOrDefault(c => c.Char != '\0' && c.Char != ' ');
@@ -426,7 +426,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 跳轉處理
     /// </summary>
-    private void JumpToLine(List<ConsoleKey> keys)
+    private void JumpToLine(List<ConsoleKeyInfo> keys)
     {
         // 將按鍵緩衝區轉換為字符串
         var input = _keyHandler.GetKeyBufferString();
@@ -439,17 +439,27 @@ public class VimNormalMode : IVimMode
         // 解析數字
         if (int.TryParse(match.Groups[1].Value, out int number))
         {
-            for (int i = 0; i < number; i++)
+            // 調整行號（確保在有效範圍內）
+            number = Math.Max(1, Math.Min(number, Instance.Context.Texts.Count));
+            
+            // 先將游標移至第一行
+            Instance.Context.CursorY = 0;
+            
+            // 然後向下移動到目標行（行號從1開始，但索引從0開始）
+            for (int i = 1; i < number; i++)
             {
                 Instance.MoveCursorDown();
             }
+            
+            // 移動到行首
+            MoveCursorToStartOfLine(keys);
         }
     }
 
     /// <summary>
     /// 清除按鍵緩衝區
     /// </summary>
-    private void ClearKeyBuffer(List<ConsoleKey> keys)
+    private void ClearKeyBuffer(List<ConsoleKeyInfo> keys)
     {
         _keyHandler.Clear();
     }

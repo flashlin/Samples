@@ -3,22 +3,22 @@ namespace VimSharpLib;
 public class KeyHandler
 {
     private readonly IConsoleDevice _consoleDevice;
-    private Dictionary<IKeyPattern, Action<List<ConsoleKey>>> _keyPatterns = new();
-    private readonly List<ConsoleKey> _keyBuffer = new();
+    private Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>> _keyPatterns = new();
+    private readonly List<ConsoleKeyInfo> _keyBuffer = new();
     
     public KeyHandler(IConsoleDevice consoleDevice)
     {
         _consoleDevice = consoleDevice;
     }
 
-    public void InitializeKeyPatterns(Dictionary<IKeyPattern, Action<List<ConsoleKey>>> keyPatterns)
+    public void InitializeKeyPatterns(Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>> keyPatterns)
     {
         _keyPatterns = keyPatterns;
     }
     
     public string GetKeyBufferString()
     {
-        return string.Join("", _keyBuffer.Select(k => k.ToChar()).Where(c => c != '\0'));
+        return string.Join("", _keyBuffer.Select(k => k.KeyChar).Where(c => c != '\0'));
     }
 
     public void Clear()
@@ -28,14 +28,22 @@ public class KeyHandler
 
     public void PressKey(ConsoleKey key)
     {
-        _keyBuffer.Add(key);
+        // 創建一個基本的 ConsoleKeyInfo 對象
+        var keyInfo = new ConsoleKeyInfo(
+            '\0',  // 默認字符
+            key,   // 按鍵碼
+            false, // Shift 狀態
+            false, // Alt 狀態
+            false  // Ctrl 狀態
+        );
+        _keyBuffer.Add(keyInfo);
         HandleInputKey();
     }
 
     public void WaitForInput()
     {
         var keyInfo = _consoleDevice.ReadKey(intercept: true);
-        _keyBuffer.Add(keyInfo.Key);
+        _keyBuffer.Add(keyInfo);
         HandleInputKey();
     }
 

@@ -14,9 +14,9 @@ public class RegexPattern : IKeyPattern
         _pattern = pattern;
     }
     
-    public bool IsMatch(List<ConsoleKey> keyBuffer)
+    public bool IsMatch(List<ConsoleKeyInfo> keyBuffer)
     {
-        if (keyBuffer == null || keyBuffer.Count == 0)
+        if (keyBuffer.Count == 0)
             return false;
             
         // 將按鍵緩衝區轉換為字符串，用於正則匹配
@@ -29,13 +29,13 @@ public class RegexPattern : IKeyPattern
     /// <summary>
     /// 將按鍵緩衝區轉換為字符串，用於正則匹配
     /// </summary>
-    private string ConvertKeyBufferToString(List<ConsoleKey> keyBuffer)
+    private string ConvertKeyBufferToString(List<ConsoleKeyInfo> keyBuffer)
     {
         var sb = new StringBuilder();
         
-        foreach (var key in keyBuffer)
+        foreach (var keyInfo in keyBuffer)
         {
-            char keyChar = key.ToChar();
+            char keyChar = keyInfo.Key.ToChar();
             if (keyChar != '\0')
             {
                 sb.Append(keyChar);
