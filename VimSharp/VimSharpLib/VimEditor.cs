@@ -484,34 +484,10 @@ public class VimEditor
 
     public void WaitForInput()
     {
-        // 檢查當前按鍵是否是 Backspace，並且當前模式是否是插入模式
+        // 讀取按鍵
         var lastKeyInfo = Console.ReadKey(true);
-        if (lastKeyInfo.Key == ConsoleKey.Backspace && Mode is VimInsertMode)
-        {
-            // 獲取當前行
-            var currentLine = GetCurrentLine();
-            
-            // 獲取當前文本
-            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            
-            // 如果文本不為空，刪除最後一個字符
-            if (!string.IsNullOrEmpty(currentText))
-            {
-                string newText = currentText.Substring(0, currentText.Length - 1);
-                currentLine.SetText(0, newText);
-                
-                // 更新游標位置
-                Context.CursorX--;
-                
-                // 重新渲染
-                Render();
-                
-                // 直接返回，不執行後續按鍵處理
-                return;
-            }
-        }
         
-        // 正常處理按鍵，但避免再次調用 WaitForInput
+        // 直接將按鍵傳遞給當前模式進行處理
         Mode.PressKey(lastKeyInfo.Key);
     }
 
@@ -913,6 +889,23 @@ public class VimEditor
 
     public ConsoleText GetCurrentLine()
     {
-        return Context.Texts[GetActualTextY()];
+        int index = GetActualTextY();
+        
+        // 確保索引在有效範圍內
+        if (index < 0 || index >= Context.Texts.Count)
+        {
+            // 如果索引超出範圍，創建一個空行並返回
+            if (Context.Texts.Count == 0)
+            {
+                var newLine = new ConsoleText();
+                Context.Texts.Add(newLine);
+                return newLine;
+            }
+            
+            // 使用最接近的有效索引
+            index = Math.Clamp(index, 0, Context.Texts.Count - 1);
+        }
+        
+        return Context.Texts[index];
     }
 }

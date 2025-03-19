@@ -32,6 +32,7 @@ public class VimInsertMode : IVimMode
             // 註冊基本功能鍵
             { new ConsoleKeyPattern(ConsoleKey.Escape), HandleEscape },
             { new ConsoleKeyPattern(ConsoleKey.Backspace), HandleBackspace },
+            { new ConsoleKeyPattern(ConsoleKey.Delete), HandleDeleteKey },
             { new ConsoleKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
             { new ConsoleKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },
             { new ConsoleKeyPattern(ConsoleKey.UpArrow), MoveCursorUp },
@@ -139,7 +140,15 @@ public class VimInsertMode : IVimMode
         if (Instance.Context.CursorX > 0)
         {
             // 獲取當前行
-            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+            var index = Instance.GetActualTextY();
+            
+            // 確保索引在有效範圍內
+            if (index < 0 || index >= Instance.Context.Texts.Count)
+                return;
+                
+            var currentLine = Instance.Context.Texts[index];
+            if (currentLine == null)
+                return;
 
             // 獲取當前文本
             string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
@@ -177,56 +186,99 @@ public class VimInsertMode : IVimMode
     /// </summary>
     private void MoveCursorLeft(List<ConsoleKey> keys)
     {
-        // 如果啟用了相對行號，則游標的 X 位置不能小於行號區域的寬度
-        if (Instance.Context.IsLineNumberVisible)
+        try
         {
-            // 計算相對行號區域的寬度
-            int lineNumberWidth = Instance.Context.GetLineNumberWidth();
-            
-            // 如果游標已經在最左邊（相對行號區域的右側），則不再向左移動
-            if (Instance.Context.CursorX <= lineNumberWidth)
+            // 如果啟用了相對行號，則檢查游標是否已經在行號區域右側
+            if (Instance.Context.IsLineNumberVisible)
             {
-                return;
-            }
-        }
-        
-        if (Instance.Context.CursorX > 0)
-        {
-            // 獲取當前文本
-            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
-            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-
-            // 計算實際索引位置
-            int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
-
-            if (actualIndex > 0)
-            {
-                // 獲取前一個字符的寬度
-                char prevChar = currentText[actualIndex - 1];
-                int newCursorX = Instance.Context.CursorX - prevChar.GetCharWidth();
-                
-                // 如果啟用了相對行號，確保游標的 X 位置不會小於行號區域的寬度
-                if (Instance.Context.IsLineNumberVisible)
+                int lineNumberWidth = Instance.Context.GetLineNumberWidth();
+                if (Instance.Context.CursorX <= lineNumberWidth)
                 {
-                    int lineNumberWidth = Instance.Context.GetLineNumberWidth();
-                    if (newCursorX < lineNumberWidth)
-                    {
-                        Instance.Context.CursorX = lineNumberWidth;
-                    }
-                    else
-                    {
-                        Instance.Context.CursorX = newCursorX;
-                    }
+                    return; // 已經在最左邊，不能再向左移動
+                }
+            }
+            
+            // 如果游標不在最左邊，可以向左移動
+            if (Instance.Context.CursorX > 0)
+            {
+                // 獲取當前實際文本X坐標
+                int actualTextX = Instance.GetActualTextX();
+                
+                // 如果已經在文本的最左邊，或者文本為空，直接減少游標位置
+                if (actualTextX <= 0)
+                {
+                    Instance.Context.CursorX--;
                 }
                 else
                 {
-                    Instance.Context.CursorX = newCursorX;
+                    // 獲取當前行
+                    var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
+                    if (currentLine == null || currentLine.Chars == null || currentLine.Chars.Length == 0)
+                    {
+                        // 如果當前行為空，直接減少游標位置
+                        Instance.Context.CursorX--;
+                    }
+                    else
+                    {
+                        // 獲取當前文本
+                        string currentText = string.Join("", currentLine.Chars.Select(c => c.Char).Where(c => c != '\0'));
+                        
+                        // 如果文本為空，直接減少游標位置
+                        if (string.IsNullOrEmpty(currentText) || actualTextX > currentText.Length)
+                        {
+                            Instance.Context.CursorX--;
+                        }
+                        else
+                        {
+                            // 確保實際位置不超過文本長度
+                            actualTextX = Math.Min(actualTextX, currentText.Length);
+                            
+                            // 獲取前一個字符的寬度（如果存在）
+                            int charWidth = 1; // 默認字符寬度為1
+                            if (actualTextX > 0 && actualTextX <= currentText.Length)
+                            {
+                                char prevChar = currentText[actualTextX - 1];
+                                charWidth = prevChar.GetCharWidth();
+                            }
+                            
+                            // 減少游標位置
+                            Instance.Context.CursorX -= charWidth;
+                        }
+                    }
+                }
+                
+                // 確保游標不會小於最小允許值
+                if (Instance.Context.IsLineNumberVisible)
+                {
+                    int lineNumberWidth = Instance.Context.GetLineNumberWidth();
+                    Instance.Context.CursorX = Math.Max(Instance.Context.CursorX, lineNumberWidth);
+                }
+                else
+                {
+                    Instance.Context.CursorX = Math.Max(Instance.Context.CursorX, 0);
                 }
             }
+            
+            // 檢查並調整游標位置和偏移量
+            AdjustCursorAndOffset();
         }
-        
-        // 檢查並調整游標位置和偏移量
-        AdjustCursorAndOffset();
+        catch (Exception)
+        {
+            // 發生錯誤時，簡單地減少游標位置，確保不會出錯
+            Instance.Context.CursorX--;
+            if (Instance.Context.IsLineNumberVisible)
+            {
+                int lineNumberWidth = Instance.Context.GetLineNumberWidth();
+                Instance.Context.CursorX = Math.Max(Instance.Context.CursorX, lineNumberWidth);
+            }
+            else
+            {
+                Instance.Context.CursorX = Math.Max(Instance.Context.CursorX, 0);
+            }
+            
+            // 檢查並調整游標位置和偏移量
+            AdjustCursorAndOffset();
+        }
     }
     
     /// <summary>
@@ -433,6 +485,31 @@ public class VimInsertMode : IVimMode
             // 不要直接修改 CursorX，而是通過 SetActualTextX 方法設置，它會考慮 ViewPort 和偏移量
             int newActualTextX = actualTextX + keyChar.GetCharWidth();
             Instance.SetActualTextX(newActualTextX);
+        }
+    }
+
+    /// <summary>
+    /// 處理 Delete 鍵
+    /// </summary>
+    private void HandleDeleteKey(List<ConsoleKey> keys)
+    {
+        // 獲取當前行
+        var currentLine = Instance.GetCurrentLine();
+        
+        // 獲取當前文本
+        string currentText = new string(currentLine.Chars.Select(c => c.Char).Where(c => c != '\0').ToArray());
+        
+        // 計算實際索引位置
+        int actualTextX = Instance.GetActualTextX();
+        
+        // 如果游標不在文本末尾，刪除游標後的字符
+        if (!string.IsNullOrEmpty(currentText) && actualTextX >= 0 && actualTextX < currentText.Length)
+        {
+            string newText = currentText.Remove(actualTextX, 1);
+            currentLine.SetText(0, newText);
+            
+            // 重新渲染
+            Instance.Render();
         }
     }
 
