@@ -426,7 +426,9 @@ namespace VimSharpLib.Tests
                 { '1', (ConsoleKey.D1, false) },
                 { '2', (ConsoleKey.D2, false) },
                 { (char)27, (ConsoleKey.Escape, false) }, // Escape
-                { '\b', (ConsoleKey.Backspace, false) }   // Backspace
+                { '\b', (ConsoleKey.Backspace, false) },   // Backspace
+                { (char)ConsoleKey.Delete, (ConsoleKey.Delete, false) },  // Delete
+                { (char)ConsoleKey.LeftArrow, (ConsoleKey.LeftArrow, false) },  // 左箭頭
             };
 
             if (keyMapping.ContainsKey(key))
