@@ -405,19 +405,19 @@ namespace VimSharpLib.Tests
 
         private void SetReadKey(char key)
         {
-            var keyMapping = new Dictionary<char, ConsoleKey>
+            var keyMapping = new Dictionary<char, (ConsoleKey, bool)>
             {
-                { '$', ConsoleKey.D4 },
-                { 'a', ConsoleKey.A },
-                { '1', ConsoleKey.D1 },
-                { '2', ConsoleKey.D2 },
-                { (char)27, ConsoleKey.Escape } // Escape
+                { '$', (ConsoleKey.D4, true) },   // $ 需要按下 Shift
+                { 'a', (ConsoleKey.A, false) },
+                { '1', (ConsoleKey.D1, false) },
+                { '2', (ConsoleKey.D2, false) },
+                { (char)27, (ConsoleKey.Escape, false) }, // Escape
+                { '\b', (ConsoleKey.Backspace, false) }   // Backspace
             };
 
             if (keyMapping.ContainsKey(key))
             {
-                var consoleKey = keyMapping[key];
-                bool shift = key == '$'; // 只有 $ 需要按下 Shift 鍵
+                var (consoleKey, shift) = keyMapping[key];
 
                 _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
                     new ConsoleKeyInfo(key, consoleKey, shift, false, false)
