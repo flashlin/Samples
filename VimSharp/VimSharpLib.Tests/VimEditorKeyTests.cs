@@ -391,6 +391,23 @@ namespace VimSharpLib.Tests
             // 驗證刪除後的文本和游標位置
             Assert.Equal("Hello1", _editor.GetCurrentLine().ToString());
             Assert.Equal(7, _editor.Context.CursorX); // 6 + ViewPort.X(1)
+
+            // 輸入 a 字母
+            SetReadKey('a');
+            // 驗證插入 a 後的文本和游標位置
+            Assert.Equal("Hello1a", _editor.GetCurrentLine().ToString());
+            Assert.Equal(8, _editor.Context.CursorX); // 7 + ViewPort.X(1)
+
+            SetReadKey((char)ConsoleKey.LeftArrow);
+            // 驗證左移後的游標位置
+            Assert.Equal(7, _editor.Context.CursorX); // 6 + ViewPort.X(1)
+
+            // 按下 Delete 按鍵，刪除游標後的字符
+            SetReadKey((char)ConsoleKey.Delete);
+            Assert.Equal("Hello1", _editor.GetCurrentLine().ToString());
+            // 驗證刪除後的游標位置
+            Assert.Equal(7, _editor.Context.CursorX); // 6 + ViewPort.X(1)
+
             
             // 設置並按下 Esc 按鍵，切換回普通模式
             SetReadKey((char)27); // Escape 的 ASCII 碼是 27
