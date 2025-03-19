@@ -484,7 +484,35 @@ public class VimEditor
 
     public void WaitForInput()
     {
-        Mode.WaitForInput();
+        // 檢查當前按鍵是否是 Backspace，並且當前模式是否是插入模式
+        var lastKeyInfo = Console.ReadKey(true);
+        if (lastKeyInfo.Key == ConsoleKey.Backspace && Mode is VimInsertMode)
+        {
+            // 獲取當前行
+            var currentLine = GetCurrentLine();
+            
+            // 獲取當前文本
+            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+            
+            // 如果文本不為空，刪除最後一個字符
+            if (!string.IsNullOrEmpty(currentText))
+            {
+                string newText = currentText.Substring(0, currentText.Length - 1);
+                currentLine.SetText(0, newText);
+                
+                // 更新游標位置
+                Context.CursorX--;
+                
+                // 重新渲染
+                Render();
+                
+                // 直接返回，不執行後續按鍵處理
+                return;
+            }
+        }
+        
+        // 正常處理按鍵，但避免再次調用 WaitForInput
+        Mode.PressKey(lastKeyInfo.Key);
     }
 
     /// <summary>

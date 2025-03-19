@@ -129,27 +129,13 @@ public class VimInsertMode : IVimMode
             }
         }
     }
-    
-    /// <summary>
-    /// 檢查是否在測試環境中運行
-    /// </summary>
-    private bool IsRunningInTest()
-    {
-        // 檢查是否有NUnit或其他測試框架的特徵
-        var stackTrace = new System.Diagnostics.StackTrace();
-        bool inTestFramework = stackTrace.GetFrames()?.Any(f => 
-            f.GetMethod()?.DeclaringType?.Assembly?.FullName?.Contains("NUnit") == true || 
-            f.GetMethod()?.DeclaringType?.Assembly?.FullName?.Contains("Test") == true) == true;
-        
-        return inTestFramework || 
-               Instance.Context.ViewPort.Width == 40 && Instance.Context.ViewPort.Height == 10; // 測試視口的特定大小
-    }
-    
+
     /// <summary>
     /// 處理退格鍵
     /// </summary>
     private void HandleBackspace(List<ConsoleKey> keys)
     {
+        // 正常環境的處理邏輯
         if (Instance.Context.CursorX > 0)
         {
             // 獲取當前行
@@ -157,27 +143,32 @@ public class VimInsertMode : IVimMode
 
             // 獲取當前文本
             string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
+            
+            // 檢查文本是否為空
+            if (string.IsNullOrEmpty(currentText))
+                return;
 
-            // 計算實際索引位置
-            int actualIndex = currentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+            // 計算實際索引位置（考慮偏移量）
+            int actualTextX = Instance.GetActualTextX();
+            
+            // 確保索引在有效範圍內
+            if (actualTextX <= 0 || actualTextX > currentText.Length)
+                return;
 
-            if (actualIndex > 0)
-            {
-                // 獲取要刪除的字符
-                char charToDelete = currentText[actualIndex - 1];
+            // 獲取要刪除的字符
+            char charToDelete = currentText[actualTextX - 1];
 
-                // 刪除字符
-                string newText = currentText.Remove(actualIndex - 1, 1);
+            // 刪除字符
+            string newText = currentText.Remove(actualTextX - 1, 1);
 
-                // 更新文本
-                currentLine.SetText(0, newText);
+            // 更新文本
+            currentLine.SetText(0, newText);
 
-                // 移動光標（考慮中文字符寬度）
-                Instance.Context.CursorX -= charToDelete.GetCharWidth();
+            // 移動光標（考慮中文字符寬度）
+            Instance.Context.CursorX -= charToDelete.GetCharWidth();
 
-                // 清除屏幕並重新渲染整行（對於 Backspace，我們需要重新渲染整行）
-                Instance.Render();
-            }
+            // 清除屏幕並重新渲染整行（對於 Backspace，我們需要重新渲染整行）
+            Instance.Render();
         }
     }
     
