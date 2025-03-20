@@ -223,47 +223,47 @@ nmap 'iw viw'ac''<Esc><left>'ap
 nmap <leader>d% my%x`yx
 
 " 滾動
-noremap jh 9jzz
-noremap jk 9kzz
+nmap J 20jzz
+nmap K 20kzz
 
 
 "[Insert]
 nmap zsb A.Should().Be();<Esc>ba
-imap zsb <Esc>zsb
+"imap zsb <Esc>zsb
 "[Refactor]
 vmap M :action ExtractMethod<CR>
 map zri :action Inline<CR>
-imap zri <Esc>zri
+"imap zri <Esc>zri
 map zrv :action IntroduceVariable<CR>
-imap zrv <Esc>zrv
+"imap zrv <Esc>zrv
 map zrp :action IntroduceParameter<CR>
-imap zrp <Esc>zrp<Esc>
+"imap zrp <Esc>zrp<Esc>
 map zrf :action IntroduceField<CR>
-imap zrf <Esc>zrf
+"imap zrf <Esc>zrf
 map zrr hhcf=return
-imap zrr <Esc>zrr
+"imap zrr <Esc>zrr
 
 "[Select]
 nmap z( vi(
-imap z( <Esc>z(
+"imap z( <Esc>z(
 nmap z) vi)
-imap z) <Esc>z)
+"imap z) <Esc>z)
 nmap z[ vi]
-imap z[ <Esc>z[
+"imap z[ <Esc>z[
 nmap z] vi]
-imap z] <Esc>z]
+"imap z] <Esc>z]
 nmap z{ vi{
-imap z{ <Esc>z{
+"imap z{ <Esc>z{
 nmap z} vi}
-imap z} <Esc>z}
+"imap z} <Esc>z}
 nmap z< vi<
-imap z< <Esc>z<
+"imap z< <Esc>z<
 nmap z> vi>
-imap z> <Esc>z>
+"imap z> <Esc>z>
 nmap z" vi"
-imap z" <Esc>z"
+"imap z" <Esc>z"
 nmap z' vi'
-imap z' <Esc>z'
+"imap z' <Esc>z'
 nmap z/ F>wvt<
 imap z/ <Esc>z/
 imap <C-x> <Esc>dd
@@ -273,36 +273,37 @@ map vv v^
 "[Refactor]
 vmap M :action ExtractMethod<CR>
 map zri :action Inline<CR>
-imap zri <Esc>zri
+"imap zri <Esc>zri
 map zrv :action IntroduceVariable<CR>
-imap zrv <Esc>zrv
+"imap zrv <Esc>zrv
 map zrp :action IntroduceParameter<CR>
-imap zrp <Esc>zrp<Esc>
+"imap zrp <Esc>zrp<Esc>
 map zrf :action IntroduceField<CR>
-imap zrf <Esc>zrf
+"imap zrf <Esc>zrf
 map zrr hhcf=return
-imap zrr <Esc>zrr
+"imap zrr <Esc>zrr
 
 "[Unit Test]
-nmap zra :action RiderUnitTestRunSolutionAction<CR>:action ActivateUnitTestsToolWindow<CR>
-imap zra <Esc>zra
-nmap zrc ?\[Test\]<CR>jj]}j:action MethodDown<CR>:action RiderUnitTestRunContextAction<CR>:action ActivateUnitTestsToolWindow<CR><Esc>
-imap zrc <Esc>zrc
+" nmap zra :action RiderUnitTestRunSolutionAction<CR>:action ActivateUnitTestsToolWindow<CR>
+nmap zT :action RiderUnitTestRunSolutionAction<CR>:action ActivateUnitTestsToolWindow<CR>
+" imap zra <Esc>zra
+nmap zt ?\[Test\]<CR>jj]}j:action MethodDown<CR>:action RiderUnitTestRunContextAction<CR>:action ActivateUnitTestsToolWindow<CR><Esc>
+"imap zrc <Esc>zrc
 nmap zrm ?\[Test<CR>:action MethodDown<CR>:action RiderUnitTestRunContextAction<CR>:action ActivateUnitTestsToolWindow<CR>
 nmap zuu <Esc>:action RiderUnitTestRepeatPreviousRunAction<CR>:action ActivateUnitTestsToolWindow<CR>
-imap zra <Esc>zra
+"imap zra <Esc>zra
 vmap zra <Esc>zra
 map zuu :action RiderUnitTestRepeatPreviousRunAction<CR>:action ActivateUnitTestsToolWindow<CR>
-imap zuu <Esc>zuu
+"imap zuu <Esc>zuu
 nmap zrs dd?class<CR>jo[SetUp]<CR>public<Space>void<Space>SetUp(){<CR>}<Esc>P:action SilentCodeCleanup<CR>
 vmap zrs s<Esc>?class<CR>jo[SetUp]<CR>public<Space>void<Space>SetUp(){<CR>}<Esc>P:action SilentCodeCleanup<CR>
 nmap zrx dd?SetUp<CR>j%P:action ReformatCode<CR>
 nmap <F1> y?\[Test<CR>P/public<CR>$B:action ReformatCode<CR>
 imap <F1> <Esc><F1>
 map zat G?\[Test<CR>jj]}o<F1>zz
-imap zat <Esc>zat
+" imap zat <Esc>zat
 nmap zpf ?new <CR>cf Substitute.For<I<Esc>f(i><Esc>ma?Substitute<CR>vf)
-imap zpf <Esc>zpf
+" imap zpf <Esc>zpf
 
 
 function! CopyPrevCSharpMethod()
