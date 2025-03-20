@@ -22,6 +22,7 @@ public partial class Form1 : Form
         this.TopMost = true;
         this.ShowInTaskbar = false;
         this.Size = new Size(200, 100);
+        this.KeyPreview = true;
 
         // 創建倒數計時器標籤
         Label timerLabel = new Label();
@@ -56,6 +57,17 @@ public partial class Form1 : Form
         this.MouseDown += Form1_MouseDown;
         this.MouseMove += Form1_MouseMove;
         this.MouseUp += Form1_MouseUp;
+        
+        // 添加鍵盤事件處理
+        this.KeyDown += Form1_KeyDown;
+    }
+
+    private void Form1_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Escape)
+        {
+            this.Close();
+        }
     }
 
     private void Form1_MouseDown(object? sender, MouseEventArgs e)
