@@ -11,6 +11,7 @@ public partial class Form1 : Form
     private Point lastLocation;
     private bool mouseDown;
     private Label timerLabel;
+    private Panel dragHandle; // 新增拖曳把手
 
     // Win32 API 引入
     [DllImport("user32.dll")]
@@ -58,10 +59,24 @@ public partial class Form1 : Form
         
         // 計算並設置視窗大小
         Size labelSize = TextRenderer.MeasureText(timerLabel.Text, timerLabel.Font);
-        this.Size = new Size(labelSize.Width + 10, labelSize.Height + 10);
+        this.Size = new Size(labelSize.Width + 20, labelSize.Height + 20);
         
         // 設置標籤位置為視窗中央
-        timerLabel.Location = new Point(5, 5);
+        timerLabel.Location = new Point(10, 10);
+        
+        // 創建拖曳把手（小方塊）
+        dragHandle = new Panel();
+        dragHandle.Size = new Size(10, 10);
+        dragHandle.BackColor = Color.Yellow;
+        dragHandle.Location = new Point(timerLabel.Location.X + labelSize.Width + 5, timerLabel.Location.Y - 5);
+        dragHandle.Cursor = Cursors.SizeAll;
+        
+        // 設置拖曳把手的滑鼠事件
+        dragHandle.MouseDown += Form1_MouseDown;
+        dragHandle.MouseMove += Form1_MouseMove;
+        dragHandle.MouseUp += Form1_MouseUp;
+        
+        this.Controls.Add(dragHandle);
 
         // 設置倒數計時器
         remainingSeconds = minutes * 60; // 使用傳入的分鐘數
@@ -74,6 +89,10 @@ public partial class Form1 : Form
                 int mins = remainingSeconds / 60;
                 int secs = remainingSeconds % 60;
                 timerLabel.Text = $"{mins:D2}:{secs:D2}";
+                
+                // 更新拖曳把手位置（如果標籤大小變化）
+                Size newLabelSize = TextRenderer.MeasureText(timerLabel.Text, timerLabel.Font);
+                dragHandle.Location = new Point(timerLabel.Location.X + newLabelSize.Width + 5, timerLabel.Location.Y - 5);
             }
             else
             {
