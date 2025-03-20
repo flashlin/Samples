@@ -92,7 +92,7 @@ public partial class Form1 : Form
                 
                 // 更新拖曳把手位置（如果標籤大小變化）
                 Size newLabelSize = TextRenderer.MeasureText(timerLabel.Text, timerLabel.Font);
-                dragHandle.Location = new Point(timerLabel.Location.X + newLabelSize.Width + 5, timerLabel.Location.Y - 5);
+                dragHandle.Location = new Point(timerLabel.Location.X + newLabelSize.Width, timerLabel.Location.Y);
             }
             else
             {
