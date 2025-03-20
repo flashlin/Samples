@@ -516,8 +516,9 @@ public class VimInsertMode : IVimMode
 
     public void WaitForInput()
     {
+        Instance.Console.SetCursorPosition(Instance.Context.CursorX, Instance.Context.CursorY);
         // 設置為垂直線游標 (DECSCUSR 6)
-        Instance.Console.Write("\x1b[6 q");
+        Instance.Console.SetLineCursor();
         
         // 確保當前行存在
         if (Instance.Context.Texts.Count <= Instance.Context.CursorY)

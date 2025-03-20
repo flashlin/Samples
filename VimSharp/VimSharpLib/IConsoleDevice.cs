@@ -36,4 +36,5 @@ public interface IConsoleDevice
     ConsoleKeyInfo ReadKey(bool intercept);
 
     void SetBlockCursor();
+    void SetLineCursor();
 } 

@@ -33,6 +33,11 @@ public class ConsoleDevice : IConsoleDevice
         Console.Write("\x1b[2 q");
     }
     
+    public void SetLineCursor()
+    {
+        Console.Write("\x1b[6 q");
+    }
+    
     /// <summary>
     /// 寫入文本到控制台
     /// </summary>

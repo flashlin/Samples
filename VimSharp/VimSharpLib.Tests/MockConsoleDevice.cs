@@ -47,7 +47,11 @@ namespace VimSharpLib.Tests
 
         public void SetBlockCursor()
         {
-            // 在側式中不需要
+            // 在測試中不需要
+        }
+
+        public void SetLineCursor()
+        {
         }
     }
 } 
