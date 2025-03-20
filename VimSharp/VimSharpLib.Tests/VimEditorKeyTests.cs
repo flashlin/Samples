@@ -339,6 +339,9 @@ namespace VimSharpLib.Tests
             // 加載文本 "Hello"
             _editor.OpenText("Hello");
             
+            Assert.Equal(1, _editor.Context.CursorX);
+            Assert.Equal(1, _editor.Context.CursorY);
+            
             // Act
             // 設置並按下 $ 按鍵 (Shift+4)，將游標移動到行尾
             SetReadKey('$');
