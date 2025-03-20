@@ -57,6 +57,8 @@ public partial class Form1 : Form
         this.MouseDown += Form1_MouseDown;
         this.MouseMove += Form1_MouseMove;
         this.MouseUp += Form1_MouseUp;
+        this.MouseEnter += Form1_MouseEnter;
+        this.MouseLeave += Form1_MouseLeave;
         
         // 添加鍵盤事件處理
         this.KeyDown += Form1_KeyDown;
@@ -91,5 +93,15 @@ public partial class Form1 : Form
     private void Form1_MouseUp(object? sender, MouseEventArgs e)
     {
         mouseDown = false;
+    }
+
+    private void Form1_MouseEnter(object? sender, EventArgs e)
+    {
+        this.Cursor = Cursors.SizeAll;
+    }
+
+    private void Form1_MouseLeave(object? sender, EventArgs e)
+    {
+        this.Cursor = Cursors.Default;
     }
 }
