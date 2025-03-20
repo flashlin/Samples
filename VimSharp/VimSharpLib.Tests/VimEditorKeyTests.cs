@@ -345,23 +345,27 @@ namespace VimSharpLib.Tests
             
             // 驗證 $ 按鍵後游標位置 (應該在最後一個字符上)
             Assert.Equal(5, _editor.Context.CursorX); // 4 + ViewPort.X(1)
+            Assert.Equal(1, _editor.Context.CursorY); // Should still be on the first line
             
             // 設置並按下 a 按鍵，切換到插入模式並將游標移到最後一個字符之後
             SetReadKey('a');
             
             // 驗證 a 按鍵後游標位置和模式
             Assert.Equal(6, _editor.Context.CursorX); // 5 + ViewPort.X(1)
+            Assert.Equal(1, _editor.Context.CursorY); // Should still be on the first line
             Assert.IsType<VimInsertMode>(_editor.Mode);
             
             // 設置並按下左箭頭按鍵，將游標向左移動一位
             SetReadKey((char)ConsoleKey.LeftArrow);
             // 驗證左箭頭按鍵後游標位置
             Assert.Equal(5, _editor.Context.CursorX);
+            Assert.Equal(1, _editor.Context.CursorY); // Should still be on the first line
             
             // 按下右鍵頭按鈕，將游標向右移動一位
             SetReadKey((char)ConsoleKey.RightArrow);
             // 驗證右箭頭按鍵後游標位置
             Assert.Equal(6, _editor.Context.CursorX);
+            Assert.Equal(1, _editor.Context.CursorY); // Should still be on the first line
             
             // 設置並按下 1 按鍵，在文本末尾插入 1
             SetReadKey('1');
@@ -369,6 +373,7 @@ namespace VimSharpLib.Tests
             // 驗證插入 1 後的文本和游標位置
             Assert.Equal("Hello1", _editor.GetCurrentLine().ToString());
             Assert.Equal(7, _editor.Context.CursorX); // 6 + ViewPort.X(1)
+            Assert.Equal(1, _editor.Context.CursorY); // Should still be on the first line
 
             // 設置並按下 2 按鍵，在文本末尾插入 2
             SetReadKey('2');
@@ -376,6 +381,7 @@ namespace VimSharpLib.Tests
             // 驗證插入 2 後的文本和游標位置
             Assert.Equal("Hello12", _editor.GetCurrentLine().ToString());
             Assert.Equal(8, _editor.Context.CursorX); // 7 + ViewPort.X(1)
+            Assert.Equal(1, _editor.Context.CursorY); // Should still be on the first line
             
             // 設置並按下 Backspace 按鍵，刪除最後一個字符
             SetReadKey('\b');
@@ -383,22 +389,26 @@ namespace VimSharpLib.Tests
             // 驗證刪除後的文本和游標位置
             Assert.Equal("Hello1", _editor.GetCurrentLine().ToString());
             Assert.Equal(7, _editor.Context.CursorX); // 6 + ViewPort.X(1)
+            Assert.Equal(1, _editor.Context.CursorY); // Should still be on the first line
 
             // 輸入 a 字母
             SetReadKey('a');
             // 驗證插入 a 後的文本和游標位置
             Assert.Equal("Hello1a", _editor.GetCurrentLine().ToString());
             Assert.Equal(8, _editor.Context.CursorX); // 7 + ViewPort.X(1)
+            Assert.Equal(1, _editor.Context.CursorY); // Should still be on the first line
 
             SetReadKey((char)ConsoleKey.LeftArrow);
             // 驗證左移後的游標位置
             Assert.Equal(7, _editor.Context.CursorX); // 6 + ViewPort.X(1)
+            Assert.Equal(1, _editor.Context.CursorY); // Should still be on the first line
 
             // 按下 Delete 按鍵，刪除游標後的字符
             SetReadKey((char)ConsoleKey.Delete);
             Assert.Equal("Hello1", _editor.GetCurrentLine().ToString());
             // 驗證刪除後的游標位置
             Assert.Equal(7, _editor.Context.CursorX); // 6 + ViewPort.X(1)
+            Assert.Equal(1, _editor.Context.CursorY); // Should still be on the first line
 
             
             // 設置並按下 Esc 按鍵，切換回普通模式
@@ -406,6 +416,7 @@ namespace VimSharpLib.Tests
             
             // 驗證 Esc 按鍵後游標位置和模式
             Assert.Equal(6, _editor.Context.CursorX); // 5 + ViewPort.X(1)
+            Assert.Equal(1, _editor.Context.CursorY); // Should still be on the first line
             Assert.IsType<VimNormalMode>(_editor.Mode);
         }
 
