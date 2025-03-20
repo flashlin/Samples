@@ -24,7 +24,7 @@ public partial class Form1 : Form
     private const int WS_EX_LAYERED = 0x80000;
     private const int WS_EX_TRANSPARENT = 0x20;
 
-    public Form1()
+    public Form1(int minutes = 20)
     {
         InitializeComponent();
 
@@ -40,7 +40,7 @@ public partial class Form1 : Form
 
         // 創建倒數計時器標籤
         timerLabel = new Label();
-        timerLabel.Text = "20:00";
+        timerLabel.Text = $"{minutes:D2}:00";
         timerLabel.Font = new Font("Arial", 24, FontStyle.Bold);
         timerLabel.ForeColor = Color.Yellow;
         timerLabel.BackColor = Color.Transparent;
@@ -64,16 +64,16 @@ public partial class Form1 : Form
         timerLabel.Location = new Point(5, 5);
 
         // 設置倒數計時器
-        remainingSeconds = 20 * 60; // 20分鐘
+        remainingSeconds = minutes * 60; // 使用傳入的分鐘數
         System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
         timer.Interval = 1000; // 1秒
         timer.Tick += (sender, e) => {
             remainingSeconds--;
             if (remainingSeconds >= 0)
             {
-                int minutes = remainingSeconds / 60;
-                int seconds = remainingSeconds % 60;
-                timerLabel.Text = $"{minutes:D2}:{seconds:D2}";
+                int mins = remainingSeconds / 60;
+                int secs = remainingSeconds % 60;
+                timerLabel.Text = $"{mins:D2}:{secs:D2}";
             }
             else
             {
