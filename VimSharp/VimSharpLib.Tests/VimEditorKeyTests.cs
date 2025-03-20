@@ -353,6 +353,16 @@ namespace VimSharpLib.Tests
             Assert.Equal(6, _editor.Context.CursorX); // 5 + ViewPort.X(1)
             Assert.IsType<VimInsertMode>(_editor.Mode);
             
+            // 設置並按下左箭頭按鍵，將游標向左移動一位
+            SetReadKey((char)ConsoleKey.LeftArrow);
+            // 驗證左箭頭按鍵後游標位置
+            Assert.Equal(5, _editor.Context.CursorX);
+            
+            // 按下右鍵頭按鈕
+            SetReadKey((char)ConsoleKey.RightArrow);
+            // 驗證右箭頭按鍵後游標位置
+            Assert.Equal(6, _editor.Context.CursorX);
+            
             // 設置並按下 1 按鍵，在文本末尾插入 1
             SetReadKey('1');
             
@@ -411,6 +421,7 @@ namespace VimSharpLib.Tests
                 { '\b', (ConsoleKey.Backspace, false) },   // Backspace
                 { (char)ConsoleKey.Delete, (ConsoleKey.Delete, false) },  // Delete
                 { (char)ConsoleKey.LeftArrow, (ConsoleKey.LeftArrow, false) },  // 左箭頭
+                { (char)ConsoleKey.RightArrow, (ConsoleKey.RightArrow, false) },  // 右箭頭
             };
 
             if (keyMapping.ContainsKey(key))
