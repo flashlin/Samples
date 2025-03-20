@@ -358,7 +358,7 @@ namespace VimSharpLib.Tests
             // 驗證左箭頭按鍵後游標位置
             Assert.Equal(5, _editor.Context.CursorX);
             
-            // 按下右鍵頭按鈕
+            // 按下右鍵頭按鈕，將游標向右移動一位
             SetReadKey((char)ConsoleKey.RightArrow);
             // 驗證右箭頭按鍵後游標位置
             Assert.Equal(6, _editor.Context.CursorX);
