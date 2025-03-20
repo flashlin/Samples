@@ -9,6 +9,7 @@ public partial class Form1 : Form
     private int remainingSeconds;
     private Point lastLocation;
     private bool mouseDown;
+    private Label timerLabel;
 
     public Form1()
     {
@@ -23,18 +24,32 @@ public partial class Form1 : Form
         this.StartPosition = FormStartPosition.CenterScreen;
         this.TopMost = true;
         this.ShowInTaskbar = false;
-        this.Size = new Size(200, 100);
         this.KeyPreview = true;
 
         // 創建倒數計時器標籤
-        Label timerLabel = new Label();
+        timerLabel = new Label();
         timerLabel.Text = "20:00";
         timerLabel.Font = new Font("Arial", 24, FontStyle.Bold);
         timerLabel.ForeColor = Color.Yellow;
         timerLabel.BackColor = Color.Transparent;
-        timerLabel.Dock = DockStyle.Fill;
+        timerLabel.AutoSize = true;
         timerLabel.TextAlign = ContentAlignment.MiddleCenter;
+        
+        // 添加標籤的滑鼠事件處理
+        timerLabel.MouseDown += Form1_MouseDown;
+        timerLabel.MouseMove += Form1_MouseMove;
+        timerLabel.MouseUp += Form1_MouseUp;
+        timerLabel.MouseEnter += Form1_MouseEnter;
+        timerLabel.MouseLeave += Form1_MouseLeave;
+        
         this.Controls.Add(timerLabel);
+        
+        // 計算並設置視窗大小
+        Size labelSize = TextRenderer.MeasureText(timerLabel.Text, timerLabel.Font);
+        this.Size = new Size(labelSize.Width + 10, labelSize.Height + 10);
+        
+        // 設置標籤位置為視窗中央
+        timerLabel.Location = new Point(5, 5);
 
         // 設置倒數計時器
         remainingSeconds = 20 * 60; // 20分鐘
