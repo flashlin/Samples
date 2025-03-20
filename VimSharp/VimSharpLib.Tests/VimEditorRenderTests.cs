@@ -1,9 +1,24 @@
 using Xunit;
+using NSubstitute;
 
 namespace VimSharpLib.Tests
 {
     public class VimEditorRenderTests
     {
+        private IConsoleDevice _mockConsole;
+        private VimEditor _editor;
+
+        public VimEditorRenderTests()
+        {
+            _mockConsole = Substitute.For<IConsoleDevice>();
+            _mockConsole.WindowWidth.Returns(80);
+            _mockConsole.WindowHeight.Returns(25);
+            _editor = new VimEditor(_mockConsole);
+            _editor.Context.IsLineNumberVisible = false;
+            _editor.Context.IsStatusBarVisible = false;
+            _editor.Context.SetViewPort(0, 0, 10, 5);
+        }
+
         /// <summary>
         /// 創建自定義大小的 screenBuffer
         /// </summary>
@@ -27,23 +42,21 @@ namespace VimSharpLib.Tests
         public void TestChineseCharacterRendering()
         {
             // Arrange
-            var mockConsole = new MockConsoleDevice { WindowWidth = 80, WindowHeight = 25 };
-            var editor = new VimEditor(mockConsole);
-            editor.Context.IsLineNumberVisible = false; // 關閉行號顯示以簡化測試
-            editor.Context.IsStatusBarVisible = false; // 關閉狀態欄以簡化測試
-            editor.Context.ViewPort = new ViewArea(0, 0, 10, 5); // 設置 ViewPort 為 (0,0,10,5)
-            editor.Context.OffsetX = 0;
-            editor.Context.OffsetY = 0;
+            _editor.Context.IsLineNumberVisible = false; // 關閉行號顯示以簡化測試
+            _editor.Context.IsStatusBarVisible = false; // 關閉狀態欄以簡化測試
+            _editor.Context.ViewPort = new ViewArea(0, 0, 10, 5); // 設置 ViewPort 為 (0,0,10,5)
+            _editor.Context.OffsetX = 0;
+            _editor.Context.OffsetY = 0;
             
             // 設置測試文本，包含中文字符
             string text = "1中2";
-            editor.OpenText(text);
+            _editor.OpenText(text);
             
             // 創建自定義大小的 screenBuffer
             var screenBuffer = CreateScreenBuffer();
             
             // Act
-            editor.Render(screenBuffer);
+            _editor.Render(screenBuffer);
             
             // Assert
             // 檢查中文字符的渲染，中文字符應該佔用兩個位置（第二個位置為 '\0'）
@@ -66,23 +79,21 @@ namespace VimSharpLib.Tests
         public void TestChineseCharacterRenderingWithOffsetViewPort()
         {
             // Arrange
-            var mockConsole = new MockConsoleDevice { WindowWidth = 80, WindowHeight = 25 };
-            var editor = new VimEditor(mockConsole);
-            editor.Context.IsLineNumberVisible = false; // 關閉行號顯示以簡化測試
-            editor.Context.IsStatusBarVisible = false; // 關閉狀態欄以簡化測試
-            editor.Context.ViewPort = new ViewArea(1, 0, 10, 5); // 設置 ViewPort 為 (1,0,10,5)，X 座標從 1 開始
-            editor.Context.OffsetX = 0;
-            editor.Context.OffsetY = 0;
+            _editor.Context.IsLineNumberVisible = false; // 關閉行號顯示以簡化測試
+            _editor.Context.IsStatusBarVisible = false; // 關閉狀態欄以簡化測試
+            _editor.Context.ViewPort = new ViewArea(1, 0, 10, 5); // 設置 ViewPort 為 (1,0,10,5)，X 座標從 1 開始
+            _editor.Context.OffsetX = 0;
+            _editor.Context.OffsetY = 0;
             
             // 設置測試文本，包含中文字符
             string text = "1中2";
-            editor.OpenText(text);
+            _editor.OpenText(text);
             
             // 創建自定義大小的 screenBuffer
             var screenBuffer = CreateScreenBuffer();
             
             // Act
-            editor.Render(screenBuffer);
+            _editor.Render(screenBuffer);
             
             // Assert
             // 檢查中文字符的渲染，中文字符應該佔用兩個位置（第二個位置為 '\0'）
@@ -101,23 +112,21 @@ namespace VimSharpLib.Tests
         public void TestChineseCharacterRenderingWithLineNumbers()
         {
             // Arrange
-            var mockConsole = new MockConsoleDevice { WindowWidth = 80, WindowHeight = 25 };
-            var editor = new VimEditor(mockConsole);
-            editor.Context.IsLineNumberVisible = true; // 開啟行號顯示
-            editor.Context.IsStatusBarVisible = false; // 關閉狀態欄以簡化測試
-            editor.Context.ViewPort = new ViewArea(0, 0, 10, 5); // 設置 ViewPort 為 (0,0,10,5)
-            editor.Context.OffsetX = 0;
-            editor.Context.OffsetY = 0;
+            _editor.Context.IsLineNumberVisible = true; // 開啟行號顯示
+            _editor.Context.IsStatusBarVisible = false; // 關閉狀態欄以簡化測試
+            _editor.Context.ViewPort = new ViewArea(0, 0, 10, 5); // 設置 ViewPort 為 (0,0,10,5)
+            _editor.Context.OffsetX = 0;
+            _editor.Context.OffsetY = 0;
             
             // 設置測試文本，包含中文字符
             string text = "1中2";
-            editor.OpenText(text);
+            _editor.OpenText(text);
             
             // 創建自定義大小的 screenBuffer
             var screenBuffer = CreateScreenBuffer();
             
             // Act
-            editor.Render(screenBuffer);
+            _editor.Render(screenBuffer);
             
             // Assert
             // 行號寬度為 1 + 1 = 2 (1位數字 + 1位空格)
