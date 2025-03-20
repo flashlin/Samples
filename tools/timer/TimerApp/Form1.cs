@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace TimerApp;
 
@@ -11,6 +12,18 @@ public partial class Form1 : Form
     private bool mouseDown;
     private Label timerLabel;
 
+    // Win32 API 引入
+    [DllImport("user32.dll")]
+    private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+    
+    [DllImport("user32.dll")]
+    private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+    
+    // 窗口樣式常量
+    private const int GWL_EXSTYLE = -20;
+    private const int WS_EX_LAYERED = 0x80000;
+    private const int WS_EX_TRANSPARENT = 0x20;
+
     public Form1()
     {
         InitializeComponent();
@@ -18,9 +31,8 @@ public partial class Form1 : Form
         // 設置視窗屬性
         this.FormBorderStyle = FormBorderStyle.None;
         this.BackColor = Color.Black;
-        // 移除TransparencyKey設置，改用Opacity實現半透明
-        // this.TransparencyKey = Color.Black;
-        this.Opacity = 0.9; // 設置為90%不透明度（即10%透明）
+        this.TransparencyKey = Color.Black; // 設置背景透明
+        this.Opacity = 0.9; // 設置為90%不透明度，這將影響標籤
         this.StartPosition = FormStartPosition.CenterScreen;
         this.TopMost = true;
         this.ShowInTaskbar = false;
@@ -79,6 +91,15 @@ public partial class Form1 : Form
         
         // 添加鍵盤事件處理
         this.KeyDown += Form1_KeyDown;
+
+        // 使窗口允許點擊穿透但保持標籤可點擊
+        this.Load += (s, e) => {
+            // 設置窗口為分層窗口
+            int exStyle = GetWindowLong(this.Handle, GWL_EXSTYLE);
+            exStyle |= WS_EX_LAYERED;
+            // 不設置 WS_EX_TRANSPARENT 使窗口可以接收滑鼠事件
+            SetWindowLong(this.Handle, GWL_EXSTYLE, exStyle);
+        };
     }
 
     private void Form1_KeyDown(object? sender, KeyEventArgs e)
