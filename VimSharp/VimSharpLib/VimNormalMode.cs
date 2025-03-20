@@ -468,8 +468,8 @@ public class VimNormalMode : IVimMode
     {
         // 設置游標位置
         Instance.Console.SetCursorPosition(Instance.Context.CursorX,  Instance.Context.CursorY);
-        // 設置為方塊游標 (DECSCUSR 2)
-        Instance.Console.Write("\x1b[2 q");
+        // 設置為方塊游標 
+        Instance.Console.SetBlockCursor();
         _keyHandler.WaitForInput();
     }
 } 

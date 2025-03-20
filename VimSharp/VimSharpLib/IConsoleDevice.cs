@@ -34,4 +34,6 @@ public interface IConsoleDevice
     /// <param name="intercept">是否攔截按鍵</param>
     /// <returns>按鍵信息</returns>
     ConsoleKeyInfo ReadKey(bool intercept);
+
+    void SetBlockCursor();
 } 

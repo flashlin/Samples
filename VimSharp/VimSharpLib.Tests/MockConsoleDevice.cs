@@ -44,5 +44,10 @@ namespace VimSharpLib.Tests
             // 在測試中返回一個默認的按鍵信息
             return new ConsoleKeyInfo('\0', ConsoleKey.Escape, false, false, false);
         }
+
+        public void SetBlockCursor()
+        {
+            // 在側式中不需要
+        }
     }
 } 
