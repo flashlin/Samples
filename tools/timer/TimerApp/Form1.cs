@@ -17,7 +17,9 @@ public partial class Form1 : Form
         // 設置視窗屬性
         this.FormBorderStyle = FormBorderStyle.None;
         this.BackColor = Color.Black;
-        this.TransparencyKey = Color.Black;
+        // 移除TransparencyKey設置，改用Opacity實現半透明
+        // this.TransparencyKey = Color.Black;
+        this.Opacity = 0.9; // 設置為90%不透明度（即10%透明）
         this.StartPosition = FormStartPosition.CenterScreen;
         this.TopMost = true;
         this.ShowInTaskbar = false;
