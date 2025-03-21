@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+
+以下方法已驗證, 無論測試結果如何不可更改方法
+* GetLineNumberWidth
