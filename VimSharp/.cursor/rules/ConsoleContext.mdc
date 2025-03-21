@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: VimInsertMode.cs
 alwaysApply: false
 ---
 

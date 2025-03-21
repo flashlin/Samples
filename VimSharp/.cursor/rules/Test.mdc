@@ -1,9 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: false
----
-執行 dotnet test
-假如測試結果失敗, 不要修改測試程式碼, 請修改應用程式使其通過驗收.
-不可以硬編碼應用程式, 請用通用邏輯使其通過驗收.
-修改程式碼請注意相關 .mdc 規定.
