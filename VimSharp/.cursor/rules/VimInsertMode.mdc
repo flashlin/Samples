@@ -12,4 +12,12 @@ alwaysApply: false
      return
    cursorX--
  * 不需要呼叫 Render
+ - void MoveCursorRight(List<ConsoleKeyInfo> keys)
+ * if cursorX >= ViewPort.Right
+     if offsetX < currentLine.Width - ViewPort.Width
+       offsetX++
+       return
+     return
+   cursorX++
+ * 不需要呼叫 Render
  

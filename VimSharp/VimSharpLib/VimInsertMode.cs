@@ -187,13 +187,6 @@ public class VimInsertMode : IVimMode
     /// </summary>
     private void MoveCursorLeft(List<ConsoleKeyInfo> keys)
     {
-        // if cursorX <= ViewPort.X + GetLineNumberWidth()
-        //    if offsetX > 0
-        //        offsetX-- 
-        //        return
-        //    return
-        // cursorX--
-       
         // 檢查是否到達左邊界
         var minX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
         if (Instance.Context.CursorX <= minX)
