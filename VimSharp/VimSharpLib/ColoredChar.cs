@@ -5,7 +5,7 @@ public class ColoredChar
     /// <summary>
     /// 空字符（黑底白字的空格）
     /// </summary>
-    public static readonly ColoredChar Empty = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.DarkGray);
+    public static readonly ColoredChar Empty = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
     public static readonly ColoredChar None = new ColoredChar('\0', ConsoleColor.White, ConsoleColor.DarkGray);
         
 
@@ -15,7 +15,7 @@ public class ColoredChar
     
     public ColoredChar(char c, 
         ConsoleColor foregroundColor = ConsoleColor.White, 
-        ConsoleColor backgroundColor = ConsoleColor.DarkGray)
+        ConsoleColor backgroundColor = ConsoleColor.Black)
     {
         Char = c;
         ForegroundColor = foregroundColor;
