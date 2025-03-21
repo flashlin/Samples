@@ -145,7 +145,7 @@ public class VimEditor
                 var color = (textIndex == cursorTextY) ? ConsoleColor.Yellow : ConsoleColor.DarkGray;
                 char charToRender = (j < lineNumber.Length) ? lineNumber[j] : ' ';
                 screenBuffer[Context.ViewPort.Y + viewY, Context.ViewPort.X + j] = 
-                    new ColoredChar(charToRender, color, ConsoleColor.Black);
+                    new ColoredChar(charToRender, color, ConsoleColor.DarkBlue);
             }
         }
     }
@@ -265,61 +265,6 @@ public class VimEditor
             {
                 outputBuffer.Append(screenBuffer[y, x].ToAnsiString());
             }
-        }
-    }
-
-    /// <summary>
-    /// 繪製行號到 screenBuffer
-    /// </summary>
-    private void RenderLineNumber(ColoredChar[,] screenBuffer, int x, int y, int lineNumber, bool isRelativeLineNumber)
-    {
-        // 檢查 Y 座標是否在 ViewPort 範圍內
-        if (y < Context.ViewPort.Y || y >= Context.ViewPort.Y + Context.ViewPort.Height)
-        {
-            return;
-        }
-
-        var digits = Context.Texts.Count.ToString().Length;
-        var lineNumberChars = new ConsoleText();
-        if (isRelativeLineNumber)
-        {
-            var foreground = ConsoleColor.DarkGray;
-            var background = ConsoleColor.Black;
-            lineNumberChars.SetText(0, lineNumber.ToString().PadLeft(digits));
-            lineNumberChars.SetColor(foreground, background);
-            // 添加一個空格作為間隔
-            screenBuffer[y, x + digits] = new ColoredChar(' ', foreground, background);
-        }
-        else
-        {
-            var foreground = ConsoleColor.Yellow;
-            var background = ConsoleColor.Black;
-            lineNumberChars.SetText(0, lineNumber.ToString().PadRight(digits));
-            lineNumberChars.SetColor(foreground, background);
-            // 添加一個空格作為間隔
-            screenBuffer[y, x + digits] = new ColoredChar(' ', foreground, background);
-        }
-        for (int i = 0; i < lineNumberChars.Width; i++)
-        {
-            screenBuffer[y, x + i] = lineNumberChars.Chars[i];
-        }
-    }
-
-    /// <summary>
-    /// 繪製空白行號區域到 screenBuffer
-    /// </summary>
-    private void RenderEmptyLineNumber(ColoredChar[,] screenBuffer, int x, int y, int lineNumbderWidth)
-    {
-        // 檢查 Y 座標是否在 ViewPort 範圍內
-        if (y < Context.ViewPort.Y || y >= Context.ViewPort.Y + Context.ViewPort.Height)
-        {
-            return; // Y 座標超出範圍，不繪製
-        }
-
-        // 添加空白字符，寬度等於行號區域寬度
-        for (int i = 0; i < lineNumbderWidth; i++)
-        {
-            screenBuffer.Set(x + i, y, new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black));
         }
     }
 
