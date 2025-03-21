@@ -208,41 +208,21 @@ public class VimInsertMode : IVimMode
     /// </summary>
     private void MoveCursorRight(List<ConsoleKeyInfo> keys)
     {
-        // 一般情況下的處理
-        if (Instance.Context.CursorY >= 0 && Instance.Context.CursorY < Instance.Context.Texts.Count)
+        // 獲取當前行
+        var currentLine = Instance.GetCurrentLine();
+        // 檢查是否到達右邊界
+        if (Instance.Context.CursorX >= Instance.Context.ViewPort.Right)
         {
-            var currentLineForRight = Instance.Context.Texts[Instance.Context.CursorY];
-            if (currentLineForRight != null && currentLineForRight.Chars != null && currentLineForRight.Chars.Any())
+            // 如果還有更多文本可以顯示，則增加水平偏移
+            if (Instance.Context.OffsetX < currentLine.Width - Instance.Context.ViewPort.Width)
             {
-                string textForRight = new string(currentLineForRight.Chars.Select(c => c.Char).ToArray());
-
-                // 計算實際索引位置
-                int actualIndexForRight = textForRight.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
-
-                // 檢查並跳過 '\0' 字符
-                while (actualIndexForRight < textForRight.Length && textForRight[actualIndexForRight] == '\0')
-                {
-                    actualIndexForRight++;
-                }
-
-                if (actualIndexForRight < textForRight.Length)
-                {
-                    // 獲取當前字符的寬度
-                    char currentChar = textForRight[actualIndexForRight];
-                    
-                    // 移動游標
-                    Instance.Context.CursorX += currentChar.GetCharWidth();
-                }
-                else if (actualIndexForRight == textForRight.Length)
-                {
-                    // 允許游標移動到最後一個字符後面
-                    Instance.Context.CursorX = textForRight.GetStringDisplayWidth() + 1;
-                }
+                Instance.Context.OffsetX++;
+                return;
             }
+            return; // 已經到達最右邊，不能再移動
         }
-        
-        // 檢查並調整游標位置和偏移量
-        AdjustCursorAndOffset();
+        // 正常情況下向右移動游標
+        Instance.Context.CursorX++;
     }
     
     /// <summary>
