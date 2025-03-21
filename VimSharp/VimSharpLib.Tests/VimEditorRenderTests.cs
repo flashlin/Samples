@@ -67,7 +67,7 @@ namespace VimSharpLib.Tests
             
             // 另外檢查第一個中文字符的顏色
             Assert.Equal(ConsoleColor.White, screenBuffer[0, 1].ForegroundColor);
-            Assert.Equal(ConsoleColor.DarkGray, screenBuffer[0, 1].BackgroundColor);
+            Assert.Equal(ConsoleColor.Black, screenBuffer[0, 1].BackgroundColor);
 
             // 檢查 ViewPort 以外的內容, 不應該被改變. 也就是要求 Render 不會改變 ViewPort 以外的內容
             Assert.Equal('.', screenBuffer[0, 11].Char);
@@ -105,7 +105,7 @@ namespace VimSharpLib.Tests
             
             // 另外檢查第一個中文字符的顏色
             Assert.Equal(ConsoleColor.White, screenBuffer[0, 2].ForegroundColor);
-            Assert.Equal(ConsoleColor.DarkGray, screenBuffer[0, 2].BackgroundColor);
+            Assert.Equal(ConsoleColor.Black, screenBuffer[0, 2].BackgroundColor);
         }
 
         [Fact]
@@ -144,11 +144,11 @@ namespace VimSharpLib.Tests
             
             // 檢查行號顏色
             Assert.Equal(ConsoleColor.Yellow, screenBuffer[0, 0].ForegroundColor);
-            Assert.Equal(ConsoleColor.Black, screenBuffer[0, 0].BackgroundColor);
+            Assert.Equal(ConsoleColor.DarkBlue, screenBuffer[0, 0].BackgroundColor);
             
             // 檢查中文字符的顏色
             Assert.Equal(ConsoleColor.White, screenBuffer[0, lineNumberWidth + 1].ForegroundColor);
-            Assert.Equal(ConsoleColor.DarkGray, screenBuffer[0, lineNumberWidth + 1].BackgroundColor);
+            Assert.Equal(ConsoleColor.Black, screenBuffer[0, lineNumberWidth + 1].BackgroundColor);
         }
     }
 } 
