@@ -83,7 +83,7 @@ nnoremap zmm :action FileStructurePopup<CR>
 nmap zft :action ActivateTestToolWindow<CR>
 
 " 單元測試
-nmap zrt :action RiderUnitTestRunContextAction<CR>
+"nmap zrt :action RiderUnitTestRunContextAction<CR>
 nmap zdt :action RiderUnitTestDebugContextAction<CR>
 " 打開單元測試視窗
 nmap zot :action RiderUnitTestFocusExplorerAction<CR>
@@ -285,18 +285,18 @@ map zrr hhcf=return
 
 "[Unit Test]
 " nmap zra :action RiderUnitTestRunSolutionAction<CR>:action ActivateUnitTestsToolWindow<CR>
-nmap zT :action RiderUnitTestRunSolutionAction<CR>:action ActivateUnitTestsToolWindow<CR>
+nmap zrT :action RiderUnitTestRunSolutionAction<CR>:action ActivateUnitTestsToolWindow<CR>:action RiderUnitTestRunContextAction<CR>
 " imap zra <Esc>zra
-nmap zt ?\[Test\]<CR>jj]}j:action MethodDown<CR>:action RiderUnitTestRunContextAction<CR>:action ActivateUnitTestsToolWindow<CR><Esc>
+nmap zrt ?\[Test\]<CR>jj]}j:action MethodDown<CR>:action RiderUnitTestRunContextAction<CR>:action ActivateUnitTestsToolWindow<CR><Esc>
 "imap zrc <Esc>zrc
-nmap zrm ?\[Test<CR>:action MethodDown<CR>:action RiderUnitTestRunContextAction<CR>:action ActivateUnitTestsToolWindow<CR>
+"nmap zrm ?\[Test<CR>:action MethodDown<CR>:action RiderUnitTestRunContextAction<CR>:action ActivateUnitTestsToolWindow<CR>
 nmap zuu <Esc>:action RiderUnitTestRepeatPreviousRunAction<CR>:action ActivateUnitTestsToolWindow<CR>
 "imap zra <Esc>zra
-vmap zra <Esc>zra
+"vmap zra <Esc>zra
 map zuu :action RiderUnitTestRepeatPreviousRunAction<CR>:action ActivateUnitTestsToolWindow<CR>
 "imap zuu <Esc>zuu
 nmap zrs dd?class<CR>jo[SetUp]<CR>public<Space>void<Space>SetUp(){<CR>}<Esc>P:action SilentCodeCleanup<CR>
-vmap zrs s<Esc>?class<CR>jo[SetUp]<CR>public<Space>void<Space>SetUp(){<CR>}<Esc>P:action SilentCodeCleanup<CR>
+"vmap zrs s<Esc>?class<CR>jo[SetUp]<CR>public<Space>void<Space>SetUp(){<CR>}<Esc>P:action SilentCodeCleanup<CR>
 nmap zrx dd?SetUp<CR>j%P:action ReformatCode<CR>
 nmap <F1> y?\[Test<CR>P/public<CR>$B:action ReformatCode<CR>
 imap <F1> <Esc><F1>
