@@ -355,24 +355,14 @@ public class VimVisualMode : IVimMode
         Instance.Context.IsStatusBarVisible = true;
         SwitchToVisualMode(keys);
     }
-    
-    /// <summary>
-    /// 設置游標位置
-    /// </summary>
-    private void SetCursorPosition()
-    {
-        // 設置為方塊游標 (DECSCUSR 2)
-        Instance.Console.Write("\x1b[2 q");
-    }
-    
+
     public void WaitForInput()
     {
         // 設置為方塊游標 (DECSCUSR 2)
-        Instance.Console.Write("\x1b[2 q");
+        Instance.Console.SetBlockCursor();
         // 高亮顯示選取的文本
         HighlightSelectedText();
         _keyHandler.WaitForInput();
-        SetCursorPosition();
     }
     
     /// <summary>
