@@ -285,13 +285,13 @@ public class VimInsertMode : IVimMode
         // 在當前行後插入新行
         Instance.Context.CursorX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
         // 新增一行
-        Instance.Context.Texts.Insert(enterActualY, new ConsoleText());
+        var newLine = new ConsoleText();
+        Instance.Context.Texts.Insert(enterActualY+1, newLine);
         
         // 如果有剩餘內容，設置到新行
         if (!string.IsNullOrEmpty(remainingText))
         {
-            var currentLine = Instance.GetCurrentLine();
-            currentLine.SetText(0, remainingText);
+            newLine.SetText(0, remainingText);
         }
         
         MoveCursorDown([ConsoleKeyPress.ArrowDown]);
