@@ -230,38 +230,16 @@ public class VimInsertMode : IVimMode
     /// </summary>
     private void MoveCursorUp(List<ConsoleKeyInfo> keys)
     {
-        if (Instance.Context.CursorY > 0)
+        if (Instance.Context.CursorY <= Instance.Context.ViewPort.Y)
         {
-            // 保存當前行信息
-            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
-            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            
-            // 檢查游標是否在當前行的文本結束位置
-            // 在普通模式下，判斷游標是否在文本結束位置是通過檢查它是否在文本的末尾
-            bool isAtEndOfCurrentLine = (Instance.Context.CursorX >= currentText.GetStringDisplayWidth());
-            
-            // 移動到上一行
-            Instance.Context.CursorY--;
-            
-            // 獲取上一行信息
-            var upLine = Instance.Context.Texts[Instance.Context.CursorY];
-            string upLineText = new string(upLine.Chars.Select(c => c.Char).ToArray());
-            
-            // 如果游標在當前行的文本結束位置，則移動到上一行的文本結束位置
-            if (isAtEndOfCurrentLine)
+            if (Instance.Context.OffsetY > 0)
             {
-                Instance.Context.CursorX = upLineText.GetStringDisplayWidth();
+                Instance.Context.OffsetY--;
+                return;
             }
-            // 否則，如果游標X位置超過上一行的長度，則調整到上一行的末尾
-            else if (Instance.Context.CursorX > upLineText.GetStringDisplayWidth())
-            {
-                Instance.Context.CursorX = upLineText.GetStringDisplayWidth();
-            }
-            // 否則保持游標X位置不變
-            
-            // 檢查並調整游標位置和偏移量
-            AdjustCursorAndOffset();
+            return;
         }
+        Instance.Context.CursorY--;
     }
     
     /// <summary>
@@ -269,38 +247,17 @@ public class VimInsertMode : IVimMode
     /// </summary>
     private void MoveCursorDown(List<ConsoleKeyInfo> keys)
     {
-        if (Instance.Context.CursorY < Instance.Context.Texts.Count - 1)
+        var statusHeight = Instance.Context.IsStatusBarVisible ? 1 : 0;
+        if (Instance.Context.CursorY >= Instance.Context.ViewPort.Bottom - statusHeight)
         {
-            // 保存當前行信息
-            var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
-            string currentText = new string(currentLine.Chars.Select(c => c.Char).ToArray());
-            
-            // 檢查游標是否在當前行的文本結束位置
-            // 在普通模式下，判斷游標是否在文本結束位置是通過檢查它是否在文本的末尾
-            bool isAtEndOfCurrentLine = (Instance.Context.CursorX >= currentText.GetStringDisplayWidth());
-            
-            // 移動到下一行
-            Instance.Context.CursorY++;
-            
-            // 獲取下一行信息
-            var downLine = Instance.Context.Texts[Instance.Context.CursorY];
-            string downLineText = new string(downLine.Chars.Select(c => c.Char).ToArray());
-            
-            // 如果游標在當前行的文本結束位置，則移動到下一行的文本結束位置
-            if (isAtEndOfCurrentLine)
+            if (Instance.Context.OffsetY < Instance.Context.Texts.Count - Instance.Context.ViewPort.Height)
             {
-                Instance.Context.CursorX = downLineText.GetStringDisplayWidth();
+                Instance.Context.OffsetY++;
+                return;
             }
-            // 否則，如果游標X位置超過下一行的長度，則調整到下一行的末尾
-            else if (Instance.Context.CursorX > downLineText.GetStringDisplayWidth())
-            {
-                Instance.Context.CursorX = downLineText.GetStringDisplayWidth();
-            }
-            // 否則保持游標X位置不變
-            
-            // 檢查並調整游標位置和偏移量
-            AdjustCursorAndOffset();
+            return;
         }
+        Instance.Context.CursorY++;
     }
     
     /// <summary>
