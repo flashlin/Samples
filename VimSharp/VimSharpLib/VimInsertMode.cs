@@ -311,6 +311,7 @@ public class VimInsertMode : IVimMode
         // 獲取當前行
         var enterCurrentLine = Instance.GetCurrentLine();
         var enterActualIndex = Instance.GetActualTextX();
+        var enterActualY = Instance.GetActualTextY();
         
         // 檢查游標後面是否有內容
         string remainingText = "";
@@ -328,11 +329,8 @@ public class VimInsertMode : IVimMode
         Instance.Context.CursorY++;
         Instance.Context.CursorX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
         
-        // 確保新行存在
-        if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
-        {
-            Instance.Context.Texts.Add(new ConsoleText());
-        }
+        // 新增一行
+        Instance.Context.Texts.Insert(enterActualY+1, new ConsoleText());
         
         // 如果有剩餘內容，設置到新行
         if (!string.IsNullOrEmpty(remainingText))
