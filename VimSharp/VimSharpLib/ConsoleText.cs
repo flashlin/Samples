@@ -60,16 +60,7 @@ public class ConsoleText
 
     public override string ToString()
     {
-        var sb = new StringBuilder();
-        foreach (var c in Chars)
-        {
-            if (c.Char == '\0')
-            {
-                continue;
-            }
-            sb.Append(c.Char);
-        }
-        return sb.ToString();
+        return Chars.ToText();
     }
 
     public string ToAnsiString()
@@ -116,5 +107,17 @@ public class ConsoleText
             }
         }
         return lastCharIndex;
+    }
+
+    public string GetText(int offset)
+    {
+        var subChars = Chars.Skip(offset).ToArray();
+        return subChars.ToText();
+    }
+
+    public string Substring(int offset, int length)
+    {
+        var subChars = Chars.Skip(offset).Take(length).ToArray();
+        return subChars.ToText();
     }
 }

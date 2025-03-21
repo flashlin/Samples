@@ -309,27 +309,24 @@ public class VimInsertMode : IVimMode
     private void HandleEnterKey(List<ConsoleKeyInfo> keys)
     {
         // 獲取當前行
-        var enterCurrentLine = Instance.Context.Texts[Instance.Context.CursorY];
-        string enterCurrentText = new string(enterCurrentLine.Chars.Select(c => c.Char).ToArray());
-        
-        // 計算實際索引位置
-        int enterActualIndex = enterCurrentText.GetStringIndexFromDisplayPosition(Instance.Context.CursorX);
+        var enterCurrentLine = Instance.GetCurrentLine();
+        var enterActualIndex = Instance.GetActualTextX();
         
         // 檢查游標後面是否有內容
         string remainingText = "";
-        if (enterActualIndex < enterCurrentText.Length)
+        if (enterActualIndex < enterCurrentLine.Width)
         {
             // 獲取游標後面的內容
-            remainingText = enterCurrentText.Substring(enterActualIndex);
+            remainingText = enterCurrentLine.GetText(enterActualIndex);
             
             // 修改當前行，只保留游標前面的內容
-            string newCurrentText = enterCurrentText.Substring(0, enterActualIndex);
+            string newCurrentText = enterCurrentLine.Substring(0, enterActualIndex);
             enterCurrentLine.SetText(0, newCurrentText);
         }
 
         // 在當前行後插入新行
         Instance.Context.CursorY++;
-        Instance.Context.CursorX = 0;
+        Instance.Context.CursorX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
         
         // 確保新行存在
         if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
@@ -340,11 +337,9 @@ public class VimInsertMode : IVimMode
         // 如果有剩餘內容，設置到新行
         if (!string.IsNullOrEmpty(remainingText))
         {
-            Instance.Context.Texts[Instance.Context.CursorY].SetText(0, remainingText);
+            var currentLine = Instance.GetCurrentLine();
+            currentLine.SetText(0, remainingText);
         }
-        
-        // 檢查並調整游標位置和偏移量
-        AdjustCursorAndOffset();
     }
     
     /// <summary>

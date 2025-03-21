@@ -31,8 +31,8 @@ namespace VimSharpLib.Tests
             _editor.Context.SetViewPort(1, 1, 40, 5);
             _editor.OpenText("Hello World");
             
-            // 移動游標到 'W' 的左邊
-            _editor.Context.CursorX = 5;  // 'W' 前面的空格位置
+            // 移動游標到 'W' 的位置
+            _editor.Context.CursorX = 7;
             
             // 進入插入模式
             _editor.Mode.PressKey(ConsoleKey.I);
