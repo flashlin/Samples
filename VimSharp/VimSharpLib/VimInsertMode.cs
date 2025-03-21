@@ -187,99 +187,27 @@ public class VimInsertMode : IVimMode
     /// </summary>
     private void MoveCursorLeft(List<ConsoleKeyInfo> keys)
     {
-        try
+        // if cursorX <= ViewPort.X + GetLineNumberWidth()
+        //    if offsetX > 0
+        //        offsetX-- 
+        //        return
+        //    return
+        // cursorX--
+       
+        // 檢查是否到達左邊界
+        var minX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
+        if (Instance.Context.CursorX <= minX)
         {
-            // 如果啟用了相對行號，則檢查游標是否已經在行號區域右側
-            if (Instance.Context.IsLineNumberVisible)
+            // 如果有水平偏移，則減少偏移而不是移動游標
+            if (Instance.Context.OffsetX > 0)
             {
-                int lineNumberWidth = Instance.Context.GetLineNumberWidth();
-                if (Instance.Context.CursorX <= lineNumberWidth)
-                {
-                    return; // 已經在最左邊，不能再向左移動
-                }
+                Instance.Context.OffsetX--;
+                return;
             }
-            
-            // 如果游標不在最左邊，可以向左移動
-            if (Instance.Context.CursorX > 0)
-            {
-                // 獲取當前實際文本X坐標
-                int actualTextX = Instance.GetActualTextX();
-                
-                // 如果已經在文本的最左邊，或者文本為空，直接減少游標位置
-                if (actualTextX <= 0)
-                {
-                    Instance.Context.CursorX--;
-                }
-                else
-                {
-                    // 獲取當前行
-                    var currentLine = Instance.Context.Texts[Instance.Context.CursorY];
-                    if (currentLine == null || currentLine.Chars == null || currentLine.Chars.Length == 0)
-                    {
-                        // 如果當前行為空，直接減少游標位置
-                        Instance.Context.CursorX--;
-                    }
-                    else
-                    {
-                        // 獲取當前文本
-                        string currentText = string.Join("", currentLine.Chars.Select(c => c.Char).Where(c => c != '\0'));
-                        
-                        // 如果文本為空，直接減少游標位置
-                        if (string.IsNullOrEmpty(currentText) || actualTextX > currentText.Length)
-                        {
-                            Instance.Context.CursorX--;
-                        }
-                        else
-                        {
-                            // 確保實際位置不超過文本長度
-                            actualTextX = Math.Min(actualTextX, currentText.Length);
-                            
-                            // 獲取前一個字符的寬度（如果存在）
-                            int charWidth = 1; // 默認字符寬度為1
-                            if (actualTextX > 0 && actualTextX <= currentText.Length)
-                            {
-                                char prevChar = currentText[actualTextX - 1];
-                                charWidth = prevChar.GetCharWidth();
-                            }
-                            
-                            // 減少游標位置
-                            Instance.Context.CursorX -= charWidth;
-                        }
-                    }
-                }
-                
-                // 確保游標不會小於最小允許值
-                if (Instance.Context.IsLineNumberVisible)
-                {
-                    int lineNumberWidth = Instance.Context.GetLineNumberWidth();
-                    Instance.Context.CursorX = Math.Max(Instance.Context.CursorX, lineNumberWidth);
-                }
-                else
-                {
-                    Instance.Context.CursorX = Math.Max(Instance.Context.CursorX, 0);
-                }
-            }
-            
-            // 檢查並調整游標位置和偏移量
-            AdjustCursorAndOffset();
+            return; // 已經到達最左邊，不能再移動
         }
-        catch (Exception)
-        {
-            // 發生錯誤時，簡單地減少游標位置，確保不會出錯
-            Instance.Context.CursorX--;
-            if (Instance.Context.IsLineNumberVisible)
-            {
-                int lineNumberWidth = Instance.Context.GetLineNumberWidth();
-                Instance.Context.CursorX = Math.Max(Instance.Context.CursorX, lineNumberWidth);
-            }
-            else
-            {
-                Instance.Context.CursorX = Math.Max(Instance.Context.CursorX, 0);
-            }
-            
-            // 檢查並調整游標位置和偏移量
-            AdjustCursorAndOffset();
-        }
+        // 正常情況下向左移動游標
+        Instance.Context.CursorX--;
     }
     
     /// <summary>

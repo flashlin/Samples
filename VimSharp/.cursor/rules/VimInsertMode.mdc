@@ -1,0 +1,15 @@
+---
+description: 
+globs: VimInsertMode.cs
+alwaysApply: false
+---
+ 規定邏輯必須如下
+ - void MoveCursorLeft(List<ConsoleKeyInfo> keys)
+ * if cursorX <= ViewPort.X + GetLineNumberWidth()
+     if offsetX > 0
+       offsetX-- 
+       return
+     return
+   cursorX--
+ * 不需要呼叫 Render
+ 
