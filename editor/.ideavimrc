@@ -1,6 +1,6 @@
 " https://github.com/JetBrains/ideavim/wiki/IdeaVim-Plugins
 ":actionlist 顯示所有的 action
-let mapleader=" "
+let mapleader="z"
 set number relativenumber
 set history=200
 set showcmd
@@ -23,8 +23,7 @@ inoremap <leader>sc <Esc>:nohlsearch<CR>
 "sethandler <C-k> a:vim
 
 """ Highlight copied text -------------------
-Plug 'machakann/vim-highlightedyank'
-
+" Plug 'machakann/vim-highlightedyank'
 
 
 """ Plugins  --------------------------------
@@ -177,9 +176,6 @@ nnoremap <s-TAB> :action NextTab<CR>
 nnoremap <Leader>e :action EditSourceInNewWindow<CR>
 nnoremap <Leader>n :action NextWindow<CR>
 
-
-nnoremap zk 20k
-nnoremap zj 20j
 nnoremap zw :action CloseAllEditorsButActive<CR>
 
 "" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
@@ -194,11 +190,11 @@ map <A-Left> :action GotoLastEditPosition<CR>
 
 " add 註解
 map zc :action CommentByLineComment<CR>
-imap zc :action CommentByLineComment<CR>
+"imap zc :action CommentByLineComment<CR>
 map zmz :action ReformatCode<CR>
 map zrc :action RearrangeCode<CR>
-nmap [ :action MethodUp<CR>
-nmap ] :action MethodDown<CR>
+map [ :action MethodUp<CR>
+map ] :action MethodDown<CR>
 nmap [[ ?class<CR>:action MethodDown<CR>
 nmap {{ ?interface<CR>:action MethodDown<CR>
 map <A-[> :action MoveStatementUp<CR>
@@ -244,30 +240,30 @@ map zrr hhcf=return
 "imap zrr <Esc>zrr
 
 "[Select]
-nmap z( vi(
+"nmap z( vi(
 "imap z( <Esc>z(
-nmap z) vi)
+"nmap z) vi)
 "imap z) <Esc>z)
-nmap z[ vi]
+"nmap z[ vi]
 "imap z[ <Esc>z[
-nmap z] vi]
+"nmap z] vi]
 "imap z] <Esc>z]
-nmap z{ vi{
+"nmap z{ vi{
 "imap z{ <Esc>z{
-nmap z} vi}
+"nmap z} vi}
 "imap z} <Esc>z}
-nmap z< vi<
+"nmap z< vi<
 "imap z< <Esc>z<
-nmap z> vi>
+"nmap z> vi>
 "imap z> <Esc>z>
-nmap z" vi"
+"nmap z" vi"
 "imap z" <Esc>z"
-nmap z' vi'
+"nmap z' vi'
 "imap z' <Esc>z'
-nmap z/ F>wvt<
-imap z/ <Esc>z/
-imap <C-x> <Esc>dd
-imap <C-a> <Esc>ma<CR>ggVG
+"nmap z/ F>wvt<
+"imap z/ <Esc>z/
+"imap <C-x> <Esc>dd
+"imap <C-a> <Esc>ma<CR>ggVG
 map vv v^
 
 "[Refactor]

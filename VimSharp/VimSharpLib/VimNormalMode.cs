@@ -472,4 +472,14 @@ public class VimNormalMode : IVimMode
         Instance.Console.SetBlockCursor();
         _keyHandler.WaitForInput();
     }
+
+    public void AfterRender(StringBuilder outputBuffer)
+    {
+        // 設置控制台游標位置
+        outputBuffer.Append($"\x1b[{Instance.Context.CursorY+1};{Instance.Context.CursorX+1}H");
+        // 顯示游標
+        outputBuffer.Append("\x1b[?25h");
+        // 顯示方塊游標
+        outputBuffer.Append("\x1b[2 q");
+    }
 } 

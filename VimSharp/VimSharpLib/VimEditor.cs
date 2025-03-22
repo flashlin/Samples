@@ -187,12 +187,13 @@ public class VimEditor
         outputBuffer.Append("\x1b[?25l");
 
         RenderBufferToConsole(screenBuffer, outputBuffer);
-
-        // 設置控制台游標位置
-        outputBuffer.Append($"\x1b[{Context.CursorY+1};{Context.CursorX+1}H");
         
-        // 顯示游標
-        outputBuffer.Append("\x1b[?25h");
+        Mode.AfterRender(outputBuffer);
+
+        // // 設置控制台游標位置
+        // outputBuffer.Append($"\x1b[{Context.CursorY+1};{Context.CursorX+1}H");
+        // // 顯示游標
+        // outputBuffer.Append("\x1b[?25h");
         // 一次性輸出所有內容到控制台
         Console.Write(outputBuffer.ToString());
     }
