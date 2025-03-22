@@ -351,11 +351,11 @@ namespace VimSharpLib.Tests
             _editor.Context.SetViewPort(1, 1, 40, 5);
             _editor.OpenText("Hello");
             SetReadKey(ConsoleKeyPress.DollarSign);
-            SetReadKey('a');
+            SetReadKey(ConsoleKeyPress.a);
 
             // Act
             // 設置並按下左箭頭按鍵，將游標向左移動一位
-            SetReadKey((char)ConsoleKey.LeftArrow);
+            SetReadKey(ConsoleKeyPress.LeftArrow);
 
             // Assert
             // 驗證左箭頭按鍵後游標位置
@@ -369,13 +369,13 @@ namespace VimSharpLib.Tests
             // Arrange
             _editor.Context.SetViewPort(1, 1, 40, 5);
             _editor.OpenText("Hello");
-            SetReadKey('$');
-            SetReadKey('a');
-            SetReadKey((char)ConsoleKey.LeftArrow);
+            SetReadKey(ConsoleKeyPress.DollarSign);
+            SetReadKey(ConsoleKeyPress.a);
+            SetReadKey(ConsoleKeyPress.LeftArrow);
 
             // Act
             // 按下右鍵頭按鈕，將游標向右移動一位
-            SetReadKey((char)ConsoleKey.RightArrow);
+            SetReadKey(ConsoleKeyPress.RightArrow);
 
             // Assert
             // 驗證右箭頭按鍵後游標位置
@@ -389,12 +389,12 @@ namespace VimSharpLib.Tests
             // Arrange
             _editor.Context.SetViewPort(1, 1, 40, 5);
             _editor.OpenText("Hello");
-            SetReadKey('$');
-            SetReadKey('a');
+            SetReadKey(ConsoleKeyPress.DollarSign);
+            SetReadKey(ConsoleKeyPress.a);
 
             // Act
             // 設置並按下 1 按鍵，在文本末尾插入 1
-            SetReadKey('1');
+            SetReadKey(ConsoleKeyPress.One);
 
             // Assert
             // 驗證插入 1 後的文本和游標位置
@@ -409,13 +409,13 @@ namespace VimSharpLib.Tests
             // Arrange
             _editor.Context.SetViewPort(1, 1, 40, 5);
             _editor.OpenText("Hello");
-            SetReadKey('$');
-            SetReadKey('a');
-            SetReadKey('1');
+            SetReadKey(ConsoleKeyPress.DollarSign);
+            SetReadKey(ConsoleKeyPress.a);
+            SetReadKey(ConsoleKeyPress.One);
 
             // Act
             // 設置並按下 2 按鍵，在文本末尾插入 2
-            SetReadKey('2');
+            SetReadKey(ConsoleKeyPress.Two);
 
             // Assert
             // 驗證插入 2 後的文本和游標位置
@@ -430,14 +430,14 @@ namespace VimSharpLib.Tests
             // Arrange
             _editor.Context.SetViewPort(1, 1, 40, 5);
             _editor.OpenText("Hello");
-            SetReadKey('$');
-            SetReadKey('a');
-            SetReadKey('1');
-            SetReadKey('2');
+            SetReadKey(ConsoleKeyPress.DollarSign);
+            SetReadKey(ConsoleKeyPress.a);
+            SetReadKey(ConsoleKeyPress.One);
+            SetReadKey(ConsoleKeyPress.Two);
 
             // Act
             // 設置並按下 Backspace 按鍵，刪除最後一個字符
-            SetReadKey('\b');
+            SetReadKey(ConsoleKeyPress.Backspace);
 
             // Assert
             // 驗證刪除後的文本和游標位置
@@ -452,15 +452,15 @@ namespace VimSharpLib.Tests
             // Arrange
             _editor.Context.SetViewPort(1, 1, 40, 5);
             _editor.OpenText("Hello");
-            SetReadKey('$');
-            SetReadKey('a');
-            SetReadKey('1');
-            SetReadKey('2');
-            SetReadKey('\b');
+            SetReadKey(ConsoleKeyPress.DollarSign);
+            SetReadKey(ConsoleKeyPress.a);
+            SetReadKey(ConsoleKeyPress.One);
+            SetReadKey(ConsoleKeyPress.Two);
+            SetReadKey(ConsoleKeyPress.Backspace);
 
             // Act
             // 輸入 a 字母
-            SetReadKey('a');
+            SetReadKey(ConsoleKeyPress.a);
 
             // Assert
             // 驗證插入 a 後的文本和游標位置
@@ -475,17 +475,17 @@ namespace VimSharpLib.Tests
             // Arrange
             _editor.Context.SetViewPort(1, 1, 40, 5);
             _editor.OpenText("Hello");
-            SetReadKey('$');
-            SetReadKey('a');
-            SetReadKey('1');
-            SetReadKey('2');
-            SetReadKey('\b');
-            SetReadKey('a');
+            SetReadKey(ConsoleKeyPress.DollarSign);
+            SetReadKey(ConsoleKeyPress.a);
+            SetReadKey(ConsoleKeyPress.One);
+            SetReadKey(ConsoleKeyPress.Two);
+            SetReadKey(ConsoleKeyPress.Backspace);
+            SetReadKey(ConsoleKeyPress.a);
 
             // Act
             // 向左移動並刪除字符
-            SetReadKey((char)ConsoleKey.LeftArrow);
-            SetReadKey((char)ConsoleKey.Delete);
+            SetReadKey(ConsoleKeyPress.LeftArrow);
+            SetReadKey(ConsoleKeyPress.Delete);
 
             // Assert
             // 驗證刪除後的文本和游標位置
@@ -500,13 +500,13 @@ namespace VimSharpLib.Tests
             // Arrange
             _editor.Context.SetViewPort(1, 1, 40, 5);
             _editor.OpenText("Hello");
-            SetReadKey('$');
-            SetReadKey('a');
-            SetReadKey('1');
+            SetReadKey(ConsoleKeyPress.DollarSign);
+            SetReadKey(ConsoleKeyPress.a);
+            SetReadKey(ConsoleKeyPress.One);
 
             // Act
             // 設置並按下 Esc 按鍵，切換回普通模式
-            SetReadKey((char)27); // Escape 的 ASCII 碼是 27
+            SetReadKey(ConsoleKeyPress.Escape);
 
             // Assert
             // 驗證 Esc 按鍵後游標位置和模式
@@ -534,15 +534,15 @@ namespace VimSharpLib.Tests
 
             // Act
             // 按下大寫 D 按鈕，刪除從當前位置到行尾
-            SetReadKey('D');
+            SetReadKey(ConsoleKeyPress.D);
 
             // 切換到插入模式
-            SetReadKey('a');
+            SetReadKey(ConsoleKeyPress.a);
 
             // 輸入 123
-            SetReadKey('1');
-            SetReadKey('2');
-            SetReadKey('3');
+            SetReadKey(ConsoleKeyPress.One);
+            SetReadKey(ConsoleKeyPress.Two);
+            SetReadKey(ConsoleKeyPress.Three);
 
             // Assert
             // 驗證當前行文本應該是 "Hello, 123"
