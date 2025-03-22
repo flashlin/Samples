@@ -133,4 +133,24 @@ public class ConsoleText
         Array.Copy(Chars, 0, newChars, 0, reverseWidth);
         Chars = newChars;
     }
+
+    public void InsertText(int offset, string text)
+    {
+        var textWidth = text.GetStringDisplayWidth();
+        var width = Width + textWidth;
+        var newChars = new ColoredChar[width];
+        Array.Copy(Chars, 0, newChars, 0, offset);
+        for (var i = 0; i < text.Length; i++)
+        {
+            var coloredChar = new ColoredChar(text[i]);
+            newChars[offset + i] = coloredChar;
+            if (coloredChar.Char > 127)
+            {
+                newChars[offset + i + 1] = ColoredChar.None;
+                i++;
+            }
+        }
+        Array.Copy(Chars, offset, newChars, offset + textWidth, Width - offset);
+        Chars = newChars;
+    }
 }
