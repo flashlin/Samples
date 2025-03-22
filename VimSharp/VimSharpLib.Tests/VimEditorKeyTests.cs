@@ -556,43 +556,9 @@ namespace VimSharpLib.Tests
             Assert.IsType<VimInsertMode>(_editor.Mode);
         }
 
-
-        private void SetReadKey(char key)
+        private void SetReadKey(ConsoleKeyInfo keyInfo)
         {
-            var keyMapping = new Dictionary<char, (ConsoleKey, bool)>
-            {
-                { '$', (ConsoleKey.D4, true) }, // $ 需要按下 Shift
-                { 'D', (ConsoleKey.D, true) }, // Shift + D
-                { 'd', (ConsoleKey.D, false) }, // d
-                { 'a', (ConsoleKey.A, false) }, // a
-                { 'A', (ConsoleKey.A, true) }, // Shift + A
-                { 'H', (ConsoleKey.H, true) }, // Shift + H
-                { 'h', (ConsoleKey.H, false) }, // h
-                { 'i', (ConsoleKey.I, false) }, // i
-                { 'I', (ConsoleKey.I, true) }, // Shift + I
-                { '1', (ConsoleKey.D1, false) },
-                { '2', (ConsoleKey.D2, false) },
-                { '3', (ConsoleKey.D3, false) },
-                { (char)27, (ConsoleKey.Escape, false) }, // Escape
-                { '\b', (ConsoleKey.Backspace, false) }, // Backspace
-                { (char)ConsoleKey.Delete, (ConsoleKey.Delete, false) }, // Delete
-                { (char)ConsoleKey.LeftArrow, (ConsoleKey.LeftArrow, false) }, // 左箭頭
-                { (char)ConsoleKey.RightArrow, (ConsoleKey.RightArrow, false) }, // 右箭頭
-            };
-
-            if (keyMapping.ContainsKey(key))
-            {
-                var (consoleKey, shift) = keyMapping[key];
-
-                _mockConsole.ReadKey(Arg.Any<bool>()).Returns(
-                    new ConsoleKeyInfo(key, consoleKey, shift, false, false)
-                );
-            }
-            else
-            {
-                throw new ArgumentException($"不支援的按鍵: {key}");
-            }
-
+            _mockConsole.ReadKey(Arg.Any<bool>()).Returns(keyInfo);
             // 調用 WaitForInput 方法，這將觸發模擬的 ReadKey 方法
             _editor.WaitForInput();
         }
