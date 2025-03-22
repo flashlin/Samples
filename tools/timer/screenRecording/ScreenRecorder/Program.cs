@@ -209,7 +209,7 @@ public class Form : System.Windows.Forms.Form
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
-        using (Pen pen = new Pen(isRecording ? Color.Red : Color.Green, 5))
+        using (Pen pen = new Pen(isRecording ? Color.Red : Color.Green, 7))
         {
             // 從真正的視窗左上角開始繪製方框
             e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
