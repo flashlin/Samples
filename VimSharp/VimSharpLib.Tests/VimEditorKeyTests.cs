@@ -535,6 +535,8 @@ namespace VimSharpLib.Tests
             // Act
             // 按下大寫 D 按鈕，刪除從當前位置到行尾
             SetReadKey(ConsoleKeyPress.D);
+            Assert.Equal("Hello, ", _editor.GetCurrentLine().ToString());
+            
 
             // 切換到插入模式
             SetReadKey(ConsoleKeyPress.i);

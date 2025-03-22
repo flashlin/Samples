@@ -128,9 +128,9 @@ public class ConsoleText
             Chars = [];
             return;
         }
-        var width = Width - textX;
-        var newChars = new ColoredChar[width];
-        Array.Copy(Chars, 0, newChars, 0, width);
+        var reverseWidth = textX;
+        var newChars = new ColoredChar[reverseWidth];
+        Array.Copy(Chars, 0, newChars, 0, reverseWidth);
         Chars = newChars;
     }
 }
