@@ -17,6 +17,7 @@ class Program
     private static int deviceNumber = 0;
     private static Form overlayForm;
     private static Process ffmpegProcess;
+    public const int BORDER_WIDTH = 7;  // 邊框粗細
 
     [DllImport("user32.dll")]
     private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
@@ -62,8 +63,8 @@ class Program
             TopMost = true,
             BackColor = Color.White,
             TransparencyKey = Color.White,
-            Size = new Size(width + 2, height + 2),  // 增加 2 像素的寬度和高度
-            Location = new Point(x - 1, y - 1),      // 向左上偏移 1 像素
+            Size = new Size(width + BORDER_WIDTH * 2, height + BORDER_WIDTH * 2),  // 增加邊框寬度的兩倍
+            Location = new Point(x - BORDER_WIDTH, y - BORDER_WIDTH),      // 向左上偏移邊框寬度
             Opacity = 1.0,
             StartPosition = FormStartPosition.Manual
         };
@@ -209,7 +210,7 @@ public class Form : System.Windows.Forms.Form
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
-        using (Pen pen = new Pen(isRecording ? Color.Red : Color.Green, 7))
+        using (Pen pen = new Pen(isRecording ? Color.Red : Color.Green, Program.BORDER_WIDTH))
         {
             // 從真正的視窗左上角開始繪製方框
             e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
