@@ -120,4 +120,17 @@ public class ConsoleText
         var subChars = Chars.Skip(offset).Take(length).ToArray();
         return subChars.ToText();
     }
+
+    public void Remove(int textX)
+    {
+        if (textX == 0)
+        {
+            Chars = [];
+            return;
+        }
+        var width = Width - textX - 1;
+        var newChars = new ColoredChar[width];
+        Array.Copy(Chars, 0, newChars, 0, width);
+        Chars = newChars;
+    }
 }

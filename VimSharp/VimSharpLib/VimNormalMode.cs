@@ -40,6 +40,7 @@ public class VimNormalMode : IVimMode
             { new CharKeyPattern('$'), MoveCursorToEndOfLine },
             { new CharKeyPattern('^'), MoveCursorToStartOfLine },
             { new RegexPattern(@"\d+J"), JumpToLine },
+            { new CharKeyPattern('D'), HandleDKey },
         });
     }
     
@@ -462,6 +463,17 @@ public class VimNormalMode : IVimMode
     private void ClearKeyBuffer(List<ConsoleKeyInfo> keys)
     {
         _keyHandler.Clear();
+    }
+    
+    /// <summary>
+    /// 處理大寫 D 鍵：刪除從游標位置到行尾的內容
+    /// </summary>
+    private void HandleDKey(List<ConsoleKeyInfo> keys)
+    {
+        var currentLine = Instance.GetCurrentLine();
+        var textX = Instance.GetActualTextX();
+        currentLine.Remove(textX);
+        MoveCursorLeft([ConsoleKeyPress.ArrowLeft]);
     }
     
     public void WaitForInput()

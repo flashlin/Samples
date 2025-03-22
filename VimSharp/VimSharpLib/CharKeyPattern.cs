@@ -18,25 +18,10 @@ public class CharKeyPattern : IKeyPattern
             return false;
 
         // 檢查按鍵緩衝區的最後一個按鍵是否對應於指定的字符
-        var lastKey = keyBuffer.Last().Key;
-        
-        // 將 ConsoleKey 轉換為字符
-        char keyChar;
+        var lastKeyChar = keyBuffer.Last().KeyChar;
         
         // 處理特殊符號
-        if (_char == '$' && lastKey == ConsoleKey.D4)
-        {
-            return true;
-        }
-        else if (_char == '^' && lastKey == ConsoleKey.D6)
-        {
-            return true;
-        }
-        else
-        {
-            keyChar = GetCharFromConsoleKey(lastKey);
-            return keyChar == _char;
-        }
+        return _char == lastKeyChar;
     }
     
     private char GetCharFromConsoleKey(ConsoleKey key)

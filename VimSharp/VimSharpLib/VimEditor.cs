@@ -426,11 +426,7 @@ public class VimEditor
 
     public void WaitForInput()
     {
-        // 讀取按鍵
-        var lastKeyInfo = Console.ReadKey(true);
-        
-        // 直接將按鍵傳遞給當前模式進行處理
-        Mode.PressKey(lastKeyInfo.Key);
+        Mode.WaitForInput();
     }
 
     /// <summary>
