@@ -122,6 +122,7 @@ class Program
                 Arguments = ffmpegArgs,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
+                RedirectStandardInput = true,
                 CreateNoWindow = true
             }
         };
