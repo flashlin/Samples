@@ -25,7 +25,7 @@ class Program
     private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
     [STAThread]
-    static async Task Main(string[] args)
+    static void Main(string[] args)
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
@@ -90,14 +90,8 @@ class Program
             }
         };
 
-        // 顯示視窗
-        overlayForm.Show();
-
-        // 主循環
-        while (isRunning)
-        {
-            await Task.Delay(100);
-        }
+        // 使用 Application.Run 來運行 Windows Forms 應用程式
+        Application.Run(overlayForm);
     }
 
     private static void ToggleRecording()
