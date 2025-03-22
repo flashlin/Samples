@@ -11,9 +11,9 @@ using NAudio.Wave;
 
 class Program
 {
-    private static bool isRecording = false;
+    public static bool isRecording = false;
     private static bool isRunning = true;
-    private static Rectangle displayRect;
+    public static Rectangle displayRect;
     private static int deviceNumber = 0;
     private static Form overlayForm;
     private static Process ffmpegProcess;
@@ -106,7 +106,7 @@ class Program
         }
     }
 
-    private static void StartRecording()
+    public static void StartRecording()
     {
         isRecording = true;
         overlayForm.SetRecordingState(true);
@@ -130,7 +130,7 @@ class Program
         ffmpegProcess.Start();
     }
 
-    private static void StopRecording()
+    public static void StopRecording()
     {
         isRecording = false;
         overlayForm.SetRecordingState(false);
@@ -140,6 +140,12 @@ class Program
             ffmpegProcess.StandardInput.WriteLine("q");
             ffmpegProcess.WaitForExit();
         }
+    }
+
+    public static void UpdateRecordingArea(int deltaX, int deltaY)
+    {
+        displayRect.X += deltaX;
+        displayRect.Y += deltaY;
     }
 }
 
@@ -188,8 +194,29 @@ public class Form : System.Windows.Forms.Form
         base.OnMouseMove(e);
         if (e.Button == MouseButtons.Left)
         {
-            this.Left += e.X - lastPoint.X;
-            this.Top += e.Y - lastPoint.Y;
+            int deltaX = e.X - lastPoint.X;
+            int deltaY = e.Y - lastPoint.Y;
+            
+            this.Left += deltaX;
+            this.Top += deltaY;
+
+            // 更新錄影範圍
+            if (Program.isRecording)
+            {
+                // 停止當前錄影
+                Program.StopRecording();
+                // 更新錄影範圍
+                Program.displayRect.X += deltaX;
+                Program.displayRect.Y += deltaY;
+                // 重新開始錄影
+                Program.StartRecording();
+            }
+            else
+            {
+                // 只更新錄影範圍
+                Program.displayRect.X += deltaX;
+                Program.displayRect.Y += deltaY;
+            }
         }
     }
 
