@@ -17,9 +17,9 @@ public class VimNormalMode : IVimMode
     
     public VimEditor Instance { get; set; }
     
-    public void PressKey(ConsoleKey key)
+    public void PressKey(ConsoleKeyInfo keyInfo)
     {
-        _keyHandler.PressKey(key);
+        _keyHandler.PressKey(keyInfo);
     }
 
     private void InitializeKeyPatterns()
@@ -473,7 +473,7 @@ public class VimNormalMode : IVimMode
         var currentLine = Instance.GetCurrentLine();
         var textX = Instance.GetActualTextX();
         currentLine.Remove(textX);
-        MoveCursorLeft([ConsoleKeyPress.ArrowLeft]);
+        MoveCursorLeft([ConsoleKeyPress.LeftArrow]);
     }
     
     public void WaitForInput()

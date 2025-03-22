@@ -17,9 +17,9 @@ public class VimInsertMode : IVimMode
     
     public VimEditor Instance { get; }
     
-    public void PressKey(ConsoleKey key)
+    public void PressKey(ConsoleKeyInfo keyInfo)
     {
-        _keyHandler.PressKey(key);
+        _keyHandler.PressKey(keyInfo);
     }
 
     public void AfterRender(StringBuilder outputBuffer)
@@ -304,7 +304,7 @@ public class VimInsertMode : IVimMode
             newLine.SetText(0, remainingText);
         }
         
-        MoveCursorDown([ConsoleKeyPress.ArrowDown]);
+        MoveCursorDown([ConsoleKeyPress.DownArrow]);
     }
     
     /// <summary>

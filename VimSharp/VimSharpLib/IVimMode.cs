@@ -6,6 +6,6 @@ public interface IVimMode
 {
     void WaitForInput();
     VimEditor Instance { get; }
-    void PressKey(ConsoleKey key);
+    void PressKey(ConsoleKeyInfo keyInfo);
     void AfterRender(StringBuilder outputBuffer);
 } 

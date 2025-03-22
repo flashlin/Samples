@@ -35,10 +35,10 @@ namespace VimSharpLib.Tests
             _editor.Context.CursorX = 7;
             
             // 進入插入模式
-            _editor.Mode.PressKey(ConsoleKey.I);
+            _editor.Mode.PressKey(ConsoleKeyPress.i);
             
             // 按下 Enter 鍵
-            _editor.Mode.PressKey(ConsoleKey.Enter);
+            _editor.Mode.PressKey(ConsoleKeyPress.Enter);
             
             // Assert
             Assert.Equal("World", _editor.GetCurrentLine().ToString());

@@ -38,7 +38,7 @@ namespace VimSharpLib.Tests
             // 按下向右按鍵 6 次
             for (int i = 0; i < 6; i++)
             {
-                _editor.Mode.PressKey(ConsoleKey.RightArrow);
+                _editor.Mode.PressKey(ConsoleKeyPress.RightArrow);
             }
 
             // Assert
@@ -63,7 +63,7 @@ namespace VimSharpLib.Tests
             // 按下向右按鍵 6 次
             for (int i = 0; i < 6; i++)
             {
-                _editor.Mode.PressKey(ConsoleKey.RightArrow);
+                _editor.Mode.PressKey(ConsoleKeyPress.RightArrow);
             }
 
             // Assert
@@ -90,11 +90,11 @@ namespace VimSharpLib.Tests
             // 按下向右按鍵 6 次
             for (int i = 0; i < 6; i++)
             {
-                _editor.Mode.PressKey(ConsoleKey.RightArrow);
+                _editor.Mode.PressKey(ConsoleKeyPress.RightArrow);
             }
 
             // 按下向下按鍵 1 次
-            _editor.Mode.PressKey(ConsoleKey.DownArrow);
+            _editor.Mode.PressKey(ConsoleKeyPress.DownArrow);
 
             // Assert
             // 驗證 CursorX 應該是 1
@@ -131,11 +131,11 @@ namespace VimSharpLib.Tests
             // 按下向右按鍵 6 次
             for (int i = 0; i < 6; i++)
             {
-                _editor.Mode.PressKey(ConsoleKey.RightArrow);
+                _editor.Mode.PressKey(ConsoleKeyPress.RightArrow);
             }
 
             // 按下向下按鍵 1 次
-            _editor.Mode.PressKey(ConsoleKey.DownArrow);
+            _editor.Mode.PressKey(ConsoleKeyPress.DownArrow);
 
             // Assert
             // 驗證 CursorX 應該是 3
@@ -159,14 +159,14 @@ namespace VimSharpLib.Tests
 
             // Act
             // 按下向右按鍵 1 次
-            _editor.Mode.PressKey(ConsoleKey.RightArrow);
+            _editor.Mode.PressKey(ConsoleKeyPress.RightArrow);
 
             // Assert
             // 驗證 CursorX 應該是 2（因為中文字符"閃"佔用兩個字符寬度）
             Assert.Equal(2, _editor.Context.CursorX);
 
             // 按下向左按鍵 1 次
-            _editor.Mode.PressKey(ConsoleKey.LeftArrow);
+            _editor.Mode.PressKey(ConsoleKeyPress.LeftArrow);
 
             // Assert
             // 驗證 CursorX 應該是 0
@@ -188,7 +188,7 @@ namespace VimSharpLib.Tests
 
             // Act
             // 按下 '$' 按鍵
-            _editor.Mode.PressKey(ConsoleKey.D4); // '$' 對應 Shift+4
+            _editor.Mode.PressKey(ConsoleKeyPress.Money); // '$' 對應 Shift+4
 
             // Assert
             // 驗證 CursorX 應該是 4（"Hello" 的長度，游標位於最後一個字符上面）
@@ -562,9 +562,17 @@ namespace VimSharpLib.Tests
             var keyMapping = new Dictionary<char, (ConsoleKey, bool)>
             {
                 { '$', (ConsoleKey.D4, true) }, // $ 需要按下 Shift
-                { 'a', (ConsoleKey.A, false) },
+                { 'D', (ConsoleKey.D, true) }, // Shift + D
+                { 'd', (ConsoleKey.D, false) }, // d
+                { 'a', (ConsoleKey.A, false) }, // a
+                { 'A', (ConsoleKey.A, true) }, // Shift + A
+                { 'H', (ConsoleKey.H, true) }, // Shift + H
+                { 'h', (ConsoleKey.H, false) }, // h
+                { 'i', (ConsoleKey.I, false) }, // i
+                { 'I', (ConsoleKey.I, true) }, // Shift + I
                 { '1', (ConsoleKey.D1, false) },
                 { '2', (ConsoleKey.D2, false) },
+                { '3', (ConsoleKey.D3, false) },
                 { (char)27, (ConsoleKey.Escape, false) }, // Escape
                 { '\b', (ConsoleKey.Backspace, false) }, // Backspace
                 { (char)ConsoleKey.Delete, (ConsoleKey.Delete, false) }, // Delete

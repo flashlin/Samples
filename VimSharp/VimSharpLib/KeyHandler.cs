@@ -26,16 +26,8 @@ public class KeyHandler
         _keyBuffer.Clear();
     }
 
-    public void PressKey(ConsoleKey key)
+    public void PressKey(ConsoleKeyInfo keyInfo)
     {
-        // 創建一個基本的 ConsoleKeyInfo 對象
-        var keyInfo = new ConsoleKeyInfo(
-            '\0',  // 默認字符
-            key,   // 按鍵碼
-            false, // Shift 狀態
-            false, // Alt 狀態
-            false  // Ctrl 狀態
-        );
         _keyBuffer.Add(keyInfo);
         HandleInputKey();
     }

@@ -24,9 +24,9 @@ public class VimVisualMode : IVimMode
     }
     public VimEditor Instance { get; set; }
     
-    public void PressKey(ConsoleKey key)
+    public void PressKey(ConsoleKeyInfo keyInfo)
     {
-        _keyHandler.PressKey(key);
+        _keyHandler.PressKey(keyInfo);
     }
 
     public void AfterRender(StringBuilder outputBuffer)
