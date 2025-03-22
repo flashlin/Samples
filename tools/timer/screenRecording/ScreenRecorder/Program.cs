@@ -60,11 +60,11 @@ class Program
             FormBorderStyle = FormBorderStyle.None,
             ShowInTaskbar = false,
             TopMost = true,
-            BackColor = Color.Green,
-            TransparencyKey = Color.Green,
+            BackColor = Color.White,
+            TransparencyKey = Color.White,
             Size = new Size(width, height),
             Location = new Point(x, y),
-            Opacity = 0.5,
+            Opacity = 1.0,
             StartPosition = FormStartPosition.Manual
         };
 
