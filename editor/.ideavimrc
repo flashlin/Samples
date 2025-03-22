@@ -1,6 +1,12 @@
 " https://github.com/JetBrains/ideavim/wiki/IdeaVim-Plugins
 ":actionlist 顯示所有的 action
-let mapleader="z"
+"主要有 map，noremap，unmap，mapclear四個 命令，並且有四個字首i,c,n,v修飾
+"nore：非遞迴
+"map：遞迴的對映
+" 如果 a 鍵被對應成了 b 鍵，c 鍵又被對應成了 a 鍵，遞迴對應會將，c 鍵對應成 b 鍵
+"unmap：刪除某個對映
+"mapclear：清除對映
+let mapleader='z'
 set number relativenumber
 set history=200
 set showcmd
@@ -8,10 +14,11 @@ set scrolloff=5
 " integrate with system clipboard
 "set clipboard=unnamedplus,unnamed,ideaput
 set clipboard+=unnamed
-
-" 設定搜尋時高亮顯示
+"顯示命令
+set showmode
+"設定搜尋時高亮顯示
 set incsearch
-" 設定搜尋後高亮顯示
+"設定搜尋後高亮顯示
 set hlsearch
 "清除高亮搜尋
 nnoremap <leader>sc :nohlsearch<CR>
@@ -193,8 +200,11 @@ map zc :action CommentByLineComment<CR>
 "imap zc :action CommentByLineComment<CR>
 map zmz :action ReformatCode<CR>
 map zrc :action RearrangeCode<CR>
-map [ :action MethodUp<CR>
-map ] :action MethodDown<CR>
+
+nnoremap [ :action MethodUp<CR>
+nnoremap ] :action MethodDown<CR>
+"nmap [ :action GotoPreviousMethod<CR>
+"nmap ] :action GotoNextMethod<CR>
 nmap [[ ?class<CR>:action MethodDown<CR>
 nmap {{ ?interface<CR>:action MethodDown<CR>
 map <A-[> :action MoveStatementUp<CR>
