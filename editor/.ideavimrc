@@ -70,8 +70,8 @@ map mp <A-p>
 " 在 V 模式下, 輸入 gc 即可註解
 " 在 V 模式下, 輸入 gcc 即可反註解
 " Plug 'tpope/vim-commentary'
-Plug 'vim-commentary'
-set commentary
+" Plug 'vim-commentary'
+" set commentary
 
 
 "" 顯示 members
@@ -79,7 +79,7 @@ nnoremap zmm :action FileStructurePopup<CR>
 
 ""
 " 聚焦 test explorer
-nmap zft :action ActivateTestToolWindow<CR>
+nmap zte :action ActivateTestToolWindow<CR>
 
 " 單元測試
 "nmap zrt :action RiderUnitTestRunContextAction<CR>
@@ -99,7 +99,7 @@ map zct :action CloseAllEditorsButActive<CR>
 nmap zmc :action RearrangeCode<CR>
 
 " 快速跳轉檔案
-nmap ztt :action GotoFile<CR>
+" nmap ztt :action GotoFile<CR>
 
 """ -------------------------------------------
 " daa 刪除參數
