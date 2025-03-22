@@ -49,6 +49,12 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void HandleIKey(List<ConsoleKeyInfo> keys)
     {
+        var textX = Instance.GetActualTextX();
+        var currentLine = Instance.GetCurrentLine();
+        if (textX > currentLine.Width)
+        {
+            currentLine.SetText(textX, " ");
+        }
         Instance.Mode = new VimInsertMode(Instance);
     }
     

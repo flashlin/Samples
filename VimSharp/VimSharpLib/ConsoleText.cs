@@ -130,7 +130,7 @@ public class ConsoleText
         }
         var width = Width - textX;
         var newChars = new ColoredChar[width];
-        Array.Copy(Chars, 0, newChars, 0, width - 1);
+        Array.Copy(Chars, 0, newChars, 0, width);
         Chars = newChars;
     }
 }
