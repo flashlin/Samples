@@ -572,6 +572,10 @@ namespace VimSharpLib.Tests
             _editor.Context.CursorX = 12;
             
             SetReadKey(ConsoleKeyPress.i);
+            
+            Assert.Equal(12, _editor.Context.CursorX);
+            Assert.Equal(1, _editor.Context.CursorY);
+            
             SetReadKey(ConsoleKeyPress.One);
             SetReadKey(ConsoleKeyPress.Two);
             SetReadKey(ConsoleKeyPress.Three);
