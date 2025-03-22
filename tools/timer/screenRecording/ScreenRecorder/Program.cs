@@ -62,8 +62,8 @@ class Program
             TopMost = true,
             BackColor = Color.White,
             TransparencyKey = Color.White,
-            Size = new Size(width, height),
-            Location = new Point(x, y),
+            Size = new Size(width + 2, height + 2),  // 增加 2 像素的寬度和高度
+            Location = new Point(x - 1, y - 1),      // 向左上偏移 1 像素
             Opacity = 1.0,
             StartPosition = FormStartPosition.Manual
         };
@@ -153,6 +153,10 @@ public class Form : System.Windows.Forms.Form
     {
         // 設定預設游標
         this.Cursor = Cursors.Default;
+        // 設定邊距為 0
+        this.Padding = new Padding(0);
+        // 設定視窗樣式，移除標題列
+        this.FormBorderStyle = FormBorderStyle.None;
     }
 
     public void SetRecordingState(bool recording)
@@ -194,8 +198,8 @@ public class Form : System.Windows.Forms.Form
         base.OnPaint(e);
         using (Pen pen = new Pen(isRecording ? Color.Red : Color.Green, 5))
         {
-            // 繪製比實際範圍大 2 像素的方框
-            e.Graphics.DrawRectangle(pen, -1, -1, Width + 1, Height + 1);
+            // 從真正的視窗左上角開始繪製方框
+            e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
         }
     }
 }
