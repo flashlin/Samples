@@ -193,7 +193,8 @@ public class Form : System.Windows.Forms.Form
         base.OnPaint(e);
         using (Pen pen = new Pen(isRecording ? Color.Red : Color.Green, 5))
         {
-            e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
+            // 繪製比實際範圍大 2 像素的方框
+            e.Graphics.DrawRectangle(pen, -1, -1, Width + 1, Height + 1);
         }
     }
 }
