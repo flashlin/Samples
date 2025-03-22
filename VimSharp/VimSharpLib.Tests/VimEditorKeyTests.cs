@@ -188,7 +188,7 @@ namespace VimSharpLib.Tests
 
             // Act
             // 按下 '$' 按鍵
-            _editor.Mode.PressKey(ConsoleKeyPress.Money); // '$' 對應 Shift+4
+            _editor.Mode.PressKey(ConsoleKeyPress.DollarSign); // '$' 對應 Shift+4
 
             // Assert
             // 驗證 CursorX 應該是 4（"Hello" 的長度，游標位於最後一個字符上面）
@@ -204,7 +204,7 @@ namespace VimSharpLib.Tests
 
             // Act
             // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
-            SetReadKey('$');
+            SetReadKey(ConsoleKeyPress.DollarSign);
 
             // Assert
             // 驗證 CursorX 應該是 4（"Hello" 的最後一個字符位置）
@@ -223,7 +223,7 @@ namespace VimSharpLib.Tests
 
             // Act
             // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
-            SetReadKey('$');
+            SetReadKey(ConsoleKeyPress.DollarSign);
 
             // Assert
             // 驗證 CursorX 應該是 8
@@ -250,7 +250,7 @@ namespace VimSharpLib.Tests
 
             // Act
             // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
-            SetReadKey('$');
+            SetReadKey(ConsoleKeyPress.DollarSign);
 
             // Assert
             // 驗證 CursorX 應該是 6
@@ -282,7 +282,7 @@ namespace VimSharpLib.Tests
 
             // Act
             // 設置 ReadKey 返回 $ 按鍵 (Shift+4)
-            SetReadKey('$');
+            SetReadKey(ConsoleKeyPress.DollarSign);
 
             // Assert
             // 驗證 CursorX 應該是 6
@@ -317,7 +317,7 @@ namespace VimSharpLib.Tests
 
             // Act
             // 設置並按下 $ 按鍵 (Shift+4)，將游標移動到行尾
-            SetReadKey('$');
+            SetReadKey(ConsoleKeyPress.DollarSign);
 
             // Assert
             // 驗證 $ 按鍵後游標位置 (應該在最後一個字符上)
@@ -331,11 +331,11 @@ namespace VimSharpLib.Tests
             // Arrange
             _editor.Context.SetViewPort(1, 1, 40, 5);
             _editor.OpenText("Hello");
-            SetReadKey('$');
+            SetReadKey(ConsoleKeyPress.DollarSign);
 
             // Act
             // 設置並按下 a 按鍵，切換到插入模式並將游標移到最後一個字符之後
-            SetReadKey('a');
+            SetReadKey(ConsoleKeyPress.a);
 
             // Assert
             // 驗證 a 按鍵後游標位置和模式
@@ -350,7 +350,7 @@ namespace VimSharpLib.Tests
             // Arrange
             _editor.Context.SetViewPort(1, 1, 40, 5);
             _editor.OpenText("Hello");
-            SetReadKey('$');
+            SetReadKey(ConsoleKeyPress.DollarSign);
             SetReadKey('a');
 
             // Act
