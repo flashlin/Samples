@@ -146,11 +146,28 @@ class Program
 public class Form : System.Windows.Forms.Form
 {
     private bool isRecording = false;
+    private Point lastPoint;
 
     public void SetRecordingState(bool recording)
     {
         isRecording = recording;
         this.Invalidate(); // 觸發重繪
+    }
+
+    protected override void OnMouseDown(MouseEventArgs e)
+    {
+        base.OnMouseDown(e);
+        lastPoint = e.Location;
+    }
+
+    protected override void OnMouseMove(MouseEventArgs e)
+    {
+        base.OnMouseMove(e);
+        if (e.Button == MouseButtons.Left)
+        {
+            this.Left += e.X - lastPoint.X;
+            this.Top += e.Y - lastPoint.Y;
+        }
     }
 
     protected override void OnPaint(PaintEventArgs e)
