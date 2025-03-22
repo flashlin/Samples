@@ -64,7 +64,7 @@ class Program
             TransparencyKey = Color.White,
             Size = new Size(width, height),
             Location = new Point(x, y),
-            Opacity = 0.1, // 設定很低的透明度，但保持可見
+            Opacity = 1.0,
             StartPosition = FormStartPosition.Manual
         };
 
@@ -83,6 +83,7 @@ class Program
         // 處理視窗關閉事件
         overlayForm.FormClosing += (s, e) =>
         {
+            isRunning = false;
             if (isRecording)
             {
                 StopRecording();
