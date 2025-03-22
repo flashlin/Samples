@@ -202,8 +202,8 @@ public class Form : System.Windows.Forms.Form
             this.Top += deltaY;
 
             // 更新錄影範圍
-            Program.displayRect.X += deltaX;
-            Program.displayRect.Y += deltaY;
+            Program.displayRect.X = this.Left + Program.BORDER_WIDTH;
+            Program.displayRect.Y = this.Top + Program.BORDER_WIDTH;
         }
     }
 
