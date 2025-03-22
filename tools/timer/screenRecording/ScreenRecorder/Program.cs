@@ -192,7 +192,7 @@ public class Form : System.Windows.Forms.Form
     protected override void OnMouseMove(MouseEventArgs e)
     {
         base.OnMouseMove(e);
-        if (e.Button == MouseButtons.Left)
+        if (e.Button == MouseButtons.Left && !Program.isRecording)  // 只在非錄影狀態下允許拖曳
         {
             int deltaX = e.X - lastPoint.X;
             int deltaY = e.Y - lastPoint.Y;
@@ -201,22 +201,8 @@ public class Form : System.Windows.Forms.Form
             this.Top += deltaY;
 
             // 更新錄影範圍
-            if (Program.isRecording)
-            {
-                // 停止當前錄影
-                Program.StopRecording();
-                // 更新錄影範圍
-                Program.displayRect.X += deltaX;
-                Program.displayRect.Y += deltaY;
-                // 重新開始錄影
-                Program.StartRecording();
-            }
-            else
-            {
-                // 只更新錄影範圍
-                Program.displayRect.X += deltaX;
-                Program.displayRect.Y += deltaY;
-            }
+            Program.displayRect.X += deltaX;
+            Program.displayRect.Y += deltaY;
         }
     }
 
