@@ -191,7 +191,7 @@ public class Form : System.Windows.Forms.Form
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
-        using (Pen pen = new Pen(isRecording ? Color.Red : Color.Green, 2))
+        using (Pen pen = new Pen(isRecording ? Color.Red : Color.Green, 5))
         {
             e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
         }
