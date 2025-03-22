@@ -537,7 +537,7 @@ namespace VimSharpLib.Tests
             SetReadKey(ConsoleKeyPress.D);
 
             // 切換到插入模式
-            SetReadKey(ConsoleKeyPress.a);
+            SetReadKey(ConsoleKeyPress.i);
 
             // 輸入 123
             SetReadKey(ConsoleKeyPress.One);

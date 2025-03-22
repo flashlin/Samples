@@ -473,7 +473,6 @@ public class VimNormalMode : IVimMode
         var currentLine = Instance.GetCurrentLine();
         var textX = Instance.GetActualTextX();
         currentLine.Remove(textX);
-        MoveCursorLeft([ConsoleKeyPress.LeftArrow]);
     }
     
     public void WaitForInput()
