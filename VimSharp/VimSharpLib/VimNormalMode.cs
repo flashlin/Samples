@@ -41,6 +41,7 @@ public class VimNormalMode : IVimMode
             { new CharKeyPattern('^'), MoveCursorToStartOfLine },
             { new RegexPattern(@"\d+J"), JumpToLine },
             { new CharKeyPattern('D'), HandleDKey },
+            { new CharKeyPattern('w'), HandleWKey },
         });
     }
     
@@ -480,7 +481,21 @@ public class VimNormalMode : IVimMode
         var textX = Instance.GetActualTextX();
         currentLine.Remove(textX);
     }
-    
+
+    private void HandleWKey(List<ConsoleKeyInfo> keys)
+    {
+        var currentLine = Instance.GetCurrentLine();
+        var textX = Instance.GetActualTextX();
+        var nextX = currentLine.NextWord(textX);
+        if (nextX != -1)
+        {
+            for (var i = 0; i < nextX - textX; i++)
+            {
+                MoveCursorRight([ConsoleKeyPress.RightArrow]);
+            }
+        }
+    }
+
     public void WaitForInput()
     {
         // 設置游標位置
