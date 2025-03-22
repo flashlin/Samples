@@ -115,8 +115,7 @@ class Program
     private static void StartRecording()
     {
         isRecording = true;
-        overlayForm.BackColor = Color.Red;
-        overlayForm.TransparencyKey = Color.Red;
+        overlayForm.SetRecordingState(true);
 
         string outputFile = $"recording_{DateTime.Now:yyyyMMdd_HHmmss}.mp4";
         string ffmpegArgs = $"-f gdigrab -framerate 30 -offset_x {displayRect.X} -offset_y {displayRect.Y} -video_size {displayRect.Width}x{displayRect.Height} -i desktop -c:v libx264 -preset ultrafast -y {outputFile}";
@@ -139,8 +138,7 @@ class Program
     private static void StopRecording()
     {
         isRecording = false;
-        overlayForm.BackColor = Color.Green;
-        overlayForm.TransparencyKey = Color.Green;
+        overlayForm.SetRecordingState(false);
 
         if (ffmpegProcess != null && !ffmpegProcess.HasExited)
         {
@@ -153,10 +151,18 @@ class Program
 // 用於顯示方框的透明視窗
 public class Form : System.Windows.Forms.Form
 {
+    private bool isRecording = false;
+
+    public void SetRecordingState(bool recording)
+    {
+        isRecording = recording;
+        this.Invalidate(); // 觸發重繪
+    }
+
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
-        using (Pen pen = new Pen(Color.Red, 2))
+        using (Pen pen = new Pen(isRecording ? Color.Red : Color.Green, 2))
         {
             e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
         }
