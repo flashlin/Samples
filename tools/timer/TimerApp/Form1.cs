@@ -32,9 +32,21 @@ public partial class Form1 : Form
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_SHOWWINDOW = 0x0040;
 
-    public Form1(int minutes = 20)
+    public Form1(string timeString = "20:00")
     {
         InitializeComponent();
+
+        // 解析時間字串
+        string[] timeParts = timeString.Split(':');
+        if (timeParts.Length != 2 || !int.TryParse(timeParts[0], out int minutes) || !int.TryParse(timeParts[1], out int seconds))
+        {
+            // 如果解析失敗，使用預設值 20:00
+            minutes = 20;
+            seconds = 0;
+        }
+
+        // 計算總秒數
+        remainingSeconds = minutes * 60 + seconds;
 
         // 設置視窗屬性
         this.FormBorderStyle = FormBorderStyle.None;
@@ -48,7 +60,7 @@ public partial class Form1 : Form
 
         // 創建倒數計時器標籤
         timerLabel = new Label();
-        timerLabel.Text = $"{minutes:D2}:00";
+        timerLabel.Text = $"{minutes:D2}:{seconds:D2}";
         timerLabel.Font = new Font("Arial", 24, FontStyle.Bold);
         timerLabel.ForeColor = Color.Yellow;
         timerLabel.BackColor = Color.Transparent;
@@ -86,7 +98,6 @@ public partial class Form1 : Form
         this.Controls.Add(dragHandle);
 
         // 設置倒數計時器
-        remainingSeconds = minutes * 60; // 使用傳入的分鐘數
         System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
         timer.Interval = 1000; // 1秒
         timer.Tick += (sender, e) => {

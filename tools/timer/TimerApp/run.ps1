@@ -1,1 +1,1 @@
-dotnet run --project .\TimerApp.csproj -t 21
+dotnet run --project .\TimerApp.csproj -t 20:30

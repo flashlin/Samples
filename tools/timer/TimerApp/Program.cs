@@ -17,19 +17,21 @@ static class Program
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
 
-        int minutes = 20; // 默認20分鐘
+        string timeString = "20:00"; // 默認20分鐘
         for (int i = 0; i < args.Length; i++)
         {
             if (args[i] == "-t" && i + 1 < args.Length)
             {
-                if (int.TryParse(args[i + 1], out int parsedMinutes))
+                // 驗證時間格式是否為 MM:SS
+                string timeArg = args[i + 1];
+                if (System.Text.RegularExpressions.Regex.IsMatch(timeArg, @"^\d{1,2}:\d{2}$"))
                 {
-                    minutes = parsedMinutes;
+                    timeString = timeArg;
                     break;
                 }
             }
         }
 
-        Application.Run(new Form1(minutes));
+        Application.Run(new Form1(timeString));
     }    
 }
