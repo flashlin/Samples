@@ -26,7 +26,7 @@ public class VimNormalMode : IVimMode
     {
         _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
         {
-            { new ConsoleKeyPattern(ConsoleKey.I), SwitchToNormalMode },
+            { new ConsoleKeyPattern(ConsoleKey.I), HandleIKey },
             { new ConsoleKeyPattern(ConsoleKey.A), HandleAKey },
             { new ConsoleKeyPattern(ConsoleKey.Q), QuitEditor },
             { new ConsoleKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
@@ -47,7 +47,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 切換到普通模式
     /// </summary>
-    private void SwitchToNormalMode(List<ConsoleKeyInfo> keys)
+    private void HandleIKey(List<ConsoleKeyInfo> keys)
     {
         Instance.Mode = new VimInsertMode(Instance);
     }
