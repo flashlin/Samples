@@ -148,10 +148,28 @@ public class Form : System.Windows.Forms.Form
     private bool isRecording = false;
     private Point lastPoint;
 
+    public Form()
+    {
+        // 設定預設游標
+        this.Cursor = Cursors.Default;
+    }
+
     public void SetRecordingState(bool recording)
     {
         isRecording = recording;
         this.Invalidate(); // 觸發重繪
+    }
+
+    protected override void OnMouseEnter(EventArgs e)
+    {
+        base.OnMouseEnter(e);
+        this.Cursor = Cursors.SizeAll; // 當滑鼠移入時，改變為移動游標
+    }
+
+    protected override void OnMouseLeave(EventArgs e)
+    {
+        base.OnMouseLeave(e);
+        this.Cursor = Cursors.Default; // 當滑鼠移出時，恢復預設游標
     }
 
     protected override void OnMouseDown(MouseEventArgs e)
