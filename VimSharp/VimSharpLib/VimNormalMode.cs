@@ -486,7 +486,7 @@ public class VimNormalMode : IVimMode
     {
         var currentLine = Instance.GetCurrentLine();
         var textX = Instance.GetActualTextX();
-        var nextX = currentLine.NextWord(textX);
+        var nextX = currentLine.IndexOfNextWord(textX);
         if (nextX != -1)
         {
             for (var i = 0; i < nextX - textX; i++)

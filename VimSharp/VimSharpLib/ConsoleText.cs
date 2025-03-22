@@ -159,7 +159,7 @@ public class ConsoleText
     /// </summary>
     /// <param name="offset">開始搜尋的位置</param>
     /// <returns>下一個單詞的起始位置，如果找不到則返回 -1</returns>
-    public int NextWord(int offset)
+    public int IndexOfNextWord(int offset)
     {
         if (offset < 0 || offset >= Width)
         {
@@ -228,7 +228,7 @@ public class ConsoleText
     /// </summary>
     /// <param name="offset">開始搜尋的位置</param>
     /// <returns>前一個單詞的起始位置，如果找不到則返回 -1</returns>
-    public int PreviousWord(int offset)
+    public int IndexOfPreviousWord(int offset)
     {
         if (offset < 0 || offset >= Width)
         {
