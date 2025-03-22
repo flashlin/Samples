@@ -558,6 +558,27 @@ namespace VimSharpLib.Tests
             Assert.IsType<VimInsertMode>(_editor.Mode);
         }
 
+        [Fact]
+        public void TestInsertingNumericCharactersBeforeChineseCharacters()
+        {
+            // Arrange
+            // 設置自定義 ViewPort
+            _editor.Context.SetViewPort(1, 1, 40, 5);
+
+            // 加載文本 "Hello, World"
+            _editor.OpenText("Hello, 閃電!");
+
+            // 將游標移到 ! 上
+            _editor.Context.CursorX = 12;
+            
+            SetReadKey(ConsoleKeyPress.i);
+            SetReadKey(ConsoleKeyPress.One);
+            SetReadKey(ConsoleKeyPress.Two);
+            SetReadKey(ConsoleKeyPress.Three);
+            
+            Assert.Equal("Hello, 閃電123!", _editor.GetCurrentLine().ToString());
+        }
+
         private void SetReadKey(ConsoleKeyInfo keyInfo)
         {
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(keyInfo);
