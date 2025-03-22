@@ -19,11 +19,18 @@ public partial class Form1 : Form
     
     [DllImport("user32.dll")]
     private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
     
     // 窗口樣式常量
     private const int GWL_EXSTYLE = -20;
     private const int WS_EX_LAYERED = 0x80000;
     private const int WS_EX_TRANSPARENT = 0x20;
+    private const int HWND_TOPMOST = -1;
+    private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_SHOWWINDOW = 0x0040;
 
     public Form1(int minutes = 20)
     {
@@ -118,6 +125,9 @@ public partial class Form1 : Form
             exStyle |= WS_EX_LAYERED;
             // 不設置 WS_EX_TRANSPARENT 使窗口可以接收滑鼠事件
             SetWindowLong(this.Handle, GWL_EXSTYLE, exStyle);
+
+            // 確保視窗始終保持在最上層
+            SetWindowPos(this.Handle, (IntPtr)HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
         };
     }
 
