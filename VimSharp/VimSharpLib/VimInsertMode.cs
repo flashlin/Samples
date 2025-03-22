@@ -316,43 +316,6 @@ public class VimInsertMode : IVimMode
         var textX = Instance.GetActualTextX();
         currentLine.InsertText(textX, keyChar.ToString());
         MoveCursorRight([ConsoleKeyPress.RightArrow]);
-        
-        // if (char.IsLetterOrDigit(keyChar) || char.IsPunctuation(keyChar) || char.IsWhiteSpace(keyChar))
-        // {
-        //     // 獲取當前行
-        //     var currentLine = Instance.GetCurrentLine();
-        //     
-        //     // 獲取當前文本
-        //     string currentText = new string(currentLine.Chars.Select(c => c.Char).Where(c => c != '\0').ToArray());
-        //     
-        //     // 計算實際索引位置
-        //     int actualIndex;
-        //     
-        //     // 獲取實際文本位置
-        //     int actualTextX = Instance.GetActualTextX();
-        //     
-        //     // 如果在行尾，直接添加到文本末尾
-        //     if (actualTextX >= currentText.Length)
-        //     {
-        //         actualIndex = currentText.Length;
-        //     }
-        //     else
-        //     {
-        //         // 否則插入到指定位置
-        //         actualIndex = actualTextX;
-        //     }
-        //     
-        //     // 在實際索引位置插入字符
-        //     string newText = currentText.Insert(actualIndex, keyChar.ToString());
-        //     
-        //     // 更新文本
-        //     currentLine.SetText(0, newText);
-        //     
-        //     // 移動光標（考慮中文字符寬度）
-        //     // 不要直接修改 CursorX，而是通過 SetActualTextX 方法設置，它會考慮 ViewPort 和偏移量
-        //     int newActualTextX = actualTextX + keyChar.GetCharWidth();
-        //     Instance.SetActualTextX(newActualTextX);
-        // }
     }
 
     /// <summary>
