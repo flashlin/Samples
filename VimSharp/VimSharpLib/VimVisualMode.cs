@@ -1,4 +1,5 @@
 namespace VimSharpLib;
+
 using System.Text;
 using System.Linq;
 using System;
@@ -10,14 +11,10 @@ public class VimVisualMode : IVimMode
     private readonly VimNormalMode _normalMode;
 
     // 記錄選取的結束位置
-    private int _endOffsetX;
-    private int _endOffsetY;
     private int _endTextX;
     private int _endTextY;
 
     // 記錄選取的起始位置
-    private int _startOffsetX;
-    private int _startOffsetY;
     private int _startTextX;
     private int _startTextY;
 
@@ -39,7 +36,7 @@ public class VimVisualMode : IVimMode
     public void AfterRender(StringBuilder outputBuffer)
     {
         // 設置控制台游標位置
-        outputBuffer.Append($"\x1b[{Instance.Context.CursorY+1};{Instance.Context.CursorX+1}H");
+        outputBuffer.Append($"\x1b[{Instance.Context.CursorY + 1};{Instance.Context.CursorX + 1}H");
         // 顯示游標
         outputBuffer.Append("\x1b[?25h");
         // 顯示方塊游標
@@ -58,20 +55,9 @@ public class VimVisualMode : IVimMode
     /// </summary>
     public void SetStartPosition()
     {
-        _startOffsetX = Instance.Context.OffsetX;
-        _startOffsetY = Instance.Context.OffsetY;
         _startTextX = Instance.GetActualTextX();
         _startTextY = Instance.GetActualTextY();
         SaveLastPosition();
-    }
-
-    /// <summary>
-    /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
-    /// </summary>
-    private void AdjustCursorAndOffset()
-    {
-        // 調用 VimEditor 中的 AdjustCursorAndOffset 方法
-        Instance.AdjustCursorPositionAndOffset(_endOffsetX, _endOffsetY);
     }
 
     /// <summary>
@@ -125,10 +111,7 @@ public class VimVisualMode : IVimMode
     private void MoveCursorRight(List<ConsoleKeyInfo> keys)
     {
         _normalMode.MoveCursorRight(keys);
-        _endOffsetX = Instance.Context.OffsetX;
-        _endOffsetY = Instance.Context.OffsetY;
-        _endTextX = Instance.Context.CursorX;
-        _endTextY = Instance.Context.CursorY;
+        SaveLastPosition();
     }
 
     /// <summary>
@@ -143,25 +126,36 @@ public class VimVisualMode : IVimMode
     public void Render(ColoredChar[,] screenBuffer)
     {
         var startX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
-        var endX = Instance.Context.ViewPort.X + Instance.Context.ViewPort.Width - 1 - Instance.Context.GetLineNumberWidth();
+        var endX = Instance.Context.ViewPort.X + Instance.Context.ViewPort.Width - 1 -
+                   Instance.Context.GetLineNumberWidth();
         var startY = Instance.Context.ViewPort.Y;
-        var endY = Instance.Context.ViewPort.Y + Instance.Context.ViewPort.Height - 1 - Instance.Context.StatusBarHeight;
-        
-        for(var y = startY; y <= endY; y++)
+        var endY = Instance.Context.ViewPort.Y + Instance.Context.ViewPort.Height - 1 -
+                   Instance.Context.StatusBarHeight;
+
+        var startOffset = Instance.Context.ComputeOffset(_startTextX, _startTextY);
+        var endOffset = Instance.Context.ComputeOffset(_endTextX, _endTextY);
+
+        for (var y = startY; y <= endY; y++)
         {
-            for(var x = startX; x <= endX; x++)
+            for (var x = startX; x <= endX; x++)
             {
                 var viewTextX = Instance.Context.ComputeTextX(x);
                 var viewTextY = Instance.Context.ComputeTextY(y);
-                if (_startTextX <= viewTextX && viewTextX <= _endTextX)
+                var viewOffset = Instance.Context.ComputeOffset(viewTextX, viewTextY);
+                if (startOffset <= viewOffset && viewOffset <= endOffset)
                 {
-                    if (_startTextY <= viewTextY && viewTextY <= _endTextY)
+                    var character = screenBuffer[y, x];
+                    if (!character.IsEmpty)
                     {
-                        var character = screenBuffer[y, x];
-                        if (character != ColoredChar.Empty)
+                        if (character.Char == ' ')
                         {
-                            screenBuffer[y, x].ForegroundColor = ConsoleColor.Black;
-                            screenBuffer[y, x].BackgroundColor = ConsoleColor.White;
+                            var newChar = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.White);
+                            screenBuffer[y, x] = newChar;
+                        }
+                        else
+                        {
+                            var newChar = new ColoredChar(character, ConsoleColor.Black, ConsoleColor.White);
+                            screenBuffer[y, x] = newChar;
                         }
                     }
                 }
@@ -171,8 +165,6 @@ public class VimVisualMode : IVimMode
 
     private void SaveLastPosition()
     {
-        _endOffsetX = Instance.Context.OffsetX;
-        _endOffsetY = Instance.Context.OffsetY;
         _endTextX = Instance.GetActualTextX();
         _endTextY = Instance.GetActualTextY();
     }
@@ -184,4 +176,4 @@ public class VimVisualMode : IVimMode
     {
         Instance.Mode = new VimNormalMode(Instance);
     }
-} 
+}

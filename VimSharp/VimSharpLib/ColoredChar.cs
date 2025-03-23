@@ -1,25 +1,28 @@
 namespace VimSharpLib;
 
-public class ColoredChar
+public record ColoredChar
 {
     /// <summary>
     /// 空字符（黑底白字的空格）
     /// </summary>
-    public static readonly ColoredChar Empty = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
-    public static readonly ColoredChar None = new ColoredChar('\0', ConsoleColor.White, ConsoleColor.DarkGray);
-        
+    public static readonly ColoredChar Empty = new(' ', ConsoleColor.White, ConsoleColor.Black, true);
+    public static readonly ColoredChar None = new('\0', ConsoleColor.White, ConsoleColor.DarkGray);
 
     public char Char { get; set; }
     public ConsoleColor ForegroundColor { get; set; }
     public ConsoleColor BackgroundColor { get; set; }
+
+    public bool IsEmpty { get; set; } = false;
     
     public ColoredChar(char c, 
         ConsoleColor foregroundColor = ConsoleColor.White, 
-        ConsoleColor backgroundColor = ConsoleColor.Black)
+        ConsoleColor backgroundColor = ConsoleColor.Black,
+        bool isEmpty = false)
     {
         Char = c;
         ForegroundColor = foregroundColor;
         BackgroundColor = backgroundColor;
+        IsEmpty = isEmpty;
     }
 
     public int ToAnsiForegroundColor(ConsoleColor color)

@@ -102,4 +102,15 @@ public class ConsoleContext
     {
         return cursorY - ViewPort.Y + OffsetY;
     }
+
+    public int ComputeOffset(int viewTextX, int viewTextY)
+    {
+        var offset = 0;
+        for (var i = 0; i < viewTextY; i++)
+        {
+            offset += Texts[i].Width;
+        }
+        offset += viewTextX;
+        return offset;
+    }
 }
