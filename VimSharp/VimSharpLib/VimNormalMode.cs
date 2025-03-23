@@ -42,6 +42,7 @@ public class VimNormalMode : IVimMode
             { new RegexPattern(@"\d+J"), JumpToLine },
             { new CharKeyPattern('D'), HandleDKey },
             { new CharKeyPattern('w'), HandleWKey },
+            { new CharKeyPattern('b'), HandleBKey },
         });
     }
     
@@ -492,6 +493,20 @@ public class VimNormalMode : IVimMode
             for (var i = 0; i < nextX - textX; i++)
             {
                 MoveCursorRight([ConsoleKeyPress.RightArrow]);
+            }
+        }
+    }
+    
+    private void HandleBKey(List<ConsoleKeyInfo> keys)
+    {
+        var currentLine = Instance.GetCurrentLine();
+        var textX = Instance.GetActualTextX();
+        var prevX = currentLine.IndexOfPrevWord(textX);
+        if (prevX != -1)
+        {
+            for (var i = 0; i < textX - prevX; i++)
+            {
+                MoveCursorLeft([ConsoleKeyPress.LeftArrow]);
             }
         }
     }

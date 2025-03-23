@@ -228,67 +228,15 @@ public class ConsoleText
     /// </summary>
     /// <param name="offset">開始搜尋的位置</param>
     /// <returns>前一個單詞的起始位置，如果找不到則返回 -1</returns>
-    public int IndexOfPreviousWord(int offset)
+    public int IndexOfPrevWord(int offset)
     {
-        if (offset < 0 || offset >= Width)
+        var wordsIndexList = Chars.QueryWordsIndexList();
+        var prevWordIndexList = wordsIndexList.Where(x => x < offset)
+            .ToList();
+        if (prevWordIndexList.Count == 0)
         {
             return -1;
         }
-
-        // 跳過當前的空白字符
-        while (offset >= 0 && (Chars[offset].Char == ' ' || Chars[offset].Char == '\0'))
-        {
-            offset--;
-        }
-
-        if (offset < 0)
-        {
-            return -1;
-        }
-
-        // 判斷當前字符的類型
-        var currentChar = Chars[offset].Char;
-        bool isCurrentWord = char.IsLetterOrDigit(currentChar) || currentChar == '_';
-        bool isCurrentPunctuation = char.IsPunctuation(currentChar);
-        bool isCurrentChinese = currentChar > 127;
-
-        // 往前尋找下一個不同類型的字符
-        while (offset >= 0)
-        {
-            var prevChar = Chars[offset].Char;
-            if (prevChar == ' ' || prevChar == '\0')
-            {
-                // 找到空白字符，返回下一個非空白字符的位置
-                while (offset >= 0 && (Chars[offset].Char == ' ' || Chars[offset].Char == '\0'))
-                {
-                    offset--;
-                }
-                return offset >= 0 ? offset : -1;
-            }
-
-            bool isPrevWord = char.IsLetterOrDigit(prevChar) || prevChar == '_';
-            bool isPrevPunctuation = char.IsPunctuation(prevChar);
-            bool isPrevChinese = prevChar > 127;
-
-            // 如果字符類型改變，返回下一個位置（因為我們要的是前一個單詞的起始位置）
-            if ((isCurrentWord && (isPrevPunctuation || isPrevChinese)) ||
-                (isCurrentPunctuation && (isPrevWord || isPrevChinese)) ||
-                (isCurrentChinese && (isPrevWord || isPrevPunctuation)))
-            {
-                return offset + 1;
-            }
-
-            // 如果是中文字元，往前跳兩個位置（因為中文字元佔用兩個位置）
-            if (isPrevChinese)
-            {
-                offset -= 2;
-            }
-            else
-            {
-                offset--;
-            }
-        }
-
-        return -1;
+        return prevWordIndexList.Last();
     }
 }
