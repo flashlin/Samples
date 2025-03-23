@@ -114,6 +114,17 @@ public class ConsoleText
         var subChars = Chars.Skip(offset).ToArray();
         return subChars.ToText();
     }
+    
+    public ColoredChar[] GetChars(int offset, int? length=null)
+    {
+        var subChars = Chars.Skip(offset).ToArray();
+        if (length != null)
+        {
+            length = Math.Min(length.Value, subChars.Length);
+            subChars = subChars.Take(length.Value).ToArray();
+        }
+        return subChars;
+    }
 
     public string Substring(int offset, int length)
     {

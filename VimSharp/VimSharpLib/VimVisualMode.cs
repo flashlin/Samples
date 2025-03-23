@@ -72,6 +72,9 @@ public class VimVisualMode : IVimMode
     /// </summary>
     private void HighlightSelectedText()
     {
+        var startOffset = Instance.Context.ComputeOffset(_startTextX, _startTextY);
+        var endOffset = Instance.Context.ComputeOffset(_endTextX, _endTextY);
+        Instance.Context.GetText(startOffset, endOffset - startOffset);
     }
 
     private void InitializeKeyPatterns()

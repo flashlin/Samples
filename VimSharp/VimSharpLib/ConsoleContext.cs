@@ -1,4 +1,6 @@
-﻿namespace VimSharpLib;
+﻿using System.Text;
+
+namespace VimSharpLib;
 
 public class ConsoleContext
 {
@@ -68,14 +70,32 @@ public class ConsoleContext
         consoleText.SetText(x, text);
     }
 
-    public ConsoleText GetText(int textY)
+    public string GetText(int offset, int length)
     {
-        // 確保 textY 在有效範圍內
-        while (textY >= Texts.Count)
+        var text = new StringBuilder();
+        var isStart = true;
+        var currentLineOffset = 0;
+        var cutLength = length;
+        for (var i = 0; i < Texts.Count; i++)
         {
-            Texts.Add(new ConsoleText());
+            if (cutLength <= 0)
+            {
+                break;
+            }
+            var currentLine = Texts[i];
+            if (isStart && currentLineOffset + currentLine.Width >= offset)
+            {
+                var line = currentLine.GetChars(offset - currentLineOffset, cutLength);
+                text.AppendLine(line.ToText());
+                cutLength -= line.Length + 1;
+                isStart = false;
+                continue;
+            }
+            var line2 = currentLine.GetChars(0, cutLength);
+            text.AppendLine(line2.ToText());
+            cutLength -= line2.Length + 1;
         }
-        return Texts[textY];
+        return text.ToString();
     }
 
     public int GetCursorLeft()
@@ -108,7 +128,7 @@ public class ConsoleContext
         var offset = 0;
         for (var i = 0; i < viewTextY; i++)
         {
-            offset += Texts[i].Width;
+            offset += Texts[i].Width + 1;
         }
         offset += viewTextX;
         return offset;
