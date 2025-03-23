@@ -485,6 +485,29 @@ public class VimNormalMode : IVimMode
 
     private void HandleWKey(List<ConsoleKeyInfo> keys)
     {
+        var success = JumpToNextWord();
+        if (success)
+        {
+            return;
+        }
+        var currentY = Instance.GetActualTextY();
+        if (currentY >= Instance.Context.Texts.Count - 1)
+        {
+            return;
+        }
+        MoveCursorDown([ConsoleKeyPress.DownArrow]);
+        Instance.Context.OffsetX = 0;
+        Instance.Context.CursorX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
+        var currentLine = Instance.GetCurrentLine();
+        var targetX = currentLine.Chars.QueryWordsIndexList().ToList().First();
+        for (var i = 0; i < targetX; i++)
+        {
+            MoveCursorRight([ConsoleKeyPress.RightArrow]);
+        }
+    }
+
+    private bool JumpToNextWord()
+    {
         var currentLine = Instance.GetCurrentLine();
         var textX = Instance.GetActualTextX();
         var nextX = currentLine.IndexOfNextWord(textX);
@@ -494,9 +517,11 @@ public class VimNormalMode : IVimMode
             {
                 MoveCursorRight([ConsoleKeyPress.RightArrow]);
             }
+            return true;
         }
+        return false;
     }
-    
+
     private void HandleBKey(List<ConsoleKeyInfo> keys)
     {
         var currentLine = Instance.GetCurrentLine();
