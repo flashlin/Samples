@@ -71,7 +71,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 向左移動游標
     /// </summary>
-    private void MoveCursorLeft(List<ConsoleKeyInfo> keys)
+    public void MoveCursorLeft(List<ConsoleKeyInfo> keys)
     {
         var lineNumberWidth = Instance.Context.GetLineNumberWidth();
         // 計算最小允許的 X 座標（ViewPort 的左邊界 + 行號區域的寬度）
@@ -107,7 +107,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 向右移動游標
     /// </summary>
-    private void MoveCursorRight(List<ConsoleKeyInfo> keys)
+    public void MoveCursorRight(List<ConsoleKeyInfo> keys)
     {
         var textX = Instance.GetActualTextX();
         var textY = Instance.GetActualTextY();
@@ -148,7 +148,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 向上移動游標
     /// </summary>
-    private void MoveCursorUp(List<ConsoleKeyInfo> keys)
+    public void MoveCursorUp(List<ConsoleKeyInfo> keys)
     {
         Instance.MoveCursorUp();
     }
@@ -156,7 +156,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 向下移動游標
     /// </summary>
-    private void MoveCursorDown(List<ConsoleKeyInfo> keys)
+    public void MoveCursorDown(List<ConsoleKeyInfo> keys)
     {
         Instance.MoveCursorDown();
     }
@@ -234,7 +234,7 @@ public class VimNormalMode : IVimMode
     private void SwitchToVisualMode(List<ConsoleKeyInfo> keys)
     {
         var mode = new VimVisualMode(Instance);
-        mode.SetStartPosition(Instance.Context.CursorX, Instance.Context.CursorY);
+        mode.SetStartPosition();
         Instance.Mode = mode;
     }
     
