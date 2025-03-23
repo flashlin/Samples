@@ -1,3 +1,5 @@
+using TextCopy;
+
 namespace VimSharpLib;
 
 using System.Text;
@@ -65,16 +67,11 @@ public class VimVisualMode : IVimMode
     /// </summary>
     private void CopySelectedText(List<ConsoleKeyInfo> keys)
     {
-    }
-
-    /// <summary>
-    /// 高亮顯示選取的文本
-    /// </summary>
-    private void HighlightSelectedText()
-    {
         var startOffset = Instance.Context.ComputeOffset(_startTextX, _startTextY);
         var endOffset = Instance.Context.ComputeOffset(_endTextX, _endTextY);
-        Instance.Context.GetText(startOffset, endOffset - startOffset);
+        var selectedText = Instance.Context.GetText(startOffset, endOffset - startOffset + 1);
+        ClipboardService.SetText(selectedText);
+        Instance.Mode = new VimNormalMode(Instance);
     }
 
     private void InitializeKeyPatterns()
