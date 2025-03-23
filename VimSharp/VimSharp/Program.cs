@@ -14,7 +14,7 @@ editor1.Context.IsStatusBarVisible = true;
 editor1.Context.SetViewPort(1, 1, 40, 5);
 
 var editor2 = new VimEditor();
-editor2.Context.SetText(0, 0, "Example2: Editor2!");
+editor2.OpenText("Example2: Editor2!");
 editor2.Context.SetViewPort(20, 12, 40, 10);
 
 var vim = new VimSharp();

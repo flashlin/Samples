@@ -60,16 +60,6 @@ public class ConsoleContext
         return Texts.Count.ToString().Length + 1;
     }
 
-    public void SetText(int x, int y, string text)
-    {
-        if (Texts.Count <= y)
-        {
-            Texts.Add(new ConsoleText());
-        }
-        var consoleText = Texts[y];
-        consoleText.SetText(x, text);
-    }
-
     public string GetText(int offset, int length)
     {
         var text = new StringBuilder();
