@@ -60,8 +60,8 @@ public class VimVisualMode : IVimMode
     {
         _startOffsetX = Instance.Context.OffsetX;
         _startOffsetY = Instance.Context.OffsetY;
-        _startTextX = Instance.Context.CursorX;
-        _startTextY = Instance.Context.CursorY;
+        _startTextX = Instance.GetActualTextX();
+        _startTextY = Instance.GetActualTextY();
         SaveLastPosition();
     }
 
@@ -140,12 +140,41 @@ public class VimVisualMode : IVimMode
         SaveLastPosition();
     }
 
+    public void Render(ColoredChar[,] screenBuffer)
+    {
+        var startX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
+        var endX = Instance.Context.ViewPort.X + Instance.Context.ViewPort.Width - 1 - Instance.Context.GetLineNumberWidth();
+        var startY = Instance.Context.ViewPort.Y;
+        var endY = Instance.Context.ViewPort.Y + Instance.Context.ViewPort.Height - 1 - Instance.Context.StatusBarHeight;
+        
+        for(var y = startY; y <= endY; y++)
+        {
+            for(var x = startX; x <= endX; x++)
+            {
+                var viewTextX = Instance.Context.ComputeTextX(x);
+                var viewTextY = Instance.Context.ComputeTextY(y);
+                if (_startTextX <= viewTextX && viewTextX <= _endTextX)
+                {
+                    if (_startTextY <= viewTextY && viewTextY <= _endTextY)
+                    {
+                        var character = screenBuffer[y, x];
+                        if (character != ColoredChar.Empty)
+                        {
+                            screenBuffer[y, x].ForegroundColor = ConsoleColor.Black;
+                            screenBuffer[y, x].BackgroundColor = ConsoleColor.White;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void SaveLastPosition()
     {
         _endOffsetX = Instance.Context.OffsetX;
         _endOffsetY = Instance.Context.OffsetY;
-        _endTextX = Instance.Context.CursorX;
-        _endTextY = Instance.Context.CursorY;
+        _endTextX = Instance.GetActualTextX();
+        _endTextY = Instance.GetActualTextY();
     }
 
     /// <summary>

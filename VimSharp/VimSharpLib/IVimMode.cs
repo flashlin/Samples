@@ -8,4 +8,5 @@ public interface IVimMode
     VimEditor Instance { get; }
     void PressKey(ConsoleKeyInfo keyInfo);
     void AfterRender(StringBuilder outputBuffer);
+    void Render(ColoredChar[,] screenBuffer);
 } 

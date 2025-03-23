@@ -61,7 +61,7 @@ public class VimSharp
             if (_currentEditor != null)
             {
                 _currentEditor.Render(screenBuffer);
-                _currentEditor.RenderToConsole(screenBuffer);
+                _currentEditor.WriteToConsole(screenBuffer);
                 _currentEditor.WaitForInput();
                 
                 // 檢查當前編輯器是否還在運行

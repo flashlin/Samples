@@ -573,4 +573,8 @@ public class VimNormalMode : IVimMode
         // 顯示方塊游標
         outputBuffer.Append("\x1b[2 q");
     }
+
+    public void Render(ColoredChar[,] screenBuffer)
+    {
+    }
 } 

@@ -81,7 +81,8 @@ public class VimEditor
 
         RenderFrame(screenBuffer);
         
-        RenderToConsole(screenBuffer);
+        Mode.Render(screenBuffer);
+        WriteToConsole(screenBuffer);
     }
 
     /// <summary>
@@ -178,7 +179,7 @@ public class VimEditor
         return screenBuffer;
     }
 
-    public void RenderToConsole(ColoredChar[,] screenBuffer)
+    public void WriteToConsole(ColoredChar[,] screenBuffer)
     {
         // 創建一個緩衝區用於收集所有輸出
         var outputBuffer = new StringBuilder();
@@ -764,12 +765,12 @@ public class VimEditor
 
     public int GetActualTextX()
     {
-        return Context.CursorX - Context.ViewPort.X + Context.OffsetX - Context.GetLineNumberWidth();
+        return Context.GetCurrentTextX();
     }
 
     public int GetActualTextY()
     {
-        return Context.CursorY - Context.ViewPort.Y + Context.OffsetY;
+        return Context.GetCurrentTextY();
     }
 
     public void SetActualTextX(int actualTextX)

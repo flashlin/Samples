@@ -32,6 +32,10 @@ public class VimInsertMode : IVimMode
         outputBuffer.Append("\x1b[6 q");
     }
 
+    public void Render(ColoredChar[,] screenBuffer)
+    {
+    }
+
     /// <summary>
     /// 初始化按鍵處理邏輯
     /// </summary>

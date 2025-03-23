@@ -28,7 +28,9 @@ public class ConsoleContext
     /// 是否顯示相對行號
     /// </summary>
     public bool IsLineNumberVisible { get; set; } = false;
-    
+
+    public int StatusBarHeight => IsStatusBarVisible ? 1 : 0;
+
     /// <summary>
     /// 設置視窗的矩形區域並調整游標位置
     /// </summary>
@@ -79,5 +81,25 @@ public class ConsoleContext
     public int GetCursorLeft()
     {
         return ViewPort.X + GetLineNumberWidth();
+    }
+
+    public int GetCurrentTextX()
+    {
+        return ComputeTextX(CursorX);
+    }
+
+    public int ComputeTextX(int cursorX)
+    {
+        return cursorX - ViewPort.X + OffsetX - GetLineNumberWidth();
+    }
+
+    public int GetCurrentTextY()
+    {
+        return ComputeTextY(CursorY);
+    }
+
+    public int ComputeTextY(int cursorY)
+    {
+        return cursorY - ViewPort.Y + OffsetY;
     }
 }
