@@ -161,66 +161,14 @@ public class ConsoleText
     /// <returns>下一個單詞的起始位置，如果找不到則返回 -1</returns>
     public int IndexOfNextWord(int offset)
     {
-        if (offset < 0 || offset >= Width)
+        var wordsIndexList = Chars.QueryWordsIndexList();
+        var nextWordIndexList = wordsIndexList.Where(x => x > offset)
+            .ToList();
+        if (nextWordIndexList.Count == 0)
         {
             return -1;
         }
-
-        // 跳過當前的空白字符
-        while (offset < Width && (Chars[offset].Char == ' ' || Chars[offset].Char == '\0'))
-        {
-            offset++;
-        }
-
-        if (offset >= Width)
-        {
-            return -1;
-        }
-
-        // 判斷當前字符的類型
-        var currentChar = Chars[offset].Char;
-        bool isCurrentWord = char.IsLetterOrDigit(currentChar) || currentChar == '_';
-        bool isCurrentPunctuation = char.IsPunctuation(currentChar);
-        bool isCurrentChinese = currentChar > 127;
-
-        // 尋找下一個不同類型的字符
-        while (offset < Width)
-        {
-            var nextChar = Chars[offset].Char;
-            if (nextChar == ' ' || nextChar == '\0')
-            {
-                // 找到空白字符，返回下一個非空白字符的位置
-                while (offset < Width && (Chars[offset].Char == ' ' || Chars[offset].Char == '\0'))
-                {
-                    offset++;
-                }
-                return offset < Width ? offset : -1;
-            }
-
-            bool isNextWord = char.IsLetterOrDigit(nextChar) || nextChar == '_';
-            bool isNextPunctuation = char.IsPunctuation(nextChar);
-            bool isNextChinese = nextChar > 127;
-
-            // 如果字符類型改變，返回當前位置
-            if ((isCurrentWord && (isNextPunctuation || isNextChinese)) ||
-                (isCurrentPunctuation && (isNextWord || isNextChinese)) ||
-                (isCurrentChinese && (isNextWord || isNextPunctuation)))
-            {
-                return offset;
-            }
-
-            // 如果是中文字元，跳過下一個位置（因為中文字元佔用兩個位置）
-            if (isNextChinese)
-            {
-                offset += 2;
-            }
-            else
-            {
-                offset++;
-            }
-        }
-
-        return -1;
+        return nextWordIndexList.First();
     }
 
     /// <summary>
