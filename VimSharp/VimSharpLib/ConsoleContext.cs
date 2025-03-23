@@ -75,4 +75,9 @@ public class ConsoleContext
         }
         return Texts[textY];
     }
+
+    public int GetCursorLeft()
+    {
+        return ViewPort.X + GetLineNumberWidth();
+    }
 }

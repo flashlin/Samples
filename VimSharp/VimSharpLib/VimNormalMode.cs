@@ -497,7 +497,7 @@ public class VimNormalMode : IVimMode
         }
         MoveCursorDown([ConsoleKeyPress.DownArrow]);
         Instance.Context.OffsetX = 0;
-        Instance.Context.CursorX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
+        Instance.Context.CursorX = Instance.Context.GetCursorLeft();
         var currentLine = Instance.GetCurrentLine();
         var targetX = currentLine.Chars.QueryWordsIndexList().ToList().First();
         for (var i = 0; i < targetX; i++)
