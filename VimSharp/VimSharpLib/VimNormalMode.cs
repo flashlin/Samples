@@ -391,7 +391,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 將游標移動到當前行的最後一個字符上
     /// </summary>
-    private void MoveCursorToEndOfLine(List<ConsoleKeyInfo> keys)
+    public void MoveCursorToEndOfLine(List<ConsoleKeyInfo> keys)
     {
         // 獲取當前行
         var textY = Instance.GetActualTextY();

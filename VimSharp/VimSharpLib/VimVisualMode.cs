@@ -83,8 +83,15 @@ public class VimVisualMode : IVimMode
             { new ConsoleKeyPattern(ConsoleKey.UpArrow), MoveCursorUp },
             { new ConsoleKeyPattern(ConsoleKey.DownArrow), MoveCursorDown },
             { new ConsoleKeyPattern(ConsoleKey.Y), CopySelectedText },
-            { new ConsoleKeyPattern(ConsoleKey.Escape), SwitchToVisualMode }
+            { new ConsoleKeyPattern(ConsoleKey.Escape), SwitchToVisualMode },
+            { new CharKeyPattern('$'), MoveCursorToEndOfLine },
         });
+    }
+
+    private void MoveCursorToEndOfLine(List<ConsoleKeyInfo> keys)
+    {
+        _normalMode.MoveCursorToEndOfLine(keys);
+        SaveLastPosition();
     }
 
     /// <summary>
