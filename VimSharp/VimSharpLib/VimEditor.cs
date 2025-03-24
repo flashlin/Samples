@@ -35,7 +35,7 @@ public class VimEditor
     public void OpenText(string text)
     {
         Context.Texts.Clear();
-        string[] lines = text.Split(["\r\n", "\n"], StringSplitOptions.None);
+        var lines = SplitText(text);
         foreach (var line in lines)
         {
             var consoleText = new ConsoleText();
@@ -43,6 +43,29 @@ public class VimEditor
             Context.Texts.Add(consoleText);
         }
         Init();
+    }
+
+    private IEnumerable<string> SplitText(string text)
+    {
+        int start = 0;
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (i + 1 < text.Length && text[i] == '\r' && text[i + 1] == '\n')
+            {
+                yield return text[start..i] + "\n";
+                start = i + 2;
+                i++;
+            }
+            else if (text[i] == '\n')
+            {
+                yield return text[start..i] + "\n";
+                start = i + 1;
+            }
+        }
+        if (start < text.Length)
+        {
+            yield return text[start..];
+        }
     }
 
     public void Init()
@@ -299,7 +322,14 @@ public class VimEditor
                 {
                     // 直接使用文本中的字符，不做修改
                     var c = text.Chars[textPos];
-                    screenBuffer[y, x + i] = c;
+                    if (c.Char != '\n')
+                    {
+                        screenBuffer[y, x + i] = c;
+                    }
+                    else
+                    {
+                        screenBuffer[y, x + i] = ColoredChar.Empty; // 使用空字符填充
+                    }
                 }
             }
         }

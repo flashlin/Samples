@@ -39,12 +39,12 @@ public class ConsoleText
     /// <param name="text">文本內容</param>
     public void SetText(int x, string text)
     {
-        int width = x + text.GetStringDisplayWidth();
+        var width = x + text.GetStringDisplayWidth();
         SetWidth(width);
-        int pos = x;
-        for (var i = 0; i < text.Length; i++)
+        var pos = x;
+        foreach (var t in text)
         {
-            var coloredChar = new ColoredChar(text[i]);
+            var coloredChar = new ColoredChar(t);
             Chars[pos] = coloredChar;
             if (coloredChar.Char > 127)
             {
