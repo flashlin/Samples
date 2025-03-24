@@ -110,8 +110,14 @@ public class VimNormalMode : IVimMode
     public void MoveCursorRight(List<ConsoleKeyInfo> keys)
     {
         var textX = Instance.GetActualTextX();
-        var textY = Instance.GetActualTextY();
         var currentLine = Instance.GetCurrentLine();
+        
+        // 檢查是否已到達行尾
+        if (textX + 1 >= currentLine.Width - 1 && currentLine.Chars[textX + 1].Char == '\n')
+        {
+            // 當下一個是 '\n' 不再向右移動
+            return;
+        }
         
         // 檢查是否已到達行尾
         if (textX >= currentLine.Width - 1)
@@ -134,7 +140,7 @@ public class VimNormalMode : IVimMode
             }
             
             // 更新游標位置
-            Instance.Context.CursorX = Instance.Context.CursorX + (newTextX - textX);
+            Instance.Context.CursorX += (newTextX - textX);
             
             // 處理水平滾動
             if (Instance.Context.CursorX > Instance.Context.ViewPort.Right)
