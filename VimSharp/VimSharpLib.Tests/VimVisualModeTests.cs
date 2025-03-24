@@ -83,6 +83,8 @@ public class VimVisualModeTests
 
         // 按下 ^ 按鍵
         SetReadKey(ConsoleKeyPress.Caret);
+        Assert.Equal(1, _editor.Context.CursorX); // "Vim" 的 "v" 位置
+        Assert.Equal(2, _editor.Context.CursorY); // 應該在第二行
 
         // 按下向右按鍵兩次
         SetReadKey(ConsoleKeyPress.RightArrow);
