@@ -100,7 +100,7 @@ public class ConsoleText
         for (var i = Width - 1; i >= 0; i--)
         {
             var currentChar = Chars[i].Char;
-            if (currentChar != ' ' && currentChar != '\0')
+            if (currentChar != ' ' && currentChar != '\0' && currentChar != '\n')
             {
                 lastCharIndex = i;
                 break;
