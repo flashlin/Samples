@@ -83,7 +83,7 @@ public class ConsoleContext
             }
             var line2 = currentLine.GetChars(0, cutLength);
             text.Append(line2.ToText());
-            cutLength -= line2.Length + 1;
+            cutLength -= line2.Length;
         }
         return text.ToString();
     }
@@ -118,7 +118,7 @@ public class ConsoleContext
         var offset = 0;
         for (var i = 0; i < viewTextY; i++)
         {
-            offset += Texts[i].Width + 1;
+            offset += Texts[i].Width;
         }
         offset += viewTextX;
         return offset;
