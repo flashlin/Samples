@@ -76,13 +76,13 @@ public class ConsoleContext
             if (isStart && currentLineOffset + currentLine.Width >= offset)
             {
                 var line = currentLine.GetChars(offset - currentLineOffset, cutLength);
-                text.AppendLine(line.ToText());
-                cutLength -= line.Length + 1;
+                text.Append(line.ToText());
+                cutLength -= line.Length;
                 isStart = false;
                 continue;
             }
             var line2 = currentLine.GetChars(0, cutLength);
-            text.AppendLine(line2.ToText());
+            text.Append(line2.ToText());
             cutLength -= line2.Length + 1;
         }
         return text.ToString();
