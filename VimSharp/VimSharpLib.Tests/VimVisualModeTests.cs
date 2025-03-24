@@ -21,7 +21,7 @@ public class VimVisualModeTests
     }
 
     [Fact]
-    public void Test1()
+    public void ShouldCopyWordToEndOfLineInVisualMode()
     {
         // Arrange
         // 設置 ViewPort = 1, 1, 40, 5
