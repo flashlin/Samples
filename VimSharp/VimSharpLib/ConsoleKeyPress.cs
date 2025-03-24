@@ -17,4 +17,7 @@ public static class ConsoleKeyPress
     public static ConsoleKeyInfo One = new('1', ConsoleKey.D1, false, false, false);
     public static ConsoleKeyInfo Two = new('2', ConsoleKey.D2, false, false, false);
     public static ConsoleKeyInfo Three = new('3', ConsoleKey.D3, false, false, false);
+    public static ConsoleKeyInfo w = new('w', ConsoleKey.W, false, false, false);
+    public static ConsoleKeyInfo v = new('v', ConsoleKey.V, false, false, false);
+    public static ConsoleKeyInfo y = new('y', ConsoleKey.Y, false, false, false);
 }
