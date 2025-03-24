@@ -58,6 +58,51 @@ public class VimVisualModeTests
         Assert.Equal("World", ClipboardService.GetText());
     }
 
+    [Fact]
+    public void ShouldCopyAcrossLinesInVisualMode()
+    {
+        // Arrange
+        // 設置 ViewPort = 1, 1, 40, 5
+        _editor.Context.SetViewPort(1, 1, 40, 5);
+
+        // 加載文本 "Hello World\nVim is a Editor"
+        _editor.OpenText("Hello World\nVim is a Editor");
+        
+        // 確保編輯器處於正常模式
+        _editor.Mode = new VimNormalMode(_editor);
+
+        // Act
+        // 按下 w 按鍵
+        SetReadKey(ConsoleKeyPress.w);
+        
+        // 按下 v 按鍵
+        SetReadKey(ConsoleKeyPress.v);
+
+        // 按下向下按鍵
+        SetReadKey(ConsoleKeyPress.DownArrow);
+
+        // 按下 ^ 按鍵
+        SetReadKey(ConsoleKeyPress.Caret);
+
+        // 按下向右按鍵兩次
+        SetReadKey(ConsoleKeyPress.RightArrow);
+        SetReadKey(ConsoleKeyPress.RightArrow);
+
+        // 按下 y 按鍵
+        SetReadKey(ConsoleKeyPress.y);
+
+        // Assert
+        // 驗證游標位置
+        Assert.Equal(3, _editor.Context.CursorX); // "Vim" 的 "m" 位置
+        Assert.Equal(2, _editor.Context.CursorY); // 應該在第二行
+
+        // 驗證當前模式是正常模式
+        Assert.IsType<VimNormalMode>(_editor.Mode);
+
+        // 驗證剪貼簿內容
+        Assert.Equal("World\nVim", ClipboardService.GetText());
+    }
+
     private void SetReadKey(ConsoleKeyInfo keyInfo)
     {
         _mockConsole.ReadKey(Arg.Any<bool>()).Returns(keyInfo);

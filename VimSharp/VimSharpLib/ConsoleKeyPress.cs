@@ -20,4 +20,5 @@ public static class ConsoleKeyPress
     public static ConsoleKeyInfo w = new('w', ConsoleKey.W, false, false, false);
     public static ConsoleKeyInfo v = new('v', ConsoleKey.V, false, false, false);
     public static ConsoleKeyInfo y = new('y', ConsoleKey.Y, false, false, false);
+    public static ConsoleKeyInfo Caret = new('^', ConsoleKey.D6, true, false, false);
 }
