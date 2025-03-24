@@ -85,7 +85,14 @@ public class VimVisualMode : IVimMode
             { new ConsoleKeyPattern(ConsoleKey.Y), CopySelectedText },
             { new ConsoleKeyPattern(ConsoleKey.Escape), SwitchToVisualMode },
             { new CharKeyPattern('$'), MoveCursorToEndOfLine },
+            { new CharKeyPattern('^'), MoveCursorToStartOfLine },
         });
+    }
+
+    private void MoveCursorToStartOfLine(List<ConsoleKeyInfo> keys)
+    {
+        _normalMode.MoveCursorToStartOfLine(keys);
+        SaveLastPosition();
     }
 
     private void MoveCursorToEndOfLine(List<ConsoleKeyInfo> keys)

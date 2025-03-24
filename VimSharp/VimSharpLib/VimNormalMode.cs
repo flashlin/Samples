@@ -426,7 +426,7 @@ public class VimNormalMode : IVimMode
     /// <summary>
     /// 將游標移動到當前行的第一個字符上
     /// </summary>
-    private void MoveCursorToStartOfLine(List<ConsoleKeyInfo> keys)
+    public void MoveCursorToStartOfLine(List<ConsoleKeyInfo> keys)
     {
         var currentLine = Instance.Context.Texts[Instance.GetActualTextY()];
         var firstChar = currentLine.Chars.FirstOrDefault(c => c.Char != '\0' && c.Char != ' ');
