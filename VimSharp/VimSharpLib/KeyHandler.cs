@@ -34,7 +34,7 @@ public class KeyHandler
 
     public void WaitForInput()
     {
-        var keyInfo = _consoleDevice.ReadKey(intercept: true);
+        var keyInfo = _consoleDevice.ReadKey(intercept: false);
         _keyBuffer.Add(keyInfo);
         HandleInputKey();
     }
