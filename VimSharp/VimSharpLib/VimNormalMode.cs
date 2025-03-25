@@ -49,7 +49,7 @@ public class VimNormalMode : IVimMode
 
     private void HandleFKey(List<ConsoleKeyInfo> keys)
     {
-        Instance.Mode = new VimFindMode(Instance);
+        Instance.Mode = new VimFindMode(Instance, this);
     }
     
     /// <summary>

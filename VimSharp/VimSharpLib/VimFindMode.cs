@@ -12,9 +12,11 @@ public class VimFindMode : IVimMode
     private List<char> _currentLabel = new();
     private List<char> _keyBuffer = new();
     private List<MatchLabel> _matches = new();
+    private IVimMode _vimHomeMode;
 
-    public VimFindMode(VimEditor instance)
+    public VimFindMode(VimEditor instance, IVimMode vimHomeMode)
     {
+        _vimHomeMode = vimHomeMode;
         Instance = instance;
         _keyHandler = new KeyHandler(instance.Console);
         InitializeKeyHandler();
@@ -33,7 +35,7 @@ public class VimFindMode : IVimMode
 
     private void HandleEscapeKey(List<ConsoleKeyInfo> keys)
     {
-        Instance.Mode = new VimNormalMode(Instance);
+        Instance.Mode = _vimHomeMode;
     }
 
     private void HandleAnyKeyInput(List<ConsoleKeyInfo> keys)
