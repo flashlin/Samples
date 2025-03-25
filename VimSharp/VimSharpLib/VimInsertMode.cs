@@ -231,12 +231,15 @@ public class VimInsertMode : IVimMode
             if (Instance.Context.OffsetX < currentLine.Width - Instance.Context.ViewPort.Width)
             {
                 Instance.Context.OffsetX++;
+                CheckCursorX();
                 return;
             }
+            CheckCursorX();
             return; // 已經到達最右邊，不能再移動
         }
         // 正常情況下向右移動游標
         Instance.Context.CursorX++;
+        CheckCursorX();
     }
     
     /// <summary>
@@ -249,11 +252,14 @@ public class VimInsertMode : IVimMode
             if (Instance.Context.OffsetY > 0)
             {
                 Instance.Context.OffsetY--;
+                CheckCursorX();
                 return;
             }
+            CheckCursorX();
             return;
         }
         Instance.Context.CursorY--;
+        CheckCursorX();
     }
     
     /// <summary>
@@ -283,6 +289,7 @@ public class VimInsertMode : IVimMode
         if (textX >= currentLine.Width)
         {
             new VimNormalMode(Instance).MoveCursorToEndOfLine([]);
+            Instance.Context.CursorX += 1;
         }
     }
 
