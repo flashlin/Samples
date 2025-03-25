@@ -11,6 +11,7 @@ public class VimFindMode : IVimMode
     private int _currentLabelCount = 0;
     private List<char> _currentLabel = new();
     private List<char> _keyBuffer = new();
+    private List<MatchLabel> _matches = new();
 
     public VimFindMode(VimEditor instance)
     {
@@ -36,6 +37,8 @@ public class VimFindMode : IVimMode
             _findChar = keys[0].KeyChar;
             return;
         }
+
+        
         _keyBuffer.Add(keys[0].KeyChar);
     }
 
@@ -70,6 +73,7 @@ public class VimFindMode : IVimMode
 
         _currentLabelCount = 0;
         _currentLabel = ['A'];
+        _matches.Clear(); // 清空之前的匹配記錄
         for (int y = startY; y <= endY; y++)
         {
             for (int x = startX; x <= endX; x++)
@@ -99,6 +103,7 @@ public class VimFindMode : IVimMode
             {
                 screenBuffer[y, x - _labelLength + i] = new ColoredChar(_currentLabel[i], ConsoleColor.DarkBlue, ConsoleColor.White);
             }
+            _matches.Add(new MatchLabel(x, y, new string(_currentLabel.ToArray())));
         }
         // 如果左側沒有空間但右側有空間，放在右側
         else if (hasRightSpace)
@@ -107,6 +112,7 @@ public class VimFindMode : IVimMode
             {
                 screenBuffer[y, x + i] = new ColoredChar(_currentLabel[i], ConsoleColor.DarkBlue, ConsoleColor.White);
             }
+            _matches.Add(new MatchLabel(x, y, new string(_currentLabel.ToArray())));
         }
         // 如果兩側都沒有空間，不顯示標籤
         else
