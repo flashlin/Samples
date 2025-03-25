@@ -85,13 +85,33 @@ public class VimFindMode : IVimMode
 
     private void PlaceLabel(ColoredChar[,] screenBuffer, int y, int x)
     {
-        // 確保有足夠的空間放置標籤
-        if (x - _labelLength < 0) return;
+        int screenWidth = Instance.Context.ViewPort.Right - Instance.Context.ViewPort.X - Instance.Context.GetLineNumberWidth();
+        
+        // 檢查左側是否有足夠空間
+        bool hasLeftSpace = x - _labelLength >= Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
+        // 檢查右側是否有足夠空間
+        bool hasRightSpace = x + _labelLength <= screenWidth;
 
-        // 放置當前標籤
-        for (int i = 0; i < _labelLength; i++)
+        // 如果左側有空間，優先放在左側
+        if (hasLeftSpace)
         {
-            screenBuffer[y, x - _labelLength + i] = new ColoredChar(_currentLabel[i], ConsoleColor.DarkBlue, ConsoleColor.White);
+            for (int i = 0; i < _labelLength; i++)
+            {
+                screenBuffer[y, x - _labelLength + i] = new ColoredChar(_currentLabel[i], ConsoleColor.DarkBlue, ConsoleColor.White);
+            }
+        }
+        // 如果左側沒有空間但右側有空間，放在右側
+        else if (hasRightSpace)
+        {
+            for (int i = 0; i < _labelLength; i++)
+            {
+                screenBuffer[y, x + i] = new ColoredChar(_currentLabel[i], ConsoleColor.DarkBlue, ConsoleColor.White);
+            }
+        }
+        // 如果兩側都沒有空間，不顯示標籤
+        else
+        {
+            return;
         }
 
         // 更新標籤
