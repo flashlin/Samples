@@ -53,6 +53,11 @@ public class VimFindMode : IVimMode
         if (_findChar == null)
         {
             _findChar = keys[0].KeyChar;
+            if (!IsExistsLabel(_findChar.Value))
+            {
+                _findChar = null;
+                CancelJumpTo();
+            }
             return;
         }
 
@@ -123,11 +128,6 @@ public class VimFindMode : IVimMode
             UpdateScreenMetrics();
         }
 
-        int startX = Instance.Context.ViewPort.X + _lineNumberWidth;
-        int startY = Instance.Context.ViewPort.Y;
-        int endY = Instance.Context.ViewPort.Bottom - Instance.Context.StatusBarHeight;
-        int endX = Instance.Context.ViewPort.Right;
-
         // 只在第一次渲染時初始化
         if (_matches.Count == 0)
         {
@@ -136,9 +136,13 @@ public class VimFindMode : IVimMode
             _matches.Clear();
         }
 
-        for (int y = startY; y <= endY; y++)
+        var startX = Instance.Context.ViewPort.X + _lineNumberWidth;
+        var startY = Instance.Context.ViewPort.Y;
+        var endY = Instance.Context.ViewPort.Bottom - Instance.Context.StatusBarHeight;
+        var endX = Instance.Context.ViewPort.Right;
+        for (var y = startY; y <= endY; y++)
         {
-            for (int x = startX; x <= endX; x++)
+            for (var x = startX; x <= endX; x++)
             {
                 if (screenBuffer[y, x].Char == _findChar)
                 {
@@ -146,6 +150,35 @@ public class VimFindMode : IVimMode
                 }
             }
         }
+    }
+
+    private bool IsExistsLabel(char findChar)
+    {
+        var startX = Instance.Context.ViewPort.X + _lineNumberWidth;
+        var startY = Instance.Context.ViewPort.Y;
+        var endY = Instance.Context.ViewPort.Bottom - Instance.Context.StatusBarHeight;
+        var endX = Instance.Context.ViewPort.Right;
+        for (var y = startY; y <= endY; y++)
+        {
+            var textY = Instance.Context.ComputeTextY(y);
+            for (var x = startX; x <= endX; x++)
+            {
+                var textX = Instance.Context.ComputeTextX(x);
+                if (textY < Instance.Context.Texts.Count)
+                {
+                    var line = Instance.Context.Texts[textY];
+                    if (textX < line.Chars.Length)
+                    {
+                        var character = line.Chars[textX];
+                        if (character.Char == findChar)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private void PlaceLabel(ColoredChar[,] screenBuffer, int y, int x)
