@@ -86,7 +86,21 @@ public class VimVisualMode : IVimMode
             { new ConsoleKeyPattern(ConsoleKey.Escape), SwitchToVisualMode },
             { new CharKeyPattern('$'), MoveCursorToEndOfLine },
             { new CharKeyPattern('^'), MoveCursorToStartOfLine },
+            { new CharKeyPattern('f'), HandleFKey },
         });
+    }
+
+    private void HandleFKey(List<ConsoleKeyInfo> obj)
+    {
+        var vimFindMode = new VimFindMode(Instance, this);
+        vimFindMode.SetBackHandler((success) =>
+        {
+            if (success)
+            {
+                SaveLastPosition();
+            }
+        });
+        Instance.Mode = vimFindMode;
     }
 
     private void MoveCursorToStartOfLine(List<ConsoleKeyInfo> keys)

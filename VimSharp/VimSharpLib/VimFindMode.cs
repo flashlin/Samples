@@ -13,6 +13,7 @@ public class VimFindMode : IVimMode
     private List<char> _keyBuffer = new();
     private List<MatchLabel> _matches = new();
     private IVimMode _vimHomeMode;
+    private Action<bool>? _backHandler;
 
     public VimFindMode(VimEditor instance, IVimMode vimHomeMode)
     {
@@ -36,6 +37,7 @@ public class VimFindMode : IVimMode
     private void HandleEscapeKey(List<ConsoleKeyInfo> keys)
     {
         Instance.Mode = _vimHomeMode;
+        _backHandler?.Invoke(false);
     }
 
     private void HandleAnyKeyInput(List<ConsoleKeyInfo> keys)
@@ -56,7 +58,8 @@ public class VimFindMode : IVimMode
             // 設定游標位置到匹配的位置
             Instance.Context.CursorX = match.X;
             Instance.Context.CursorY = match.Y;
-            Instance.Mode = new VimNormalMode(Instance);
+            Instance.Mode = _vimHomeMode;
+            _backHandler?.Invoke(true);
             return;
         }
         
@@ -177,5 +180,10 @@ public class VimFindMode : IVimMode
             remainder /= 26;
             _currentLabel[i] = (char)('A' + value);
         }
+    }
+
+    public void SetBackHandler(Action<bool> backHandler)
+    {
+        _backHandler = backHandler;
     }
 } 
