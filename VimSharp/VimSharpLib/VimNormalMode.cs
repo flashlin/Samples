@@ -43,7 +43,13 @@ public class VimNormalMode : IVimMode
             { new CharKeyPattern('D'), HandleDKey },
             { new CharKeyPattern('w'), HandleWKey },
             { new CharKeyPattern('b'), HandleBKey },
+            { new CharKeyPattern('f'), HandleFKey },
         });
+    }
+
+    private void HandleFKey(List<ConsoleKeyInfo> keys)
+    {
+        Instance.Mode = new VimFindMode(Instance);
     }
     
     /// <summary>
