@@ -48,7 +48,7 @@ public class VimFindMode : IVimMode
 
         // 檢查是否找到匹配的標籤
         var match = _matches.FirstOrDefault(m => 
-            m.Label.SequenceEqual(_keyBuffer));
+            m.Label.ToLower().SequenceEqual(_keyBuffer));
         if (match != null)
         {
             // 設定游標位置到匹配的位置
