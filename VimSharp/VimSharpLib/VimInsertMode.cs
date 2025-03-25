@@ -261,19 +261,31 @@ public class VimInsertMode : IVimMode
     /// </summary>
     private void MoveCursorDown(List<ConsoleKeyInfo> keys)
     {
-        var statusHeight = Instance.Context.IsStatusBarVisible ? 1 : 0;
-        if (Instance.Context.CursorY >= Instance.Context.ViewPort.Bottom - statusHeight)
+        if (Instance.Context.CursorY >= Instance.Context.ViewPort.Bottom - Instance.Context.StatusBarHeight)
         {
             if (Instance.Context.OffsetY < Instance.Context.Texts.Count - Instance.Context.ViewPort.Height)
             {
                 Instance.Context.OffsetY++;
+                CheckCursorX();
                 return;
             }
+            CheckCursorX();
             return;
         }
         Instance.Context.CursorY++;
+        CheckCursorX();
     }
-    
+
+    private void CheckCursorX()
+    {
+        var textX = Instance.GetActualTextX();
+        var currentLine = Instance.GetCurrentLine();
+        if (textX >= currentLine.Width)
+        {
+            new VimNormalMode(Instance).MoveCursorToEndOfLine([]);
+        }
+    }
+
     /// <summary>
     /// 處理 Enter 鍵
     /// </summary>
