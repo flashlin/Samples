@@ -38,8 +38,28 @@ public class VimFindMode : IVimMode
             return;
         }
 
-        
         _keyBuffer.Add(keys[0].KeyChar);
+
+        // 檢查是否找到匹配的標籤
+        var match = _matches.FirstOrDefault(m => 
+            m.Label.SequenceEqual(_keyBuffer));
+        if (match != null)
+        {
+            // 設定游標位置到匹配的位置
+            Instance.Context.CursorX = match.X;
+            Instance.Context.CursorY = match.Y;
+            Instance.Mode = new VimNormalMode(Instance);
+            return;
+        }
+        
+        // 如果標籤長度大於按鍵緩衝區長度，則繼續等待輸入
+        if (_labelLength > _keyBuffer.Count)
+        {
+            return;
+        }
+        
+        // 清空按鍵緩衝區
+        _keyBuffer.Clear();
     }
 
     public void PressKey(ConsoleKeyInfo keyInfo)
