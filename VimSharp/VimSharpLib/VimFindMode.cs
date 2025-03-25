@@ -112,7 +112,10 @@ public class VimFindMode : IVimMode
 
     public void Render(ColoredChar[,] screenBuffer)
     {
-        if (_findChar == null) return;
+        if (_findChar == null)
+        {
+            return;
+        }
 
         // 只在需要時更新螢幕度量
         if (_screenWidth != Instance.Context.ViewPort.Right - Instance.Context.ViewPort.X - Instance.Context.GetLineNumberWidth())
