@@ -45,8 +45,7 @@ public class VimFindMode : IVimMode
 
     private void HandleEscapeKey(List<ConsoleKeyInfo> keys)
     {
-        Instance.Mode = _vimHomeMode;
-        _backHandler?.Invoke(false);
+        CancelJumpTo();
     }
 
     private void HandleAnyKeyInput(List<ConsoleKeyInfo> keys)
@@ -74,10 +73,7 @@ public class VimFindMode : IVimMode
         var matchCount = _matches.Count(m => m.Key.Length == _keyBuffer.Count);
         if (matchCount == 0)
         {
-            _findChar = null;
-            _keyBuffer.Clear();
-            Instance.Mode = _vimHomeMode;
-            _backHandler?.Invoke(false);
+            CancelJumpTo();
             return;
         }
         
@@ -86,6 +82,11 @@ public class VimFindMode : IVimMode
             return;
         }
 
+        CancelJumpTo();
+    }
+
+    private void CancelJumpTo()
+    {
         _findChar = null;
         _keyBuffer.Clear();
         Instance.Mode = _vimHomeMode;
