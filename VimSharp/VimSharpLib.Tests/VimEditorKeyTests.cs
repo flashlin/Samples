@@ -595,9 +595,24 @@ namespace VimSharpLib.Tests
             
             // 呼叫正常模式的 Render 方法
             _editor.Mode.Render(screenBuffer);
-            
+
             // 按下 'f' 進入尋找模式
             SetReadKey(ConsoleKeyPress.f);
+
+            // 應該什麼也不改變, 驗證第一行的內容
+            Assert.Equal('H', screenBuffer[1, 1].Char);
+            Assert.Equal('e', screenBuffer[1, 2].Char);
+            Assert.Equal('l', screenBuffer[1, 3].Char);
+            Assert.Equal('l', screenBuffer[1, 4].Char);
+            Assert.Equal('o', screenBuffer[1, 5].Char);
+            Assert.Equal(',', screenBuffer[1, 6].Char);
+            Assert.Equal(' ', screenBuffer[1, 7].Char);
+            Assert.Equal('W', screenBuffer[1, 8].Char);
+            Assert.Equal('o', screenBuffer[1, 9].Char);
+            Assert.Equal('r', screenBuffer[1, 10].Char);
+            Assert.Equal('l', screenBuffer[1, 11].Char);
+            Assert.Equal('d', screenBuffer[1, 12].Char);
+            Assert.Equal('!', screenBuffer[1, 13].Char);
             
             // 按下 '!' 尋找驚嘆號
             SetReadKey(ConsoleKeyPress.ExclamationMark);
