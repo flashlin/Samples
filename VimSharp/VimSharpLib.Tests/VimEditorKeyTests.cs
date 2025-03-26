@@ -593,10 +593,6 @@ namespace VimSharpLib.Tests
             // 建立 screenBuffer
             var screenBuffer = new ColoredChar[25, 80];
             
-            // 確保編輯器處於正常模式
-            var normalMode = new VimNormalMode(_editor);
-            _editor.Mode = normalMode;
-            
             // 按下 'f' 進入尋找模式
             SetReadKey(ConsoleKeyPress.f);
             
