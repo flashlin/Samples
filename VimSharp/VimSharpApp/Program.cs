@@ -17,7 +17,6 @@ webBuilder.WebHost.UseUrls("http://localhost:8080");
 var webApp = webBuilder.Build();
 
 // 註冊 API 端點
-webApp.MapWelcomeEndpoints();
 JobApiHandler.MapEndpoints(webApp);
 
 // 在背景執行 Web API
