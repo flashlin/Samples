@@ -276,7 +276,7 @@ public class VimEditor
     /// <summary>
     /// 將 screenBuffer 轉換為 ANSI 控制碼並輸出到 outputBuffer
     /// </summary>
-    private void RenderBufferToConsole(ColoredChar[,] screenBuffer, StringBuilder outputBuffer)
+    public void RenderBufferToConsole(ColoredChar[,] screenBuffer, StringBuilder outputBuffer)
     {
         // 輸出整個 screenBuffer 的內容
         for (int y = 0; y < screenBuffer.GetLength(0); y++)

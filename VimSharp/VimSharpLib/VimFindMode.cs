@@ -184,9 +184,9 @@ public class VimFindMode : IVimMode
     private void PlaceLabel(ColoredChar[,] screenBuffer, int y, int x)
     {
         // 檢查左側是否有足夠空間
-        bool hasLeftSpace = x - _labelLength >= Instance.Context.ViewPort.X + _lineNumberWidth;
+        var hasLeftSpace = x - _labelLength >= Instance.Context.ViewPort.X + _lineNumberWidth;
         // 檢查右側是否有足夠空間
-        bool hasRightSpace = x + _labelLength <= _screenWidth;
+        var hasRightSpace = x + _labelLength <= _screenWidth;
 
         // 如果左側有空間，優先放在左側
         if (hasLeftSpace)

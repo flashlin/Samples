@@ -2,6 +2,7 @@ using Xunit;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace VimSharpLib.Tests
 {
@@ -596,6 +597,9 @@ namespace VimSharpLib.Tests
             // 呼叫正常模式的 Render 方法
             _editor.Render(screenBuffer);
 
+            var normalOutput = new StringBuilder();
+            _editor.RenderBufferToConsole(screenBuffer, normalOutput);
+
             // 按下 'f' 進入尋找模式
             SetReadKey(ConsoleKeyPress.f);
 
@@ -620,6 +624,11 @@ namespace VimSharpLib.Tests
             // Act
             // 呼叫 Render 方法
             _editor.Render(screenBuffer);
+            
+            var findOutput = new StringBuilder();
+            _editor.RenderBufferToConsole(screenBuffer, findOutput);
+            
+            Assert.Equal(normalOutput.Length, findOutput.Length);
             
             // Assert
             // 驗證第一行的內容
