@@ -16,6 +16,8 @@ public class VimFindMode : IVimMode
     private Action<bool>? _backHandler;
     private int _screenWidth;
     private int _lineNumberWidth;
+    private readonly ConsoleColor _labelForegroundColor = ConsoleColor.Yellow;
+    private readonly ConsoleColor _labelBackgroundColor = ConsoleColor.DarkBlue;
 
     public VimFindMode(VimEditor instance, IVimMode vimHomeMode)
     {
@@ -193,14 +195,14 @@ public class VimFindMode : IVimMode
         {
             for (int i = 0; i < _labelLength; i++)
             {
-                screenBuffer[y, x - _labelLength + i] = new ColoredChar(_currentLabel[i], ConsoleColor.DarkBlue, ConsoleColor.White);
+                screenBuffer[y, x - _labelLength + i] = new ColoredChar(_currentLabel[i], _labelForegroundColor, _labelBackgroundColor);
             }
             
             // 檢查標記前面是否為中文字元，如果是，則將其覆蓋為空格
             var prevIndex = x - _labelLength - 1;
             if (prevIndex > 0 && screenBuffer[y, prevIndex].Char.GetCharWidth() > 1)
             {
-                screenBuffer[y, prevIndex] = new ColoredChar(' ', ConsoleColor.DarkBlue, ConsoleColor.White);
+                screenBuffer[y, prevIndex] = new ColoredChar(' ', _labelForegroundColor, _labelBackgroundColor);
             }
             
             var label = new string(_currentLabel.ToArray());
@@ -211,7 +213,7 @@ public class VimFindMode : IVimMode
         {
             for (int i = 0; i < _labelLength; i++)
             {
-                screenBuffer[y, x + i] = new ColoredChar(_currentLabel[i], ConsoleColor.DarkBlue, ConsoleColor.White);
+                screenBuffer[y, x + i] = new ColoredChar(_currentLabel[i], _labelForegroundColor, _labelBackgroundColor);
             }
             var label = new string(_currentLabel.ToArray());
             _matches[label.ToLower()] = new MatchLabel(x, y, label);
