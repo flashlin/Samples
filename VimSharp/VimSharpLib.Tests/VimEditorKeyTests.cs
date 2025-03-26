@@ -583,6 +583,47 @@ namespace VimSharpLib.Tests
             Assert.Equal("Hello, 閃電123!", _editor.GetCurrentLine().ToString());
         }
 
+        [Fact]
+        public void TestFindModeWithExclamationMark()
+        {
+            // Arrange
+            _editor.Context.SetViewPort(1, 1, 40, 5);
+            _editor.OpenText("Hello, World!\nExample");
+            
+            // 建立 screenBuffer
+            var screenBuffer = new ColoredChar[25, 80];
+            
+            // 確保編輯器處於正常模式
+            var normalMode = new VimNormalMode(_editor);
+            _editor.Mode = normalMode;
+            
+            // 按下 'f' 進入尋找模式
+            SetReadKey(ConsoleKeyPress.f);
+            
+            // 按下 '!' 尋找驚嘆號
+            SetReadKey(ConsoleKeyPress.ExclamationMark);
+            
+            // Act
+            // 呼叫 Render 方法
+            _editor.Mode.Render(screenBuffer);
+            
+            // Assert
+            // 驗證第一行的內容
+            Assert.Equal('H', screenBuffer[1, 1].Char);
+            Assert.Equal('e', screenBuffer[1, 2].Char);
+            Assert.Equal('l', screenBuffer[1, 3].Char);
+            Assert.Equal('l', screenBuffer[1, 4].Char);
+            Assert.Equal('o', screenBuffer[1, 5].Char);
+            Assert.Equal(',', screenBuffer[1, 6].Char);
+            Assert.Equal(' ', screenBuffer[1, 7].Char);
+            Assert.Equal('W', screenBuffer[1, 8].Char);
+            Assert.Equal('o', screenBuffer[1, 9].Char);
+            Assert.Equal('r', screenBuffer[1, 10].Char);
+            Assert.Equal('l', screenBuffer[1, 11].Char);
+            Assert.Equal('A', screenBuffer[1, 12].Char); // 標籤應該顯示在這裡
+            Assert.Equal('!', screenBuffer[1, 13].Char);
+        }
+
         private void SetReadKey(ConsoleKeyInfo keyInfo)
         {
             _mockConsole.ReadKey(Arg.Any<bool>()).Returns(keyInfo);

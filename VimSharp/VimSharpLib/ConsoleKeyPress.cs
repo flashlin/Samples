@@ -21,4 +21,6 @@ public static class ConsoleKeyPress
     public static ConsoleKeyInfo v = new('v', ConsoleKey.V, false, false, false);
     public static ConsoleKeyInfo y = new('y', ConsoleKey.Y, false, false, false);
     public static ConsoleKeyInfo Caret = new('^', ConsoleKey.D6, true, false, false);
+    public static ConsoleKeyInfo f = new('f', ConsoleKey.F, false, false, false);
+    public static ConsoleKeyInfo ExclamationMark = new('!', ConsoleKey.D1, true, false, false);
 }
