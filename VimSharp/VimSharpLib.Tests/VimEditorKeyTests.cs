@@ -593,6 +593,9 @@ namespace VimSharpLib.Tests
             // 建立 screenBuffer
             var screenBuffer = new ColoredChar[25, 80];
             
+            // 呼叫正常模式的 Render 方法
+            _editor.Mode.Render(screenBuffer);
+            
             // 按下 'f' 進入尋找模式
             SetReadKey(ConsoleKeyPress.f);
             
