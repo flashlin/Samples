@@ -195,6 +195,14 @@ public class VimFindMode : IVimMode
             {
                 screenBuffer[y, x - _labelLength + i] = new ColoredChar(_currentLabel[i], ConsoleColor.DarkBlue, ConsoleColor.White);
             }
+            
+            // 檢查標記前面是否為中文字元，如果是，則將其覆蓋為空格
+            var prevIndex = x - _labelLength - 1;
+            if (prevIndex > 0 && screenBuffer[y, prevIndex].Char.GetCharWidth() > 1)
+            {
+                screenBuffer[y, prevIndex] = new ColoredChar(' ', ConsoleColor.DarkBlue, ConsoleColor.White);
+            }
+            
             var label = new string(_currentLabel.ToArray());
             _matches[label.ToLower()] = new MatchLabel(x, y, label);
         }

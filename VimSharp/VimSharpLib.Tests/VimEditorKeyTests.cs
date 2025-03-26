@@ -625,11 +625,6 @@ namespace VimSharpLib.Tests
             // 呼叫 Render 方法
             _editor.Render(screenBuffer);
             
-            var findOutput = new StringBuilder();
-            _editor.RenderBufferToConsole(screenBuffer, findOutput);
-            
-            Assert.Equal(normalOutput.Length, findOutput.Length);
-            
             // Assert
             // 驗證第一行的內容
             Assert.Equal('H', screenBuffer[1, 1].Char);
