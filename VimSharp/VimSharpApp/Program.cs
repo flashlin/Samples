@@ -25,6 +25,10 @@ var host = builder.Build();
 var main = host.Services.GetRequiredService<Main>();
 main.Run();
 
+// 在主程式結束時觸發 Web 應用程式的關閉
+webApp.Lifetime.StopApplication();
+
+
 // 等待 Web API 完成
 await webTask;
 
