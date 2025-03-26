@@ -2,7 +2,7 @@
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VimSharp", "VimSharp\VimSharp.csproj", "{D60296E1-F29A-4E76-9ABB-605F11B34BA5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VimSharpApp", "VimSharpApp\VimSharpApp.csproj", "{D60296E1-F29A-4E76-9ABB-605F11B34BA5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VimSharpLib", "VimSharpLib\VimSharpLib.csproj", "{EA8C258B-CE91-4035-B893-C24F3ACD9301}"
 EndProject

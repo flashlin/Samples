@@ -1,1 +1,1 @@
-dotnet run --project ./VimSharp/VimSharp.csproj 
+dotnet run --project ./VimSharpApp/VimSharpApp.csproj 
