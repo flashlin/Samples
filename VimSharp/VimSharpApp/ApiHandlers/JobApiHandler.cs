@@ -3,19 +3,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace VimSharpApp.ApiHandlers;
 
-public class JobInfo
-{
-    public string Id { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public string Method { get; set; } = string.Empty;
-    public List<string> Parameters { get; set; } = [];
-}
-
-public class GetJobsInfoResponse
-{
-    public List<JobInfo> Jobs { get; set; } = [];
-}
-
 public class JobApiHandler : IJobApiHandler
 {
     public Task<GetJobsInfoResponse> GetJobsInfo()
@@ -33,9 +20,4 @@ public class JobApiHandler : IJobApiHandler
     {
         app.MapPost("/api/GetJobsInfo", (IJobApiHandler handler) => handler.GetJobsInfo());
     }
-}
-
-public interface IJobApiHandler
-{
-    Task<GetJobsInfoResponse> GetJobsInfo();
 }
