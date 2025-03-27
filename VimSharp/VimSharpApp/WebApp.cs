@@ -11,8 +11,8 @@ namespace VimSharpApp
         private WebApplication _webApp;
         private Task _webTask;
 
-        // 建立 Web 應用程式的方法
-        public WebApplication CreateWebApplication(string[] args)
+        // 建立並啟動 Web 應用程式的方法
+        public async Task StartAsync(string[] args)
         {
             var webBuilder = WebApplication.CreateBuilder(args);
 
@@ -26,14 +26,8 @@ namespace VimSharpApp
             // 註冊 API 端點
             JobApiHandler.MapEndpoints(_webApp);
             
-            return _webApp;
-        }
-        
-        // 啟動 Web 應用程式
-        public Task StartAsync()
-        {
+            // 啟動 Web 應用程式
             _webTask = _webApp.RunAsync();
-            return _webTask;
         }
         
         // 關閉 Web 應用程式的方法

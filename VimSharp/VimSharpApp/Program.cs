@@ -16,8 +16,7 @@ namespace VimSharpApp
         {
             // 建立及啟動 Web 應用程式
             var webAppInstance = new WebApp();
-            webAppInstance.CreateWebApplication(args);
-            await webAppInstance.StartAsync();
+            await webAppInstance.StartAsync(args);
 
             // 執行 Console 應用程式
             var main = ConsoleApp.CreateConsoleApplication(args);
