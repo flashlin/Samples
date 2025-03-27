@@ -14,15 +14,17 @@ namespace VimSharpApp
         // 應用程序入口點
         public static async Task Main(string[] args)
         {
-            // 主程式
-            var webApp = WebApp.CreateWebApplication(args);
-            var webTask = webApp.RunAsync();
+            // 建立及啟動 Web 應用程式
+            var webAppInstance = new WebApp();
+            webAppInstance.CreateWebApplication(args);
+            await webAppInstance.StartAsync();
 
+            // 執行 Console 應用程式
             var main = ConsoleApp.CreateConsoleApplication(args);
             main.Run();
 
             // 關閉 Web 應用程式
-            await WebApp.Shutdown(webApp, webTask);
+            await webAppInstance.Shutdown();
         }
     }
 }

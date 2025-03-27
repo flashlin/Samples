@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 namespace VimSharpApp
 {
     // WebApp類別
-    public static class WebApp
+    public class WebApp
     {
+        private WebApplication _webApp;
+        private Task _webTask;
+
         // 建立 Web 應用程式的方法
-        public static WebApplication CreateWebApplication(string[] args)
+        public WebApplication CreateWebApplication(string[] args)
         {
             var webBuilder = WebApplication.CreateBuilder(args);
 
@@ -18,22 +21,29 @@ namespace VimSharpApp
             webBuilder.Logging.AddDebug();
 
             webBuilder.WebHost.UseUrls("http://localhost:8080");
-            var webApp = webBuilder.Build();
+            _webApp = webBuilder.Build();
 
             // 註冊 API 端點
-            JobApiHandler.MapEndpoints(webApp);
+            JobApiHandler.MapEndpoints(_webApp);
             
-            return webApp;
+            return _webApp;
+        }
+        
+        // 啟動 Web 應用程式
+        public Task StartAsync()
+        {
+            _webTask = _webApp.RunAsync();
+            return _webTask;
         }
         
         // 關閉 Web 應用程式的方法
-        public static async Task Shutdown(WebApplication webApp, Task webTask)
+        public async Task Shutdown()
         {
             // 在主程式結束時觸發 Web 應用程式的關閉
-            webApp.Lifetime.StopApplication();
+            _webApp.Lifetime.StopApplication();
 
             // 等待 Web API 完成
-            await webTask;
+            await _webTask;
         }
     }
 } 
