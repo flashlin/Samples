@@ -6,45 +6,24 @@ using Microsoft.Extensions.Logging;
 using VimSharpApp;
 using VimSharpApp.ApiHandlers;
 
-// 主程式
-var webApp = CreateWebApplication(args);
-var webTask = webApp.RunAsync();
-
-var main = CreateConsoleApplication(args);
-main.Run();
-
-// 在主程式結束時觸發 Web 應用程式的關閉
-webApp.Lifetime.StopApplication();
-
-// 等待 Web API 完成
-await webTask;
-
-// 建立 Web 應用程式的方法
-static WebApplication CreateWebApplication(string[] args)
+namespace VimSharpApp
 {
-    var webBuilder = WebApplication.CreateBuilder(args);
+    // Program類別
+    public class Program
+    {
+        // 應用程序入口點
+        public static async Task Main(string[] args)
+        {
+            // 主程式
+            var webApp = WebApp.CreateWebApplication(args);
+            var webTask = webApp.RunAsync();
 
-    // 設定日誌，移除 Console 輸出
-    webBuilder.Logging.ClearProviders();
-    webBuilder.Logging.AddDebug();
+            var main = ConsoleApp.CreateConsoleApplication(args);
+            main.Run();
 
-    webBuilder.WebHost.UseUrls("http://localhost:8080");
-    var webApp = webBuilder.Build();
-
-    // 註冊 API 端點
-    JobApiHandler.MapEndpoints(webApp);
-    
-    return webApp;
-}
-
-// 建立 Console 應用程式的方法
-static Main CreateConsoleApplication(string[] args)
-{
-    var builder = Host.CreateApplicationBuilder(args);
-    builder.Services.AddSingleton<Main>();
-    var host = builder.Build();
-
-    // 取得 Console 應用程式的實例
-    return host.Services.GetRequiredService<Main>();
+            // 關閉 Web 應用程式
+            await WebApp.Shutdown(webApp, webTask);
+        }
+    }
 }
 
