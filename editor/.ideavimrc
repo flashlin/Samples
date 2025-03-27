@@ -6,7 +6,7 @@
 " 如果 a 鍵被對應成了 b 鍵，c 鍵又被對應成了 a 鍵，遞迴對應會將，c 鍵對應成 b 鍵
 "unmap：刪除某個對映
 "mapclear：清除對映
-let mapleader='z'
+let mapleader=' '
 set number relativenumber
 set history=200
 set showcmd
@@ -82,31 +82,31 @@ map mp <A-p>
 
 
 "" 顯示 members
-nnoremap zmm :action FileStructurePopup<CR>
+nnoremap <Leader>mm :action FileStructurePopup<CR>
 
 ""
 " 聚焦 test explorer
-nmap zte :action ActivateTestToolWindow<CR>
+nmap <Leader>te :action ActivateTestToolWindow<CR>
 
 " 單元測試
-"nmap zrt :action RiderUnitTestRunContextAction<CR>
-nmap zdt :action RiderUnitTestDebugContextAction<CR>
+"nmap <Leader>rt :action RiderUnitTestRunContextAction<CR>
+nmap <Leader>dt :action RiderUnitTestDebugContextAction<CR>
 " 打開單元測試視窗
-nmap zot :action RiderUnitTestFocusExplorerAction<CR>
-nmap zvf :action HideAllWindows<CR>
-nmap zet :action RiderUnitTestAbortedTestsFilterAction<CR>
+nmap <Leader>ot :action RiderUnitTestFocusExplorerAction<CR>
+nmap <Leader>vf :action HideAllWindows<CR>
+nmap <Leader>et :action RiderUnitTestAbortedTestsFilterAction<CR>
 " 跳到標記 a then刪除
-map zdm v`aD
+map <Leader>dm v`aD
 
 " 關閉所有編輯器
-map zct :action CloseAllEditorsButActive<CR>
+map <Leader>ct :action CloseAllEditorsButActive<CR>
 
 
 " 重新 rearrange code layout
-nmap zmc :action RearrangeCode<CR>
+nmap <Leader>mc :action RearrangeCode<CR>
 
 " 快速跳轉檔案
-" nmap ztt :action GotoFile<CR>
+" nmap <Leader>tt :action GotoFile<CR>
 
 """ -------------------------------------------
 " daa 刪除參數
@@ -180,10 +180,9 @@ nnoremap <A-l> <c-w>l
 nnoremap <TAB> :action PreviousTab<CR>
 nnoremap <s-TAB> :action NextTab<CR>
 " 開新的視窗編輯程式碼
-nnoremap <Leader>e :action EditSourceInNewWindow<CR>
-nnoremap <Leader>n :action NextWindow<CR>
-
-nnoremap zw :action CloseAllEditorsButActive<CR>
+" nnoremap <Leader>e :action EditSourceInNewWindow<CR>
+" nnoremap <Leader>n :action NextWindow<CR>
+" nnoremap <Leader>w :action CloseAllEditorsButActive<CR>
 
 "" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
 "" Map \r to the Reformat Code action
@@ -196,19 +195,19 @@ map <A-Left> :action GotoLastEditPosition<CR>
 
 
 " add 註解
-map zc :action CommentByLineComment<CR>
+" map zc :action CommentByLineComment<CR>
 "imap zc :action CommentByLineComment<CR>
-map zmz :action ReformatCode<CR>
-map zrc :action RearrangeCode<CR>
+map <Leader>mz :action ReformatCode<CR>
+map <Leader>rc :action RearrangeCode<CR>
 
 nnoremap [ :action MethodUp<CR>
 nnoremap ] :action MethodDown<CR>
 "nmap [ :action GotoPreviousMethod<CR>
 "nmap ] :action GotoNextMethod<CR>
-nmap [[ ?class<CR>:action MethodDown<CR>
-nmap {{ ?interface<CR>:action MethodDown<CR>
-map <A-[> :action MoveStatementUp<CR>
-map <A-]> :action MoveStatementDown<CR>
+nmap { ?class<CR>:action MethodDown<CR>
+"nmap {{ ?interface<CR>:action MethodDown<CR>
+"map <A-[> :action MoveStatementUp<CR>
+"map <A-]> :action MoveStatementDown<CR>
 
 " 移動 line 程式碼上下
 map <A-Up> :action MoveLineUp<CR>:action VimAutoIndentLines<CR>
@@ -217,9 +216,9 @@ map <A-Down> :action MoveLineDown<CR>:action VimAutoIndentLines<CR>
 imap <A-Down> <Esc>:action MoveLineDown<CR>:action VimAutoIndentLines<CR>
 
 " 跳到錯誤的地方
-nmap zn :action ReSharperGotoNextErrorInSolution<CR>
-nmap ze :action GotoNextError<CR>
-nmap zE :action GotoPreviousError<CR>
+nmap <Leader>n :action ReSharperGotoNextErrorInSolution<CR>
+nmap <Leader>e :action GotoNextError<CR>
+nmap <Leader>E :action GotoPreviousError<CR>
 
 " 標記 word 並加上 雙引號
 nmap "iw viw"ac""<Esc><left>"ap
@@ -234,20 +233,8 @@ nmap K 20kzz
 
 
 "[Insert]
-nmap zsb A.Should().Be();<Esc>ba
+nmap <Leader>sb A.Should().Be();<Esc>ba
 "imap zsb <Esc>zsb
-"[Refactor]
-vmap M :action ExtractMethod<CR>
-map zri :action Inline<CR>
-"imap zri <Esc>zri
-map zrv :action IntroduceVariable<CR>
-"imap zrv <Esc>zrv
-map zrp :action IntroduceParameter<CR>
-"imap zrp <Esc>zrp<Esc>
-map zrf :action IntroduceField<CR>
-"imap zrf <Esc>zrf
-map zrr hhcf=return
-"imap zrr <Esc>zrr
 
 "[Select]
 "nmap z( vi(
@@ -278,37 +265,37 @@ map vv v^
 
 "[Refactor]
 vmap M :action ExtractMethod<CR>
-map zri :action Inline<CR>
-"imap zri <Esc>zri
-map zrv :action IntroduceVariable<CR>
+map <Leader>ri :action Inline<CR>
+"imap <Leader>ri <Esc>zri
+map <Leader>rv :action IntroduceVariable<CR>
 "imap zrv <Esc>zrv
-map zrp :action IntroduceParameter<CR>
+map <Leader>rp :action IntroduceParameter<CR>
 "imap zrp <Esc>zrp<Esc>
-map zrf :action IntroduceField<CR>
+map <Leader>rf :action IntroduceField<CR>
 "imap zrf <Esc>zrf
-map zrr hhcf=return
+map <Leader>rr hhcf=return
 "imap zrr <Esc>zrr
 
 "[Unit Test]
 " nmap zra :action RiderUnitTestRunSolutionAction<CR>:action ActivateUnitTestsToolWindow<CR>
-nmap zrT :action RiderUnitTestRunSolutionAction<CR>:action ActivateUnitTestsToolWindow<CR>:action RiderUnitTestRunContextAction<CR>
+nmap <Leader>rT :action RiderUnitTestRunSolutionAction<CR>:action ActivateUnitTestsToolWindow<CR>:action RiderUnitTestRunContextAction<CR>
 " imap zra <Esc>zra
-nmap zrt ?\[Test\]<CR>jj]}j:action MethodDown<CR>:action RiderUnitTestRunContextAction<CR>:action ActivateUnitTestsToolWindow<CR><Esc>
+nmap <Leader>rt ?\[Test\]<CR>jj]}j:action MethodDown<CR>:action RiderUnitTestRunContextAction<CR>:action ActivateUnitTestsToolWindow<CR><Esc>
 "imap zrc <Esc>zrc
 "nmap zrm ?\[Test<CR>:action MethodDown<CR>:action RiderUnitTestRunContextAction<CR>:action ActivateUnitTestsToolWindow<CR>
-nmap zuu <Esc>:action RiderUnitTestRepeatPreviousRunAction<CR>:action ActivateUnitTestsToolWindow<CR>
+nmap <Leader>uu <Esc>:action RiderUnitTestRepeatPreviousRunAction<CR>:action ActivateUnitTestsToolWindow<CR>
 "imap zra <Esc>zra
 "vmap zra <Esc>zra
-map zuu :action RiderUnitTestRepeatPreviousRunAction<CR>:action ActivateUnitTestsToolWindow<CR>
+map <Leader>uu :action RiderUnitTestRepeatPreviousRunAction<CR>:action ActivateUnitTestsToolWindow<CR>
 "imap zuu <Esc>zuu
-nmap zrs dd?class<CR>jo[SetUp]<CR>public<Space>void<Space>SetUp(){<CR>}<Esc>P:action SilentCodeCleanup<CR>
+nmap <Leader>rs dd?class<CR>jo[SetUp]<CR>public<Space>void<Space>SetUp(){<CR>}<Esc>P:action SilentCodeCleanup<CR>
 "vmap zrs s<Esc>?class<CR>jo[SetUp]<CR>public<Space>void<Space>SetUp(){<CR>}<Esc>P:action SilentCodeCleanup<CR>
-nmap zrx dd?SetUp<CR>j%P:action ReformatCode<CR>
+nmap <Leader>rx dd?SetUp<CR>j%P:action ReformatCode<CR>
 nmap <F1> y?\[Test<CR>P/public<CR>$B:action ReformatCode<CR>
 imap <F1> <Esc><F1>
-map zat G?\[Test<CR>jj]}o<F1>zz
+map <Leader>at G?\[Test<CR>jj]}o<F1>zz
 " imap zat <Esc>zat
-nmap zpf ?new <CR>cf Substitute.For<I<Esc>f(i><Esc>ma?Substitute<CR>vf)
+nmap <Leader>pf ?new <CR>cf Substitute.For<I<Esc>f(i><Esc>ma?Substitute<CR>vf)
 " imap zpf <Esc>zpf
 
 
@@ -339,5 +326,5 @@ function! CopyPrevCSharpMethod()
   normal! `a
 endfunction
 
-nnoremap zcp :call CopyPrevCSharpMethod()<CR>
-nnoremap gc :action Git.Commit.Stage<CR>
+nnoremap <Leader>cp :call CopyPrevCSharpMethod()<CR>
+nnoremap <Leader>gc :action Git.Commit.Stage<CR>
