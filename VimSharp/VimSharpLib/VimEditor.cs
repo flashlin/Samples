@@ -15,10 +15,6 @@ public class VimEditor
     // 添加剪貼簿緩衝區
     public List<ConsoleText> ClipboardBuffers { get; set; } = [];
 
-    public VimEditor() : this(new ConsoleDevice())
-    {
-    }
-
     public VimEditor(IConsoleDevice console)
     {
         Console = console;
