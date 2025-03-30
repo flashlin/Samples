@@ -199,7 +199,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 處理 Enter 鍵
     /// </summary>
-    private void HandleEnterKey(List<ConsoleKeyInfo> keys)
+    protected virtual void HandleEnterKey(List<ConsoleKeyInfo> keys)
     {
         // 獲取當前行
         var enterCurrentLine = Instance.GetCurrentLine();
@@ -236,7 +236,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 切換到普通模式
     /// </summary>
-    private void HandleEscape(List<ConsoleKeyInfo> keys)
+    protected virtual void HandleEscape(List<ConsoleKeyInfo> keys)
     {
         // 獲取當前行
         var currentLine = Instance.GetCurrentLine();

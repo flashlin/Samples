@@ -9,5 +9,8 @@ public class VimInsertCommandMode : VimInsertMode
     {
     }
     
-    
+    protected override void HandleEnterKey(List<ConsoleKeyInfo> keys)
+    {
+        HandleEscape(keys);
+    }
 } 
