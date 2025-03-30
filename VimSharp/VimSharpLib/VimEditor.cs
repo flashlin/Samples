@@ -6,7 +6,6 @@ using System.Linq;
 
 public class VimEditor
 {
-    private VimCommand? _vimCommand;
     
     public VimEditor(IConsoleDevice console)
     {
@@ -14,6 +13,7 @@ public class VimEditor
         Mode = new VimNormalMode(this);
         Initialize();
     }
+    public VimCommand? VimCommand { get; set; }
 
     public IConsoleDevice Console { get; }
 
@@ -280,7 +280,7 @@ public class VimEditor
         RenderFrame(screenBuffer);
         Mode.Render(screenBuffer);
 
-        _vimCommand?.Render(screenBuffer);
+        VimCommand?.Render(screenBuffer);
 
         WriteToConsole(screenBuffer);
     }
@@ -348,9 +348,9 @@ public class VimEditor
 
     public void WaitForInput()
     {
-        if (_vimCommand != null)
+        if (VimCommand != null)
         {
-            _vimCommand.WaitForInput();
+            VimCommand.WaitForInput();
         }
         else
         {
