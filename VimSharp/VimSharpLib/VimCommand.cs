@@ -10,6 +10,6 @@ public class VimCommand : VimEditor
         var viewX = console.WindowWidth / 2 - viewWidth / 2;
         var viewY = 5;
         Context.SetViewPort(viewX, viewY, viewWidth, 1);
-        Mode = new VimInsertMode(this);
+        Mode = new VimCommandMode(this);
     }
 } 

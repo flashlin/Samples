@@ -2,9 +2,9 @@ using VimSharpLib;
 
 namespace VimSharpLib;
 
-public class VimInsertCommandMode : VimInsertMode
+public class VimCommandMode : VimInsertMode
 {
-    public VimInsertCommandMode(VimEditor instance) 
+    public VimCommandMode(VimEditor instance) 
         : base(instance)
     {
     }
