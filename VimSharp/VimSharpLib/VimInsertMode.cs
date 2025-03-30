@@ -14,9 +14,9 @@ public class VimInsertMode : IVimMode
         _keyHandler = new KeyHandler(instance.Console);
         InitializeKeyHandler();
     }
-    
+
     public VimEditor Instance { get; }
-    
+
     public void PressKey(ConsoleKeyInfo keyInfo)
     {
         _keyHandler.PressKey(keyInfo);
@@ -36,26 +36,40 @@ public class VimInsertMode : IVimMode
     {
     }
 
-    /// <summary>
-    /// 初始化按鍵處理邏輯
-    /// </summary>
-    private void InitializeKeyHandler()
+    public void WaitForInput()
     {
-        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
+        Instance.Console.SetCursorPosition(Instance.Context.CursorX, Instance.Context.CursorY);
+        // 設置為垂直線游標 (DECSCUSR 6)
+        Instance.Console.SetLineCursor();
+        
+        // 確保當前行存在
+        if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
         {
-            // 註冊基本功能鍵
-            { new ConsoleKeyPattern(ConsoleKey.Escape), HandleEscape },
-            { new ConsoleKeyPattern(ConsoleKey.Backspace), HandleBackspace },
-            { new ConsoleKeyPattern(ConsoleKey.Delete), HandleDeleteKey },
-            { new ConsoleKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
-            { new ConsoleKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },
-            { new ConsoleKeyPattern(ConsoleKey.UpArrow), MoveCursorUp },
-            { new ConsoleKeyPattern(ConsoleKey.DownArrow), MoveCursorDown },
-            { new ConsoleKeyPattern(ConsoleKey.Enter), HandleEnterKey },
-            { new CharKeyPattern('/'), HandleSlashKey },
-            // 註冊一般字元輸入
-            { new AnyKeyPattern(), HandleAnyKeyInput }
-        });
+            Instance.Context.Texts.Add(new ConsoleText());
+        }
+        
+        // 直接調用 KeyHandler 處理按鍵輸入
+        _keyHandler.WaitForInput();
+    }
+
+    /// <summary>
+    /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
+    /// </summary>
+    private void AdjustCursorAndOffset()
+    {
+        // 調用 VimEditor 中的 AdjustCursorAndOffset 方法
+        Instance.AdjustCursorPositionAndOffset(Instance.Context.CursorX, Instance.Context.CursorY);
+    }
+
+    private void CheckCursorX()
+    {
+        var textX = Instance.GetActualTextX();
+        var currentLine = Instance.GetCurrentLine();
+        if (textX >= currentLine.Width)
+        {
+            new VimNormalMode(Instance).MoveCursorToEndOfLine([]);
+            Instance.Context.CursorX += 1;
+        }
     }
 
     /// <summary>
@@ -93,58 +107,6 @@ public class VimInsertMode : IVimMode
             
             // 清空按鍵緩衝區以準備下一次輸入
             _keyHandler.Clear();
-        }
-    }
-
-    /// <summary>
-    /// 檢查並調整游標位置和偏移量，確保游標在可見區域內
-    /// </summary>
-    private void AdjustCursorAndOffset()
-    {
-        // 調用 VimEditor 中的 AdjustCursorAndOffset 方法
-        Instance.AdjustCursorPositionAndOffset(Instance.Context.CursorX, Instance.Context.CursorY);
-    }
-    
-    /// <summary>
-    /// 切換到普通模式
-    /// </summary>
-    private void HandleEscape(List<ConsoleKeyInfo> keys)
-    {
-        // 獲取當前行
-        var currentLine = Instance.GetCurrentLine();
-        var textX = Instance.GetActualTextX();
-        var isEndOfLine = textX >= currentLine.Chars.Length;
-        
-        // 記錄當前游標位置和偏移量
-        int cursorX = Instance.Context.CursorX;
-        int offsetX = Instance.Context.OffsetX;
-        
-        // 切換到普通模式
-        Instance.Mode = new VimNormalMode(Instance);
-        
-        // 如果游標在行尾，則處理游標位置
-        if (isEndOfLine)
-        {
-            // 1. 減少 GetActualX()，即 textX - 1
-            // 2. 減少 CursorX
-            Instance.Context.CursorX = cursorX - 1;
-            
-            // 3. 檢查 CursorX 是否小於 ViewPort.X - GetLineNumberWidth()
-            int minX = Instance.Context.ViewPort.X - Instance.Context.GetLineNumberWidth();
-            if (Instance.Context.CursorX < minX)
-            {
-                // 設置 CursorX 為最小允許值
-                Instance.Context.CursorX = minX;
-                
-                // 減少 OffsetX
-                Instance.Context.OffsetX = offsetX - 1;
-                
-                // 確保 OffsetX 不小於 0
-                if (Instance.Context.OffsetX < 0)
-                {
-                    Instance.Context.OffsetX = 0;
-                }
-            }
         }
     }
 
@@ -197,101 +159,40 @@ public class VimInsertMode : IVimMode
             Instance.Render();
         }
     }
-    
+
     /// <summary>
-    /// 向左移動游標
+    /// 處理一般字符輸入
     /// </summary>
-    private void MoveCursorLeft(List<ConsoleKeyInfo> keys)
+    private void HandleCharInput(char keyChar)
     {
-        // 檢查是否到達左邊界
-        var minX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
-        if (Instance.Context.CursorX <= minX)
-        {
-            // 如果有水平偏移，則減少偏移而不是移動游標
-            if (Instance.Context.OffsetX > 0)
-            {
-                Instance.Context.OffsetX--;
-                return;
-            }
-            return; // 已經到達最左邊，不能再移動
-        }
-        // 正常情況下向左移動游標
-        Instance.Context.CursorX--;
+        var currentLine = Instance.GetCurrentLine();
+        var textX = Instance.GetActualTextX();
+        currentLine.InsertText(textX, keyChar.ToString());
+        MoveCursorRight([ConsoleKeyPress.RightArrow]);
     }
-    
+
     /// <summary>
-    /// 向右移動游標
+    /// 處理 Delete 鍵
     /// </summary>
-    private void MoveCursorRight(List<ConsoleKeyInfo> keys)
+    private void HandleDeleteKey(List<ConsoleKeyInfo> keys)
     {
         // 獲取當前行
         var currentLine = Instance.GetCurrentLine();
-        // 檢查是否到達右邊界
-        if (Instance.Context.CursorX >= Instance.Context.ViewPort.Right)
+        
+        // 獲取當前文本
+        string currentText = new string(currentLine.Chars.Select(c => c.Char).Where(c => c != '\0').ToArray());
+        
+        // 計算實際索引位置
+        int actualTextX = Instance.GetActualTextX();
+        
+        // 如果游標不在文本末尾，刪除游標後的字符
+        if (!string.IsNullOrEmpty(currentText) && actualTextX >= 0 && actualTextX < currentText.Length)
         {
-            // 如果還有更多文本可以顯示，則增加水平偏移
-            if (Instance.Context.OffsetX < currentLine.Width - Instance.Context.ViewPort.Width)
-            {
-                Instance.Context.OffsetX++;
-                CheckCursorX();
-                return;
-            }
-            CheckCursorX();
-            return; // 已經到達最右邊，不能再移動
-        }
-        // 正常情況下向右移動游標
-        Instance.Context.CursorX++;
-        CheckCursorX();
-    }
-    
-    /// <summary>
-    /// 向上移動游標
-    /// </summary>
-    private void MoveCursorUp(List<ConsoleKeyInfo> keys)
-    {
-        if (Instance.Context.CursorY <= Instance.Context.ViewPort.Y)
-        {
-            if (Instance.Context.OffsetY > 0)
-            {
-                Instance.Context.OffsetY--;
-                CheckCursorX();
-                return;
-            }
-            CheckCursorX();
-            return;
-        }
-        Instance.Context.CursorY--;
-        CheckCursorX();
-    }
-    
-    /// <summary>
-    /// 向下移動游標
-    /// </summary>
-    private void MoveCursorDown(List<ConsoleKeyInfo> keys)
-    {
-        if (Instance.Context.CursorY >= Instance.Context.ViewPort.Bottom - Instance.Context.StatusBarHeight)
-        {
-            if (Instance.Context.OffsetY < Instance.Context.Texts.Count - Instance.Context.ViewPort.Height)
-            {
-                Instance.Context.OffsetY++;
-                CheckCursorX();
-                return;
-            }
-            CheckCursorX();
-            return;
-        }
-        Instance.Context.CursorY++;
-        CheckCursorX();
-    }
-
-    private void CheckCursorX()
-    {
-        var textX = Instance.GetActualTextX();
-        var currentLine = Instance.GetCurrentLine();
-        if (textX >= currentLine.Width)
-        {
-            new VimNormalMode(Instance).MoveCursorToEndOfLine([]);
-            Instance.Context.CursorX += 1;
+            string newText = currentText.Remove(actualTextX, 1);
+            currentLine.SetText(0, newText);
+            
+            // 重新渲染
+            Instance.Render();
         }
     }
 
@@ -331,40 +232,47 @@ public class VimInsertMode : IVimMode
         
         MoveCursorDown([ConsoleKeyPress.DownArrow]);
     }
-    
-    /// <summary>
-    /// 處理一般字符輸入
-    /// </summary>
-    private void HandleCharInput(char keyChar)
-    {
-        var currentLine = Instance.GetCurrentLine();
-        var textX = Instance.GetActualTextX();
-        currentLine.InsertText(textX, keyChar.ToString());
-        MoveCursorRight([ConsoleKeyPress.RightArrow]);
-    }
 
     /// <summary>
-    /// 處理 Delete 鍵
+    /// 切換到普通模式
     /// </summary>
-    private void HandleDeleteKey(List<ConsoleKeyInfo> keys)
+    private void HandleEscape(List<ConsoleKeyInfo> keys)
     {
         // 獲取當前行
         var currentLine = Instance.GetCurrentLine();
+        var textX = Instance.GetActualTextX();
+        var isEndOfLine = textX >= currentLine.Chars.Length;
         
-        // 獲取當前文本
-        string currentText = new string(currentLine.Chars.Select(c => c.Char).Where(c => c != '\0').ToArray());
+        // 記錄當前游標位置和偏移量
+        int cursorX = Instance.Context.CursorX;
+        int offsetX = Instance.Context.OffsetX;
         
-        // 計算實際索引位置
-        int actualTextX = Instance.GetActualTextX();
+        // 切換到普通模式
+        Instance.Mode = new VimNormalMode(Instance);
         
-        // 如果游標不在文本末尾，刪除游標後的字符
-        if (!string.IsNullOrEmpty(currentText) && actualTextX >= 0 && actualTextX < currentText.Length)
+        // 如果游標在行尾，則處理游標位置
+        if (isEndOfLine)
         {
-            string newText = currentText.Remove(actualTextX, 1);
-            currentLine.SetText(0, newText);
+            // 1. 減少 GetActualX()，即 textX - 1
+            // 2. 減少 CursorX
+            Instance.Context.CursorX = cursorX - 1;
             
-            // 重新渲染
-            Instance.Render();
+            // 3. 檢查 CursorX 是否小於 ViewPort.X - GetLineNumberWidth()
+            int minX = Instance.Context.ViewPort.X - Instance.Context.GetLineNumberWidth();
+            if (Instance.Context.CursorX < minX)
+            {
+                // 設置 CursorX 為最小允許值
+                Instance.Context.CursorX = minX;
+                
+                // 減少 OffsetX
+                Instance.Context.OffsetX = offsetX - 1;
+                
+                // 確保 OffsetX 不小於 0
+                if (Instance.Context.OffsetX < 0)
+                {
+                    Instance.Context.OffsetX = 0;
+                }
+            }
         }
     }
 
@@ -373,19 +281,111 @@ public class VimInsertMode : IVimMode
         Instance.VimCommand = new VimCommand(Instance.Console);
     }
 
-    public void WaitForInput()
+    /// <summary>
+    /// 初始化按鍵處理邏輯
+    /// </summary>
+    private void InitializeKeyHandler()
     {
-        Instance.Console.SetCursorPosition(Instance.Context.CursorX, Instance.Context.CursorY);
-        // 設置為垂直線游標 (DECSCUSR 6)
-        Instance.Console.SetLineCursor();
-        
-        // 確保當前行存在
-        if (Instance.Context.Texts.Count <= Instance.Context.CursorY)
+        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
         {
-            Instance.Context.Texts.Add(new ConsoleText());
+            // 註冊基本功能鍵
+            { new ConsoleKeyPattern(ConsoleKey.Escape), HandleEscape },
+            { new ConsoleKeyPattern(ConsoleKey.Backspace), HandleBackspace },
+            { new ConsoleKeyPattern(ConsoleKey.Delete), HandleDeleteKey },
+            { new ConsoleKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
+            { new ConsoleKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },
+            { new ConsoleKeyPattern(ConsoleKey.UpArrow), MoveCursorUp },
+            { new ConsoleKeyPattern(ConsoleKey.DownArrow), MoveCursorDown },
+            { new ConsoleKeyPattern(ConsoleKey.Enter), HandleEnterKey },
+            { new CharKeyPattern('/'), HandleSlashKey },
+            // 註冊一般字元輸入
+            { new AnyKeyPattern(), HandleAnyKeyInput }
+        });
+    }
+
+    /// <summary>
+    /// 向下移動游標
+    /// </summary>
+    private void MoveCursorDown(List<ConsoleKeyInfo> keys)
+    {
+        if (Instance.Context.CursorY >= Instance.Context.ViewPort.Bottom - Instance.Context.StatusBarHeight)
+        {
+            if (Instance.Context.OffsetY < Instance.Context.Texts.Count - Instance.Context.ViewPort.Height)
+            {
+                Instance.Context.OffsetY++;
+                CheckCursorX();
+                return;
+            }
+            CheckCursorX();
+            return;
         }
-        
-        // 直接調用 KeyHandler 處理按鍵輸入
-        _keyHandler.WaitForInput();
+        Instance.Context.CursorY++;
+        CheckCursorX();
+    }
+
+    /// <summary>
+    /// 向左移動游標
+    /// </summary>
+    private void MoveCursorLeft(List<ConsoleKeyInfo> keys)
+    {
+        // 檢查是否到達左邊界
+        var minX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
+        if (Instance.Context.CursorX <= minX)
+        {
+            // 如果有水平偏移，則減少偏移而不是移動游標
+            if (Instance.Context.OffsetX > 0)
+            {
+                Instance.Context.OffsetX--;
+                return;
+            }
+            return; // 已經到達最左邊，不能再移動
+        }
+        // 正常情況下向左移動游標
+        Instance.Context.CursorX--;
+    }
+
+    /// <summary>
+    /// 向右移動游標
+    /// </summary>
+    private void MoveCursorRight(List<ConsoleKeyInfo> keys)
+    {
+        // 獲取當前行
+        var currentLine = Instance.GetCurrentLine();
+        // 檢查是否到達右邊界
+        if (Instance.Context.CursorX >= Instance.Context.ViewPort.Right)
+        {
+            // 如果還有更多文本可以顯示，則增加水平偏移
+            if (Instance.Context.OffsetX < currentLine.Width - Instance.Context.ViewPort.Width)
+            {
+                Instance.Context.OffsetX++;
+                CheckCursorX();
+                return;
+            }
+            CheckCursorX();
+            return; // 已經到達最右邊，不能再移動
+        }
+        // 正常情況下向右移動游標
+        Instance.Context.CursorX++;
+        CheckCursorX();
+    }
+
+    /// <summary>
+    /// 向上移動游標
+    /// </summary>
+    private void MoveCursorUp(List<ConsoleKeyInfo> keys)
+    {
+        if (Instance.Context.CursorY <= Instance.Context.ViewPort.Y)
+        {
+            if (Instance.Context.OffsetY > 0)
+            {
+                Instance.Context.OffsetY--;
+                CheckCursorX();
+                return;
+            }
+            CheckCursorX();
+            return;
+        }
+        Instance.Context.CursorY--;
+        CheckCursorX();
     }
 }
