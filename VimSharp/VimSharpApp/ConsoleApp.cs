@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using VimSharpApp;
+using VimSharpLib;
 
 namespace VimSharpApp
 {
@@ -13,7 +14,12 @@ namespace VimSharpApp
         public void Start(string[] args)
         {
             var builder = Host.CreateApplicationBuilder(args);
-            builder.Services.AddSingleton<Main>();
+
+            var services = builder.Services;
+            
+            services.AddSingleton<IConsoleDevice, ConsoleDevice>();
+            services.AddSingleton<Main>();
+            
             var host = builder.Build();
 
             // 取得 Console 應用程式的實例

@@ -52,6 +52,8 @@ public class VimInsertMode : IVimMode
             { new ConsoleKeyPattern(ConsoleKey.UpArrow), MoveCursorUp },
             { new ConsoleKeyPattern(ConsoleKey.DownArrow), MoveCursorDown },
             { new ConsoleKeyPattern(ConsoleKey.Enter), HandleEnterKey },
+            { new CharKeyPattern('/'), HandleSlashKey },
+            // 註冊一般字元輸入
             { new AnyKeyPattern(), HandleAnyKeyInput }
         });
     }
@@ -364,6 +366,11 @@ public class VimInsertMode : IVimMode
             // 重新渲染
             Instance.Render();
         }
+    }
+
+    private void HandleSlashKey(List<ConsoleKeyInfo> keys)
+    {
+        Instance.VimCommand = new VimCommand(Instance.Console);
     }
 
     public void WaitForInput()
