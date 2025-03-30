@@ -306,7 +306,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 向下移動游標
     /// </summary>
-    private void MoveCursorDown(List<ConsoleKeyInfo> keys)
+    protected virtual void MoveCursorDown(List<ConsoleKeyInfo> keys)
     {
         if (Instance.Context.CursorY >= Instance.Context.ViewPort.Bottom - Instance.Context.StatusBarHeight)
         {
@@ -372,7 +372,7 @@ public class VimInsertMode : IVimMode
     /// <summary>
     /// 向上移動游標
     /// </summary>
-    private void MoveCursorUp(List<ConsoleKeyInfo> keys)
+    protected virtual void MoveCursorUp(List<ConsoleKeyInfo> keys)
     {
         if (Instance.Context.CursorY <= Instance.Context.ViewPort.Y)
         {

@@ -13,4 +13,14 @@ public class VimInsertCommandMode : VimInsertMode
     {
         HandleEscape(keys);
     }
+
+    protected override void MoveCursorUp(List<ConsoleKeyInfo> keys)
+    {
+        // 不執行任何動作
+    }
+
+    protected override void MoveCursorDown(List<ConsoleKeyInfo> keys)
+    {
+        // 不執行任何動作
+    }
 } 
