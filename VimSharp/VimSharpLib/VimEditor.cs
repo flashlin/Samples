@@ -6,6 +6,8 @@ using System.Linq;
 
 public class VimEditor
 {
+    private VimCommand? _vimCommand;
+    
     public VimEditor(IConsoleDevice console)
     {
         Console = console;
@@ -266,26 +268,20 @@ public class VimEditor
 
     public void Render(ColoredChar[,]? screenBuffer = null)
     {
-        if (screenBuffer == null)
-        {
-            screenBuffer = CreateScreenBuffer();
-        }
-
+        screenBuffer ??= CreateScreenBuffer();
         // 計算行號寬度
-        int lineNumberWidth = Context.GetLineNumberWidth();
-
+        var lineNumberWidth = Context.GetLineNumberWidth();
         // 獲取游標在文本中的實際位置
-        int cursorTextY = GetActualTextY();
-
+        var cursorTextY = GetActualTextY();
         // 繪製內容區域（包括行號和文本）
         RenderContentArea(screenBuffer, lineNumberWidth, cursorTextY);
-
         // 繪製狀態欄
         RenderStatusBar(screenBuffer);
-
         RenderFrame(screenBuffer);
-
         Mode.Render(screenBuffer);
+
+        _vimCommand?.Render(screenBuffer);
+
         WriteToConsole(screenBuffer);
     }
 
@@ -302,15 +298,6 @@ public class VimEditor
             {
                 outputBuffer.Append(screenBuffer[y, x].ToAnsiString());
             }
-        }
-    }
-
-    public void Run()
-    {
-        while (IsRunning)
-        {
-            Render();
-            WaitForInput();
         }
     }
 
@@ -361,7 +348,14 @@ public class VimEditor
 
     public void WaitForInput()
     {
-        Mode.WaitForInput();
+        if (_vimCommand != null)
+        {
+            _vimCommand.WaitForInput();
+        }
+        else
+        {
+            Mode.WaitForInput();
+        }
     }
 
     public void WriteToConsole(ColoredChar[,] screenBuffer)
