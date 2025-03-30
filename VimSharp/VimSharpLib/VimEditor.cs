@@ -685,6 +685,11 @@ public class VimEditor
     /// </summary>
     private void RenderStatusBar(ColoredChar[,] screenBuffer)
     {
+        if (!Context.IsStatusBarVisible)
+        {
+            return;
+        }
+        
         int bufferWidth = screenBuffer.GetLength(1);
         int bufferHeight = screenBuffer.GetLength(0);
 
