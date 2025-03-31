@@ -147,4 +147,10 @@ public class XlsxFile
 
         return resultSheet;
     }
+
+    public void SaveWorksheet(IXLWorksheet sheet, string xlsxFile)
+    {
+        var workbook = sheet.Workbook;
+        workbook.SaveAs(xlsxFile);
+    }
 }
