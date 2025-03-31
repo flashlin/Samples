@@ -326,5 +326,7 @@ function! CopyPrevCSharpMethod()
   normal! `a
 endfunction
 
-nnoremap <Leader>cp :call CopyPrevCSharpMethod()<CR>
+"nmap <Leader>cp kma:action MethodUp<CR>^v`ayP`a
+nmap <Leader>cp kma:action MethodUp<CR>
+nmap <Leader>cp2 ^v`ayP`a:action MethodUp<CR>
 nnoremap <Leader>gc :action Git.Commit.Stage<CR>
