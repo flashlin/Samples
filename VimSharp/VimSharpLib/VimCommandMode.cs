@@ -14,6 +14,11 @@ public class VimCommandMode : VimInsertMode
         HandleEscape(keys);
     }
 
+    protected override void HandleEscape(List<ConsoleKeyInfo> keys)
+    {
+        Instance.VimCommand = null;
+    }
+
     protected override void MoveCursorUp(List<ConsoleKeyInfo> keys)
     {
         // 不執行任何動作
