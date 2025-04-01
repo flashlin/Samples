@@ -21,7 +21,14 @@ public class ColoredCharScreen
     public ColoredChar this[int y, int x]
     {
         get => _screen[y, x];
-        set => _screen[y, x] = value;
+        set
+        {
+            if (y < 0 || y >= _screen.GetLength(0) || x < 0 || x >= _screen.GetLength(1))
+            {
+                return;
+            }
+            _screen[y, x] = value;
+        }
     }
 
     public int GetLength(int dimension)
