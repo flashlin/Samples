@@ -16,7 +16,7 @@ public class VimCommandMode : VimInsertMode
 
     protected override void HandleEscape(List<ConsoleKeyInfo> keys)
     {
-        Instance.VimCommand = null;
+        Instance.OnClose?.Invoke();
     }
 
     protected override void MoveCursorUp(List<ConsoleKeyInfo> keys)

@@ -23,6 +23,8 @@ public class VimEditor
 
     // 添加剪貼簿緩衝區
     public List<ConsoleText> ClipboardBuffers { get; set; } = [];
+    
+    public Action? OnClose { get; set; }
 
     /// <summary>
     /// 檢查並調整游標位置和偏移量，確保游標在可見區域內

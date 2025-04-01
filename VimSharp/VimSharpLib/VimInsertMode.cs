@@ -278,7 +278,14 @@ public class VimInsertMode : IVimMode
 
     private void HandleSlashKey(List<ConsoleKeyInfo> keys)
     {
-        Instance.VimCommand = new VimCommand(Instance.Console);
+        var vimCommand = new VimCommand(Instance.Console)
+        {
+            OnClose = () =>
+            {
+                Instance.VimCommand = null;
+            }
+        };
+        Instance.VimCommand = vimCommand;
     }
 
     /// <summary>
