@@ -113,20 +113,11 @@ public class VimEditor
         }
     }
 
-    public ColoredChar[,] CreateScreenBuffer()
+    public ColoredCharScreen CreateScreenBuffer()
     {
         int height = Console.WindowHeight;
         int width = Console.WindowWidth;
-        var screenBuffer = new ColoredChar[height, width];
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                screenBuffer[y, x] = new ColoredChar(' ', ConsoleColor.White, ConsoleColor.Black);
-            }
-        }
-
-        return screenBuffer;
+        return new ColoredCharScreen(height, width);
     }
 
     public int GetActualTextX()
@@ -266,7 +257,7 @@ public class VimEditor
         Init();
     }
 
-    public void Render(ColoredChar[,]? screenBuffer = null)
+    public void Render(ColoredCharScreen? screenBuffer = null)
     {
         screenBuffer ??= CreateScreenBuffer();
         // 計算行號寬度
@@ -288,7 +279,7 @@ public class VimEditor
     /// <summary>
     /// 將 screenBuffer 轉換為 ANSI 控制碼並輸出到 outputBuffer
     /// </summary>
-    public void RenderBufferToConsole(ColoredChar[,] screenBuffer, StringBuilder outputBuffer)
+    public void RenderBufferToConsole(ColoredCharScreen screenBuffer, StringBuilder outputBuffer)
     {
         // 輸出整個 screenBuffer 的內容
         for (int y = 0; y < screenBuffer.GetLength(0); y++)
@@ -358,7 +349,7 @@ public class VimEditor
         }
     }
 
-    public void WriteToConsole(ColoredChar[,] screenBuffer)
+    public void WriteToConsole(ColoredCharScreen screenBuffer)
     {
         // 創建一個緩衝區用於收集所有輸出
         var outputBuffer = new StringBuilder();
@@ -514,10 +505,9 @@ public class VimEditor
     /// <summary>
     /// 繪製內容區域（包括行號和文本）
     /// </summary>
-    private void RenderContentArea(ColoredChar[,] screenBuffer, int lineNumberWidth, int cursorTextY)
+    private void RenderContentArea(ColoredCharScreen screenBuffer, int lineNumberWidth, int cursorTextY)
     {
         int bufferWidth = screenBuffer.GetLength(1);
-
         // 如果狀態欄可見，則減少一行用於顯示狀態欄
         int maxLines = Context.IsStatusBarVisible ? Context.ViewPort.Height - 1 : Context.ViewPort.Height;
 
@@ -551,7 +541,7 @@ public class VimEditor
     /// <summary>
     /// 繪製空白行到 screenBuffer
     /// </summary>
-    private void RenderEmptyLine(ColoredChar[,] screenBuffer, int x, int y, int width)
+    private void RenderEmptyLine(ColoredCharScreen screenBuffer, int x, int y, int width)
     {
         // 檢查 Y 座標是否在 ViewPort 範圍內
         if (y < Context.ViewPort.Y || y >= Context.ViewPort.Y + Context.ViewPort.Height)
@@ -564,7 +554,7 @@ public class VimEditor
         {
             if (x + i >= 0 && x + i < screenBuffer.GetLength(0) && y >= 0 && y < screenBuffer.GetLength(1))
             {
-                screenBuffer.Set(x + i, y, ColoredChar.Empty);
+                screenBuffer[y, x + i] = ColoredChar.Empty;
             }
         }
     }
@@ -572,7 +562,7 @@ public class VimEditor
     /// <summary>
     /// 繪製顯示框到 screenBuffer
     /// </summary>
-    private void RenderFrame(ColoredChar[,] screenBuffer)
+    private void RenderFrame(ColoredCharScreen screenBuffer)
     {
         // 定義框架字符
         char topLeft = '┌';
@@ -654,7 +644,7 @@ public class VimEditor
     /// <summary>
     /// 為指定行繪製行號
     /// </summary>
-    private void RenderLineNumberForRow(ColoredChar[,] screenBuffer, int viewY, int textIndex, int cursorTextY,
+    private void RenderLineNumberForRow(ColoredCharScreen screenBuffer, int viewY, int textIndex, int cursorTextY,
         int lineNumberWidth, int bufferWidth)
     {
         string lineNumber;
@@ -683,7 +673,7 @@ public class VimEditor
     /// <summary>
     /// 繪製狀態欄到 screenBuffer
     /// </summary>
-    private void RenderStatusBar(ColoredChar[,] screenBuffer)
+    private void RenderStatusBar(ColoredCharScreen screenBuffer)
     {
         if (!Context.IsStatusBarVisible)
         {
@@ -744,7 +734,7 @@ public class VimEditor
     /// <summary>
     /// 繪製文本到 screenBuffer，考慮 ViewPort 和偏移量
     /// </summary>
-    private void RenderText(ColoredChar[,] screenBuffer, int x, int y, ConsoleText text, int offset, ViewArea viewPort,
+    private void RenderText(ColoredCharScreen screenBuffer, int x, int y, ConsoleText text, int offset, ViewArea viewPort,
         int lineNumberWidth = 0)
     {
         // 檢查 Y 座標是否在 ViewPort 範圍內
@@ -807,7 +797,7 @@ public class VimEditor
     /// <summary>
     /// 為指定行繪製文本內容
     /// </summary>
-    private void RenderTextForRow(ColoredChar[,] screenBuffer, int viewY, ConsoleText textLine, int lineNumberWidth)
+    private void RenderTextForRow(ColoredCharScreen screenBuffer, int viewY, ConsoleText textLine, int lineNumberWidth)
     {
         // 計算文本在螢幕上的位置
         int textX = Context.ViewPort.X + lineNumberWidth;

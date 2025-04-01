@@ -117,7 +117,7 @@ public class VimFindMode : IVimMode
         outputBuffer.Append("\x1b[2 q");
     }
 
-    public void Render(ColoredChar[,] screenBuffer)
+    public void Render(ColoredCharScreen screenBuffer)
     {
         if (_findChar == null)
         {
@@ -183,7 +183,7 @@ public class VimFindMode : IVimMode
         return false;
     }
 
-    private void PlaceLabel(ColoredChar[,] screenBuffer, int y, int x)
+    private void PlaceLabel(ColoredCharScreen screenBuffer, int y, int x)
     {
         // 檢查左側是否有足夠空間
         var hasLeftSpace = x - _labelLength >= Instance.Context.ViewPort.X + _lineNumberWidth;

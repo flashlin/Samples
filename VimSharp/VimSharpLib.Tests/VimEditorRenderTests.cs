@@ -25,17 +25,9 @@ namespace VimSharpLib.Tests
         /// <param name="height">緩衝區高度</param>
         /// <param name="width">緩衝區寬度</param>
         /// <returns>初始化的 ColoredChar 陣列</returns>
-        private ColoredChar[,] CreateScreenBuffer(int height = 25, int width = 80)
+        private ColoredCharScreen CreateScreenBuffer()
         {
-            var screenBuffer = new ColoredChar[height, width];
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    screenBuffer[y, x] = new ColoredChar('.', ConsoleColor.White, ConsoleColor.Black);
-                }
-            }
-            return screenBuffer;
+            return _editor.CreateScreenBuffer();
         }
 
         [Fact]

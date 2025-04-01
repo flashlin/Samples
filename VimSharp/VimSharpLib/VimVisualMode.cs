@@ -151,7 +151,7 @@ public class VimVisualMode : IVimMode
         SaveLastPosition();
     }
 
-    public void Render(ColoredChar[,] screenBuffer)
+    public void Render(ColoredCharScreen screenBuffer)
     {
         var startX = Instance.Context.ViewPort.X + Instance.Context.GetLineNumberWidth();
         var endX = Instance.Context.ViewPort.X + Instance.Context.ViewPort.Width - 1 -

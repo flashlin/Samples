@@ -32,7 +32,7 @@ public class VimInsertMode : IVimMode
         outputBuffer.Append("\x1b[6 q");
     }
 
-    public void Render(ColoredChar[,] screenBuffer)
+    public void Render(ColoredCharScreen screenBuffer)
     {
     }
 
