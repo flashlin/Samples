@@ -34,7 +34,7 @@ public class VimCommand : VimEditor
             }
         }
 
-        base.Render();
+        base.Render(screenBuffer);
     }
 
     public void RestoreScreen(ColoredCharScreen bufferScreen)
