@@ -10,12 +10,14 @@ namespace VimSharpLib.Tests
     {
         private IConsoleDevice _mockConsole;
         private VimEditor _editor;
+        private ColoredCharScreen _screenBuffer; 
 
         public VimEditorKeyTests()
         {
             _mockConsole = Substitute.For<IConsoleDevice>();
             _mockConsole.WindowWidth.Returns(80);
             _mockConsole.WindowHeight.Returns(25);
+            _screenBuffer = ColoredCharScreen.CreateScreenBuffer(_mockConsole);
             _editor = new VimEditor(_mockConsole);
             _editor.Context.IsLineNumberVisible = false;
             _editor.Context.IsStatusBarVisible = false;
@@ -277,7 +279,7 @@ namespace VimSharpLib.Tests
             // 確保行號寬度被正確計算為 2
             Assert.Equal(2, _editor.Context.GetLineNumberWidth());
 
-            _editor.Render();
+            _editor.Render(_screenBuffer);
             // 驗證狀態欄顯示內容
             Assert.Equal(" Normal | Line: 1 | Col: 1 ", _editor.Context.StatusBar.ToString());
 
@@ -592,7 +594,7 @@ namespace VimSharpLib.Tests
             _editor.OpenText("Hello, World!\nExample");
             
             // 建立 screenBuffer
-            var screenBuffer = _editor.CreateScreenBuffer();
+            var screenBuffer = ColoredCharScreen.CreateScreenBuffer(_editor.Console);
             
             // 呼叫正常模式的 Render 方法
             _editor.Render(screenBuffer);

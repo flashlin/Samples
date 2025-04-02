@@ -115,13 +115,6 @@ public class VimEditor
         }
     }
 
-    public ColoredCharScreen CreateScreenBuffer()
-    {
-        int height = Console.WindowHeight;
-        int width = Console.WindowWidth;
-        return new ColoredCharScreen(height, width);
-    }
-
     public int GetActualTextX()
     {
         return Context.GetCurrentTextX();
@@ -259,9 +252,8 @@ public class VimEditor
         Init();
     }
 
-    public virtual void Render(ColoredCharScreen? screenBuffer = null)
+    public virtual void Render(ColoredCharScreen screenBuffer)
     {
-        screenBuffer ??= CreateScreenBuffer();
         // 計算行號寬度
         var lineNumberWidth = Context.GetLineNumberWidth();
         // 獲取游標在文本中的實際位置
@@ -501,7 +493,6 @@ public class VimEditor
     private void Initialize()
     {
         Mode = new VimNormalMode(this);
-        Context.SetViewPort(0, 0, Console.WindowWidth, Console.WindowHeight);
     }
 
     /// <summary>

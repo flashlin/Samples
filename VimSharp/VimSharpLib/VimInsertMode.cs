@@ -154,9 +154,6 @@ public class VimInsertMode : IVimMode
 
             // 移動光標（考慮中文字符寬度）
             Instance.Context.CursorX -= charToDelete.GetCharWidth();
-
-            // 清除屏幕並重新渲染整行（對於 Backspace，我們需要重新渲染整行）
-            Instance.Render();
         }
     }
 
@@ -190,9 +187,6 @@ public class VimInsertMode : IVimMode
         {
             string newText = currentText.Remove(actualTextX, 1);
             currentLine.SetText(0, newText);
-            
-            // 重新渲染
-            Instance.Render();
         }
     }
 

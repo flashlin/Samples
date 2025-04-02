@@ -43,7 +43,8 @@ public class VimSharp
     /// </summary>
     public void Run()
     {
-        var screenBuffer = _editors[0].CreateScreenBuffer();
+        VimEditor tempQualifier = _editors[0];
+        var screenBuffer = ColoredCharScreen.CreateScreenBuffer(tempQualifier.Console);
 
         // 主循環
         while (_isRunning)

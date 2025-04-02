@@ -15,7 +15,7 @@ public class VimCommand : VimEditor
         Mode = new VimCommandMode(this);
     }
 
-    public override void Render(ColoredCharScreen? screenBuffer = null)
+    public override void Render(ColoredCharScreen screenBuffer)
     {
         // 如果是第一次渲染，備份原始螢幕內容
         if (_backupScreen == null)
@@ -24,7 +24,7 @@ public class VimCommand : VimEditor
             _backupScreen = new ColoredCharScreen(viewPort.Height, viewPort.Width);
             
             // 複製 ViewPort 範圍的螢幕內容
-            var currentBuffer = screenBuffer ?? CreateScreenBuffer();
+            var currentBuffer = screenBuffer ?? ColoredCharScreen.CreateScreenBuffer(Console);
             for (int y = 0; y < viewPort.Height; y++)
             {
                 for (int x = 0; x < viewPort.Width; x++)

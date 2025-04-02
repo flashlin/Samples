@@ -27,7 +27,7 @@ namespace VimSharpLib.Tests
         /// <returns>初始化的 ColoredChar 陣列</returns>
         private ColoredCharScreen CreateScreenBuffer()
         {
-            return _editor.CreateScreenBuffer();
+            return ColoredCharScreen.CreateScreenBuffer(_mockConsole);
         }
 
         [Fact]

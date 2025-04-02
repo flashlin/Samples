@@ -35,4 +35,11 @@ public class ColoredCharScreen
     {
         return _screen.GetLength(dimension);
     }
+
+    public static ColoredCharScreen CreateScreenBuffer(IConsoleDevice consoleDevice)
+    {
+        int height = consoleDevice.WindowHeight;
+        int width = consoleDevice.WindowWidth;
+        return new ColoredCharScreen(height, width);
+    }
 } 
