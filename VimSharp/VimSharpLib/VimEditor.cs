@@ -266,8 +266,6 @@ public class VimEditor
         Mode.Render(screenBuffer);
 
         VimCommand?.Render(screenBuffer);
-
-        WriteToConsole(screenBuffer);
     }
 
     /// <summary>
@@ -343,7 +341,7 @@ public class VimEditor
         }
     }
 
-    public void WriteToConsole(ColoredCharScreen screenBuffer)
+    public static void WriteToConsole(VimEditor vimEditor, ColoredCharScreen screenBuffer)
     {
         // 創建一個緩衝區用於收集所有輸出
         var outputBuffer = new StringBuilder();
@@ -351,12 +349,12 @@ public class VimEditor
         // 隱藏游標 (符合 Rule 12)
         outputBuffer.Append("\x1b[?25l");
 
-        RenderBufferToConsole(screenBuffer, outputBuffer);
+        vimEditor.RenderBufferToConsole(screenBuffer, outputBuffer);
 
-        Mode.AfterRender(outputBuffer);
+        vimEditor.Mode.AfterRender(outputBuffer);
 
         // 一次性輸出所有內容到控制台
-        Console.Write(outputBuffer.ToString());
+        vimEditor.Console.Write(outputBuffer.ToString());
     }
 
     /// <summary>

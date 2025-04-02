@@ -43,6 +43,7 @@ public class VimSharp
     /// </summary>
     public void Run()
     {
+        
         VimEditor tempQualifier = _editors[0];
         var screenBuffer = ColoredCharScreen.CreateScreenBuffer(tempQualifier.Console);
 
@@ -62,7 +63,7 @@ public class VimSharp
             if (_currentEditor != null)
             {
                 _currentEditor.Render(screenBuffer);
-                _currentEditor.WriteToConsole(screenBuffer);
+                VimEditor.WriteToConsole(_currentEditor, screenBuffer);
                 _currentEditor.WaitForInput();
                 
                 // 檢查當前編輯器是否還在運行
