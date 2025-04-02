@@ -24,7 +24,7 @@ public class VimNormalMode : IVimMode
 
     private void InitializeKeyPatterns()
     {
-        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
+        _keyHandler.InitializeKeyHandlers(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
         {
             { new ConsoleKeyPattern(ConsoleKey.I), HandleIKey },
             { new ConsoleKeyPattern(ConsoleKey.A), HandleAKey },

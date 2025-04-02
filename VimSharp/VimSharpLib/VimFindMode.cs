@@ -38,7 +38,7 @@ public class VimFindMode : IVimMode
 
     private void InitializeKeyHandler()
     {
-        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
+        _keyHandler.InitializeKeyHandlers(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
         {
             { new ConsoleKeyPattern(ConsoleKey.Escape), HandleEscapeKey },
             { new AnyKeyPattern(), HandleAnyKeyInput },

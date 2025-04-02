@@ -76,7 +76,7 @@ public class VimVisualMode : IVimMode
 
     private void InitializeKeyPatterns()
     {
-        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
+        _keyHandler.InitializeKeyHandlers(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
         {
             { new ConsoleKeyPattern(ConsoleKey.LeftArrow), MoveCursorLeft },
             { new ConsoleKeyPattern(ConsoleKey.RightArrow), MoveCursorRight },

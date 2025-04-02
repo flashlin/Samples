@@ -1,6 +1,6 @@
 namespace VimSharpLib;
 
-public class KeyHandler
+public class KeyHandler : IKeyHandler
 {
     private readonly IConsoleDevice _consoleDevice;
     private Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>> _keyPatterns = new();
@@ -11,7 +11,7 @@ public class KeyHandler
         _consoleDevice = consoleDevice;
     }
 
-    public void InitializeKeyPatterns(Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>> keyPatterns)
+    public void InitializeKeyHandlers(Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>> keyPatterns)
     {
         _keyPatterns = keyPatterns;
     }

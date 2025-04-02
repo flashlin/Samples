@@ -287,7 +287,7 @@ public class VimInsertMode : IVimMode
     /// </summary>
     private void InitializeKeyHandler()
     {
-        _keyHandler.InitializeKeyPatterns(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
+        _keyHandler.InitializeKeyHandlers(new Dictionary<IKeyPattern, Action<List<ConsoleKeyInfo>>>
         {
             // 註冊基本功能鍵
             { new ConsoleKeyPattern(ConsoleKey.Escape), HandleEscape },
