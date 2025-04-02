@@ -18,6 +18,7 @@ namespace VimSharpApp
             var services = builder.Services;
             
             services.AddSingleton<IConsoleDevice, ConsoleDevice>();
+            services.AddTransient<IKeyHandler, KeyHandler>();
             services.AddSingleton<Main>();
             
             var host = builder.Build();
