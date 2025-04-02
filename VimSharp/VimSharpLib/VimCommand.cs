@@ -24,12 +24,11 @@ public class VimCommand : VimEditor
             _backupScreen = new ColoredCharScreen(viewPort.Height, viewPort.Width);
             
             // 複製 ViewPort 範圍的螢幕內容
-            var currentBuffer = screenBuffer ?? ColoredCharScreen.CreateScreenBuffer(Console);
             for (int y = 0; y < viewPort.Height; y++)
             {
                 for (int x = 0; x < viewPort.Width; x++)
                 {
-                    _backupScreen[y, x] = currentBuffer[viewPort.Y + y, viewPort.X + x];
+                    _backupScreen[y, x] = screenBuffer[viewPort.Y + y, viewPort.X + x];
                 }
             }
         }
