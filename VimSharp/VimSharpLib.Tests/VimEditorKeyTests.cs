@@ -594,7 +594,7 @@ namespace VimSharpLib.Tests
             _editor.OpenText("Hello, World!\nExample");
             
             // 建立 screenBuffer
-            var screenBuffer = ColoredCharScreen.CreateScreenBuffer(_editor.Console);
+            var screenBuffer = ColoredCharScreen.CreateScreenBuffer(_mockConsole);
             
             // 呼叫正常模式的 Render 方法
             _editor.Render(screenBuffer);
