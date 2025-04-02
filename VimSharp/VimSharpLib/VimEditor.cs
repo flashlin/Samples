@@ -259,7 +259,7 @@ public class VimEditor
         Init();
     }
 
-    public void Render(ColoredCharScreen? screenBuffer = null)
+    public virtual void Render(ColoredCharScreen? screenBuffer = null)
     {
         screenBuffer ??= CreateScreenBuffer();
         // 計算行號寬度
