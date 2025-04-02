@@ -6,7 +6,6 @@ using System.Linq;
 
 public class VimEditor
 {
-    
     public VimEditor(IConsoleDevice console)
     {
         Console = console;

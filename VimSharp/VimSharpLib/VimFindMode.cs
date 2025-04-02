@@ -28,7 +28,7 @@ public class VimFindMode : IVimMode
         UpdateScreenMetrics();
     }
 
-    public VimEditor Instance { get; }
+    public VimEditor Instance { get; set; }
 
     private void UpdateScreenMetrics()
     {

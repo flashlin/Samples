@@ -1,9 +1,29 @@
+using Microsoft.Extensions.DependencyInjection;
+
 namespace VimSharpLib;
 using System.Text;
 using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+
+public class VimModeFactory
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public VimModeFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+    
+    public IVimMode Create<T>(VimEditor editor)
+        where T : IVimMode
+    {
+        var vimMode = _serviceProvider.GetRequiredService<T>();
+        vimMode.Instance = editor;
+        return vimMode;
+    }
+}
 
 public class VimNormalMode : IVimMode
 {

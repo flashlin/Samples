@@ -15,7 +15,7 @@ public class VimInsertMode : IVimMode
         InitializeKeyHandler();
     }
 
-    public VimEditor Instance { get; }
+    public VimEditor Instance { get; set; }
 
     public void PressKey(ConsoleKeyInfo keyInfo)
     {
