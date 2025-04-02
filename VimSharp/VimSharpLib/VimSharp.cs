@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace VimSharpLib;
 
 /// <summary>
@@ -63,7 +65,7 @@ public class VimSharp
             if (_currentEditor != null)
             {
                 _currentEditor.Render(screenBuffer);
-                VimEditor.WriteToConsole(_currentEditor, screenBuffer);
+                WriteToConsole(_currentEditor, screenBuffer);
                 _currentEditor.WaitForInput();
                 
                 // 檢查當前編輯器是否還在運行
@@ -84,5 +86,21 @@ public class VimSharp
                 _isRunning = false;
             }
         }
+    }
+
+    public static void WriteToConsole(VimEditor vimEditor, ColoredCharScreen screenBuffer)
+    {
+        // 創建一個緩衝區用於收集所有輸出
+        var outputBuffer = new StringBuilder();
+        outputBuffer.Append($"\x1b[0;0H");
+        // 隱藏游標 (符合 Rule 12)
+        outputBuffer.Append("\x1b[?25l");
+
+        vimEditor.RenderBufferToConsole(screenBuffer, outputBuffer);
+
+        vimEditor.Mode.AfterRender(outputBuffer);
+
+        // 一次性輸出所有內容到控制台
+        vimEditor.Console.Write(outputBuffer.ToString());
     }
 } 

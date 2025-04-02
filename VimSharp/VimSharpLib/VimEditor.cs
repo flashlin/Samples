@@ -341,22 +341,6 @@ public class VimEditor
         }
     }
 
-    public static void WriteToConsole(VimEditor vimEditor, ColoredCharScreen screenBuffer)
-    {
-        // 創建一個緩衝區用於收集所有輸出
-        var outputBuffer = new StringBuilder();
-        outputBuffer.Append($"\x1b[0;0H");
-        // 隱藏游標 (符合 Rule 12)
-        outputBuffer.Append("\x1b[?25l");
-
-        vimEditor.RenderBufferToConsole(screenBuffer, outputBuffer);
-
-        vimEditor.Mode.AfterRender(outputBuffer);
-
-        // 一次性輸出所有內容到控制台
-        vimEditor.Console.Write(outputBuffer.ToString());
-    }
-
     /// <summary>
     /// 調整游標位置以適應行寬度
     /// </summary>
