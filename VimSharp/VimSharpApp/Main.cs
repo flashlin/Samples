@@ -4,16 +4,17 @@ namespace VimSharpApp;
 
 public class Main
 {
-    private readonly IConsoleDevice _consoleDevice;
+    private readonly IVimFactory _vimFactory;
 
-    public Main(IConsoleDevice consoleDevice)
+    public Main(IVimFactory vimFactory)
     {
-        _consoleDevice = consoleDevice;
+        _vimFactory = vimFactory;
     }
 
     public void Run()
     {
-        var editor1 = new VimEditor(_consoleDevice);
+        var consoleDevice = new ConsoleDevice();
+        var editor1 = _vimFactory.CreateEditor<VimEditor>(consoleDevice);
         editor1.OpenText($"""
         Hello, World!
         123
@@ -25,11 +26,11 @@ public class Main
         editor1.Context.IsStatusBarVisible = true;
         editor1.Context.SetViewPort(1, 1, 40, 5);
 
-        var editor2 = new VimEditor(_consoleDevice);
+        var editor2 = _vimFactory.CreateEditor<VimEditor>(consoleDevice);
         editor2.OpenText("Example2: Editor2!");
         editor2.Context.SetViewPort(20, 12, 40, 10);
 
-        var vim = new VimSharp();
+        var vim = new VimSharp(consoleDevice);
         vim.AddEditor(editor1);
         vim.AddEditor(editor2);
         vim.FocusEditor(editor1);

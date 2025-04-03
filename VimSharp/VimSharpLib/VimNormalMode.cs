@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace VimSharpLib;
 using System.Text;
 using System.Linq;
@@ -7,31 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-public class VimModeFactory
-{
-    private readonly IServiceProvider _serviceProvider;
-
-    public VimModeFactory(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
-    
-    public IVimMode Create<T>(VimEditor editor)
-        where T : IVimMode
-    {
-        var vimMode = _serviceProvider.GetRequiredService<T>();
-        vimMode.Instance = editor;
-        return vimMode;
-    }
-}
-
 public class VimNormalMode : IVimMode
 {
-    private readonly KeyHandler _keyHandler;
-    public VimNormalMode(VimEditor instance)
+    private readonly IKeyHandler _keyHandler;
+    private readonly IVimFactory _vimFactory;
+
+    public VimNormalMode(IKeyHandler keyHandler, IVimFactory vimFactory)
     {
-        Instance = instance;
-        _keyHandler = new KeyHandler(instance.Console);
+        _keyHandler = keyHandler;
+        _vimFactory = vimFactory;
         InitializeKeyPatterns();
     }
     
@@ -83,7 +65,7 @@ public class VimNormalMode : IVimMode
         {
             currentLine.SetText(textX, " ");
         }
-        Instance.Mode = new VimInsertMode(Instance);
+        Instance.Mode = _vimFactory.CreateVimMode<VimInsertMode>(Instance);
     }
     
     /// <summary>
@@ -257,7 +239,7 @@ public class VimNormalMode : IVimMode
         }
         
         // 切換到插入模式
-        Instance.Mode = new VimInsertMode(Instance);
+        Instance.Mode = _vimFactory.CreateVimMode<VimInsertMode>(Instance);
     }
 
     /// <summary>
@@ -265,7 +247,7 @@ public class VimNormalMode : IVimMode
     /// </summary>
     private void SwitchToVisualMode(List<ConsoleKeyInfo> keys)
     {
-        var mode = new VimVisualMode(Instance);
+        var mode = _vimFactory.CreateVimMode<VimVisualMode>(Instance);
         mode.SetStartPosition();
         Instance.Mode = mode;
     }
@@ -413,7 +395,7 @@ public class VimNormalMode : IVimMode
         }
         
         // 切換到普通模式
-        Instance.Mode = new VimInsertMode(Instance);
+        Instance.Mode = _vimFactory.CreateVimMode<VimInsertMode>(Instance);
         
         // 顯示狀態欄消息
         Instance.Context.StatusBar.SetText(0, "已貼上剪貼簿內容");

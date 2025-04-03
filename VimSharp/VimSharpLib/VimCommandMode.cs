@@ -4,8 +4,8 @@ namespace VimSharpLib;
 
 public class VimCommandMode : VimInsertMode
 {
-    public VimCommandMode(VimEditor instance) 
-        : base(instance)
+    public VimCommandMode(IKeyHandler keyHandler, IVimFactory vimFactory) 
+        : base(keyHandler, vimFactory)
     {
     }
     

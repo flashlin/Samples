@@ -8,20 +8,14 @@ namespace VimSharpLib.Tests
     {
         private readonly IConsoleDevice _mockConsole;
         private readonly VimEditor _editor;
+        private VimSharpTester _vimSharpTester = new();
 
         public VimInsertModeTests()
         {
             _mockConsole = Substitute.For<IConsoleDevice>();
             _mockConsole.WindowWidth.Returns(80);
             _mockConsole.WindowHeight.Returns(25);
-            _editor = new VimEditor(_mockConsole)
-            {
-                Context =
-                {
-                    IsLineNumberVisible = false,
-                    IsStatusBarVisible = false
-                }
-            };
+            _editor = _vimSharpTester.GetRequiredService<VimEditor>();
         }
 
         [Fact]

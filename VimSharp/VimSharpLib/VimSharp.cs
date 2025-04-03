@@ -7,9 +7,15 @@ namespace VimSharpLib;
 /// </summary>
 public class VimSharp
 {
-    private List<VimEditor> _editors = new List<VimEditor>();
+    private readonly IConsoleDevice _consoleDevice;
+    private readonly List<VimEditor> _editors = new();
     private VimEditor? _currentEditor;
     private bool _isRunning = true;
+
+    public VimSharp(IConsoleDevice consoleDevice)
+    {
+        _consoleDevice = consoleDevice;
+    }
 
     /// <summary>
     /// 添加一個編輯器實例
@@ -17,15 +23,13 @@ public class VimSharp
     /// <param name="editor">要添加的編輯器</param>
     public void AddEditor(VimEditor editor)
     {
-        
+        editor.Console = _consoleDevice;
         _editors.Add(editor);
-        
         // 如果這是第一個添加的編輯器，則自動設置為當前編輯器
         if (_currentEditor == null)
         {
             _currentEditor = editor;
         }
-        
     }
 
     /// <summary>
@@ -45,9 +49,7 @@ public class VimSharp
     /// </summary>
     public void Run()
     {
-        
-        VimEditor tempQualifier = _editors[0];
-        var screenBuffer = ColoredCharScreen.CreateScreenBuffer(tempQualifier.Console);
+        var screenBuffer = ColoredCharScreen.CreateScreenBuffer(_consoleDevice);
 
         // 主循環
         while (_isRunning)
@@ -88,7 +90,7 @@ public class VimSharp
         }
     }
 
-    public static void WriteToConsole(VimEditor vimEditor, ColoredCharScreen screenBuffer)
+    private void WriteToConsole(VimEditor vimEditor, ColoredCharScreen screenBuffer)
     {
         // 創建一個緩衝區用於收集所有輸出
         var outputBuffer = new StringBuilder();
@@ -101,6 +103,6 @@ public class VimSharp
         vimEditor.Mode.AfterRender(outputBuffer);
 
         // 一次性輸出所有內容到控制台
-        vimEditor.Console.Write(outputBuffer.ToString());
+        _consoleDevice.Write(outputBuffer.ToString());
     }
 } 

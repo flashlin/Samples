@@ -6,19 +6,17 @@ using System.Linq;
 
 public class VimEditor
 {
-    public VimEditor(IConsoleDevice console)
+    public VimEditor(IVimFactory vimFactory)
     {
-        Console = console;
-        Mode = new VimNormalMode(this);
-        Initialize();
+        Mode = vimFactory.CreateVimMode<VimNormalMode>(this);
     }
     public VimCommand? VimCommand { get; set; }
 
-    public IConsoleDevice Console { get; }
+    public IConsoleDevice Console { get; set; }
 
     public bool IsRunning { get; set; } = true;
     public ConsoleContext Context { get; set; } = new();
-    public IVimMode Mode { get; set; } = null!;
+    public IVimMode Mode { get; set; }
 
     // 添加剪貼簿緩衝區
     public List<ConsoleText> ClipboardBuffers { get; set; } = [];
@@ -469,11 +467,6 @@ public class VimEditor
             // 不需要滾動，直接更新游標 Y 位置
             Context.CursorY = targetCursorY;
         }
-    }
-
-    private void Initialize()
-    {
-        Mode = new VimNormalMode(this);
     }
 
     /// <summary>

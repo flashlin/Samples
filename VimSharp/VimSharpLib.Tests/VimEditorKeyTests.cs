@@ -8,17 +8,14 @@ namespace VimSharpLib.Tests
 {
     public class VimEditorKeyTests
     {
-        private IConsoleDevice _mockConsole;
-        private VimEditor _editor;
-        private ColoredCharScreen _screenBuffer; 
+        private readonly VimSharpTester _vimSharpTester = new();
+        private readonly VimEditor _editor;
+        private readonly IConsoleDevice _mockConsole;
 
         public VimEditorKeyTests()
         {
-            _mockConsole = Substitute.For<IConsoleDevice>();
-            _mockConsole.WindowWidth.Returns(80);
-            _mockConsole.WindowHeight.Returns(25);
-            _screenBuffer = ColoredCharScreen.CreateScreenBuffer(_mockConsole);
-            _editor = new VimEditor(_mockConsole);
+            _mockConsole = _vimSharpTester.MockConsole;
+            _editor = _vimSharpTester.CreateVimEditor();
             _editor.Context.IsLineNumberVisible = false;
             _editor.Context.IsStatusBarVisible = false;
             _editor.Context.SetViewPort(0, 0, 10, 5);
@@ -33,9 +30,6 @@ namespace VimSharpLib.Tests
 
             // 加載文本 "Hello"
             _editor.OpenText("Hello");
-
-            // 確保編輯器處於正常模式
-            _editor.Mode = new VimNormalMode(_editor);
 
             // Act
             // 按下向右按鍵 6 次
@@ -58,9 +52,6 @@ namespace VimSharpLib.Tests
 
             // 加載多行文本 "Hello\r\nFlash"
             _editor.OpenText("Hello\r\nFlash");
-
-            // 確保編輯器處於正常模式
-            _editor.Mode = new VimNormalMode(_editor);
 
             // Act
             // 按下向右按鍵 6 次
@@ -85,9 +76,6 @@ namespace VimSharpLib.Tests
 
             // 加載多行文本 "Hello\r\nHi"
             _editor.OpenText("Hello\r\nHi");
-
-            // 確保編輯器處於正常模式
-            _editor.Mode = new VimNormalMode(_editor);
 
             // Act
             // 按下向右按鍵 6 次
@@ -157,9 +145,6 @@ namespace VimSharpLib.Tests
             // 加載包含中文字符的文本 "閃1"
             _editor.OpenText("閃1");
 
-            // 確保編輯器處於正常模式
-            _editor.Mode = new VimNormalMode(_editor);
-
             // Act
             // 按下向右按鍵 1 次
             _editor.Mode.PressKey(ConsoleKeyPress.RightArrow);
@@ -185,9 +170,6 @@ namespace VimSharpLib.Tests
 
             // 加載文本 "Hello"
             _editor.OpenText("Hello");
-
-            // 確保編輯器處於正常模式
-            _editor.Mode = new VimNormalMode(_editor);
 
             // Act
             // 按下 '$' 按鍵
@@ -279,7 +261,7 @@ namespace VimSharpLib.Tests
             // 確保行號寬度被正確計算為 2
             Assert.Equal(2, _editor.Context.GetLineNumberWidth());
 
-            _editor.Render(_screenBuffer);
+            _editor.Render(_vimSharpTester.ScreenBuffer);
             // 驗證狀態欄顯示內容
             Assert.Equal(" Normal | Line: 1 | Col: 1 ", _editor.Context.StatusBar.ToString());
 
@@ -531,9 +513,6 @@ namespace VimSharpLib.Tests
             // 將游標移到 W 上
             // "Hello, " 長度為 7，加上 ViewPort.X(1)，游標位置應為 8
             _editor.Context.CursorX = 8;
-
-            // 確保編輯器處於正常模式
-            _editor.Mode = new VimNormalMode(_editor);
 
             // Act
             // 按下大寫 D 按鈕，刪除從當前位置到行尾

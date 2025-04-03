@@ -16,18 +16,17 @@ namespace VimSharpApp
             var builder = Host.CreateApplicationBuilder(args);
 
             var services = builder.Services;
-            
-            services.AddSingleton<IConsoleDevice, ConsoleDevice>();
-            services.AddTransient<IKeyHandler, KeyHandler>();
+            services.AddVimSharpServices();
             services.AddSingleton<Main>();
-            
+
             var host = builder.Build();
 
             // 取得 Console 應用程式的實例
             _main = host.Services.GetRequiredService<Main>();
-            
+
             // 執行 Console 應用程式
             _main.Run();
         }
     }
-} 
+}    
+     

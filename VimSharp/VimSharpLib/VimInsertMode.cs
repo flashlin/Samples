@@ -6,12 +6,13 @@ using System.Collections.Generic;
 
 public class VimInsertMode : IVimMode
 {
-    private readonly KeyHandler _keyHandler;
+    private readonly IVimFactory _vimFactory;
+    private readonly IKeyHandler _keyHandler;
 
-    public VimInsertMode(VimEditor instance)
+    public VimInsertMode(IKeyHandler keyHandler, IVimFactory vimFactory)
     {
-        Instance = instance;
-        _keyHandler = new KeyHandler(instance.Console);
+        _vimFactory = vimFactory;
+        _keyHandler = keyHandler;
         InitializeKeyHandler();
     }
 
@@ -67,7 +68,8 @@ public class VimInsertMode : IVimMode
         var currentLine = Instance.GetCurrentLine();
         if (textX >= currentLine.Width)
         {
-            new VimNormalMode(Instance).MoveCursorToEndOfLine([]);
+            var vimNormalMode = _vimFactory.CreateVimMode<VimNormalMode>(Instance);
+            vimNormalMode.MoveCursorToEndOfLine([]);
             Instance.Context.CursorX += 1;
         }
     }
@@ -242,7 +244,7 @@ public class VimInsertMode : IVimMode
         int offsetX = Instance.Context.OffsetX;
         
         // 切換到普通模式
-        Instance.Mode = new VimNormalMode(Instance);
+        Instance.Mode = _vimFactory.CreateVimMode<VimNormalMode>(Instance);
         
         // 如果游標在行尾，則處理游標位置
         if (isEndOfLine)
@@ -272,12 +274,10 @@ public class VimInsertMode : IVimMode
 
     private void HandleSlashKey(List<ConsoleKeyInfo> keys)
     {
-        var vimCommand = new VimCommand(Instance.Console)
+        var vimCommand = _vimFactory.CreateEditor<VimCommand>(Instance.Console);
+        vimCommand.OnClose = () =>
         {
-            OnClose = () =>
-            {
-                Instance.VimCommand = null;
-            }
+            Instance.VimCommand = null;
         };
         Instance.VimCommand = vimCommand;
     }

@@ -7,15 +7,14 @@ namespace VimSharpLib.Tests;
 
 public class VimVisualModeTests
 {
-    private IConsoleDevice _mockConsole;
-    private VimEditor _editor;
+    private readonly VimSharpTester _vimSharpTester = new();
+    private readonly IConsoleDevice _mockConsole;
+    private readonly VimEditor _editor;
 
     public VimVisualModeTests()
     {
-        _mockConsole = Substitute.For<IConsoleDevice>();
-        _mockConsole.WindowWidth.Returns(80);
-        _mockConsole.WindowHeight.Returns(25);
-        _editor = new VimEditor(_mockConsole);
+        _editor = _vimSharpTester.CreateVimEditor();
+        _mockConsole = _vimSharpTester.MockConsole;
         _editor.Context.IsLineNumberVisible = false;
         _editor.Context.IsStatusBarVisible = false;
     }
@@ -29,9 +28,6 @@ public class VimVisualModeTests
 
         // 加載文本 "Hello World"
         _editor.OpenText("Hello World");
-
-        // 確保編輯器處於正常模式
-        _editor.Mode = new VimNormalMode(_editor);
 
         // Act
         // 按下 w 按鍵
@@ -68,9 +64,6 @@ public class VimVisualModeTests
         // 加載文本 "Hello World\nVim is a Editor"
         _editor.OpenText("Hello World\nVim is a Editor");
         
-        // 確保編輯器處於正常模式
-        _editor.Mode = new VimNormalMode(_editor);
-
         // Act
         // 按下 w 按鍵
         SetReadKey(ConsoleKeyPress.w);

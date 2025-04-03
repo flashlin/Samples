@@ -5,29 +5,15 @@ namespace VimSharpLib.Tests
 {
     public class VimEditorRenderTests
     {
-        private IConsoleDevice _mockConsole;
+        private VimSharpTester _vimSharpTester = new();  
         private VimEditor _editor;
 
         public VimEditorRenderTests()
         {
-            _mockConsole = Substitute.For<IConsoleDevice>();
-            _mockConsole.WindowWidth.Returns(80);
-            _mockConsole.WindowHeight.Returns(25);
-            _editor = new VimEditor(_mockConsole);
+            _editor = _vimSharpTester.CreateVimEditor();
             _editor.Context.IsLineNumberVisible = false;
             _editor.Context.IsStatusBarVisible = false;
             _editor.Context.SetViewPort(0, 0, 10, 5);
-        }
-
-        /// <summary>
-        /// 創建自定義大小的 screenBuffer
-        /// </summary>
-        /// <param name="height">緩衝區高度</param>
-        /// <param name="width">緩衝區寬度</param>
-        /// <returns>初始化的 ColoredChar 陣列</returns>
-        private ColoredCharScreen CreateScreenBuffer()
-        {
-            return ColoredCharScreen.CreateScreenBuffer(_mockConsole);
         }
 
         [Fact]
@@ -45,7 +31,7 @@ namespace VimSharpLib.Tests
             _editor.OpenText(text);
             
             // 創建自定義大小的 screenBuffer
-            var screenBuffer = CreateScreenBuffer();
+            var screenBuffer = _vimSharpTester.ScreenBuffer;
             
             // Act
             _editor.Render(screenBuffer);
@@ -82,7 +68,7 @@ namespace VimSharpLib.Tests
             _editor.OpenText(text);
             
             // 創建自定義大小的 screenBuffer
-            var screenBuffer = CreateScreenBuffer();
+            var screenBuffer = _vimSharpTester.ScreenBuffer;
             
             // Act
             _editor.Render(screenBuffer);
@@ -115,7 +101,7 @@ namespace VimSharpLib.Tests
             _editor.OpenText(text);
             
             // 創建自定義大小的 screenBuffer
-            var screenBuffer = CreateScreenBuffer();
+            var screenBuffer = _vimSharpTester.ScreenBuffer;
             
             // Act
             _editor.Render(screenBuffer);

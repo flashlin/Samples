@@ -3,13 +3,13 @@ using TextCopy;
 namespace VimSharpLib;
 
 using System.Text;
-using System.Linq;
 using System;
 using System.Collections.Generic;
 
 public class VimVisualMode : IVimMode
 {
-    private readonly KeyHandler _keyHandler;
+    private readonly IKeyHandler _keyHandler;
+    private readonly IVimFactory _vimFactory;
     private readonly VimNormalMode _normalMode;
 
     // 記錄選取的結束位置
@@ -20,11 +20,12 @@ public class VimVisualMode : IVimMode
     private int _startTextX;
     private int _startTextY;
 
-    public VimVisualMode(VimEditor instance)
+    public VimVisualMode(VimEditor vimEditor, IKeyHandler keyHandler, IVimFactory vimFactory)
     {
-        Instance = instance;
-        _normalMode = new VimNormalMode(instance);
-        _keyHandler = new KeyHandler(instance.Console);
+        Instance = vimEditor;
+        _normalMode = vimFactory.CreateVimMode<VimNormalMode>(Instance);
+        _keyHandler = keyHandler;
+        _vimFactory = vimFactory;
         InitializeKeyPatterns();
     }
 
@@ -71,7 +72,7 @@ public class VimVisualMode : IVimMode
         var endOffset = Instance.Context.ComputeOffset(_endTextX, _endTextY);
         var selectedText = Instance.Context.GetText(startOffset, endOffset - startOffset + 1);
         ClipboardService.SetText(selectedText);
-        Instance.Mode = new VimNormalMode(Instance);
+        Instance.Mode = _vimFactory.CreateVimMode<VimNormalMode>(Instance);
     }
 
     private void InitializeKeyPatterns()
@@ -105,12 +106,14 @@ public class VimVisualMode : IVimMode
 
     private void MoveCursorToStartOfLine(List<ConsoleKeyInfo> keys)
     {
+        _normalMode.Instance = Instance;
         _normalMode.MoveCursorToStartOfLine(keys);
         SaveLastPosition();
     }
 
     private void MoveCursorToEndOfLine(List<ConsoleKeyInfo> keys)
     {
+        _normalMode.Instance = Instance;
         _normalMode.MoveCursorToEndOfLine(keys);
         SaveLastPosition();
     }
@@ -120,6 +123,7 @@ public class VimVisualMode : IVimMode
     /// </summary>
     private void MoveCursorDown(List<ConsoleKeyInfo> keys)
     {
+        _normalMode.Instance = Instance;
         _normalMode.MoveCursorDown(keys);
         SaveLastPosition();
     }
@@ -129,6 +133,7 @@ public class VimVisualMode : IVimMode
     /// </summary>
     private void MoveCursorLeft(List<ConsoleKeyInfo> keys)
     {
+        _normalMode.Instance = Instance;
         _normalMode.MoveCursorLeft(keys);
         SaveLastPosition();
     }
@@ -138,6 +143,7 @@ public class VimVisualMode : IVimMode
     /// </summary>
     private void MoveCursorRight(List<ConsoleKeyInfo> keys)
     {
+        _normalMode.Instance = Instance;
         _normalMode.MoveCursorRight(keys);
         SaveLastPosition();
     }
@@ -147,6 +153,7 @@ public class VimVisualMode : IVimMode
     /// </summary>
     private void MoveCursorUp(List<ConsoleKeyInfo> keys)
     {
+        _normalMode.Instance = Instance;
         _normalMode.MoveCursorUp(keys);
         SaveLastPosition();
     }
@@ -202,6 +209,6 @@ public class VimVisualMode : IVimMode
     /// </summary>
     private void SwitchToVisualMode(List<ConsoleKeyInfo> keys)
     {
-        Instance.Mode = new VimNormalMode(Instance);
+        Instance.Mode = _vimFactory.CreateVimMode<VimNormalMode>(Instance);
     }
 }

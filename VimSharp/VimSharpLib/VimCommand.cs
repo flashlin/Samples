@@ -6,13 +6,14 @@ public class VimCommand : VimEditor
 {
     private ColoredCharScreen? _backupScreen;
 
-    public VimCommand(IConsoleDevice console) : base(console)
+    public VimCommand(IVimFactory vimFactory, IConsoleDevice console) 
+        : base(vimFactory)
     {
         var viewWidth = (int)(console.WindowWidth * 0.8);
         var viewX = console.WindowWidth / 2 - viewWidth / 2;
         var viewY = 5;
         Context.SetViewPort(viewX, viewY, viewWidth, 1);
-        Mode = new VimCommandMode(this);
+        Mode = vimFactory.CreateVimMode<VimCommandMode>(this);
     }
 
     public override void Render(ColoredCharScreen screenBuffer)
