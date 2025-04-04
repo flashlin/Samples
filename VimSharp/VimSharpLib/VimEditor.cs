@@ -10,7 +10,7 @@ public class VimEditor
     {
         Mode = vimFactory.CreateVimMode<VimNormalMode>(this);
     }
-    public VimCommand? VimCommand { get; set; }
+    public VimCommandEditor? VimCommand { get; set; }
     public IConsoleDevice Console { get; set; }
     public ColoredCharScreen ScreenBuffer { get; set; }
     public bool IsRunning { get; set; } = true;

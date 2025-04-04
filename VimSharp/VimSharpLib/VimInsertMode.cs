@@ -274,7 +274,7 @@ public class VimInsertMode : IVimMode
 
     private void HandleSlashKey(List<ConsoleKeyInfo> keys)
     {
-        var vimCommand = _vimFactory.CreateEditor<VimCommand>(Instance.Console);
+        var vimCommand = _vimFactory.CreateEditor<VimCommandEditor>(Instance.Console);
         vimCommand.OnClose = () =>
         {
             vimCommand.RestoreScreen(Instance.ScreenBuffer);

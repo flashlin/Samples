@@ -2,11 +2,11 @@ using VimSharpLib;
 
 namespace VimSharpLib;
 
-public class VimCommand : VimEditor
+public class VimCommandEditor : VimEditor
 {
     private ColoredCharScreen? _backupScreen;
 
-    public VimCommand(IVimFactory vimFactory, IConsoleDevice console) 
+    public VimCommandEditor(IVimFactory vimFactory, IConsoleDevice console) 
         : base(vimFactory)
     {
         var viewWidth = (int)(console.WindowWidth * 0.8);

@@ -14,7 +14,7 @@ public static class VimSharpServiceCollectionExtensions
         services.AddTransient<VimVisualMode>();
         services.AddTransient<VimCommandMode>();
         services.AddTransient<VimEditor>();
-        services.AddTransient<VimCommand>();
+        services.AddTransient<VimCommandEditor>();
         return services;
     }
 }
