@@ -22,13 +22,15 @@ public class VimCommand : VimEditor
         if (_backupScreen == null)
         {
             var viewPort = Context.ViewPort;
-            _backupScreen = new ColoredCharScreen(viewPort.Height, viewPort.Width);
-            // 複製 ViewPort 範圍的螢幕內容
-            for (int y = 0; y < viewPort.Height; y++)
+            // 創建比 ViewPort 大一圈的備份區域
+            _backupScreen = new ColoredCharScreen(viewPort.Height + 2, viewPort.Width + 2);
+            
+            // 複製 ViewPort 範圍的螢幕內容，包含周圍一圈
+            for (int y = 0; y < viewPort.Height + 2; y++)
             {
-                for (int x = 0; x < viewPort.Width; x++)
+                for (int x = 0; x < viewPort.Width + 2; x++)
                 {
-                    _backupScreen[y, x] = screenBuffer[viewPort.Y + y, viewPort.X + x];
+                    _backupScreen[y, x] = screenBuffer[viewPort.Y + y - 1, viewPort.X + x - 1];
                 }
             }
         }
@@ -39,13 +41,14 @@ public class VimCommand : VimEditor
     public void RestoreScreen(ColoredCharScreen bufferScreen)
     {
         if (_backupScreen == null) return;
+
         var viewPort = Context.ViewPort;
-        // 將備份的內容還原到指定的緩衝區
-        for (int y = 0; y < viewPort.Height; y++)
+        // 將備份的內容還原到指定的緩衝區，包含周圍一圈
+        for (int y = 0; y < viewPort.Height + 2; y++)
         {
-            for (int x = 0; x < viewPort.Width; x++)
+            for (int x = 0; x < viewPort.Width + 2; x++)
             {
-                bufferScreen[viewPort.Y + y, viewPort.X + x] = _backupScreen[y, x];
+                bufferScreen[viewPort.Y + y - 1, viewPort.X + x - 1] = _backupScreen[y, x];
             }
         }
     }
