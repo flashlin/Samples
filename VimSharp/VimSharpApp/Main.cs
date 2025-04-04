@@ -24,11 +24,11 @@ public class Main
         """);
         editor1.Context.IsLineNumberVisible = true;
         editor1.Context.IsStatusBarVisible = true;
-        editor1.Context.SetViewPort(1, 1, 40, 5);
+        editor1.Context.SetViewPort(1, 1, consoleDevice.WindowWidth-2, 10);
 
         var editor2 = _vimFactory.CreateEditor<VimEditor>(consoleDevice);
         editor2.OpenText("Example2: Editor2!");
-        editor2.Context.SetViewPort(20, 12, 40, 10);
+        editor2.Context.SetViewPort(1, 12, consoleDevice.WindowWidth-2, 10);
 
         var vim = new VimSharp(consoleDevice);
         vim.AddEditor(editor1);
