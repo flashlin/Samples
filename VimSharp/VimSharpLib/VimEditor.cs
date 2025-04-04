@@ -248,6 +248,11 @@ public class VimEditor
         Init();
     }
 
+    public string GetText()
+    {
+        return Context.ToString();
+    }
+
     public virtual void Render(ColoredCharScreen screenBuffer)
     {
         ScreenBuffer = screenBuffer;

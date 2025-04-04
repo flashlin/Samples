@@ -60,6 +60,16 @@ public class ConsoleContext
         return Texts.Count.ToString().Length + 1;
     }
 
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        foreach (var text in Texts)
+        {
+            sb.Append(text);
+        }
+        return sb.ToString();
+    }
+
     public string GetText(int offset, int length)
     {
         var text = new StringBuilder();
