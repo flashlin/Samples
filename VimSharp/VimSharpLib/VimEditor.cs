@@ -11,9 +11,8 @@ public class VimEditor
         Mode = vimFactory.CreateVimMode<VimNormalMode>(this);
     }
     public VimCommand? VimCommand { get; set; }
-
     public IConsoleDevice Console { get; set; }
-
+    public ColoredCharScreen ScreenBuffer { get; set; }
     public bool IsRunning { get; set; } = true;
     public ConsoleContext Context { get; set; } = new();
     public IVimMode Mode { get; set; }
@@ -251,6 +250,7 @@ public class VimEditor
 
     public virtual void Render(ColoredCharScreen screenBuffer)
     {
+        ScreenBuffer = screenBuffer;
         // 計算行號寬度
         var lineNumberWidth = Context.GetLineNumberWidth();
         // 獲取游標在文本中的實際位置
@@ -261,7 +261,6 @@ public class VimEditor
         RenderStatusBar(screenBuffer);
         RenderFrame(screenBuffer);
         Mode.Render(screenBuffer);
-
         VimCommand?.Render(screenBuffer);
     }
 

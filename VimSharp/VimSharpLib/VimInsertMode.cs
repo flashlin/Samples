@@ -277,6 +277,7 @@ public class VimInsertMode : IVimMode
         var vimCommand = _vimFactory.CreateEditor<VimCommand>(Instance.Console);
         vimCommand.OnClose = () =>
         {
+            vimCommand.RestoreScreen(Instance.ScreenBuffer);
             Instance.VimCommand = null;
         };
         Instance.VimCommand = vimCommand;

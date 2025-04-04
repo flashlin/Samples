@@ -23,7 +23,6 @@ public class VimCommand : VimEditor
         {
             var viewPort = Context.ViewPort;
             _backupScreen = new ColoredCharScreen(viewPort.Height, viewPort.Width);
-            
             // 複製 ViewPort 範圍的螢幕內容
             for (int y = 0; y < viewPort.Height; y++)
             {
@@ -40,7 +39,6 @@ public class VimCommand : VimEditor
     public void RestoreScreen(ColoredCharScreen bufferScreen)
     {
         if (_backupScreen == null) return;
-
         var viewPort = Context.ViewPort;
         // 將備份的內容還原到指定的緩衝區
         for (int y = 0; y < viewPort.Height; y++)
