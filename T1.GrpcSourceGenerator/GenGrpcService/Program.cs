@@ -73,8 +73,7 @@ namespace GenGrpcService
             }
             
             Console.WriteLine();
-            Console.WriteLine("按任意鍵退出...");
-            Console.ReadKey();
+            Console.WriteLine("Generate Grpc Service Code Done...");
         }
     }
 } 
