@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package consoletestapp;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+message SayHelloAsyncRequestMessage {
+  string name = 1;
+}
+
+message SayHelloAsyncReplyMessage {
+  string result = 1;
+}
+
+message GetUserInfoAsyncRequestMessage {
+  int32 id = 1;
+  bool includeDetails = 2;
+}
+
+message GetUserInfoAsyncReplyMessage {
+  string result = 1;
+}
+
+message AddRequestMessage {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+message AddReplyMessage {
+  int32 result = 1;
+}
+
+service Greeter {
+  rpc SayHelloAsync (SayHelloAsyncRequestMessage) returns (SayHelloAsyncReplyMessage);
+  rpc GetUserInfoAsync (GetUserInfoAsyncRequestMessage) returns (GetUserInfoAsyncReplyMessage);
+  rpc Add (AddRequestMessage) returns (AddReplyMessage);
+}

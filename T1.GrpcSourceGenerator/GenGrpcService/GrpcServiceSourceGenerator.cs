@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using T1.GrpcSourceGenerator;
 
 namespace GenGrpcService
 {
@@ -17,7 +18,7 @@ namespace GenGrpcService
     public class GrpcServiceSourceGenerator
     {
         private const string AttributeName = "GenerateGrpcServiceAttribute";
-        private const string AttributeFullName = "GenGrpcService.GenerateGrpcServiceAttribute";
+        private const string AttributeFullName = "T1.GrpcSourceGenerator.GenerateGrpcServiceAttribute";
 
         /// <summary>
         /// 執行 gRPC 服務代碼生成
@@ -25,6 +26,11 @@ namespace GenGrpcService
         /// <param name="csprojFile">專案文件路徑</param>
         public void Execute(string csprojFile)
         {
+            if (string.IsNullOrEmpty(csprojFile))
+            {
+                throw new ArgumentNullException(nameof(csprojFile));
+            }
+
             Console.WriteLine("====================================");
             Console.WriteLine($"開始處理專案文件: {csprojFile}");
             Console.WriteLine("====================================");
@@ -35,7 +41,12 @@ namespace GenGrpcService
                 return;
             }
 
-            string projectDirectory = Path.GetDirectoryName(csprojFile);
+            string? projectDirectory = Path.GetDirectoryName(csprojFile);
+            if (string.IsNullOrEmpty(projectDirectory))
+            {
+                throw new InvalidOperationException("無法獲取專案目錄");
+            }
+
             Console.WriteLine($"專案目錄: {projectDirectory}");
             
             try 
@@ -499,10 +510,13 @@ namespace GenGrpcService
 
         private string ToCamelCase(string input)
         {
-            if (string.IsNullOrEmpty(input) || !char.IsUpper(input[0]))
+            if (string.IsNullOrEmpty(input))
+                return string.Empty;
+            
+            if (!char.IsUpper(input[0]))
                 return input;
             
-            return char.ToLower(input[0]) + input.Substring(1);
+            return char.ToLower(input[0]) + input[1..];
         }
 
         private string ToPascalCase(string input)

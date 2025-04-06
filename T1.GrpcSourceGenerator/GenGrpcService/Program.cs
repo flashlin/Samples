@@ -22,7 +22,7 @@ namespace GenGrpcService
                 
                 // 互動式模式：如果沒有提供命令行參數，則提示用戶輸入
                 Console.Write("請輸入專案文件路徑: ");
-                string projectFilePath = Console.ReadLine().Trim();
+                string projectFilePath = Console.ReadLine()?.Trim();
                 
                 if (string.IsNullOrEmpty(projectFilePath))
                 {
