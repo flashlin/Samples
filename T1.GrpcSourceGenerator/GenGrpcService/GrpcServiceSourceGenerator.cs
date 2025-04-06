@@ -47,22 +47,22 @@ namespace GenGrpcService
             }
 
             Console.WriteLine("====================================");
-            Console.WriteLine($"開始處理專案文件: {csprojFile}");
+            Console.WriteLine($"Starting to process project file: {csprojFile}");
             Console.WriteLine("====================================");
             
             if (!File.Exists(csprojFile))
             {
-                Console.WriteLine($"錯誤：找不到專案文件 {csprojFile}");
+                Console.WriteLine($"Error: Project file not found {csprojFile}");
                 return;
             }
 
             string? projectDirectory = Path.GetDirectoryName(csprojFile);
             if (string.IsNullOrEmpty(projectDirectory))
             {
-                throw new InvalidOperationException("無法獲取專案目錄");
+                throw new InvalidOperationException("Unable to get project directory");
             }
 
-            Console.WriteLine($"專案目錄: {projectDirectory}");
+            Console.WriteLine($"Project directory: {projectDirectory}");
             
             try 
             {
@@ -70,11 +70,11 @@ namespace GenGrpcService
                 var csharpFiles = GetCSharpFiles(projectDirectory);
                 if (csharpFiles.Count == 0)
                 {
-                    Console.WriteLine("找不到 C# 檔案");
+                    Console.WriteLine("No C# files found");
                     return;
                 }
 
-                Console.WriteLine($"已找到 {csharpFiles.Count} 個 C# 檔案:");
+                Console.WriteLine($"Found {csharpFiles.Count} C# files:");
                 foreach (var file in csharpFiles)
                 {
                     Console.WriteLine($"  - {file}");
@@ -84,21 +84,21 @@ namespace GenGrpcService
                 var compilation = CreateCompilation(csharpFiles);
                 if (compilation == null)
                 {
-                    Console.WriteLine("無法創建代碼編譯器");
+                    Console.WriteLine("Failed to create code compiler");
                     return;
                 }
-                Console.WriteLine("成功創建代碼編譯器");
+                Console.WriteLine("Successfully created code compiler");
 
                 // 掃描標記了 [GenerateGrpcService] 特性的類
                 var candidateClasses = FindCandidateClasses(compilation);
                 if (candidateClasses.Count == 0)
                 {
-                    Console.WriteLine("找不到標記了 [GenerateGrpcService] 的類");
-                    Console.WriteLine("請確保已添加 GenerateGrpcServiceAttribute 特性並正確引用");
+                    Console.WriteLine("No classes found with [GenerateGrpcService] attribute");
+                    Console.WriteLine("Please ensure you have added the GenerateGrpcServiceAttribute and referenced it correctly");
                     return;
                 }
 
-                Console.WriteLine($"已找到 {candidateClasses.Count} 個標記的類");
+                Console.WriteLine($"Found {candidateClasses.Count} classes with the attribute");
 
                 // 處理每個標記的類
                 foreach (var (classSymbol, interfaceSymbol) in candidateClasses)
@@ -108,7 +108,7 @@ namespace GenGrpcService
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"執行過程中發生錯誤: {ex.Message}");
+                Console.WriteLine($"An error occurred during execution: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);
             }
         }
@@ -143,7 +143,7 @@ namespace GenGrpcService
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"解析文件 {file} 時發生錯誤：{ex.Message}");
+                    Console.WriteLine($"Error parsing file {file}: {ex.Message}");
                 }
             }
 
@@ -206,7 +206,7 @@ namespace GenGrpcService
                     // 尋找具有目標特性的類
                     foreach (var attribute in classSymbol.GetAttributes())
                     {
-                        Console.WriteLine($"檢查類 {classSymbol.Name} 的特性: {attribute.AttributeClass?.Name}");
+                        Console.WriteLine($"Checking class {classSymbol.Name} attribute: {attribute.AttributeClass?.Name}");
                         
                         if (attribute.AttributeClass?.Name == AttributeName || 
                             attribute.AttributeClass?.ToDisplayString() == AttributeFullName)
@@ -214,16 +214,16 @@ namespace GenGrpcService
                             if (attribute.ConstructorArguments.Length > 0)
                             {
                                 var attributeArg = attribute.ConstructorArguments[0].Value;
-                                Console.WriteLine($"  特性參數類型: {attributeArg?.GetType().Name}");
+                                Console.WriteLine($"  Attribute parameter type: {attributeArg?.GetType().Name}");
                                 
                                 if (attributeArg is INamedTypeSymbol interfaceType)
                                 {
                                     result.Add((classSymbol, interfaceType));
-                                    Console.WriteLine($"找到類 {classSymbol.Name}，標記了接口 {interfaceType.Name}");
+                                    Console.WriteLine($"Found class {classSymbol.Name}, marked with interface {interfaceType.Name}");
                                 }
                                 else
                                 {
-                                    Console.WriteLine($"  特性參數不是 INamedTypeSymbol");
+                                    Console.WriteLine($"  Attribute parameter is not INamedTypeSymbol");
                                 }
                             }
                         }
