@@ -1,14 +1,14 @@
 using System.Threading.Tasks;
 
-namespace T1.GrpcSourceGenerator.Demo
+namespace ConsoleTestApp
 {
     /// <summary>
-    /// 示例接口，用於生成 gRPC 服務
+    /// 問候服務接口
     /// </summary>
     public interface IGreeter
     {
         /// <summary>
-        /// 打招呼方法
+        /// 向指定的人問候
         /// </summary>
         /// <param name="name">姓名</param>
         /// <returns>問候語</returns>
@@ -32,7 +32,7 @@ namespace T1.GrpcSourceGenerator.Demo
     }
     
     /// <summary>
-    /// 用戶信息類
+    /// 用戶信息
     /// </summary>
     public class UserInfo
     {

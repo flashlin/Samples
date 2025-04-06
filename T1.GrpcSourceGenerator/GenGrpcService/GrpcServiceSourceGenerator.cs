@@ -1,118 +1,282 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace T1.GrpcSourceGenerator
+namespace GenGrpcService
 {
-    [Generator]
-    public class GrpcServiceSourceGenerator : ISourceGenerator
+    /// <summary>
+    /// gRPC 服務代碼生成器
+    /// </summary>
+    public class GrpcServiceSourceGenerator
     {
-        private const string AttributeFullName = "T1.GrpcSourceGenerator.GenerateGrpcServiceAttribute";
+        private const string AttributeName = "GenerateGrpcServiceAttribute";
+        private const string AttributeFullName = "GenGrpcService.GenerateGrpcServiceAttribute";
 
-        public void Initialize(GeneratorInitializationContext context)
+        /// <summary>
+        /// 執行 gRPC 服務代碼生成
+        /// </summary>
+        /// <param name="csprojFile">專案文件路徑</param>
+        public void Execute(string csprojFile)
         {
-            // 註冊語法接收器
-            context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
-        }
-
-        public void Execute(GeneratorExecutionContext context)
-        {
-            // 處理候選類
-            if (!(context.SyntaxContextReceiver is SyntaxReceiver receiver) || receiver.CandidateClasses.Count == 0)
+            Console.WriteLine("====================================");
+            Console.WriteLine($"開始處理專案文件: {csprojFile}");
+            Console.WriteLine("====================================");
+            
+            if (!File.Exists(csprojFile))
+            {
+                Console.WriteLine($"錯誤：找不到專案文件 {csprojFile}");
                 return;
-
-            // 獲取 Attribute 符號
-            INamedTypeSymbol attributeSymbol = context.Compilation.GetTypeByMetadataName(AttributeFullName);
-            if (attributeSymbol == null)
-            {
-                // 如果找不到 Attribute 類型，生成一個
-                GenerateAttributeClass(context);
-                return; // 在下一個編譯循環中再處理
             }
 
-            // 處理每個標記了 Attribute 的類
-            foreach (var candidateClass in receiver.CandidateClasses)
+            string projectDirectory = Path.GetDirectoryName(csprojFile);
+            Console.WriteLine($"專案目錄: {projectDirectory}");
+            
+            try 
             {
-                ProcessClass(context, candidateClass.ClassSymbol, candidateClass.InterfaceSymbol);
+                // 獲取所有 C# 檔案，直接通過文件系統而不使用 MSBuild
+                var csharpFiles = GetCSharpFiles(projectDirectory);
+                if (csharpFiles.Count == 0)
+                {
+                    Console.WriteLine("找不到 C# 檔案");
+                    return;
+                }
+
+                Console.WriteLine($"已找到 {csharpFiles.Count} 個 C# 檔案:");
+                foreach (var file in csharpFiles)
+                {
+                    Console.WriteLine($"  - {file}");
+                }
+
+                // 創建代碼分析工作區
+                var compilation = CreateCompilation(csharpFiles);
+                if (compilation == null)
+                {
+                    Console.WriteLine("無法創建代碼編譯器");
+                    return;
+                }
+                Console.WriteLine("成功創建代碼編譯器");
+
+                // 掃描標記了 [GenerateGrpcService] 特性的類
+                var candidateClasses = FindCandidateClasses(compilation);
+                if (candidateClasses.Count == 0)
+                {
+                    Console.WriteLine("找不到標記了 [GenerateGrpcService] 的類");
+                    Console.WriteLine("請確保已添加 GenerateGrpcServiceAttribute 特性並正確引用");
+                    return;
+                }
+
+                Console.WriteLine($"已找到 {candidateClasses.Count} 個標記的類");
+
+                // 處理每個標記的類
+                foreach (var (classSymbol, interfaceSymbol) in candidateClasses)
+                {
+                    ProcessClass(classSymbol, interfaceSymbol, projectDirectory);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"執行過程中發生錯誤: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
             }
         }
 
-        private void GenerateAttributeClass(GeneratorExecutionContext context)
+        private List<string> GetCSharpFiles(string projectDirectory)
         {
-            string attributeSource = @"
-using System;
+            var result = new List<string>();
 
-namespace T1.GrpcSourceGenerator
-{
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class GenerateGrpcServiceAttribute : Attribute
-    {
-        public Type InterfaceType { get; }
+            // 遞迴搜索目錄下所有的 .cs 文件，排除 bin 和 obj 目錄
+            foreach (var file in Directory.GetFiles(projectDirectory, "*.cs", SearchOption.AllDirectories))
+            {
+                if (!file.Contains("\\bin\\") && !file.Contains("\\obj\\"))
+                {
+                    result.Add(file);
+                }
+            }
 
-        public GenerateGrpcServiceAttribute(Type interfaceType)
-        {
-            InterfaceType = interfaceType ?? throw new ArgumentNullException(nameof(interfaceType));
-        }
-    }
-}";
-            context.AddSource("GenerateGrpcServiceAttribute.g.cs", SourceText.From(attributeSource, Encoding.UTF8));
+            return result;
         }
 
-        private void ProcessClass(GeneratorExecutionContext context, INamedTypeSymbol classSymbol, INamedTypeSymbol interfaceSymbol)
+        private Compilation CreateCompilation(List<string> sourceFiles)
+        {
+            // 創建語法樹
+            var syntaxTrees = new List<SyntaxTree>();
+            foreach (var file in sourceFiles)
+            {
+                try
+                {
+                    string code = File.ReadAllText(file);
+                    var syntaxTree = CSharpSyntaxTree.ParseText(code);
+                    syntaxTrees.Add(syntaxTree);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"解析文件 {file} 時發生錯誤：{ex.Message}");
+                }
+            }
+
+            // 獲取基本引用
+            var references = new List<MetadataReference>
+            {
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Task).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(GenerateGrpcServiceAttribute).Assembly.Location)
+            };
+
+            // 獲取 .NET Runtime 路徑
+            string runtimePath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+            string[] assemblies = { 
+                "System.Runtime.dll",
+                "System.Collections.dll",
+                "System.Text.RegularExpressions.dll",
+                "System.Console.dll",
+                "System.IO.dll"
+            };
+
+            foreach (var assembly in assemblies)
+            {
+                string path = Path.Combine(runtimePath, assembly);
+                if (File.Exists(path))
+                {
+                    references.Add(MetadataReference.CreateFromFile(path));
+                }
+            }
+
+            // 創建編譯
+            var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
+            var compilation = CSharpCompilation.Create(
+                "DynamicAssembly",
+                syntaxTrees: syntaxTrees,
+                references: references,
+                options: compilationOptions);
+
+            return compilation;
+        }
+
+        private List<(INamedTypeSymbol ClassSymbol, INamedTypeSymbol InterfaceSymbol)> FindCandidateClasses(Compilation compilation)
+        {
+            var result = new List<(INamedTypeSymbol ClassSymbol, INamedTypeSymbol InterfaceSymbol)>();
+
+            foreach (SyntaxTree syntaxTree in compilation.SyntaxTrees)
+            {
+                SemanticModel semanticModel = compilation.GetSemanticModel(syntaxTree);
+                
+                // 查找類聲明
+                var classDeclarations = syntaxTree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>();
+                
+                foreach (var classDeclaration in classDeclarations)
+                {
+                    var classSymbol = semanticModel.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;
+                    if (classSymbol == null)
+                        continue;
+
+                    // 尋找具有目標特性的類
+                    foreach (var attribute in classSymbol.GetAttributes())
+                    {
+                        Console.WriteLine($"檢查類 {classSymbol.Name} 的特性: {attribute.AttributeClass?.Name}");
+                        
+                        if (attribute.AttributeClass?.Name == AttributeName || 
+                            attribute.AttributeClass?.ToDisplayString() == AttributeFullName)
+                        {
+                            if (attribute.ConstructorArguments.Length > 0)
+                            {
+                                var attributeArg = attribute.ConstructorArguments[0].Value;
+                                Console.WriteLine($"  特性參數類型: {attributeArg?.GetType().Name}");
+                                
+                                if (attributeArg is INamedTypeSymbol interfaceType)
+                                {
+                                    result.Add((classSymbol, interfaceType));
+                                    Console.WriteLine($"找到類 {classSymbol.Name}，標記了接口 {interfaceType.Name}");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"  特性參數不是 INamedTypeSymbol");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private void ProcessClass(INamedTypeSymbol classSymbol, INamedTypeSymbol interfaceSymbol, string projectDirectory)
         {
             string className = classSymbol.Name;
             string interfaceName = interfaceSymbol.Name;
             
-            // 從接口名稱得到服務名稱 (去掉開頭的 'I')
+            // 從接口名稱獲取服務名稱 (去掉開頭的 'I')
             string serviceName = interfaceName.StartsWith("I") ? interfaceName.Substring(1) : interfaceName;
+            
+            Console.WriteLine($"處理 {className} 類，生成 {serviceName} 服務...");
 
-            // 生成 .proto 文件內容 (僅作為註釋添加，不生成實際文件)
-            string protoContent = GenerateProtoFileContent(interfaceSymbol, serviceName);
-            context.AddSource($"{serviceName}Messages.proto.g.cs", SourceText.From(
-                $"// 以下是自動生成的 .proto 文件內容\r\n" +
-                $"// 請將此內容複製到一個 .proto 文件中，並使用 Grpc.Tools 編譯\r\n" +
-                $"/*\r\n{protoContent}\r\n*/", 
-                Encoding.UTF8));
+            // 創建 GrpcProto 目錄 (如果不存在)
+            string grpcProtoDir = Path.Combine(projectDirectory, "GrpcProto");
+            if (!Directory.Exists(grpcProtoDir))
+            {
+                Directory.CreateDirectory(grpcProtoDir);
+                Console.WriteLine($"已創建 GrpcProto 目錄");
+            }
+
+            // 生成 .proto 文件
+            string protoContent = GenerateProtoFile(interfaceSymbol, serviceName);
+            string protoFilePath = Path.Combine(grpcProtoDir, $"{serviceName}Messages.proto");
+            File.WriteAllText(protoFilePath, protoContent);
+            Console.WriteLine($"已生成 .proto 文件：{protoFilePath}");
+
+            // 創建 GrpcServices 目錄 (如果不存在)
+            string grpcServicesDir = Path.Combine(projectDirectory, "GrpcServices");
+            if (!Directory.Exists(grpcServicesDir))
+            {
+                Directory.CreateDirectory(grpcServicesDir);
+                Console.WriteLine($"已創建 GrpcServices 目錄");
+            }
 
             // 生成 gRPC 服務實現類
-            GenerateGrpcServiceClass(context, classSymbol, interfaceSymbol, serviceName);
+            string serviceContent = GenerateGrpcServiceClass(classSymbol, interfaceSymbol, serviceName);
+            string serviceFilePath = Path.Combine(grpcServicesDir, $"{serviceName}GrpcService.cs");
+            File.WriteAllText(serviceFilePath, serviceContent);
+            Console.WriteLine($"已生成 gRPC 服務實現類：{serviceFilePath}");
         }
 
-        private string GenerateProtoFileContent(INamedTypeSymbol interfaceSymbol, string serviceName)
+        private string GenerateProtoFile(INamedTypeSymbol interfaceSymbol, string serviceName)
         {
-            StringBuilder protoBuilder = new StringBuilder();
-
+            var protoBuilder = new StringBuilder();
+            
             // Proto 文件頭
             protoBuilder.AppendLine("syntax = \"proto3\";");
             protoBuilder.AppendLine();
-
+            
             // 命名空間/包名
             string packageName = interfaceSymbol.ContainingNamespace.ToDisplayString().ToLowerInvariant();
             protoBuilder.AppendLine($"package {packageName};");
             protoBuilder.AppendLine();
-
-            // 導入必要的 proto 定義
+            
+            // 導入常用的 proto 定義
             protoBuilder.AppendLine("import \"google/protobuf/timestamp.proto\";");
             protoBuilder.AppendLine("import \"google/protobuf/empty.proto\";");
             protoBuilder.AppendLine();
-
-            // 用於跟踪已經生成的消息類型
+            
+            // 跟踪已經生成的消息類型
             HashSet<string> generatedMessages = new HashSet<string>();
-
+            
             // 為每個方法生成消息定義
             foreach (var member in interfaceSymbol.GetMembers())
             {
                 if (member is IMethodSymbol methodSymbol && methodSymbol.MethodKind == MethodKind.Ordinary)
                 {
-                    GenerateMessagesForMethodProto(protoBuilder, methodSymbol, generatedMessages);
+                    GenerateMessagesForMethod(protoBuilder, methodSymbol, generatedMessages);
                 }
             }
-
+            
             // 生成服務定義
             protoBuilder.AppendLine($"service {serviceName} {{");
             
@@ -129,11 +293,11 @@ namespace T1.GrpcSourceGenerator
             }
             
             protoBuilder.AppendLine("}");
-
+            
             return protoBuilder.ToString();
         }
 
-        private void GenerateMessagesForMethodProto(StringBuilder protoBuilder, IMethodSymbol methodSymbol, HashSet<string> generatedMessages)
+        private void GenerateMessagesForMethod(StringBuilder protoBuilder, IMethodSymbol methodSymbol, HashSet<string> generatedMessages)
         {
             string methodName = methodSymbol.Name;
             
@@ -178,16 +342,11 @@ namespace T1.GrpcSourceGenerator
             }
         }
 
-        private void GenerateGrpcServiceClass(GeneratorExecutionContext context, INamedTypeSymbol classSymbol, 
-                                             INamedTypeSymbol interfaceSymbol, string serviceName)
+        private string GenerateGrpcServiceClass(INamedTypeSymbol classSymbol, INamedTypeSymbol interfaceSymbol, string serviceName)
         {
-            StringBuilder serviceBuilder = new StringBuilder();
+            var serviceBuilder = new StringBuilder();
             
             // 添加必要的 using 語句
-            serviceBuilder.AppendLine("// <auto-generated />");
-            serviceBuilder.AppendLine("#pragma warning disable CS1591, CS0612, CS3021, IDE1006");
-            serviceBuilder.AppendLine("#nullable enable");
-            serviceBuilder.AppendLine();
             serviceBuilder.AppendLine("using System;");
             serviceBuilder.AppendLine("using System.Threading.Tasks;");
             serviceBuilder.AppendLine("using Grpc.Core;");
@@ -196,69 +355,14 @@ namespace T1.GrpcSourceGenerator
             
             // 命名空間
             string namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
-            serviceBuilder.AppendLine($"namespace {namespaceName}");
+            serviceBuilder.AppendLine($"namespace {namespaceName}.GrpcServices");
             serviceBuilder.AppendLine("{");
-            
-            // 生成空的消息類型 (用於編譯通過，實際使用時需要替換為 protoc 生成的類型)
-            // 這裡僅為示例，實際應用中應從 proto 文件生成真正的消息類型
-            foreach (var member in interfaceSymbol.GetMembers())
-            {
-                if (member is IMethodSymbol methodSymbol && methodSymbol.MethodKind == MethodKind.Ordinary)
-                {
-                    string methodName = methodSymbol.Name;
-                    string requestMessageName = $"{methodName}RequestMessage";
-                    string replyMessageName = $"{methodName}ReplyMessage";
-
-                    // 生成示例請求消息類型
-                    serviceBuilder.AppendLine($"    // 請替換為實際由 protoc 生成的消息類型");
-                    serviceBuilder.AppendLine($"    public class {requestMessageName}");
-                    serviceBuilder.AppendLine("    {");
-                    foreach (var parameter in methodSymbol.Parameters)
-                    {
-                        string propertyName = ToPascalCase(parameter.Name);
-                        string typeName = parameter.Type.ToDisplayString();
-                        serviceBuilder.AppendLine($"        public {typeName} {propertyName} {{ get; set; }}");
-                    }
-                    serviceBuilder.AppendLine("    }");
-                    serviceBuilder.AppendLine();
-
-                    // 生成示例回應消息類型
-                    serviceBuilder.AppendLine($"    public class {replyMessageName}");
-                    serviceBuilder.AppendLine("    {");
-                    ITypeSymbol returnType = GetActualReturnType(methodSymbol);
-                    if (returnType != null && returnType.SpecialType != SpecialType.System_Void)
-                    {
-                        string typeName = returnType.ToDisplayString();
-                        serviceBuilder.AppendLine($"        public {typeName} Result {{ get; set; }}");
-                    }
-                    serviceBuilder.AppendLine("    }");
-                    serviceBuilder.AppendLine();
-                }
-            }
-
-            // 生成基類 (僅為示例，實際應用中應使用 protoc 生成的基類)
-            serviceBuilder.AppendLine($"    // 請替換為實際由 protoc 生成的基類");
-            serviceBuilder.AppendLine($"    public abstract class {serviceName}Base");
-            serviceBuilder.AppendLine("    {");
-            foreach (var member in interfaceSymbol.GetMembers())
-            {
-                if (member is IMethodSymbol methodSymbol && methodSymbol.MethodKind == MethodKind.Ordinary)
-                {
-                    string methodName = methodSymbol.Name;
-                    string requestMessageName = $"{methodName}RequestMessage";
-                    string replyMessageName = $"{methodName}ReplyMessage";
-                    
-                    serviceBuilder.AppendLine($"        public virtual Task<{replyMessageName}> {methodName}({requestMessageName} request, ServerCallContext context) => Task.FromResult(new {replyMessageName}());");
-                }
-            }
-            serviceBuilder.AppendLine("    }");
-            serviceBuilder.AppendLine();
             
             // 生成服務實現類
             serviceBuilder.AppendLine($"    /// <summary>");
-            serviceBuilder.AppendLine($"    /// 自動生成的 gRPC 服務實現，基於 {interfaceSymbol.Name}");
+            serviceBuilder.AppendLine($"    /// gRPC 服務實現，基於 {interfaceSymbol.Name}");
             serviceBuilder.AppendLine($"    /// </summary>");
-            serviceBuilder.AppendLine($"    public class {serviceName}GrpcService : {serviceName}Base");
+            serviceBuilder.AppendLine($"    public class {serviceName}GrpcService : {serviceName}.{serviceName}Base");
             serviceBuilder.AppendLine("    {");
             
             // 字段和構造函數
@@ -281,11 +385,8 @@ namespace T1.GrpcSourceGenerator
             
             serviceBuilder.AppendLine("    }");
             serviceBuilder.AppendLine("}");
-            serviceBuilder.AppendLine("#pragma warning restore CS1591, CS0612, CS3021, IDE1006");
-            serviceBuilder.AppendLine("#nullable restore");
             
-            // 添加生成的服務類
-            context.AddSource($"{serviceName}GrpcService.g.cs", SourceText.From(serviceBuilder.ToString(), Encoding.UTF8));
+            return serviceBuilder.ToString();
         }
 
         private void GenerateMethodImplementation(StringBuilder sb, IMethodSymbol methodSymbol, string serviceName)
@@ -410,43 +511,6 @@ namespace T1.GrpcSourceGenerator
                 return input;
             
             return char.ToUpper(input[0]) + input.Substring(1);
-        }
-
-        /// <summary>
-        /// 語法接收器，用於收集標記了 GenerateGrpcServiceAttribute 的類
-        /// </summary>
-        private class SyntaxReceiver : ISyntaxContextReceiver
-        {
-            public List<(INamedTypeSymbol ClassSymbol, INamedTypeSymbol InterfaceSymbol)> CandidateClasses { get; } = 
-                new List<(INamedTypeSymbol, INamedTypeSymbol)>();
-
-            public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
-            {
-                // 只處理類聲明
-                if (context.Node is ClassDeclarationSyntax classDeclaration &&
-                    classDeclaration.AttributeLists.Count > 0)
-                {
-                    SemanticModel semanticModel = context.SemanticModel;
-                    INamedTypeSymbol classSymbol = semanticModel.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;
-                    
-                    if (classSymbol == null)
-                        return;
-                    
-                    // 檢查是否標記了目標 Attribute
-                    foreach (AttributeData attribute in classSymbol.GetAttributes())
-                    {
-                        if (attribute.AttributeClass?.ToDisplayString() == AttributeFullName &&
-                            attribute.ConstructorArguments.Length > 0)
-                        {
-                            if (attribute.ConstructorArguments[0].Value is INamedTypeSymbol interfaceSymbol)
-                            {
-                                CandidateClasses.Add((classSymbol, interfaceSymbol));
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 } 

@@ -1,9 +1,10 @@
 using System.Threading.Tasks;
+using T1.GrpcSourceGenerator;
 
-namespace T1.GrpcSourceGenerator.Demo
+namespace ConsoleTestApp
 {
     /// <summary>
-    /// IGreeter 接口的實現類，使用 GenerateGrpcServiceAttribute 標記
+    /// 問候服務實現
     /// </summary>
     [GenerateGrpcService(typeof(IGreeter))]
     public class MyGreeter : IGreeter
