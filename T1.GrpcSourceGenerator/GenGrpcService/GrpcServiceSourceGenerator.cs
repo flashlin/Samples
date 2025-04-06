@@ -313,8 +313,11 @@ namespace GenGrpcService
                 if (member is IMethodSymbol methodSymbol && methodSymbol.MethodKind == MethodKind.Ordinary)
                 {
                     string methodName = methodSymbol.Name;
-                    string requestMessageName = $"{methodName}RequestMessage";
-                    string replyMessageName = $"{methodName}ReplyMessage";
+                    string baseMessageName = methodName.EndsWith("Async") 
+                        ? methodName.Substring(0, methodName.Length - 5) 
+                        : methodName;
+                    string requestMessageName = $"{baseMessageName}RequestMessage";
+                    string replyMessageName = $"{baseMessageName}ReplyMessage";
                     
                     protoBuilder.AppendLine($"  rpc {methodName} ({requestMessageName}) returns ({replyMessageName});");
                 }
@@ -328,6 +331,9 @@ namespace GenGrpcService
         private void GenerateMessagesForMethod(StringBuilder protoBuilder, IMethodSymbol methodSymbol, HashSet<string> generatedMessages)
         {
             string methodName = methodSymbol.Name;
+            string baseMessageName = methodName.EndsWith("Async") 
+                ? methodName.Substring(0, methodName.Length - 5) 
+                : methodName;
             
             // 生成參數類型的消息定義
             foreach (var parameter in methodSymbol.Parameters)
@@ -346,7 +352,7 @@ namespace GenGrpcService
             }
             
             // 請求消息
-            string requestMessageName = $"{methodName}RequestMessage";
+            string requestMessageName = $"{baseMessageName}RequestMessage";
             if (!generatedMessages.Contains(requestMessageName))
             {
                 protoBuilder.AppendLine($"message {requestMessageName} {{");
@@ -367,7 +373,7 @@ namespace GenGrpcService
             }
             
             // 回應消息
-            string replyMessageName = $"{methodName}ReplyMessage";
+            string replyMessageName = $"{baseMessageName}ReplyMessage";
             if (!generatedMessages.Contains(replyMessageName))
             {
                 protoBuilder.AppendLine($"message {replyMessageName} {{");
