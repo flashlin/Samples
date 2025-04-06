@@ -56,3 +56,5 @@ bash/nvim-linux64
 bash/cuda_12.2.2_535.104.05_linux.run
 bash/cuda-keyring_1.1-1_all.deb
 vscode-plugin-demo/artemis/out
+T1.GrpcSourceGenerator/ConsoleTestApp/GrpcProto
+T1.GrpcSourceGenerator/ConsoleTestApp/GrpcServices
