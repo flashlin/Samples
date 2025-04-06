@@ -17,10 +17,9 @@ namespace ConsoleTestApp
         /// <summary>
         /// 獲取用戶信息
         /// </summary>
-        /// <param name="id">用戶 ID</param>
-        /// <param name="includeDetails">是否包含詳細信息</param>
+        /// <param name="req">請求參數</param>
         /// <returns>用戶信息</returns>
-        Task<UserInfo> GetUserInfoAsync(int id, bool includeDetails);
+        Task<UserInfo> GetUserInfoAsync(GetUserReq req);
         
         /// <summary>
         /// 計算兩個數的和
@@ -31,6 +30,22 @@ namespace ConsoleTestApp
         int Add(int a, int b);
     }
     
+    /// <summary>
+    /// 用戶信息請求
+    /// </summary>
+    public class GetUserReq
+    {
+        /// <summary>
+        /// 用戶 ID
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 是否包含詳細信息
+        /// </summary>
+        public bool IncludeDetails { get; set; }
+    }
+
     /// <summary>
     /// 用戶信息
     /// </summary>

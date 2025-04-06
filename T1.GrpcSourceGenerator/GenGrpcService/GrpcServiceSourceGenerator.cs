@@ -329,6 +329,22 @@ namespace GenGrpcService
         {
             string methodName = methodSymbol.Name;
             
+            // 生成參數類型的消息定義
+            foreach (var parameter in methodSymbol.Parameters)
+            {
+                if (parameter.Type is INamedTypeSymbol paramType && !IsBasicType(paramType))
+                {
+                    GenerateMessageForType(protoBuilder, paramType, generatedMessages);
+                }
+            }
+
+            // 生成返回類型的消息定義
+            var returnType = GetActualReturnType(methodSymbol);
+            if (returnType is INamedTypeSymbol returnNamedType && !IsBasicType(returnNamedType))
+            {
+                GenerateMessageForType(protoBuilder, returnNamedType, generatedMessages);
+            }
+            
             // 請求消息
             string requestMessageName = $"{methodName}RequestMessage";
             if (!generatedMessages.Contains(requestMessageName))
@@ -356,7 +372,6 @@ namespace GenGrpcService
             {
                 protoBuilder.AppendLine($"message {replyMessageName} {{");
                 
-                ITypeSymbol returnType = GetActualReturnType(methodSymbol);
                 if (returnType != null && returnType.SpecialType != SpecialType.System_Void)
                 {
                     string protoType = GetProtoType(returnType);
@@ -368,6 +383,61 @@ namespace GenGrpcService
                 
                 generatedMessages.Add(replyMessageName);
             }
+        }
+
+        private bool IsBasicType(ITypeSymbol type)
+        {
+            if (type == null) return true;
+
+            switch (type.SpecialType)
+            {
+                case SpecialType.System_Boolean:
+                case SpecialType.System_SByte:
+                case SpecialType.System_Byte:
+                case SpecialType.System_Int16:
+                case SpecialType.System_UInt16:
+                case SpecialType.System_Int32:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_Int64:
+                case SpecialType.System_UInt64:
+                case SpecialType.System_Single:
+                case SpecialType.System_Double:
+                case SpecialType.System_String:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private void GenerateMessageForType(StringBuilder protoBuilder, INamedTypeSymbol type, HashSet<string> generatedMessages)
+        {
+            if (generatedMessages.Contains(type.Name))
+                return;
+
+            protoBuilder.AppendLine($"message {type.Name} {{");
+            
+            int fieldIndex = 1;
+            var processedProperties = new HashSet<string>();
+            var properties = type.GetMembers()
+                .OfType<IPropertySymbol>()
+                .Where(p => p.DeclaredAccessibility == Accessibility.Public);
+
+            foreach (var property in properties)
+            {
+                if (processedProperties.Contains(property.Name))
+                    continue;
+
+                string protoType = GetProtoType(property.Type);
+                string fieldName = ToCamelCase(property.Name);
+                protoBuilder.AppendLine($"  {protoType} {fieldName} = {fieldIndex};");
+                fieldIndex++;
+                processedProperties.Add(property.Name);
+            }
+            
+            protoBuilder.AppendLine("}");
+            protoBuilder.AppendLine();
+            
+            generatedMessages.Add(type.Name);
         }
 
         private string GenerateGrpcServiceClass(INamedTypeSymbol classSymbol, INamedTypeSymbol interfaceSymbol, string serviceName)
@@ -524,6 +594,8 @@ namespace GenGrpcService
 
         private string GetProtoType(ITypeSymbol type)
         {
+            if (type == null) return "string";
+
             switch (type.SpecialType)
             {
                 case SpecialType.System_Boolean:
@@ -554,8 +626,12 @@ namespace GenGrpcService
                     if (type.Name == "TimeSpan")
                         return "int64";
                     
-                    // 對於複雜類型，簡化處理為字串
-                    // 實際應用中，應為複雜類型生成對應的 message 定義
+                    // 如果是自定義類型，生成對應的消息類型
+                    if (type is INamedTypeSymbol namedType)
+                    {
+                        return namedType.Name;
+                    }
+                    
                     return "string";
             }
         }

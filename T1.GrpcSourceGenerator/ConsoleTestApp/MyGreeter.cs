@@ -26,14 +26,14 @@ namespace ConsoleTestApp
         /// <summary>
         /// 實現 GetUserInfoAsync 方法
         /// </summary>
-        public Task<UserInfo> GetUserInfoAsync(int id, bool includeDetails)
+        public Task<UserInfo> GetUserInfoAsync(GetUserReq req)
         {
             var userInfo = new UserInfo
             {
-                Id = id,
-                Name = $"User-{id}",
-                Age = 30 + id % 20,
-                Details = includeDetails ? "This is the detailed information about the user." : null
+                Id = req.Id,
+                Name = $"User-{req.Id}",
+                Age = 30 + req.Id % 20,
+                Details = req.IncludeDetails ? "This is the detailed information about the user." : null
             };
             
             return Task.FromResult(userInfo);
