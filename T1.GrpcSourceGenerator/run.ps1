@@ -1,0 +1,1 @@
+dotnet run --project .\GenGrpcService\GenGrpcService.csproj .\ConsoleTestApp\ConsoleTestApp.csproj
