@@ -263,6 +263,14 @@ namespace GenGrpcService
             var protoBuilder = new StringBuilder();
             
             // Proto 文件頭
+            protoBuilder.AppendLine("// =================================================================");
+            protoBuilder.AppendLine("// 此文件是由 GenGrpcService 工具自動生成");
+            protoBuilder.AppendLine("// 生成時間: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            protoBuilder.AppendLine("// 請勿手動修改此文件，因為它會在下次執行時被覆蓋");
+            protoBuilder.AppendLine("// 如需重新生成，請執行：");
+            protoBuilder.AppendLine("// GenGrpcService.exe <專案檔路徑>");
+            protoBuilder.AppendLine("// =================================================================");
+            protoBuilder.AppendLine();
             protoBuilder.AppendLine("syntax = \"proto3\";");
             protoBuilder.AppendLine();
             
@@ -356,6 +364,16 @@ namespace GenGrpcService
         private string GenerateGrpcServiceClass(INamedTypeSymbol classSymbol, INamedTypeSymbol interfaceSymbol, string serviceName)
         {
             var serviceBuilder = new StringBuilder();
+            
+            // 添加自動生成注釋
+            serviceBuilder.AppendLine("// =================================================================");
+            serviceBuilder.AppendLine("// 此文件是由 GenGrpcService 工具自動生成");
+            serviceBuilder.AppendLine("// 生成時間: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            serviceBuilder.AppendLine("// 請勿手動修改此文件，因為它會在下次執行時被覆蓋");
+            serviceBuilder.AppendLine("// 如需重新生成，請執行：");
+            serviceBuilder.AppendLine("// GenGrpcService.exe <專案檔路徑>");
+            serviceBuilder.AppendLine("// =================================================================");
+            serviceBuilder.AppendLine();
             
             // 添加必要的 using 語句
             serviceBuilder.AppendLine("using System;");
