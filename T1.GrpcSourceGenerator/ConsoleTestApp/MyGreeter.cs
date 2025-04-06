@@ -3,6 +3,12 @@ using T1.GrpcSourceGenerator;
 
 namespace ConsoleTestApp
 {
+    public class GetUserReq
+    {
+        public int Id { get; set; }
+        public bool IncludeDetails { get; set; }
+    }
+
     /// <summary>
     /// 問候服務實現
     /// </summary>
