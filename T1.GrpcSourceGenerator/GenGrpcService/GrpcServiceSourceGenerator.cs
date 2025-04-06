@@ -411,10 +411,11 @@ namespace GenGrpcService
 
         private void GenerateMessageForType(StringBuilder protoBuilder, INamedTypeSymbol type, HashSet<string> generatedMessages)
         {
-            if (generatedMessages.Contains(type.Name))
+            string messageName = $"{type.Name}Message";
+            if (generatedMessages.Contains(messageName))
                 return;
 
-            protoBuilder.AppendLine($"message {type.Name} {{");
+            protoBuilder.AppendLine($"message {messageName} {{");
             
             int fieldIndex = 1;
             var processedProperties = new HashSet<string>();
@@ -437,7 +438,7 @@ namespace GenGrpcService
             protoBuilder.AppendLine("}");
             protoBuilder.AppendLine();
             
-            generatedMessages.Add(type.Name);
+            generatedMessages.Add(messageName);
         }
 
         private string GenerateGrpcServiceClass(INamedTypeSymbol classSymbol, INamedTypeSymbol interfaceSymbol, string serviceName)
@@ -626,10 +627,10 @@ namespace GenGrpcService
                     if (type.Name == "TimeSpan")
                         return "int64";
                     
-                    // 如果是自定義類型，生成對應的消息類型
+                    // 如果是自定義類型，生成對應的消息類型並添加 Message 後綴
                     if (type is INamedTypeSymbol namedType)
                     {
-                        return namedType.Name;
+                        return $"{namedType.Name}Message";
                     }
                     
                     return "string";
