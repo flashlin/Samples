@@ -157,6 +157,21 @@ export class VimEditor extends LitElement {
             this.cursorX += 1;
           }
           break;
+        case 'i': // 進入插入模式
+          this.mode = 'insert';
+          break;
+        case 'a': // 往右移動後進入插入模式
+          // 如果游標不在行尾，則向右移動一格
+          if (this.content[this.cursorY] && this.cursorX < this.content[this.cursorY].length - 1) {
+            this.cursorX += 1;
+          }
+          this.mode = 'insert';
+          break;
+      }
+    } else if (this.mode === 'insert') {
+      // 在插入模式中，ESC 鍵返回正常模式
+      if (key === 'Escape') {
+        this.mode = 'normal';
       }
     }
     
