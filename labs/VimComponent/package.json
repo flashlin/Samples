@@ -1,0 +1,27 @@
+{
+  "name": "vimcomponent",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/vim-editor.umd.js",
+  "module": "dist/vim-editor.es.js",
+  "types": "dist/vim-editor.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/p5": "^1.7.3",
+    "lit": "^3.1.1",
+    "p5": "^1.6.0",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9"
+  }
+}

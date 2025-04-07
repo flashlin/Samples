@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vim Editor Component</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        vim-editor {
+            width: 800px;
+            height: 600px;
+            border: 1px solid #333;
+            background-color: #000;
+            display: block;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vim Editor Component Demo</h1>
+    <vim-editor></vim-editor>
+    <script type="module" src="/src/vim-editor.ts"></script>
+</body>
+</html>
