@@ -7,6 +7,11 @@ export class VimEditor extends LitElement {
   private p5Instance: p5 | null = null;
   private canvas: HTMLCanvasElement | null = null;
   private cursorBlinkInterval: number | null = null;
+  private charWidth = 9; // 假設等寬字體的字符寬度為 9 像素
+  private lineHeight = 20; // 行高
+  private baseLine = 14; // 文字基準線
+  private textPadding = 2; // 文字上下間距
+  private statusBarHeight = 20; // 狀態列高度
   
   @state()
   private cursorVisible = true;
@@ -22,6 +27,16 @@ export class VimEditor extends LitElement {
 
   @property({ type: Array })
   content: string[] = ['Hello World!'];
+
+  // 計算文字的 Y 座標
+  private getTextY(lineIndex: number): number {
+    return this.textPadding + lineIndex * this.lineHeight + this.baseLine;
+  }
+
+  // 計算游標的 Y 座標
+  private getCursorY(lineIndex: number): number {
+    return this.textPadding + lineIndex * this.lineHeight;
+  }
 
   firstUpdated() {
     console.log('firstUpdated called');
@@ -54,6 +69,9 @@ export class VimEditor extends LitElement {
         p.textAlign(p.LEFT, p.TOP);
         p.textFont('monospace');
         
+        // 計算字符寬度
+        this.charWidth = p.textWidth('M');
+        
         // 關閉自動循環
         p.noLoop();
       };
@@ -68,6 +86,10 @@ export class VimEditor extends LitElement {
         p.noFill();
         p.rect(0, 0, p.width-1, p.height-1);
         p.noStroke();
+        
+        // 繪製編輯區域背景
+        p.fill(0);
+        p.rect(0, 0, p.width, p.height - this.statusBarHeight);
         
         console.log('Drawing line numbers...');
         this.drawLineNumbers(p);
@@ -111,36 +133,51 @@ export class VimEditor extends LitElement {
 
   private drawLineNumbers(p: p5) {
     p.fill(0, 0, 100);
-    p.rect(0, 0, 50, p.height-30);
+    p.rect(0, 0, 50, p.height - this.statusBarHeight);
     p.fill(255);
     this.content.forEach((_, i) => {
-      const y = 20 + i * 20;
-      p.text((i + 1).toString(), 5, y);
+      p.text((i + 1).toString(), 5, this.getTextY(i));
     });
   }
 
   private drawContent(p: p5) {
     p.fill(255);
     this.content.forEach((line, i) => {
-      const y = 20 + i * 20;
-      p.text(line, 60, y);
+      p.text(line, 60, this.getTextY(i));
     });
   }
 
   private drawCursor(p: p5) {
     if (this.cursorVisible) {
+      // 使用反色效果
+      p.push();
       p.fill(255);
-      const cursorX = 60 + p.textWidth(this.content[this.cursorY].substring(0, this.cursorX));
-      const cursorY = 20 + this.cursorY * 20;
-      p.rect(cursorX, cursorY - 16, 2, 20);
+      const cursorX = 60;  // 固定在行首
+      const cursorY = this.getCursorY(this.cursorY);
+      // 繪製一個完整字符大小的方塊
+      p.rect(cursorX, cursorY, this.charWidth, this.lineHeight);
+      
+      // 在方塊上用黑色繪製字符
+      p.fill(0);
+      if (this.content[this.cursorY] && this.content[this.cursorY].length > 0) {
+        p.text(this.content[this.cursorY][0], cursorX, this.getTextY(this.cursorY));
+      }
+      p.pop();
     }
   }
 
   private drawStatusBar(p: p5) {
+    const statusY = p.height - this.statusBarHeight;
+    // 繪製狀態列背景
     p.fill(0, 0, 100);
-    p.rect(0, p.height - 30, p.width, 30);
+    p.rect(0, statusY, p.width, this.statusBarHeight);
+    // 繪製狀態列文字
     p.fill(255);
-    p.text(`Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.cursorX + 1}`, 10, p.height - 10);
+    p.text(
+      `Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.cursorX + 1}`,
+      10,
+      statusY + this.textPadding + this.baseLine
+    );
   }
 
   render() {
