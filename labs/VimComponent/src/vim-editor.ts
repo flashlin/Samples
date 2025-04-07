@@ -35,7 +35,7 @@ export class VimEditor extends LitElement {
 
   // 計算游標的 Y 座標
   private getCursorY(lineIndex: number): number {
-    return this.textPadding + lineIndex * this.lineHeight;
+    return this.textPadding + lineIndex * this.lineHeight + this.baseLine;
   }
 
   firstUpdated() {
@@ -153,7 +153,10 @@ export class VimEditor extends LitElement {
       p.push();
       p.fill(255);
       const cursorX = 60;  // 固定在行首
+      
+      // 使用 getCursorY 方法來計算游標位置
       const cursorY = this.getCursorY(this.cursorY);
+      
       // 繪製一個完整字符大小的方塊
       p.rect(cursorX, cursorY, this.charWidth, this.lineHeight);
       
