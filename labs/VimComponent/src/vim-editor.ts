@@ -11,7 +11,7 @@ export class VimEditor extends LitElement {
   private lineHeight = 20; // 行高
   private baseLine = 14; // 文字基準線
   private textPadding = 2; // 文字上下間距
-  private statusBarHeight = 20; // 狀態列高度
+  private statusBarHeight = 24; // 狀態列高度
   
   @state()
   private cursorVisible = true;
@@ -175,15 +175,16 @@ export class VimEditor extends LitElement {
     // 將狀態列放在編輯區域的底部
     const statusY = editorHeight;
     
-    // 繪製狀態列背景
-    p.fill(0, 0, 100);
+    // 繪製狀態列背景 - 使用暗灰色而不是藍色
+    p.fill(50); // 暗灰色背景
     p.rect(0, statusY, p.width, this.statusBarHeight);
+    
     // 繪製狀態列文字
     p.fill(255);
     p.text(
       `Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.cursorX + 1}`,
-      20,
-      statusY
+      10,
+      statusY + 3 // 計算垂直居中位置
     );
   }
 
