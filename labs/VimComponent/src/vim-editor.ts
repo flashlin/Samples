@@ -27,6 +27,9 @@ export class VimEditor extends LitElement {
 
   @property({ type: Array })
   content: string[] = ['Hello World!'];
+  
+  @state()
+  private lastKeyPressed = '';
 
   // 計算文字的 Y 座標
   private getTextY(lineIndex: number): number {
@@ -119,6 +122,48 @@ export class VimEditor extends LitElement {
         this.p5Instance.redraw();
       }
     }, 500);
+
+    // 添加鍵盤事件監聽器
+    window.addEventListener('keydown', this.handleKeyDown.bind(this));
+  }
+
+  private handleKeyDown(event: KeyboardEvent) {
+    const key = event.key;
+    this.lastKeyPressed = key;
+    
+    // 避免瀏覽器默認行為（例如頁面滾動）
+    event.preventDefault();
+    
+    // 處理 Vim 移動按鍵
+    if (this.mode === 'normal') {
+      switch (key) {
+        case 'j': // 向下移動
+          if (this.cursorY < this.content.length - 1) {
+            this.cursorY += 1;
+          }
+          break;
+        case 'k': // 向上移動
+          if (this.cursorY > 0) {
+            this.cursorY -= 1;
+          }
+          break;
+        case 'h': // 向左移動
+          if (this.cursorX > 0) {
+            this.cursorX -= 1;
+          }
+          break;
+        case 'l': // 向右移動
+          if (this.content[this.cursorY] && this.cursorX < this.content[this.cursorY].length - 1) {
+            this.cursorX += 1;
+          }
+          break;
+      }
+    }
+    
+    // 重新繪製以更新游標位置和顯示按下的按鍵
+    if (this.p5Instance) {
+      this.p5Instance.redraw();
+    }
   }
 
   disconnectedCallback() {
@@ -128,6 +173,8 @@ export class VimEditor extends LitElement {
     if (this.p5Instance) {
       this.p5Instance.remove();
     }
+    // 移除鍵盤事件監聽器
+    window.removeEventListener('keydown', this.handleKeyDown.bind(this));
     super.disconnectedCallback();
   }
 
@@ -152,7 +199,8 @@ export class VimEditor extends LitElement {
       // 使用反色效果
       p.push();
       p.fill(255);
-      const cursorX = 60;  // 固定在行首
+      // 根據當前游標位置計算 X 座標
+      const cursorX = 60 + this.cursorX * this.charWidth;
       
       // 使用 getCursorY 方法來計算游標位置
       const cursorY = this.getCursorY(this.cursorY);
@@ -162,8 +210,8 @@ export class VimEditor extends LitElement {
       
       // 在方塊上用黑色繪製字符
       p.fill(0);
-      if (this.content[this.cursorY] && this.content[this.cursorY].length > 0) {
-        p.text(this.content[this.cursorY][0], cursorX, this.getTextY(this.cursorY));
+      if (this.content[this.cursorY] && this.content[this.cursorY][this.cursorX]) {
+        p.text(this.content[this.cursorY][this.cursorX], cursorX, this.getTextY(this.cursorY));
       }
       p.pop();
     }
@@ -179,10 +227,15 @@ export class VimEditor extends LitElement {
     p.fill(50); // 暗灰色背景
     p.rect(0, statusY, p.width, this.statusBarHeight);
     
-    // 繪製狀態列文字
+    // 繪製狀態列文字，包含最後按下的按鍵
     p.fill(255);
+    let statusText = `Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.cursorX + 1}`;
+    if (this.lastKeyPressed) {
+      statusText += ` | Key: "${this.lastKeyPressed}"`;
+    }
+    
     p.text(
-      `Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.cursorX + 1}`,
+      statusText,
       10,
       statusY + 3 // 計算垂直居中位置
     );
