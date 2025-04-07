@@ -170,7 +170,11 @@ export class VimEditor extends LitElement {
   }
 
   private drawStatusBar(p: p5) {
-    const statusY = p.height - this.statusBarHeight;
+    // 計算編輯區域的高度
+    const editorHeight = p.height - this.statusBarHeight;
+    // 將狀態列放在編輯區域的底部
+    const statusY = editorHeight;
+    
     // 繪製狀態列背景
     p.fill(0, 0, 100);
     p.rect(0, statusY, p.width, this.statusBarHeight);
@@ -178,8 +182,8 @@ export class VimEditor extends LitElement {
     p.fill(255);
     p.text(
       `Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.cursorX + 1}`,
-      10,
-      statusY + this.textPadding + this.baseLine
+      20,
+      statusY
     );
   }
 
