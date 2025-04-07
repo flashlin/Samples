@@ -172,6 +172,59 @@ export class VimEditor extends LitElement {
       // 在插入模式中，ESC 鍵返回正常模式
       if (key === 'Escape') {
         this.mode = 'normal';
+      } else if (key === 'Backspace') {
+        // 刪除游標前的字符
+        if (this.cursorX > 0) {
+          // 如果游標不在行首，刪除前一個字符
+          const currentLine = this.content[this.cursorY];
+          this.content[this.cursorY] = currentLine.substring(0, this.cursorX - 1) + currentLine.substring(this.cursorX);
+          this.cursorX -= 1;
+        } else if (this.cursorY > 0) {
+          // 如果游標在行首但不是第一行，將該行合併到上一行
+          const previousLine = this.content[this.cursorY - 1];
+          const currentLine = this.content[this.cursorY];
+          
+          // 設置新的游標位置
+          this.cursorX = previousLine.length;
+          
+          // 合併兩行
+          this.content[this.cursorY - 1] = previousLine + currentLine;
+          
+          // 刪除當前行
+          this.content.splice(this.cursorY, 1);
+          
+          // 移動游標到上一行
+          this.cursorY -= 1;
+        }
+      } else if (key === 'Enter') {
+        // 處理回車鍵，插入新行
+        const currentLine = this.content[this.cursorY];
+        
+        // 將當前行分割成兩部分
+        const lineBeforeCursor = currentLine.substring(0, this.cursorX);
+        const lineAfterCursor = currentLine.substring(this.cursorX);
+        
+        // 更新當前行
+        this.content[this.cursorY] = lineBeforeCursor;
+        
+        // 在當前行之後插入新行
+        this.content.splice(this.cursorY + 1, 0, lineAfterCursor);
+        
+        // 移動游標到下一行的開頭
+        this.cursorY += 1;
+        this.cursorX = 0;
+      } else if (key.length === 1) {
+        // 處理普通字符輸入
+        const currentLine = this.content[this.cursorY];
+        
+        // 在游標位置插入字符
+        this.content[this.cursorY] = 
+          currentLine.substring(0, this.cursorX) + 
+          key + 
+          currentLine.substring(this.cursorX);
+        
+        // 移動游標位置
+        this.cursorX += 1;
       }
     }
     
