@@ -7,4 +7,7 @@ public interface IKeyHandler
     void WaitForInput();
     void Clear();
     string GetKeyBufferString();
+    void AddOnKeyPress(IKeyPattern keyPattern, Action<IProgress> action);
+    bool HandleUserKeyPress(ConsoleKeyInfo keyInfo);
+    void SetEditor(VimEditor editor);
 }
