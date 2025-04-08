@@ -183,19 +183,39 @@ class SudokuView : View() {
     }
 
     private fun isValid(row: Int, col: Int, num: Int): Boolean {
+        // 如果是空格，則視為有效
         if (num == 0) return true
         
+        // 檢查行規則：同一行不能有重複數字
         for (x in 0..8) {
-            if (x != col && sudokuBoard[row][x] == num) return false
-            if (x != row && sudokuBoard[x][col] == num) return false
+            if (x != col) {
+                val valueToCheck = if (fixedNumbers[row][x]) sudokuBoard[row][x] else userInputs[row][x]
+                if (valueToCheck == num) return false
+            }
         }
         
+        // 檢查列規則：同一列不能有重複數字
+        for (x in 0..8) {
+            if (x != row) {
+                val valueToCheck = if (fixedNumbers[x][col]) sudokuBoard[x][col] else userInputs[x][col]
+                if (valueToCheck == num) return false
+            }
+        }
+        
+        // 檢查區域規則：3x3區域內不能有重複數字
         val startRow = row - row % 3
         val startCol = col - col % 3
         for (i in 0..2) {
             for (j in 0..2) {
-                if ((i + startRow != row || j + startCol != col) && 
-                    sudokuBoard[i + startRow][j + startCol] == num) return false
+                if (i + startRow != row || j + startCol != col) {
+                    val currentRow = i + startRow
+                    val currentCol = j + startCol
+                    val valueToCheck = if (fixedNumbers[currentRow][currentCol]) 
+                        sudokuBoard[currentRow][currentCol] 
+                    else 
+                        userInputs[currentRow][currentCol]
+                    if (valueToCheck == num) return false
+                }
             }
         }
         
