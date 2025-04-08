@@ -9,6 +9,10 @@ import javafx.scene.layout.GridPane
 import javafx.scene.layout.VBox
 import javafx.scene.layout.HBox
 import javafx.scene.control.Label
+import javafx.scene.canvas.Canvas
+import javafx.scene.text.Font
+import javafx.scene.text.TextAlignment
+import javafx.geometry.VPos
 import kotlin.random.Random
 
 class SudokuApp : App(SudokuView::class)
@@ -18,18 +22,9 @@ class SudokuView : View() {
     private val fixedNumbers: Array<Array<Boolean>> = Array(9) { Array(9) { false } }
     private val userInputs: Array<Array<Int>> = Array(9) { Array(9) { 0 } }
     private var selectedCell: Pair<Int, Int>? = null
-    private val buttons: Array<Array<Button>> = Array(9) { i -> Array(9) { j -> 
-        Button().apply {
-            setPrefSize(50.0, 50.0)
-            action {
-                selectedCell = i to j
-                if (!fixedNumbers[i][j]) {
-                    updateButtonStyles()
-                }
-            }
-        }
-    }}
-
+    private val cellSize = 50.0
+    private val canvas = Canvas(450.0, 450.0)
+    
     override val root: VBox = vbox {
         setPrefSize(500.0, 600.0)
         spacing = 10.0
@@ -40,15 +35,14 @@ class SudokuView : View() {
             isVisible = false
         }
 
-        gridpane {
-            alignment = Pos.CENTER
-            hgap = 2.0
-            vgap = 2.0
-
-            for (i in 0..8) {
-                for (j in 0..8) {
-                    add(buttons[i][j], j, i)
-                }
+        add(canvas)
+        
+        canvas.setOnMouseClicked { event ->
+            val col = (event.x / cellSize).toInt()
+            val row = (event.y / cellSize).toInt()
+            if (row in 0..8 && col in 0..8) {
+                selectedCell = row to col
+                drawBoard()
             }
         }
 
@@ -65,7 +59,7 @@ class SudokuView : View() {
                         selectedCell?.let { (row, col) ->
                             if (!fixedNumbers[row][col]) {
                                 userInputs[row][col] = num
-                                updateUI()
+                                drawBoard()
                                 checkWinCondition()
                             }
                         }
@@ -79,7 +73,7 @@ class SudokuView : View() {
             
             action {
                 generateNewGame()
-                updateUI()
+                drawBoard()
                 messageLabel.isVisible = false
             }
         }
@@ -87,40 +81,62 @@ class SudokuView : View() {
 
     init {
         generateNewGame()
-        updateUI()
+        drawBoard()
     }
 
-    private fun updateButtonStyles() {
-        buttons.forEachIndexed { i, row ->
-            row.forEachIndexed { j, button ->
-                if (selectedCell?.first == i && selectedCell?.second == j) {
-                    button.style = "-fx-border-color: blue;"
-                } else {
-                    button.style = ""
+    private fun drawBoard() {
+        val gc = canvas.graphicsContext2D
+        gc.clearRect(0.0, 0.0, canvas.width, canvas.height)
+        
+        // 繪製背景格子
+        for (i in 0..8) {
+            for (j in 0..8) {
+                gc.stroke = Color.BLACK
+                gc.strokeRect(j * cellSize, i * cellSize, cellSize, cellSize)
+                
+                // 繪製3x3區塊的粗線
+                if (i % 3 == 0 && i != 0) {
+                    gc.lineWidth = 2.0
+                    gc.strokeLine(0.0, i * cellSize, canvas.width, i * cellSize)
+                    gc.lineWidth = 1.0
+                }
+                if (j % 3 == 0 && j != 0) {
+                    gc.lineWidth = 2.0
+                    gc.strokeLine(j * cellSize, 0.0, j * cellSize, canvas.height)
+                    gc.lineWidth = 1.0
                 }
             }
         }
-    }
 
-    private fun updateUI() {
+        // 繪製選中的格子
+        selectedCell?.let { (row, col) ->
+            gc.fill = Color.LIGHTBLUE.deriveColor(0.0, 1.0, 1.0, 0.3)
+            gc.fillRect(col * cellSize, row * cellSize, cellSize, cellSize)
+        }
+
+        // 繪製數字
         for (i in 0..8) {
             for (j in 0..8) {
                 val value = if (fixedNumbers[i][j]) sudokuBoard[i][j] else userInputs[i][j]
-                buttons[i][j].apply {
-                    text = if (value == 0) "" else value.toString()
+                if (value != 0) {
+                    gc.font = Font.font("Arial", FontWeight.BOLD, 24.0)
+                    gc.textAlign = TextAlignment.CENTER
+                    gc.textBaseline = VPos.CENTER
+                    
                     if (fixedNumbers[i][j]) {
-                        style = "-fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 16px;"
+                        gc.fill = Color.BLACK
                     } else {
-                        style = if (isValid(i, j, value)) {
-                            "-fx-text-fill: blue; -fx-font-weight: bold; -fx-font-size: 16px;"
-                        } else {
-                            "-fx-text-fill: red; -fx-font-weight: bold; -fx-font-size: 16px;"
-                        }
+                        gc.fill = if (isValid(i, j, value)) Color.BLUE else Color.RED
                     }
+                    
+                    gc.fillText(
+                        value.toString(),
+                        j * cellSize + cellSize / 2,
+                        i * cellSize + cellSize / 2
+                    )
                 }
             }
         }
-        updateButtonStyles()
     }
 
     private fun generateNewGame() {
