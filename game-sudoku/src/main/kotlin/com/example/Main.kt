@@ -109,12 +109,12 @@ class SudokuView : View() {
                 buttons[i][j].apply {
                     text = if (value == 0) "" else value.toString()
                     if (fixedNumbers[i][j]) {
-                        style = "-fx-text-fill: black;"
+                        style = "-fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 16px;"
                     } else {
                         style = if (isValid(i, j, value)) {
-                            "-fx-text-fill: blue;"
+                            "-fx-text-fill: blue; -fx-font-weight: bold; -fx-font-size: 16px;"
                         } else {
-                            "-fx-text-fill: red;"
+                            "-fx-text-fill: red; -fx-font-weight: bold; -fx-font-size: 16px;"
                         }
                     }
                 }
