@@ -30,6 +30,23 @@ public class Main
         editor2.OpenText("Example2: Editor2!");
         editor2.Context.SetViewPort(1, 12, consoleDevice.WindowWidth-2, 10);
 
+        editor1.AddOnKeyPress(new UserKeyPattern{
+            KeyChar = 'j',
+            IsCtrl = false,
+            IsAlt = true,
+            }, (progress) =>
+        {
+            var converter = new TextToCsvConverter();
+            progress.ShowProgress("Start Convert to CSV...");
+            var text = editor1.GetText();
+            progress.ShowProgress("Converting to CSV...");
+            var csv = converter.Convert(text);
+            progress.ShowProgress("Converting to CSV End...");
+            editor2.OpenText(csv);
+            progress.ShowProgress("Output to CSV Done.");
+        });
+
+
         var vim = new VimSharp(consoleDevice);
         vim.AddEditor(editor1);
         vim.AddEditor(editor2);

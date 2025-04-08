@@ -6,8 +6,8 @@ public class VimCommandEditor : VimEditor
 {
     private ColoredCharScreen? _backupScreen;
 
-    public VimCommandEditor(IVimFactory vimFactory, IConsoleDevice console) 
-        : base(vimFactory)
+    public VimCommandEditor(IVimFactory vimFactory, IConsoleDevice console, IKeyHandler keyHandler) 
+        : base(vimFactory, keyHandler)
     {
         var viewWidth = (int)(console.WindowWidth * 0.8);
         var viewX = console.WindowWidth / 2 - viewWidth / 2;

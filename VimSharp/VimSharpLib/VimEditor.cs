@@ -6,8 +6,12 @@ using System.Linq;
 
 public class VimEditor
 {
-    public VimEditor(IVimFactory vimFactory)
+    private readonly IKeyHandler _keyHandler;
+
+    public VimEditor(IVimFactory vimFactory, IKeyHandler keyHandler)
     {
+        _keyHandler = keyHandler;
+        _keyHandler.SetEditor(this);
         Mode = vimFactory.CreateVimMode<VimNormalMode>(this);
     }
     public VimCommandEditor? VimCommand { get; set; }
@@ -330,6 +334,16 @@ public class VimEditor
         Context.OffsetY = Math.Max(0, offsetY);
     }
 
+    /// <summary>
+    /// 添加按鍵處理動作
+    /// </summary>
+    /// <param name="keyPattern">按鍵模式</param>
+    /// <param name="action">要執行的動作</param>
+    public void AddOnKeyPress(IKeyPattern keyPattern, Action<IProgress> action)
+    {
+        _keyHandler.AddOnKeyPress(keyPattern, action);
+    }
+    
     public void WaitForInput()
     {
         if (VimCommand != null)
