@@ -58,3 +58,9 @@ bash/cuda-keyring_1.1-1_all.deb
 vscode-plugin-demo/artemis/out
 T1.GrpcSourceGenerator/ConsoleTestApp/GrpcProto
 T1.GrpcSourceGenerator/ConsoleTestApp/GrpcServices
+game-sudoku/build/distributions
+game-sudoku/build/kotlin/compileKotlin
+game-sudoku/build/libs
+game-sudoku/build/classes
+game-sudoku/gradle
+game-sudoku/.gradle

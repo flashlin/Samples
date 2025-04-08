@@ -1,0 +1,213 @@
+package com.example
+
+import tornadofx.*
+import javafx.scene.paint.Color
+import javafx.scene.text.FontWeight
+import javafx.geometry.Pos
+import javafx.scene.control.Button
+import javafx.scene.layout.GridPane
+import javafx.scene.layout.VBox
+import javafx.scene.layout.HBox
+import javafx.scene.control.Label
+import kotlin.random.Random
+
+class SudokuApp : App(SudokuView::class)
+
+class SudokuView : View() {
+    private val sudokuBoard: Array<Array<Int>> = Array(9) { Array(9) { 0 } }
+    private val fixedNumbers: Array<Array<Boolean>> = Array(9) { Array(9) { false } }
+    private val userInputs: Array<Array<Int>> = Array(9) { Array(9) { 0 } }
+    private var selectedCell: Pair<Int, Int>? = null
+    private val buttons: Array<Array<Button>> = Array(9) { i -> Array(9) { j -> 
+        Button().apply {
+            setPrefSize(50.0, 50.0)
+            action {
+                selectedCell = i to j
+                if (!fixedNumbers[i][j]) {
+                    updateButtonStyles()
+                }
+            }
+        }
+    }}
+
+    override val root: VBox = vbox {
+        setPrefSize(500.0, 600.0)
+        spacing = 10.0
+        padding = insets(20)
+
+        val messageLabel = label("") {
+            id = "successMessage"
+            isVisible = false
+        }
+
+        gridpane {
+            alignment = Pos.CENTER
+            hgap = 2.0
+            vgap = 2.0
+
+            for (i in 0..8) {
+                for (j in 0..8) {
+                    add(buttons[i][j], j, i)
+                }
+            }
+        }
+
+        hbox {
+            alignment = Pos.CENTER
+            spacing = 10.0
+            padding = insets(20)
+
+            for (num in 1..9) {
+                button(num.toString()) {
+                    setPrefSize(40.0, 40.0)
+                    
+                    action {
+                        selectedCell?.let { (row, col) ->
+                            if (!fixedNumbers[row][col]) {
+                                userInputs[row][col] = num
+                                updateUI()
+                                checkWinCondition()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        button("New Game") {
+            setPrefSize(120.0, 40.0)
+            
+            action {
+                generateNewGame()
+                updateUI()
+                messageLabel.isVisible = false
+            }
+        }
+    }
+
+    init {
+        generateNewGame()
+        updateUI()
+    }
+
+    private fun updateButtonStyles() {
+        buttons.forEachIndexed { i, row ->
+            row.forEachIndexed { j, button ->
+                if (selectedCell?.first == i && selectedCell?.second == j) {
+                    button.style = "-fx-border-color: blue;"
+                } else {
+                    button.style = ""
+                }
+            }
+        }
+    }
+
+    private fun updateUI() {
+        for (i in 0..8) {
+            for (j in 0..8) {
+                val value = if (fixedNumbers[i][j]) sudokuBoard[i][j] else userInputs[i][j]
+                buttons[i][j].apply {
+                    text = if (value == 0) "" else value.toString()
+                    if (fixedNumbers[i][j]) {
+                        style = "-fx-text-fill: black;"
+                    } else {
+                        style = if (isValid(i, j, value)) {
+                            "-fx-text-fill: blue;"
+                        } else {
+                            "-fx-text-fill: red;"
+                        }
+                    }
+                }
+            }
+        }
+        updateButtonStyles()
+    }
+
+    private fun generateNewGame() {
+        for (i in 0..8) {
+            for (j in 0..8) {
+                sudokuBoard[i][j] = 0
+                fixedNumbers[i][j] = false
+                userInputs[i][j] = 0
+            }
+        }
+        
+        generateValidSudoku(0, 0)
+        
+        for (i in 0..8) {
+            for (j in 0..8) {
+                if (Random.nextDouble() < 0.7) {
+                    sudokuBoard[i][j] = 0
+                } else {
+                    fixedNumbers[i][j] = true
+                }
+            }
+        }
+    }
+
+    private fun generateValidSudoku(row: Int, col: Int): Boolean {
+        if (col == 9) {
+            return generateValidSudoku(row + 1, 0)
+        }
+        if (row == 9) {
+            return true
+        }
+        
+        val numbers = (1..9).shuffled()
+        for (num in numbers) {
+            if (isValid(row, col, num)) {
+                sudokuBoard[row][col] = num
+                if (generateValidSudoku(row, col + 1)) {
+                    return true
+                }
+                sudokuBoard[row][col] = 0
+            }
+        }
+        return false
+    }
+
+    private fun isValid(row: Int, col: Int, num: Int): Boolean {
+        if (num == 0) return true
+        
+        for (x in 0..8) {
+            if (x != col && sudokuBoard[row][x] == num) return false
+            if (x != row && sudokuBoard[x][col] == num) return false
+        }
+        
+        val startRow = row - row % 3
+        val startCol = col - col % 3
+        for (i in 0..2) {
+            for (j in 0..2) {
+                if ((i + startRow != row || j + startCol != col) && 
+                    sudokuBoard[i + startRow][j + startCol] == num) return false
+            }
+        }
+        
+        return true
+    }
+
+    private fun checkWinCondition() {
+        var isComplete = true
+        for (i in 0..8) {
+            for (j in 0..8) {
+                val currentNum = if (fixedNumbers[i][j]) sudokuBoard[i][j] else userInputs[i][j]
+                if (currentNum == 0 || !isValid(i, j, currentNum)) {
+                    isComplete = false
+                    break
+                }
+            }
+        }
+        
+        if (isComplete) {
+            root.lookup("#successMessage").apply {
+                (this as Label).text = "成功！"
+                style = "-fx-background-color: blue; -fx-text-fill: white; -fx-padding: 10;"
+                isVisible = true
+            }
+        }
+    }
+}
+
+fun main() {
+    launch<SudokuApp>() 
+} 
