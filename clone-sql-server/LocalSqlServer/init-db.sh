@@ -7,13 +7,23 @@
 echo "======================"
 echo "等待 SQL Server 啟動..."
 echo "======================"
-for i in {1..60}; do
-    echo ".........."
-    if /opt/mssql-tools18/bin/sqlcmd -S "localhost,1433;TrustServerCertificate=yes" -U SA -P $SA_PASSWORD -Q "SELECT 1" -C -N -t 30 &> /dev/null; then
-        echo "SQL Server 已啟動"
+
+# 增加初始等待時間，讓 SQL Server 有足夠時間完成初始化
+sleep 10
+
+for i in {1..90}; do
+    echo "第 $i 次嘗試連接..."
+    if /opt/mssql-tools18/bin/sqlcmd \
+        -S "localhost,1433;TrustServerCertificate=yes" \
+        -U SA \
+        -P $SA_PASSWORD \
+        -Q "SELECT @@VERSION" \
+        -C -N -t 30 2>&1; then
+        echo "SQL Server 已成功啟動"
         break
     fi
-    sleep 1
+    echo "等待 SQL Server 就緒..."
+    sleep 2
 done
 
 # 執行資料庫初始化腳本
