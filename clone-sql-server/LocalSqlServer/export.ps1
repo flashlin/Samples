@@ -20,21 +20,18 @@ $DATABASES = Invoke-Sqlcmd -ServerInstance $SERVER -Query $query -TrustServerCer
 foreach ($DB in $DATABASES) {
     Write-Host "📦 導出資料庫：$DB"
 
-    $OUTPUT_FILE = Join-Path $OUTPUT_DIR "Create_${DB}.sql"
+    $OUTPUT_FILE = Join-Path $OUTPUT_DIR "Create_${DB}.bacpac"
 
-    # 使用 SqlPackage.exe 導出資料庫結構
-    & SqlPackage /Action:Script `
+    # 使用 SqlPackage.exe 導出資料庫
+    & SqlPackage /Action:Export `
         /SourceServerName:$SERVER `
         /SourceDatabaseName:$DB `
         /TargetFile:$OUTPUT_FILE `
-        /p:ExtractAllTableData=False `
-        /p:ScriptDatabaseOptions=True `
-        /p:ScriptDrops=False `
-        /p:IncludeCompositeObjects=True `
-        /p:ScriptUseDatabase=True `
-        /p:IncludeTransactionalScripts=False `
-        /p:TargetServerVersion="SqlServer$SQL_VERSION" `
-        /p:TrustServerCertificate=true
+        /Properties:CompressionOption=Fast `
+        /Properties:VerifyExtraction=True `
+        /Properties:CommandTimeout=0 `
+        /Properties:DatabaseLockTimeout=60 `
+        /SourceTrustServerCertificate:True
 
     Write-Host "✅ 已匯出：$OUTPUT_FILE"
 }
