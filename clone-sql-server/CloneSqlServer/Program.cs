@@ -64,6 +64,8 @@ class Program
 
     private static async Task GenerateDatabaseObjects(SqlConnection connection, string database, StringBuilder schemaScript)
     {
+        AppendCreateDatabaseScript(schemaScript, database);
+
         connection.ChangeDatabase(database);
         
         schemaScript.AppendLine($"USE [{database}]");
@@ -71,6 +73,15 @@ class Program
 
         await GenerateStoredProceduresAndViews(connection, schemaScript);
         await GenerateTableDefinitions(connection, schemaScript);
+    }
+
+    private static void AppendCreateDatabaseScript(StringBuilder schemaScript, string database)
+    {
+        schemaScript.AppendLine($"IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'{database}')");
+        schemaScript.AppendLine("BEGIN");
+        schemaScript.AppendLine($"    CREATE DATABASE [{database}]");
+        schemaScript.AppendLine("END");
+        schemaScript.AppendLine("GO");
     }
 
     private static async Task GenerateStoredProceduresAndViews(SqlConnection connection, StringBuilder schemaScript)
