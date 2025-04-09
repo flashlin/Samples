@@ -4,7 +4,8 @@ param(
     [string]$SQL_VERSION = "160" # SQL Server 2022 對應 version 是 160
 )
 
-Install-Module -Name SqlServer -Force
+# Install-Module -Name SqlServer -Force
+Write-Host "$SERVER"
 
 # 輸出資料夾
 $OUTPUT_DIR = "./exports"
@@ -13,7 +14,7 @@ New-Item -ItemType Directory -Force -Path $OUTPUT_DIR | Out-Null
 # 取得所有 user database 名稱（排除系統資料庫）
 Write-Host "🔍 正在取得所有 user databases..."
 $query = "SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name NOT IN ('master','tempdb','model','msdb')"
-$DATABASES = Invoke-Sqlcmd -ServerInstance $SERVER -Query $query | Select-Object -ExpandProperty name
+$DATABASES = Invoke-Sqlcmd -ServerInstance $SERVER -Query $query -TrustServerCertificate | Select-Object -ExpandProperty name
 
 foreach ($DB in $DATABASES) {
     Write-Host "📦 導出資料庫：$DB"
@@ -31,7 +32,8 @@ foreach ($DB in $DATABASES) {
         /p:IncludeCompositeObjects=True `
         /p:ScriptUseDatabase=True `
         /p:IncludeTransactionalScripts=False `
-        /p:TargetServerVersion="SqlServer$SQL_VERSION"
+        /p:TargetServerVersion="SqlServer$SQL_VERSION" `
+        /p:TrustServerCertificate=true
 
     Write-Host "✅ 已匯出：$OUTPUT_FILE"
 }
