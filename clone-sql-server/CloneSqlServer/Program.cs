@@ -138,7 +138,8 @@ class Program
             SELECT 
                 STRING_AGG(
                     CASE 
-                        WHEN is_identity = 1 THEN COLUMN_NAME + ' ' + DATA_TYPE + 
+                        WHEN COLUMNPROPERTY(OBJECT_ID(TABLE_SCHEMA + '.' + TABLE_NAME), COLUMN_NAME, 'IsIdentity') = 1 
+                        THEN COLUMN_NAME + ' ' + DATA_TYPE + 
                             CASE 
                                 WHEN CHARACTER_MAXIMUM_LENGTH IS NOT NULL 
                                 THEN '(' + CAST(CHARACTER_MAXIMUM_LENGTH AS VARCHAR) + ')' 
