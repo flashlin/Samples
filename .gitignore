@@ -64,3 +64,6 @@ game-sudoku/build/libs
 game-sudoku/build/classes
 game-sudoku/gradle
 game-sudoku/.gradle
+game-sudoku/build/kotlin/compileTestKotlin
+game-sudoku/build/test-results/test/binary
+game-sudoku/build/test-results/test

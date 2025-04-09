@@ -15,9 +15,134 @@ import javafx.scene.text.TextAlignment
 import javafx.geometry.VPos
 import kotlin.random.Random
 
+class SudokuLogic {
+    private val board: Array<Array<Int>> = Array(9) { Array(9) { 0 } }
+    
+    fun generateNewGame() {
+        // 初始化棋盤
+        clearBoard()
+        
+        // 生成完整的數獨解
+        generateFullSudoku()
+        
+        // 隨機移除一些數字來創建遊戲
+        for (i in 0..8) {
+            for (j in 0..8) {
+                if (Random.nextDouble() < 0.7) {
+                    board[i][j] = 0
+                }
+            }
+        }
+    }
+    
+    fun clearBoard() {
+        for (i in 0..8) {
+            for (j in 0..8) {
+                board[i][j] = 0
+            }
+        }
+    }
+    
+    private fun generateFullSudoku(): Boolean {
+        // 依序填充每個 3x3 區塊
+        for (blockRow in 0..2) {
+            for (blockCol in 0..2) {
+                if (!fillBlock(blockRow, blockCol)) {
+                    clearBoard()
+                    return generateFullSudoku()
+                }
+            }
+        }
+        return true
+    }
+    
+    private fun fillBlock(blockRow: Int, blockCol: Int): Boolean {
+        // 收集區塊內所有空格子的位置
+        val emptyPositions = mutableListOf<Pair<Int, Int>>()
+        for (i in 0..2) {
+            for (j in 0..2) {
+                val row = blockRow * 3 + i
+                val col = blockCol * 3 + j
+                if (board[row][col] == 0) {
+                    emptyPositions.add(row to col)
+                }
+            }
+        }
+        
+        // 如果區塊已經填滿，返回 true
+        if (emptyPositions.isEmpty()) return true
+        
+        // 打亂空格子的順序
+        val shuffledPositions = emptyPositions.shuffled()
+        
+        // 對每個空位嘗試填入 1-9
+        for ((row, col) in shuffledPositions) {
+            // 打亂 1-9 的數字順序
+            val numbers = (1..9).shuffled()
+            
+            // 嘗試每個數字
+            for (num in numbers) {
+                // 先放入數字
+                board[row][col] = num
+                
+                // 檢查是否合法
+                if (isValid(row, col, num)) {
+                    // 如果當前數字合法，繼續填充下一個位置
+                    if (emptyPositions.size == 1 || fillBlock(blockRow, blockCol)) {
+                        return true
+                    }
+                }
+                
+                // 如果不合法或後續填充失敗，還原並嘗試下一個數字
+                board[row][col] = 0
+            }
+        }
+        
+        // 如果所有數字都試過了還是不行，返回 false
+        return false
+    }
+    
+    fun isValid(row: Int, col: Int, num: Int): Boolean {
+        // 如果是空格，則視為有效
+        if (num == 0) return true
+        
+        // 檢查行規則：同一行不能有重複數字
+        for (x in 0..8) {
+            if (x != col && board[row][x] == num) return false
+        }
+        
+        // 檢查列規則：同一列不能有重複數字
+        for (x in 0..8) {
+            if (x != row && board[x][col] == num) return false
+        }
+        
+        // 檢查區域規則：3x3區域內不能有重複數字
+        val startRow = row - row % 3
+        val startCol = col - col % 3
+        for (i in 0..2) {
+            for (j in 0..2) {
+                if (i + startRow != row || j + startCol != col) {
+                    if (board[i + startRow][j + startCol] == num) return false
+                }
+            }
+        }
+        
+        return true
+    }
+    
+    fun getBoard(): Array<Array<Int>> {
+        return Array(9) { row ->
+            Array(9) { col ->
+                board[row][col]
+            }
+        }
+    }
+}
+
 class SudokuApp : App(SudokuView::class)
 
 class SudokuView : View() {
+    private val sudokuLogic = SudokuLogic()
     private val sudokuBoard: Array<Array<Int>> = Array(9) { Array(9) { 0 } }
     private val fixedNumbers: Array<Array<Boolean>> = Array(9) { Array(9) { false } }
     private val userInputs: Array<Array<Int>> = Array(9) { Array(9) { 0 } }
@@ -84,6 +209,21 @@ class SudokuView : View() {
         drawBoard()
     }
 
+    fun generateNewGame() {
+        // 使用 SudokuLogic 生成新遊戲
+        sudokuLogic.generateNewGame()
+        val generatedBoard = sudokuLogic.getBoard()
+        
+        // 更新視圖數據
+        for (i in 0..8) {
+            for (j in 0..8) {
+                sudokuBoard[i][j] = generatedBoard[i][j]
+                fixedNumbers[i][j] = generatedBoard[i][j] != 0
+                userInputs[i][j] = 0
+            }
+        }
+    }
+
     private fun drawBoard() {
         val gc = canvas.graphicsContext2D
         gc.clearRect(0.0, 0.0, canvas.width, canvas.height)
@@ -129,7 +269,7 @@ class SudokuView : View() {
                     if (fixedNumbers[i][j]) {
                         gc.fill = Color.BLACK
                     } else {
-                        gc.fill = if (isValid(i, j, value)) Color.BLUE else Color.RED
+                        gc.fill = if (sudokuLogic.isValid(i, j, value)) Color.BLUE else Color.RED
                     }
                     
                     gc.fillText(
@@ -142,145 +282,12 @@ class SudokuView : View() {
         }
     }
 
-    private fun generateNewGame() {
-        // 初始化棋盤和標記
-        for (i in 0..8) {
-            for (j in 0..8) {
-                sudokuBoard[i][j] = 0
-                fixedNumbers[i][j] = false
-                userInputs[i][j] = 0
-            }
-        }
-        
-        // 生成完整的數獨解
-        generateFullSudoku()
-        
-        // 隨機移除一些數字來創建遊戲
-        for (i in 0..8) {
-            for (j in 0..8) {
-                if (Random.nextDouble() < 0.7) {
-                    sudokuBoard[i][j] = 0
-                } else {
-                    fixedNumbers[i][j] = true
-                }
-            }
-        }
-    }
-
-    private fun generateFullSudoku(): Boolean {
-        // 獲取未填充的 3x3 區塊
-        val unfilledBlock = findUnfilledBlock()
-        if (unfilledBlock == null) return true // 所有區塊都已填滿
-        
-        val (blockRow, blockCol) = unfilledBlock
-        
-        // 創建並打亂 1-9 的數字池
-        val numbers = (1..9).toList().shuffled().toMutableList()
-        
-        // 嘗試填充當前區塊
-        for (i in 0..2) {
-            for (j in 0..2) {
-                val row = blockRow * 3 + i
-                val col = blockCol * 3 + j
-                
-                var numberPlaced = false
-                for (num in numbers.toList()) {
-                    if (isValid(row, col, num)) {
-                        sudokuBoard[row][col] = num
-                        numbers.remove(num)
-                        numberPlaced = true
-                        break
-                    }
-                }
-                
-                if (!numberPlaced) {
-                    // 如果無法放置任何數字，回溯並清空當前區塊
-                    clearBlock(blockRow, blockCol)
-                    return false
-                }
-            }
-        }
-        
-        // 遞迴填充下一個區塊
-        return generateFullSudoku()
-    }
-
-    private fun findUnfilledBlock(): Pair<Int, Int>? {
-        for (blockRow in 0..2) {
-            for (blockCol in 0..2) {
-                if (isBlockEmpty(blockRow, blockCol)) {
-                    return Pair(blockRow, blockCol)
-                }
-            }
-        }
-        return null
-    }
-
-    private fun isBlockEmpty(blockRow: Int, blockCol: Int): Boolean {
-        for (i in 0..2) {
-            for (j in 0..2) {
-                if (sudokuBoard[blockRow * 3 + i][blockCol * 3 + j] != 0) {
-                    return false
-                }
-            }
-        }
-        return true
-    }
-
-    private fun clearBlock(blockRow: Int, blockCol: Int) {
-        for (i in 0..2) {
-            for (j in 0..2) {
-                sudokuBoard[blockRow * 3 + i][blockCol * 3 + j] = 0
-            }
-        }
-    }
-
-    private fun isValid(row: Int, col: Int, num: Int): Boolean {
-        // 如果是空格，則視為有效
-        if (num == 0) return true
-        
-        // 檢查行規則：同一行不能有重複數字
-        for (x in 0..8) {
-            if (x != col) {
-                val valueToCheck = if (fixedNumbers[row][x]) sudokuBoard[row][x] else userInputs[row][x]
-                if (valueToCheck == num) return false
-            }
-        }
-        
-        // 檢查列規則：同一列不能有重複數字
-        for (x in 0..8) {
-            if (x != row) {
-                val valueToCheck = if (fixedNumbers[x][col]) sudokuBoard[x][col] else userInputs[x][col]
-                if (valueToCheck == num) return false
-            }
-        }
-        
-        // 檢查區域規則：3x3區域內不能有重複數字
-        val startRow = row - row % 3
-        val startCol = col - col % 3
-        for (i in 0..2) {
-            for (j in 0..2) {
-                if (i + startRow != row || j + startCol != col) {
-                    val currentRow = i + startRow
-                    val currentCol = j + startCol
-                    val valueToCheck = if (fixedNumbers[currentRow][currentCol]) 
-                        sudokuBoard[currentRow][currentCol] 
-                    else 
-                        userInputs[currentRow][currentCol]
-                    if (valueToCheck == num) return false
-                }
-            }
-        }
-        
-        return true
-    }
-
     private fun checkWinCondition() {
         var isComplete = true
         for (i in 0..8) {
             for (j in 0..8) {
                 val currentNum = if (fixedNumbers[i][j]) sudokuBoard[i][j] else userInputs[i][j]
-                if (currentNum == 0 || !isValid(i, j, currentNum)) {
+                if (currentNum == 0 || !sudokuLogic.isValid(i, j, currentNum)) {
                     isComplete = false
                     break
                 }
@@ -292,6 +299,15 @@ class SudokuView : View() {
                 (this as Label).text = "成功！"
                 style = "-fx-background-color: blue; -fx-text-fill: white; -fx-padding: 10;"
                 isVisible = true
+            }
+        }
+    }
+
+    // 提供一個方法來獲取數獨板的內容
+    fun getSudokuBoard(): Array<Array<Int>> {
+        return Array(9) { row ->
+            Array(9) { col ->
+                sudokuBoard[row][col]
             }
         }
     }
