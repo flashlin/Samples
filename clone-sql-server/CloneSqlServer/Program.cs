@@ -16,7 +16,9 @@ class Program
     {
         if (args.Length == 0)
         {
-            Console.WriteLine("請提供 SQL Server 連接字串，例如: 127.0.0.1:3390");
+            Console.WriteLine("請提供 SQL Server 連接字串");
+            Console.WriteLine("格式：servername[:port]");
+            Console.WriteLine("範例：127.0.0.1:3390 或 devdb.coreop.net");
             return;
         }
 
@@ -32,7 +34,10 @@ class Program
     private static string BuildConnectionString(string server)
     {
         string[] serverParts = server.Split(':');
-        return $"Server={serverParts[0]},{serverParts[1]};Integrated Security=True;TrustServerCertificate=True;";
+        string serverName = serverParts[0];
+        string port = serverParts.Length > 1 ? $",{serverParts[1]}" : string.Empty;
+        
+        return $"Server={serverName}{port};Integrated Security=True;TrustServerCertificate=True;";
     }
 
     private static async Task<string> GenerateDatabaseSchemaScript(SqlConnection connection)
