@@ -109,12 +109,14 @@ class Program
                 DB_NAME() as Name,
                 t.name as ObjectName,
                 'UDT' as ObjectType,
-                CONCAT('CREATE TYPE [', SCHEMA_NAME(t.schema_id), '].[', t.name, '] FROM ', 
-                    CASE WHEN t.is_table_type = 1 
-                        THEN 'AS TABLE (' + 
-                            (SELECT STRING_AGG(
-                                CONCAT('[', c.name, '] ', 
-                                    tp.name, 
+                CASE 
+                    WHEN t.is_table_type = 1 THEN
+                    (
+                        SELECT 
+                            'CREATE TYPE [' + SCHEMA_NAME(tt.schema_id) + '].[' + tt.name + '] AS TABLE (' +
+                            STUFF((
+                                SELECT ', [' + c.name + '] ' + 
+                                    tp.name + 
                                     CASE 
                                         WHEN tp.name IN ('varchar', 'nvarchar', 'char', 'nchar') 
                                             THEN '(' + CASE WHEN c.max_length = -1 
@@ -124,29 +126,45 @@ class Program
                                                     ELSE c.max_length END AS VARCHAR) 
                                             END + ')'
                                         WHEN tp.name IN ('decimal', 'numeric') 
-                                            THEN '(' + CAST(c.precision AS VARCHAR) + ',' + CAST(c.scale AS VARCHAR) + ')'
+                                            THEN '(' + CAST(c.[precision] AS VARCHAR) + ',' + CAST(c.scale AS VARCHAR) + ')'
+                                        WHEN tp.name IN ('binary', 'varbinary')
+                                            THEN '(' + CASE WHEN c.max_length = -1 
+                                                THEN 'MAX' 
+                                                ELSE CAST(c.max_length AS VARCHAR) 
+                                            END + ')'
                                         ELSE ''
-                                    END,
+                                    END +
                                     CASE WHEN c.is_nullable = 1 THEN ' NULL' ELSE ' NOT NULL' END
-                                ), ', ')
-                            FROM sys.columns c
-                            INNER JOIN sys.types tp ON c.user_type_id = tp.user_type_id
-                            WHERE c.object_id = t.type_table_object_id
-                            ) + ')'
-                        ELSE CONCAT(
-                            base_type.name,
-                            CASE 
-                                WHEN t.max_length = -1 THEN '(MAX)'
-                                WHEN t.max_length > 0 THEN '(' + CAST(t.max_length AS VARCHAR) + ')'
-                                ELSE ''
-                            END
-                        )
-                    END
-                ) as Definition
+                                FROM sys.table_types tt2
+                                INNER JOIN sys.columns c ON c.object_id = tt2.type_table_object_id
+                                INNER JOIN sys.types tp ON c.user_type_id = tp.user_type_id
+                                WHERE tt2.user_type_id = t.user_type_id
+                                ORDER BY c.column_id
+                                FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') + ')'
+                        FROM sys.table_types tt
+                        WHERE tt.user_type_id = t.user_type_id
+                    )
+                    ELSE 
+                        'CREATE TYPE [' + SCHEMA_NAME(t.schema_id) + '].[' + t.name + '] FROM ' +
+                        CASE 
+                            WHEN t.is_table_type = 0 THEN
+                                base_type.name +
+                                CASE 
+                                    WHEN t.max_length = -1 THEN '(MAX)'
+                                    WHEN t.max_length > 0 AND base_type.name IN ('varchar', 'nvarchar', 'char', 'nchar', 'binary', 'varbinary')
+                                        THEN '(' + CAST(t.max_length AS VARCHAR) + ')'
+                                    WHEN base_type.name IN ('decimal', 'numeric')
+                                        THEN '(' + CAST(t.precision AS VARCHAR) + ',' + CAST(t.scale AS VARCHAR) + ')'
+                                    ELSE ''
+                                END
+                            ELSE ''
+                        END
+                END as Definition
             FROM sys.types t
             LEFT JOIN sys.types base_type ON t.system_type_id = base_type.user_type_id
             WHERE t.is_user_defined = 1
-                AND t.schema_id <> SCHEMA_ID('sys')";
+                AND t.schema_id <> SCHEMA_ID('sys')
+            ORDER BY t.name";
 
         var dbObjects = await connection.QueryAsync<DatabaseInfo>(query);
 
