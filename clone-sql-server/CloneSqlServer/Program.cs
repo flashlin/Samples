@@ -26,21 +26,26 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        if (args.Length == 0)
+        if (args.Length < 2)
         {
-            Console.WriteLine("請提供 SQL Server 連接字串");
-            Console.WriteLine("格式：servername[:port]");
-            Console.WriteLine("範例：127.0.0.1:3390 或 devdb.coreop.net");
+            Console.WriteLine("請提供 SQL Server 連接字串和目標路徑");
+            Console.WriteLine("格式：servername[:port] targetPath");
+            Console.WriteLine("範例：127.0.0.1:3390 D:\\Backup\\Schema");
             return;
         }
 
         string connectionString = BuildConnectionString(args[0]);
+        string targetPath = args[1];
+
+        // 確保目標目錄存在
+        Directory.CreateDirectory(targetPath);
+
         using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync();
         Console.WriteLine("成功連接到 SQL Server");
 
         var schemaScript = await GenerateDatabaseSchemaScript(connection);
-        await SaveSchemaScript(schemaScript);
+        await SaveSchemaScript(schemaScript, targetPath);
     }
 
     private static string BuildConnectionString(string server)
@@ -248,9 +253,10 @@ class Program
         return await connection.QueryAsync<DatabaseInfo>(tableQuery);
     }
 
-    private static async Task SaveSchemaScript(string schemaScript)
+    private static async Task SaveSchemaScript(string schemaScript, string targetPath)
     {
-        await File.WriteAllTextAsync("CreateDatabase.sql", schemaScript);
-        Console.WriteLine("資料庫結構已成功導出到 CreateDatabase.sql");
+        string filePath = Path.Combine(targetPath, "CreateDatabase.sql");
+        await File.WriteAllTextAsync(filePath, schemaScript);
+        Console.WriteLine($"資料庫結構已成功導出到 {filePath}");
     }
 }
