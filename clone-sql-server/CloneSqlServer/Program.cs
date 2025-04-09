@@ -20,20 +20,13 @@ class Program
             return;
         }
 
-        try
-        {
-            string connectionString = BuildConnectionString(args[0]);
-            using var connection = new SqlConnection(connectionString);
-            await connection.OpenAsync();
-            Console.WriteLine("成功連接到 SQL Server");
+        string connectionString = BuildConnectionString(args[0]);
+        using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
+        Console.WriteLine("成功連接到 SQL Server");
 
-            var schemaScript = await GenerateDatabaseSchemaScript(connection);
-            await SaveSchemaScript(schemaScript);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"錯誤: {ex.Message}");
-        }
+        var schemaScript = await GenerateDatabaseSchemaScript(connection);
+        await SaveSchemaScript(schemaScript);
     }
 
     private static string BuildConnectionString(string server)
