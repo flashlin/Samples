@@ -113,6 +113,7 @@ class Program
 
         foreach (var table in tables)
         {
+            Console.WriteLine($"Processing table: {table.ObjectName}");
             var tableDefinition = await GetTableColumnDefinitions(connection, table.ObjectName);
             AppendTableDefinition(schemaScript, table.ObjectName, tableDefinition);
         }
