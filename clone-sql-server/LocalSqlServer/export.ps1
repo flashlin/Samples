@@ -4,6 +4,7 @@ param(
     [string]$SQL_VERSION = "160" # SQL Server 2022 對應 version 是 160
 )
 
+# https://learn.microsoft.com/en-us/sql/tools/sqlpackage/sqlpackage-download?view=sql-server-ver16
 # Install-Module -Name SqlServer -Force
 Write-Host "$SERVER"
 
