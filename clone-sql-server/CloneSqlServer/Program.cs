@@ -5,6 +5,7 @@ using Dapper;
 public class DatabaseInfo
 {
     public string? Name { get; set; }
+    public string? SchemaName { get; set; }
     public string? ObjectName { get; set; }
     public string? ObjectType { get; set; }
     public string? Definition { get; set; }
@@ -88,8 +89,9 @@ class Program
         schemaScript.AppendLine("GO");
 
         await GenerateTableDefinitions(connection, schemaScript);
-        await GenerateViews(connection, schemaScript);
+        await GenerateUserFunctions(connection, schemaScript);
         await GenerateUserDefineTypes(connection, schemaScript);
+        await GenerateViews(connection, schemaScript);
         await GenerateStoredProcedures(connection, schemaScript);
     }
 
@@ -100,6 +102,48 @@ class Program
         schemaScript.AppendLine($"    CREATE DATABASE [{database}]");
         schemaScript.AppendLine("END");
         schemaScript.AppendLine("GO");
+    }
+
+    private static async Task GenerateUserFunctions(SqlConnection connection, StringBuilder schemaScript)
+    {
+        var query = @"
+            SELECT 
+                DB_NAME() as Name,
+                SCHEMA_NAME(o.schema_id) as SchemaName,
+                o.name as ObjectName,
+                o.type as ObjectType,
+                m.definition as Definition
+            FROM sys.objects o
+            INNER JOIN sys.sql_modules m ON o.object_id = m.object_id
+            WHERE o.type IN ('FN', 'IF', 'TF', 'AF')  -- Scalar, Inline Table-valued, Table-valued, and Aggregate functions
+                AND o.is_ms_shipped = 0
+                AND SCHEMA_NAME(o.schema_id) != 'sys'
+            ORDER BY o.type, o.name";
+
+        var dbObjects = await connection.QueryAsync<DatabaseInfo>(query);
+
+        foreach (var obj in dbObjects)
+        {
+            if (!string.IsNullOrEmpty(obj.Definition))
+            {
+                string functionType = obj.ObjectType switch
+                {
+                    "FN" => "Scalar Function",
+                    "IF" => "Inline Table-valued Function",
+                    "TF" => "Table-valued Function",
+                    "AF" => "Aggregate Function",
+                    _ => "Function"
+                };
+
+                schemaScript.AppendLine($"-- {functionType}: [{obj.SchemaName}].[{obj.ObjectName}]");
+                schemaScript.AppendLine($"IF OBJECT_ID(N'[{obj.SchemaName}].[{obj.ObjectName}]') IS NOT NULL");
+                schemaScript.AppendLine($"    DROP FUNCTION [{obj.SchemaName}].[{obj.ObjectName}]");
+                schemaScript.AppendLine("GO");
+                schemaScript.AppendLine(obj.Definition);
+                schemaScript.AppendLine("GO");
+                schemaScript.AppendLine();
+            }
+        }
     }
 
     private static async Task GenerateUserDefineTypes(SqlConnection connection, StringBuilder schemaScript)
