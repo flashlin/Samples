@@ -284,14 +284,14 @@ class Program
         for (int i = 0; i < tables.Count; i += batchSize)
         {
             var batch = tables.Skip(i).Take(batchSize).ToList();
-            Console.WriteLine($"Processing tables {i + 1} to {Math.Min(i + batchSize, tables.Count)} of {tables.Count}");
 
             var tableSchemas = await GetBatchTableColumnDefinitions(connection, batch.Select(t => t.ObjectName!).ToList());
-            
             foreach (var tableGroup in tableSchemas.GroupBy(t => t.TableName))
             {
                 var tableName = tableGroup.Key;
                 var columnDefinitions = BuildColumnDefinitions(tableGroup);
+
+                Console.WriteLine($"Processing table {tableName}");
                 AppendTableDefinition(schemaScript, tableName, columnDefinitions);
             }
         }
@@ -301,17 +301,24 @@ class Program
     {
         var query = @"
             SELECT 
-                c.TABLE_NAME as TableName,
-                c.COLUMN_NAME as ColumnName,
-                c.DATA_TYPE as DataType,
-                c.CHARACTER_MAXIMUM_LENGTH as CharacterMaxLength,
-                c.NUMERIC_PRECISION as NumericPrecision,
-                c.NUMERIC_SCALE as NumericScale,
-                CASE WHEN c.IS_NULLABLE = 'YES' THEN 1 ELSE 0 END as IsNullable,
-                ISNULL(COLUMNPROPERTY(OBJECT_ID(c.TABLE_SCHEMA + '.' + c.TABLE_NAME), c.COLUMN_NAME, 'IsIdentity'), 0) as IsIdentity
-            FROM INFORMATION_SCHEMA.COLUMNS c
-            WHERE c.TABLE_NAME IN @TableNames
-            ORDER BY c.TABLE_NAME, c.ORDINAL_POSITION";
+                SCHEMA_NAME(t.schema_id) + '.' + t.name as TableName,
+                c.name as ColumnName,
+                tp.name as DataType,
+                CASE 
+                    WHEN tp.name IN ('nchar', 'nvarchar') AND c.max_length != -1 THEN c.max_length/2
+                    ELSE c.max_length
+                END as CharacterMaxLength,
+                c.precision as NumericPrecision,
+                c.scale as NumericScale,
+                c.is_nullable as IsNullable,
+                c.is_identity as IsIdentity
+            FROM sys.tables t
+            INNER JOIN sys.columns c ON t.object_id = c.object_id
+            INNER JOIN sys.types tp ON c.user_type_id = tp.user_type_id
+            WHERE SCHEMA_NAME(t.schema_id) + '.' + t.name IN @TableNames
+            ORDER BY 
+                SCHEMA_NAME(t.schema_id) + '.' + t.name,
+                c.column_id";
 
         return await connection.QueryAsync<TableSchemaInfo>(query, new { TableNames = tableNames });
     }
