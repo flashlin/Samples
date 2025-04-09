@@ -89,6 +89,7 @@ class Program
 
         await GenerateTableDefinitions(connection, schemaScript);
         await GenerateViews(connection, schemaScript);
+        await GenerateUserDefineTypes(connection, schemaScript);
         await GenerateStoredProcedures(connection, schemaScript);
     }
 
@@ -99,6 +100,68 @@ class Program
         schemaScript.AppendLine($"    CREATE DATABASE [{database}]");
         schemaScript.AppendLine("END");
         schemaScript.AppendLine("GO");
+    }
+
+    private static async Task GenerateUserDefineTypes(SqlConnection connection, StringBuilder schemaScript)
+    {
+        var query = @"
+            SELECT 
+                DB_NAME() as Name,
+                t.name as ObjectName,
+                'UDT' as ObjectType,
+                CONCAT('CREATE TYPE [', SCHEMA_NAME(t.schema_id), '].[', t.name, '] FROM ', 
+                    CASE WHEN t.is_table_type = 1 
+                        THEN 'AS TABLE (' + 
+                            (SELECT STRING_AGG(
+                                CONCAT('[', c.name, '] ', 
+                                    tp.name, 
+                                    CASE 
+                                        WHEN tp.name IN ('varchar', 'nvarchar', 'char', 'nchar') 
+                                            THEN '(' + CASE WHEN c.max_length = -1 
+                                                THEN 'MAX' 
+                                                ELSE CAST(CASE WHEN tp.name LIKE 'n%' 
+                                                    THEN c.max_length/2 
+                                                    ELSE c.max_length END AS VARCHAR) 
+                                            END + ')'
+                                        WHEN tp.name IN ('decimal', 'numeric') 
+                                            THEN '(' + CAST(c.precision AS VARCHAR) + ',' + CAST(c.scale AS VARCHAR) + ')'
+                                        ELSE ''
+                                    END,
+                                    CASE WHEN c.is_nullable = 1 THEN ' NULL' ELSE ' NOT NULL' END
+                                ), ', ')
+                            FROM sys.columns c
+                            INNER JOIN sys.types tp ON c.user_type_id = tp.user_type_id
+                            WHERE c.object_id = t.type_table_object_id
+                            ) + ')'
+                        ELSE CONCAT(
+                            base_type.name,
+                            CASE 
+                                WHEN t.max_length = -1 THEN '(MAX)'
+                                WHEN t.max_length > 0 THEN '(' + CAST(t.max_length AS VARCHAR) + ')'
+                                ELSE ''
+                            END
+                        )
+                    END
+                ) as Definition
+            FROM sys.types t
+            LEFT JOIN sys.types base_type ON t.system_type_id = base_type.user_type_id
+            WHERE t.is_user_defined = 1
+                AND t.schema_id <> SCHEMA_ID('sys')";
+
+        var dbObjects = await connection.QueryAsync<DatabaseInfo>(query);
+
+        foreach (var obj in dbObjects)
+        {
+            if (!string.IsNullOrEmpty(obj.Definition))
+            {
+                schemaScript.AppendLine($"-- User-Defined Type: {obj.ObjectName}");
+                schemaScript.AppendLine($"IF TYPE_ID(N'{obj.ObjectName}') IS NOT NULL");
+                schemaScript.AppendLine($"    DROP TYPE [{obj.ObjectName}]");
+                schemaScript.AppendLine("GO");
+                schemaScript.AppendLine(obj.Definition);
+                schemaScript.AppendLine("GO");
+            }
+        }
     }
 
     private static async Task GenerateStoredProcedures(SqlConnection connection, StringBuilder schemaScript)
