@@ -265,20 +265,26 @@ class Program
         
         sb.Append($"[{column.ColumnName}] {column.DataType}");
 
-        // 添加資料類型的長度/精度/小數點
-        if (column.CharacterMaxLength.HasValue)
+        // 只有特定資料類型需要加入長度/精度/小數點
+        if (column.DataType.ToLower() is "varchar" or "nvarchar" or "char" or "nchar" or "binary" or "varbinary")
         {
-            sb.Append(column.CharacterMaxLength == -1 ? "(MAX)" : $"({column.CharacterMaxLength})");
-        }
-        else if (column.NumericPrecision.HasValue)
-        {
-            if (column.NumericScale.HasValue && column.NumericScale.Value > 0)
+            if (column.CharacterMaxLength.HasValue)
             {
-                sb.Append($"({column.NumericPrecision},{column.NumericScale})");
+                sb.Append(column.CharacterMaxLength == -1 ? "(MAX)" : $"({column.CharacterMaxLength})");
             }
-            else
+        }
+        else if (column.DataType.ToLower() is "decimal" or "numeric")
+        {
+            if (column.NumericPrecision.HasValue)
             {
-                sb.Append($"({column.NumericPrecision})");
+                if (column.NumericScale.HasValue && column.NumericScale.Value > 0)
+                {
+                    sb.Append($"({column.NumericPrecision},{column.NumericScale})");
+                }
+                else
+                {
+                    sb.Append($"({column.NumericPrecision})");
+                }
             }
         }
 
