@@ -20,6 +20,20 @@ $DATABASES = Invoke-Sqlcmd -ServerInstance $SERVER -Query $query -TrustServerCer
 foreach ($DB in $DATABASES) {
     Write-Host "📦 導出資料庫：$DB"
 
+    # 取得使用到 Synonym 的預存程序清單
+    $spWithSynonymQuery = @"
+SELECT DISTINCT 
+    QUOTENAME(OBJECT_SCHEMA_NAME(p.object_id)) + '.' + QUOTENAME(p.name) as ProcedureName
+FROM sys.sql_modules m
+INNER JOIN sys.procedures p ON m.object_id = p.object_id
+INNER JOIN sys.synonyms s ON m.definition LIKE '%' + s.name + '%'
+"@
+    
+    $spWithSynonyms = Invoke-Sqlcmd -ServerInstance $SERVER -Database $DB -Query $spWithSynonymQuery -TrustServerCertificate | Select-Object -ExpandProperty ProcedureName
+    
+    # 建立排除物件清單
+    $excludeObjects = $spWithSynonyms -join ';'
+    
     $OUTPUT_FILE = Join-Path $OUTPUT_DIR "Create_${DB}.bacpac"
 
     # 使用 SqlPackage.exe 導出資料庫
@@ -31,9 +45,15 @@ foreach ($DB in $DATABASES) {
         /Properties:VerifyExtraction=True `
         /Properties:CommandTimeout=0 `
         /Properties:DatabaseLockTimeout=60 `
+        /Properties:ExcludeObjectTypes=Synonyms `
+        /Properties:ExcludeObjects=$excludeObjects `
         /SourceTrustServerCertificate:True
 
     Write-Host "✅ 已匯出：$OUTPUT_FILE"
+    if ($spWithSynonyms) {
+        Write-Host "⚠️ 已排除以下使用 Synonym 的預存程序："
+        $spWithSynonyms | ForEach-Object { Write-Host "   - $_" }
+    }
 }
 
 Write-Host "🎉 所有資料庫已成功匯出至 $OUTPUT_DIR" 
