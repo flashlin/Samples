@@ -23,6 +23,6 @@ fi
 
 # 建立 Docker 映像
 echo "正在建立 Docker 映像..."
-docker build -t my-sql-server .
-
-echo "完成！Docker 映像 'my-sql-server' 已建立" 
+cd LocalSqlServer
+./build-image.sh
+cd ..

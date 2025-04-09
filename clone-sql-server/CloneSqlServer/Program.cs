@@ -40,6 +40,7 @@ class Program
         // 確保目標目錄存在
         Directory.CreateDirectory(targetPath);
 
+        Console.WriteLine($"連接字串: {connectionString}");
         using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync();
         Console.WriteLine("成功連接到 SQL Server");
