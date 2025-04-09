@@ -2,6 +2,8 @@ FROM mcr.microsoft.com/mssql/server:2022-latest
 
 ENV ACCEPT_EULA=Y
 ENV SA_PASSWORD=YourStrong@Passw0rd
+ENV MSSQL_ENCRYPT=OPTIONAL
+ENV SQLCMDPASSWORD=$SA_PASSWORD
 
 # 安裝 sqlcmd 工具
 USER root
