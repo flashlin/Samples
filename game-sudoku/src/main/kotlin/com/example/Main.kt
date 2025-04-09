@@ -91,21 +91,24 @@ class SudokuView : View() {
         // 繪製背景格子
         for (i in 0..8) {
             for (j in 0..8) {
+                // 設置基本格子線條寬度
+                gc.lineWidth = 1.0
                 gc.stroke = Color.BLACK
                 gc.strokeRect(j * cellSize, i * cellSize, cellSize, cellSize)
-                
-                // 繪製3x3區塊的粗線
-                if (i % 3 == 0 && i != 0) {
-                    gc.lineWidth = 2.0
-                    gc.strokeLine(0.0, i * cellSize, canvas.width, i * cellSize)
-                    gc.lineWidth = 1.0
-                }
-                if (j % 3 == 0 && j != 0) {
-                    gc.lineWidth = 2.0
-                    gc.strokeLine(j * cellSize, 0.0, j * cellSize, canvas.height)
-                    gc.lineWidth = 1.0
-                }
             }
+        }
+
+        // 繪製3x3區域的粗線
+        gc.lineWidth = 5.0  // 將3x3區域的線條寬度設置為5.0
+        
+        // 繪製豎線
+        for (i in 0..3) {
+            gc.strokeLine(i * (cellSize * 3), 0.0, i * (cellSize * 3), canvas.height)
+        }
+        
+        // 繪製橫線
+        for (i in 0..3) {
+            gc.strokeLine(0.0, i * (cellSize * 3), canvas.width, i * (cellSize * 3))
         }
 
         // 繪製選中的格子
