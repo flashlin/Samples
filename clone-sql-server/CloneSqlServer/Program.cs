@@ -89,10 +89,10 @@ class Program
         schemaScript.AppendLine("GO");
 
         await GenerateTableDefinitions(connection, schemaScript);
-        await GenerateUserFunctions(connection, schemaScript);
-        await GenerateUserDefineTypes(connection, schemaScript);
-        await GenerateViews(connection, schemaScript);
-        await GenerateStoredProcedures(connection, schemaScript);
+        //await GenerateUserFunctions(connection, schemaScript);
+        //await GenerateUserDefineTypes(connection, schemaScript);
+        //await GenerateViews(connection, schemaScript);
+        //await GenerateStoredProcedures(connection, schemaScript);
     }
 
     private static void AppendCreateDatabaseScript(StringBuilder schemaScript, string database)
@@ -376,11 +376,17 @@ class Program
         var tableQuery = @"
             SELECT 
                 DB_NAME() as Name,
-                t.name as ObjectName,
+                SCHEMA_NAME(t.schema_id) + '.' + t.name as ObjectName,
                 'U' as ObjectType,
                 OBJECT_DEFINITION(t.object_id) as Definition
             FROM sys.tables t
-            WHERE t.is_ms_shipped = 0";
+            WHERE t.is_ms_shipped = 0
+                AND t.type = 'U'  -- 只取得使用者定義的資料表
+                AND t.temporal_type = 0  -- 排除系統版本控制的資料表
+                AND SCHEMA_NAME(t.schema_id) != 'sys'  -- 排除系統結構描述
+                AND t.name NOT LIKE 'dt%'  -- 排除暫存資料表
+                AND t.name NOT LIKE '#%'   -- 排除暫存資料表
+            ORDER BY SCHEMA_NAME(t.schema_id), t.name";
 
         return await connection.QueryAsync<DatabaseInfo>(tableQuery);
     }
