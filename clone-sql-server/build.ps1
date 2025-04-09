@@ -7,7 +7,7 @@ Write-Host "開始執行資料庫克隆流程..."
 
 # 執行 CloneSqlServer 程式
 Write-Host "正在導出資料庫結構..."
-.\CloneSqlServer\bin\Debug\net9.0\CloneSqlServer.exe $SqlServerInstance
+.\CloneSqlServer\bin\Debug\net9.0\CloneSqlServer.exe $SqlServerInstance "LocalSqlServer"
 
 # 檢查是否成功生成 SQL 檔案
 if (!(Test-Path "CreateDatabase.sql")) {

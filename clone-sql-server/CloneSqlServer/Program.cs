@@ -86,9 +86,9 @@ class Program
         schemaScript.AppendLine($"USE [{database}]");
         schemaScript.AppendLine("GO");
 
-        await GenerateStoredProcedures(connection, schemaScript);
-        await GenerateViews(connection, schemaScript);
         await GenerateTableDefinitions(connection, schemaScript);
+        await GenerateViews(connection, schemaScript);
+        await GenerateStoredProcedures(connection, schemaScript);
     }
 
     private static void AppendCreateDatabaseScript(StringBuilder schemaScript, string database)
