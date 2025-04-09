@@ -1,5 +1,14 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Text;
+using Dapper;
+
+public class DatabaseInfo
+{
+    public string? Name { get; set; }
+    public string? ObjectName { get; set; }
+    public string? ObjectType { get; set; }
+    public string? Definition { get; set; }
+}
 
 class Program
 {
@@ -23,18 +32,9 @@ class Program
                 Console.WriteLine("成功連接到 SQL Server");
 
                 // 獲取所有資料庫
-                List<string> databases = new List<string>();
-                using (SqlCommand command = new SqlCommand(
-                    "SELECT name FROM sys.databases WHERE database_id > 4", connection))
-                {
-                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            databases.Add(reader.GetString(0));
-                        }
-                    }
-                }
+                var databases = await connection.QueryAsync<string>(
+                    "SELECT name FROM sys.databases WHERE database_id > 4"
+                );
 
                 StringBuilder schemaScript = new StringBuilder();
 
@@ -43,27 +43,79 @@ class Program
                     // 切換資料庫
                     connection.ChangeDatabase(database);
                     
-                    // 獲取資料庫結構
-                    using (SqlCommand command = new SqlCommand(@"
-                        SELECT OBJECT_DEFINITION(object_id) as Definition
-                        FROM sys.objects
+                    // 使用 Dapper 獲取資料庫物件定義
+                    var query = @"
+                        SELECT 
+                            DB_NAME() as Name,
+                            o.name as ObjectName,
+                            o.type as ObjectType,
+                            OBJECT_DEFINITION(o.object_id) as Definition
+                        FROM sys.objects o
                         WHERE type in ('U', 'P', 'V', 'TR', 'FN')
-                        AND is_ms_shipped = 0", connection))
+                        AND is_ms_shipped = 0";
+
+                    var dbObjects = await connection.QueryAsync<DatabaseInfo>(query);
+
+                    schemaScript.AppendLine($"USE [{database}]");
+                    schemaScript.AppendLine("GO");
+
+                    foreach (var obj in dbObjects)
                     {
-                        schemaScript.AppendLine($"USE [{database}]");
-                        schemaScript.AppendLine("GO");
-                        
-                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                        if (!string.IsNullOrEmpty(obj.Definition))
                         {
-                            while (await reader.ReadAsync())
-                            {
-                                if (!reader.IsDBNull(0))
-                                {
-                                    schemaScript.AppendLine(reader.GetString(0));
-                                    schemaScript.AppendLine("GO");
-                                }
-                            }
+                            schemaScript.AppendLine($"-- Object: {obj.ObjectName} ({obj.ObjectType})");
+                            schemaScript.AppendLine(obj.Definition);
+                            schemaScript.AppendLine("GO");
                         }
+                    }
+
+                    // 獲取資料表結構
+                    var tableQuery = @"
+                        SELECT 
+                            DB_NAME() as Name,
+                            t.name as ObjectName,
+                            'U' as ObjectType,
+                            OBJECT_DEFINITION(t.object_id) as Definition
+                        FROM sys.tables t
+                        WHERE t.is_ms_shipped = 0";
+
+                    var tables = await connection.QueryAsync<DatabaseInfo>(tableQuery);
+
+                    foreach (var table in tables)
+                    {
+                        schemaScript.AppendLine($"-- Table: {table.ObjectName}");
+                        var tableDefinition = await connection.QueryFirstAsync<string>(@"
+                            SELECT 
+                                STRING_AGG(
+                                    CASE 
+                                        WHEN is_identity = 1 THEN COLUMN_NAME + ' ' + DATA_TYPE + 
+                                            CASE 
+                                                WHEN CHARACTER_MAXIMUM_LENGTH IS NOT NULL 
+                                                THEN '(' + CAST(CHARACTER_MAXIMUM_LENGTH AS VARCHAR) + ')' 
+                                                ELSE '' 
+                                            END + ' IDENTITY(1,1)'
+                                        ELSE COLUMN_NAME + ' ' + DATA_TYPE + 
+                                            CASE 
+                                                WHEN CHARACTER_MAXIMUM_LENGTH IS NOT NULL 
+                                                THEN '(' + CAST(CHARACTER_MAXIMUM_LENGTH AS VARCHAR) + ')' 
+                                                ELSE '' 
+                                            END
+                                    END + 
+                                    CASE 
+                                        WHEN IS_NULLABLE = 'NO' THEN ' NOT NULL'
+                                        ELSE ' NULL'
+                                    END,
+                                    ', '
+                                ) 
+                            FROM INFORMATION_SCHEMA.COLUMNS 
+                            WHERE TABLE_NAME = @TableName",
+                            new { TableName = table.ObjectName }
+                        );
+
+                        schemaScript.AppendLine($"CREATE TABLE [{table.ObjectName}] (");
+                        schemaScript.AppendLine($"    {tableDefinition}");
+                        schemaScript.AppendLine(")");
+                        schemaScript.AppendLine("GO");
                     }
                 }
 
