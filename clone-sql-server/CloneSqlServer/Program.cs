@@ -10,6 +10,18 @@ public class DatabaseInfo
     public string? Definition { get; set; }
 }
 
+public class TableSchemaInfo
+{
+    public string TableName { get; set; } = string.Empty;
+    public string ColumnName { get; set; } = string.Empty;
+    public string DataType { get; set; } = string.Empty;
+    public int? CharacterMaxLength { get; set; }
+    public int? NumericPrecision { get; set; }
+    public int? NumericScale { get; set; }
+    public bool IsNullable { get; set; }
+    public bool IsIdentity { get; set; }
+}
+
 class Program
 {
     static async Task Main(string[] args)
@@ -109,14 +121,91 @@ class Program
 
     private static async Task GenerateTableDefinitions(SqlConnection connection, StringBuilder schemaScript)
     {
-        var tables = await GetTables(connection);
+        var tables = (await GetTables(connection)).ToList();
+        const int batchSize = 50;
 
-        foreach (var table in tables)
+        for (int i = 0; i < tables.Count; i += batchSize)
         {
-            Console.WriteLine($"Processing table: {table.ObjectName}");
-            var tableDefinition = await GetTableColumnDefinitions(connection, table.ObjectName);
-            AppendTableDefinition(schemaScript, table.ObjectName, tableDefinition);
+            var batch = tables.Skip(i).Take(batchSize).ToList();
+            Console.WriteLine($"Processing tables {i + 1} to {Math.Min(i + batchSize, tables.Count)} of {tables.Count}");
+
+            var tableSchemas = await GetBatchTableColumnDefinitions(connection, batch.Select(t => t.ObjectName!).ToList());
+            
+            foreach (var tableGroup in tableSchemas.GroupBy(t => t.TableName))
+            {
+                var tableName = tableGroup.Key;
+                var columnDefinitions = BuildColumnDefinitions(tableGroup);
+                AppendTableDefinition(schemaScript, tableName, columnDefinitions);
+            }
         }
+    }
+
+    private static async Task<IEnumerable<TableSchemaInfo>> GetBatchTableColumnDefinitions(SqlConnection connection, List<string> tableNames)
+    {
+        var query = @"
+            SELECT 
+                c.TABLE_NAME as TableName,
+                c.COLUMN_NAME as ColumnName,
+                c.DATA_TYPE as DataType,
+                c.CHARACTER_MAXIMUM_LENGTH as CharacterMaxLength,
+                c.NUMERIC_PRECISION as NumericPrecision,
+                c.NUMERIC_SCALE as NumericScale,
+                CASE WHEN c.IS_NULLABLE = 'YES' THEN 1 ELSE 0 END as IsNullable,
+                ISNULL(COLUMNPROPERTY(OBJECT_ID(c.TABLE_SCHEMA + '.' + c.TABLE_NAME), c.COLUMN_NAME, 'IsIdentity'), 0) as IsIdentity
+            FROM INFORMATION_SCHEMA.COLUMNS c
+            WHERE c.TABLE_NAME IN @TableNames
+            ORDER BY c.TABLE_NAME, c.ORDINAL_POSITION";
+
+        return await connection.QueryAsync<TableSchemaInfo>(query, new { TableNames = tableNames });
+    }
+
+    private static string BuildColumnDefinitions(IGrouping<string, TableSchemaInfo> columns)
+    {
+        return string.Join(",\n    ", columns.Select(col => BuildColumnDefinition(col)));
+    }
+
+    private static string BuildColumnDefinition(TableSchemaInfo column)
+    {
+        var sb = new StringBuilder();
+        
+        sb.Append($"[{column.ColumnName}] {column.DataType}");
+
+        // 添加資料類型的長度/精度/小數點
+        if (column.CharacterMaxLength.HasValue)
+        {
+            sb.Append(column.CharacterMaxLength == -1 ? "(MAX)" : $"({column.CharacterMaxLength})");
+        }
+        else if (column.NumericPrecision.HasValue)
+        {
+            if (column.NumericScale.HasValue && column.NumericScale.Value > 0)
+            {
+                sb.Append($"({column.NumericPrecision},{column.NumericScale})");
+            }
+            else
+            {
+                sb.Append($"({column.NumericPrecision})");
+            }
+        }
+
+        // 添加 IDENTITY
+        if (column.IsIdentity)
+        {
+            sb.Append(" IDENTITY(1,1)");
+        }
+
+        // 添加 NULL/NOT NULL
+        sb.Append(column.IsNullable ? " NULL" : " NOT NULL");
+
+        return sb.ToString();
+    }
+
+    private static void AppendTableDefinition(StringBuilder schemaScript, string tableName, string columnDefinitions)
+    {
+        schemaScript.AppendLine($"-- Table: {tableName}");
+        schemaScript.AppendLine($"CREATE TABLE [{tableName}] (");
+        schemaScript.AppendLine($"    {columnDefinitions}");
+        schemaScript.AppendLine(")");
+        schemaScript.AppendLine("GO");
     }
 
     private static async Task<IEnumerable<DatabaseInfo>> GetTables(SqlConnection connection)
@@ -131,47 +220,6 @@ class Program
             WHERE t.is_ms_shipped = 0";
 
         return await connection.QueryAsync<DatabaseInfo>(tableQuery);
-    }
-
-    private static async Task<string> GetTableColumnDefinitions(SqlConnection connection, string? tableName)
-    {
-        return await connection.QueryFirstAsync<string>(@"
-            SELECT 
-                STRING_AGG(
-                    CASE 
-                        WHEN COLUMNPROPERTY(OBJECT_ID(TABLE_SCHEMA + '.' + TABLE_NAME), COLUMN_NAME, 'IsIdentity') = 1 
-                        THEN COLUMN_NAME + ' ' + DATA_TYPE + 
-                            CASE 
-                                WHEN CHARACTER_MAXIMUM_LENGTH IS NOT NULL 
-                                THEN '(' + CAST(CHARACTER_MAXIMUM_LENGTH AS VARCHAR) + ')' 
-                                ELSE '' 
-                            END + ' IDENTITY(1,1)'
-                        ELSE COLUMN_NAME + ' ' + DATA_TYPE + 
-                            CASE 
-                                WHEN CHARACTER_MAXIMUM_LENGTH IS NOT NULL 
-                                THEN '(' + CAST(CHARACTER_MAXIMUM_LENGTH AS VARCHAR) + ')' 
-                                ELSE '' 
-                            END
-                    END + 
-                    CASE 
-                        WHEN IS_NULLABLE = 'NO' THEN ' NOT NULL'
-                        ELSE ' NULL'
-                    END,
-                    ', '
-                ) 
-            FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE TABLE_NAME = @TableName",
-            new { TableName = tableName }
-        );
-    }
-
-    private static void AppendTableDefinition(StringBuilder schemaScript, string? tableName, string tableDefinition)
-    {
-        schemaScript.AppendLine($"-- Table: {tableName}");
-        schemaScript.AppendLine($"CREATE TABLE [{tableName}] (");
-        schemaScript.AppendLine($"    {tableDefinition}");
-        schemaScript.AppendLine(")");
-        schemaScript.AppendLine("GO");
     }
 
     private static async Task SaveSchemaScript(string schemaScript)
