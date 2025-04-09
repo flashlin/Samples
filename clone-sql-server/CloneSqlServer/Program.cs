@@ -81,7 +81,8 @@ class Program
         schemaScript.AppendLine($"USE [{database}]");
         schemaScript.AppendLine("GO");
 
-        await GenerateStoredProceduresAndViews(connection, schemaScript);
+        await GenerateStoredProcedures(connection, schemaScript);
+        await GenerateViews(connection, schemaScript);
         await GenerateTableDefinitions(connection, schemaScript);
     }
 
@@ -94,7 +95,7 @@ class Program
         schemaScript.AppendLine("GO");
     }
 
-    private static async Task GenerateStoredProceduresAndViews(SqlConnection connection, StringBuilder schemaScript)
+    private static async Task GenerateStoredProcedures(SqlConnection connection, StringBuilder schemaScript)
     {
         var query = @"
             SELECT 
@@ -103,7 +104,7 @@ class Program
                 o.type as ObjectType,
                 OBJECT_DEFINITION(o.object_id) as Definition
             FROM sys.objects o
-            WHERE type in ('U', 'P', 'V', 'TR', 'FN')
+            WHERE type in ('P')
             AND is_ms_shipped = 0";
 
         var dbObjects = await connection.QueryAsync<DatabaseInfo>(query);
@@ -112,7 +113,32 @@ class Program
         {
             if (!string.IsNullOrEmpty(obj.Definition))
             {
-                schemaScript.AppendLine($"-- Object: {obj.ObjectName} ({obj.ObjectType})");
+                schemaScript.AppendLine($"-- Stored Procedure: {obj.ObjectName}");
+                schemaScript.AppendLine(obj.Definition);
+                schemaScript.AppendLine("GO");
+            }
+        }
+    }
+
+    private static async Task GenerateViews(SqlConnection connection, StringBuilder schemaScript)
+    {
+        var query = @"
+            SELECT 
+                DB_NAME() as Name,
+                o.name as ObjectName,
+                o.type as ObjectType,
+                OBJECT_DEFINITION(o.object_id) as Definition
+            FROM sys.objects o
+            WHERE type in ('V')
+            AND is_ms_shipped = 0";
+
+        var dbObjects = await connection.QueryAsync<DatabaseInfo>(query);
+
+        foreach (var obj in dbObjects)
+        {
+            if (!string.IsNullOrEmpty(obj.Definition))
+            {
+                schemaScript.AppendLine($"-- View: {obj.ObjectName}");
                 schemaScript.AppendLine(obj.Definition);
                 schemaScript.AppendLine("GO");
             }
