@@ -143,6 +143,7 @@ class SudokuView : View() {
     }
 
     private fun generateNewGame() {
+        // 初始化棋盤和標記
         for (i in 0..8) {
             for (j in 0..8) {
                 sudokuBoard[i][j] = 0
@@ -151,8 +152,10 @@ class SudokuView : View() {
             }
         }
         
-        generateValidSudoku(0, 0)
+        // 生成完整的數獨解
+        generateFullSudoku()
         
+        // 隨機移除一些數字來創建遊戲
         for (i in 0..8) {
             for (j in 0..8) {
                 if (Random.nextDouble() < 0.7) {
@@ -164,25 +167,72 @@ class SudokuView : View() {
         }
     }
 
-    private fun generateValidSudoku(row: Int, col: Int): Boolean {
-        if (col == 9) {
-            return generateValidSudoku(row + 1, 0)
-        }
-        if (row == 9) {
-            return true
-        }
+    private fun generateFullSudoku(): Boolean {
+        // 獲取未填充的 3x3 區塊
+        val unfilledBlock = findUnfilledBlock()
+        if (unfilledBlock == null) return true // 所有區塊都已填滿
         
-        val numbers = (1..9).shuffled()
-        for (num in numbers) {
-            if (isValid(row, col, num)) {
-                sudokuBoard[row][col] = num
-                if (generateValidSudoku(row, col + 1)) {
-                    return true
+        val (blockRow, blockCol) = unfilledBlock
+        
+        // 創建並打亂 1-9 的數字池
+        val numbers = (1..9).toList().shuffled().toMutableList()
+        
+        // 嘗試填充當前區塊
+        for (i in 0..2) {
+            for (j in 0..2) {
+                val row = blockRow * 3 + i
+                val col = blockCol * 3 + j
+                
+                var numberPlaced = false
+                for (num in numbers.toList()) {
+                    if (isValid(row, col, num)) {
+                        sudokuBoard[row][col] = num
+                        numbers.remove(num)
+                        numberPlaced = true
+                        break
+                    }
                 }
-                sudokuBoard[row][col] = 0
+                
+                if (!numberPlaced) {
+                    // 如果無法放置任何數字，回溯並清空當前區塊
+                    clearBlock(blockRow, blockCol)
+                    return false
+                }
             }
         }
-        return false
+        
+        // 遞迴填充下一個區塊
+        return generateFullSudoku()
+    }
+
+    private fun findUnfilledBlock(): Pair<Int, Int>? {
+        for (blockRow in 0..2) {
+            for (blockCol in 0..2) {
+                if (isBlockEmpty(blockRow, blockCol)) {
+                    return Pair(blockRow, blockCol)
+                }
+            }
+        }
+        return null
+    }
+
+    private fun isBlockEmpty(blockRow: Int, blockCol: Int): Boolean {
+        for (i in 0..2) {
+            for (j in 0..2) {
+                if (sudokuBoard[blockRow * 3 + i][blockCol * 3 + j] != 0) {
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
+    private fun clearBlock(blockRow: Int, blockCol: Int) {
+        for (i in 0..2) {
+            for (j in 0..2) {
+                sudokuBoard[blockRow * 3 + i][blockCol * 3 + j] = 0
+            }
+        }
     }
 
     private fun isValid(row: Int, col: Int, num: Int): Boolean {
@@ -248,5 +298,5 @@ class SudokuView : View() {
 }
 
 fun main() {
-    launch<SudokuApp>() 
+    launch<SudokuApp>()
 } 
