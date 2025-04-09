@@ -31,12 +31,15 @@ INNER JOIN sys.synonyms s ON m.definition LIKE '%' + s.name + '%'
     
     $spWithSynonyms = Invoke-Sqlcmd -ServerInstance $SERVER -Database $DB -Query $spWithSynonymQuery -TrustServerCertificate | Select-Object -ExpandProperty ProcedureName
     
-    # 建立排除物件清單
-    $excludeObjects = $spWithSynonyms -join ';'
+    if ($spWithSynonyms) {
+        Write-Host "⚠️ 發現以下使用 Synonym 的預存程序："
+        $spWithSynonyms | ForEach-Object { Write-Host "   - $_" }
+    }
     
     $OUTPUT_FILE = Join-Path $OUTPUT_DIR "Create_${DB}.bacpac"
 
     # 使用 SqlPackage.exe 導出資料庫
+    Write-Host "正在導出資料庫..."
     & SqlPackage /Action:Export `
         /SourceServerName:$SERVER `
         /SourceDatabaseName:$DB `
@@ -45,15 +48,10 @@ INNER JOIN sys.synonyms s ON m.definition LIKE '%' + s.name + '%'
         /Properties:VerifyExtraction=True `
         /Properties:CommandTimeout=0 `
         /Properties:DatabaseLockTimeout=60 `
-        /Properties:ExcludeObjectTypes=Synonyms `
-        /Properties:ExcludeObjects=$excludeObjects `
+        /Properties:Storage=Memory `
         /SourceTrustServerCertificate:True
 
     Write-Host "✅ 已匯出：$OUTPUT_FILE"
-    if ($spWithSynonyms) {
-        Write-Host "⚠️ 已排除以下使用 Synonym 的預存程序："
-        $spWithSynonyms | ForEach-Object { Write-Host "   - $_" }
-    }
 }
 
 Write-Host "🎉 所有資料庫已成功匯出至 $OUTPUT_DIR" 
