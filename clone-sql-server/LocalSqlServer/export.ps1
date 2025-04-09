@@ -1,10 +1,10 @@
-Install-Module -Name SqlServer -Force
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$SERVER,
+    [string]$SQL_VERSION = "160" # SQL Server 2022 對應 version 是 160
+)
 
-# 資料庫連線資訊
-$SERVER = "localhost"
-$USERNAME = "sa"
-$PASSWORD = "YourStrongPassword123"
-$SQL_VERSION = "160" # SQL Server 2022 對應 version 是 160
+Install-Module -Name SqlServer -Force
 
 # 輸出資料夾
 $OUTPUT_DIR = "./exports"
@@ -13,7 +13,7 @@ New-Item -ItemType Directory -Force -Path $OUTPUT_DIR | Out-Null
 # 取得所有 user database 名稱（排除系統資料庫）
 Write-Host "🔍 正在取得所有 user databases..."
 $query = "SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name NOT IN ('master','tempdb','model','msdb')"
-$DATABASES = Invoke-Sqlcmd -ServerInstance $SERVER -Username $USERNAME -Password $PASSWORD -Query $query | Select-Object -ExpandProperty name
+$DATABASES = Invoke-Sqlcmd -ServerInstance $SERVER -Query $query | Select-Object -ExpandProperty name
 
 foreach ($DB in $DATABASES) {
     Write-Host "📦 導出資料庫：$DB"
@@ -25,8 +25,6 @@ foreach ($DB in $DATABASES) {
         /SourceServerName:$SERVER `
         /SourceDatabaseName:$DB `
         /TargetFile:$OUTPUT_FILE `
-        /SourceUser:$USERNAME `
-        /SourcePassword:$PASSWORD `
         /p:ExtractAllTableData=False `
         /p:ScriptDatabaseOptions=True `
         /p:ScriptDrops=False `
