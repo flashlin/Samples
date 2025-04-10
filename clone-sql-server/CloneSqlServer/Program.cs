@@ -205,29 +205,33 @@ class Program
     private static async Task GenerateStoredProcedures(SqlConnection connection, StringBuilder schemaScript)
     {
         var query = @"
-            WITH ProcedureDependencies AS (
-                SELECT 
-                    referencing_id,
-                    COUNT(*) as dependency_count
-                FROM sys.sql_expression_dependencies
-                WHERE referencing_id IN (
-                    SELECT object_id 
-                    FROM sys.objects 
-                    WHERE type = 'P' 
-                    AND is_ms_shipped = 0
-                )
-                GROUP BY referencing_id
-            )
-            SELECT 
-                DB_NAME() as Name,
-                o.name as ObjectName,
-                o.type as ObjectType,
-                OBJECT_DEFINITION(o.object_id) as Definition
-            FROM sys.objects o
-            LEFT JOIN ProcedureDependencies pd ON o.object_id = pd.referencing_id
-            WHERE o.type = 'P'
-            AND o.is_ms_shipped = 0
-            AND (pd.dependency_count IS NULL OR pd.dependency_count = 0)";
+                    SELECT 
+                        DB_NAME() as Name,
+                        o.name as ObjectName,
+                        o.type as ObjectType,
+                        OBJECT_DEFINITION(o.object_id) as Definition
+                    FROM sys.objects o
+                    WHERE o.type = 'P'
+                      AND o.is_ms_shipped = 0
+                      AND NOT EXISTS (
+                          SELECT 1
+                          FROM sys.sql_expression_dependencies d
+                          WHERE d.referencing_id = o.object_id
+                            AND (
+                                d.referenced_id IN (
+                                    SELECT object_id 
+                                    FROM sys.objects 
+                                    WHERE type = 'P'
+                                )
+                                OR d.referenced_server_name IS NOT NULL
+                            )
+                      )
+                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%EXEC %'
+                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%sp_executesql%'
+                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%OPENQUERY%'
+                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%OPENROWSET%'
+                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%OPENDATASOURCE%'
+                    ";
 
         var dbObjects = await connection.QueryAsync<DatabaseInfo>(query);
 
