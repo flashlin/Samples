@@ -11,4 +11,5 @@ public class TableIndexSchema
     public List<string> Columns { get; set; } = new();
     public string? ReferencedTableName { get; set; }  // 只有 FK 才會有值
     public List<string> ReferencedColumns { get; set; } = new();  // 只有 FK 才會有值
+    public string ColumnsString { get; set; }
 }
