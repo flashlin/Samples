@@ -93,7 +93,23 @@ public class GenerateContext
     {
         var result = new List<TableIndexSchema>();
 
-        // 1. 取得主鍵資訊
+        // 取得所有類型的索引
+        var pks = await GetPrimaryKeyIndexes(connection, tableNames);
+        var fks = await GetForeignKeyIndexes(connection, tableNames);
+        var indexes = await GetNormalIndexes(connection, tableNames);
+
+        result.AddRange(pks);
+        result.AddRange(fks);
+        result.AddRange(indexes);
+
+        // 處理欄位字串轉換
+        ConvertColumnStringsToLists(result);
+
+        return result;
+    }
+
+    private static async Task<IEnumerable<TableIndexSchema>> GetPrimaryKeyIndexes(SqlConnection connection, List<string> tableNames)
+    {
         var pkQuery = @"
             SELECT 
                 SCHEMA_NAME(t.schema_id) + '.' + t.name as TableName,
@@ -115,10 +131,11 @@ public class GenerateContext
                 i.is_unique,
                 i.type_desc";
 
-        var pks = await connection.QueryAsync<TableIndexSchema>(pkQuery, new { TableNames = tableNames });
-        result.AddRange(pks);
+        return await connection.QueryAsync<TableIndexSchema>(pkQuery, new { TableNames = tableNames });
+    }
 
-        // 2. 取得外鍵資訊
+    private static async Task<IEnumerable<TableIndexSchema>> GetForeignKeyIndexes(SqlConnection connection, List<string> tableNames)
+    {
         var fkQuery = @"
             SELECT 
                 SCHEMA_NAME(t.schema_id) + '.' + t.name as TableName,
@@ -142,10 +159,11 @@ public class GenerateContext
                 fk.name,
                 SCHEMA_NAME(rt.schema_id) + '.' + rt.name";
 
-        var fks = await connection.QueryAsync<TableIndexSchema>(fkQuery, new { TableNames = tableNames });
-        result.AddRange(fks);
+        return await connection.QueryAsync<TableIndexSchema>(fkQuery, new { TableNames = tableNames });
+    }
 
-        // 3. 取得一般索引資訊
+    private static async Task<IEnumerable<TableIndexSchema>> GetNormalIndexes(SqlConnection connection, List<string> tableNames)
+    {
         var indexQuery = @"
             SELECT 
                 SCHEMA_NAME(t.schema_id) + '.' + t.name as TableName,
@@ -169,11 +187,12 @@ public class GenerateContext
                 i.is_unique,
                 i.type_desc";
 
-        var indexes = await connection.QueryAsync<TableIndexSchema>(indexQuery, new { TableNames = tableNames });
-        result.AddRange(indexes);
+        return await connection.QueryAsync<TableIndexSchema>(indexQuery, new { TableNames = tableNames });
+    }
 
-        // 處理 Columns 和 ReferencedColumns 字串轉換為列表
-        foreach (var item in result)
+    private static void ConvertColumnStringsToLists(List<TableIndexSchema> indexes)
+    {
+        foreach (var item in indexes)
         {
             if (!string.IsNullOrEmpty(item.Columns.ToString()))
             {
@@ -185,7 +204,5 @@ public class GenerateContext
                 item.ReferencedColumns = item.ReferencedColumns.ToString()!.Split(',').ToList();
             }
         }
-
-        return result;
     }
 }
