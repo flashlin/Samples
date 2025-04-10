@@ -359,18 +359,28 @@ class Program
 
     private static void GenerateForeignKeys(StringBuilder schemaScript, List<TableIndexSchema> tableIndexes)
     {
-        foreach (var fk in tableIndexes.Where(i => i.IndexType == "FK"))
+        var foreignKeys = tableIndexes.Where(i => i.IndexType == "FK").ToList();
+        if (!foreignKeys.Any())
         {
-            schemaScript.AppendLine($"-- Foreign Key: {fk.IndexName} on {fk.TableName}");
-            schemaScript.AppendLine($"ALTER TABLE [{fk.TableName}] ADD CONSTRAINT [{fk.IndexName}]");
-            schemaScript.AppendLine($"    FOREIGN KEY (");
-            schemaScript.AppendLine($"        {string.Join(",\n        ", fk.Columns.Select(c => $"[{c}]"))}");
-            schemaScript.AppendLine("    )");
-            schemaScript.AppendLine($"    REFERENCES [{fk.ReferencedTableName}] (");
-            schemaScript.AppendLine($"        {string.Join(",\n        ", fk.ReferencedColumns.Select(c => $"[{c}]"))}");
-            schemaScript.AppendLine("    )");
-            schemaScript.AppendLine("GO");
-            schemaScript.AppendLine();
+            return;
+        }
+
+        foreach (var fk in foreignKeys)
+        {
+            var text = new StringBuilder();
+            text.AppendLine($"-- Foreign Key: {fk.IndexName} on {fk.TableName}");
+            text.AppendLine($"ALTER TABLE [{fk.TableName}] ADD CONSTRAINT [{fk.IndexName}]");
+            text.AppendLine($"    FOREIGN KEY (");
+            text.AppendLine($"        {string.Join(",\n        ", fk.Columns.Select(c => $"[{c}]"))}");
+            text.AppendLine("    )");
+            text.AppendLine($"    REFERENCES [{fk.ReferencedTableName}] (");
+            text.AppendLine($"        {string.Join(",\n        ", fk.ReferencedColumns.Select(c => $"[{c}]"))}");
+            text.AppendLine("    )");
+            text.AppendLine("GO");
+            text.AppendLine();
+            schemaScript.AppendLine(text.ToString());
+
+            Console.WriteLine(text.ToString());
         }
     }
 
