@@ -69,6 +69,7 @@ class Program
         await GenerateViews(connection, schemaScript);
         await GenerateStoredProcedures(connection, schemaScript);
         GenerateLoginUsers(schemaScript, context);
+        GenerateRolePermissions(schemaScript, context);
     }
 
     private static void AppendCreateDatabaseScript(StringBuilder schemaScript, string database)
@@ -494,6 +495,20 @@ GO
             }
         }
         schemaScript.AppendLine(addRoleSql.ToString());
+    }
+
+    private static void GenerateRolePermissions(StringBuilder schemaScript, GenerateContext context)
+    {
+        var grantSql = new StringBuilder();
+        foreach (var permission in context.DatabasePermissions)
+        {
+            grantSql.AppendLine($@"
+-- Grant {permission.PermissionName} on {permission.ObjectName} to {permission.RoleName}
+GRANT {permission.PermissionName} ON [{permission.ObjectName}] TO [{permission.RoleName}]
+GO
+");
+        }
+        schemaScript.AppendLine(grantSql.ToString());
     }
 
     private static async Task SaveSchemaScript(string schemaScript, string targetPath)
