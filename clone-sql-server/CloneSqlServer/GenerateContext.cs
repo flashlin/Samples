@@ -14,12 +14,7 @@ public class GenerateContext
     private static readonly string[] DatabaseNameWhiteList =
     [
         "MembersInfoDB",
-        "AccountDB",
-        "PlutoRepSB",
-        "CashmarketDB",
-        "MailManagement",
-        "PromotionManagement",
-        "PromotionManagementHistory"
+        "AccountDB"
     ];
     public List<string> Databases { get; set; } = new();
     public Dictionary<string, List<DatabaseInfo>> Tables { get; set; } = new();
@@ -27,6 +22,7 @@ public class GenerateContext
     public Dictionary<string, List<TableIndexSchema>> TableIndexes { get; set; } = new();
     public List<string> LoginNames { get; set; } = new();
     public List<LoginRoleInfo> LoginRoles { get; set; } = [];
+    public List<string> DatabaseRoleNames { get; set; } = new();
 
     /// <summary>
     /// 取得所有 SQL Server 登入帳號（僅 SQL Login）
@@ -76,6 +72,25 @@ public class GenerateContext
         return result.ToList();
     }
 
+    /// <summary>
+    /// 取得所有資料庫角色
+    /// </summary>
+    /// <param name="connection">資料庫連線</param>
+    /// <returns>資料庫角色清單</returns>
+    private static async Task<List<string>> GetAllDatabaseRoles(SqlConnection connection)
+    {
+        var query = @"
+            SELECT name 
+            FROM sys.database_principals 
+            WHERE type = 'R'
+            AND is_fixed_role = 0
+            AND name NOT LIKE '##%'
+            ORDER BY name";
+
+        var result = await connection.QueryAsync<string>(query);
+        return result.ToList();
+    }
+
     public static async Task<GenerateContext> Initialize(SqlConnection connection)
     {
         var context = new GenerateContext();
@@ -108,6 +123,10 @@ public class GenerateContext
         Console.WriteLine($"Fetch SQL Logins ...");
         context.LoginNames = await GetAllLoginNames(connection);
         context.LoginRoles = await GetAllUserRoles(connection, context.LoginNames);
+
+        Console.WriteLine($"Fetch Database Roles ...");
+        context.DatabaseRoleNames = await GetAllDatabaseRoles(connection);
+
         return context;
     }
 
