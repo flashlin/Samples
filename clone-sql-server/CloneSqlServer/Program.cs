@@ -335,7 +335,13 @@ class Program
 
     private static void GeneratePrimaryKeys(StringBuilder schemaScript, List<TableIndexSchema> tableIndexes)
     {
-        foreach (var pk in tableIndexes.Where(i => i.IsPrimaryKey))
+        var primaryKeys = tableIndexes.Where(i => i.IsPrimaryKey).ToList();
+        if (!primaryKeys.Any())
+        {
+            return;
+        }
+
+        foreach (var pk in primaryKeys)
         {
             var text = new StringBuilder();
             text.AppendLine($"-- Primary Key: {pk.IndexName} on {pk.TableName}");
