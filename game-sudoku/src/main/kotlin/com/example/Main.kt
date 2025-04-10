@@ -147,8 +147,8 @@ class SudokuView : View() {
     private val fixedNumbers: Array<Array<Boolean>> = Array(9) { Array(9) { false } }
     private val userInputs: Array<Array<Int>> = Array(9) { Array(9) { 0 } }
     private var selectedCell: Pair<Int, Int>? = null
-    private val cellSize = 50.0
-    private val canvas = Canvas(450.0, 450.0)
+    private var cellSize = 50.0
+    private val canvas = Canvas()
     
     override val root: VBox = vbox {
         setPrefSize(500.0, 600.0)
@@ -160,9 +160,30 @@ class SudokuView : View() {
             isVisible = false
         }
 
-        add(canvas)
+        // 創建一個容器來包裝 canvas，使其能夠自適應大小
+        stackpane {
+            // 設置最小尺寸
+            minWidth = 300.0
+            minHeight = 300.0
+            
+            // 設置首選尺寸
+            prefWidth = 450.0
+            prefHeight = 450.0
+            
+            // 綁定 canvas 大小到容器大小
+            add(canvas.apply {
+                widthProperty().bind(this@stackpane.widthProperty())
+                heightProperty().bind(this@stackpane.heightProperty())
+                
+                // 當 canvas 大小改變時重新繪製
+                widthProperty().addListener { _, _, _ -> drawBoard() }
+                heightProperty().addListener { _, _, _ -> drawBoard() }
+            })
+        }
         
         canvas.setOnMouseClicked { event ->
+            // 根據當前 canvas 大小計算 cellSize
+            cellSize = minOf(canvas.width, canvas.height) / 9
             val col = (event.x / cellSize).toInt()
             val row = (event.y / cellSize).toInt()
             if (row in 0..8 && col in 0..8) {
@@ -228,10 +249,12 @@ class SudokuView : View() {
         val gc = canvas.graphicsContext2D
         gc.clearRect(0.0, 0.0, canvas.width, canvas.height)
         
+        // 計算新的 cellSize
+        cellSize = minOf(canvas.width, canvas.height) / 9
+        
         // 繪製背景格子
         for (i in 0..8) {
             for (j in 0..8) {
-                // 設置基本格子線條寬度
                 gc.lineWidth = 1.0
                 gc.stroke = Color.BLACK
                 gc.strokeRect(j * cellSize, i * cellSize, cellSize, cellSize)
@@ -239,7 +262,7 @@ class SudokuView : View() {
         }
 
         // 繪製3x3區域的粗線
-        gc.lineWidth = 5.0  // 將3x3區域的線條寬度設置為5.0
+        gc.lineWidth = 3.0
         
         // 繪製豎線
         for (i in 0..3) {
@@ -262,7 +285,7 @@ class SudokuView : View() {
             for (j in 0..8) {
                 val value = if (fixedNumbers[i][j]) sudokuBoard[i][j] else userInputs[i][j]
                 if (value != 0) {
-                    gc.font = Font.font("Arial", FontWeight.BOLD, 24.0)
+                    gc.font = Font.font("Arial", FontWeight.BOLD, cellSize * 0.6) // 根據 cellSize 調整字體大小
                     gc.textAlign = TextAlignment.CENTER
                     gc.textBaseline = VPos.CENTER
                     
