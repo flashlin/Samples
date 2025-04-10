@@ -12,12 +12,12 @@ public class GenerateContext
 
     public static async Task<GenerateContext> Initialize(SqlConnection connection)
     {
-        Console.WriteLine("Fetch databases Schema...");
         var context = new GenerateContext();
         context.Databases = (await GetUserDatabases(connection)).ToList();
         
         foreach (var database in context.Databases)
         {
+            Console.WriteLine($"Fetch databases Schema {database}...");
             connection.ChangeDatabase(database);
             var tables = (await GetTables(connection)).ToList();
             context.Tables[database] = tables;
@@ -25,6 +25,7 @@ public class GenerateContext
             var tableSchemas = new List<TableSchemaInfo>();
             const int batchSize = 50;
             
+            Console.WriteLine($"Fetch Table Schemas ...");
             for (int i = 0; i < tables.Count; i += batchSize)
             {
                 var batch = tables.Skip(i).Take(batchSize).ToList();
@@ -94,6 +95,7 @@ public class GenerateContext
 
     private static async Task<List<TableIndexSchema>> GetTablePkFkIndexs(SqlConnection connection, List<string> tableNames)
     {
+        Console.WriteLine($"Fetch Table Indexes Schema...");
         var result = new List<TableIndexSchema>();
 
         // 取得所有類型的索引
