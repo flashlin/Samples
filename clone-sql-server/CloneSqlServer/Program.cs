@@ -439,7 +439,7 @@ class Program
     {
         var password = GetPasswordFromEnv();
         GenerateCreateLogins(schemaScript, context.LoginNames, password);
-        GenerateCreateRoles(schemaScript, context.LoginRoles);
+        GenerateCreateDatabaseRoles(schemaScript, context);
         GenerateAddRoleMembers(schemaScript, context.LoginRoles);
     }
 
@@ -460,21 +460,16 @@ GO
         schemaScript.AppendLine(createLoginSql.ToString());
     }
 
-    private static void GenerateCreateRoles(StringBuilder schemaScript, List<LoginRoleInfo> loginRoles)
+    private static void GenerateCreateDatabaseRoles(StringBuilder schemaScript, GenerateContext context)
     {
         var createRoleSql = new StringBuilder();
-        var distinctRoles = loginRoles
-            .Where(x => !string.IsNullOrEmpty(x.RoleName))
-            .Select(x => x.RoleName)
-            .Distinct();
-
-        foreach (var roleName in distinctRoles)
+        foreach (var roleName in context.DatabaseRoleNames)
         {
             createRoleSql.AppendLine($@"
 -- Create Role: {roleName}
-IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = N'{roleName}' AND type = 'R')
+IF NOT EXISTS (SELECT name FROM sys.database_principals WHERE name = N'{roleName}' AND type = 'R')
 BEGIN
-    CREATE SERVER ROLE [{roleName}]
+    CREATE ROLE [{roleName}]
 END
 GO
 ");
