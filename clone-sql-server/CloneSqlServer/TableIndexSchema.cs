@@ -8,8 +8,9 @@ public class TableIndexSchema
     public bool IsPrimaryKey { get; set; }
     public bool IsUnique { get; set; }
     public bool IsClustered { get; set; }
-    public List<string> Columns { get; set; } = new();
-    public string? ReferencedTableName { get; set; }  // 只有 FK 才會有值
-    public List<string> ReferencedColumns { get; set; } = new();  // 只有 FK 才會有值
-    public string ColumnsString { get; set; }
+    public string ColumnsString { get; set; } = string.Empty;
+    public List<string> Columns => string.IsNullOrEmpty(ColumnsString) ? [] : ColumnsString.Split(',').ToList();
+    public string ReferencedTableName { get; set; } = string.Empty;
+    public string ReferencedColumnsString { get; set; } = string.Empty;
+    public List<string> ReferencedColumns => string.IsNullOrEmpty(ReferencedColumnsString) ? [] : ReferencedColumnsString.Split(',').ToList();
 }
