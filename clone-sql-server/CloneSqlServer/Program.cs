@@ -22,7 +22,7 @@ class Program
         Directory.CreateDirectory(targetPath);
 
         Console.WriteLine($"連接字串: {connectionString}");
-        using var connection = new SqlConnection(connectionString);
+        await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync();
         Console.WriteLine("成功連接到 SQL Server");
 
@@ -61,7 +61,7 @@ class Program
         schemaScript.AppendLine($"USE [{database}]");
         schemaScript.AppendLine("GO");
 
-        await GenerateTableDefinitions(connection, schemaScript, context, database);
+        await GenerateTableDefinitions(schemaScript, context, database);
         GenerateTableIndexObjects(schemaScript, context, database);
         await GenerateUserFunctions(connection, schemaScript);
         await GenerateUserDefineTypes(connection, schemaScript);
@@ -250,7 +250,7 @@ class Program
         }
     }
 
-    private static async Task GenerateTableDefinitions(SqlConnection connection, StringBuilder schemaScript, GenerateContext context, string database)
+    private static Task GenerateTableDefinitions(StringBuilder schemaScript, GenerateContext context, string database)
     {
         var tables = context.Tables[database];
         var tableSchemas = context.TableSchemas[database];
@@ -258,11 +258,13 @@ class Program
         foreach (var table in tables)
         {
             var tableName = table.ObjectName!;
-            var columnDefinitions = BuildColumnDefinitions(tableSchemas.Where(t => t.TableName == tableName).GroupBy(t => t.TableName).First());
+            var columnDefinitions = BuildColumnDefinitions(tableSchemas.Where(t => t.TableName == tableName)
+                .GroupBy(t => t.TableName).First());
 
             Console.WriteLine($"Processing table {tableName}");
             AppendTableDefinition(schemaScript, tableName, columnDefinitions);
         }
+        return Task.CompletedTask;
     }
 
     private static string BuildColumnDefinitions(IGrouping<string, TableSchemaInfo> columns)
