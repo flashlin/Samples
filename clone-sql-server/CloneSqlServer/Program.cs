@@ -205,14 +205,29 @@ class Program
     private static async Task GenerateStoredProcedures(SqlConnection connection, StringBuilder schemaScript)
     {
         var query = @"
+            WITH ProcedureDependencies AS (
+                SELECT 
+                    referencing_id,
+                    COUNT(*) as dependency_count
+                FROM sys.sql_expression_dependencies
+                WHERE referencing_id IN (
+                    SELECT object_id 
+                    FROM sys.objects 
+                    WHERE type = 'P' 
+                    AND is_ms_shipped = 0
+                )
+                GROUP BY referencing_id
+            )
             SELECT 
                 DB_NAME() as Name,
                 o.name as ObjectName,
                 o.type as ObjectType,
                 OBJECT_DEFINITION(o.object_id) as Definition
             FROM sys.objects o
-            WHERE type in ('P')
-            AND is_ms_shipped = 0";
+            LEFT JOIN ProcedureDependencies pd ON o.object_id = pd.referencing_id
+            WHERE o.type = 'P'
+            AND o.is_ms_shipped = 0
+            AND (pd.dependency_count IS NULL OR pd.dependency_count = 0)";
 
         var dbObjects = await connection.QueryAsync<DatabaseInfo>(query);
 
@@ -220,9 +235,14 @@ class Program
         {
             if (!string.IsNullOrEmpty(obj.Definition))
             {
-                schemaScript.AppendLine($"-- Stored Procedure: {obj.ObjectName}");
-                schemaScript.AppendLine(obj.Definition);
-                schemaScript.AppendLine("GO");
+                var text = new StringBuilder();
+                text.AppendLine($"-- Stored Procedure: {obj.ObjectName}");
+                text.AppendLine(obj.Definition);
+                text.AppendLine("GO");
+                text.AppendLine();
+                schemaScript.AppendLine(text.ToString());
+
+                Console.WriteLine(text.ToString());
             }
         }
     }
