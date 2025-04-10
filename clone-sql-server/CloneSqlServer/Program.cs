@@ -386,15 +386,25 @@ class Program
 
     private static void GenerateIndexes(StringBuilder schemaScript, List<TableIndexSchema> tableIndexes)
     {
-        foreach (var idx in tableIndexes.Where(i => i.IndexType == "INDEX"))
+        var indexes = tableIndexes.Where(i => i.IndexType == "INDEX").ToList();
+        if (!indexes.Any())
         {
-            schemaScript.AppendLine($"-- Index: {idx.IndexName} on {idx.TableName}");
-            schemaScript.AppendLine($"CREATE {(idx.IsUnique ? "UNIQUE " : "")}{(idx.IsClustered ? "CLUSTERED" : "NONCLUSTERED")} INDEX [{idx.IndexName}]");
-            schemaScript.AppendLine($"    ON [{idx.TableName}] (");
-            schemaScript.AppendLine($"        {string.Join(",\n        ", idx.Columns.Select(c => $"[{c}]"))}");
-            schemaScript.AppendLine("    )");
-            schemaScript.AppendLine("GO");
-            schemaScript.AppendLine();
+            return;
+        }
+
+        foreach (var idx in indexes)
+        {
+            var text = new StringBuilder();
+            text.AppendLine($"-- Index: {idx.IndexName} on {idx.TableName}");
+            text.AppendLine($"CREATE {(idx.IsUnique ? "UNIQUE " : "")}{(idx.IsClustered ? "CLUSTERED" : "NONCLUSTERED")} INDEX [{idx.IndexName}]");
+            text.AppendLine($"    ON [{idx.TableName}] (");
+            text.AppendLine($"        {string.Join(",\n        ", idx.Columns.Select(c => $"[{c}]"))}");
+            text.AppendLine("    )");
+            text.AppendLine("GO");
+            text.AppendLine();
+            schemaScript.AppendLine(text.ToString());
+
+            Console.WriteLine(text.ToString());
         }
     }
 
