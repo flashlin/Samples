@@ -3,6 +3,12 @@ using Microsoft.Data.SqlClient;
 
 namespace CloneSqlServer;
 
+public class LoginRoleInfo
+{
+    public string LoginName { get; set; } = string.Empty;
+    public string RoleName { get; set; } = string.Empty;
+}
+
 public class GenerateContext
 {
     private static readonly string[] DatabaseNameWhiteList =
@@ -19,6 +25,8 @@ public class GenerateContext
     public Dictionary<string, List<DatabaseInfo>> Tables { get; set; } = new();
     public Dictionary<string, List<TableSchemaInfo>> TableSchemas { get; set; } = new();
     public Dictionary<string, List<TableIndexSchema>> TableIndexes { get; set; } = new();
+    public List<string> LoginNames { get; set; } = new();
+    public List<LoginRoleInfo> LoginRoles { get; set; } = [];
 
     /// <summary>
     /// 取得所有 SQL Server 登入帳號（僅 SQL Login）
@@ -36,6 +44,35 @@ public class GenerateContext
             ORDER BY name";
 
         var result = await connection.QueryAsync<string>(query);
+        return result.ToList();
+    }
+
+    /// <summary>
+    /// 取得指定登入帳號的所有角色
+    /// </summary>
+    /// <param name="connection">資料庫連線</param>
+    /// <param name="loginNames">登入帳號清單</param>
+    /// <returns>登入帳號和角色的對應清單</returns>
+    private static async Task<List<LoginRoleInfo>> GetAllUserRoles(SqlConnection connection, List<string> loginNames)
+    {
+        if (loginNames == null || !loginNames.Any())
+            return new List<LoginRoleInfo>();
+
+        var query = @"
+            SELECT 
+                sp.name AS LoginName,
+                srm.role_principal_id,
+                ISNULL(sp2.name, 'public') AS RoleName
+            FROM sys.server_principals sp
+            LEFT JOIN sys.server_role_members srm 
+                ON sp.principal_id = srm.member_principal_id
+            LEFT JOIN sys.server_principals sp2 
+                ON srm.role_principal_id = sp2.principal_id
+            WHERE sp.type_desc = 'SQL_LOGIN'
+                AND sp.name IN @LoginNames
+            ORDER BY sp.name, sp2.name";
+
+        var result = await connection.QueryAsync<LoginRoleInfo>(query, new { LoginNames = loginNames });
         return result.ToList();
     }
 
@@ -68,6 +105,9 @@ public class GenerateContext
             context.TableIndexes[database] = await GetTablePkFkIndexs(connection, tables.Select(t => t.ObjectName!).ToList());
         }
 
+        Console.WriteLine($"Fetch SQL Logins ...");
+        context.LoginNames = await GetAllLoginNames(connection);
+        context.LoginRoles = await GetAllUserRoles(connection, context.LoginNames);
         return context;
     }
 
