@@ -9,7 +9,6 @@ public class GenerateContext
     [
         "MembersInfoDB",
         "AccountDB",
-        "PlutoRepSB"
     ];
     public List<string> Databases { get; set; } = new();
     public Dictionary<string, List<DatabaseInfo>> Tables { get; set; } = new();
