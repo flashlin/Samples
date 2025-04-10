@@ -12,6 +12,7 @@ public class GenerateContext
 
     public static async Task<GenerateContext> Initialize(SqlConnection connection)
     {
+        Console.WriteLine("Fetch databases Schema...");
         var context = new GenerateContext();
         context.Databases = (await GetUserDatabases(connection)).ToList();
         

@@ -61,6 +61,7 @@ class Program
         schemaScript.AppendLine($"USE [{database}]");
         schemaScript.AppendLine("GO");
 
+        Console.WriteLine($"Creating database objects for {database}");
         await GenerateTableDefinitions(schemaScript, context, database);
         GenerateTableIndexObjects(schemaScript, context, database);
         await GenerateUserFunctions(connection, schemaScript);
