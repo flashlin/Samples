@@ -68,6 +68,7 @@ class Program
         await GenerateUserDefineTypes(connection, schemaScript);
         await GenerateViews(connection, schemaScript);
         await GenerateStoredProcedures(connection, schemaScript);
+        GenerateLoginUsers(schemaScript, context);
     }
 
     private static void AppendCreateDatabaseScript(StringBuilder schemaScript, string database)
@@ -336,13 +337,17 @@ class Program
     {
         foreach (var pk in tableIndexes.Where(i => i.IsPrimaryKey))
         {
-            schemaScript.AppendLine($"-- Primary Key: {pk.IndexName} on {pk.TableName}");
-            schemaScript.AppendLine($"ALTER TABLE [{pk.TableName}] ADD CONSTRAINT [{pk.IndexName}]");
-            schemaScript.AppendLine($"    PRIMARY KEY {(pk.IsClustered ? "CLUSTERED" : "NONCLUSTERED")} (");
-            schemaScript.AppendLine($"        {string.Join(",\n        ", pk.Columns.Select(c => $"[{c}]"))}");
-            schemaScript.AppendLine("    )");
-            schemaScript.AppendLine("GO");
-            schemaScript.AppendLine();
+            var text = new StringBuilder();
+            text.AppendLine($"-- Primary Key: {pk.IndexName} on {pk.TableName}");
+            text.AppendLine($"ALTER TABLE [{pk.TableName}] ADD CONSTRAINT [{pk.IndexName}]");
+            text.AppendLine($"    PRIMARY KEY {(pk.IsClustered ? "CLUSTERED" : "NONCLUSTERED")} (");
+            text.AppendLine($"        {string.Join(",\n        ", pk.Columns.Select(c => $"[{c}]"))}");
+            text.AppendLine("    )");
+            text.AppendLine("GO");
+            text.AppendLine();
+            schemaScript.AppendLine(text.ToString());
+
+            Console.WriteLine(text.ToString());
         }
     }
 
@@ -374,6 +379,52 @@ class Program
             schemaScript.AppendLine("    )");
             schemaScript.AppendLine("GO");
             schemaScript.AppendLine();
+        }
+    }
+
+    private static string GetPasswordFromEnv()
+    {
+        var envPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
+        if (!File.Exists(envPath))
+        {
+            throw new Exception("警告：找不到 .env 檔案，請設定密碼");
+        }
+
+        var envContent = File.ReadAllLines(envPath);
+        var passwordLine = envContent.FirstOrDefault(line => line.StartsWith("PASSWORD="));
+        return passwordLine.Split('=')[1].Trim();
+    }
+
+    private static void GenerateLoginUsers(StringBuilder schemaScript, GenerateContext context)
+    {
+        var password = GetPasswordFromEnv();
+
+        // 建立登入帳號
+        foreach (var loginName in context.LoginNames)
+        {
+            var createLoginSql = $@"
+-- Create Login: {loginName}
+IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = N'{loginName}')
+BEGIN
+    CREATE LOGIN [{loginName}] WITH PASSWORD = N'{password}', DEFAULT_DATABASE = [master], CHECK_EXPIRATION = OFF, CHECK_POLICY = OFF
+END
+GO
+";
+            schemaScript.AppendLine(createLoginSql);
+        }
+
+        // 設定角色
+        foreach (var loginRole in context.LoginRoles)
+        {
+            if (!string.IsNullOrEmpty(loginRole.RoleName))
+            {
+                var addRoleSql = $@"
+-- Add Role: {loginRole.RoleName} to {loginRole.LoginName}
+ALTER SERVER ROLE [{loginRole.RoleName}] ADD MEMBER [{loginRole.LoginName}]
+GO
+";
+                schemaScript.AppendLine(addRoleSql);
+            }
         }
     }
 
