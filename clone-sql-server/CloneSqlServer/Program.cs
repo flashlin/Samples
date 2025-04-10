@@ -387,7 +387,7 @@ class Program
         var envPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
         if (!File.Exists(envPath))
         {
-            throw new Exception("警告：找不到 .env 檔案，請設定密碼");
+            throw new Exception($"警告：{envPath} 找不到 .env 檔案，請設定密碼");
         }
 
         var envContent = File.ReadAllLines(envPath);
