@@ -9,6 +9,15 @@ public class LoginRoleInfo
     public string RoleName { get; set; } = string.Empty;
 }
 
+public class DatabasePermissionInfo
+{
+    public string DatabaseName { get; set; } = string.Empty;
+    public string RoleName { get; set; } = string.Empty;
+    public string ObjectName { get; set; } = string.Empty;
+    public string ObjectType { get; set; } = string.Empty;
+    public string PermissionName { get; set; } = string.Empty;
+}
+
 public class GenerateContext
 {
     private static readonly string[] DatabaseNameWhiteList =
@@ -23,6 +32,7 @@ public class GenerateContext
     public List<string> LoginNames { get; set; } = new();
     public List<LoginRoleInfo> LoginRoles { get; set; } = [];
     public List<string> DatabaseRoleNames { get; set; } = new();
+    public List<DatabasePermissionInfo> DatabasePermissions { get; set; } = new();
 
     /// <summary>
     /// 取得所有 SQL Server 登入帳號（僅 SQL Login）
@@ -91,6 +101,31 @@ public class GenerateContext
         return result.ToList();
     }
 
+    /// <summary>
+    /// 取得所有預存程序的權限
+    /// </summary>
+    /// <param name="connection">資料庫連線</param>
+    /// <returns>權限清單</returns>
+    private static async Task<List<DatabasePermissionInfo>> GetAllDatabasePermissions(SqlConnection connection)
+    {
+        var query = @"
+            SELECT 
+                DB_NAME() AS DatabaseName,
+                dp.name AS RoleName,
+                o.name AS ObjectName,
+                o.type_desc AS ObjectType,
+                perm.permission_name AS PermissionName
+            FROM sys.database_permissions perm
+            JOIN sys.objects o ON perm.major_id = o.object_id
+            JOIN sys.database_principals dp ON perm.grantee_principal_id = dp.principal_id
+            WHERE 
+                o.type = 'P' -- Stored Procedure
+                AND perm.permission_name IN ('EXECUTE')";
+
+        var result = await connection.QueryAsync<DatabasePermissionInfo>(query);
+        return result.ToList();
+    }
+
     public static async Task<GenerateContext> Initialize(SqlConnection connection)
     {
         var context = new GenerateContext();
@@ -126,6 +161,9 @@ public class GenerateContext
 
         Console.WriteLine($"Fetch Database Roles ...");
         context.DatabaseRoleNames = await GetAllDatabaseRoles(connection);
+
+        Console.WriteLine($"Fetch Database Permissions ...");
+        context.DatabasePermissions = await GetAllDatabasePermissions(connection);
 
         return context;
     }
