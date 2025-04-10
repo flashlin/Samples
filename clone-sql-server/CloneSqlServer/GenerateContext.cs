@@ -9,11 +9,35 @@ public class GenerateContext
     [
         "MembersInfoDB",
         "AccountDB",
+        "PlutoRepSB",
+        "CashmarketDB",
+        "MailManagement",
+        "PromotionManagement",
+        "PromotionManagementHistory"
     ];
     public List<string> Databases { get; set; } = new();
     public Dictionary<string, List<DatabaseInfo>> Tables { get; set; } = new();
     public Dictionary<string, List<TableSchemaInfo>> TableSchemas { get; set; } = new();
     public Dictionary<string, List<TableIndexSchema>> TableIndexes { get; set; } = new();
+
+    /// <summary>
+    /// 取得所有 SQL Server 登入帳號（僅 SQL Login）
+    /// </summary>
+    /// <param name="connection">資料庫連線</param>
+    /// <returns>登入帳號清單</returns>
+    private static async Task<List<string>> GetAllLoginNames(SqlConnection connection)
+    {
+        var query = @"
+            SELECT name 
+            FROM sys.server_principals 
+            WHERE type_desc = 'SQL_LOGIN'
+            AND name NOT LIKE '##%'
+            AND name != 'sa'
+            ORDER BY name";
+
+        var result = await connection.QueryAsync<string>(query);
+        return result.ToList();
+    }
 
     public static async Task<GenerateContext> Initialize(SqlConnection connection)
     {
