@@ -1,11 +1,25 @@
 using Microsoft.Data.SqlClient;
 using Dapper;
 
+public class TableIndexSchema
+{
+    public string TableName { get; set; } = string.Empty;
+    public string IndexName { get; set; } = string.Empty;
+    public string IndexType { get; set; } = string.Empty;  // PK, FK, INDEX
+    public bool IsPrimaryKey { get; set; }
+    public bool IsUnique { get; set; }
+    public bool IsClustered { get; set; }
+    public List<string> Columns { get; set; } = new();
+    public string? ReferencedTableName { get; set; }  // 只有 FK 才會有值
+    public List<string> ReferencedColumns { get; set; } = new();  // 只有 FK 才會有值
+}
+
 public class GenerateContext
 {
     public List<string> Databases { get; set; } = new();
     public Dictionary<string, List<DatabaseInfo>> Tables { get; set; } = new();
     public Dictionary<string, List<TableSchemaInfo>> TableSchemas { get; set; } = new();
+    public Dictionary<string, List<TableIndexSchema>> TableIndexes { get; set; } = new();
 
     public static async Task<GenerateContext> Initialize(SqlConnection connection)
     {
@@ -29,6 +43,7 @@ public class GenerateContext
             }
             
             context.TableSchemas[database] = tableSchemas.ToList();
+            context.TableIndexes[database] = await GetTablePkFkIndexs(connection, tables.Select(t => t.ObjectName!).ToList());
         }
 
         return context;
@@ -85,5 +100,105 @@ public class GenerateContext
                 c.column_id";
 
         return await connection.QueryAsync<TableSchemaInfo>(query, new { TableNames = tableNames });
+    }
+
+    private static async Task<List<TableIndexSchema>> GetTablePkFkIndexs(SqlConnection connection, List<string> tableNames)
+    {
+        var result = new List<TableIndexSchema>();
+
+        // 1. 取得主鍵資訊
+        var pkQuery = @"
+            SELECT 
+                SCHEMA_NAME(t.schema_id) + '.' + t.name as TableName,
+                i.name as IndexName,
+                'PK' as IndexType,
+                1 as IsPrimaryKey,
+                i.is_unique as IsUnique,
+                i.type_desc LIKE '%CLUSTERED%' as IsClustered,
+                STRING_AGG(c.name, ',') WITHIN GROUP (ORDER BY ic.key_ordinal) as Columns
+            FROM sys.tables t
+            INNER JOIN sys.indexes i ON t.object_id = i.object_id
+            INNER JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+            INNER JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+            WHERE i.is_primary_key = 1
+            AND SCHEMA_NAME(t.schema_id) + '.' + t.name IN @TableNames
+            GROUP BY 
+                SCHEMA_NAME(t.schema_id) + '.' + t.name,
+                i.name,
+                i.is_unique,
+                i.type_desc";
+
+        var pks = await connection.QueryAsync<TableIndexSchema>(pkQuery, new { TableNames = tableNames });
+        result.AddRange(pks);
+
+        // 2. 取得外鍵資訊
+        var fkQuery = @"
+            SELECT 
+                SCHEMA_NAME(t.schema_id) + '.' + t.name as TableName,
+                fk.name as IndexName,
+                'FK' as IndexType,
+                0 as IsPrimaryKey,
+                0 as IsUnique,
+                0 as IsClustered,
+                STRING_AGG(c.name, ',') WITHIN GROUP (ORDER BY fkc.constraint_column_id) as Columns,
+                SCHEMA_NAME(rt.schema_id) + '.' + rt.name as ReferencedTableName,
+                STRING_AGG(rc.name, ',') WITHIN GROUP (ORDER BY fkc.constraint_column_id) as ReferencedColumns
+            FROM sys.tables t
+            INNER JOIN sys.foreign_keys fk ON t.object_id = fk.parent_object_id
+            INNER JOIN sys.foreign_key_columns fkc ON fk.object_id = fkc.constraint_object_id
+            INNER JOIN sys.columns c ON fkc.parent_object_id = c.object_id AND fkc.parent_column_id = c.column_id
+            INNER JOIN sys.tables rt ON fk.referenced_object_id = rt.object_id
+            INNER JOIN sys.columns rc ON fkc.referenced_object_id = rc.object_id AND fkc.referenced_column_id = rc.column_id
+            WHERE SCHEMA_NAME(t.schema_id) + '.' + t.name IN @TableNames
+            GROUP BY 
+                SCHEMA_NAME(t.schema_id) + '.' + t.name,
+                fk.name,
+                SCHEMA_NAME(rt.schema_id) + '.' + rt.name";
+
+        var fks = await connection.QueryAsync<TableIndexSchema>(fkQuery, new { TableNames = tableNames });
+        result.AddRange(fks);
+
+        // 3. 取得一般索引資訊
+        var indexQuery = @"
+            SELECT 
+                SCHEMA_NAME(t.schema_id) + '.' + t.name as TableName,
+                i.name as IndexName,
+                'INDEX' as IndexType,
+                0 as IsPrimaryKey,
+                i.is_unique as IsUnique,
+                i.type_desc LIKE '%CLUSTERED%' as IsClustered,
+                STRING_AGG(c.name, ',') WITHIN GROUP (ORDER BY ic.key_ordinal) as Columns
+            FROM sys.tables t
+            INNER JOIN sys.indexes i ON t.object_id = i.object_id
+            INNER JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+            INNER JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+            WHERE i.is_primary_key = 0 
+            AND i.is_unique_constraint = 0
+            AND i.type > 0  -- 排除 Heap
+            AND SCHEMA_NAME(t.schema_id) + '.' + t.name IN @TableNames
+            GROUP BY 
+                SCHEMA_NAME(t.schema_id) + '.' + t.name,
+                i.name,
+                i.is_unique,
+                i.type_desc";
+
+        var indexes = await connection.QueryAsync<TableIndexSchema>(indexQuery, new { TableNames = tableNames });
+        result.AddRange(indexes);
+
+        // 處理 Columns 和 ReferencedColumns 字串轉換為列表
+        foreach (var item in result)
+        {
+            if (!string.IsNullOrEmpty(item.Columns.ToString()))
+            {
+                item.Columns = item.Columns.ToString()!.Split(',').ToList();
+            }
+            
+            if (!string.IsNullOrEmpty(item.ReferencedColumns.ToString()))
+            {
+                item.ReferencedColumns = item.ReferencedColumns.ToString()!.Split(',').ToList();
+            }
+        }
+
+        return result;
     }
 }
