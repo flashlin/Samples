@@ -13,7 +13,7 @@ public class GenerateContext
     public static async Task<GenerateContext> Initialize(SqlConnection connection)
     {
         var context = new GenerateContext();
-        context.Databases = (await GetUserDatabases(connection)).ToList();
+        context.Databases = await GetUserDatabases(connection);
         
         foreach (var database in context.Databases)
         {
@@ -40,11 +40,12 @@ public class GenerateContext
         return context;
     }
 
-    private static async Task<IEnumerable<string>> GetUserDatabases(SqlConnection connection)
+    private static async Task<List<string>> GetUserDatabases(SqlConnection connection)
     {
-        return await connection.QueryAsync<string>(
+        var result = await connection.QueryAsync<string>(
             "SELECT name FROM sys.databases WHERE database_id > 4"
         );
+        return result.ToList();
     }
 
     private static async Task<IEnumerable<DatabaseInfo>> GetTables(SqlConnection connection)
