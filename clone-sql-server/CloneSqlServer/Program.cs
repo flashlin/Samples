@@ -397,8 +397,6 @@ class Program
             text.AppendLine("GO");
             text.AppendLine();
             schemaScript.AppendLine(text.ToString());
-
-            Console.WriteLine(text.ToString());
         }
     }
 
@@ -421,8 +419,6 @@ class Program
             text.AppendLine("GO");
             text.AppendLine();
             schemaScript.AppendLine(text.ToString());
-
-            Console.WriteLine(text.ToString());
         }
     }
 
