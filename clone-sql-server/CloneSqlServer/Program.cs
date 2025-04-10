@@ -438,34 +438,65 @@ class Program
     private static void GenerateLoginUsers(StringBuilder schemaScript, GenerateContext context)
     {
         var password = GetPasswordFromEnv();
+        GenerateCreateLogins(schemaScript, context.LoginNames, password);
+        GenerateCreateRoles(schemaScript, context.LoginRoles);
+        GenerateAddRoleMembers(schemaScript, context.LoginRoles);
+    }
 
-        // 建立登入帳號
-        foreach (var loginName in context.LoginNames)
+    private static void GenerateCreateLogins(StringBuilder schemaScript, List<string> loginNames, string password)
+    {
+        var createLoginSql = new StringBuilder();
+        foreach (var loginName in loginNames)
         {
-            var createLoginSql = $@"
+            createLoginSql.AppendLine($@"
 -- Create Login: {loginName}
 IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = N'{loginName}')
 BEGIN
     CREATE LOGIN [{loginName}] WITH PASSWORD = N'{password}', DEFAULT_DATABASE = [master], CHECK_EXPIRATION = OFF, CHECK_POLICY = OFF
 END
 GO
-";
-            schemaScript.AppendLine(createLoginSql);
+");
         }
+        schemaScript.AppendLine(createLoginSql.ToString());
+    }
 
-        // 設定角色
-        foreach (var loginRole in context.LoginRoles)
+    private static void GenerateCreateRoles(StringBuilder schemaScript, List<LoginRoleInfo> loginRoles)
+    {
+        var createRoleSql = new StringBuilder();
+        var distinctRoles = loginRoles
+            .Where(x => !string.IsNullOrEmpty(x.RoleName))
+            .Select(x => x.RoleName)
+            .Distinct();
+
+        foreach (var roleName in distinctRoles)
+        {
+            createRoleSql.AppendLine($@"
+-- Create Role: {roleName}
+IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = N'{roleName}' AND type = 'R')
+BEGIN
+    CREATE SERVER ROLE [{roleName}]
+END
+GO
+");
+        }
+        schemaScript.AppendLine(createRoleSql.ToString());
+    }
+
+    private static void GenerateAddRoleMembers(StringBuilder schemaScript, List<LoginRoleInfo> loginRoles)
+    {
+        var addRoleSql = new StringBuilder();
+        foreach (var loginRole in loginRoles)
         {
             if (!string.IsNullOrEmpty(loginRole.RoleName))
             {
-                var addRoleSql = $@"
+                addRoleSql.AppendLine($@"
 -- Add Role: {loginRole.RoleName} to {loginRole.LoginName}
 ALTER SERVER ROLE [{loginRole.RoleName}] ADD MEMBER [{loginRole.LoginName}]
 GO
-";
-                schemaScript.AppendLine(addRoleSql);
+");
             }
         }
+        schemaScript.AppendLine(addRoleSql.ToString());
     }
 
     private static async Task SaveSchemaScript(string schemaScript, string targetPath)
