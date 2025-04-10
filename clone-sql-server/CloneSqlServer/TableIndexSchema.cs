@@ -1,3 +1,5 @@
+namespace CloneSqlServer;
+
 public class TableIndexSchema
 {
     public string TableName { get; set; } = string.Empty;

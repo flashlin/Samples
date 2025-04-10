@@ -1,5 +1,7 @@
-using Microsoft.Data.SqlClient;
 using Dapper;
+using Microsoft.Data.SqlClient;
+
+namespace CloneSqlServer;
 
 public class GenerateContext
 {
@@ -102,9 +104,6 @@ public class GenerateContext
         result.AddRange(fks);
         result.AddRange(indexes);
 
-        // 處理欄位字串轉換
-        ConvertColumnStringsToLists(result);
-
         return result;
     }
 
@@ -117,8 +116,8 @@ public class GenerateContext
                 'PK' as IndexType,
                 1 as IsPrimaryKey,
                 i.is_unique as IsUnique,
-                i.type_desc LIKE '%CLUSTERED%' as IsClustered,
-                STRING_AGG(c.name, ',') WITHIN GROUP (ORDER BY ic.key_ordinal) as Columns
+                CASE WHEN i.type_desc LIKE '%CLUSTERED%' THEN 1 ELSE 0 END as IsClustered,
+                STRING_AGG(c.name, ',') WITHIN GROUP (ORDER BY ic.key_ordinal) as ColumnsString
             FROM sys.tables t
             INNER JOIN sys.indexes i ON t.object_id = i.object_id
             INNER JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
@@ -144,9 +143,9 @@ public class GenerateContext
                 0 as IsPrimaryKey,
                 0 as IsUnique,
                 0 as IsClustered,
-                STRING_AGG(c.name, ',') WITHIN GROUP (ORDER BY fkc.constraint_column_id) as Columns,
+                STRING_AGG(c.name, ',') WITHIN GROUP (ORDER BY fkc.constraint_column_id) as ColumnsString,
                 SCHEMA_NAME(rt.schema_id) + '.' + rt.name as ReferencedTableName,
-                STRING_AGG(rc.name, ',') WITHIN GROUP (ORDER BY fkc.constraint_column_id) as ReferencedColumns
+                STRING_AGG(rc.name, ',') WITHIN GROUP (ORDER BY fkc.constraint_column_id) as ReferencedColumnsString
             FROM sys.tables t
             INNER JOIN sys.foreign_keys fk ON t.object_id = fk.parent_object_id
             INNER JOIN sys.foreign_key_columns fkc ON fk.object_id = fkc.constraint_object_id
@@ -171,8 +170,8 @@ public class GenerateContext
                 'INDEX' as IndexType,
                 0 as IsPrimaryKey,
                 i.is_unique as IsUnique,
-                i.type_desc LIKE '%CLUSTERED%' as IsClustered,
-                STRING_AGG(c.name, ',') WITHIN GROUP (ORDER BY ic.key_ordinal) as Columns
+                CASE WHEN i.type_desc LIKE '%CLUSTERED%' THEN 1 ELSE 0 END as IsClustered,
+                STRING_AGG(c.name, ',') WITHIN GROUP (ORDER BY ic.key_ordinal) as ColumnsString
             FROM sys.tables t
             INNER JOIN sys.indexes i ON t.object_id = i.object_id
             INNER JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
@@ -188,21 +187,5 @@ public class GenerateContext
                 i.type_desc";
 
         return await connection.QueryAsync<TableIndexSchema>(indexQuery, new { TableNames = tableNames });
-    }
-
-    private static void ConvertColumnStringsToLists(List<TableIndexSchema> indexes)
-    {
-        foreach (var item in indexes)
-        {
-            if (!string.IsNullOrEmpty(item.Columns.ToString()))
-            {
-                item.Columns = item.Columns.ToString()!.Split(',').ToList();
-            }
-            
-            if (!string.IsNullOrEmpty(item.ReferencedColumns.ToString()))
-            {
-                item.ReferencedColumns = item.ReferencedColumns.ToString()!.Split(',').ToList();
-            }
-        }
     }
 }

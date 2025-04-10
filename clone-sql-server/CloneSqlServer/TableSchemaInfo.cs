@@ -1,3 +1,5 @@
+namespace CloneSqlServer;
+
 public class TableSchemaInfo
 {
     public string TableName { get; set; } = string.Empty;
