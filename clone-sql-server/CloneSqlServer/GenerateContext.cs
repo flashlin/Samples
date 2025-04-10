@@ -5,6 +5,12 @@ namespace CloneSqlServer;
 
 public class GenerateContext
 {
+    private static readonly string[] DatabaseNameWhiteList =
+    [
+        "MembersInfoDB",
+        "AccountDB",
+        "PlutoRepSB"
+    ];
     public List<string> Databases { get; set; } = new();
     public Dictionary<string, List<DatabaseInfo>> Tables { get; set; } = new();
     public Dictionary<string, List<TableSchemaInfo>> TableSchemas { get; set; } = new();
@@ -14,6 +20,8 @@ public class GenerateContext
     {
         var context = new GenerateContext();
         context.Databases = await GetUserDatabases(connection);
+        // For now, we only use the white list
+        context.Databases = DatabaseNameWhiteList.ToList();
         
         foreach (var database in context.Databases)
         {
