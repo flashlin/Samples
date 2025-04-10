@@ -61,6 +61,7 @@ class Program
         schemaScript.AppendLine("GO");
 
         await GenerateTableDefinitions(connection, schemaScript, context, database);
+        GenerateTableIndexObjects(schemaScript, context, database);
         await GenerateUserFunctions(connection, schemaScript);
         await GenerateUserDefineTypes(connection, schemaScript);
         await GenerateViews(connection, schemaScript);
@@ -316,6 +317,60 @@ class Program
         schemaScript.AppendLine($"    {columnDefinitions}");
         schemaScript.AppendLine(")");
         schemaScript.AppendLine("GO");
+    }
+
+    private static void GenerateTableIndexObjects(StringBuilder schemaScript, GenerateContext context, string database)
+    {
+        var tableIndexes = context.TableIndexes[database];
+        
+        GeneratePrimaryKeys(schemaScript, tableIndexes);
+        GenerateForeignKeys(schemaScript, tableIndexes);
+        GenerateIndexes(schemaScript, tableIndexes);
+    }
+
+    private static void GeneratePrimaryKeys(StringBuilder schemaScript, List<TableIndexSchema> tableIndexes)
+    {
+        foreach (var pk in tableIndexes.Where(i => i.IsPrimaryKey))
+        {
+            schemaScript.AppendLine($"-- Primary Key: {pk.IndexName} on {pk.TableName}");
+            schemaScript.AppendLine($"ALTER TABLE [{pk.TableName}] ADD CONSTRAINT [{pk.IndexName}]");
+            schemaScript.AppendLine($"    PRIMARY KEY {(pk.IsClustered ? "CLUSTERED" : "NONCLUSTERED")} (");
+            schemaScript.AppendLine($"        {string.Join(",\n        ", pk.Columns.Select(c => $"[{c}]"))}");
+            schemaScript.AppendLine("    )");
+            schemaScript.AppendLine("GO");
+            schemaScript.AppendLine();
+        }
+    }
+
+    private static void GenerateForeignKeys(StringBuilder schemaScript, List<TableIndexSchema> tableIndexes)
+    {
+        foreach (var fk in tableIndexes.Where(i => i.IndexType == "FK"))
+        {
+            schemaScript.AppendLine($"-- Foreign Key: {fk.IndexName} on {fk.TableName}");
+            schemaScript.AppendLine($"ALTER TABLE [{fk.TableName}] ADD CONSTRAINT [{fk.IndexName}]");
+            schemaScript.AppendLine($"    FOREIGN KEY (");
+            schemaScript.AppendLine($"        {string.Join(",\n        ", fk.Columns.Select(c => $"[{c}]"))}");
+            schemaScript.AppendLine("    )");
+            schemaScript.AppendLine($"    REFERENCES [{fk.ReferencedTableName}] (");
+            schemaScript.AppendLine($"        {string.Join(",\n        ", fk.ReferencedColumns.Select(c => $"[{c}]"))}");
+            schemaScript.AppendLine("    )");
+            schemaScript.AppendLine("GO");
+            schemaScript.AppendLine();
+        }
+    }
+
+    private static void GenerateIndexes(StringBuilder schemaScript, List<TableIndexSchema> tableIndexes)
+    {
+        foreach (var idx in tableIndexes.Where(i => i.IndexType == "INDEX"))
+        {
+            schemaScript.AppendLine($"-- Index: {idx.IndexName} on {idx.TableName}");
+            schemaScript.AppendLine($"CREATE {(idx.IsUnique ? "UNIQUE " : "")}{(idx.IsClustered ? "CLUSTERED" : "NONCLUSTERED")} INDEX [{idx.IndexName}]");
+            schemaScript.AppendLine($"    ON [{idx.TableName}] (");
+            schemaScript.AppendLine($"        {string.Join(",\n        ", idx.Columns.Select(c => $"[{c}]"))}");
+            schemaScript.AppendLine("    )");
+            schemaScript.AppendLine("GO");
+            schemaScript.AppendLine();
+        }
     }
 
     private static async Task SaveSchemaScript(string schemaScript, string targetPath)
