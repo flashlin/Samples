@@ -10,7 +10,7 @@ Write-Host "正在導出資料庫結構..."
 .\CloneSqlServer\bin\Debug\net9.0\CloneSqlServer.exe $SqlServerInstance "LocalSqlServer"
 
 # 檢查是否成功生成 SQL 檔案
-if (!(Test-Path "CreateDatabase.sql")) {
+if (!(Test-Path "LocalSqlServer/CreateDatabase.sql")) {
     Write-Host "錯誤：未能生成 CreateDatabase.sql 檔案"
     exit 1
 }

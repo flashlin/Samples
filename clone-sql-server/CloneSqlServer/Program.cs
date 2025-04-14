@@ -1,27 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Text;
+using CloneSqlServer;
 using Dapper;
-
-public class DatabaseInfo
-{
-    public string? Name { get; set; }
-    public string? SchemaName { get; set; }
-    public string? ObjectName { get; set; }
-    public string? ObjectType { get; set; }
-    public string? Definition { get; set; }
-}
-
-public class TableSchemaInfo
-{
-    public string TableName { get; set; } = string.Empty;
-    public string ColumnName { get; set; } = string.Empty;
-    public string DataType { get; set; } = string.Empty;
-    public int? CharacterMaxLength { get; set; }
-    public int? NumericPrecision { get; set; }
-    public int? NumericScale { get; set; }
-    public bool IsNullable { get; set; }
-    public bool IsIdentity { get; set; }
-}
 
 class Program
 {
@@ -42,11 +22,12 @@ class Program
         Directory.CreateDirectory(targetPath);
 
         Console.WriteLine($"連接字串: {connectionString}");
-        using var connection = new SqlConnection(connectionString);
+        await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync();
         Console.WriteLine("成功連接到 SQL Server");
 
-        var schemaScript = await GenerateDatabaseSchemaScript(connection);
+        var context = await GenerateContext.Initialize(connection);
+        var schemaScript = await GenerateDatabaseSchemaScript(connection, context);
         await SaveSchemaScript(schemaScript, targetPath);
     }
 
@@ -59,27 +40,19 @@ class Program
         return $"Server={serverName}{port};Integrated Security=True;TrustServerCertificate=True;";
     }
 
-    private static async Task<string> GenerateDatabaseSchemaScript(SqlConnection connection)
+    private static async Task<string> GenerateDatabaseSchemaScript(SqlConnection connection, GenerateContext context)
     {
-        var databases = await GetUserDatabases(connection);
         var schemaScript = new StringBuilder();
 
-        foreach (string database in databases)
+        foreach (string database in context.Databases)
         {
-            await GenerateDatabaseObjects(connection, database, schemaScript);
+            await GenerateDatabaseObjects(connection, database, schemaScript, context);
         }
 
         return schemaScript.ToString();
     }
 
-    private static async Task<IEnumerable<string>> GetUserDatabases(SqlConnection connection)
-    {
-        return await connection.QueryAsync<string>(
-            "SELECT name FROM sys.databases WHERE database_id > 4"
-        );
-    }
-
-    private static async Task GenerateDatabaseObjects(SqlConnection connection, string database, StringBuilder schemaScript)
+    private static async Task GenerateDatabaseObjects(SqlConnection connection, string database, StringBuilder schemaScript, GenerateContext context)
     {
         AppendCreateDatabaseScript(schemaScript, database);
 
@@ -88,11 +61,15 @@ class Program
         schemaScript.AppendLine($"USE [{database}]");
         schemaScript.AppendLine("GO");
 
-        await GenerateTableDefinitions(connection, schemaScript);
-        //await GenerateUserFunctions(connection, schemaScript);
-        //await GenerateUserDefineTypes(connection, schemaScript);
-        //await GenerateViews(connection, schemaScript);
-        //await GenerateStoredProcedures(connection, schemaScript);
+        Console.WriteLine($"Creating database objects for {database}");
+        await GenerateTableDefinitions(schemaScript, context, database);
+        GenerateTableIndexObjects(schemaScript, context, database);
+        await GenerateUserFunctions(connection, schemaScript);
+        await GenerateUserDefineTypes(connection, schemaScript);
+        await GenerateViews(connection, schemaScript);
+        await GenerateStoredProcedures(connection, schemaScript);
+        GenerateLoginUsers(schemaScript, context);
+        GenerateRolePermissions(schemaScript, context);
     }
 
     private static void AppendCreateDatabaseScript(StringBuilder schemaScript, string database)
@@ -229,14 +206,33 @@ class Program
     private static async Task GenerateStoredProcedures(SqlConnection connection, StringBuilder schemaScript)
     {
         var query = @"
-            SELECT 
-                DB_NAME() as Name,
-                o.name as ObjectName,
-                o.type as ObjectType,
-                OBJECT_DEFINITION(o.object_id) as Definition
-            FROM sys.objects o
-            WHERE type in ('P')
-            AND is_ms_shipped = 0";
+                    SELECT 
+                        DB_NAME() as Name,
+                        o.name as ObjectName,
+                        o.type as ObjectType,
+                        OBJECT_DEFINITION(o.object_id) as Definition
+                    FROM sys.objects o
+                    WHERE o.type = 'P'
+                      AND o.is_ms_shipped = 0
+                      AND NOT EXISTS (
+                          SELECT 1
+                          FROM sys.sql_expression_dependencies d
+                          WHERE d.referencing_id = o.object_id
+                            AND (
+                                d.referenced_id IN (
+                                    SELECT object_id 
+                                    FROM sys.objects 
+                                    WHERE type = 'P'
+                                )
+                                OR d.referenced_server_name IS NOT NULL
+                            )
+                      )
+                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%EXEC %'
+                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%sp_executesql%'
+                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%OPENQUERY%'
+                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%OPENROWSET%'
+                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%OPENDATASOURCE%'
+                    ";
 
         var dbObjects = await connection.QueryAsync<DatabaseInfo>(query);
 
@@ -244,9 +240,12 @@ class Program
         {
             if (!string.IsNullOrEmpty(obj.Definition))
             {
-                schemaScript.AppendLine($"-- Stored Procedure: {obj.ObjectName}");
-                schemaScript.AppendLine(obj.Definition);
-                schemaScript.AppendLine("GO");
+                var text = new StringBuilder();
+                text.AppendLine($"-- Stored Procedure: {obj.ObjectName}");
+                text.AppendLine(obj.Definition);
+                text.AppendLine("GO");
+                text.AppendLine();
+                schemaScript.AppendLine(text.ToString());
             }
         }
     }
@@ -276,51 +275,21 @@ class Program
         }
     }
 
-    private static async Task GenerateTableDefinitions(SqlConnection connection, StringBuilder schemaScript)
+    private static Task GenerateTableDefinitions(StringBuilder schemaScript, GenerateContext context, string database)
     {
-        var tables = (await GetTables(connection)).ToList();
-        const int batchSize = 50;
+        var tables = context.Tables[database];
+        var tableSchemas = context.TableSchemas[database];
 
-        for (int i = 0; i < tables.Count; i += batchSize)
+        foreach (var table in tables)
         {
-            var batch = tables.Skip(i).Take(batchSize).ToList();
+            var tableName = table.ObjectName!;
+            var columnDefinitions = BuildColumnDefinitions(tableSchemas.Where(t => t.TableName == tableName)
+                .GroupBy(t => t.TableName).First());
 
-            var tableSchemas = await GetBatchTableColumnDefinitions(connection, batch.Select(t => t.ObjectName!).ToList());
-            foreach (var tableGroup in tableSchemas.GroupBy(t => t.TableName))
-            {
-                var tableName = tableGroup.Key;
-                var columnDefinitions = BuildColumnDefinitions(tableGroup);
-
-                Console.WriteLine($"Processing table {tableName}");
-                AppendTableDefinition(schemaScript, tableName, columnDefinitions);
-            }
+            Console.WriteLine($"Processing table {tableName}");
+            AppendTableDefinition(schemaScript, tableName, columnDefinitions);
         }
-    }
-
-    private static async Task<IEnumerable<TableSchemaInfo>> GetBatchTableColumnDefinitions(SqlConnection connection, List<string> tableNames)
-    {
-        var query = @"
-            SELECT 
-                SCHEMA_NAME(t.schema_id) + '.' + t.name as TableName,
-                c.name as ColumnName,
-                tp.name as DataType,
-                CASE 
-                    WHEN tp.name IN ('nchar', 'nvarchar') AND c.max_length != -1 THEN c.max_length/2
-                    ELSE c.max_length
-                END as CharacterMaxLength,
-                c.precision as NumericPrecision,
-                c.scale as NumericScale,
-                c.is_nullable as IsNullable,
-                c.is_identity as IsIdentity
-            FROM sys.tables t
-            INNER JOIN sys.columns c ON t.object_id = c.object_id
-            INNER JOIN sys.types tp ON c.user_type_id = tp.user_type_id
-            WHERE SCHEMA_NAME(t.schema_id) + '.' + t.name IN @TableNames
-            ORDER BY 
-                SCHEMA_NAME(t.schema_id) + '.' + t.name,
-                c.column_id";
-
-        return await connection.QueryAsync<TableSchemaInfo>(query, new { TableNames = tableNames });
+        return Task.CompletedTask;
     }
 
     private static string BuildColumnDefinitions(IGrouping<string, TableSchemaInfo> columns)
@@ -378,24 +347,168 @@ class Program
         schemaScript.AppendLine("GO");
     }
 
-    private static async Task<IEnumerable<DatabaseInfo>> GetTables(SqlConnection connection)
+    private static void GenerateTableIndexObjects(StringBuilder schemaScript, GenerateContext context, string database)
     {
-        var tableQuery = @"
-            SELECT 
-                DB_NAME() as Name,
-                SCHEMA_NAME(t.schema_id) + '.' + t.name as ObjectName,
-                'U' as ObjectType,
-                OBJECT_DEFINITION(t.object_id) as Definition
-            FROM sys.tables t
-            WHERE t.is_ms_shipped = 0
-                AND t.type = 'U'  -- 只取得使用者定義的資料表
-                AND t.temporal_type = 0  -- 排除系統版本控制的資料表
-                AND SCHEMA_NAME(t.schema_id) != 'sys'  -- 排除系統結構描述
-                AND t.name NOT LIKE 'dt%'  -- 排除暫存資料表
-                AND t.name NOT LIKE '#%'   -- 排除暫存資料表
-            ORDER BY SCHEMA_NAME(t.schema_id), t.name";
+        var tableIndexes = context.TableIndexes[database];
+        
+        GeneratePrimaryKeys(schemaScript, tableIndexes);
+        GenerateForeignKeys(schemaScript, tableIndexes);
+        GenerateIndexes(schemaScript, tableIndexes);
+    }
 
-        return await connection.QueryAsync<DatabaseInfo>(tableQuery);
+    private static void GeneratePrimaryKeys(StringBuilder schemaScript, List<TableIndexSchema> tableIndexes)
+    {
+        var primaryKeys = tableIndexes.Where(i => i.IsPrimaryKey).ToList();
+        if (!primaryKeys.Any())
+        {
+            return;
+        }
+
+        foreach (var pk in primaryKeys)
+        {
+            var text = new StringBuilder();
+            text.AppendLine($"-- Primary Key: {pk.IndexName} on {pk.TableName}");
+            text.AppendLine($"ALTER TABLE [{pk.TableName}] ADD CONSTRAINT [{pk.IndexName}]");
+            text.AppendLine($"    PRIMARY KEY {(pk.IsClustered ? "CLUSTERED" : "NONCLUSTERED")} (");
+            text.AppendLine($"        {string.Join(",\n        ", pk.Columns.Select(c => $"[{c}]"))}");
+            text.AppendLine("    )");
+            text.AppendLine("GO");
+            text.AppendLine();
+            schemaScript.AppendLine(text.ToString());
+        }
+    }
+
+    private static void GenerateForeignKeys(StringBuilder schemaScript, List<TableIndexSchema> tableIndexes)
+    {
+        var foreignKeys = tableIndexes.Where(i => i.IndexType == "FK").ToList();
+        if (!foreignKeys.Any())
+        {
+            return;
+        }
+
+        foreach (var fk in foreignKeys)
+        {
+            var text = new StringBuilder();
+            text.AppendLine($"-- Foreign Key: {fk.IndexName} on {fk.TableName}");
+            text.AppendLine($"ALTER TABLE [{fk.TableName}] ADD CONSTRAINT [{fk.IndexName}]");
+            text.AppendLine($"    FOREIGN KEY (");
+            text.AppendLine($"        {string.Join(",\n        ", fk.Columns.Select(c => $"[{c}]"))}");
+            text.AppendLine("    )");
+            text.AppendLine($"    REFERENCES [{fk.ReferencedTableName}] (");
+            text.AppendLine($"        {string.Join(",\n        ", fk.ReferencedColumns.Select(c => $"[{c}]"))}");
+            text.AppendLine("    )");
+            text.AppendLine("GO");
+            text.AppendLine();
+            schemaScript.AppendLine(text.ToString());
+        }
+    }
+
+    private static void GenerateIndexes(StringBuilder schemaScript, List<TableIndexSchema> tableIndexes)
+    {
+        var indexes = tableIndexes.Where(i => i.IndexType == "INDEX").ToList();
+        if (!indexes.Any())
+        {
+            return;
+        }
+
+        foreach (var idx in indexes)
+        {
+            var text = new StringBuilder();
+            text.AppendLine($"-- Index: {idx.IndexName} on {idx.TableName}");
+            text.AppendLine($"CREATE {(idx.IsUnique ? "UNIQUE " : "")}{(idx.IsClustered ? "CLUSTERED" : "NONCLUSTERED")} INDEX [{idx.IndexName}]");
+            text.AppendLine($"    ON [{idx.TableName}] (");
+            text.AppendLine($"        {string.Join(",\n        ", idx.Columns.Select(c => $"[{c}]"))}");
+            text.AppendLine("    )");
+            text.AppendLine("GO");
+            text.AppendLine();
+            schemaScript.AppendLine(text.ToString());
+        }
+    }
+
+    private static string GetPasswordFromEnv()
+    {
+        var envPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
+        if (!File.Exists(envPath))
+        {
+            throw new Exception($"警告：{envPath} 找不到 .env 檔案，請設定密碼");
+        }
+
+        var envContent = File.ReadAllLines(envPath);
+        var passwordLine = envContent.FirstOrDefault(line => line.StartsWith("PASSWORD="));
+        return passwordLine.Split('=')[1].Trim();
+    }
+
+    private static void GenerateLoginUsers(StringBuilder schemaScript, GenerateContext context)
+    {
+        var password = GetPasswordFromEnv();
+        GenerateCreateLogins(schemaScript, context.LoginNames, password);
+        GenerateCreateDatabaseRoles(schemaScript, context);
+        GenerateAddRoleMembers(schemaScript, context.LoginRoles);
+    }
+
+    private static void GenerateCreateLogins(StringBuilder schemaScript, List<string> loginNames, string password)
+    {
+        var createLoginSql = new StringBuilder();
+        foreach (var loginName in loginNames)
+        {
+            createLoginSql.AppendLine($@"
+-- Create Login: {loginName}
+IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = N'{loginName}')
+BEGIN
+    CREATE LOGIN [{loginName}] WITH PASSWORD = N'{password}', DEFAULT_DATABASE = [master], CHECK_EXPIRATION = OFF, CHECK_POLICY = OFF
+END
+GO
+");
+        }
+        schemaScript.AppendLine(createLoginSql.ToString());
+    }
+
+    private static void GenerateCreateDatabaseRoles(StringBuilder schemaScript, GenerateContext context)
+    {
+        var createRoleSql = new StringBuilder();
+        foreach (var roleName in context.DatabaseRoleNames)
+        {
+            createRoleSql.AppendLine($@"
+-- Create Role: {roleName}
+IF NOT EXISTS (SELECT name FROM sys.database_principals WHERE name = N'{roleName}' AND type = 'R')
+BEGIN
+    CREATE ROLE [{roleName}]
+END
+GO
+");
+        }
+        schemaScript.AppendLine(createRoleSql.ToString());
+    }
+
+    private static void GenerateAddRoleMembers(StringBuilder schemaScript, List<LoginRoleInfo> loginRoles)
+    {
+        var addRoleSql = new StringBuilder();
+        foreach (var loginRole in loginRoles)
+        {
+            if (!string.IsNullOrEmpty(loginRole.RoleName))
+            {
+                addRoleSql.AppendLine($@"
+-- Add Role: {loginRole.RoleName} to {loginRole.LoginName}
+ALTER SERVER ROLE [{loginRole.RoleName}] ADD MEMBER [{loginRole.LoginName}]
+GO
+");
+            }
+        }
+        schemaScript.AppendLine(addRoleSql.ToString());
+    }
+
+    private static void GenerateRolePermissions(StringBuilder schemaScript, GenerateContext context)
+    {
+        var grantSql = new StringBuilder();
+        foreach (var permission in context.DatabasePermissions)
+        {
+            grantSql.AppendLine($@"
+-- Grant {permission.PermissionName} on {permission.ObjectName} to {permission.RoleName}
+GRANT {permission.PermissionName} ON [{permission.ObjectName}] TO [{permission.RoleName}]
+GO
+");
+        }
+        schemaScript.AppendLine(grantSql.ToString());
     }
 
     private static async Task SaveSchemaScript(string schemaScript, string targetPath)
