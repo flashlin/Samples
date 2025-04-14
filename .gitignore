@@ -67,3 +67,6 @@ game-sudoku/.gradle
 game-sudoku/build/kotlin/compileTestKotlin
 game-sudoku/build/test-results/test/binary
 game-sudoku/build/test-results/test
+game-sudoku/app/build/kotlin
+game-sudoku/app/build/tmp
+game-sudoku/app/build/intermediates
