@@ -13,14 +13,15 @@ ENV MSSQL_TCP_PORT=1433
 RUN mkdir -p /usr/config
 WORKDIR /usr/config
 
-# Bundle config source
-COPY . /usr/config
+# Copy initialization script
+COPY init.sql /usr/config/
+COPY ./setup.sh /usr/config/
 
-# Grant permissions for config directory
-RUN chmod +x /usr/config
+# Grant permissions
+RUN chmod +x /usr/config/setup.sh
 
 # Expose port 1433
 EXPOSE 1433
 
-# Set the default command
-CMD ["/opt/mssql/bin/sqlservr"] 
+# Start SQL Server, run the initialization script, and then loop forever
+CMD /bin/bash ./setup.sh 
