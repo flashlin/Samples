@@ -1,6 +1,9 @@
 # Use SQL Server 2022 image
 FROM mcr.microsoft.com/mssql/server:2022-latest
 
+# Switch to root to create directories
+USER root
+
 # Create work directory
 WORKDIR /usr/src/app
 
@@ -18,7 +21,11 @@ COPY init.sql /usr/config/
 COPY ./setup.sh /usr/config/
 
 # Grant permissions
-RUN chmod +x /usr/config/setup.sh
+RUN chmod +x /usr/config/setup.sh && \
+    chown -R mssql:root /usr/config
+
+# Switch back to mssql user
+USER mssql
 
 # Expose port 1433
 EXPOSE 1433
