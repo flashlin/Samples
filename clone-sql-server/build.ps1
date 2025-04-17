@@ -3,7 +3,7 @@ dotnet build
 
 # Execute CloneSqlServer program
 Write-Host "Exporting database structure..."
-.\CloneSqlServer\bin\Debug\net9.0\CloneSqlServer.exe devdb.coreop.net "LocalSqlServer"
+.\CloneSqlServer\bin\Debug\net9.0\CloneSqlServer.exe 127.0.0.1,1433 "LocalSqlServer"
 
 # Check if SQL file was successfully generated
 if (!(Test-Path "LocalSqlServer/CreateDatabase.sql")) {
