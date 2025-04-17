@@ -36,6 +36,3 @@ echo "====================="
     -P $SA_PASSWORD \
     -i CreateDatabase.sql \
     -C -N -t 30
-
-# Keep container running
-tail -f /dev/null

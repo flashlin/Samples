@@ -3,6 +3,25 @@ using System.Text;
 using CloneSqlServer;
 using Dapper;
 
+public class SqlBoxerEnv
+{
+    public string SqlSaPassword { get; set; }
+
+    public static SqlBoxerEnv LoadFromEnvironment()
+    {
+        var password = Environment.GetEnvironmentVariable("SQL_SA_PASSWORD");
+        if (string.IsNullOrEmpty(password))
+        {
+            throw new InvalidOperationException("環境變數 SQL_SA_PASSWORD 未設定，請設定 SQL Server SA 密碼");
+        }
+
+        return new SqlBoxerEnv
+        {
+            SqlSaPassword = password
+        };
+    }
+}
+
 class Program
 {
     static async Task Main(string[] args)
@@ -15,7 +34,8 @@ class Program
             return;
         }
 
-        string connectionString = BuildConnectionString(args[0]);
+        var env = SqlBoxerEnv.LoadFromEnvironment();
+        string connectionString = BuildConnectionString(args[0], env);
         string targetPath = args[1];
 
         // 確保目標目錄存在
@@ -27,29 +47,58 @@ class Program
         Console.WriteLine("成功連接到 SQL Server");
 
         var context = await GenerateContext.Initialize(connection);
-        var schemaScript = await GenerateDatabaseSchemaScript(connection, context);
-        await SaveSchemaScript(schemaScript, targetPath);
+        await GenerateDatabaseSchemaScripts(connection, context, targetPath);
     }
 
-    private static string BuildConnectionString(string server)
+    private static string BuildConnectionString(string server, SqlBoxerEnv env)
     {
         string[] serverParts = server.Split(':');
         string serverName = serverParts[0];
         string port = serverParts.Length > 1 ? $",{serverParts[1]}" : string.Empty;
-        
-        return $"Server={serverName}{port};Integrated Security=True;TrustServerCertificate=True;";
+        return $"Server={serverName}{port};User ID=sa;Password={env.SqlSaPassword};TrustServerCertificate=True;";
     }
 
-    private static async Task<string> GenerateDatabaseSchemaScript(SqlConnection connection, GenerateContext context)
+    private static async Task GenerateDatabaseSchemaScripts(SqlConnection connection, GenerateContext context, string targetPath)
     {
-        var schemaScript = new StringBuilder();
+        var combinedScript = new StringBuilder();
+        combinedScript.AppendLine("-- Combined Database Creation Script");
+        combinedScript.AppendLine($"-- Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        combinedScript.AppendLine();
 
         foreach (string database in context.Databases)
         {
-            await GenerateDatabaseObjects(connection, database, schemaScript, context);
+            Console.WriteLine($"開始產生資料庫 {database} 的結構指令碼...");
+            var schemaScript = await GenerateDatabaseSchemaScript(connection, context, database);
+            
+            // 儲存個別資料庫腳本
+            await SaveDatabaseSchemaScript(schemaScript, targetPath, database);
+            Console.WriteLine($"完成產生資料庫 {database} 的結構指令碼");
+
+            // 加入到整合腳本
+            combinedScript.AppendLine($"-- Start Database: {database}");
+            combinedScript.AppendLine(schemaScript);
+            combinedScript.AppendLine($"-- End Database: {database}");
+            combinedScript.AppendLine();
         }
 
+        // 儲存整合腳本
+        string combinedFilePath = Path.Combine(targetPath, "CreateDatabase.sql");
+        await File.WriteAllTextAsync(combinedFilePath, combinedScript.ToString());
+        Console.WriteLine($"完成產生整合資料庫腳本：{combinedFilePath}");
+    }
+
+    private static async Task<string> GenerateDatabaseSchemaScript(SqlConnection connection, GenerateContext context, string database)
+    {
+        var schemaScript = new StringBuilder();
+        await GenerateDatabaseObjects(connection, database, schemaScript, context);
         return schemaScript.ToString();
+    }
+
+    private static async Task SaveDatabaseSchemaScript(string schemaScript, string targetPath, string database)
+    {
+        string filePath = Path.Combine(targetPath, $"{database}_Schema.sql");
+        await File.WriteAllTextAsync(filePath, schemaScript);
+        Console.WriteLine($"資料庫 {database} 的結構已成功導出到 {filePath}");
     }
 
     private static async Task GenerateDatabaseObjects(SqlConnection connection, string database, StringBuilder schemaScript, GenerateContext context)
@@ -64,12 +113,14 @@ class Program
         Console.WriteLine($"Creating database objects for {database}");
         await GenerateTableDefinitions(schemaScript, context, database);
         GenerateTableIndexObjects(schemaScript, context, database);
+        GenerateTableConstraints(schemaScript, context, database);
         await GenerateUserFunctions(connection, schemaScript);
-        await GenerateUserDefineTypes(connection, schemaScript);
+        await GenerateUserDefineTypes(connection, schemaScript, context, database);
         await GenerateViews(connection, schemaScript);
-        await GenerateStoredProcedures(connection, schemaScript);
-        GenerateLoginUsers(schemaScript, context);
+        await GenerateStoredProcedures(connection, schemaScript, context, database);
+        GenerateLoginUsers(schemaScript, context, database);
         GenerateRolePermissions(schemaScript, context);
+        await GenerateUserDefineTypesRolePermission(schemaScript, context, database);
     }
 
     private static void AppendCreateDatabaseScript(StringBuilder schemaScript, string database)
@@ -123,131 +174,142 @@ class Program
         }
     }
 
-    private static async Task GenerateUserDefineTypes(SqlConnection connection, StringBuilder schemaScript)
+    private static async Task GenerateUserDefineTypes(SqlConnection connection, StringBuilder schemaScript, GenerateContext context, string database)
     {
-        var query = @"
-            SELECT 
-                DB_NAME() as Name,
-                t.name as ObjectName,
-                'UDT' as ObjectType,
-                CASE 
-                    WHEN t.is_table_type = 1 THEN
-                    (
-                        SELECT 
-                            'CREATE TYPE [' + SCHEMA_NAME(tt.schema_id) + '].[' + tt.name + '] AS TABLE (' +
-                            STUFF((
-                                SELECT ', [' + c.name + '] ' + 
-                                    tp.name + 
-                                    CASE 
-                                        WHEN tp.name IN ('varchar', 'nvarchar', 'char', 'nchar') 
-                                            THEN '(' + CASE WHEN c.max_length = -1 
-                                                THEN 'MAX' 
-                                                ELSE CAST(CASE WHEN tp.name LIKE 'n%' 
-                                                    THEN c.max_length/2 
-                                                    ELSE c.max_length END AS VARCHAR) 
-                                            END + ')'
-                                        WHEN tp.name IN ('decimal', 'numeric') 
-                                            THEN '(' + CAST(c.[precision] AS VARCHAR) + ',' + CAST(c.scale AS VARCHAR) + ')'
-                                        WHEN tp.name IN ('binary', 'varbinary')
-                                            THEN '(' + CASE WHEN c.max_length = -1 
-                                                THEN 'MAX' 
-                                                ELSE CAST(c.max_length AS VARCHAR) 
-                                            END + ')'
-                                        ELSE ''
-                                    END +
-                                    CASE WHEN c.is_nullable = 1 THEN ' NULL' ELSE ' NOT NULL' END
-                                FROM sys.table_types tt2
-                                INNER JOIN sys.columns c ON c.object_id = tt2.type_table_object_id
-                                INNER JOIN sys.types tp ON c.user_type_id = tp.user_type_id
-                                WHERE tt2.user_type_id = t.user_type_id
-                                ORDER BY c.column_id
-                                FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 2, '') + ')'
-                        FROM sys.table_types tt
-                        WHERE tt.user_type_id = t.user_type_id
-                    )
-                    ELSE 
-                        'CREATE TYPE [' + SCHEMA_NAME(t.schema_id) + '].[' + t.name + '] FROM ' +
-                        CASE 
-                            WHEN t.is_table_type = 0 THEN
-                                base_type.name +
-                                CASE 
-                                    WHEN t.max_length = -1 THEN '(MAX)'
-                                    WHEN t.max_length > 0 AND base_type.name IN ('varchar', 'nvarchar', 'char', 'nchar', 'binary', 'varbinary')
-                                        THEN '(' + CAST(t.max_length AS VARCHAR) + ')'
-                                    WHEN base_type.name IN ('decimal', 'numeric')
-                                        THEN '(' + CAST(t.precision AS VARCHAR) + ',' + CAST(t.scale AS VARCHAR) + ')'
-                                    ELSE ''
-                                END
-                            ELSE ''
-                        END
-                END as Definition
-            FROM sys.types t
-            LEFT JOIN sys.types base_type ON t.system_type_id = base_type.user_type_id
-            WHERE t.is_user_defined = 1
-                AND t.schema_id <> SCHEMA_ID('sys')
-            ORDER BY t.name";
+        var userDefinedTypes = context.UserDefinedTypes
+            .Where(udt => udt.Name == database)
+            .OrderBy(udt => udt.ObjectName);
 
-        var dbObjects = await connection.QueryAsync<DatabaseInfo>(query);
-
-        foreach (var obj in dbObjects)
+        foreach (var udt in userDefinedTypes)
         {
-            if (!string.IsNullOrEmpty(obj.Definition))
+            if (!string.IsNullOrEmpty(udt.Definition))
             {
-                schemaScript.AppendLine($"-- User-Defined Type: {obj.ObjectName}");
-                schemaScript.AppendLine($"IF TYPE_ID(N'{obj.ObjectName}') IS NOT NULL");
-                schemaScript.AppendLine($"    DROP TYPE [{obj.ObjectName}]");
+                schemaScript.AppendLine($"-- User-Defined Type: {udt.ObjectName}");
+                schemaScript.AppendLine($"IF TYPE_ID(N'{udt.ObjectName}') IS NOT NULL");
+                schemaScript.AppendLine($"    DROP TYPE [{udt.ObjectName}]");
                 schemaScript.AppendLine("GO");
-                schemaScript.AppendLine(obj.Definition);
+                schemaScript.AppendLine(udt.Definition);
                 schemaScript.AppendLine("GO");
+                schemaScript.AppendLine();
             }
         }
     }
 
-    private static async Task GenerateStoredProcedures(SqlConnection connection, StringBuilder schemaScript)
+    private static Task GenerateUserDefineTypesRolePermission(StringBuilder schemaScript, GenerateContext context, string database)
     {
-        var query = @"
-                    SELECT 
-                        DB_NAME() as Name,
-                        o.name as ObjectName,
-                        o.type as ObjectType,
-                        OBJECT_DEFINITION(o.object_id) as Definition
-                    FROM sys.objects o
-                    WHERE o.type = 'P'
-                      AND o.is_ms_shipped = 0
-                      AND NOT EXISTS (
-                          SELECT 1
-                          FROM sys.sql_expression_dependencies d
-                          WHERE d.referencing_id = o.object_id
-                            AND (
-                                d.referenced_id IN (
-                                    SELECT object_id 
-                                    FROM sys.objects 
-                                    WHERE type = 'P'
-                                )
-                                OR d.referenced_server_name IS NOT NULL
-                            )
-                      )
-                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%EXEC %'
-                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%sp_executesql%'
-                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%OPENQUERY%'
-                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%OPENROWSET%'
-                      AND OBJECT_DEFINITION(o.object_id) NOT LIKE '%OPENDATASOURCE%'
-                    ";
+        var udtWithRoles = context.UserDefinedTypeWithRoles
+            .Where(udt => udt.DatabaseName == database)
+            .ToList();
 
-        var dbObjects = await connection.QueryAsync<DatabaseInfo>(query);
-
-        foreach (var obj in dbObjects)
+        if (udtWithRoles.Any())
         {
-            if (!string.IsNullOrEmpty(obj.Definition))
+            schemaScript.AppendLine($"-- User-Defined Type Role Permissions for {database}");
+            foreach (var udt in udtWithRoles)
             {
-                var text = new StringBuilder();
-                text.AppendLine($"-- Stored Procedure: {obj.ObjectName}");
-                text.AppendLine(obj.Definition);
-                text.AppendLine("GO");
-                text.AppendLine();
-                schemaScript.AppendLine(text.ToString());
+                if (!string.IsNullOrEmpty(udt.RoleNames))
+                {
+                    foreach (var role in udt.RoleNamesList)
+                    {
+                        schemaScript.AppendLine($"GRANT EXECUTE ON TYPE::[{udt.TypeName}] TO [{role}]");
+                        schemaScript.AppendLine("GO");
+                    }
+                }
+            }
+            schemaScript.AppendLine();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static async Task GenerateStoredProcedures(SqlConnection connection, StringBuilder schemaScript, GenerateContext context, string database)
+    {
+        schemaScript.AppendLine($"USE [{database}]");
+        schemaScript.AppendLine("GO");
+        schemaScript.AppendLine();
+
+        schemaScript.AppendLine($"-- AllStoreProceduresCount={context.StoreProcedures.Count}");
+        schemaScript.AppendLine($"-- {database} AllStoreProceduresCount={context.StoreProcedures.Count(x => x.DatabaseName==database)}");
+
+        await GenerateIndependentStoredProcedures(schemaScript, context, database);
+        await GenerateDependentStoredProcedures(schemaScript, context, database);
+    }
+
+    /// <summary>
+    /// Generate independent stored procedures (those that don't depend on other stored procedures)
+    /// </summary>
+    private static Task GenerateIndependentStoredProcedures(StringBuilder schemaScript, GenerateContext context, string database)
+    {
+        Console.WriteLine($"Generating independent stored procedures for database {database}...");
+        var databaseSps = context.IndependentStoreProcedures.Where(sp => sp.DatabaseName == database);
+        
+        foreach (var sp in databaseSps)
+        {
+            if (!string.IsNullOrEmpty(sp.Definition))
+            {
+                AppendStoredProcedureDefinition(schemaScript, sp, isIndependent: true);
             }
         }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Generate dependent stored procedures (those that depend on other stored procedures)
+    /// </summary>
+    private static Task GenerateDependentStoredProcedures(StringBuilder schemaScript, GenerateContext context, string database)
+    {
+        Console.WriteLine($"Generating dependent stored procedures for database {database}...");
+        var independentSpNames = GetIndependentStoredProcedureNames(context, database);
+        var dependentSps = GetDependentStoredProcedures(context, independentSpNames, database);
+
+        foreach (var sp in dependentSps)
+        {
+            if (!string.IsNullOrEmpty(sp.Definition))
+            {
+                AppendStoredProcedureDefinition(schemaScript, sp, isIndependent: false);
+            }
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// 取得獨立預存程序的完整名稱清單
+    /// </summary>
+    private static HashSet<string> GetIndependentStoredProcedureNames(GenerateContext context, string database)
+    {
+        return context.IndependentStoreProcedures
+            .Where(sp => sp.DatabaseName == database)
+            .Select(sp => $"{sp.DatabaseName}.{sp.StoreProcedureName}")
+            .ToHashSet();
+    }
+
+    /// <summary>
+    /// 取得相依的預存程序清單
+    /// </summary>
+    private static IEnumerable<StoreProcedureInfo> GetDependentStoredProcedures(
+        GenerateContext context, 
+        HashSet<string> independentSpNames,
+        string database)
+    {
+        return context.StoreProcedures
+            .Where(sp => sp.DatabaseName == database && 
+                        !independentSpNames.Contains($"{sp.DatabaseName}.{sp.StoreProcedureName}"));
+    }
+
+    /// <summary>
+    /// 將預存程序定義加入到腳本中
+    /// </summary>
+    private static void AppendStoredProcedureDefinition(
+        StringBuilder schemaScript, 
+        StoreProcedureInfo sp,
+        bool isIndependent)
+    {
+        var text = new StringBuilder();
+        var spType = isIndependent ? "Independent" : "Dependent";
+        text.AppendLine($"-- {spType} Stored Procedure: [{sp.DatabaseName}].[{sp.StoreProcedureName}]");
+        text.AppendLine(sp.Definition);
+        text.AppendLine("GO");
+        text.AppendLine();
+        schemaScript.AppendLine(text.ToString());
     }
 
     private static async Task GenerateViews(SqlConnection connection, StringBuilder schemaScript)
@@ -438,83 +500,128 @@ class Program
         return passwordLine.Split('=')[1].Trim();
     }
 
-    private static void GenerateLoginUsers(StringBuilder schemaScript, GenerateContext context)
+    private static void GenerateLoginUsers(StringBuilder schemaScript, GenerateContext context, string database)
     {
-        var password = GetPasswordFromEnv();
-        GenerateCreateLogins(schemaScript, context.LoginNames, password);
-        GenerateCreateDatabaseRoles(schemaScript, context);
-        GenerateAddRoleMembers(schemaScript, context.LoginRoles);
+        GenerateCreateLogins(schemaScript, context.LoginNames.Select(l => l.LoginName).ToList(), database);
+        GenerateCreateDatabaseRoles(schemaScript, context, database);
+        GenerateAddRoleMembers(schemaScript, context.LoginRoles, database);
     }
 
-    private static void GenerateCreateLogins(StringBuilder schemaScript, List<string> loginNames, string password)
+    private static void GenerateCreateDatabaseRoles(StringBuilder schemaScript, GenerateContext context,
+        string database)
     {
-        var createLoginSql = new StringBuilder();
+        var dbRoles = context.DatabaseRoleNames
+            .Where(x=>x.DatabaseName == database)
+            .ToList();
+
+        schemaScript.AppendLine($"-- Create database roles for {database}");
+        schemaScript.AppendLine($"USE [{database}]");
+        schemaScript.AppendLine("GO");
+
+        foreach (var role in dbRoles)
+        {
+            schemaScript.AppendLine($@"
+IF NOT EXISTS (SELECT name FROM sys.database_principals WHERE name = '{role.RoleName}' AND type = 'R')
+BEGIN
+    CREATE ROLE [{role.RoleName}]
+END
+GO");
+        }
+        schemaScript.AppendLine();
+    }
+
+    private static void GenerateCreateLogins(StringBuilder schemaScript, List<string> loginNames, string database)
+    {
+        var passwordFromEnv = GetPasswordFromEnv();
         foreach (var loginName in loginNames)
         {
-            createLoginSql.AppendLine($@"
--- Create Login: {loginName}
-IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = N'{loginName}')
+            schemaScript.AppendLine($@"
+-- Create login {loginName}
+IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = '{loginName}')
 BEGIN
-    CREATE LOGIN [{loginName}] WITH PASSWORD = N'{password}', DEFAULT_DATABASE = [master], CHECK_EXPIRATION = OFF, CHECK_POLICY = OFF
+    CREATE LOGIN [{loginName}] WITH PASSWORD = '{passwordFromEnv}'
 END
 GO
-");
-        }
-        schemaScript.AppendLine(createLoginSql.ToString());
-    }
 
-    private static void GenerateCreateDatabaseRoles(StringBuilder schemaScript, GenerateContext context)
-    {
-        var createRoleSql = new StringBuilder();
-        foreach (var roleName in context.DatabaseRoleNames)
-        {
-            createRoleSql.AppendLine($@"
--- Create Role: {roleName}
-IF NOT EXISTS (SELECT name FROM sys.database_principals WHERE name = N'{roleName}' AND type = 'R')
+-- Create database users for the login
+");
+            schemaScript.AppendLine($@"
+USE [{database}]
+GO
+IF NOT EXISTS (SELECT name FROM sys.database_principals WHERE name = '{loginName}')
 BEGIN
-    CREATE ROLE [{roleName}]
+    CREATE USER [{loginName}] FOR LOGIN [{loginName}]
 END
-GO
-");
+GO");
+            schemaScript.AppendLine();
         }
-        schemaScript.AppendLine(createRoleSql.ToString());
     }
 
-    private static void GenerateAddRoleMembers(StringBuilder schemaScript, List<LoginRoleInfo> loginRoles)
+    private static void GenerateAddRoleMembers(StringBuilder schemaScript, List<LoginRoleInfo> loginRoles,
+        string database)
     {
-        var addRoleSql = new StringBuilder();
-        foreach (var loginRole in loginRoles)
+        var dbRoles = loginRoles
+            .Where(x=>x.DatabaseName == database)
+            .ToList();
+
+        schemaScript.AppendLine($"-- Add role members for {database}");
+        schemaScript.AppendLine($"USE [{database}]");
+        schemaScript.AppendLine("GO");
+
+        foreach (var role in dbRoles)
         {
-            if (!string.IsNullOrEmpty(loginRole.RoleName))
-            {
-                addRoleSql.AppendLine($@"
--- Add Role: {loginRole.RoleName} to {loginRole.LoginName}
-ALTER SERVER ROLE [{loginRole.RoleName}] ADD MEMBER [{loginRole.LoginName}]
-GO
-");
-            }
+            schemaScript.AppendLine($"ALTER ROLE [{role.RoleName}] ADD MEMBER [{role.LoginName}]");
+            schemaScript.AppendLine("GO");
         }
-        schemaScript.AppendLine(addRoleSql.ToString());
+        schemaScript.AppendLine();
     }
 
     private static void GenerateRolePermissions(StringBuilder schemaScript, GenerateContext context)
     {
-        var grantSql = new StringBuilder();
-        foreach (var permission in context.DatabasePermissions)
+        var permissions = context.StoreProcedurePermissions
+            .GroupBy(p => p.DatabaseName)
+            .OrderBy(g => g.Key);
+
+        foreach (var dbPermissions in permissions)
         {
-            grantSql.AppendLine($@"
--- Grant {permission.PermissionName} on {permission.ObjectName} to {permission.RoleName}
-GRANT {permission.PermissionName} ON [{permission.ObjectName}] TO [{permission.RoleName}]
-GO
-");
+            schemaScript.AppendLine($"-- Permissions for database {dbPermissions.Key}");
+            schemaScript.AppendLine($"USE [{dbPermissions.Key}]");
+            schemaScript.AppendLine("GO");
+
+            foreach (var permission in dbPermissions)
+            {
+                schemaScript.AppendLine($"GRANT {permission.PermissionName} ON [{permission.StoreProcedureName}] TO [{permission.RoleName}]");
+                schemaScript.AppendLine("GO");
+            }
+            schemaScript.AppendLine();
         }
-        schemaScript.AppendLine(grantSql.ToString());
     }
 
-    private static async Task SaveSchemaScript(string schemaScript, string targetPath)
+    private static void GenerateTableConstraints(StringBuilder schemaScript, GenerateContext context, string database)
     {
-        string filePath = Path.Combine(targetPath, "CreateDatabase.sql");
-        await File.WriteAllTextAsync(filePath, schemaScript);
-        Console.WriteLine($"資料庫結構已成功導出到 {filePath}");
+        var constraints = context.TableConstraints
+            .Where(c => c.DatabaseName == database)
+            .GroupBy(c => c.TableName)
+            .OrderBy(g => g.Key);
+
+        foreach (var tableGroup in constraints)
+        {
+            schemaScript.AppendLine($"-- Constraints for Table: {tableGroup.Key}");
+            foreach (var constraint in tableGroup.OrderBy(c => c.ConstraintName))
+            {
+                if (string.IsNullOrEmpty(constraint.ColumnName))
+                {
+                    // Check constraint
+                    schemaScript.AppendLine($"ALTER TABLE [{tableGroup.Key}] ADD CONSTRAINT [{constraint.ConstraintName}] CHECK {constraint.ConstraintDefine}");
+                }
+                else
+                {
+                    // Default constraint
+                    schemaScript.AppendLine($"ALTER TABLE [{tableGroup.Key}] ADD CONSTRAINT [{constraint.ConstraintName}] DEFAULT {constraint.ConstraintDefine} FOR [{constraint.ColumnName}]");
+                }
+                schemaScript.AppendLine("GO");
+                schemaScript.AppendLine();
+            }
+        }
     }
 }

@@ -1,22 +1,26 @@
-param(
-    [Parameter(Mandatory=$true)]
-    [string]$SqlServerInstance
-)
+Write-Host "Starting database cloning process..."
+dotnet build
 
-Write-Host "開始執行資料庫克隆流程..."
+# Execute CloneSqlServer program
+Write-Host "Exporting database structure..."
+.\CloneSqlServer\bin\Debug\net9.0\CloneSqlServer.exe devdb.coreop.net "LocalSqlServer"
 
-# 執行 CloneSqlServer 程式
-Write-Host "正在導出資料庫結構..."
-.\CloneSqlServer\bin\Debug\net9.0\CloneSqlServer.exe $SqlServerInstance "LocalSqlServer"
-
-# 檢查是否成功生成 SQL 檔案
+# Check if SQL file was successfully generated
 if (!(Test-Path "LocalSqlServer/CreateDatabase.sql")) {
-    Write-Host "錯誤：未能生成 CreateDatabase.sql 檔案"
+    Write-Host "Error: Failed to generate CreateDatabase.sql file"
     exit 1
 }
 
-# 建立 Docker 映像
-Write-Host "正在建立 Docker 映像..."
-docker build -t sbo-sql-server .
+# Check if SQL_SA_PASSWORD environment variable exists
+if ([string]::IsNullOrEmpty($env:SQL_SA_PASSWORD)) {
+    Write-Host "Error: SQL_SA_PASSWORD environment variable is not set"
+    exit 1
+}
 
-Write-Host "完成！Docker 映像 'sbo-sql-server' 已建立" 
+# Build Docker image
+Write-Host "Building Docker image..."
+Set-Location LocalSqlServer
+docker build --build-arg SA_PASSWORD=$env:SQL_SA_PASSWORD -t local-sql-server .
+
+Set-Location ..
+Write-Host "Done! Docker image 'local-sql-server' has been created"
