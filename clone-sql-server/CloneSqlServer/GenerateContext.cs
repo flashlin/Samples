@@ -11,6 +11,18 @@ public class StoreProcedureInfo
     public string Definition { get; set; } = string.Empty;
 }
 
+public class ForeignKeyInfo
+{
+    public string DatabaseName { get; set; } = string.Empty;
+    public string TableName { get; set; } = string.Empty;
+    public string ForeignKeyName { get; set; } = string.Empty;
+    public string ReferencedTableName { get; set; } = string.Empty;
+    public string ColumnNames { get; set; } = string.Empty;
+    public string ReferencedColumnNames { get; set; } = string.Empty;
+    public string DeleteAction { get; set; } = string.Empty;
+    public string UpdateAction { get; set; } = string.Empty;
+}
+
 public class LoginRoleInfo
 {
     public string DatabaseName { get; set; } = string.Empty;
@@ -91,6 +103,7 @@ public class GenerateContext
     public List<UserDefinedTypeInfo> UserDefinedTypes { get; set; } = [];
     public List<UserDefinedTypeWithRoleInfo> UserDefinedTypeWithRoles { get; set; } = [];
     public List<ConstraintsInfo> TableConstraints { get; set; } = [];
+    public List<ForeignKeyInfo> ForeignKeys { get; set; } = [];
     
 
     /// <summary>
@@ -255,6 +268,9 @@ public class GenerateContext
             Console.WriteLine($"Fetch Table Constraints for {database}...");
             var tableNames = tables.Select(t => t.ObjectName!).ToList();
             context.TableConstraints.AddRange(await GetTableConstraints(connection, tableNames));
+
+            Console.WriteLine($"Fetch Foreign Keys for {database}...");
+            context.ForeignKeys.AddRange(await GetAllForeignKeys(connection));
         }
         
         return context;
@@ -607,6 +623,55 @@ public class GenerateContext
             ORDER BY TableName, ConstraintName";
 
         var result = await connection.QueryAsync<ConstraintsInfo>(query, new { TableNames = tableNames });
+        return result.ToList();
+    }
+
+    /// <summary>
+    /// 取得所有資料庫的外鍵約束
+    /// </summary>
+    /// <param name="connection">資料庫連線</param>
+    /// <returns>外鍵約束清單</returns>
+    private static async Task<List<ForeignKeyInfo>> GetAllForeignKeys(SqlConnection connection)
+    {
+        var query = @"
+            SELECT 
+                DB_NAME() AS DatabaseName,
+                OBJECT_NAME(fk.parent_object_id) AS TableName,
+                fk.name AS ForeignKeyName,
+                OBJECT_NAME(fk.referenced_object_id) AS ReferencedTableName,
+                STUFF((
+                    SELECT ', ' + c.name
+                    FROM sys.foreign_key_columns fkc
+                    INNER JOIN sys.columns c ON fkc.parent_object_id = c.object_id AND fkc.parent_column_id = c.column_id
+                    WHERE fkc.constraint_object_id = fk.object_id
+                    ORDER BY fkc.constraint_column_id
+                    FOR XML PATH('')
+                ), 1, 2, '') AS ColumnNames,
+                STUFF((
+                    SELECT ', ' + c.name
+                    FROM sys.foreign_key_columns fkc
+                    INNER JOIN sys.columns c ON fkc.referenced_object_id = c.object_id AND fkc.referenced_column_id = c.column_id
+                    WHERE fkc.constraint_object_id = fk.object_id
+                    ORDER BY fkc.constraint_column_id
+                    FOR XML PATH('')
+                ), 1, 2, '') AS ReferencedColumnNames,
+                CASE fk.delete_referential_action
+                    WHEN 0 THEN 'NO_ACTION'
+                    WHEN 1 THEN 'CASCADE'
+                    WHEN 2 THEN 'SET_NULL'
+                    WHEN 3 THEN 'SET_DEFAULT'
+                END AS DeleteAction,
+                CASE fk.update_referential_action
+                    WHEN 0 THEN 'NO_ACTION'
+                    WHEN 1 THEN 'CASCADE'
+                    WHEN 2 THEN 'SET_NULL'
+                    WHEN 3 THEN 'SET_DEFAULT'
+                END AS UpdateAction
+            FROM sys.foreign_keys fk
+            WHERE fk.is_ms_shipped = 0
+            ORDER BY TableName, ForeignKeyName";
+
+        var result = await connection.QueryAsync<ForeignKeyInfo>(query);
         return result.ToList();
     }
 }
