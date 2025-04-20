@@ -1,8 +1,6 @@
 # Use SQL Server 2022 image
 FROM mcr.microsoft.com/mssql/server:2022-latest
 
-ARG SQL_SA_PASSWORD
-
 # Switch to root to create directories
 USER root
 
@@ -13,6 +11,7 @@ WORKDIR /usr/src/app
 ENV ACCEPT_EULA=Y
 ENV MSSQL_PID=Developer
 ENV MSSQL_TCP_PORT=1433
+ENV MSSQL_SA_PASSWORD=YourStrongPassw0rd!
 
 # Create a config directory
 RUN mkdir -p /usr/config
