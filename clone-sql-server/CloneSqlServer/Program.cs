@@ -5,7 +5,7 @@ using Dapper;
 
 public class SqlBoxerEnv
 {
-    public string SqlSaPassword { get; set; }
+    public string SqlSaPassword { get; set; } = string.Empty;
 
     public static SqlBoxerEnv LoadFromEnvironment()
     {
@@ -174,7 +174,7 @@ class Program
         }
     }
 
-    private static async Task GenerateUserDefineTypes(SqlConnection connection, StringBuilder schemaScript, GenerateContext context, string database)
+    private static Task GenerateUserDefineTypes(SqlConnection connection, StringBuilder schemaScript, GenerateContext context, string database)
     {
         var userDefinedTypes = context.UserDefinedTypes
             .Where(udt => udt.Name == database)
@@ -192,7 +192,8 @@ class Program
                 schemaScript.AppendLine("GO");
                 schemaScript.AppendLine();
             }
-        }
+        }       
+        return Task.CompletedTask;
     }
 
     private static Task GenerateUserDefineTypesRolePermission(StringBuilder schemaScript, GenerateContext context, string database)
@@ -497,6 +498,10 @@ class Program
 
         var envContent = File.ReadAllLines(envPath);
         var passwordLine = envContent.FirstOrDefault(line => line.StartsWith("PASSWORD="));
+        if (passwordLine == null)
+        {
+            throw new Exception($"Please set the password in the .env file");
+        }
         return passwordLine.Split('=')[1].Trim();
     }
 
