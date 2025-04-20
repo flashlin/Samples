@@ -1,6 +1,8 @@
 # Use SQL Server 2022 image
 FROM mcr.microsoft.com/mssql/server:2022-latest
 
+ARG SQL_SA_PASSWORD
+
 # Switch to root to create directories
 USER root
 

@@ -7,7 +7,7 @@
 sleep 30s
 
 # Run the initialization script
-/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -i /usr/config/init.sql
+/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SQL_SA_PASSWORD -i /usr/config/init.sql
 
 # Keep container running
 tail -f /dev/null 

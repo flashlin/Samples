@@ -10,7 +10,7 @@ namespace TestProject.Steps
     public class GenerateContextSteps
     {
         private GenerateContext? _context;
-        private string _connectionString = "Server=127.0.0.1,1433;Database=master;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;";
+        private string _connectionString = "Server=127.0.0.1,1433;Database=master;User Id=sa;Password=YourStrongPassw0rd!;TrustServerCertificate=True;";
 
         [Given(@"I have connected to SQL Server")]
         public async Task GivenIHaveConnectedToSQLServer()
