@@ -33,12 +33,43 @@ namespace TestProject.Steps
                 tableSchemas.Should().NotBeNull();
                 tableSchemas.Should().NotBeEmpty();
                 
-                foreach (var schema in tableSchemas)
-                {
-                    schema.TableName.Should().NotBeNullOrEmpty();
-                    schema.ColumnName.Should().NotBeNullOrEmpty();
-                    schema.DataType.Should().NotBeNullOrEmpty();
-                }
+                // 驗證 Categories 表格
+                var categoriesSchema = tableSchemas.Where(s => s.TableName == "Categories").ToList();
+                categoriesSchema.Should().NotBeEmpty();
+                categoriesSchema.Should().Contain(s => s.ColumnName == "CategoryId" && s.DataType == "int" && s.IsIdentity);
+                categoriesSchema.Should().Contain(s => s.ColumnName == "CategoryName" && s.DataType == "nvarchar" && s.CharacterMaxLength == 50 && !s.IsNullable);
+                categoriesSchema.Should().Contain(s => s.ColumnName == "CreatedDate" && s.DataType == "datetime" && s.IsNullable);
+
+                // 驗證 Products 表格
+                var productsSchema = tableSchemas.Where(s => s.TableName == "Products").ToList();
+                productsSchema.Should().NotBeEmpty();
+                productsSchema.Should().Contain(s => s.ColumnName == "ProductId" && s.DataType == "int" && s.IsIdentity);
+                productsSchema.Should().Contain(s => s.ColumnName == "CategoryId" && s.DataType == "int" && !s.IsNullable);
+                productsSchema.Should().Contain(s => s.ColumnName == "ProductName" && s.DataType == "nvarchar" && s.CharacterMaxLength == 100 && !s.IsNullable);
+                productsSchema.Should().Contain(s => s.ColumnName == "UnitPrice" && s.DataType == "decimal" && s.NumericPrecision == 18 && s.NumericScale == 2 && s.IsNullable);
+                productsSchema.Should().Contain(s => s.ColumnName == "CreatedDate" && s.DataType == "datetime" && s.IsNullable);
+
+                // 驗證 OrderDetails 表格
+                var orderDetailsSchema = tableSchemas.Where(s => s.TableName == "OrderDetails").ToList();
+                orderDetailsSchema.Should().NotBeEmpty();
+                orderDetailsSchema.Should().Contain(s => s.ColumnName == "OrderDetailId" && s.DataType == "int" && s.IsIdentity);
+                orderDetailsSchema.Should().Contain(s => s.ColumnName == "ProductId" && s.DataType == "int" && !s.IsNullable);
+                orderDetailsSchema.Should().Contain(s => s.ColumnName == "Quantity" && s.DataType == "int" && !s.IsNullable);
+                orderDetailsSchema.Should().Contain(s => s.ColumnName == "OrderDate" && s.DataType == "datetime" && s.IsNullable);
+
+                // 驗證 LogEvents 表格
+                var logEventsSchema = tableSchemas.Where(s => s.TableName == "LogEvents").ToList();
+                logEventsSchema.Should().NotBeEmpty();
+                logEventsSchema.Should().Contain(s => s.ColumnName == "LogId" && s.DataType == "int" && s.IsIdentity);
+                logEventsSchema.Should().Contain(s => s.ColumnName == "EventType" && s.DataType == "nvarchar" && s.CharacterMaxLength == 50 && !s.IsNullable);
+                logEventsSchema.Should().Contain(s => s.ColumnName == "EventMessage" && s.DataType == "nvarchar" && s.CharacterMaxLength == -1 && s.IsNullable);
+                logEventsSchema.Should().Contain(s => s.ColumnName == "CreatedDate" && s.DataType == "datetime" && s.IsNullable);
+
+                // 驗證 OrderDetailsType 表格類型
+                var orderDetailsTypeSchema = tableSchemas.Where(s => s.TableName == "OrderDetailsType").ToList();
+                orderDetailsTypeSchema.Should().NotBeEmpty();
+                orderDetailsTypeSchema.Should().Contain(s => s.ColumnName == "ProductId" && s.DataType == "int" && s.IsNullable);
+                orderDetailsTypeSchema.Should().Contain(s => s.ColumnName == "Quantity" && s.DataType == "int" && s.IsNullable);
             }
         }
     }
