@@ -28,5 +28,3 @@ echo "Container should be ready now. You can connect to SQL Server at localhost,
 echo "SA Password: $SQL_SA_PASSWORD"
 
 docker logs $CONTAINER_NAME
-
-./build.sh
