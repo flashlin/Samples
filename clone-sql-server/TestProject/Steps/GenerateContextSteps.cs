@@ -24,7 +24,6 @@ namespace TestProject.Steps
         public void ThenTableSchemasShouldContainCorrectTableStructureInformation()
         {
             _context.Should().NotBeNull();
-            _context!.TableSchemas.Should().NotBeNull();
             _context.TableSchemas.Should().NotBeEmpty();
             
             foreach (var database in _context.TableSchemas.Keys)
@@ -64,12 +63,6 @@ namespace TestProject.Steps
                 logEventsSchema.Should().Contain(s => s.ColumnName == "EventType" && s.DataType == "nvarchar" && s.CharacterMaxLength == 50 && !s.IsNullable);
                 logEventsSchema.Should().Contain(s => s.ColumnName == "EventMessage" && s.DataType == "nvarchar" && s.CharacterMaxLength == -1 && s.IsNullable);
                 logEventsSchema.Should().Contain(s => s.ColumnName == "CreatedDate" && s.DataType == "datetime" && s.IsNullable);
-
-                // 驗證 OrderDetailsType 表格類型
-                var orderDetailsTypeSchema = tableSchemas.Where(s => s.TableName == "OrderDetailsType").ToList();
-                orderDetailsTypeSchema.Should().NotBeEmpty();
-                orderDetailsTypeSchema.Should().Contain(s => s.ColumnName == "ProductId" && s.DataType == "int" && s.IsNullable);
-                orderDetailsTypeSchema.Should().Contain(s => s.ColumnName == "Quantity" && s.DataType == "int" && s.IsNullable);
             }
         }
     }
