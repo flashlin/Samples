@@ -4,6 +4,13 @@ FROM mcr.microsoft.com/mssql/server:2022-latest
 # Switch to root to create directories
 USER root
 
+# Install mssql-tools
+RUN apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev && \
+    echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Create work directory
 WORKDIR /usr/src/app
 
@@ -12,6 +19,7 @@ ENV ACCEPT_EULA=Y
 ENV MSSQL_PID=Developer
 ENV MSSQL_TCP_PORT=1433
 ENV MSSQL_SA_PASSWORD=YourStrongPassw0rd!
+ENV PATH="/opt/mssql-tools/bin:${PATH}"
 
 # Create a config directory
 RUN mkdir -p /usr/config
