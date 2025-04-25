@@ -58,11 +58,30 @@ class MainActivity : AppCompatActivity() {
                 for (j in 0..8) {
                     val cell = cells[i][j]
                     cell.text = if (board[i][j] != 0) board[i][j].toString() else ""
-                    cell.textSize = 20f
+                    cell.textSize = 24f
                     cell.gravity = android.view.Gravity.CENTER
-                    cell.setBackgroundResource(android.R.drawable.edit_text)
+                    
+                    // 設置背景顏色
+                    if (board[i][j] != 0) {
+                        // 原始數字使用暗灰色背景
+                        cell.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
+                    } else {
+                        // 可編輯的格子使用白色背景
+                        cell.setBackgroundResource(android.R.drawable.edit_text)
+                    }
+                    
+                    // 設置格子大小
+                    val params = android.widget.GridLayout.LayoutParams().apply {
+                        width = 0
+                        height = 0
+                        columnSpec = android.widget.GridLayout.spec(j, 1f)
+                        rowSpec = android.widget.GridLayout.spec(i, 1f)
+                        setMargins(2, 2, 2, 2)
+                    }
+                    cell.layoutParams = params
+                    
                     cell.setOnClickListener {
-                        if (selectedNumber != null) {
+                        if (selectedNumber != null && board[i][j] == 0) {
                             game.setNumber(i, j, selectedNumber!!)
                             updateBoard()
                             selectedNumber = null
