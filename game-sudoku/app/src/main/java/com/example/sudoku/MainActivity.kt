@@ -71,11 +71,19 @@ class MainActivity : AppCompatActivity() {
                     }
                     
                     // 檢查數字是否合法
-                    if (board[i][j] != 0 && !game.isOriginalNumber(i, j)) {
-                        if (!game.isValid(i, j, board[i][j])) {
-                            cell.setTextColor(android.graphics.Color.RED)
-                        } else {
+                    if (board[i][j] != 0) {
+                        if (game.isOriginalNumber(i, j)) {
                             cell.setTextColor(android.graphics.Color.BLACK)
+                        } else {
+                            // 檢查當前數字是否合法
+                            val currentNum = board[i][j]
+                            // 暫時將當前數字設為0，以便檢查其他位置的數字
+                            board[i][j] = 0
+                            val isValid = game.isValid(i, j, currentNum)
+                            // 恢復當前數字
+                            board[i][j] = currentNum
+                            
+                            cell.setTextColor(if (isValid) android.graphics.Color.BLACK else android.graphics.Color.RED)
                         }
                     } else {
                         cell.setTextColor(android.graphics.Color.BLACK)
