@@ -11,6 +11,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var game: SudokuGame
     private lateinit var cells: Array<Array<android.widget.TextView>>
     private var selectedNumber: Int? = null
+    private var selectedCell: Pair<Int, Int>? = null
 
     companion object {
         private const val TAG = "SudokuGame"
@@ -107,6 +108,10 @@ class MainActivity : AppCompatActivity() {
                                 updateBoard()
                                 selectedNumber = null
                                 updateNumberButtonsState()
+                            } else {
+                                // 如果沒有選中數字，則清除當前格子的數字
+                                game.setNumber(i, j, 0)
+                                updateBoard()
                             }
                         }
                     }
@@ -132,6 +137,13 @@ class MainActivity : AppCompatActivity() {
             button.setOnClickListener {
                 if (index == 9) { // 清除按鈕
                     selectedNumber = null
+                    // 清除當前選中的格子
+                    selectedCell?.let { (row, col) ->
+                        if (!game.isOriginalNumber(row, col)) {
+                            game.setNumber(row, col, 0)
+                            updateBoard()
+                        }
+                    }
                 } else {
                     selectedNumber = index + 1
                 }
@@ -150,9 +162,9 @@ class MainActivity : AppCompatActivity() {
 
         numberButtons.forEachIndexed { index, button ->
             if (index == 9) { // 清除按鈕
-                button.isEnabled = selectedNumber != null
+                button.isEnabled = true
             } else {
-                button.isEnabled = selectedNumber != index + 1
+                button.isEnabled = true
             }
         }
     }
