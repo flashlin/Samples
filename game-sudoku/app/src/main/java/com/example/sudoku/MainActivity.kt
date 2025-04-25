@@ -163,8 +163,18 @@ class MainActivity : AppCompatActivity() {
         numberButtons.forEachIndexed { index, button ->
             if (index == 9) { // 清除按鈕
                 button.isEnabled = true
+                button.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
             } else {
                 button.isEnabled = true
+                if (selectedNumber == index + 1) {
+                    // 選中的數字按鈕變成藍色
+                    button.setBackgroundColor(android.graphics.Color.parseColor("#2196F3"))
+                    button.setTextColor(android.graphics.Color.WHITE)
+                } else {
+                    // 其他按鈕維持原本顏色
+                    button.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
+                    button.setTextColor(android.graphics.Color.BLACK)
+                }
             }
         }
     }
