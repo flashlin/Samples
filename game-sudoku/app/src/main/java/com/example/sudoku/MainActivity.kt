@@ -32,6 +32,20 @@ class MainActivity : AppCompatActivity() {
             setupGame()
             setupNumberButtons()
             setupListeners()
+            
+            // 初始化按鈕顏色
+            val numberButtons = listOf(
+                binding.button1, binding.button2, binding.button3,
+                binding.button4, binding.button5, binding.button6,
+                binding.button7, binding.button8, binding.button9,
+                binding.buttonClear
+            )
+            
+            numberButtons.forEach { button ->
+                button.setBackgroundColor(android.graphics.Color.WHITE)
+                button.setTextColor(android.graphics.Color.BLACK)
+            }
+            
             Log.d(TAG, "Game setup completed")
         } catch (e: Exception) {
             Log.e(TAG, "Error in onCreate: ${e.message}", e)
@@ -169,7 +183,7 @@ class MainActivity : AppCompatActivity() {
                     button.setTextColor(android.graphics.Color.WHITE)
                 } else {
                     // 未選中時維持原本顏色
-                    button.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
+                    button.setBackgroundColor(android.graphics.Color.WHITE)
                     button.setTextColor(android.graphics.Color.BLACK)
                 }
             } else {
@@ -179,7 +193,7 @@ class MainActivity : AppCompatActivity() {
                     button.setTextColor(android.graphics.Color.WHITE)
                 } else {
                     // 其他按鈕維持原本顏色
-                    button.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
+                    button.setBackgroundColor(android.graphics.Color.WHITE)
                     button.setTextColor(android.graphics.Color.BLACK)
                 }
             }
