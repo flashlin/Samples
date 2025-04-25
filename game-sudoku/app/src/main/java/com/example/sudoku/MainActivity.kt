@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
                     cell.gravity = android.view.Gravity.CENTER
                     
                     // 設置背景顏色
-                    if (board[i][j] != 0) {
+                    if (board[i][j] != 0 && game.isOriginalNumber(i, j)) {
                         // 原始數字使用暗灰色背景
                         cell.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
                     } else {
@@ -81,11 +81,14 @@ class MainActivity : AppCompatActivity() {
                     cell.layoutParams = params
                     
                     cell.setOnClickListener {
-                        if (selectedNumber != null && board[i][j] == 0) {
-                            game.setNumber(i, j, selectedNumber!!)
-                            updateBoard()
-                            selectedNumber = null
-                            updateNumberButtonsState()
+                        // 只有原始數字不能更改
+                        if (!game.isOriginalNumber(i, j)) {
+                            if (selectedNumber != null) {
+                                game.setNumber(i, j, selectedNumber!!)
+                                updateBoard()
+                                selectedNumber = null
+                                updateNumberButtonsState()
+                            }
                         }
                     }
                     binding.sudokuGrid.addView(cell)

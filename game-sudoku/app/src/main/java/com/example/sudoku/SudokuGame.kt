@@ -2,12 +2,14 @@ package com.example.sudoku
 
 class SudokuGame {
     private var board = Array(9) { IntArray(9) }
+    private var originalBoard = Array(9) { IntArray(9) }
 
     fun generateNewGame() {
         // 清空棋盤
         for (i in 0..8) {
             for (j in 0..8) {
                 board[i][j] = 0
+                originalBoard[i][j] = 0
             }
         }
 
@@ -15,6 +17,13 @@ class SudokuGame {
         fillDiagonal()
         fillRemaining(0, 3)
         removeNumbers()
+        
+        // 保存原始數字
+        for (i in 0..8) {
+            for (j in 0..8) {
+                originalBoard[i][j] = board[i][j]
+            }
+        }
     }
 
     private fun fillDiagonal() {
@@ -167,5 +176,9 @@ class SudokuGame {
         }
 
         return true
+    }
+
+    fun isOriginalNumber(row: Int, col: Int): Boolean {
+        return originalBoard[row][col] != 0
     }
 } 
