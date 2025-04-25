@@ -105,8 +105,8 @@ class MainActivity : AppCompatActivity() {
                         if (!game.isOriginalNumber(i, j)) {
                             if (selectedNumber != null) {
                                 game.setNumber(i, j, selectedNumber!!)
-                                updateBoard()
                                 selectedNumber = null
+                                updateBoard()
                                 updateNumberButtonsState()
                             } else {
                                 // 如果沒有選中數字，則清除當前格子的數字
@@ -161,8 +161,8 @@ class MainActivity : AppCompatActivity() {
         )
 
         numberButtons.forEachIndexed { index, button ->
+            button.isEnabled = true
             if (index == 9) { // 清除按鈕
-                button.isEnabled = true
                 if (selectedNumber == null) {
                     // 選中清除按鈕時變成藍色
                     button.setBackgroundColor(android.graphics.Color.parseColor("#2196F3"))
@@ -173,7 +173,6 @@ class MainActivity : AppCompatActivity() {
                     button.setTextColor(android.graphics.Color.BLACK)
                 }
             } else {
-                button.isEnabled = true
                 if (selectedNumber == index + 1) {
                     // 選中的數字按鈕變成藍色
                     button.setBackgroundColor(android.graphics.Color.parseColor("#2196F3"))
