@@ -10,6 +10,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var game: SudokuGame
     private lateinit var cells: Array<Array<android.widget.TextView>>
+    private var selectedNumber: Int? = null
 
     companion object {
         private const val TAG = "SudokuGame"
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
             
             game = SudokuGame()
             setupGame()
+            setupNumberButtons()
             setupListeners()
             Log.d(TAG, "Game setup completed")
         } catch (e: Exception) {
@@ -60,7 +62,12 @@ class MainActivity : AppCompatActivity() {
                     cell.gravity = android.view.Gravity.CENTER
                     cell.setBackgroundResource(android.R.drawable.edit_text)
                     cell.setOnClickListener {
-                        showNumberPicker(i, j)
+                        if (selectedNumber != null) {
+                            game.setNumber(i, j, selectedNumber!!)
+                            updateBoard()
+                            selectedNumber = null
+                            updateNumberButtonsState()
+                        }
                     }
                     binding.sudokuGrid.addView(cell)
                 }
@@ -72,23 +79,40 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showNumberPicker(row: Int, col: Int) {
-        try {
-            val numbers = arrayOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "清除")
-            android.app.AlertDialog.Builder(this)
-                .setTitle("選擇數字")
-                .setItems(numbers) { _, which ->
-                    if (which == 9) {
-                        game.setNumber(row, col, 0)
-                    } else {
-                        game.setNumber(row, col, which + 1)
-                    }
-                    updateBoard()
+    private fun setupNumberButtons() {
+        val numberButtons = listOf(
+            binding.button1, binding.button2, binding.button3,
+            binding.button4, binding.button5, binding.button6,
+            binding.button7, binding.button8, binding.button9,
+            binding.buttonClear
+        )
+
+        numberButtons.forEachIndexed { index, button ->
+            button.setOnClickListener {
+                if (index == 9) { // 清除按鈕
+                    selectedNumber = null
+                } else {
+                    selectedNumber = index + 1
                 }
-                .show()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error in showNumberPicker: ${e.message}", e)
-            Toast.makeText(this, "選擇數字失敗: ${e.message}", Toast.LENGTH_LONG).show()
+                updateNumberButtonsState()
+            }
+        }
+    }
+
+    private fun updateNumberButtonsState() {
+        val numberButtons = listOf(
+            binding.button1, binding.button2, binding.button3,
+            binding.button4, binding.button5, binding.button6,
+            binding.button7, binding.button8, binding.button9,
+            binding.buttonClear
+        )
+
+        numberButtons.forEachIndexed { index, button ->
+            if (index == 9) { // 清除按鈕
+                button.isEnabled = selectedNumber != null
+            } else {
+                button.isEnabled = selectedNumber != index + 1
+            }
         }
     }
 
@@ -96,6 +120,8 @@ class MainActivity : AppCompatActivity() {
         try {
             binding.newGameButton.setOnClickListener {
                 setupGame()
+                selectedNumber = null
+                updateNumberButtonsState()
             }
 
             binding.checkButton.setOnClickListener {
