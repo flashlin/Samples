@@ -9,7 +9,6 @@ import com.example.sudoku.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var game: SudokuGame
-    private lateinit var cells: Array<Array<android.widget.TextView>>
     private var selectedNumber: Int? = null
     private var selectedCell: Pair<Int, Int>? = null
 
@@ -25,8 +24,6 @@ class MainActivity : AppCompatActivity() {
             binding = ActivityMainBinding.inflate(layoutInflater)
             setContentView(binding.root)
             Log.d(TAG, "View binding completed")
-
-            cells = Array(9) { Array(9) { android.widget.TextView(this) } }
             
             game = SudokuGame()
             setupGame()
@@ -67,71 +64,12 @@ class MainActivity : AppCompatActivity() {
     private fun updateBoard() {
         try {
             val board = game.getBoard()
-            binding.sudokuGrid.removeAllViews()
-            
-            for (i in 0..8) {
-                for (j in 0..8) {
-                    val cell = cells[i][j]
-                    cell.text = if (board[i][j] != 0) board[i][j].toString() else ""
-                    cell.textSize = 24f
-                    cell.gravity = android.view.Gravity.CENTER
-                    
-                    // 設置背景顏色
-                    if (board[i][j] != 0 && game.isOriginalNumber(i, j)) {
-                        // 原始數字使用暗灰色背景
-                        cell.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
-                    } else {
-                        // 可編輯的格子使用白色背景
-                        cell.setBackgroundResource(android.R.drawable.edit_text)
-                    }
-                    
-                    // 檢查數字是否合法
-                    if (board[i][j] != 0) {
-                        if (game.isOriginalNumber(i, j)) {
-                            cell.setTextColor(android.graphics.Color.BLACK)
-                        } else {
-                            // 檢查當前數字是否合法
-                            val currentNum = board[i][j]
-                            // 暫時將當前數字設為0，以便檢查其他位置的數字
-                            board[i][j] = 0
-                            val isValid = game.isValid(i, j, currentNum)
-                            // 恢復當前數字
-                            board[i][j] = currentNum
-                            
-                            cell.setTextColor(if (isValid) android.graphics.Color.BLACK else android.graphics.Color.RED)
-                        }
-                    } else {
-                        cell.setTextColor(android.graphics.Color.BLACK)
-                    }
-                    
-                    // 設置格子大小
-                    val params = android.widget.GridLayout.LayoutParams().apply {
-                        width = 0
-                        height = 0
-                        columnSpec = android.widget.GridLayout.spec(j, 1f)
-                        rowSpec = android.widget.GridLayout.spec(i, 1f)
-                        setMargins(2, 2, 2, 2)
-                    }
-                    cell.layoutParams = params
-                    
-                    cell.setOnClickListener {
-                        // 只有原始數字不能更改
-                        if (!game.isOriginalNumber(i, j)) {
-                            if (selectedNumber != null) {
-                                game.setNumber(i, j, selectedNumber!!)
-                                selectedNumber = null
-                                updateBoard()
-                                updateNumberButtonsState()
-                            } else {
-                                // 如果沒有選中數字，則清除當前格子的數字
-                                game.setNumber(i, j, 0)
-                                updateBoard()
-                            }
-                        }
-                    }
-                    binding.sudokuGrid.addView(cell)
+            val originalNumbers = Array(9) { row ->
+                BooleanArray(9) { col ->
+                    game.isOriginalNumber(row, col)
                 }
             }
+            binding.sudokuGrid.setBoard(board, originalNumbers)
             Log.d(TAG, "Board UI updated")
         } catch (e: Exception) {
             Log.e(TAG, "Error in updateBoard: ${e.message}", e)
@@ -201,24 +139,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        try {
-            binding.newGameButton.setOnClickListener {
-                setupGame()
-                selectedNumber = null
-                updateNumberButtonsState()
-            }
-
-            binding.checkButton.setOnClickListener {
-                if (game.checkSolution()) {
-                    Toast.makeText(this, "恭喜！答案正確！", Toast.LENGTH_SHORT).show()
+        binding.sudokuGrid.setOnCellClickListener { row, col ->
+            // 只有原始數字不能更改
+            if (!game.isOriginalNumber(row, col)) {
+                if (selectedNumber != null) {
+                    game.setNumber(row, col, selectedNumber!!)
+                    selectedNumber = null
+                    updateBoard()
+                    updateNumberButtonsState()
                 } else {
-                    Toast.makeText(this, "答案不正確，請繼續努力！", Toast.LENGTH_SHORT).show()
+                    // 如果沒有選中數字，則清除當前格子的數字
+                    game.setNumber(row, col, 0)
+                    updateBoard()
                 }
             }
-            Log.d(TAG, "Listeners setup completed")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error in setupListeners: ${e.message}", e)
-            Toast.makeText(this, "設定按鈕失敗: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+
+        binding.newGameButton.setOnClickListener {
+            setupGame()
+            updateNumberButtonsState()
+        }
+
+        binding.checkButton.setOnClickListener {
+            if (game.checkSolution()) {
+                Toast.makeText(this, "恭喜！您已經完成數獨！", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "遊戲尚未完成，請繼續努力！", Toast.LENGTH_LONG).show()
+            }
         }
     }
 } 

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/white" />
+        </shape>
+    </item>
+    
+    <!-- 右邊框 -->
+    <item android:right="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/black" />
+        </shape>
+    </item>
+    
+    <!-- 下邊框 -->
+    <item android:bottom="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/black" />
+        </shape>
+    </item>
+    
+    <!-- 3x3 區塊的右邊框 -->
+    <item android:right="5dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/black" />
+        </shape>
+    </item>
+    
+    <!-- 3x3 區塊的下邊框 -->
+    <item android:bottom="5dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/black" />
+        </shape>
+    </item>
+</layer-list> 
