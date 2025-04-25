@@ -70,6 +70,17 @@ class MainActivity : AppCompatActivity() {
                         cell.setBackgroundResource(android.R.drawable.edit_text)
                     }
                     
+                    // 檢查數字是否合法
+                    if (board[i][j] != 0 && !game.isOriginalNumber(i, j)) {
+                        if (!game.isValid(i, j, board[i][j])) {
+                            cell.setTextColor(android.graphics.Color.RED)
+                        } else {
+                            cell.setTextColor(android.graphics.Color.BLACK)
+                        }
+                    } else {
+                        cell.setTextColor(android.graphics.Color.BLACK)
+                    }
+                    
                     // 設置格子大小
                     val params = android.widget.GridLayout.LayoutParams().apply {
                         width = 0

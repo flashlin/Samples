@@ -88,7 +88,7 @@ class SudokuGame {
         return false
     }
 
-    private fun isValid(row: Int, col: Int, num: Int): Boolean {
+    fun isValid(row: Int, col: Int, num: Int): Boolean {
         // 檢查行
         for (x in 0..8) {
             if (board[row][x] == num) {
