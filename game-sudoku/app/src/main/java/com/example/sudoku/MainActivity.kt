@@ -9,7 +9,7 @@ import com.example.sudoku.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var game: SudokuGame
-    private val cells = Array(9) { Array(9) { android.widget.TextView(this) } }
+    private lateinit var cells: Array<Array<android.widget.TextView>>
 
     companion object {
         private const val TAG = "SudokuGame"
@@ -24,6 +24,8 @@ class MainActivity : AppCompatActivity() {
             setContentView(binding.root)
             Log.d(TAG, "View binding completed")
 
+            cells = Array(9) { Array(9) { android.widget.TextView(this) } }
+            
             game = SudokuGame()
             setupGame()
             setupListeners()

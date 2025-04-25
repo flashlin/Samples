@@ -47,10 +47,10 @@ class SudokuGame {
     }
 
     private fun fillRemaining(i: Int, j: Int): Boolean {
-        if (j >= 9 && i < 8) {
+        if (j >= 9) {
             return fillRemaining(i + 1, 0)
         }
-        if (i >= 9 && j >= 9) {
+        if (i >= 9) {
             return true
         }
         if (i < 3) {

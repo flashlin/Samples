@@ -70,3 +70,4 @@ game-sudoku/build/test-results/test
 game-sudoku/app/build/kotlin
 game-sudoku/app/build/tmp
 game-sudoku/app/build/intermediates
+game-sudoku/app/build/reports
