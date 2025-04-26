@@ -159,7 +159,7 @@ class SudokuGridView @JvmOverloads constructor(
                         ContextCompat.getColor(context, R.color.white)
                     } else {
                         if (isValid(row, col, number)) {
-                            ContextCompat.getColor(context, R.color.white)
+                            ContextCompat.getColor(context, R.color.blue)
                         } else {
                             ContextCompat.getColor(context, R.color.red)
                         }
