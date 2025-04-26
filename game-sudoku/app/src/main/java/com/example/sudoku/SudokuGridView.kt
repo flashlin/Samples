@@ -104,9 +104,9 @@ class SudokuGridView @JvmOverloads constructor(
         super.onDraw(canvas)
 
         // 繪製黑色背景
-        canvas.drawColor(ContextCompat.getColor(context, R.color.black))
+        canvas.drawColor(ContextCompat.getColor(context, R.color.dark_gray))
 
-        // 繪製原始數字區域的暗灰色背景
+        // 繪製原始數字區域的淡紫色背景
         for (row in 0..8) {
             for (col in 0..8) {
                 if (originalNumbers[row][col]) {
@@ -117,7 +117,7 @@ class SudokuGridView @JvmOverloads constructor(
                         ((row + 1) * cellSize).toInt()
                     )
                     canvas.drawRect(cellRect, Paint().apply {
-                        color = ContextCompat.getColor(context, R.color.dark_gray)
+                        color = ContextCompat.getColor(context, R.color.purple)
                         style = Paint.Style.FILL
                     })
                 }
@@ -156,7 +156,7 @@ class SudokuGridView @JvmOverloads constructor(
                     val x = col * cellSize + cellSize / 2
                     val y = row * cellSize + cellSize / 2 + textPaint.textSize / 3
                     textPaint.color = if (originalNumbers[row][col]) {
-                        ContextCompat.getColor(context, R.color.white)
+                        ContextCompat.getColor(context, R.color.black)
                     } else {
                         if (isValid(row, col, number)) {
                             ContextCompat.getColor(context, R.color.blue)
