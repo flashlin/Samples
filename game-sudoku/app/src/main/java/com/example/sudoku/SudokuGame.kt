@@ -181,4 +181,21 @@ class SudokuGame {
     fun isOriginalNumber(row: Int, col: Int): Boolean {
         return originalBoard[row][col] != 0
     }
+
+    fun getOriginalBoard(): Array<IntArray> {
+        return Array(9) { row ->
+            IntArray(9) { col ->
+                originalBoard[row][col]
+            }
+        }
+    }
+
+    fun restoreState(newBoard: Array<IntArray>, newOriginalBoard: Array<IntArray>) {
+        for (i in 0..8) {
+            for (j in 0..8) {
+                board[i][j] = newBoard[i][j]
+                originalBoard[i][j] = newOriginalBoard[i][j]
+            }
+        }
+    }
 } 

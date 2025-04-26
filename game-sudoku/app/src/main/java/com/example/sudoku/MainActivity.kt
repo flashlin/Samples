@@ -14,6 +14,11 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "SudokuGame"
+        private const val KEY_BOARD = "board"
+        private const val KEY_ORIGINAL_BOARD = "original_board"
+        private const val KEY_SELECTED_NUMBER = "selected_number"
+        private const val KEY_SELECTED_CELL_ROW = "selected_cell_row"
+        private const val KEY_SELECTED_CELL_COL = "selected_cell_col"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +31,28 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "View binding completed")
             
             game = SudokuGame()
-            setupGame()
+            
+            if (savedInstanceState != null) {
+                // 恢復遊戲狀態
+                val board = savedInstanceState.getSerializable(KEY_BOARD) as? Array<IntArray>
+                val originalBoard = savedInstanceState.getSerializable(KEY_ORIGINAL_BOARD) as? Array<IntArray>
+                selectedNumber = savedInstanceState.getInt(KEY_SELECTED_NUMBER, -1).takeIf { it != -1 }
+                val row = savedInstanceState.getInt(KEY_SELECTED_CELL_ROW, -1)
+                val col = savedInstanceState.getInt(KEY_SELECTED_CELL_COL, -1)
+                if (row != -1 && col != -1) {
+                    selectedCell = Pair(row, col)
+                }
+                
+                if (board != null && originalBoard != null) {
+                    game.restoreState(board, originalBoard)
+                    updateBoard()
+                } else {
+                    setupGame()
+                }
+            } else {
+                setupGame()
+            }
+            
             setupNumberButtons()
             setupListeners()
             
@@ -47,6 +73,18 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "Error in onCreate: ${e.message}", e)
             Toast.makeText(this, "發生錯誤: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // 保存遊戲狀態
+        outState.putSerializable(KEY_BOARD, game.getBoard())
+        outState.putSerializable(KEY_ORIGINAL_BOARD, game.getOriginalBoard())
+        outState.putInt(KEY_SELECTED_NUMBER, selectedNumber ?: -1)
+        selectedCell?.let { (row, col) ->
+            outState.putInt(KEY_SELECTED_CELL_ROW, row)
+            outState.putInt(KEY_SELECTED_CELL_COL, col)
         }
     }
 
