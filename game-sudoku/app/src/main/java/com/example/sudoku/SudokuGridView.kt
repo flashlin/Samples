@@ -17,21 +17,22 @@ class SudokuGridView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     private val paint = Paint().apply {
-        color = ContextCompat.getColor(context, R.color.black)
-        strokeWidth = 1f
+        color = ContextCompat.getColor(context, R.color.white)
+        strokeWidth = 3f
         style = Paint.Style.STROKE
     }
 
     private val thickPaint = Paint().apply {
-        color = ContextCompat.getColor(context, R.color.black)
-        strokeWidth = 5f
+        color = ContextCompat.getColor(context, R.color.white)
+        strokeWidth = 7f
         style = Paint.Style.STROKE
     }
 
     private val textPaint = Paint().apply {
-        color = ContextCompat.getColor(context, R.color.black)
+        color = ContextCompat.getColor(context, R.color.white)
         textSize = 48f
         textAlign = Paint.Align.CENTER
+        isFakeBoldText = true
     }
 
     private val cellRect = Rect()
@@ -68,8 +69,60 @@ class SudokuGridView @JvmOverloads constructor(
         return super.onTouchEvent(event)
     }
 
+    private fun isValid(row: Int, col: Int, num: Int): Boolean {
+        // 檢查行
+        for (x in 0..8) {
+            if (x != col && board[row][x] == num) {
+                return false
+            }
+        }
+
+        // 檢查列
+        for (x in 0..8) {
+            if (x != row && board[x][col] == num) {
+                return false
+            }
+        }
+
+        // 檢查 3x3 方塊
+        val startRow = row - row % 3
+        val startCol = col - col % 3
+        for (i in 0..2) {
+            for (j in 0..2) {
+                if (i + startRow != row || j + startCol != col) {
+                    if (board[i + startRow][j + startCol] == num) {
+                        return false
+                    }
+                }
+            }
+        }
+
+        return true
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+
+        // 繪製黑色背景
+        canvas.drawColor(ContextCompat.getColor(context, R.color.black))
+
+        // 繪製原始數字區域的暗灰色背景
+        for (row in 0..8) {
+            for (col in 0..8) {
+                if (originalNumbers[row][col]) {
+                    cellRect.set(
+                        (col * cellSize).toInt(),
+                        (row * cellSize).toInt(),
+                        ((col + 1) * cellSize).toInt(),
+                        ((row + 1) * cellSize).toInt()
+                    )
+                    canvas.drawRect(cellRect, Paint().apply {
+                        color = ContextCompat.getColor(context, R.color.dark_gray)
+                        style = Paint.Style.FILL
+                    })
+                }
+            }
+        }
 
         // 繪製所有單元格的邊框
         for (row in 0..8) {
@@ -103,9 +156,13 @@ class SudokuGridView @JvmOverloads constructor(
                     val x = col * cellSize + cellSize / 2
                     val y = row * cellSize + cellSize / 2 + textPaint.textSize / 3
                     textPaint.color = if (originalNumbers[row][col]) {
-                        ContextCompat.getColor(context, R.color.black)
+                        ContextCompat.getColor(context, R.color.white)
                     } else {
-                        ContextCompat.getColor(context, R.color.purple_500)
+                        if (isValid(row, col, number)) {
+                            ContextCompat.getColor(context, R.color.white)
+                        } else {
+                            ContextCompat.getColor(context, R.color.red)
+                        }
                     }
                     canvas.drawText(number.toString(), x, y, textPaint)
                 }
