@@ -2,6 +2,7 @@ package com.example.sudoku
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sudoku.databinding.ActivityMainBinding
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         private const val KEY_SELECTED_NUMBER = "selected_number"
         private const val KEY_SELECTED_CELL_ROW = "selected_cell_row"
         private const val KEY_SELECTED_CELL_COL = "selected_cell_col"
+        private const val KEY_DIFFICULTY = "difficulty"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +57,7 @@ class MainActivity : AppCompatActivity() {
             
             setupNumberButtons()
             setupListeners()
+            setupDifficultySpinner()
             
             // 初始化按鈕顏色
             val numberButtons = listOf(
@@ -85,6 +88,38 @@ class MainActivity : AppCompatActivity() {
         selectedCell?.let { (row, col) ->
             outState.putInt(KEY_SELECTED_CELL_ROW, row)
             outState.putInt(KEY_SELECTED_CELL_COL, col)
+        }
+        outState.putString(KEY_DIFFICULTY, game.getDifficulty().name)
+    }
+
+    private fun setupDifficultySpinner() {
+        val difficulties = arrayOf("簡單", "中等", "高等")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, difficulties)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.difficultySpinner.adapter = adapter
+
+        // 設置初始難度
+        binding.difficultySpinner.setSelection(when (game.getDifficulty()) {
+            Difficulty.EASY -> 0
+            Difficulty.MEDIUM -> 1
+            Difficulty.HARD -> 2
+        })
+
+        binding.difficultySpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                val newDifficulty = when (position) {
+                    0 -> Difficulty.EASY
+                    1 -> Difficulty.MEDIUM
+                    2 -> Difficulty.HARD
+                    else -> Difficulty.MEDIUM
+                }
+                game.setDifficulty(newDifficulty)
+                setupGame()
+            }
+
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {
+                // 不需要處理
+            }
         }
     }
 

@@ -1,8 +1,23 @@
 package com.example.sudoku
 
+enum class Difficulty {
+    EASY,
+    MEDIUM,
+    HARD
+}
+
 class SudokuGame {
     private var board = Array(9) { IntArray(9) }
     private var originalBoard = Array(9) { IntArray(9) }
+    private var currentDifficulty = Difficulty.MEDIUM
+
+    fun setDifficulty(difficulty: Difficulty) {
+        currentDifficulty = difficulty
+    }
+
+    fun getDifficulty(): Difficulty {
+        return currentDifficulty
+    }
 
     fun generateNewGame() {
         // 清空棋盤
@@ -118,8 +133,12 @@ class SudokuGame {
     }
 
     private fun removeNumbers() {
-        // 隨機移除一些數字來創建謎題
-        val cellsToRemove = 45 // 調整這個數字來改變難度
+        // 根據難度等級決定要移除的數字數量
+        val cellsToRemove = when (currentDifficulty) {
+            Difficulty.EASY -> 35
+            Difficulty.MEDIUM -> 45
+            Difficulty.HARD -> 55
+        }
         var count = cellsToRemove
         while (count != 0) {
             val cellId = (0..80).random()
