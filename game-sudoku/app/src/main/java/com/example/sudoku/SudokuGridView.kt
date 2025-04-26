@@ -24,7 +24,7 @@ class SudokuGridView @JvmOverloads constructor(
 
     private val thickPaint = Paint().apply {
         color = ContextCompat.getColor(context, R.color.white)
-        strokeWidth = 7f
+        strokeWidth = 9f
         style = Paint.Style.STROKE
     }
 
