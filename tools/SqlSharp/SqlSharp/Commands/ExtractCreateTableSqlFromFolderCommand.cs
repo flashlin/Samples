@@ -6,7 +6,7 @@ namespace SqlSharp.Commands;
 
 public class ExtractCreateTableSqlFromFolderCommand : ISpecificationAsync<SqlSharpOptions, Task>
 {
-    private ILogger<ExtractCreateTableSqlFromFolderCommand> _logger;
+    private readonly ILogger<ExtractCreateTableSqlFromFolderCommand> _logger;
     public ExtractCreateTableSqlFromFolderCommand(ILogger<ExtractCreateTableSqlFromFolderCommand> logger)
     {
         _logger = logger;
