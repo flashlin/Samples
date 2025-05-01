@@ -23,6 +23,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    cssCodeSplit: false,
     rollupOptions: {
       input: {
         popup: resolve(__dirname, 'src/popup.ts'),
@@ -37,7 +38,12 @@ export default defineConfig({
           return '[name].js'
         },
         chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]'
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name === 'style.css') {
+            return 'popup.css'
+          }
+          return 'assets/[name].[hash].[ext]'
+        }
       }
     }
   },
