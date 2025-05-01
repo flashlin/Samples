@@ -281,3 +281,81 @@ export function convertCsvFormatToJson(text: string): string {
     return text;
   }
 }
+
+/**
+ * 將 CSV 格式的文本轉換為固定寬度的表格格式
+ * @param text 要轉換的 CSV 文本
+ * @param delimiter 輸出的分隔符
+ * @returns 表格格式的文本
+ */
+export function convertCsvFormatToTable(text: string, delimiter: string = '\t'): string {
+  if (!isCsvFormat(text)) {
+    return text;
+  }
+
+  try {
+    // 解析 CSV 文本
+    const result = Papa.parse(text, {
+      header: true,
+      skipEmptyLines: true,
+      dynamicTyping: true
+    }) as PapaParseResult;
+
+    if (!result.data || result.data.length === 0) {
+      return text;
+    }
+
+    // 獲取表頭
+    const headers = Object.keys(result.data[0]);
+    
+    // 計算每列的最大寬度
+    const columnWidths = new Map<string, number>();
+    
+    // 初始化寬度為表頭長度
+    headers.forEach(header => {
+      columnWidths.set(header, header.length);
+    });
+
+    // 計算每個欄位的最大寬度
+    interface CsvRow {
+      [key: string]: any;
+    }
+
+    result.data.forEach((row: CsvRow) => {
+      headers.forEach(header => {
+        const value = String(row[header] ?? '');
+        const currentWidth = columnWidths.get(header) || 0;
+        columnWidths.set(header, Math.max(currentWidth, value.length));
+      });
+    });
+
+    // 生成表格內容
+    const lines: string[] = [];
+
+    // 添加表頭
+    const headerLine = headers.map(header => 
+      header.padEnd(columnWidths.get(header) || 0)
+    ).join(delimiter);
+    lines.push(headerLine);
+
+    // 添加分隔線
+    const separator = headers.map(header =>
+      '-'.repeat(columnWidths.get(header) || 0)
+    ).join(delimiter);
+    lines.push(separator);
+
+    // 添加數據行
+    result.data.forEach((row: CsvRow) => {
+      const line = headers.map(header => {
+        const value = String(row[header] ?? '');
+        return value.padEnd(columnWidths.get(header) || 0);
+      }).join(delimiter);
+      lines.push(line);
+    });
+
+    return lines.join('\n');
+  } catch (error) {
+    console.error('CSV 轉表格錯誤:', error);
+    return text;
+  }
+}

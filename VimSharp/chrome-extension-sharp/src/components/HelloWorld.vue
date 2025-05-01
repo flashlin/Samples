@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson  } from '../tools/textTool'
+import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson, convertCsvFormatToTable  } from '../tools/textTool'
 import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
 
 defineProps<{ msg: string }>()
@@ -59,6 +59,14 @@ function clickJsonToCsv() {
 function clickCsvToJson() {
   const inputText = code.value
   code.value = convertCsvFormatToJson(inputText);
+  if (code.value !== inputText) {
+    pasteToClipboard(code.value);
+  }
+}
+
+function clickCsvToTable() {
+  const inputText = code.value
+  code.value = convertCsvFormatToTable(inputText, inputDelimiter.value);
   if (code.value !== inputText) {
     pasteToClipboard(code.value);
   }
@@ -142,6 +150,7 @@ function runCode() {
           <button type="button" @click="clickTableToCsv">Table To CSV</button>
           <button type="button" @click="clickJsonToCsv">Json To CSV</button>
           <button type="button" @click="clickCsvToJson">CSV To Json</button>
+          <button type="button" @click="clickCsvToTable">CSV To Table</button>
         </div>
         <div class="delimiter-row">
           <label for="delimiter-input">Table delimiter:</label>
