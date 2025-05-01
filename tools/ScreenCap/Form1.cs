@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace ScreenCap;
 
@@ -30,6 +31,8 @@ public partial class Form1 : Form
         InitializePreviewBox();
         RegisterGlobalHotKey();
         this.FormClosing += Form1_FormClosing;
+        this.KeyPreview = true; // 允許表單攔截鍵盤事件
+        this.KeyDown += Form1_KeyDown;
     }
 
     private void InitializePreviewBox()
@@ -212,5 +215,34 @@ public partial class Form1 : Form
     private void Form1_FormClosing(object sender, FormClosingEventArgs e)
     {
         UnregisterHotKey(this.Handle, HOTKEY_ID);
+    }
+
+    private void Form1_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Control && e.KeyCode == Keys.S)
+        {
+            SaveImage();
+            e.Handled = true;
+        }
+    }
+
+    private void SaveImage()
+    {
+        if (previewBox.Image == null)
+        {
+            MessageBox.Show("沒有可儲存的截圖！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+        using (SaveFileDialog sfd = new SaveFileDialog())
+        {
+            sfd.Filter = "PNG 圖片 (*.png)|*.png";
+            sfd.DefaultExt = "png";
+            sfd.AddExtension = true;
+            sfd.Title = "儲存截圖";
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                previewBox.Image.Save(sfd.FileName, System.Drawing.Imaging.ImageFormat.Png);
+            }
+        }
     }
 }
