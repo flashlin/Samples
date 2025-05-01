@@ -177,3 +177,76 @@ export function convertJsonFormatToCsv(text: string): string {
     return text;
   }
 }
+
+// 添加型別定義
+interface PapaParseResult {
+  data: string[][];
+  errors: any[];
+  meta: {
+    delimiter: string;
+    linebreak: string;
+    aborted: boolean;
+    truncated: boolean;
+  };
+}
+
+/**
+ * 檢查文本是否為 CSV 格式（使用 Papa.parse 嘗試多種分隔符）
+ * @param text 要檢查的文本
+ * @returns 是否為 CSV 格式
+ */
+export function isCsvFormat(text: string): boolean {
+  if (!text || typeof text !== 'string') {
+    console.log('輸入為空或不是字串');
+    return false;
+  }
+
+  // 要嘗試的分隔符列表
+  const delimiters = ['\t', ',', ';'];
+  
+  // 檢查是否有至少一行
+  const lines = text.trim().split('\n');
+  if (lines.length === 0) {
+    console.log('沒有任何內容');
+    return false;
+  }
+
+  // 嘗試每種分隔符
+  for (const delimiter of delimiters) {
+    try {
+      const result = Papa.parse(text, {
+        delimiter: delimiter,
+        preview: 5, // 只檢查前 5 行以提高效能
+        skipEmptyLines: true
+      }) as PapaParseResult;
+
+      // 檢查解析結果
+      if (result.data && result.data.length > 0) {
+        const firstRowLength = result.data[0].length;
+        
+        // 確保第一行有多個欄位（至少2個）
+        if (firstRowLength < 2) {
+          continue;
+        }
+
+        // 檢查所有行的欄位數是否一致
+        const isValid = result.data.every(row => 
+          row.length === firstRowLength && 
+          // 確保不是所有欄位都是空的
+          row.some(cell => cell && cell.trim() !== '')
+        );
+
+        if (isValid) {
+          console.log(`檢測到有效的 CSV 格式，分隔符: "${delimiter}"`);
+          return true;
+        }
+      }
+    } catch (error) {
+      console.log(`使用分隔符 "${delimiter}" 解析失敗:`, error);
+      continue;
+    }
+  }
+
+  console.log('未檢測到有效的 CSV 格式');
+  return false;
+}
