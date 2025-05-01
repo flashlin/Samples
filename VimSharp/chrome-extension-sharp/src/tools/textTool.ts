@@ -8,17 +8,19 @@ import Papa from 'papaparse';
  */
 export function isTableFormat(text: string, delimiter: string = '\t'): boolean {
   if (!text.includes('\n')) {
+    console.log(`沒有換行符`);
     return false;
   }
   
-  const lines = text.split('\n').filter(line => line.trim() !== '');
-  
-  if (lines.length === 0) {
+  const lines = text.split('\n').filter(line => line.trim() !== '');  
+  if (lines.length === 0) { 
+    console.log(`沒有任何行`);
     return false;
   }
   
   const firstLineDelimiterCount = (lines[0].match(new RegExp(delimiter, 'g')) || []).length;
   if (firstLineDelimiterCount === 0) {
+    console.log(`第一行沒有分隔符`);
     return false;
   }
   
@@ -26,6 +28,7 @@ export function isTableFormat(text: string, delimiter: string = '\t'): boolean {
     if (lines[i].trim() === '') continue;
     const delimiterCount = (lines[i].match(new RegExp(delimiter, 'g')) || []).length;
     if (delimiterCount !== firstLineDelimiterCount) {
+      console.log(`第${i}行分隔符數量不一致`);
       return false;
     }
   }
@@ -57,6 +60,7 @@ export function convertTableFormatToCsv(
     });
 
     if (!result.data || result.data.length === 0) {
+      console.log(`convert Fail`);
       return text;
     }
 
