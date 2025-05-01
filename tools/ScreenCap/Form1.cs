@@ -145,12 +145,28 @@ public partial class Form1 : Form
                     // 顯示尺寸資訊
                     string dimensions = $"{rect.Width} x {rect.Height}";
                     using (Font font = new Font("Arial", 10))
-                    using (SolidBrush brush = new SolidBrush(Color.White))
-                    using (var path = new GraphicsPath())
                     {
-                        path.AddString(dimensions, font.FontFamily, (int)font.Style, 
-                            font.Size, new Point(rect.X, rect.Y - 20), StringFormat.GenericDefault);
-                        e.Graphics.FillPath(brush, path);
+                        // 計算文字大小
+                        var textSize = e.Graphics.MeasureString(dimensions, font);
+                        var textRect = new Rectangle(
+                            rect.X,
+                            rect.Y - 25,
+                            (int)textSize.Width + 10,
+                            (int)textSize.Height + 6
+                        );
+
+                        // 繪製黑色背景
+                        using (var brush = new SolidBrush(Color.FromArgb(200, 0, 0, 0)))
+                        {
+                            e.Graphics.FillRectangle(brush, textRect);
+                        }
+
+                        // 繪製白色文字
+                        using (var brush = new SolidBrush(Color.White))
+                        {
+                            e.Graphics.DrawString(dimensions, font, brush, 
+                                textRect.X + 5, textRect.Y + 3);
+                        }
                     }
                 }
             }
