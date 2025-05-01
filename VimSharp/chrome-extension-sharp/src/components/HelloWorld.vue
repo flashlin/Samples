@@ -2,10 +2,12 @@
 import { ref } from 'vue'
 import { convertTableFormatToCsv } from '../tools/textTool'
 import { copyFromClipboard } from '../tools/clipboardTool'
+
 defineProps<{ msg: string }>()
 
 const code = ref('// 在這裡輸入您的程式碼\nfunction hello() {\n  console.log("Hello, World!");\n}')
 const clipboardError = ref('')
+const activeTab = ref('clipboard')
 const inputDelimiter = ref('\t')
 
 function clickConvertTableFormatToCsv() {
@@ -64,10 +66,36 @@ function runCode() {
 </script>
 
 <template>
-  <div class="card">
-    <button type="button" @click="handleCopyFromClipboard">From 剪貼簿</button>
-    <button type="button" @click="clickConvertTableFormatToCsv">ToCsv</button>
-    <p v-if="clipboardError" class="error-message">{{ clipboardError }}</p>
+  <div class="control-panel">
+    <div class="tabs">
+      <button 
+        class="tab-button" 
+        :class="{ active: activeTab === 'clipboard' }"
+        @click="activeTab = 'clipboard'"
+      >
+        剪貼簿
+      </button>
+      <button 
+        class="tab-button" 
+        :class="{ active: activeTab === 'csv' }"
+        @click="activeTab = 'csv'"
+      >
+        CSV
+      </button>
+    </div>
+
+    <div class="tab-panels">
+      <!-- 剪貼簿面板 -->
+      <div v-if="activeTab === 'clipboard'" class="tab-panel">
+        <button type="button" @click="handleCopyFromClipboard">從剪貼簿複製</button>
+        <p v-if="clipboardError" class="error-message">{{ clipboardError }}</p>
+      </div>
+
+      <!-- CSV 面板 -->
+      <div v-if="activeTab === 'csv'" class="tab-panel">
+        <button type="button" @click="clickConvertTableFormatToCsv">轉換為 CSV</button>
+      </div>
+    </div>
   </div>
 
   <div class="editor-container">
@@ -81,8 +109,6 @@ function runCode() {
       <button @click="runCode" class="run-button">執行程式碼</button>
     </div>
   </div>
-
-  
 </template>
 
 <style scoped>
@@ -91,9 +117,9 @@ function runCode() {
 }
 
 .editor-container {
-  margin: 20px 0;
-  width: 100%;
-  max-width: 100%;
+  margin: 20px auto;
+  width: 90%;
+  min-width: 400px;
 }
 
 .editor-container h2 {
@@ -107,7 +133,7 @@ function runCode() {
   font-size: 14px;
   line-height: 1.5;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #333;
   border-radius: 4px;
   background-color: #1e1e1e;
   color: #d4d4d4;
@@ -140,8 +166,10 @@ function runCode() {
 }
 
 .error-message {
-  color: #f44336;
-  margin-top: 5px;
+  color: #ff6b6b;
+  background-color: rgba(255, 107, 107, 0.1);
+  padding: 8px;
+  border-radius: 4px;
   font-size: 14px;
 }
 
@@ -156,5 +184,105 @@ function runCode() {
   .code-editor {
     height: 500px;
   }
+}
+
+.control-panel {
+  margin: 20px auto;
+  width: 90%;
+  min-width: 400px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #1e1e1e;
+}
+
+.tabs {
+  display: flex;
+  background-color: #252526;
+  border-bottom: 1px solid #333;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #969696;
+  transition: all 0.3s ease;
+  border-right: 1px solid #333;
+}
+
+.tab-button:hover {
+  background-color: #2d2d2d;
+  color: #ffffff;
+}
+
+.tab-button.active {
+  background-color: #1e1e1e;
+  color: #4CAF50;
+  border-bottom: 2px solid #4CAF50;
+}
+
+.tab-panels {
+  background-color: #1e1e1e;
+}
+
+.tab-panel {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tab-panel button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.tab-panel button:hover {
+  background-color: #45a049;
+}
+
+.control-panel {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tab-panel button {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.tab-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #4CAF50;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.tab-button.active::after {
+  transform: scaleX(1);
+}
+
+.code-editor {
+  border-color: #333;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
 }
 </style>
