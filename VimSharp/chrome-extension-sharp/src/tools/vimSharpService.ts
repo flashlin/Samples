@@ -71,7 +71,7 @@ export class VimSharpService {
    }
 
    async postHookStreamStringAsync(apiUrl: string, req: HookRequest): Promise<void> {
-      await this._client.postTokenStreamStringAsync(apiUrl, req, (token: string) => {
+      await this._client.postTokenStreamStringAsync(apiUrl, req, (_token: string) => {
       });
    }
 

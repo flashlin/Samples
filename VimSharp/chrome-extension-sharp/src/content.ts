@@ -12,7 +12,7 @@ chrome.runtime.sendMessage({ action: 'contentScriptLoaded' }, (response) => {
 });
 
 // 監聽來自背景腳本的消息
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   console.log('收到消息:', message);
   sendResponse({ received: true });
   return true;

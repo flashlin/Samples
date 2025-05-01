@@ -84,26 +84,6 @@ async function handleCopyFromClipboard() {
   );
 }
 
-function useAlternativeClipboardMethod() {
-  const textArea = document.createElement('textarea');
-  document.body.appendChild(textArea);
-  textArea.focus();
-  
-  try {
-    const successful = document.execCommand('paste');
-    if (successful) {
-      code.value = textArea.value;
-      clipboardError.value = '';
-    } else {
-      clipboardError.value = '請使用 Ctrl+V 手動貼上';
-    }
-  } catch (err) {
-    clipboardError.value = '請使用 Ctrl+V 手動貼上';
-  }
-  
-  document.body.removeChild(textArea);
-}
-
 function handleCodeChange(event: Event) {
   const target = event.target as HTMLTextAreaElement
   code.value = target.value

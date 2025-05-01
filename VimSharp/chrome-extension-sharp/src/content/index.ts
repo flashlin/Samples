@@ -16,7 +16,7 @@ interface MessageResponse {
 console.log('Chrome 擴充功能內容腳本已加載');
 
 // 監聽來自背景腳本的消息
-chrome.runtime.onMessage.addListener((message: any, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message: any, _sender, sendResponse) => {
   if (message.action === 'getPageInfo') {
     // 收集頁面信息
     const pageInfo: PageInfo = {

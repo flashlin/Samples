@@ -38,7 +38,7 @@ chrome.runtime.onInstalled.addListener((details: InstallDetails) => {
 });
 
 // 監聽來自彈出窗口或內容腳本的消息
-chrome.runtime.onMessage.addListener((message: any, sender, sendResponse: (response: MessageResponse) => void) => {
+chrome.runtime.onMessage.addListener((message: any, _sender, sendResponse: (response: MessageResponse) => void) => {
   if (message.action === 'incrementCounter') {
     // 從存儲中獲取當前計數器值
     chrome.storage.local.get('counter', (data: StorageData) => {

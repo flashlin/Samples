@@ -16,12 +16,13 @@
     "vue": "^3.4.21"
   },
   "devDependencies": {
+    "@types/chrome": "^0.0.317",
     "@types/node": "^20.17.19",
     "@types/papaparse": "^5.3.15",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/tsconfig": "^0.5.1",
-    "typescript": "^5.2.2",
+    "typescript": "^5.8.3",
     "vite": "^5.1.4",
-    "vue-tsc": "^1.8.27"
+    "vue-tsc": "^2.2.10"
   }
 }
