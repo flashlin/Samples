@@ -105,3 +105,75 @@ function fallbackConversion(
   
   return csvLines.join('\n');
 }
+
+/**
+ * 檢查文本是否為有效的 JSON 格式
+ * @param text 要檢查的文本
+ * @returns 是否為 JSON 格式
+ */
+export function isJsonFormat(text: string): boolean {
+  if (!text || typeof text !== 'string') {
+    console.log('輸入為空或不是字串');
+    return false;
+  }
+
+  text = text.trim();
+  
+  // 檢查基本的 JSON 結構標記
+  if (!(
+    (text.startsWith('{') && text.endsWith('}')) || // 物件
+    (text.startsWith('[') && text.endsWith(']'))    // 陣列
+  )) {
+    console.log('不是有效的 JSON 結構');
+    return false;
+  }
+
+  try {
+    // 嘗試解析 JSON
+    JSON.parse(text);
+    return true;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log('JSON 解析錯誤:', error.message);
+    }
+    return false;
+  }
+}
+
+/**
+ * 將 JSON 格式的文本轉換為 CSV 格式
+ * @param text 要轉換的 JSON 文本
+ * @returns CSV 格式的文本，如果轉換失敗則返回原文本
+ */
+export function convertJsonFormatToCsv(text: string): string {
+  // 檢查是否為有效的 JSON 格式
+  if (!isJsonFormat(text)) {
+    return text;
+  }
+
+  try {
+    // 解析 JSON 文本
+    const jsonData = JSON.parse(text);
+    
+    // 檢查是否為陣列或物件
+    if (!Array.isArray(jsonData) && typeof jsonData !== 'object') {
+      console.log('JSON 必須是陣列或物件格式');
+      return text;
+    }
+
+    // 如果是單一物件，轉換為陣列
+    const dataArray = Array.isArray(jsonData) ? jsonData : [jsonData];
+    
+    // 使用 Papa.unparse 將資料轉換為 CSV
+    const csv = Papa.unparse(dataArray, {
+      delimiter: ',',
+      newline: '\n',
+      header: true // 自動產生標題列
+    });
+
+    return csv;
+  } catch (error) {
+    console.error('JSON 轉 CSV 錯誤:', error);
+    return text;
+  }
+}
