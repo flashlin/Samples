@@ -3,10 +3,20 @@ import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
-  <HelloWorld msg="Vite + Vue" />
+  <div class="app-container">
+    <HelloWorld msg="Vite + Vue" />
+  </div>
 </template>
 
 <style scoped>
+.app-container {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 1rem;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
