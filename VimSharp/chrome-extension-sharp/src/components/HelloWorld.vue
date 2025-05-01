@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { convertTableFormatToCsv } from '../tools/textTool'
+import { copyFromClipboard } from '../tools/clipboardTool'
 defineProps<{ msg: string }>()
 
 const code = ref('// 在這裡輸入您的程式碼\nfunction hello() {\n  console.log("Hello, World!");\n}')
@@ -10,21 +11,16 @@ function clickConvertTableFormatToCsv() {
   code.value = convertTableFormatToCsv(code.value)
 }
 
-async function copyFromClipboard() {
-  try {
-    const permissionStatus = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
-    if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') {
-      const text = await navigator.clipboard.readText();
+async function handleCopyFromClipboard() {
+  await copyFromClipboard(
+    (text) => {
       code.value = text;
       clipboardError.value = '';
-    } else {
-      clipboardError.value = '沒有剪貼簿讀取權限';
-      useAlternativeClipboardMethod();
+    },
+    (error) => {
+      clipboardError.value = error;
     }
-  } catch (error) {
-    clipboardError.value = '讀取剪貼簿失敗，請嘗試手動貼上';
-    useAlternativeClipboardMethod();
-  }
+  );
 }
 
 function useAlternativeClipboardMethod() {
@@ -67,10 +63,8 @@ function runCode() {
 </script>
 
 <template>
-  <h1>{{ msg }}</h1>
-
   <div class="card">
-    <button type="button" @click="copyFromClipboard">從剪貼簿複製</button>
+    <button type="button" @click="handleCopyFromClipboard">從剪貼簿複製</button>
     <button type="button" @click="clickConvertTableFormatToCsv">ToCsv</button>
     <p v-if="clipboardError" class="error-message">{{ clipboardError }}</p>
     <p>
