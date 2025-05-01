@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "我的 Chrome 擴充功能",
+  "name": "Support Tool",
   "version": "1.0",
   "description": "一個使用 Vue 和 TypeScript 構建的 Chrome 擴充功能",
   "action": {
