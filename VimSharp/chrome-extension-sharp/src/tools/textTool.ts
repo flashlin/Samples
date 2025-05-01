@@ -250,3 +250,34 @@ export function isCsvFormat(text: string): boolean {
   console.log('未檢測到有效的 CSV 格式');
   return false;
 }
+
+/**
+ * 將 CSV 格式的文本轉換為 JSON 格式
+ * @param text 要轉換的 CSV 文本
+ * @returns JSON 格式的文本，如果轉換失敗則返回原文本
+ */
+export function convertCsvToJson(text: string): string {
+  if (!isCsvFormat(text)) {
+    return text;
+  }
+
+  try {
+    // 使用 Papa.parse 解析 CSV 文本，自動檢測分隔符
+    const result = Papa.parse(text, {
+      header: true, // 使用第一行作為標題
+      skipEmptyLines: true,
+      dynamicTyping: true // 自動轉換數字和布林值
+    }) as PapaParseResult;
+
+    if (!result.data || result.data.length === 0) {
+      console.log('CSV 解析後沒有資料');
+      return text;
+    }
+
+    // 將解析結果轉換為 JSON 字串，使用縮排格式化
+    return JSON.stringify(result.data, null, 2);
+  } catch (error) {
+    console.error('CSV 轉 JSON 錯誤:', error);
+    return text;
+  }
+}
