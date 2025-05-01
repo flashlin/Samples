@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { convertTableFormatToCsv } from '../tools/textTool'
+import { convertTableFormatToCsv, convertJsonFormatToCsv  } from '../tools/textTool'
 import { copyFromClipboard } from '../tools/clipboardTool'
 
 defineProps<{ msg: string }>()
@@ -177,11 +177,9 @@ function runCode() {
 }
 
 .error-message {
-  color: #ff6b6b;
-  background-color: rgba(255, 107, 107, 0.1);
+  margin: 0;
   padding: 8px;
-  border-radius: 4px;
-  font-size: 14px;
+  color: #ff6b6b;
 }
 
 @media (min-width: 768px) {
@@ -242,8 +240,10 @@ function runCode() {
 .tab-panel {
   padding: 15px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .tab-panel button {
@@ -254,8 +254,8 @@ function runCode() {
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.3s ease;
-  text-align: left;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
 }
 
 .tab-panel button:hover {
@@ -264,10 +264,6 @@ function runCode() {
 
 .control-panel {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.tab-panel button {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .tab-button {
