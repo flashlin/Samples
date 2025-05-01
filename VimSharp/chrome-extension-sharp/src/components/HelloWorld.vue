@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { convertTableFormatToCsv, convertJsonFormatToCsv  } from '../tools/textTool'
-import { copyFromClipboard } from '../tools/clipboardTool'
+import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
 
 defineProps<{ msg: string }>()
 
@@ -22,11 +22,19 @@ const tabList: TabItem[] = [
 ]
 
 function clickTableToCsv() {
-  code.value = convertTableFormatToCsv(code.value, inputDelimiter.value)
+  const inputText = code.value
+  code.value = convertTableFormatToCsv(inputText, inputDelimiter.value);
+  if (code.value !== inputText) {
+    pasteToClipboard(code.value);
+  }
 }
 
 function clickJsonToCsv() {
-  code.value = convertJsonFormatToCsv(code.value)
+  const inputText = code.value
+  code.value = convertJsonFormatToCsv(inputText);
+  if (code.value !== inputText) {
+    pasteToClipboard(code.value);
+  }
 }
 
 async function handleCopyFromClipboard() {

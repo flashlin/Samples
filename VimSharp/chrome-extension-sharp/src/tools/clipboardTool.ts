@@ -49,7 +49,6 @@ export async function pasteToClipboard(text: string): Promise<boolean> {
     // 檢查是否支援新的 Clipboard API
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);
-      console.log('使用 Clipboard API 複製成功');
       return true;
     }
     
