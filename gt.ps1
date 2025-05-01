@@ -1,6 +1,13 @@
 # 創建一個空的 ArrayList 來存儲結果
 $PathCommitedList = [System.Collections.ArrayList]::new()
 
+# 初始化排除名單
+$ExcludePathList = @(
+    "build",
+    ".cursor",
+    "src"
+)
+
 # 初始化變數
 $processedPaths = @{}
 $maxPaths = 30
@@ -39,6 +46,20 @@ while ($processedPaths.Count -lt $maxPaths) {
             
             # 跳過只有檔名的情況
             if ($pathParts.Count -lt 2) {
+                return
+            }
+            
+            # 檢查是否包含排除名單中的路徑
+            $shouldExclude = $false
+            foreach ($excludePath in $ExcludePathList) {
+                if ($pathParts[0] -eq $excludePath -or ($pathParts.Count -gt 1 -and $pathParts[1] -eq $excludePath)) {
+                    $shouldExclude = $true
+                    break
+                }
+            }
+            
+            # 如果路徑包含在排除名單中，則跳過
+            if ($shouldExclude) {
                 return
             }
             
