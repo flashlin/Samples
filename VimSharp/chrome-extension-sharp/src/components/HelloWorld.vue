@@ -6,9 +6,10 @@ defineProps<{ msg: string }>()
 
 const code = ref('// 在這裡輸入您的程式碼\nfunction hello() {\n  console.log("Hello, World!");\n}')
 const clipboardError = ref('')
+const inputDelimiter = ref('\t')
 
 function clickConvertTableFormatToCsv() {
-  code.value = convertTableFormatToCsv(code.value)
+  code.value = convertTableFormatToCsv(code.value, inputDelimiter.value)
 }
 
 async function handleCopyFromClipboard() {
