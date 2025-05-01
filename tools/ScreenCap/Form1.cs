@@ -224,6 +224,11 @@ public partial class Form1 : Form
             SaveImage();
             e.Handled = true;
         }
+        else if (e.Control && e.KeyCode == Keys.V)
+        {
+            PasteImage();
+            e.Handled = true;
+        }
     }
 
     private void SaveImage()
@@ -243,6 +248,40 @@ public partial class Form1 : Form
             {
                 previewBox.Image.Save(sfd.FileName, System.Drawing.Imaging.ImageFormat.Png);
             }
+        }
+    }
+
+    private void PasteImage()
+    {
+        try
+        {
+            if (Clipboard.ContainsImage())
+            {
+                using (Image clipboardImage = Clipboard.GetImage())
+                {
+                    if (clipboardImage != null)
+                    {
+                        // 釋放舊的圖片資源
+                        previewBox.Image?.Dispose();
+                        
+                        // 建立新的 Bitmap 並複製剪貼簿圖片
+                        previewBox.Image = new Bitmap(clipboardImage);
+                        
+                        // 調整視窗大小以適應圖片
+                        this.ClientSize = new Size(
+                            Math.Min(800, previewBox.Image.Width + 24),
+                            Math.Min(600, previewBox.Image.Height + 24));
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("剪貼簿中沒有圖片！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"無法貼上圖片：{ex.Message}", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }
