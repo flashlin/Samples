@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { convertTableFormatToCsv, convertJsonFormatToCsv  } from '../tools/textTool'
 import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
 
@@ -9,6 +9,25 @@ const code = ref('// 在這裡輸入您的程式碼\nfunction hello() {\n  conso
 const clipboardError = ref('')
 const activeTab = ref('clipboard')
 const inputDelimiter = ref('\t')
+const inputDelimiterDisplay = ref('\\t')
+
+// 監聽顯示值的變化並更新實際值
+watch(inputDelimiterDisplay, (newValue) => {
+  // 將顯示的轉義字符轉換為實際的分隔符
+  switch (newValue) {
+    case '\\t':
+      inputDelimiter.value = '\t'
+      break
+    case '\\n':
+      inputDelimiter.value = '\n'
+      break
+    case '\\r':
+      inputDelimiter.value = '\r'
+      break
+    default:
+      inputDelimiter.value = newValue
+  }
+})
 
 // 新增：標籤頁列表
 interface TabItem {
@@ -111,8 +130,20 @@ function runCode() {
 
       <!-- CSV 面板 -->
       <div v-if="activeTab === 'csv'" class="tab-panel">
-        <button type="button" @click="clickTableToCsv">Table To CSV</button>
-        <button type="button" @click="clickJsonToCsv">Json To CSV</button>
+        <div class="buttons-row">
+          <button type="button" @click="clickTableToCsv">Table To CSV</button>
+          <button type="button" @click="clickJsonToCsv">Json To CSV</button>
+        </div>
+        <div class="delimiter-row">
+          <label for="delimiter-input">Table delimiter:</label>
+          <input 
+            id="delimiter-input"
+            type="text" 
+            v-model="inputDelimiterDisplay"
+            class="delimiter-input"
+            title="使用 \t 表示 Tab，\n 表示換行"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -248,13 +279,50 @@ function runCode() {
 .tab-panel {
   padding: 15px;
   display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.buttons-row {
+  display: flex;
   flex-direction: row;
   gap: 10px;
   align-items: center;
-  justify-content: flex-start;
 }
 
-.tab-panel button {
+.delimiter-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+}
+
+.delimiter-row label {
+  color: #d4d4d4;
+  font-size: 14px;
+}
+
+.delimiter-input {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  color: #d4d4d4;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 60px;
+  transition: border-color 0.3s ease;
+}
+
+.delimiter-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.delimiter-input:hover {
+  border-color: #666;
+}
+
+.buttons-row button {
   background-color: #4CAF50;
   color: white;
   border: none;
@@ -266,7 +334,7 @@ function runCode() {
   white-space: nowrap;
 }
 
-.tab-panel button:hover {
+.buttons-row button:hover {
   background-color: #45a049;
 }
 
