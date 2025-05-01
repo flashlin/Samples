@@ -65,17 +65,12 @@ function runCode() {
 
 <template>
   <div class="card">
-    <button type="button" @click="handleCopyFromClipboard">從剪貼簿複製</button>
+    <button type="button" @click="handleCopyFromClipboard">From 剪貼簿</button>
     <button type="button" @click="clickConvertTableFormatToCsv">ToCsv</button>
     <p v-if="clipboardError" class="error-message">{{ clipboardError }}</p>
-    <p>
-      Edit
-      <code>components/HelloWorld.vue</code> to test HMR
-    </p>
   </div>
 
   <div class="editor-container">
-    <h2>程式碼編輯器</h2>
     <textarea 
       class="code-editor" 
       v-model="code" 
