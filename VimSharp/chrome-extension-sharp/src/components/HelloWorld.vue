@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson, convertCsvFormatToTable  } from '../tools/textTool'
 import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
+import { translateToEnAsync, translateToZhAsync } from '../tools/translateApi'
 
 defineProps<{ msg: string }>()
 
@@ -37,7 +38,8 @@ interface TabItem {
 
 const tabList: TabItem[] = [
   { id: 'clipboard', name: '剪貼簿' },
-  { id: 'csv', name: 'CSV' }
+  { id: 'csv', name: 'CSV' },
+  { id: 'translate', name: '翻譯' },
 ]
 
 function clickTableToCsv() {
@@ -67,6 +69,24 @@ function clickCsvToJson() {
 function clickCsvToTable() {
   const inputText = code.value
   code.value = convertCsvFormatToTable(inputText, inputDelimiter.value);
+  if (code.value !== inputText) {
+    pasteToClipboard(code.value);
+  }
+}
+
+async function clickTranslateToEn() {
+  const inputText = code.value;
+  const result = await translateToEnAsync(inputText);
+  code.value = result;
+  if (code.value !== inputText) {
+    pasteToClipboard(code.value);
+  }
+}
+
+async function clickTranslateToZh() {
+  const inputText = code.value;
+  const result = await translateToZhAsync(inputText);
+  code.value = result;
   if (code.value !== inputText) {
     pasteToClipboard(code.value);
   }
@@ -141,6 +161,14 @@ function runCode() {
             class="delimiter-input"
             title="使用 \t 表示 Tab，\n 表示換行"
           />
+        </div>
+      </div>
+
+      <!-- 翻譯面板 -->
+      <div v-if="activeTab === 'translate'" class="tab-panel">
+        <div class="buttons-row">
+          <button type="button" @click="clickTranslateToEn">To 英文</button>
+          <button type="button" @click="clickTranslateToZh">To 中文</button>
         </div>
       </div>
     </div>
