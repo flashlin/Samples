@@ -256,7 +256,7 @@ export function isCsvFormat(text: string): boolean {
  * @param text 要轉換的 CSV 文本
  * @returns JSON 格式的文本，如果轉換失敗則返回原文本
  */
-export function convertCsvToJson(text: string): string {
+export function convertCsvFormatToJson(text: string): string {
   if (!isCsvFormat(text)) {
     return text;
   }
