@@ -21,8 +21,12 @@ const tabList: TabItem[] = [
   { id: 'csv', name: 'CSV' }
 ]
 
-function clickConvertTableFormatToCsv() {
+function clickTableToCsv() {
   code.value = convertTableFormatToCsv(code.value, inputDelimiter.value)
+}
+
+function clickJsonToCsv() {
+  code.value = convertJsonFormatToCsv(code.value)
 }
 
 async function handleCopyFromClipboard() {
@@ -99,7 +103,8 @@ function runCode() {
 
       <!-- CSV 面板 -->
       <div v-if="activeTab === 'csv'" class="tab-panel">
-        <button type="button" @click="clickConvertTableFormatToCsv">轉換為 CSV</button>
+        <button type="button" @click="clickTableToCsv">Table To CSV</button>
+        <button type="button" @click="clickJsonToCsv">Json To CSV</button>
       </div>
     </div>
   </div>
