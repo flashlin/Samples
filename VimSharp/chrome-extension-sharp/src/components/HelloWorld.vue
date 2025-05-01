@@ -10,6 +10,17 @@ const clipboardError = ref('')
 const activeTab = ref('clipboard')
 const inputDelimiter = ref('\t')
 
+// 新增：標籤頁列表
+interface TabItem {
+  id: string
+  name: string
+}
+
+const tabList: TabItem[] = [
+  { id: 'clipboard', name: '剪貼簿' },
+  { id: 'csv', name: 'CSV' }
+]
+
 function clickConvertTableFormatToCsv() {
   code.value = convertTableFormatToCsv(code.value, inputDelimiter.value)
 }
@@ -69,18 +80,13 @@ function runCode() {
   <div class="control-panel">
     <div class="tabs">
       <button 
+        v-for="tab in tabList"
+        :key="tab.id"
         class="tab-button" 
-        :class="{ active: activeTab === 'clipboard' }"
-        @click="activeTab = 'clipboard'"
+        :class="{ active: activeTab === tab.id }"
+        @click="activeTab = tab.id"
       >
-        剪貼簿
-      </button>
-      <button 
-        class="tab-button" 
-        :class="{ active: activeTab === 'csv' }"
-        @click="activeTab = 'csv'"
-      >
-        CSV
+        {{ tab.name }}
       </button>
     </div>
 
