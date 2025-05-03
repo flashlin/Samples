@@ -359,3 +359,47 @@ export function convertCsvFormatToTable(text: string, delimiter: string = '\t'):
     return text;
   }
 }
+
+
+export function convertCsvFormatToSql(text: string, tableName:string): string {
+  if (!isCsvFormat(text)) {
+    return text;
+  }
+
+  try {
+    // 使用 Papa.parse 解析 CSV 文本，自動檢測分隔符
+    const result = Papa.parse(text, {
+      header: true, // 使用第一行作為標題
+      skipEmptyLines: true,
+      dynamicTyping: true // 自動轉換數字和布林值
+    }) as PapaParseResult;
+
+    if (!result.data || result.data.length === 0) {
+      console.log('CSV 解析後沒有資料');
+      return text;
+    }
+
+    // 取得所有欄位名稱
+    const headers = Object.keys(result.data[0]);
+    // 產生 INSERT 語句
+    const sqlLines = result.data.map((row: any) => {
+      const values = headers.map(header => {
+        let value = row[header];
+        if (value === null || value === undefined || value === '') {
+          return 'NULL';
+        } else if (typeof value === 'number' || typeof value === 'boolean') {
+          return value.toString();
+        } else {
+          // escape 單引號
+          const escaped = String(value).replace(/'/g, "''");
+          return `'${escaped}'`;
+        }
+      });
+      return `INSERT INTO ${tableName} (${headers.join(', ')}) VALUES (${values.join(', ')});`;
+    });
+    return sqlLines.join('\n');
+  } catch (error) {
+    console.error('CSV 轉 JSON 錯誤:', error);
+    return text;
+  }
+}

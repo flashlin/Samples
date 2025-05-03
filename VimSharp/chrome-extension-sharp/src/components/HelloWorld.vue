@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson, convertCsvFormatToTable  } from '../tools/textTool'
+import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson, 
+  convertCsvFormatToTable, convertCsvFormatToSql
+} from '../tools/textTool'
 import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
 import { translateToEnAsync, translateToZhAsync } from '../tools/translateApi'
 
@@ -11,6 +13,7 @@ const clipboardError = ref('')
 const activeTab = ref('clipboard')
 const inputDelimiter = ref('\t')
 const inputDelimiterDisplay = ref('\\t')
+const tableName = ref('tb1')
 
 // 監聽顯示值的變化並更新實際值
 watch(inputDelimiterDisplay, (newValue) => {
@@ -73,6 +76,15 @@ function clickCsvToTable() {
     pasteToClipboard(code.value);
   }
 }
+
+function clickCsvToSql() {
+  const inputText = code.value
+  code.value = convertCsvFormatToSql(inputText, tableName.value);
+  if (code.value !== inputText) {
+    pasteToClipboard(code.value);
+  }
+}
+
 
 async function clickTranslateToEn() {
   const inputText = code.value;
@@ -151,6 +163,7 @@ function runCode() {
           <button type="button" @click="clickJsonToCsv">Json To CSV</button>
           <button type="button" @click="clickCsvToJson">CSV To Json</button>
           <button type="button" @click="clickCsvToTable">CSV To Table</button>
+          <button type="button" @click="clickCsvToSql">CSV To SQL</button>
         </div>
         <div class="delimiter-row">
           <label for="delimiter-input">Table delimiter:</label>
@@ -160,6 +173,15 @@ function runCode() {
             v-model="inputDelimiterDisplay"
             class="delimiter-input"
             title="使用 \t 表示 Tab，\n 表示換行"
+          />
+        </div>
+        <div class="delimiter-row">
+          <label for="delimiter-input">To Table Name:</label>
+          <input 
+            type="text" 
+            v-model="tableName"
+            class="delimiter-input"
+            title="to table name"
           />
         </div>
       </div>
