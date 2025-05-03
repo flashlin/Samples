@@ -9,6 +9,7 @@ import { translateToEnAsync, translateToZhAsync } from '../tools/translateApi'
 defineProps<{ msg: string }>()
 
 const code = ref('// 在這裡輸入您的程式碼\nfunction hello() {\n  console.log("Hello, World!");\n}')
+const codeHistory = ref<string[]>([])
 const clipboardError = ref('')
 const activeTab = ref('clipboard')
 const inputDelimiter = ref('\t')
@@ -116,9 +117,18 @@ async function handleCopyFromClipboard() {
   );
 }
 
+function clickUndo() {
+  code.value = codeHistory.value.shift() || ''
+}
+
 function handleCodeChange(event: Event) {
   const target = event.target as HTMLTextAreaElement
   code.value = target.value
+  // 記錄到 codeHistory，只保留最近 10 筆
+  codeHistory.value.unshift(code.value)
+  if (codeHistory.value.length > 10) {
+    codeHistory.value.length = 10
+  }
 }
 
 function runCode() {
@@ -183,6 +193,9 @@ function runCode() {
             class="delimiter-input"
             title="to table name"
           />
+        </div>
+        <div class="buttons-row">
+          <button type="button" @click="clickUndo">Undo</button>
         </div>
       </div>
 
