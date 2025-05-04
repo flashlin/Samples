@@ -1,6 +1,6 @@
 // @ts-ignore
 // Import Hello function from linqjs
-import { Hello, LinqQueryExpr, LinqFromExpr, LinqWhereExpr, LinqSelectExpr, LinqJoinExpr, LinqBinaryExpr, LinqIdentifierExpr, LinqMemberAccessExpr, LinqLiteralExpr } from 'linqjs';
+import { LinqQueryExpr, LinqFromExpr, LinqWhereExpr, LinqSelectExpr, LinqJoinExpr, LinqBinaryExpr, LinqIdentifierExpr, LinqMemberAccessExpr, LinqLiteralExpr } from 'linqjs';
 
 // 範例客戶資料
 const myCustomers = [
@@ -19,14 +19,6 @@ const myOrders = [
   { OrderId: 104, CustomerId: 3, Amount: 150, Status: "cancelled" },
   { OrderId: 105, CustomerId: 5, Amount: 500, Status: "shipped" }
 ];
-
-// Demo: use Hello function
-function runDemo() {
-  const message = Hello('World');
-  console.log(message);
-}
-
-runDemo();
 
 // 查詢例子：查找狀態為 "active" 的客戶 join 訂單
 
