@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+// @ts-ignore
 // Import Hello function from linqjs
 const linqjs_1 = require("linqjs");
 // Demo: use Hello function
