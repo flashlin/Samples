@@ -1,8 +1,3 @@
-// Hello function, return greeting message
-export function Hello(name: string): string {
-  return `Hello, ${name}!`;
-}
-
 // 定義基底類別 LinqExpr
 export abstract class LinqExpr {}
 
