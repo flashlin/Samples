@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T1.SqlSharp", "T1.SqlSharp\T1.SqlSharp.csproj", "{CFA8C4F9-D05F-48FD-8703-28CE91879099}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T1.SqlSharpTests", "T1.SqlSharpTests\T1.SqlSharpTests.csproj", "{44068007-3BA2-4519-959F-6D84D9FE22DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{CFA8C4F9-D05F-48FD-8703-28CE91879099}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CFA8C4F9-D05F-48FD-8703-28CE91879099}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFA8C4F9-D05F-48FD-8703-28CE91879099}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44068007-3BA2-4519-959F-6D84D9FE22DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44068007-3BA2-4519-959F-6D84D9FE22DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44068007-3BA2-4519-959F-6D84D9FE22DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44068007-3BA2-4519-959F-6D84D9FE22DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
