@@ -1,6 +1,6 @@
 // @ts-ignore
 // Import Hello function from linqjs
-import { LinqQueryExpr, LinqFromExpr, LinqWhereExpr, LinqSelectExpr, LinqJoinExpr, LinqBinaryExpr, LinqIdentifierExpr, LinqMemberAccessExpr, LinqLiteralExpr } from 'linqjs';
+import { LinqQueryExpr, LinqFromExpr, LinqWhereExpr, LinqSelectExpr, LinqJoinExpr, LinqBinaryExpr, LinqIdentifierExpr, LinqMemberAccessExpr, LinqLiteralExpr, LinqExecutor } from 'linqjs';
 
 // 範例客戶資料
 const myCustomers = [
@@ -27,7 +27,7 @@ const query = new LinqQueryExpr();
 
 // 設定 FROM
 query.From.Identifier = "c";
-query.From.Source = "myCustomers";
+query.From.Source = "customers";
 
 // 設定 WHERE 條件：c.status == "active"
 const whereExpr = new LinqWhereExpr();
@@ -47,7 +47,7 @@ query.Where = whereExpr;
 // 設定 JOIN myOrders o ON c.id == o.CustomerId
 const join = new LinqJoinExpr();
 join.Identifier = "o";
-join.Source = "myOrders";
+join.Source = "orders";
 const outerKey = new LinqMemberAccessExpr();
 outerKey.Target = new LinqIdentifierExpr();
 outerKey.Target.Name = "c";
@@ -66,4 +66,13 @@ select.Expression = new LinqIdentifierExpr();
 select.Expression.Name = "{c, o}";
 query.Select = select;
 
-console.log('Linq 查詢物件：', JSON.stringify(query, null, 2)); 
+//console.log('Linq 查詢物件：', JSON.stringify(query, null, 2));
+
+// 建立 LinqExecutor 並設定資料來源
+const linq = new LinqExecutor();
+linq.Data["customers"] = myCustomers;
+linq.Data["orders"] = myOrders;
+
+// 執行查詢並打印結果
+const result = linq.execute(query);
+console.log('查詢結果：', JSON.stringify(result, null, 2)); 
