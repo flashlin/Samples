@@ -90,50 +90,42 @@ export class LinqParser {
     if (this.nextToken() !== 'select') throw new Error('缺少 select');
     expr.Select = new LinqSelectExpr();
     if (this.peekToken() === 'new' && this._tokens[this._i + 1] === '{') {
-      // select new { ... }
       this.nextToken(); // new
       this.nextToken(); // {
       const newExpr = new LinqNewExpr();
-      // 解析屬性
       while (this._i < this._tokens.length && this.peekToken() !== '}') {
+        // 跳過逗號
+        if (this.peekToken() === ',') {
+          this.nextToken();
+          continue;
+        }
         // 解析屬性名稱與值
         let name = this.nextToken();
         let valueExpr: any;
         if (this.peekToken() === '=') {
           this.nextToken(); // =
-          // 右側可能是 tb1.LastName 或單一識別字
           if (this._tokens[this._i + 1] === '.') {
-            // tb1.LastName
             const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
             valueExpr = member;
             this._i = nextIdx;
           } else {
-            // 單一識別字
             valueExpr = new LinqIdentifierExpr();
             valueExpr.Name = this.nextToken();
           }
-        } else if (this.peekToken() === ',') {
-          // 逗號分隔，略過
-          this.nextToken();
-          continue;
+        } else if (this.peekToken() === '.') {
+          // tb1.id 這種情況
+          const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i - 1);
+          valueExpr = member;
+          name = this._tokens[this._i - 1];
+          this._i = nextIdx;
         } else {
-          // 直接是 tb1、tb1.name、tb2.Amount
-          if (this._tokens[this._i] && this._tokens[this._i + 1] === '.') {
-            const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
-            valueExpr = member;
-            name = this._tokens[this._i];
-            this._i = nextIdx;
-          } else {
-            valueExpr = new LinqIdentifierExpr();
-            valueExpr.Name = name;
-            name = this._tokens[this._i - 1];
-          }
+          valueExpr = new LinqIdentifierExpr();
+          valueExpr.Name = name;
         }
         const prop = new LinqPropertyExpr();
         prop.Name = name;
         prop.Value = valueExpr;
         newExpr.Properties.push(prop);
-        if (this.peekToken() === ',') this.nextToken();
       }
       this.nextToken(); // }
       expr.Select.Expression = newExpr;
