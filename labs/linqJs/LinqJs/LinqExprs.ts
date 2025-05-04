@@ -80,4 +80,14 @@ export class LinqLiteralExpr extends LinqValueExpr {
 }
 
 // 預留 IntoExpr 結構
-export class LinqIntoExpr extends LinqExpr {} 
+export class LinqIntoExpr extends LinqExpr {}
+
+// select new { ... } AST 結構
+export class LinqNewExpr extends LinqValueExpr {
+  Properties: LinqPropertyExpr[] = [];
+}
+
+export class LinqPropertyExpr {
+  Name: string = '';
+  Value: LinqValueExpr = new LinqIdentifierExpr();
+} 

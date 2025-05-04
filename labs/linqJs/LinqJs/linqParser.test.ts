@@ -31,7 +31,17 @@ describe('LinqParser', () => {
     expect(innerKey.MemberName).toBe('id');
     // 檢查 Select
     expect(expr.Select).toBeDefined();
-    // 這裡僅檢查 select new 結構字串
-    expect((expr.Select!.Expression as any).Raw).toBe('new { tb1.id, Name = tb1.LastName, tb2.Amount }');
+    // 驗證 select new 結構 AST
+    const newExpr = expr.Select!.Expression as any;
+    expect(newExpr.Properties.length).toBe(3);
+    // tb1.id
+    expect(newExpr.Properties[0].Name).toBe('tb1');
+    expect(newExpr.Properties[0].Value.MemberName).toBe('id');
+    // Name = tb1.LastName
+    expect(newExpr.Properties[1].Name).toBe('Name');
+    expect(newExpr.Properties[1].Value.MemberName).toBe('LastName');
+    // tb2.Amount
+    expect(newExpr.Properties[2].Name).toBe('tb2');
+    expect(newExpr.Properties[2].Value.MemberName).toBe('Amount');
   });
 }); 

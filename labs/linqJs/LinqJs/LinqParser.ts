@@ -4,7 +4,9 @@ import {
   LinqSelectExpr,
   LinqJoinExpr,
   LinqIdentifierExpr,
-  LinqMemberAccessExpr
+  LinqMemberAccessExpr,
+  LinqNewExpr,
+  LinqPropertyExpr
 } from './LinqExprs';
 
 // 將查詢字串轉為 token 陣列
@@ -19,55 +21,128 @@ export class LinqTokenizer {
 
 // LinqParser class for parsing LINQ query string to AST
 export class LinqParser {
-   // 解析成 LinqMemberAccessExpr
-   private _parseMemberAccess(expr: string): LinqMemberAccessExpr {
-     const parts = expr.split('.');
-     const member = new LinqMemberAccessExpr();
-     const target = new LinqIdentifierExpr();
-     target.Name = parts[0];
-     member.Target = target;
-     member.MemberName = parts[1] || '';
-     return member;
-   }
-   // 解析 LINQ 查詢字串，回傳 AST
-   public parse(query: string): LinqQueryExpr {
-     // 先進行 token 化
-     const tokenizer = new LinqTokenizer();
-     const tokens = tokenizer.tokenize(query);
-     // TODO: 以 tokens 進行語法分析，這裡暫時保留原本的正則解析
-     // 支援 join 語法與 select new
-     const joinMatch = query.match(/from\s+(\w+)\s+in\s+(\w+)(?:\s+join\s+(\w+)\s+in\s+(\w+)\s+on\s+([\w\.]+)\s+equals\s+([\w\.]+))?\s+select\s+(new\s+\{[^}]+\}|\w+)/);
-     if (!joinMatch) throw new Error('查詢語法錯誤');
-     const fromId = joinMatch[1];
-     const fromSrc = joinMatch[2];
-     const joinId = joinMatch[3];
-     const joinSrc = joinMatch[4];
-     const joinLeft = joinMatch[5];
-     const joinRight = joinMatch[6];
-     const selectRaw = joinMatch[7];
-     const expr = new LinqQueryExpr();
-     expr.From = new LinqFromExpr();
-     expr.From.Identifier = fromId;
-     expr.From.Source = fromSrc;
-     // 處理 join
-     if (joinId && joinSrc && joinLeft && joinRight) {
-       const joinExpr = new LinqJoinExpr();
-       joinExpr.Identifier = joinId;
-       joinExpr.Source = joinSrc;
-       joinExpr.OuterKey = this._parseMemberAccess(joinLeft);
-       joinExpr.InnerKey = this._parseMemberAccess(joinRight);
-       expr.Joins.push(joinExpr);
-     }
-     // 處理 select
-     expr.Select = new LinqSelectExpr();
-     if (/^new\s+\{/.test(selectRaw)) {
-       // select new 結構
-       (expr.Select.Expression as any).Raw = selectRaw;
-     } else {
-       const idExpr = new LinqIdentifierExpr();
-       idExpr.Name = selectRaw;
-       expr.Select.Expression = idExpr;
-     }
-     return expr;
-   }
+  private _tokens: string[] = [];
+  private _i: number = 0;
+  private nextToken(): string {
+    return this._tokens[this._i++];
+  }
+  private peekToken(): string {
+    return this._tokens[this._i];
+  }
+  // 解析成 LinqMemberAccessExpr
+  private _parseMemberAccess(tokens: string[], start: number): [LinqMemberAccessExpr, number] {
+    // 例如 tb1.id
+    const id = tokens[start];
+    if (tokens[start + 1] === '.') {
+      const member = new LinqMemberAccessExpr();
+      const target = new LinqIdentifierExpr();
+      target.Name = id;
+      member.Target = target;
+      member.MemberName = tokens[start + 2];
+      return [member, start + 3];
+    } else {
+      // 單一識別字
+      const member = new LinqMemberAccessExpr();
+      const target = new LinqIdentifierExpr();
+      target.Name = id;
+      member.Target = target;
+      member.MemberName = '';
+      return [member, start + 1];
+    }
+  }
+  // 解析 LINQ 查詢字串，回傳 AST
+  public parse(query: string): LinqQueryExpr {
+    const tokenizer = new LinqTokenizer();
+    this._tokens = tokenizer.tokenize(query);
+    this._i = 0;
+    const expr = new LinqQueryExpr();
+    // from tb1 in customer
+    if (this.nextToken() !== 'from') throw new Error('必須以 from 開頭');
+    expr.From = new LinqFromExpr();
+    expr.From.Identifier = this.nextToken();
+    if (this.nextToken() !== 'in') throw new Error('from 後需 in');
+    expr.From.Source = this.nextToken();
+    // join ...
+    if (this.peekToken() === 'join') {
+      this.nextToken();
+      const join = new LinqJoinExpr();
+      join.Identifier = this.nextToken();
+      if (this.nextToken() !== 'in') throw new Error('join 後需 in');
+      join.Source = this.nextToken();
+      if (this.nextToken() !== 'on') throw new Error('join 後需 on');
+      // tb2.CustomerId
+      const [outerKey, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
+      join.OuterKey = outerKey;
+      this._i = nextIdx;
+      if (this.nextToken() !== 'equals') throw new Error('join on 後需 equals');
+      // tb1.id
+      const [innerKey, nextIdx2] = this._parseMemberAccess(this._tokens, this._i);
+      join.InnerKey = innerKey;
+      this._i = nextIdx2;
+      expr.Joins.push(join);
+    }
+    // where ... (暫不實作)
+    if (this.peekToken() === 'where') {
+      // 可擴充: 目前略過 where
+      while (this.peekToken() !== 'select' && this._i < this._tokens.length) this.nextToken();
+    }
+    // select ...
+    if (this.nextToken() !== 'select') throw new Error('缺少 select');
+    expr.Select = new LinqSelectExpr();
+    if (this.peekToken() === 'new' && this._tokens[this._i + 1] === '{') {
+      // select new { ... }
+      this.nextToken(); // new
+      this.nextToken(); // {
+      const newExpr = new LinqNewExpr();
+      // 解析屬性
+      while (this._i < this._tokens.length && this.peekToken() !== '}') {
+        // 解析屬性名稱與值
+        let name = this.nextToken();
+        let valueExpr: any;
+        if (this.peekToken() === '=') {
+          this.nextToken(); // =
+          // 右側可能是 tb1.LastName 或單一識別字
+          if (this._tokens[this._i + 1] === '.') {
+            // tb1.LastName
+            const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
+            valueExpr = member;
+            this._i = nextIdx;
+          } else {
+            // 單一識別字
+            valueExpr = new LinqIdentifierExpr();
+            valueExpr.Name = this.nextToken();
+          }
+        } else if (this.peekToken() === ',') {
+          // 逗號分隔，略過
+          this.nextToken();
+          continue;
+        } else {
+          // 直接是 tb1、tb1.name、tb2.Amount
+          if (this._tokens[this._i] && this._tokens[this._i + 1] === '.') {
+            const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
+            valueExpr = member;
+            name = this._tokens[this._i];
+            this._i = nextIdx;
+          } else {
+            valueExpr = new LinqIdentifierExpr();
+            valueExpr.Name = name;
+            name = this._tokens[this._i - 1];
+          }
+        }
+        const prop = new LinqPropertyExpr();
+        prop.Name = name;
+        prop.Value = valueExpr;
+        newExpr.Properties.push(prop);
+        if (this.peekToken() === ',') this.nextToken();
+      }
+      this.nextToken(); // }
+      expr.Select.Expression = newExpr;
+    } else {
+      // select tb1
+      const idExpr = new LinqIdentifierExpr();
+      idExpr.Name = this.nextToken();
+      expr.Select.Expression = idExpr;
+    }
+    return expr;
+  }
 } 
