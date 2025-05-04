@@ -21,6 +21,9 @@ describe('LinqParser', () => {
     expect(expr.Joins.length).toBe(1);
     expect(expr.Joins[0].Identifier).toBe('tb2');
     expect(expr.Joins[0].Source).toBe('orders');
+    // 驗證 join on 條件
+    expect((expr.Joins[0] as any).OuterKeyRaw).toBe('tb2.CustomerId');
+    expect((expr.Joins[0] as any).InnerKeyRaw).toBe('tb1.id');
     // 檢查 Select
     expect(expr.Select).toBeDefined();
     // 這裡僅檢查 select new 結構字串
