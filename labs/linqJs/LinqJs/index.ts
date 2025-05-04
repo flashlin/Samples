@@ -153,6 +153,16 @@ export class LinqExecutor {
 
 // LinqParser class for parsing LINQ query string to AST
 export class LinqParser {
+  // 解析成 LinqMemberAccessExpr
+  private _parseMemberAccess(expr: string): LinqMemberAccessExpr {
+    const parts = expr.split('.');
+    const member = new LinqMemberAccessExpr();
+    const target = new LinqIdentifierExpr();
+    target.Name = parts[0];
+    member.Target = target;
+    member.MemberName = parts[1] || '';
+    return member;
+  }
   // 解析 LINQ 查詢字串，回傳 AST
   public parse(query: string): LinqQueryExpr {
     // 支援 join 語法與 select new
@@ -174,9 +184,8 @@ export class LinqParser {
       const joinExpr = new LinqJoinExpr();
       joinExpr.Identifier = joinId;
       joinExpr.Source = joinSrc;
-      // 只存原始 key 字串，進階可再解析
-      (joinExpr as any).OuterKeyRaw = joinLeft;
-      (joinExpr as any).InnerKeyRaw = joinRight;
+      joinExpr.OuterKey = this._parseMemberAccess(joinLeft);
+      joinExpr.InnerKey = this._parseMemberAccess(joinRight);
       expr.Joins.push(joinExpr);
     }
     // 處理 select

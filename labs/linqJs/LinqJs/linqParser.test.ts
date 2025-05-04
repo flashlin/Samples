@@ -1,4 +1,4 @@
-import { LinqIdentifierExpr, LinqParser } from './index';
+import { LinqIdentifierExpr, LinqParser, LinqMemberAccessExpr } from './index';
 
 describe('LinqParser', () => {
   it('should parse simple select', () => {
@@ -22,8 +22,12 @@ describe('LinqParser', () => {
     expect(expr.Joins[0].Identifier).toBe('tb2');
     expect(expr.Joins[0].Source).toBe('orders');
     // 驗證 join on 條件
-    expect((expr.Joins[0] as any).OuterKeyRaw).toBe('tb2.CustomerId');
-    expect((expr.Joins[0] as any).InnerKeyRaw).toBe('tb1.id');
+    const outerKey = expr.Joins[0].OuterKey as LinqMemberAccessExpr;
+    const innerKey = expr.Joins[0].InnerKey as LinqMemberAccessExpr;
+    expect((outerKey.Target as LinqIdentifierExpr).Name).toBe('tb2');
+    expect(outerKey.MemberName).toBe('CustomerId');
+    expect((innerKey.Target as LinqIdentifierExpr).Name).toBe('tb1');
+    expect(innerKey.MemberName).toBe('id');
     // 檢查 Select
     expect(expr.Select).toBeDefined();
     // 這裡僅檢查 select new 結構字串
