@@ -1,4 +1,5 @@
-import { LinqIdentifierExpr, LinqParser, LinqMemberAccessExpr } from './index';
+import { LinqIdentifierExpr, LinqMemberAccessExpr } from './LinqExprs';
+import { LinqParser } from './LinqParser';
 
 describe('LinqParser', () => {
   it('should parse simple select', () => {

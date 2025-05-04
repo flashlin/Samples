@@ -7,6 +7,16 @@ import {
   LinqMemberAccessExpr
 } from './LinqExprs';
 
+// 將查詢字串轉為 token 陣列
+export class LinqTokenizer {
+  public tokenize(query: string): string[] {
+    // 以空白、運算子、標點符號分割
+    const regex = /([{}()\[\].,=><!]+|\w+|==|!=|<=|>=|\S)/g;
+    // 避免數字與識別字混淆，保留所有符號
+    return query.match(regex)?.filter(t => t.trim().length > 0) ?? [];
+  }
+}
+
 // LinqParser class for parsing LINQ query string to AST
 export class LinqParser {
    // 解析成 LinqMemberAccessExpr
@@ -21,6 +31,10 @@ export class LinqParser {
    }
    // 解析 LINQ 查詢字串，回傳 AST
    public parse(query: string): LinqQueryExpr {
+     // 先進行 token 化
+     const tokenizer = new LinqTokenizer();
+     const tokens = tokenizer.tokenize(query);
+     // TODO: 以 tokens 進行語法分析，這裡暫時保留原本的正則解析
      // 支援 join 語法與 select new
      const joinMatch = query.match(/from\s+(\w+)\s+in\s+(\w+)(?:\s+join\s+(\w+)\s+in\s+(\w+)\s+on\s+([\w\.]+)\s+equals\s+([\w\.]+))?\s+select\s+(new\s+\{[^}]+\}|\w+)/);
      if (!joinMatch) throw new Error('查詢語法錯誤');
