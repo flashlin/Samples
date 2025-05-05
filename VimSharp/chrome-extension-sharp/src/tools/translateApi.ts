@@ -25,7 +25,7 @@ export async function invokeGptApiAsync(text: string) {
   };
   const cursorChar = "▌";
   let output = "";
-  await gptApi.postTokenStreamStringAsync('messageStream', req, (token: string) => {
+  await gptApi.postTokenStreamStringAsync('MessageStream', req, (token: string) => {
       let outputText = output;
       let answer = outputText.substring(0, outputText.lastIndexOf(cursorChar));
       output = answer + token + cursorChar;
