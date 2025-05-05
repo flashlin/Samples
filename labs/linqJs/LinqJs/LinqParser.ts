@@ -1,4 +1,5 @@
 import {
+  LinqExpr,
   LinqQueryExpr,
   LinqFromExpr,
   LinqSelectExpr,
@@ -17,6 +18,132 @@ export class LinqTokenizer {
     // 避免數字與識別字混淆，保留所有符號
     return query.match(regex)?.filter(t => t.trim().length > 0) ?? [];
   }
+}
+
+// Result 型別與 ok/err 工具
+export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
+export const ok = <T>(value: T): Result<T> => ({ ok: true, value });
+export const err = <T = never>(error: string): Result<T> => ({ ok: false, error });
+
+
+function parseLiteral(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }> {
+  const [first, ...rest] = tokens;
+  if (/^\d+$/.test(first)) {
+    const lit = new LinqIdentifierExpr();
+    lit.Name = first;
+    return ok({ expr: lit, rest });
+  }
+  return err('Expected literal');
+}
+
+function parseMemberAccess(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }> {
+  const [first, second, third, ...rest] = tokens;
+  if (second === '.') {
+    const member = new LinqMemberAccessExpr();
+    const target = new LinqIdentifierExpr();
+    target.Name = first;
+    member.Target = target;
+    member.MemberName = third;
+    return ok({ expr: member, rest });
+  }
+  if (first) {
+    const id = new LinqIdentifierExpr();
+    id.Name = first;
+    return ok({ expr: id, rest: [second, third, ...rest].filter(x => x !== undefined) });
+  }
+  return err('Expected identifier');
+}
+
+function parseBinaryExpr(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }> {
+  const leftResult = parseMemberAccess(tokens);
+  if (!leftResult.ok) return leftResult;
+  const [op, ...rest1] = leftResult.value.rest;
+  if (!['==', '!=', '<', '>', '<=', '>='].includes(op)) {
+    return err('Expected binary operator after left expression');
+  }
+  const rightResult = parseLiteral(rest1);
+  if (!rightResult.ok) return rightResult;
+  const bin = new LinqMemberAccessExpr();
+  // 這裡僅示意，實際應建立 LinqBinaryExpr
+  return ok({
+    expr: leftResult.value.expr, // 應改為 LinqBinaryExpr
+    rest: rightResult.value.rest,
+  });
+}
+
+function parseWhere(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }> {
+  if (tokens[0] !== 'where') return err('Expected where');
+  return parseBinaryExpr(tokens.slice(1));
+}
+
+function parseSelect(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }> {
+  if (tokens[0] !== 'select') return err('Expected select');
+  return parseMemberAccess(tokens.slice(1));
+}
+
+function parseFrom(tokens: string[]): Result<{ from: string; fromAlias: string; rest: string[] }> {
+  if (tokens[0] !== 'from') return err('Expected from');
+  const fromAlias = tokens[1];
+  if (tokens[2] !== 'in') return err('Expected in after from alias');
+  const from = tokens[3];
+  return ok({ from, fromAlias, rest: tokens.slice(4) });
+}
+
+function parseJoin(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }> {
+  // join tb2 in orders on tb2.CustomerId equals tb1.id
+  if (tokens[0] !== 'join') return err('Expected join');
+  const alias = tokens[1];
+  if (tokens[2] !== 'in') return err('Expected in after join alias');
+  const source = tokens[3];
+  if (tokens[4] !== 'on') return err('Expected on after join source');
+  // tb2.CustomerId equals tb1.id
+  const leftRes = parseMemberAccess(tokens.slice(5));
+  if (!leftRes.ok) return leftRes;
+  if (leftRes.value.rest[0] !== 'equals') return err('Expected equals in join');
+  const rightRes = parseMemberAccess(leftRes.value.rest.slice(1));
+  if (!rightRes.ok) return rightRes;
+  // 這裡僅示意，實際應建立 LinqJoinExpr
+  const joinExpr = new LinqJoinExpr();
+  joinExpr.Identifier = alias;
+  joinExpr.Source = source;
+  joinExpr.OuterKey = leftRes.value.expr;
+  joinExpr.InnerKey = rightRes.value.expr;
+  return ok({ expr: joinExpr, rest: rightRes.value.rest });
+}
+
+export function parseExpr(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }> {
+  // from tb1 in customer [join ...] [where ...] select ...
+  const fromResult = parseFrom(tokens);
+  if (!fromResult.ok) return fromResult;
+  let rest = fromResult.value.rest;
+  let join: LinqExpr | undefined;
+  let where: LinqExpr | undefined;
+  let groupBy: LinqExpr | undefined;
+  // join
+  if (rest[0] === 'join') {
+    const joinRes = parseJoin(rest);
+    if (!joinRes.ok) return joinRes;
+    join = joinRes.value.expr;
+    rest = joinRes.value.rest;
+  }
+  // where
+  if (rest[0] === 'where') {
+    const whereRes = parseWhere(rest);
+    if (!whereRes.ok) return whereRes;
+    where = whereRes.value.expr;
+    rest = whereRes.value.rest;
+  }
+  // group by (暫略)
+  if (rest[0] === 'group') {
+    rest = rest.slice(3); // 跳過 group by ...
+  }
+  // select
+  const selectRes = parseSelect(rest);
+  if (!selectRes.ok) return selectRes;
+  return ok({
+    expr: selectRes.value.expr,
+    rest: selectRes.value.rest,
+  });
 }
 
 // LinqParser class for parsing LINQ query string to AST
