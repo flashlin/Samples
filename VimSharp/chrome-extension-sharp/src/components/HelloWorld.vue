@@ -5,6 +5,7 @@ import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson
 } from '../tools/textTool'
 import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
 import { translateToEnAsync, translateToZhAsync } from '../tools/translateApi'
+import Loading from './Loading.vue'
 
 defineProps<{ msg: string }>()
 
@@ -15,6 +16,7 @@ const activeTab = ref('clipboard')
 const inputDelimiter = ref('\t')
 const inputDelimiterDisplay = ref('\\t')
 const tableName = ref('tb1')
+const isLoading = ref(false)
 
 // 監聽顯示值的變化並更新實際值
 watch(inputDelimiterDisplay, (newValue) => {
@@ -88,21 +90,25 @@ function clickCsvToSql() {
 
 
 async function clickTranslateToEn() {
+  isLoading.value = true;
   const inputText = code.value;
   const result = await translateToEnAsync(inputText);
   code.value = result;
   if (code.value !== inputText) {
     pasteToClipboard(code.value);
   }
+  isLoading.value = false;
 }
 
 async function clickTranslateToZh() {
+  isLoading.value = true;
   const inputText = code.value;
   const result = await translateToZhAsync(inputText);
   code.value = result;
   if (code.value !== inputText) {
     pasteToClipboard(code.value);
   }
+  isLoading.value = false;
 }
 
 async function handleCopyFromClipboard() {
@@ -146,6 +152,7 @@ function runCode() {
 </script>
 
 <template>
+  <Loading v-if="isLoading" />
   <div class="control-panel">
     <div class="tabs">
       <button 
