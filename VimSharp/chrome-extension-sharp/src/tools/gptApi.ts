@@ -20,7 +20,7 @@ export class GptApi {
   private _apiUrl: string = "";
   private _urlPrefix: string = "/";
 
-  constructor(apiUrl: string, urlPrefix: string) {
+  constructor(apiUrl: string, urlPrefix: string="/api/") {
      this._apiUrl = apiUrl;
      this._urlPrefix = urlPrefix;
   }
