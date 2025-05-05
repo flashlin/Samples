@@ -1,10 +1,11 @@
 import { LinqIdentifierExpr, LinqMemberAccessExpr } from './LinqExprs';
 import { LinqParser } from './LinqParser';
+import { LinqQueryExpr } from './LinqExprs';
 
 describe('LinqParser', () => {
   it('should parse simple select', () => {
     const linq = new LinqParser();
-    const expr = linq.parse('from tb1 in customer select tb1');
+    const expr = linq.parse('from tb1 in customer select tb1') as LinqQueryExpr;
     expect(expr.From.Identifier).toBe('tb1');
     expect(expr.From.Source).toBe('customer');
     // 保證 expr.Select 不為 undefined
@@ -14,7 +15,7 @@ describe('LinqParser', () => {
 
   it('should parse join and select new', () => {
     const linq = new LinqParser();
-    const expr = linq.parse('from tb1 in customer join tb2 in orders on tb2.CustomerId equals tb1.id select new { tb1.id, Name = tb1.LastName, tb2.Amount }');
+    const expr = linq.parse('from tb1 in customer join tb2 in orders on tb2.CustomerId equals tb1.id select new { tb1.id, Name = tb1.LastName, tb2.Amount }') as LinqQueryExpr;
     // 檢查 From
     expect(expr.From.Identifier).toBe('tb1');
     expect(expr.From.Source).toBe('customer');
