@@ -15,6 +15,10 @@ export interface GptReq {
   maxTokens: number;
 }
 
+function removeThinkTagContent(text: string): string {
+  return text.replace(/<think>[\s\S]+<\/think>/g, '');
+}
+
 export async function invokeGptApiAsync(text: string) {
   const gptApi = new GptApi(GPTAPI_URL);
   const req: GptReq = {
@@ -30,6 +34,8 @@ export async function invokeGptApiAsync(text: string) {
       let answer = outputText.substring(0, outputText.lastIndexOf(cursorChar));
       output = answer + token + cursorChar;
   });
+  output = output.substring(0, output.lastIndexOf(cursorChar));
+  output = removeThinkTagContent(output);
   return output;
 }
 
