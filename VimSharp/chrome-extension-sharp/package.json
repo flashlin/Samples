@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:localdev": "vite --mode localdev",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "build:extension": "vite build && node scripts/copy-popup.js"
