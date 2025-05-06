@@ -1,5 +1,13 @@
 #!/bin/bash
 
+#
+# gt() {
+#  /mnt/d/VDisk/Github/Samples/bash/gt.sh "$@"
+# }
+# source ~/.bashrc
+# 
+
+
 # Print info message in green
 info() {
   echo -e "\033[32m$1\033[0m"
