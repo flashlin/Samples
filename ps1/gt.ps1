@@ -171,7 +171,45 @@ if( "c" -eq $action ) {
 
 if( "df" -eq $action )
 {
-    InvokeCmd "git diff origin/master"
+    # 取得所有修改但尚未 commit 的檔案
+    $changes = git diff --name-status
+
+    foreach ($line in $changes) {
+        $status, $path = $line -split "`t"
+
+        switch ($status) {
+            'M' {
+                Write-Host " M " -BackgroundColor Yellow -ForegroundColor Black -NoNewline
+                Write-Host " $path"
+
+                # 匯出暫存區版本（若無，會失敗）
+                $stagedPath = "$env:TEMP\__staged__.txt"
+                git show ":$path" 2>$null > $stagedPath
+
+                # 匯出當前工作目錄版本
+                $workingPath = "$env:TEMP\__working__.txt"
+                Get-Content $path > $workingPath
+
+                # 使用 side-by-side diff
+                diff -y --width=160 --suppress-common-lines $stagedPath $workingPath
+
+                Remove-Item $stagedPath, $workingPath
+            }
+            'A' {
+                Write-Host " A " -BackgroundColor Green -ForegroundColor White -NoNewline
+                Write-Host " $path"
+            }
+            'D' {
+                Write-Host " D " -BackgroundColor Red -ForegroundColor White -NoNewline
+                Write-Host " $path"
+            }
+            default {
+                Write-Host " $status " -BackgroundColor DarkGray -ForegroundColor White -NoNewline
+                Write-Host " $path"
+            }
+        }
+    }
+
     return
 }
 
