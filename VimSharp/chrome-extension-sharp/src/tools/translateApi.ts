@@ -16,7 +16,7 @@ export interface GptReq {
 }
 
 function removeThinkTagContent(text: string): string {
-  return text.replace(/<think>[\s\S]+<\/think>/g, '');
+  return text.replace(/<think>[\s\S]+?<\/think>/, '');
 }
 
 export async function invokeGptApiAsync(text: string) {
@@ -36,6 +36,8 @@ export async function invokeGptApiAsync(text: string) {
   });
   output = output.substring(0, output.lastIndexOf(cursorChar));
   output = removeThinkTagContent(output);
+  // Remove leading whitespace from output
+  output = output.replace(/^\s+/, '');
   return output;
 }
 
