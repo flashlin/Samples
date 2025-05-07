@@ -7,7 +7,9 @@ import {
   LinqIdentifierExpr,
   LinqMemberAccessExpr,
   LinqNewExpr,
-  LinqPropertyExpr
+  LinqPropertyExpr,
+  LinqBinaryExpr,
+  LinqWhereExpr
 } from './LinqExprs';
 
 // 將查詢字串轉為 token 陣列
@@ -63,17 +65,24 @@ function parseBinaryExpr(tokens: string[]): Result<{ expr: LinqExpr; rest: strin
   }
   const rightResult = parseLiteral(rest1);
   if (!rightResult.ok) return rightResult;
-  const bin = new LinqMemberAccessExpr();
-  // 這裡僅示意，實際應建立 LinqBinaryExpr
+  // 正確建立 LinqBinaryExpr
+  const bin = new LinqBinaryExpr();
+  bin.Left = leftResult.value.expr;
+  bin.Operator = op;
+  bin.Right = rightResult.value.expr;
   return ok({
-    expr: leftResult.value.expr, // 應改為 LinqBinaryExpr
+    expr: bin,
     rest: rightResult.value.rest,
   });
 }
 
 function parseWhere(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }> {
   if (tokens[0] !== 'where') return err('Expected where');
-  return parseBinaryExpr(tokens.slice(1));
+  const condResult = parseBinaryExpr(tokens.slice(1));
+  if (!condResult.ok) return condResult;
+  const whereExpr = new LinqWhereExpr();
+  whereExpr.Condition = condResult.value.expr;
+  return ok({ expr: whereExpr, rest: condResult.value.rest });
 }
 
 function parseSelect(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }> {
@@ -249,9 +258,32 @@ export class LinqParser {
     if (this.peekToken() === 'join') {
       this._parseJoin(expr);
     }
-    // where ... (暫不實作)
+    // where ...
     if (this.peekToken() === 'where') {
-      while (this.peekToken() !== 'select' && this._i < this._tokens.length) this.nextToken();
+      this.nextToken(); // where
+      // 解析左側（如 tb1.status）
+      const left = this._parseMemberAccess(this._tokens, this._i);
+      const leftExpr = left[0];
+      this._i = left[1];
+      const op = this.nextToken(); // 例如 ==
+      // 解析右側（如 1）
+      let rightExpr;
+      const rightToken = this._tokens[this._i];
+      if (/^\d+$/.test(rightToken)) {
+        rightExpr = new LinqIdentifierExpr();
+        rightExpr.Name = rightToken;
+        this._i++;
+      } else {
+        rightExpr = new LinqIdentifierExpr();
+        rightExpr.Name = this.nextToken();
+      }
+      // 組成 LinqBinaryExpr
+      const cond = new LinqBinaryExpr();
+      cond.Left = leftExpr;
+      cond.Operator = op;
+      cond.Right = rightExpr;
+      expr.Where = new LinqWhereExpr();
+      expr.Where.Condition = cond;
     }
     // select ...
     if (this.nextToken() !== 'select') throw new Error('缺少 select');
