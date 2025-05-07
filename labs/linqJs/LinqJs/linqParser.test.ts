@@ -1,6 +1,7 @@
 import { LinqIdentifierExpr, LinqMemberAccessExpr } from './LinqExprs';
 import { LinqParser } from './LinqParser';
 import { LinqQueryExpr } from './LinqExprs';
+import { LinqNewExpr } from './LinqExprs';
 
 describe('LinqParser', () => {
   it('should parse simple select', () => {
@@ -33,19 +34,19 @@ describe('LinqParser', () => {
     // 檢查 Select
     expect(expr.Select).toBeDefined();
     // 驗證 select new 結構 AST
-    const newExpr = expr.Select!.Expression as any;
+    const newExpr = expr.Select!.Expression as LinqNewExpr;
     expect(newExpr.Properties.length).toBe(3);
     // tb1.id
     expect(newExpr.Properties[0].Name).toBe('tb1');
-    expect(newExpr.Properties[0].Value.MemberName).toBe('id');
+    expect((newExpr.Properties[0].Value as LinqMemberAccessExpr).MemberName).toBe('id');
     // Name = tb1.LastName
     expect(newExpr.Properties[1].Name).toBe('Name');
-    expect(newExpr.Properties[1].Value.MemberName).toBe('LastName');
+    expect((newExpr.Properties[1].Value as LinqMemberAccessExpr).MemberName).toBe('LastName');
     // 驗證 tb1.LastName 的 Target.Name
-    expect((newExpr.Properties[1].Value.Target as LinqIdentifierExpr).Name).toBe('tb1');
+    expect(((newExpr.Properties[1].Value as LinqMemberAccessExpr).Target as LinqIdentifierExpr).Name).toBe('tb1');
     // tb2.Amount
     expect(newExpr.Properties[2].Name).toBe('tb2');
-    expect(newExpr.Properties[2].Value.MemberName).toBe('Amount');
+    expect((newExpr.Properties[2].Value as LinqMemberAccessExpr).MemberName).toBe('Amount');
   });
 
 
@@ -104,16 +105,18 @@ describe('LinqParser', () => {
     // 驗證 select new
     expect(expr.Select).toBeDefined();
     // 驗證 select new 結構 AST
-    const newExpr = expr.Select!.Expression as any;
+    const newExpr = expr.Select!.Expression as LinqNewExpr;
     expect(newExpr.Properties.length).toBe(2);
     // CustomerId = g.Key
     expect(newExpr.Properties[0].Name).toBe('CustomerId');
-    expect(newExpr.Properties[0].Value.MemberName).toBe('Key');
+    const customerIdValue = newExpr.Properties[0].Value as LinqMemberAccessExpr;
+    expect(customerIdValue.MemberName).toBe('Key');
     // TotalAmount = g.Sum(o => o.Amount)
     expect(newExpr.Properties[1].Name).toBe('TotalAmount');
-    expect(newExpr.Properties[1].Value.FunctionName).toBe('Sum');
-    expect(newExpr.Properties[1].Value.Arguments.length).toBe(1);
-    expect(newExpr.Properties[1].Value.Arguments[0].Name).toBe('o');
-    expect(newExpr.Properties[1].Value.Arguments[0].MemberName).toBe('Amount');
+    const sumExpr = newExpr.Properties[1].Value as any;
+    expect(sumExpr.FunctionName).toBe('Sum');
+    expect(sumExpr.Arguments.length).toBe(1);
+    expect(sumExpr.Arguments[0].Name).toBe('o');
+    expect(sumExpr.Arguments[0].MemberName).toBe('Amount');
   });
 }); 
