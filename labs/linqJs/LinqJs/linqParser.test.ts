@@ -47,4 +47,35 @@ describe('LinqParser', () => {
     expect(newExpr.Properties[2].Name).toBe('tb2');
     expect(newExpr.Properties[2].Value.MemberName).toBe('Amount');
   });
+
+
+  it('should parse join with on equals and where', () => {
+    const linq = new LinqParser();
+    const expr = linq.parse('from tb1 in customer join tb2 in orders on tb2.CustomerId equals tb1.id where tb1.status == 1 select tb1') as LinqQueryExpr;
+    // 檢查 From
+    expect(expr.From.Identifier).toBe('tb1');
+    expect(expr.From.Source).toBe('customer');
+    // 檢查 Join
+    expect(expr.Joins.length).toBe(1);
+    expect(expr.Joins[0].Identifier).toBe('tb2');
+    expect(expr.Joins[0].Source).toBe('orders');
+    // 驗證 join on 條件
+    const outerKey = expr.Joins[0].OuterKey as LinqMemberAccessExpr;
+    const innerKey = expr.Joins[0].InnerKey as LinqMemberAccessExpr;
+    expect((outerKey.Target as LinqIdentifierExpr).Name).toBe('tb2');
+    expect(outerKey.MemberName).toBe('CustomerId');
+    expect((innerKey.Target as LinqIdentifierExpr).Name).toBe('tb1');
+    expect(innerKey.MemberName).toBe('id');
+    // 檢查 Where
+    expect(expr.Where).toBeDefined();
+    const cond = expr.Where!.Condition as any;
+    // 只驗證型別與欄位
+    expect(cond.Left.Target.Name).toBe('tb1');
+    expect(cond.Left.MemberName).toBe('status');
+    expect(cond.Operator).toBe('==');
+    expect(cond.Right.Name).toBe('1');
+    // 檢查 Select
+    expect(expr.Select).toBeDefined();
+    expect((expr.Select!.Expression as LinqIdentifierExpr).Name).toBe('tb1');
+  });
 }); 
