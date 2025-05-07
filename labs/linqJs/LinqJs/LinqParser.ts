@@ -163,34 +163,105 @@ export class LinqParser {
         this.nextToken();
         continue;
       }
-      let name = this.nextToken();
-      let valueExpr: any;
-      if (this.peekToken() === '=') {
-        this.nextToken(); // =
-        if (this._tokens[this._i + 1] === '.') {
-          const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
-          valueExpr = member;
-          this._i = nextIdx;
-        } else {
-          valueExpr = new LinqIdentifierExpr();
-          valueExpr.Name = this.nextToken();
-        }
-      } else if (this.peekToken() === '.') {
-        const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i - 1);
-        valueExpr = member;
-        name = this._tokens[this._i - 1];
-        this._i = nextIdx;
-      } else {
-        valueExpr = new LinqIdentifierExpr();
-        valueExpr.Name = name;
-      }
-      const prop = new LinqPropertyExpr();
-      prop.Name = name;
-      prop.Value = valueExpr;
+      // 解析 property
+      const prop = this._parseSelectNewProperty();
       newExpr.Properties.push(prop);
     }
     this.nextToken(); // }
     return newExpr;
+  }
+
+  // 解析 select new { ... } 內單一 property
+  private _parseSelectNewProperty(): LinqPropertyExpr {
+    let name = this.nextToken();
+    let valueExpr: any;
+    // Name = ...
+    if (this.peekToken() === '=') {
+      this.nextToken(); // =
+      // function call: g.Sum(...)
+      if (this._tokens[this._i] && this._tokens[this._i + 1] === '.' && this._tokens[this._i + 3] === '(') {
+        // 例如 g.Sum(...)
+        const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
+        this._i = nextIdx;
+        valueExpr = this._parseFunctionCall(member);
+      } else if (this._tokens[this._i] && this._tokens[this._i + 1] === '.') {
+        // 例如 tb1.LastName
+        const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
+        valueExpr = member;
+        this._i = nextIdx;
+      } else {
+        // 例如 Name = g
+        valueExpr = new LinqIdentifierExpr();
+        valueExpr.Name = this.nextToken();
+      }
+    } else if (this.peekToken() === '.') {
+      // 例如 tb1.id
+      const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i - 1);
+      valueExpr = member;
+      name = this._tokens[this._i - 1];
+      this._i = nextIdx;
+    } else if (this._tokens[this._i] && this._tokens[this._i + 1] === '.') {
+      // 例如 tb2.Amount
+      const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
+      valueExpr = member;
+      name = this._tokens[this._i];
+      this._i = nextIdx;
+    } else if (this._tokens[this._i] && this._tokens[this._i + 1] === '(') {
+      // 例如 g.Sum(...)
+      valueExpr = this._parseFunctionCall();
+    } else {
+      // 例如 tb1
+      valueExpr = new LinqIdentifierExpr();
+      valueExpr.Name = name;
+    }
+    const prop = new LinqPropertyExpr();
+    prop.Name = name;
+    prop.Value = valueExpr;
+    return prop;
+  }
+
+  // 解析 function call (ex: g.Sum(o => o.Amount))
+  private _parseFunctionCall(memberAccess?: LinqMemberAccessExpr): any {
+    // memberAccess: g.Sum
+    let funcName = '';
+    let objExpr = null;
+    if (memberAccess) {
+      objExpr = memberAccess.Target;
+      funcName = memberAccess.MemberName;
+    } else {
+      // 例如 g.Sum
+      objExpr = new LinqIdentifierExpr();
+      objExpr.Name = this.nextToken();
+      this.nextToken(); // .
+      funcName = this.nextToken();
+    }
+    this.nextToken(); // (
+    // 處理 lambda: o => o.Amount
+    let argExpr;
+    if (this._tokens[this._i + 1] === '=>') {
+      // lambda
+      const lambdaArg = this.nextToken(); // o
+      this.nextToken(); // =>
+      const argObj = new LinqIdentifierExpr();
+      argObj.Name = lambdaArg;
+      this.nextToken(); // o
+      this.nextToken(); // .
+      const member = new LinqMemberAccessExpr();
+      member.Target = argObj;
+      member.MemberName = this.nextToken(); // Amount
+      argExpr = member;
+    } else if (this._tokens[this._i] && this._tokens[this._i + 1] === '.') {
+      // 例如 g.Key
+      const [member, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
+      argExpr = member;
+      this._i = nextIdx;
+    } else {
+      // 例如 g
+      argExpr = new LinqIdentifierExpr();
+      argExpr.Name = this.nextToken();
+    }
+    this.nextToken(); // )
+    return { FunctionName: funcName, Object: objExpr, Arguments: [argExpr] };
   }
   // 解析 join 區塊
   private _parseJoin(expr: LinqQueryExpr) {

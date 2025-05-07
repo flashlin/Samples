@@ -106,6 +106,7 @@ describe('LinqParser', () => {
     expect(expr.Select).toBeDefined();
     // 驗證 select new 結構 AST
     const newExpr = expr.Select!.Expression as LinqNewExpr;
+    console.log(newExpr.Properties);
     expect(newExpr.Properties.length).toBe(2);
     // CustomerId = g.Key
     expect(newExpr.Properties[0].Name).toBe('CustomerId');
@@ -116,7 +117,8 @@ describe('LinqParser', () => {
     const sumExpr = newExpr.Properties[1].Value as any;
     expect(sumExpr.FunctionName).toBe('Sum');
     expect(sumExpr.Arguments.length).toBe(1);
-    expect(sumExpr.Arguments[0].Name).toBe('o');
-    expect(sumExpr.Arguments[0].MemberName).toBe('Amount');
+    const arg0 = sumExpr.Arguments[0] as LinqMemberAccessExpr;
+    expect((arg0.Target as LinqIdentifierExpr).Name).toBe('o');
+    expect(arg0.MemberName).toBe('Amount');
   });
 }); 
