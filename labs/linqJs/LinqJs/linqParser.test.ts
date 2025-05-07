@@ -41,6 +41,8 @@ describe('LinqParser', () => {
     // Name = tb1.LastName
     expect(newExpr.Properties[1].Name).toBe('Name');
     expect(newExpr.Properties[1].Value.MemberName).toBe('LastName');
+    // 驗證 tb1.LastName 的 Target.Name
+    expect((newExpr.Properties[1].Value.Target as LinqIdentifierExpr).Name).toBe('tb1');
     // tb2.Amount
     expect(newExpr.Properties[2].Name).toBe('tb2');
     expect(newExpr.Properties[2].Value.MemberName).toBe('Amount');
