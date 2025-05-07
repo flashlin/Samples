@@ -242,6 +242,33 @@ export class LinqParser {
     this._i = nextIdx2;
     expr.Joins.push(join);
   }
+  // 解析 where 區塊
+  private _parseWhere(expr: LinqQueryExpr) {
+    this.nextToken(); // where
+    // 解析左側（如 tb1.status）
+    const left = this._parseMemberAccess(this._tokens, this._i);
+    const leftExpr = left[0];
+    this._i = left[1];
+    const op = this.nextToken(); // 例如 ==
+    // 解析右側（如 1）
+    let rightExpr;
+    const rightToken = this._tokens[this._i];
+    if (/^\d+$/.test(rightToken)) {
+      rightExpr = new LinqIdentifierExpr();
+      rightExpr.Name = rightToken;
+      this._i++;
+    } else {
+      rightExpr = new LinqIdentifierExpr();
+      rightExpr.Name = this.nextToken();
+    }
+    // 組成 LinqBinaryExpr
+    const cond = new LinqBinaryExpr();
+    cond.Left = leftExpr;
+    cond.Operator = op;
+    cond.Right = rightExpr;
+    expr.Where = new LinqWhereExpr();
+    expr.Where.Condition = cond;
+  }
   // 解析 LINQ 查詢字串，回傳 AST
   public parse(query: string): LinqQueryExpr {
     const tokenizer = new LinqTokenizer();
@@ -260,30 +287,7 @@ export class LinqParser {
     }
     // where ...
     if (this.peekToken() === 'where') {
-      this.nextToken(); // where
-      // 解析左側（如 tb1.status）
-      const left = this._parseMemberAccess(this._tokens, this._i);
-      const leftExpr = left[0];
-      this._i = left[1];
-      const op = this.nextToken(); // 例如 ==
-      // 解析右側（如 1）
-      let rightExpr;
-      const rightToken = this._tokens[this._i];
-      if (/^\d+$/.test(rightToken)) {
-        rightExpr = new LinqIdentifierExpr();
-        rightExpr.Name = rightToken;
-        this._i++;
-      } else {
-        rightExpr = new LinqIdentifierExpr();
-        rightExpr.Name = this.nextToken();
-      }
-      // 組成 LinqBinaryExpr
-      const cond = new LinqBinaryExpr();
-      cond.Left = leftExpr;
-      cond.Operator = op;
-      cond.Right = rightExpr;
-      expr.Where = new LinqWhereExpr();
-      expr.Where.Condition = cond;
+      this._parseWhere(expr);
     }
     // select ...
     if (this.nextToken() !== 'select') throw new Error('缺少 select');
