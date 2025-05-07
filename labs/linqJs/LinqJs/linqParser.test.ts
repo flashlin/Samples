@@ -106,7 +106,6 @@ describe('LinqParser', () => {
     expect(expr.Select).toBeDefined();
     // 驗證 select new 結構 AST
     const newExpr = expr.Select!.Expression as LinqNewExpr;
-    console.log(newExpr.Properties);
     expect(newExpr.Properties.length).toBe(2);
     // CustomerId = g.Key
     expect(newExpr.Properties[0].Name).toBe('CustomerId');

@@ -122,6 +122,18 @@ function parseJoin(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }>
   return ok({ expr: joinExpr, rest: rightRes.value.rest });
 }
 
+// 自訂解析錯誤例外，包含 token 與位置
+export class LinqParseError extends Error {
+  token: string;
+  position: number;
+  constructor(message: string, token: string, position: number) {
+    super(`${message} (at token: '${token}', position: ${position})`);
+    this.token = token;
+    this.position = position;
+    this.name = 'LinqParseError';
+  }
+}
+
 // LinqParser class for parsing LINQ query string to AST
 export class LinqParser {
   private _tokens: string[] = [];
@@ -131,6 +143,10 @@ export class LinqParser {
   }
   private peekToken(): string {
     return this._tokens[this._i];
+  }
+  // 輔助方法: 拋出解析錯誤，帶入目前 token 與位置
+  private throwParseError(message: string): never {
+    throw new LinqParseError(message, this._tokens[this._i - 1], this._i - 1);
   }
   // 解析成 LinqMemberAccessExpr
   private _parseMemberAccess(tokens: string[], start: number): [LinqMemberAccessExpr, number] {
@@ -143,7 +159,7 @@ export class LinqParser {
       member.Target = target;
       member.MemberName = tokens[start + 2];
       return [member, start + 3];
-    } else {
+    } else if (id) {
       // 單一識別字
       const member = new LinqMemberAccessExpr();
       const target = new LinqIdentifierExpr();
@@ -151,6 +167,8 @@ export class LinqParser {
       member.Target = target;
       member.MemberName = '';
       return [member, start + 1];
+    } else {
+      this.throwParseError('Expected identifier');
     }
   }
   // 解析 select new { ... } 區塊
@@ -268,13 +286,13 @@ export class LinqParser {
     this.nextToken(); // join
     const join = new LinqJoinExpr();
     join.Identifier = this.nextToken();
-    if (this.nextToken() !== 'in') throw new Error('join 後需 in');
+    if (this.nextToken() !== 'in') this.throwParseError('join 後需 in');
     join.Source = this.nextToken();
-    if (this.nextToken() !== 'on') throw new Error('join 後需 on');
+    if (this.nextToken() !== 'on') this.throwParseError('join 後需 on');
     const [outerKey, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
     join.OuterKey = outerKey;
     this._i = nextIdx;
-    if (this.nextToken() !== 'equals') throw new Error('join on 後需 equals');
+    if (this.nextToken() !== 'equals') this.throwParseError('join on 後需 equals');
     const [innerKey, nextIdx2] = this._parseMemberAccess(this._tokens, this._i);
     join.InnerKey = innerKey;
     this._i = nextIdx2;
@@ -322,7 +340,7 @@ export class LinqParser {
         idExpr.Name = this.nextToken();
         elementExpr = idExpr;
       }
-      if (this.nextToken() !== 'by') throw new Error('group by 語法錯誤');
+      if (this.nextToken() !== 'by') this.throwParseError('group by 語法錯誤');
       // 解析 key
       const [keyExpr, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
       this._i = nextIdx;
@@ -351,10 +369,10 @@ export class LinqParser {
     this._initTokens(query);
     const expr = new LinqQueryExpr();
     // from tb1 in customer
-    if (this.nextToken() !== 'from') throw new Error('必須以 from 開頭');
+    if (this.nextToken() !== 'from') this.throwParseError('必須以 from 開頭');
     expr.From = new LinqFromExpr();
     expr.From.Identifier = this.nextToken();
-    if (this.nextToken() !== 'in') throw new Error('from 後需 in');
+    if (this.nextToken() !== 'in') this.throwParseError('from 後需 in');
     expr.From.Source = this.nextToken();
     // join ...
     if (this.peekToken() === 'join') {
@@ -367,7 +385,7 @@ export class LinqParser {
     // group by ...
     this._parseGroupByIfExist(expr);
     // select ...
-    if (this.nextToken() !== 'select') throw new Error('缺少 select');
+    if (this.nextToken() !== 'select') this.throwParseError('缺少 select');
     expr.Select = new LinqSelectExpr();
     if (this.peekToken() === 'new' && this._tokens[this._i + 1] === '{') {
       expr.Select.Expression = this._parseSelectNew();
