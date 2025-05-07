@@ -269,11 +269,15 @@ export class LinqParser {
     expr.Where = new LinqWhereExpr();
     expr.Where.Condition = cond;
   }
-  // 解析 LINQ 查詢字串，回傳 AST
-  public parse(query: string): LinqQueryExpr {
+  // 初始化 tokens 與索引
+  private _initTokens(query: string) {
     const tokenizer = new LinqTokenizer();
     this._tokens = tokenizer.tokenize(query);
     this._i = 0;
+  }
+  // 解析 LINQ 查詢字串，回傳 AST
+  public parse(query: string): LinqQueryExpr {
+    this._initTokens(query);
     const expr = new LinqQueryExpr();
     // from tb1 in customer
     if (this.nextToken() !== 'from') throw new Error('必須以 from 開頭');
