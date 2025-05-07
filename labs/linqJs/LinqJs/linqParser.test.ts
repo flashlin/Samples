@@ -78,4 +78,42 @@ describe('LinqParser', () => {
     expect(expr.Select).toBeDefined();
     expect((expr.Select!.Expression as LinqIdentifierExpr).Name).toBe('tb1');
   });
+
+  it('should parse group by and select new', () => {
+    const linq = new LinqParser();
+    const expr = linq.parse('from o in orders join c in customers on o.CustomerId equals c.CustomerId group o by c.CustomerId into g select new { CustomerId = g.Key, TotalAmount = g.Sum(o => o.Amount) }') as LinqQueryExpr;
+    // 檢查 From
+    expect(expr.From.Identifier).toBe('o');
+    expect(expr.From.Source).toBe('orders');
+    // 檢查 Join
+    expect(expr.Joins.length).toBe(1);
+    expect(expr.Joins[0].Identifier).toBe('c');
+    expect(expr.Joins[0].Source).toBe('customers');
+    // 驗證 join on 條件
+    const outerKey = expr.Joins[0].OuterKey as LinqMemberAccessExpr;
+    const innerKey = expr.Joins[0].InnerKey as LinqMemberAccessExpr;
+    expect((outerKey.Target as LinqIdentifierExpr).Name).toBe('o');
+    expect(outerKey.MemberName).toBe('CustomerId');
+    expect((innerKey.Target as LinqIdentifierExpr).Name).toBe('c');
+    expect(innerKey.MemberName).toBe('CustomerId');
+    // 驗證 group by
+    expect(expr.Group).toBeDefined();
+    const groupKey = expr.Group!.Key as LinqMemberAccessExpr;
+    expect((groupKey.Target as LinqIdentifierExpr).Name).toBe('c');
+    expect(groupKey.MemberName).toBe('CustomerId');
+    // 驗證 select new
+    expect(expr.Select).toBeDefined();
+    // 驗證 select new 結構 AST
+    const newExpr = expr.Select!.Expression as any;
+    expect(newExpr.Properties.length).toBe(2);
+    // CustomerId = g.Key
+    expect(newExpr.Properties[0].Name).toBe('CustomerId');
+    expect(newExpr.Properties[0].Value.MemberName).toBe('Key');
+    // TotalAmount = g.Sum(o => o.Amount)
+    expect(newExpr.Properties[1].Name).toBe('TotalAmount');
+    expect(newExpr.Properties[1].Value.FunctionName).toBe('Sum');
+    expect(newExpr.Properties[1].Value.Arguments.length).toBe(1);
+    expect(newExpr.Properties[1].Value.Arguments[0].Name).toBe('o');
+    expect(newExpr.Properties[1].Value.Arguments[0].MemberName).toBe('Amount');
+  });
 }); 
