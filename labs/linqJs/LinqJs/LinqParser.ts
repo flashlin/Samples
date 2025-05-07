@@ -9,7 +9,9 @@ import {
   LinqNewExpr,
   LinqPropertyExpr,
   LinqBinaryExpr,
-  LinqWhereExpr
+  LinqWhereExpr,
+  LinqGroupByExpr,
+  LinqIntoExpr
 } from './LinqExprs';
 
 // 將查詢字串轉為 token 陣列
@@ -118,41 +120,6 @@ function parseJoin(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }>
   joinExpr.OuterKey = leftRes.value.expr;
   joinExpr.InnerKey = rightRes.value.expr;
   return ok({ expr: joinExpr, rest: rightRes.value.rest });
-}
-
-export function parseExpr(tokens: string[]): Result<{ expr: LinqExpr; rest: string[] }> {
-  // from tb1 in customer [join ...] [where ...] select ...
-  const fromResult = parseFrom(tokens);
-  if (!fromResult.ok) return fromResult;
-  let rest = fromResult.value.rest;
-  let join: LinqExpr | undefined;
-  let where: LinqExpr | undefined;
-  let groupBy: LinqExpr | undefined;
-  // join
-  if (rest[0] === 'join') {
-    const joinRes = parseJoin(rest);
-    if (!joinRes.ok) return joinRes;
-    join = joinRes.value.expr;
-    rest = joinRes.value.rest;
-  }
-  // where
-  if (rest[0] === 'where') {
-    const whereRes = parseWhere(rest);
-    if (!whereRes.ok) return whereRes;
-    where = whereRes.value.expr;
-    rest = whereRes.value.rest;
-  }
-  // group by (暫略)
-  if (rest[0] === 'group') {
-    rest = rest.slice(3); // 跳過 group by ...
-  }
-  // select
-  const selectRes = parseSelect(rest);
-  if (!selectRes.ok) return selectRes;
-  return ok({
-    expr: selectRes.value.expr,
-    rest: selectRes.value.rest,
-  });
 }
 
 // LinqParser class for parsing LINQ query string to AST
@@ -269,6 +236,39 @@ export class LinqParser {
     expr.Where = new LinqWhereExpr();
     expr.Where.Condition = cond;
   }
+  // 解析 group by/into 區塊
+  private _parseGroupByIfExist(expr: LinqQueryExpr) {
+    if (this.peekToken() === 'group') {
+      this.nextToken(); // group
+      // group o by c.CustomerId into g
+      // group <element> by <key> [into <intoIdentifier>]
+      // 解析 element
+      let elementExpr: any;
+      if (this.peekToken() === 'new' && this._tokens[this._i + 1] === '{') {
+        elementExpr = this._parseSelectNew();
+      } else {
+        const idExpr = new LinqIdentifierExpr();
+        idExpr.Name = this.nextToken();
+        elementExpr = idExpr;
+      }
+      if (this.nextToken() !== 'by') throw new Error('group by 語法錯誤');
+      // 解析 key
+      const [keyExpr, nextIdx] = this._parseMemberAccess(this._tokens, this._i);
+      this._i = nextIdx;
+      const groupExpr = new LinqGroupByExpr();
+      groupExpr.Element = elementExpr;
+      groupExpr.Key = keyExpr;
+      expr.Group = groupExpr;
+      // 處理 into
+      if (this.peekToken() === 'into') {
+        this.nextToken(); // into
+        const intoId = this.nextToken();
+        const intoExpr = new LinqIntoExpr();
+        (intoExpr as any).Identifier = intoId;
+        expr.Into = intoExpr;
+      }
+    }
+  }
   // 初始化 tokens 與索引
   private _initTokens(query: string) {
     const tokenizer = new LinqTokenizer();
@@ -293,6 +293,8 @@ export class LinqParser {
     if (this.peekToken() === 'where') {
       this._parseWhere(expr);
     }
+    // group by ...
+    this._parseGroupByIfExist(expr);
     // select ...
     if (this.nextToken() !== 'select') throw new Error('缺少 select');
     expr.Select = new LinqSelectExpr();
