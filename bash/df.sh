@@ -28,7 +28,7 @@ show_icdiff_for_files() {
   # 從第二個參數開始才是檔案
   for file in "${files[@]:1}"; do
     echo "🔍 比較檔案：$file"
-    icdiff <(git show "${commit_id}^":"$file") <(git show "${commit_id}":"$file")
+    icdiff -N <(git show "${commit_id}^":"$file") <(git show "${commit_id}":"$file")
     echo ""
   done
 }
