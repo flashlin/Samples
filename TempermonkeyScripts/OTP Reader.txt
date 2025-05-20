@@ -1,0 +1,68 @@
+// ==UserScript==
+// @name         OTP Reader
+// @namespace    http://tampermonkey.net/
+// @version      0.2
+// @description  Auto fill Artemis OTP
+// @author       king.ho
+// @match        http://dba-sb-prod.coreop.net/
+// @match        http://dba-xt-prod.coreop.net/
+// @require      http://code.jquery.com/jquery-3.5.1.min.js
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    let channelId = 'DS223A3U3';
+    let token = 'xoxp-xxx-xxx-xxx-xxx';
+
+    // Your code here...
+    function getOtp(){
+        let otp;
+        $.ajax({
+            url: "https://slack.com/api/conversations.history?token=" + token + "&channel=" + channelId + "&limit=1&pretty=1",
+            async: false,
+            success: function(response){
+                let message = response.messages[0].text;
+                let otpPattern = /\d{6}/;
+                let regexResult = message.match(otpPattern);
+                otp = regexResult[0];
+            }
+        });
+        return otp;
+    }
+
+    function waitOtpElement(){
+        let otpElement = $('#password');
+        if(otpElement && otpElement[0].name === 'otp'){
+            fillOtpAndSubmit(otpElement[0]);
+            markMessageAsRead();
+        }
+        else
+        {
+            window.setTimeout(waitOtpElement, 1000);
+        }
+    }
+
+    function fillOtpAndSubmit(otpElement){
+        let otp = getOtp();
+        otpElement.value = otp;
+        let submitElement = $('.FormButton');
+        submitElement.click();
+    }
+
+    function markMessageAsRead(){
+        let currentUnixTimestamp = Math.floor(Date.now() / 1000);
+        $.ajax({
+            url: "https://slack.com/api/conversations.mark?token=" + token + "&channel=" + channelId + "&ts=" + currentUnixTimestamp +"&pretty=1",
+            async: false,
+            success: function(response){
+                if(response.ok != true){
+                    console.log(response.error);
+                };
+            }
+        });
+    }
+
+    waitOtpElement();
+
+})();
