@@ -20,6 +20,12 @@ public class LinqParser
         if (inResult.HasError) return inResult.Error;
         var sourceResult = ParseIdentifier();
         if (sourceResult.HasError) return sourceResult.Error;
+        // parse where
+        LinqWhereExpr whereExpr = null;
+        if (TryParseWhere(out var where))
+        {
+            whereExpr = new LinqWhereExpr { Condition = where };
+        }
         var selectResult = Keywords("select")();
         if (selectResult.HasError) return selectResult.Error;
         var selectAliasResult = ParseIdentifier();
@@ -31,11 +37,99 @@ public class LinqParser
                 Source = sourceResult.ResultValue,
                 AliasName = aliasResult.ResultValue
             },
+            Where = whereExpr,
             Select = new LinqSelectAllExpr
             {
                 AliasName = selectAliasResult.ResultValue
             }
         };
+    }
+
+    private bool TryParseWhere(out ILinqExpression where)
+    {
+        where = null;
+        _text.SkipWhitespace();
+        var pos = _text.Position;
+        if (!_text.TryKeywordIgnoreCase("where", out _))
+        {
+            _text.Position = pos;
+            return false;
+        }
+        _text.SkipWhitespace();
+        // parse left: tb1.Id
+        var left = ParseLinqFieldExpr();
+        if (left == null)
+        {
+            _text.Position = pos;
+            return false;
+        }
+        _text.SkipWhitespace();
+        // parse operator: ==
+        var op = ParseComparisonOperator();
+        if (op == null)
+        {
+            _text.Position = pos;
+            return false;
+        }
+        _text.SkipWhitespace();
+        // parse right: 1
+        var right = ParseLinqValue();
+        if (right == null)
+        {
+            _text.Position = pos;
+            return false;
+        }
+        where = new LinqConditionExpression
+        {
+            Left = left,
+            ComparisonOperator = op.Value,
+            Right = right
+        };
+        return true;
+    }
+
+    private LinqFieldExpr ParseLinqFieldExpr()
+    {
+        _text.SkipWhitespace();
+        var id1 = _text.ReadIdentifier();
+        if (string.IsNullOrEmpty(id1.Word)) return null;
+        var pos = _text.Position;
+        _text.SkipWhitespace();
+        if (_text.PeekChar() == '.')
+        {
+            _text.NextChar();
+            var id2 = _text.ReadIdentifier();
+            if (string.IsNullOrEmpty(id2.Word))
+            {
+                _text.Position = pos;
+                return null;
+            }
+            return new LinqFieldExpr { TableOrAlias = id1.Word, FieldName = id2.Word };
+        }
+        return new LinqFieldExpr { TableOrAlias = null, FieldName = id1.Word };
+    }
+
+    private ComparisonOperator? ParseComparisonOperator()
+    {
+        if (_text.TryMatch("==", out _)) return ComparisonOperator.Equal;
+        if (_text.TryMatch("!=", out _)) return ComparisonOperator.NotEqual;
+        if (_text.TryMatch(">=", out _)) return ComparisonOperator.GreaterThanOrEqual;
+        if (_text.TryMatch("<=", out _)) return ComparisonOperator.LessThanOrEqual;
+        if (_text.TryMatch(">", out _)) return ComparisonOperator.GreaterThan;
+        if (_text.TryMatch("<", out _)) return ComparisonOperator.LessThan;
+        return null;
+    }
+
+    private LinqValue ParseLinqValue()
+    {
+        _text.SkipWhitespace();
+        var num = _text.ReadInt();
+        if (!string.IsNullOrEmpty(num.Word))
+        {
+            return new LinqValue { Value = num.Word };
+        }
+        // 可擴充字串等
+        return null;
     }
 
     private Func<ParseResult<LinqToken>> Keywords(params string[] keywords)
