@@ -58,12 +58,13 @@ public class LinqConditionExpression : ILinqExpression
     public ILinqExpression Left { get; set; }
     public ComparisonOperator ComparisonOperator { get; set; }
     public ILinqExpression Right { get; set; }
+    public LogicalOperator? LogicalOperator { get; set; }
     public override bool Equals(object? obj)
     {
         if (obj is not LinqConditionExpression other) return false;
-        return Equals(Left, other.Left) && ComparisonOperator == other.ComparisonOperator && Equals(Right, other.Right);
+        return Equals(Left, other.Left) && ComparisonOperator == other.ComparisonOperator && Equals(Right, other.Right) && Nullable.Equals(LogicalOperator, other.LogicalOperator);
     }
-    public override int GetHashCode() => (Left, ComparisonOperator, Right).GetHashCode();
+    public override int GetHashCode() => (Left, ComparisonOperator, Right, LogicalOperator).GetHashCode();
 }
 
 public class LinqFieldExpr : ILinqExpression
@@ -87,4 +88,4 @@ public class LinqValue : ILinqExpression
         return Value == other.Value;
     }
     public override int GetHashCode() => Value.GetHashCode();
-} 
+}
