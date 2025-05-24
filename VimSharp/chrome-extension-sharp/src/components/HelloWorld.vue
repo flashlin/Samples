@@ -218,8 +218,8 @@ function runCode() {
         <!-- 顯示表頭（checkbox 方式，每個 header 一個 checkbox） -->
         <div class="delimiter-row" style="flex-direction: column; align-items: flex-start;">
           <label>Table headers:</label>
-          <div>
-            <div v-for="header in csvHeaders" :key="header" style="margin-bottom: 4px;">
+          <div style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px;">
+            <div v-for="header in csvHeaders" :key="header">
               <label>
                 <input type="checkbox" :value="header" v-model="selectedHeaders" />
                 {{ header }}
