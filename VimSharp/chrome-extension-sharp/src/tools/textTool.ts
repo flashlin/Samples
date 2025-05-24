@@ -417,3 +417,36 @@ export function getCsvHeadersName(csvText: string, delimiter: string = '\t'): st
   const headers = result.data[0] as string[];
   return headers.map(h => String(h).trim());
 }
+
+/**
+ * 擷取 CSV 內容中指定 headers 欄位，並轉回 CSV 字串
+ * @param csvText 原始 CSV 字串
+ * @param headers 欲保留的表頭陣列
+ * @param delimiter 欄位分隔符
+ * @returns 只包含指定欄位的 CSV 字串
+ */
+export function cutCsvText(csvText: string, headers: string[], delimiter: string): string {
+  // 解析 CSV
+  const result = Papa.parse(csvText, {
+    delimiter: delimiter,
+    skipEmptyLines: true,
+    header: true
+  });
+  if (!result.data || result.data.length === 0) {
+    return '';
+  }
+  // 過濾每一列，只保留指定欄位
+  const filteredData = (result.data as any[]).map(row => {
+    const filteredRow: any = {};
+    headers.forEach(h => {
+      filteredRow[h] = row[h];
+    });
+    return filteredRow;
+  });
+  // 轉回 CSV
+  return Papa.unparse(filteredData, {
+    delimiter: delimiter,
+    header: true,
+    newline: '\n'
+  });
+}
