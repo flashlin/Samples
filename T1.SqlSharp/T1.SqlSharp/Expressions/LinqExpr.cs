@@ -4,13 +4,14 @@ public class LinqExpr
 {
     public LinqFromExpr From { get; set; }
     public LinqWhereExpr? Where { get; set; }
+    public LinqOrderByExpr? OrderBy { get; set; }
     public LinqSelectAllExpr Select { get; set; }
     public override bool Equals(object? obj)
     {
         if (obj is not LinqExpr other) return false;
-        return Equals(From, other.From) && Equals(Where, other.Where) && Equals(Select, other.Select);
+        return Equals(From, other.From) && Equals(Where, other.Where) && Equals(OrderBy, other.OrderBy) && Equals(Select, other.Select);
     }
-    public override int GetHashCode() => (From, Where, Select).GetHashCode();
+    public override int GetHashCode() => (From, Where, OrderBy, Select).GetHashCode();
 }
 
 public class LinqFromExpr
@@ -92,4 +93,27 @@ public class LinqValue : ILinqExpression
         return Value == other.Value;
     }
     public override int GetHashCode() => Value.GetHashCode();
+}
+
+public class LinqOrderByExpr : ILinqExpression
+{
+    public List<LinqOrderByFieldExpr> Fields { get; set; } = new();
+    public override bool Equals(object? obj)
+    {
+        if (obj is not LinqOrderByExpr other) return false;
+        return Fields.SequenceEqual(other.Fields);
+    }
+    public override int GetHashCode() => Fields.GetHashCode();
+}
+
+public class LinqOrderByFieldExpr : ILinqExpression
+{
+    public LinqFieldExpr Field { get; set; }
+    public bool IsDescending { get; set; }
+    public override bool Equals(object? obj)
+    {
+        if (obj is not LinqOrderByFieldExpr other) return false;
+        return Equals(Field, other.Field) && IsDescending == other.IsDescending;
+    }
+    public override int GetHashCode() => (Field, IsDescending).GetHashCode();
 }

@@ -79,4 +79,38 @@ public class ParseLinqWhereTest
             }
         });
     }
+
+    [Test]
+    public void Should_parse_linq_with_orderby_clause()
+    {
+        // Arrange
+        var linq = "from tb1 in test orderby tb1.Name select tb1";
+        var linqParser = new LinqParser(linq);
+        // Act
+        var actual = linqParser.Parse();
+        // Assert
+        actual.ResultValue.ShouldBe(new LinqExpr
+        {
+            From = new LinqFromExpr
+            {
+                Source = "test",
+                AliasName = "tb1"
+            },
+            OrderBy = new LinqOrderByExpr
+            {
+                Fields =
+                [
+                    new LinqOrderByFieldExpr
+                    {
+                        Field = new LinqFieldExpr { TableOrAlias = "tb1", FieldName = "Name" },
+                        IsDescending = false
+                    }
+                ]
+            },
+            Select = new LinqSelectAllExpr
+            {
+                AliasName = "tb1"
+            }
+        });
+    }
 } 
