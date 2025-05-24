@@ -24,7 +24,9 @@ const isLoading = ref(false)
 const csvText = ref('')
 
 const csvHeaders = computed(() => {
-  return getCsvHeadersName(csvText.value, ',')
+  const headers = getCsvHeadersName(csvText.value, ',')
+  selectedHeaders.value = headers;
+  return headers;
 })
 
 const selectedHeaders = ref<string[]>([])
