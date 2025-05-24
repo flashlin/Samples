@@ -415,5 +415,8 @@ export function getCsvHeadersName(csvText: string, delimiter: string = '\t'): st
   }
   // 取得第一行作為表頭
   const headers = result.data[0] as string[];
+  if (headers.length === 1 && typeof headers[0] === 'string' && headers[0].includes(delimiter)) {
+    return headers[0].split(delimiter).map(h => h.trim());
+  }
   return headers.map(h => String(h).trim());
 }
