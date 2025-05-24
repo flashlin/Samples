@@ -46,7 +46,9 @@ watch(inputDelimiterDisplay, (newValue) => {
 // 當 selectedHeaders 變化時，根據勾選的欄位裁切 csvText 並更新 code
 watch(selectedHeaders, (newHeaders) => {
   if (csvText.value && newHeaders.length > 0) {
-    code.value = cutCsvText(csvText.value, newHeaders, ',')
+    // 依照 csvHeaders 的順序排列 newHeaders
+    const orderedHeaders = csvHeaders.value.filter(h => newHeaders.includes(h))
+    code.value = cutCsvText(csvText.value, orderedHeaders, ',')
   }
 })
 
