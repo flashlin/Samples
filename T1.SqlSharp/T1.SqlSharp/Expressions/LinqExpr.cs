@@ -5,13 +5,20 @@ public class LinqExpr
     public LinqFromExpr From { get; set; }
     public LinqWhereExpr? Where { get; set; }
     public LinqOrderByExpr? OrderBy { get; set; }
+    public List<LinqJoinExpr>? Joins { get; set; }
     public LinqSelectAllExpr Select { get; set; }
     public override bool Equals(object? obj)
     {
         if (obj is not LinqExpr other) return false;
-        return Equals(From, other.From) && Equals(Where, other.Where) && Equals(OrderBy, other.OrderBy) && Equals(Select, other.Select);
+        return Equals(From, other.From) && Equals(Where, other.Where) && Equals(OrderBy, other.OrderBy) && EqualsJoins(Joins, other.Joins) && Equals(Select, other.Select);
     }
-    public override int GetHashCode() => (From, Where, OrderBy, Select).GetHashCode();
+    private static bool EqualsJoins(List<LinqJoinExpr>? a, List<LinqJoinExpr>? b)
+    {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+        return a.SequenceEqual(b);
+    }
+    public override int GetHashCode() => (From, Where, OrderBy, Joins, Select).GetHashCode();
 }
 
 public class LinqFromExpr
@@ -116,4 +123,21 @@ public class LinqOrderByFieldExpr : ILinqExpression
         return Equals(Field, other.Field) && IsDescending == other.IsDescending;
     }
     public override int GetHashCode() => (Field, IsDescending).GetHashCode();
+}
+
+public class LinqJoinExpr : ILinqExpression
+{
+    public string JoinType { get; set; } = "join";
+    public string AliasName { get; set; }
+    public string Source { get; set; }
+    public LinqConditionExpression On { get; set; }
+    public override bool Equals(object? obj)
+    {
+        if (obj is not LinqJoinExpr other) return false;
+        return JoinType == other.JoinType
+            && AliasName == other.AliasName
+            && Source == other.Source
+            && Equals(On, other.On);
+    }
+    public override int GetHashCode() => (JoinType, AliasName, Source, On).GetHashCode();
 }

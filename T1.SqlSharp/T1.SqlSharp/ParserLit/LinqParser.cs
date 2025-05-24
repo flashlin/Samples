@@ -20,6 +20,8 @@ public class LinqParser
         if (inResult.HasError) return inResult.Error;
         var sourceResult = ParseIdentifier();
         if (sourceResult.HasError) return sourceResult.Error;
+        // parse join(s)
+        var joins = ParseJoins();
         // parse where
         LinqWhereExpr whereExpr = null;
         if (TryParseWhere(out var where))
@@ -43,6 +45,7 @@ public class LinqParser
                 Source = sourceResult.ResultValue,
                 AliasName = aliasResult.ResultValue
             },
+            Joins = joins,
             Where = whereExpr,
             OrderBy = orderByExpr,
             Select = new LinqSelectAllExpr
@@ -50,6 +53,46 @@ public class LinqParser
                 AliasName = selectAliasResult.ResultValue
             }
         };
+    }
+
+    private List<LinqJoinExpr> ParseJoins()
+    {
+        var joins = new List<LinqJoinExpr>();
+        while (true)
+        {
+            _text.SkipWhitespace();
+            var pos = _text.Position;
+            if (!_text.TryKeywordIgnoreCase("join", out _))
+            {
+                _text.Position = pos;
+                break;
+            }
+            var aliasResult = ParseIdentifier();
+            if (aliasResult.HasError) break;
+            if (!_text.TryKeywordIgnoreCase("in", out _)) break;
+            var sourceResult = ParseIdentifier();
+            if (sourceResult.HasError) break;
+            if (!_text.TryKeywordIgnoreCase("on", out _)) break;
+            var leftField = ParseLinqFieldExpr();
+            if (leftField == null) break;
+            if (!_text.TryKeywordIgnoreCase("equals", out _)) break;
+            var rightField = ParseLinqFieldExpr();
+            if (rightField == null) break;
+            var onExpr = new LinqConditionExpression
+            {
+                Left = leftField,
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = rightField
+            };
+            joins.Add(new LinqJoinExpr
+            {
+                JoinType = "join",
+                AliasName = aliasResult.ResultValue,
+                Source = sourceResult.ResultValue,
+                On = onExpr
+            });
+        }
+        return joins.Count > 0 ? joins : null;
     }
 
     private bool TryParseWhere(out ILinqExpression where)
