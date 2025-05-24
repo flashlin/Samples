@@ -26,6 +26,12 @@ public class LinqParser
         {
             whereExpr = new LinqWhereExpr { Condition = where };
         }
+        // parse orderby
+        LinqOrderByExpr orderByExpr = null;
+        if (TryParseOrderBy(out var orderBy))
+        {
+            orderByExpr = orderBy;
+        }
         var selectResult = Keywords("select")();
         if (selectResult.HasError) return selectResult.Error;
         var selectAliasResult = ParseIdentifier();
@@ -38,6 +44,7 @@ public class LinqParser
                 AliasName = aliasResult.ResultValue
             },
             Where = whereExpr,
+            OrderBy = orderByExpr,
             Select = new LinqSelectAllExpr
             {
                 AliasName = selectAliasResult.ResultValue
@@ -58,6 +65,60 @@ public class LinqParser
         _text.SkipWhitespace();
         where = ParseConditionExpr();
         return where != null;
+    }
+
+    private bool TryParseOrderBy(out LinqOrderByExpr orderBy)
+    {
+        orderBy = null;
+        _text.SkipWhitespace();
+        var pos = _text.Position;
+        if (!_text.TryKeywordIgnoreCase("orderby", out _))
+        {
+            _text.Position = pos;
+            return false;
+        }
+        _text.SkipWhitespace();
+        var fields = new List<LinqOrderByFieldExpr>();
+        while (true)
+        {
+            var field = ParseOrderByField();
+            if (field == null) break;
+            fields.Add(field);
+            _text.SkipWhitespace();
+            if (!_text.TryMatch(",", out _))
+            {
+                break;
+            }
+            _text.SkipWhitespace();
+        }
+        if (fields.Count == 0)
+        {
+            _text.Position = pos;
+            return false;
+        }
+        orderBy = new LinqOrderByExpr { Fields = fields };
+        return true;
+    }
+
+    private LinqOrderByFieldExpr ParseOrderByField()
+    {
+        var field = ParseLinqFieldExpr();
+        if (field == null) return null;
+        _text.SkipWhitespace();
+        bool isDesc = false;
+        if (_text.TryKeywordIgnoreCase("descending", out _))
+        {
+            isDesc = true;
+        }
+        else if (_text.TryKeywordIgnoreCase("asc", out _))
+        {
+            isDesc = false;
+        }
+        return new LinqOrderByFieldExpr
+        {
+            Field = field,
+            IsDescending = isDesc
+        };
     }
 
     private ILinqExpression ParseConditionExpr()
