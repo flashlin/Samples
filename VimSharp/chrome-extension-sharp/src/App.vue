@@ -5,8 +5,7 @@ import Excel from './components/Excel.vue'
 
 <template>
   <div class="app-container">
-    <HelloWorld msg="Vite + Vue" />
-    <Excel />
+    <router-view />
   </div>
 </template>
 
