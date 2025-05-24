@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson, 
-  convertCsvFormatToTable, convertCsvFormatToSql
-} from '../tools/textTool'
+  convertCsvFormatToTable, convertCsvFormatToSql, getCsvHeadersName } from '../tools/textTool'
 import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
 import { translateToEnAsync, translateToZhAsync } from '../tools/translateApi'
 import Loading from './Loading.vue'
@@ -21,6 +20,14 @@ const inputDelimiter = ref('\t')
 const inputDelimiterDisplay = ref('\\t')
 const tableName = ref('tb1')
 const isLoading = ref(false)
+
+const csvText = ref('')
+
+const csvHeaders = computed(() => {
+  return getCsvHeadersName(csvText.value, ',')
+})
+
+const selectedHeaders = ref<string[]>([])
 
 // 監聽顯示值的變化並更新實際值
 watch(inputDelimiterDisplay, (newValue) => {
@@ -58,6 +65,8 @@ function clickTableToCsv() {
   if (code.value !== inputText) {
     pasteToClipboard(code.value);
   }
+  csvText.value = code.value
+  selectedHeaders.value = []
 }
 
 function clickJsonToCsv() {
@@ -205,6 +214,20 @@ function runCode() {
             title="to table name"
           />
         </div>
+
+        <!-- 顯示表頭（checkbox 方式，每個 header 一個 checkbox） -->
+        <div class="delimiter-row" style="flex-direction: column; align-items: flex-start;">
+          <label>Table headers:</label>
+          <div>
+            <div v-for="header in csvHeaders" :key="header" style="margin-bottom: 4px;">
+              <label>
+                <input type="checkbox" :value="header" v-model="selectedHeaders" />
+                {{ header }}
+              </label>
+            </div>
+          </div>
+        </div>
+        
         <div class="buttons-row">
           <button type="button" @click="clickUndo">Undo</button>
         </div>
