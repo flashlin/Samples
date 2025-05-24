@@ -9,7 +9,11 @@ import Loading from './Loading.vue'
 
 defineProps<{ msg: string }>()
 
-const code = ref('// 在這裡輸入您的程式碼\nfunction hello() {\n  console.log("Hello, World!");\n}')
+const code = ref(`id name age
+1 flash 10
+2 jack 11
+3 jerry 12
+`)
 const codeHistory = ref<string[]>([])
 const clipboardError = ref('')
 const activeTab = ref('clipboard')
