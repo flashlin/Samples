@@ -403,3 +403,17 @@ export function convertCsvFormatToSql(text: string, tableName:string): string {
     return text;
   }
 }
+
+export function getCsvHeadersName(csvText: string, delimiter: string = '\t'): string[] {
+  // Parse CSV text to get headers
+  const result = Papa.parse(csvText, {
+    delimiter: delimiter,
+    skipEmptyLines: true,
+  });
+  if (!result.data || result.data.length === 0) {
+    return [];
+  }
+  // 取得第一行作為表頭
+  const headers = result.data[0] as string[];
+  return headers.map(h => String(h).trim());
+}
