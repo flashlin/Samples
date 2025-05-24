@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import HelloWorld from './components/HelloWorld.vue'
+import Excel from './components/Excel.vue'
 </script>
 
 <template>
   <div class="app-container">
     <HelloWorld msg="Vite + Vue" />
+    <Excel />
   </div>
 </template>
 
@@ -29,4 +31,5 @@ import HelloWorld from './components/HelloWorld.vue'
 .logo.vue:hover {
   filter: drop-shadow(0 0 2em #42b883aa);
 }
+
 </style>
