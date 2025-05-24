@@ -8,7 +8,7 @@ namespace VimSharpApp
     // ConsoleApp類別
     public class ConsoleApp
     {
-        private Main _main;
+        private Main _main = null!;
 
         // 建立並執行 Console 應用程式的方法
         public void Start(string[] args)
