@@ -56,36 +56,60 @@ public class LinqParser
             return false;
         }
         _text.SkipWhitespace();
-        // parse left: tb1.Id
+        where = ParseConditionExpr();
+        return where != null;
+    }
+
+    private ILinqExpression ParseConditionExpr()
+    {
+        var left = ParseSingleCondition();
+        if (left == null) return null;
+        _text.SkipWhitespace();
+        while (true)
+        {
+            LogicalOperator? logicalOp = null;
+            if (_text.TryMatch("&&", out _))
+            {
+                logicalOp = LogicalOperator.And;
+            }
+            else if (_text.TryMatch("||", out _))
+            {
+                logicalOp = LogicalOperator.Or;
+            }
+            else
+            {
+                break;
+            }
+            _text.SkipWhitespace();
+            var right = ParseSingleCondition();
+            if (right == null) break;
+            left = new LinqConditionExpression
+            {
+                Left = left,
+                LogicalOperator = logicalOp,
+                Right = right
+            };
+            _text.SkipWhitespace();
+        }
+        return left;
+    }
+
+    private ILinqExpression ParseSingleCondition()
+    {
         var left = ParseLinqFieldExpr();
-        if (left == null)
-        {
-            _text.Position = pos;
-            return false;
-        }
+        if (left == null) return null;
         _text.SkipWhitespace();
-        // parse operator: ==
         var op = ParseComparisonOperator();
-        if (op == null)
-        {
-            _text.Position = pos;
-            return false;
-        }
+        if (op == null) return null;
         _text.SkipWhitespace();
-        // parse right: 1
         var right = ParseLinqValue();
-        if (right == null)
-        {
-            _text.Position = pos;
-            return false;
-        }
-        where = new LinqConditionExpression
+        if (right == null) return null;
+        return new LinqConditionExpression
         {
             Left = left,
             ComparisonOperator = op.Value,
             Right = right
         };
-        return true;
     }
 
     private LinqFieldExpr ParseLinqFieldExpr()
@@ -128,7 +152,11 @@ public class LinqParser
         {
             return new LinqValue { Value = num.Word };
         }
-        // 可擴充字串等
+        var str = _text.ReadSqlQuotedString();
+        if (!string.IsNullOrEmpty(str.Word))
+        {
+            return new LinqValue { Value = str.Word };
+        }
         return null;
     }
 

@@ -62,7 +62,11 @@ public class LinqConditionExpression : ILinqExpression
     public override bool Equals(object? obj)
     {
         if (obj is not LinqConditionExpression other) return false;
-        return Equals(Left, other.Left) && ComparisonOperator == other.ComparisonOperator && Equals(Right, other.Right) && Nullable.Equals(LogicalOperator, other.LogicalOperator);
+        if (LogicalOperator.HasValue || other.LogicalOperator.HasValue)
+        {
+            return Equals(Left, other.Left) && Equals(Right, other.Right) && Nullable.Equals(LogicalOperator, other.LogicalOperator);
+        }
+        return Equals(Left, other.Left) && ComparisonOperator == other.ComparisonOperator && Equals(Right, other.Right);
     }
     public override int GetHashCode() => (Left, ComparisonOperator, Right, LogicalOperator).GetHashCode();
 }
