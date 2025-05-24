@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+// https://docs.univer.ai/zh-CN/guides/sheets/getting-started/installation
+// https://docs.univer.ai/zh-CN/guides/sheets/integrations/vue
 import { onMounted, onBeforeUnmount, ref } from 'vue'
  
 import { createUniver, defaultTheme, FUniver, LocaleType, merge, Univer } from '@univerjs/presets';
