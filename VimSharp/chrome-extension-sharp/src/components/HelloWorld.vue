@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson, 
-  convertCsvFormatToTable, convertCsvFormatToSql, getCsvHeadersName } from '../tools/textTool'
+  convertCsvFormatToTable, convertCsvFormatToSql, getCsvHeadersName, cutCsvText } from '../tools/textTool'
 import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
 import { translateToEnAsync, translateToZhAsync } from '../tools/translateApi'
 import Loading from './Loading.vue'
@@ -22,13 +22,7 @@ const tableName = ref('tb1')
 const isLoading = ref(false)
 
 const csvText = ref('')
-
-const csvHeaders = computed(() => {
-  const headers = getCsvHeadersName(csvText.value, ',')
-  selectedHeaders.value = headers;
-  return headers;
-})
-
+const csvHeaders = ref<string[]>([])
 const selectedHeaders = ref<string[]>([])
 
 // 監聽顯示值的變化並更新實際值
@@ -46,6 +40,13 @@ watch(inputDelimiterDisplay, (newValue) => {
       break
     default:
       inputDelimiter.value = newValue
+  }
+})
+
+// 當 selectedHeaders 變化時，根據勾選的欄位裁切 csvText 並更新 code
+watch(selectedHeaders, (newHeaders) => {
+  if (csvText.value && newHeaders.length > 0) {
+    code.value = cutCsvText(csvText.value, newHeaders, ',')
   }
 })
 
@@ -68,7 +69,8 @@ function clickTableToCsv() {
     pasteToClipboard(code.value);
   }
   csvText.value = code.value
-  selectedHeaders.value = []
+  csvHeaders.value = getCsvHeadersName(csvText.value, ',')
+  selectedHeaders.value = csvHeaders.value
 }
 
 function clickJsonToCsv() {
