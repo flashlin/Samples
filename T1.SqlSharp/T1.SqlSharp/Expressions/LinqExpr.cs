@@ -6,34 +6,24 @@ public class LinqExpr
     public LinqWhereExpr? Where { get; set; }
     public LinqOrderByExpr? OrderBy { get; set; }
     public List<LinqJoinExpr>? Joins { get; set; }
-    public LinqSelectAllExpr Select { get; set; }
-    public override bool Equals(object? obj)
-    {
-        if (obj is not LinqExpr other) return false;
-        return Equals(From, other.From) && Equals(Where, other.Where) && Equals(OrderBy, other.OrderBy) && EqualsJoins(Joins, other.Joins) && Equals(Select, other.Select);
-    }
-    private static bool EqualsJoins(List<LinqJoinExpr>? a, List<LinqJoinExpr>? b)
-    {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
-        return a.SequenceEqual(b);
-    }
-    public override int GetHashCode() => (From, Where, OrderBy, Joins, Select).GetHashCode();
+    public List<LinqFromExpr>? AdditionalFroms { get; set; }
+    public ILinqExpression? Select { get; set; }
 }
 
 public class LinqFromExpr
 {
     public string Source { get; set; }
     public string AliasName { get; set; }
+    public bool IsDefaultIfEmpty { get; set; }
     public override bool Equals(object? obj)
     {
         if (obj is not LinqFromExpr other) return false;
-        return Source == other.Source && AliasName == other.AliasName;
+        return Source == other.Source && AliasName == other.AliasName && IsDefaultIfEmpty == other.IsDefaultIfEmpty;
     }
-    public override int GetHashCode() => (Source, AliasName).GetHashCode();
+    public override int GetHashCode() => (Source, AliasName, IsDefaultIfEmpty).GetHashCode();
 }
 
-public class LinqSelectAllExpr
+public class LinqSelectAllExpr : ILinqExpression
 {
     public string AliasName { get; set; }
     public override bool Equals(object? obj)
@@ -131,13 +121,38 @@ public class LinqJoinExpr : ILinqExpression
     public string AliasName { get; set; }
     public string Source { get; set; }
     public LinqConditionExpression On { get; set; }
+    public string? Into { get; set; }
     public override bool Equals(object? obj)
     {
         if (obj is not LinqJoinExpr other) return false;
         return JoinType == other.JoinType
             && AliasName == other.AliasName
             && Source == other.Source
-            && Equals(On, other.On);
+            && Equals(On, other.On)
+            && Into == other.Into;
     }
-    public override int GetHashCode() => (JoinType, AliasName, Source, On).GetHashCode();
+    public override int GetHashCode() => (JoinType, AliasName, Source, On, Into).GetHashCode();
+}
+
+public class LinqSelectNewExpr : ILinqExpression
+{
+    public List<LinqSelectFieldExpr> Fields { get; set; }
+    public override bool Equals(object? obj)
+    {
+        if (obj is not LinqSelectNewExpr other) return false;
+        return Fields.SequenceEqual(other.Fields);
+    }
+    public override int GetHashCode() => Fields.GetHashCode();
+}
+
+public class LinqSelectFieldExpr : ILinqExpression
+{
+    public string Name { get; set; }
+    public ILinqExpression Value { get; set; }
+    public override bool Equals(object? obj)
+    {
+        if (obj is not LinqSelectFieldExpr other) return false;
+        return Name == other.Name && Equals(Value, other.Value);
+    }
+    public override int GetHashCode() => (Name, Value).GetHashCode();
 }
