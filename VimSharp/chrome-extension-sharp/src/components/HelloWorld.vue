@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson, 
   convertCsvFormatToTable, convertCsvFormatToSql, getCsvHeadersName, cutCsvText } from '../tools/textTool'
 import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
