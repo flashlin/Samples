@@ -4,28 +4,32 @@ import { SelectClause, QueryBody, FromClause, WhereClause, IdentifierExpression 
 describe('parseLinq', () => {
   it('should parse simple from-where-select', () => {
     const ast = parseLinq('from x in xs where y select z')
-    // 檢查 select
-    expect(ast.kind).toBe('SelectClause')
-    const select = ast as SelectClause
-    expect(select.expression.kind).toBe('QueryBody')
-    const queryBody = select.expression as QueryBody
-    expect(queryBody.clauses.length).toBe(2)
-    // from
-    const from = queryBody.clauses[0] as FromClause
-    expect(from.kind).toBe('FromClause')
-    expect(from.identifier).toBe('x')
-    expect((from.source as IdentifierExpression).name).toBe('xs')
-    // where
-    const where = queryBody.clauses[1] as WhereClause
-    expect(where.kind).toBe('WhereClause')
-    expect((where.condition as IdentifierExpression).name).toBe('y')
-    // 驗證 select 欄位
-    expect(select.fields).toEqual([{ kind: 'IdentifierExpression', name: 'z' }])
+    expect(ast).toEqual({
+      kind: 'SelectClause',
+      expression: {
+        kind: 'QueryBody',
+        clauses: [
+          {
+            kind: 'FromClause',
+            identifier: 'x',
+            source: { kind: 'IdentifierExpression', name: 'xs' }
+          },
+          {
+            kind: 'WhereClause',
+            condition: { kind: 'IdentifierExpression', name: 'y' }
+          }
+        ]
+      },
+      fields: [{ kind: 'IdentifierExpression', name: 'z' }]
+    })
   })
 
   it('should parse select only', () => {
     const ast = parseLinq('select foo')
-    expect(ast.kind).toBe('SelectClause')
-    expect((ast.expression as IdentifierExpression).name).toBe('foo')
+    expect(ast).toEqual({
+      kind: 'SelectClause',
+      expression: { kind: 'IdentifierExpression', name: 'foo' },
+      fields: [{ kind: 'IdentifierExpression', name: 'foo' }]
+    })
   })
 }) 
