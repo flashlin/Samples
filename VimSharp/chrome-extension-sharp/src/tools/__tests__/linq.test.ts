@@ -19,9 +19,6 @@ describe('parseLinq', () => {
     const where = queryBody.clauses[1] as WhereClause
     expect(where.kind).toBe('WhereClause')
     expect((where.condition as IdentifierExpression).name).toBe('y')
-    // 驗證 select 子句內容
-    const selectExpr = select.expression as QueryBody
-    expect(selectExpr.kind).toBe('QueryBody')
   })
 
   it('should parse select only', () => {

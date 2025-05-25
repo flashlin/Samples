@@ -58,10 +58,27 @@ export function parseLinq(text: string): SelectClause {
   // parse select ...
   function parseSelect(): SelectClause {
     expect('select')
-    const expr = parseIdentifier()
+    // 支援多欄位 select a, b, c
+    const fields: IdentifierExpression[] = []
+    while (index < tokens.length) {
+      const token = peek()
+      if (!token || token === 'from' || token === 'where' || token === 'select') break
+      if (token === ',') {
+        next() // skip comma
+        continue
+      }
+      fields.push(parseIdentifier())
+    }
+    let expr: LinqExpression
+    if (fields.length === 1) {
+      expr = fields[0]
+    } else {
+      expr = { kind: 'SelectFields', fields } as any
+    }
     return {
       kind: 'SelectClause',
       expression: expr,
+      fields,
     }
   }
 

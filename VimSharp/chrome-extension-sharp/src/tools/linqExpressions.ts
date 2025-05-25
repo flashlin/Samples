@@ -52,6 +52,7 @@ export interface OrderByExpression extends LinqExpression {
 export interface SelectClause extends LinqExpression {
   kind: 'SelectClause'
   expression: LinqExpression
+  fields?: LinqExpression[]
 }
 
 // group 語句
