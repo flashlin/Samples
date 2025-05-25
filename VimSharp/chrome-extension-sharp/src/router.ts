@@ -11,6 +11,11 @@ const routes: RouteRecordRaw[] = [
     name: 'Excel',
     component: () => import('./components/Excel.vue'),
   },
+  {
+    path: '/vim',
+    name: 'VimDemo',
+    component: () => import('./views/demo.vue'),
+  },
 ]
 
 const router = createRouter({
