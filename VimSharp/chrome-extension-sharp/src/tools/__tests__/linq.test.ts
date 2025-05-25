@@ -1,5 +1,4 @@
 import { parseLinq } from '../linq'
-import { SelectClause, QueryBody, FromClause, WhereClause, IdentifierExpression } from '../linqExpressions'
 
 describe('parseLinq', () => {
   it('should parse simple from-where-select', () => {
