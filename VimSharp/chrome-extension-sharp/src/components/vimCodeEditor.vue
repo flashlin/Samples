@@ -1,11 +1,13 @@
 <template>
-  <MonacoEditor
-    v-model:value="innerValue"
-    language="typescript"
-    theme="vs-dark"
-    height="400px"
-    @mount="onEditorMount"
-  />
+  <div class="vim-editor-root" style="height: 600px;">
+    <MonacoEditor
+      v-model:value="innerValue"
+      language="typescript"
+      theme="vs-dark"
+      height="100%"
+      @mount="onEditorMount"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -35,5 +37,37 @@ function onEditorMount(editor: monaco.editor.IStandaloneCodeEditor) {
 </script>
 
 <style scoped>
-/* 可自訂編輯器外觀 */
+.vim-editor-root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.monaco-editor,
+.monaco-editor-background,
+.monaco-editor .overflow-guard {
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  border: 1px solid #222;
+  background: #181c24 !important;
+  padding: 8px 0 0 0;
+}
+
+/* 狀態列樣式 */
+.monaco-vim-status {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  background: rgba(30, 30, 30, 0.85);
+  color: #ffeb3b;
+  font-size: 14px;
+  padding: 2px 12px;
+  border-radius: 6px;
+  z-index: 20;
+  pointer-events: none;
+  font-family: 'JetBrains Mono', 'Fira Mono', 'Consolas', monospace;
+  letter-spacing: 1px;
+}
 </style> 

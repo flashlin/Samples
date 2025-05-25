@@ -5,5 +5,7 @@ import VimCodeEditor from '@/components/VimCodeEditor.vue'
 const code = ref('Hello World')
 </script>
 <template>
-   <vim-code-editor v-model:value="code" />
+  <div style="height: 100vh; padding: 24px; box-sizing: border-box;">
+    <vim-code-editor v-model:value="code" />
+  </div>
 </template>
