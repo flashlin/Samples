@@ -1,24 +1,13 @@
-<template>
-  <div class="vim-editor-root" style="height: 600px;">
-    <MonacoEditor
-      v-model:value="innerValue"
-      language="typescript"
-      theme="vs-dark"
-      height="100%"
-      @mount="onEditorMount"
-    />
-  </div>
-</template>
-
 <script setup lang="ts">
+// https://www.npmjs.com/package/monaco-editor-vue3
 import { ref, watch } from 'vue'
 import MonacoEditor from 'monaco-editor-vue3'
 import * as monaco from 'monaco-editor'
 import { initVimMode } from 'monaco-vim'
 
 const props = defineProps<{ value: string }>()
-
 const innerValue = ref(props.value)
+const monacoRef = ref<any>(null)
 
 watch(() => props.value, v => {
   if (v !== innerValue.value) innerValue.value = v
@@ -35,6 +24,19 @@ function onEditorMount(editor: monaco.editor.IStandaloneCodeEditor) {
   }
 }
 </script>
+
+<template>
+  <div class="vim-editor-root" style="height: 600px;">
+    <MonacoEditor
+      ref="monacoRef"
+      v-model:value="innerValue"
+      language="typescript"
+      theme="vs-dark"
+      height="100%"
+      @editorDidMount="onEditorMount"
+    />
+  </div>
+</template>
 
 <style scoped>
 .vim-editor-root {
