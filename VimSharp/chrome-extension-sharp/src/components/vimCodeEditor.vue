@@ -3,24 +3,27 @@
 import { ref, watch } from 'vue'
 import MonacoEditor from 'monaco-editor-vue3'
 import * as monaco from 'monaco-editor'
-import { initVimMode } from 'monaco-vim'
+import { initVimMode2 } from '@/tools/monaco-vim2'
 
 const props = defineProps<{ value: string }>()
 const innerValue = ref(props.value)
 const monacoRef = ref<any>(null)
 
-watch(() => props.value, v => {
-  if (v !== innerValue.value) innerValue.value = v
+watch(() => props.value, newValue => {
+  if (newValue !== innerValue.value) {
+    innerValue.value = newValue
+  }
 })
 
 let vimMode: any = null
 function onEditorMount(editor: monaco.editor.IStandaloneCodeEditor) {
-  // 初始化 Vim 模式
   if (!vimMode) {
+    editor.focus()
     const statusNode = document.createElement('div')
     statusNode.style.cssText = 'position:absolute;right:10px;bottom:10px;color:#fff;z-index:10;'
     editor.getDomNode()?.appendChild(statusNode)
-    vimMode = initVimMode(editor, statusNode)
+    editor.focus()
+    vimMode = initVimMode2(editor, statusNode)
   }
 }
 </script>
