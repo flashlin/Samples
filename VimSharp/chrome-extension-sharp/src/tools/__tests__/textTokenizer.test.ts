@@ -8,10 +8,10 @@ describe('textTokenize', () => {
   })
 
   // 測試小數點
-  it('should tokenize decimal numbers as separate tokens', () => {
+  it('should tokenize decimal numbers as single tokens', () => {
     const tokens = Array.from(textTokenize('3.14 0.99'))
-    // 預期: 3, ., 14,  , 0, ., 99
-    expect(tokens).toEqual(['3', '.', '14', ' ', '0', '.', '99'])
+    // 預期: 3.14,  , 0.99
+    expect(tokens).toEqual(['3.14', ' ', '0.99'])
   })
 
   // 測試特殊符號

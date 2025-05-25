@@ -12,10 +12,15 @@ export function* textTokenize(text: string): IterableIterator<string> {
       yield text.slice(start, i)
       continue
     }
-    // 1. Numbers
+    // 1. Numbers (float or integer)
     if (/[0-9]/.test(c)) {
       let start = i
       while (i < len && /[0-9]/.test(text[i])) i++
+      // check for float
+      if (i < len && text[i] === '.' && i + 1 < len && /[0-9]/.test(text[i + 1])) {
+        i++ // skip '.'
+        while (i < len && /[0-9]/.test(text[i])) i++
+      }
       yield text.slice(start, i)
       continue
     }
