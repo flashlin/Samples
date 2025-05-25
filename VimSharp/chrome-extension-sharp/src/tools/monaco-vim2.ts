@@ -53,6 +53,18 @@ export function initVimMode2(
         e.preventDefault()
         return
       }
+      // w 跳到下一個 word 開始
+      if (e.browserEvent.key === 'w') {
+        editor.trigger('vim', 'cursorWordStartRight', null)
+        e.preventDefault()
+        return
+      }
+      // b 跳到前一個 word
+      if (e.browserEvent.key === 'b') {
+        editor.trigger('vim', 'cursorWordStartLeft', null)
+        e.preventDefault()
+        return
+      }
       editor.updateOptions({ readOnly: true })
     } else if (mode === 'insert') {
       if (e.browserEvent.key === 'Escape') {
