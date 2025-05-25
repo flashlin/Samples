@@ -4,6 +4,14 @@ export function* textTokenize(text: string): IterableIterator<string> {
   const len = text.length
   while (i < len) {
     const c = text[i]
+    // 0. Identifier: starts with _ or letter, then _/letter/number
+    if (c === '_' || /[a-zA-Z]/.test(c)) {
+      let start = i
+      i++
+      while (i < len && (text[i] === '_' || /[a-zA-Z0-9]/.test(text[i]))) i++
+      yield text.slice(start, i)
+      continue
+    }
     // 1. Numbers
     if (/[0-9]/.test(c)) {
       let start = i
@@ -11,7 +19,7 @@ export function* textTokenize(text: string): IterableIterator<string> {
       yield text.slice(start, i)
       continue
     }
-    // 2. Quoted string
+    // 2. Quoted string (double quote)
     if (c === '"') {
       i++
       let str = '"'
@@ -21,6 +29,26 @@ export function* textTokenize(text: string): IterableIterator<string> {
           i += 2
         } else if (text[i] === '"') {
           str += '"'
+          i++
+          break
+        } else {
+          str += text[i]
+          i++
+        }
+      }
+      yield str
+      continue
+    }
+    // 2. Quoted string (single quote)
+    if (c === "'") {
+      i++
+      let str = "'"
+      while (i < len) {
+        if (text[i] === '\\' && text[i + 1] === "'") {
+          str += "\\'"
+          i += 2
+        } else if (text[i] === "'") {
+          str += "'"
           i++
           break
         } else {
