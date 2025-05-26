@@ -48,10 +48,10 @@ const formatFileSize = (bytes: number): string => {
 
 <template>
 <!-- File Uploading Progress Form -->
-<div class="flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl">
+<div class="flex flex-col bg-white border border-gray-700 shadow-lg rounded-xl">
   <!-- Body -->
-  <div class="p-4 md:p-5 space-y-7">
-    <div v-for="(file, index) in fileProgressList" :key="index">
+  <div class="p-4 md:p-5 space-y-7 divide-y divide-gray-200">
+    <div v-for="(file, index) in fileProgressList" :key="index" class="py-4">
       <!-- Uploading File Content -->
       <div class="mb-2 flex justify-between items-center">
         <div class="flex items-center gap-x-3">
