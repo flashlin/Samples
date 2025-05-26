@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { ref } from 'vue';
+
 interface FileProgressItem {
     name: string;
     size: number;
@@ -11,9 +13,37 @@ interface FileItem {
 interface FileUploadProps {
     fileList: FileItem[];
 }
-const props = defineProps<FileUploadProps>();
-const fileProgressList: FileProgressItem[] = [];
 
+const props = defineProps<FileUploadProps>();
+const fileProgressList = ref<FileProgressItem[]>([
+    {
+        name: 'preline-ui.html',
+        size: 7 * 1024, // 7 KB
+        progress: 1,
+        status: 'uploading'
+    },
+    {
+        name: 'preline-ui.mp4',
+        size: 105.5 * 1024 * 1024, // 105.5 MB
+        progress: 1,
+        status: 'uploading'
+    },
+    {
+        name: 'preline-ui-cover.jpg',
+        size: 55 * 1024, // 55 KB
+        progress: 1,
+        status: 'uploading'
+    }
+]);
+
+// Format file size to human readable format
+const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
 </script>
 
 <template>
@@ -21,7 +51,7 @@ const fileProgressList: FileProgressItem[] = [];
 <div class="flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl">
   <!-- Body -->
   <div class="p-4 md:p-5 space-y-7">
-    <div>
+    <div v-for="(file, index) in fileProgressList" :key="index">
       <!-- Uploading File Content -->
       <div class="mb-2 flex justify-between items-center">
         <div class="flex items-center gap-x-3">
@@ -33,8 +63,8 @@ const fileProgressList: FileProgressItem[] = [];
             </svg>
           </span>
           <div>
-            <p class="text-sm font-medium text-gray-800">preline-ui.html</p>
-            <p class="text-xs text-gray-500">7 KB</p>
+            <p class="text-sm font-medium text-gray-800">{{ file.name }}</p>
+            <p class="text-xs text-gray-500">{{ formatFileSize(file.size) }}</p>
           </div>
         </div>
         <div class="inline-flex items-center gap-x-2">
@@ -60,98 +90,8 @@ const fileProgressList: FileProgressItem[] = [];
       <!-- End Uploading File Content -->
 
       <!-- Progress Bar -->
-      <div class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="100">
-        <div class="flex flex-col justify-center rounded-full overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap transition duration-500" style="width: 1%"></div>
-      </div>
-      <!-- End Progress Bar -->
-    </div>
-
-    <div>
-      <!-- Uploading File Content -->
-      <div class="mb-2 flex justify-between items-center">
-        <div class="flex items-center gap-x-3">
-          <span class="size-8 flex justify-center items-center border border-gray-200 text-gray-500 rounded-lg">
-            <svg class="shrink-0 size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" x2="12" y1="3" y2="15"></line>
-            </svg>
-          </span>
-          <div>
-            <p class="text-sm font-medium text-gray-800">preline-ui.mp4</p>
-            <p class="text-xs text-gray-500">105.5 MB</p>
-          </div>
-        </div>
-        <div class="inline-flex items-center gap-x-2">
-          <button type="button" class="relative text-gray-500 hover:text-gray-800 focus:outline-hidden focus:text-gray-800 disabled:opacity-50 disabled:pointer-events-none">
-            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="4" height="16" x="6" y="4"></rect>
-              <rect width="4" height="16" x="14" y="4"></rect>
-            </svg>
-            <span class="sr-only">Pause</span>
-          </button>
-          <button type="button" class="relative text-gray-500 hover:text-gray-800 focus:outline-hidden focus:text-gray-800 disabled:opacity-50 disabled:pointer-events-none">
-            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18"></path>
-              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-              <line x1="10" x2="10" y1="11" y2="17"></line>
-              <line x1="14" x2="14" y1="11" y2="17"></line>
-            </svg>
-            <span class="sr-only">Delete</span>
-          </button>
-        </div>
-      </div>
-      <!-- End Uploading File Content -->
-
-      <!-- Progress Bar -->
-      <div class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="100">
-        <div class="flex flex-col justify-center rounded-full overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap transition duration-500" style="width: 1%"></div>
-      </div>
-      <!-- End Progress Bar -->
-    </div>
-
-    <div>
-      <!-- Uploading File Content -->
-      <div class="mb-2 flex justify-between items-center">
-        <div class="flex items-center gap-x-3">
-          <span class="size-8 flex justify-center items-center border border-gray-200 text-gray-500 rounded-lg">
-            <svg class="shrink-0 size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" x2="12" y1="3" y2="15"></line>
-            </svg>
-          </span>
-          <div>
-            <p class="text-sm font-medium text-gray-800">preline-ui-cover.jpg</p>
-            <p class="text-xs text-gray-500">55 KB</p>
-          </div>
-        </div>
-        <div class="inline-flex items-center gap-x-2">
-          <button type="button" class="relative text-gray-500 hover:text-gray-800 focus:outline-hidden focus:text-gray-800 disabled:opacity-50 disabled:pointer-events-none">
-            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="4" height="16" x="6" y="4"></rect>
-              <rect width="4" height="16" x="14" y="4"></rect>
-            </svg>
-            <span class="sr-only">Pause</span>
-          </button>
-          <button type="button" class="relative text-gray-500 hover:text-gray-800 focus:outline-hidden focus:text-gray-800 disabled:opacity-50 disabled:pointer-events-none">
-            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18"></path>
-              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-              <line x1="10" x2="10" y1="11" y2="17"></line>
-              <line x1="14" x2="14" y1="11" y2="17"></line>
-            </svg>
-            <span class="sr-only">Delete</span>
-          </button>
-        </div>
-      </div>
-      <!-- End Uploading File Content -->
-
-      <!-- Progress Bar -->
-      <div class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="100">
-        <div class="flex flex-col justify-center rounded-full overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap transition duration-500" style="width: 1%"></div>
+      <div class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden" role="progressbar" :aria-valuenow="file.progress" aria-valuemin="0" aria-valuemax="100">
+        <div class="flex flex-col justify-center rounded-full overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap transition duration-500" :style="{ width: file.progress + '%' }"></div>
       </div>
       <!-- End Progress Bar -->
     </div>
@@ -163,7 +103,7 @@ const fileProgressList: FileProgressItem[] = [];
     <div class="flex flex-wrap justify-between items-center gap-x-3">
       <div>
         <span class="text-sm font-semibold text-gray-800">
-          3 left
+          {{ fileProgressList.length }} left
         </span>
       </div>
       <!-- End Col -->
