@@ -44,93 +44,84 @@ const formatFileSize = (bytes: number): string => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 };
+
+// Remove file by index
+const removeFile = (idx: number) => {
+    fileProgressList.value.splice(idx, 1);
+};
 </script>
 
 <template>
-<!-- File Uploading Progress Form -->
-<div class="flex flex-col">
-  <!-- Body -->
-  <div class="p-4 md:p-5 space-y-7 divide-y divide-gray-200">
-    <div v-for="(file, index) in fileProgressList" :key="index" class="py-4">
-      <!-- Uploading File Content -->
-      <div class="mb-2 flex justify-between items-center">
-        <div class="flex items-center gap-x-3">
-          <span class="size-8 flex justify-center items-center border border-gray-200 text-gray-500 rounded-lg">
-            <svg class="shrink-0 size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" x2="12" y1="3" y2="15"></line>
-            </svg>
-          </span>
-          <div>
-            <p class="text-sm font-medium text-gray-800">{{ file.name }}</p>
-            <p class="text-xs text-gray-500">{{ formatFileSize(file.size) }}</p>
+  <!-- File Uploading Progress Form -->
+  <div class="flex flex-col bg-[#181c20] border border-[#23272f] shadow-2xs rounded-xl">
+    <!-- Body -->
+    <div class="p-2 space-y-2">
+      <div v-for="(item, idx) in fileProgressList" :key="item.name" class="bg-gray-800 rounded-lg px-4 py-3 flex flex-col gap-1">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-x-3">
+            <span class="size-7 flex justify-center items-center border border-[#23272f] text-white rounded-lg">
+              <svg class="shrink-0 size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="white"/>
+                <polyline points="17 8 12 3 7 8" stroke="white"/>
+                <line x1="12" x2="12" y1="3" y2="15" stroke="white"/>
+              </svg>
+            </span>
+            <div>
+              <p class="text-sm font-medium text-white">{{ item.name }}</p>
+              <p class="text-xs text-neutral-300">{{ formatFileSize(item.size) }}</p>
+            </div>
+          </div>
+          <div class="inline-flex items-center gap-x-2">
+            <button type="button" class="text-neutral-400 hover:text-white">
+              <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="4" height="16" x="6" y="4" stroke="currentColor"/>
+                <rect width="4" height="16" x="14" y="4" stroke="currentColor"/>
+              </svg>
+              <span class="sr-only">Pause</span>
+            </button>
+            <button type="button" @click="removeFile(idx)" class="text-neutral-400 hover:text-red-400">
+              <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18" stroke="currentColor"/>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" stroke="currentColor"/>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" stroke="currentColor"/>
+                <line x1="10" x2="10" y1="11" y2="17" stroke="currentColor"/>
+                <line x1="14" x2="14" y1="11" y2="17" stroke="currentColor"/>
+              </svg>
+              <span class="sr-only">Delete</span>
+            </button>
           </div>
         </div>
-        <div class="inline-flex items-center gap-x-2">
-          <button type="button" class="relative text-gray-500 hover:text-gray-800 focus:outline-hidden focus:text-gray-800 disabled:opacity-50 disabled:pointer-events-none">
-            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect width="4" height="16" x="6" y="4"></rect>
-              <rect width="4" height="16" x="14" y="4"></rect>
-            </svg>
-            <span class="sr-only">Pause</span>
-          </button>
-          <button type="button" class="relative text-gray-500 hover:text-gray-800 focus:outline-hidden focus:text-gray-800 disabled:opacity-50 disabled:pointer-events-none">
-            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18"></path>
-              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-              <line x1="10" x2="10" y1="11" y2="17"></line>
-              <line x1="14" x2="14" y1="11" y2="17"></line>
-            </svg>
-            <span class="sr-only">Delete</span>
-          </button>
+        <!-- Progress Bar -->
+        <div class="w-full h-1 bg-transparent mt-1">
+          <div class="h-1 bg-blue-500 rounded-full" :style="{ width: (item.progress * 100) + '%' }"></div>
         </div>
       </div>
-      <!-- End Uploading File Content -->
-
-      <!-- Progress Bar -->
-      <div class="flex w-full h-2 bg-gray-200 rounded-full overflow-hidden" role="progressbar" :aria-valuenow="file.progress" aria-valuemin="0" aria-valuemax="100">
-        <div class="flex flex-col justify-center rounded-full overflow-hidden bg-blue-600 text-xs text-white text-center whitespace-nowrap transition duration-500" :style="{ width: file.progress + '%' }"></div>
-      </div>
-      <!-- End Progress Bar -->
     </div>
-  </div>
-  <!-- End Body -->
-
-  <!-- Footer -->
-  <div class="bg-gray-50 border-t border-gray-200 rounded-b-xl py-2 px-4 md:px-5">
-    <div class="flex flex-wrap justify-between items-center gap-x-3">
-      <div>
-        <span class="text-sm font-semibold text-gray-800">
-          {{ fileProgressList.length }} left
-        </span>
-      </div>
-      <!-- End Col -->
-
-      <div class="-me-2.5">
-        <button type="button" class="py-2 px-3 inline-flex items-center gap-x-1.5 text-sm font-medium rounded-lg border border-transparent text-gray-500 hover:bg-gray-200 hover:text-gray-800 focus:outline-hidden focus:bg-gray-200 focus:text-gray-800 disabled:opacity-50 disabled:pointer-events-none">
+    <!-- End Body -->
+    <!-- Footer -->
+    <div class="bg-gray-800 border-t border-[#23272f] rounded-b-xl py-2 px-4 flex justify-between items-center">
+      <span class="text-sm font-semibold text-white">{{ fileProgressList.length }} left</span>
+      <div class="flex items-center gap-x-2">
+        <button type="button" class="text-neutral-400 hover:text-white">
           <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect width="4" height="16" x="6" y="4"></rect>
-            <rect width="4" height="16" x="14" y="4"></rect>
+            <rect width="4" height="16" x="6" y="4" stroke="currentColor"/>
+            <rect width="4" height="16" x="14" y="4" stroke="currentColor"/>
           </svg>
           <span class="sr-only">Pause</span>
         </button>
-        <button type="button" class="py-2 px-3 inline-flex items-center gap-x-1.5 text-sm font-medium rounded-lg border border-transparent text-gray-500 hover:bg-gray-200 hover:text-gray-800 focus:outline-hidden focus:bg-gray-200 focus:text-gray-800 disabled:opacity-50 disabled:pointer-events-none">
+        <button type="button" class="text-neutral-400 hover:text-red-400 flex items-center gap-x-1">
           <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 6h18"></path>
-            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-            <line x1="10" x2="10" y1="11" y2="17"></line>
-            <line x1="14" x2="14" y1="11" y2="17"></line>
+            <path d="M3 6h18" stroke="currentColor"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" stroke="currentColor"/>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" stroke="currentColor"/>
+            <line x1="10" x2="10" y1="11" y2="17" stroke="currentColor"/>
+            <line x1="14" x2="14" y1="11" y2="17" stroke="currentColor"/>
           </svg>
-          Delete
+          <span>Delete</span>
         </button>
       </div>
-      <!-- End Col -->
     </div>
+    <!-- End Footer -->
   </div>
-  <!-- End Footer -->
-</div>
-<!-- End File Uploading Progress Form -->    
+  <!-- End File Uploading Progress Form -->
 </template>
