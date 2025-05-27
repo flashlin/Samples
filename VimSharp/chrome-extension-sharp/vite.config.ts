@@ -13,7 +13,7 @@ export default defineConfig({
         // 複製 popup.html 到 dist 目錄
         copyFileSync('public/popup.html', 'dist/popup.html')
       }
-    }
+    },
   ],
   resolve: {
     alias: {

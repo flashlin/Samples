@@ -24,6 +24,8 @@
     "vue-router": "4"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.7",
+    "@tailwindcss/vite": "^4.1.7",
     "@types/chrome": "^0.0.317",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.17.19",
