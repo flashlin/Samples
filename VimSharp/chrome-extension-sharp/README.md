@@ -78,3 +78,7 @@ npm run build:extension
 
 - 此擴充功能需要 Chrome 88 或更高版本
 - 使用了 Manifest V3 格式
+
+pnpm install -D tailwindcss@latest postcss@latest autoprefixer@latest
+# npx tailwindcss init -p
+pnpm exec tailwindcss init -p
