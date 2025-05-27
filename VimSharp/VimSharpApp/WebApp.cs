@@ -25,6 +25,18 @@ namespace VimSharpApp
 
             // 註冊 API 端點
             JobApiHandler.MapEndpoints(_webApp);
+
+            // 提供 public 資料夾的靜態檔案
+            _webApp.UseDefaultFiles(new DefaultFilesOptions
+            {
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "public")),
+                RequestPath = ""
+            });
+            _webApp.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "public")),
+                RequestPath = ""
+            });
             
             // 啟動 Web 應用程式
             _webTask = _webApp.RunAsync();
