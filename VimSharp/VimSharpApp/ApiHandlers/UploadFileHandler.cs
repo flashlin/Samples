@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace VimSharpApp.ApiHandlers;
 
@@ -11,7 +12,8 @@ public interface IUploadFileHandler
 public class UploadFileRequest
 {
     public required string FileName { get; set; }
-    public string FileContent { get; set; }
+    public required byte[] FileContent { get; set; }
+    public required long Offset { get; set; }
 }
 
 public class UploadFileResponse
@@ -21,11 +23,36 @@ public class UploadFileResponse
 
 public class UploadFileHandler : IUploadFileHandler
 {
-    public Task<UploadFileResponse> Upload(UploadFileRequest req)
+    private const string UsersFileDir = @"D:\\demo\\UserFiles";
+
+    public async Task<UploadFileResponse> Upload(UploadFileRequest req)
     {
-        return Task.FromResult(new UploadFileResponse{
-            FileName = req.FileName
-        });       
+        EnsureDirectoryExists();
+        var filePath = GetFilePath(req.FileName);
+        await WriteChunkToFile(filePath, req.FileContent, req.Offset);
+        return new UploadFileResponse { FileName = req.FileName };
+    }
+
+    private void EnsureDirectoryExists()
+    {
+        if (!Directory.Exists(UsersFileDir))
+        {
+            Directory.CreateDirectory(UsersFileDir);
+        }
+    }
+
+    private string GetFilePath(string fileName)
+    {
+        return Path.Combine(UsersFileDir, fileName);
+    }
+
+    private async Task WriteChunkToFile(string filePath, byte[] content, long offset)
+    {
+        using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+        {
+            stream.Seek(offset, SeekOrigin.Begin);
+            await stream.WriteAsync(content, 0, content.Length);
+        }
     }
 
     public static void MapEndpoints(WebApplication app)
