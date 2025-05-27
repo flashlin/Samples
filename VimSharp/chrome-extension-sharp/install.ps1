@@ -1,0 +1,1 @@
+pnpm exec tailwindcss init -p
