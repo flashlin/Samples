@@ -14,7 +14,7 @@ interface FileUploadProps {
     fileList: FileItem[];
 }
 
-const props = defineProps<FileUploadProps>();
+defineProps<FileUploadProps>();
 const fileProgressList = ref<FileProgressItem[]>([
     {
         name: 'preline-ui.html',

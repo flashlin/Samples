@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import Excel from './components/Excel.vue'
 </script>
 
 <template>
