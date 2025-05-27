@@ -327,6 +327,11 @@ if( "plm" -eq $action )
 if( "ab" -eq $action )
 {
     InvokeCmd "git restore ."
+    $answer = Read-Host "是否刪除 Untracked 的資料夾（不只檔案）? (y/n)"
+    if ($answer -ne "y") {
+        return
+    }
+    InvokeCmd "git clean -fd"
     # InvokeCmd "git reset --hard HEAD"  # 清除 unstage files
     # InvokeCmd "git clean -fdx"  # 清除 untrack files
     return
