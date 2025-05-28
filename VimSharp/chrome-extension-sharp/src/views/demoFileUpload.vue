@@ -5,7 +5,7 @@ import { UploadFileApi, UploadFileRequest } from '@/tools/uploadFileApi';
 const apiUrl = import.meta.env.VITE_API_URL;
 const uploader = new UploadFileApi(apiUrl);
 
-async function uploadAllFiles(files: File[]) {
+async function uploadAllFiles(files: File[], instance: { processBarStatus: string }) {
   for (const file of files) {
     const arrayBuffer = await file.arrayBuffer();
     const req: UploadFileRequest = {
@@ -17,10 +17,10 @@ async function uploadAllFiles(files: File[]) {
       const resp = await uploader.upload(req);
       console.log('Uploaded:', resp.fileName);
     } catch (err) {
+      if (instance) instance.processBarStatus = `${file.name} error`;
       console.error('Upload failed:', file.name, err);
     }
   }
-  alert('All files uploaded!');
 }
 </script>
 

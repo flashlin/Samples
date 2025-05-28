@@ -1,9 +1,13 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 
+interface FileUploadInstance {
+  processBarStatus: string;
+}
+
 interface FileUploadProps {
     accept?: string;
-    processHandler?: (files: File[]) => void | Promise<void>;
+    processHandler?: (files: File[], instance: FileUploadInstance) => void | Promise<void>;
     processButtonTitle?: string;
 }
 
@@ -12,6 +16,15 @@ const props = withDefaults(defineProps<FileUploadProps>(), {
 });
 
 const fileList = ref<File[]>([]);
+const processBarStatus = ref('');
+const instance: FileUploadInstance = {
+  get processBarStatus() {
+    return processBarStatus.value;
+  },
+  set processBarStatus(val: string) {
+    processBarStatus.value = val;
+  }
+};
 
 function onFileChange(e: Event) {
   const input = e.target as HTMLInputElement;
@@ -42,7 +55,7 @@ const formatFileSize = (bytes: number): string => {
 
 function handleAllFileProcess() {
   if (props.processHandler) {
-    props.processHandler(fileList.value);
+    props.processHandler(fileList.value, instance);
   }
 }
 </script>
@@ -107,6 +120,8 @@ function handleAllFileProcess() {
         <div class="w-full h-1 bg-transparent mt-1">
           <div class="h-1 bg-blue-500 rounded-full" :style="{ width: (item.progress * 100) + '%' }"></div>
         </div>
+        <!-- Process Status -->
+        <div v-if="processBarStatus" class="text-xs text-red-400 mt-1">{{ processBarStatus }}</div>
       </div>
     </div>
     <!-- End Body -->
