@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
+import { UploadFileApi, UploadFileRequest } from '@/tools/uploadFileApi';
 
 interface FileUploadProps {
     accept?: string;
@@ -38,6 +39,30 @@ const formatFileSize = (bytes: number): string => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 };
 
+const apiUrl = import.meta.env.VITE_API_URL;
+const uploader = new UploadFileApi(apiUrl);
+
+async function uploadAllFiles() {
+  for (const file of fileList.value) {
+    // 讀取檔案內容為 ArrayBuffer
+    const arrayBuffer = await file.arrayBuffer();
+    const req: UploadFileRequest = {
+      fileName: file.name,
+      fileContent: new Uint8Array(arrayBuffer),
+      offset: 0
+    };
+    try {
+      const resp = await uploader.upload(req);
+      console.log('Uploaded:', resp.fileName);
+    } catch (err) {
+      console.error('Upload failed:', file.name, err);
+    }
+  }
+  alert('All files uploaded!');
+}
+
+const isUploading = ref(false);
+
 // 移除檔案功能可留待後續串接 emit 實作
 </script>
 
@@ -45,19 +70,21 @@ const formatFileSize = (bytes: number): string => {
   <!-- File Uploading Progress Form -->
   <div class="flex flex-col bg-[#181c20] border border-[#23272f] shadow-2xs rounded-xl">
     <!-- 上傳按鈕與 input -->
-    <label
-      class="flex bg-gray-800 hover:bg-gray-700 text-white text-base font-medium px-4 py-2.5 outline-none rounded w-max cursor-pointer mx-auto mb-4">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 mr-2 fill-white inline" viewBox="0 0 32 32">
-        <path
-          d="M23.75 11.044a7.99 7.99 0 0 0-15.5-.009A8 8 0 0 0 9 27h3a1 1 0 0 0 0-2H9a6 6 0 0 1-.035-12 1.038 1.038 0 0 0 1.1-.854 5.991 5.991 0 0 1 11.862 0A1.08 1.08 0 0 0 23 13a6 6 0 0 1 0 12h-3a1 1 0 0 0 0 2h3a8 8 0 0 0 .75-15.956z"
-          data-original="#000000" />
-        <path
-          d="M20.293 19.707a1 1 0 0 0 1.414-1.414l-5-5a1 1 0 0 0-1.414 0l-5 5a1 1 0 0 0 1.414 1.414L15 16.414V29a1 1 0 0 0 2 0V16.414z"
-          data-original="#000000" />
-      </svg>
-      Upload
-      <input type="file" class="hidden" @change="onFileChange" multiple :accept="props.accept" />
-    </label>
+    <div class="flex justify-between items-center mb-4">
+      <label
+        class="flex bg-gray-800 hover:bg-gray-700 text-white text-base font-medium px-4 py-2.5 outline-none rounded w-max cursor-pointer mx-0">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 mr-2 fill-white inline" viewBox="0 0 32 32">
+          <path
+            d="M23.75 11.044a7.99 7.99 0 0 0-15.5-.009A8 8 0 0 0 9 27h3a1 1 0 0 0 0-2H9a6 6 0 0 1-.035-12 1.038 1.038 0 0 0 1.1-.854 5.991 5.991 0 0 1 11.862 0A1.08 1.08 0 0 0 23 13a6 6 0 0 1 0 12h-3a1 1 0 0 0 0 2h3a8 8 0 0 0 .75-15.956z"
+            data-original="#000000" />
+          <path
+            d="M20.293 19.707a1 1 0 0 0 1.414-1.414l-5-5a1 1 0 0 0-1.414 0l-5 5a1 1 0 0 0 1.414 1.414L15 16.414V29a1 1 0 0 0 2 0V16.414z"
+            data-original="#000000" />
+        </svg>
+        Upload
+        <input type="file" class="hidden" @change="onFileChange" multiple :accept="props.accept" />
+      </label>
+    </div>
     <!-- Body -->
     <div class="p-2 space-y-2">
       <div v-for="item in fileProgressList" :key="item.name" class="bg-gray-800 rounded-lg px-4 py-3 flex flex-col gap-1">
@@ -122,6 +149,9 @@ const formatFileSize = (bytes: number): string => {
             <line x1="14" x2="14" y1="11" y2="17" stroke="currentColor"/>
           </svg>
           <span>Delete</span>
+        </button>
+        <button @click="uploadAllFiles" class="ml-4 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded" :disabled="fileList.length === 0">
+          Upload
         </button>
       </div>
     </div>
