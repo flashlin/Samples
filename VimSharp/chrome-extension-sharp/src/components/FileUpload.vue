@@ -120,14 +120,14 @@ function handleAllFileProcess() {
         <div class="w-full h-1 bg-transparent mt-1">
           <div class="h-1 bg-blue-500 rounded-full" :style="{ width: (item.progress * 100) + '%' }"></div>
         </div>
-        <!-- Process Status -->
-        <div v-if="processBarStatus" class="text-xs text-red-400 mt-1">{{ processBarStatus }}</div>
       </div>
     </div>
     <!-- End Body -->
     <!-- Footer -->
     <div class="bg-gray-800 border-t border-[#23272f] rounded-b-xl py-2 px-4 flex justify-between items-center">
       <span class="text-sm font-semibold text-white">{{ fileProgressList.length }} left</span>
+      <!-- Process Status -->
+      <div v-if="processBarStatus" class="text-xs text-red-400 mt-1">{{ processBarStatus }}</div>
       <div class="flex items-center gap-x-2">
         <button type="button" class="text-neutral-400 hover:text-white">
           <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
