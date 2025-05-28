@@ -22,7 +22,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('./views/demoFileUpload.vue'),
   },
   {
-    path: '/excel',
+    path: '/excelQuery',
     name: 'excel',
     component: () => import('./views/excelFileQuery.vue'),
   },
