@@ -4,9 +4,12 @@ import { ref, computed } from 'vue';
 interface FileUploadProps {
     accept?: string;
     processHandler?: (files: File[]) => void | Promise<void>;
+    processButtonTitle?: string;
 }
 
-const props = defineProps<FileUploadProps>();
+const props = withDefaults(defineProps<FileUploadProps>(), {
+  processButtonTitle: 'Process',
+});
 
 const fileList = ref<File[]>([]);
 
@@ -37,7 +40,7 @@ const formatFileSize = (bytes: number): string => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 };
 
-function handleUpload() {
+function handleAllFileProcess() {
   if (props.processHandler) {
     props.processHandler(fileList.value);
   }
@@ -59,7 +62,7 @@ function handleUpload() {
             d="M20.293 19.707a1 1 0 0 0 1.414-1.414l-5-5a1 1 0 0 0-1.414 0l-5 5a1 1 0 0 0 1.414 1.414L15 16.414V29a1 1 0 0 0 2 0V16.414z"
             data-original="#000000" />
         </svg>
-        Upload
+        Select Files
         <input type="file" class="hidden" @change="onFileChange" multiple :accept="props.accept" />
       </label>
     </div>
@@ -128,8 +131,8 @@ function handleUpload() {
           </svg>
           <span>Delete</span>
         </button>
-        <button @click="handleUpload" class="ml-4 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded" :disabled="fileList.length === 0">
-          Upload
+        <button @click="handleAllFileProcess" class="ml-4 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded" :disabled="fileList.length === 0">
+          {{ props.processButtonTitle }}
         </button>
       </div>
     </div>
