@@ -3,7 +3,7 @@
 import { ref, watch } from 'vue'
 import MonacoEditor from 'monaco-editor-vue3'
 import * as monaco from 'monaco-editor'
-import { initVimMode2 } from '@/tools/monaco-vim2'
+import { initVimMode2, VimMode2 } from '@/tools/monaco-vim2'
 
 const props = defineProps<{ value: string }>()
 const innerValue = ref(props.value)
@@ -15,7 +15,7 @@ watch(() => props.value, newValue => {
   }
 })
 
-let vimMode: any = null
+let vimMode: VimMode2 | null = null
 function onEditorMount(editor: monaco.editor.IStandaloneCodeEditor) {
   if (!vimMode) {
     editor.focus()
