@@ -1,19 +1,25 @@
 <script lang="ts" setup>
+import { ref } from 'vue';
 import FileUpload from '@/components/FileUpload.vue';
 
-// Sample file list for demonstration
-const fileList = [
-    { name: 'document1.pdf' },
-    { name: 'image1.jpg' },
-    { name: 'video1.mp4' }
-];
+// fileList 改為 reactive 狀態，存放 File 物件
+const fileList = ref<File[]>([]);
+
+function onFileChange(e: Event) {
+  const input = e.target as HTMLInputElement;
+  if (input.files) {
+    for (let i = 0; i < input.files.length; i++) {
+      fileList.value.push(input.files[i]);
+    }
+  }
+}
 </script>
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-900 w-full">
     <div class="flex flex-col items-center w-full">
       <h1 class="text-2xl font-bold mb-4 text-white text-center">Demo</h1>
-      <label for="uploadFile1"
+      <label
         class="flex bg-gray-800 hover:bg-gray-700 text-white text-base font-medium px-4 py-2.5 outline-none rounded w-max cursor-pointer mx-auto">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 mr-2 fill-white inline" viewBox="0 0 32 32">
           <path
@@ -24,7 +30,7 @@ const fileList = [
             data-original="#000000" />
         </svg>
         Upload
-        <input type="file" class="hidden" />
+        <input type="file" class="hidden" @change="onFileChange" multiple />
       </label>
       <div class="w-full mx-auto border border-gray-700 shadow-lg rounded-xl p-6 flex justify-center" style="background:#2d333b;">
         <FileUpload :fileList="fileList" style="width:98%;" />
