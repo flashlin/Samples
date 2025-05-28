@@ -21,6 +21,11 @@ const routes: RouteRecordRaw[] = [
     name: 'FileUpload',
     component: () => import('./views/demoFileUpload.vue'),
   },
+  {
+    path: '/excel',
+    name: 'excel',
+    component: () => import('./views/excelFileQuery.vue'),
+  },
 ]
 
 const router = createRouter({
