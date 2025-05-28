@@ -1,14 +1,13 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
-import { UploadFileApi, UploadFileRequest } from '@/tools/uploadFileApi';
 
 interface FileUploadProps {
     accept?: string;
+    processHandler?: (files: File[]) => void | Promise<void>;
 }
 
 const props = defineProps<FileUploadProps>();
 
-// fileList 狀態與 onFileChange 方法
 const fileList = ref<File[]>([]);
 
 function onFileChange(e: Event) {
@@ -20,7 +19,6 @@ function onFileChange(e: Event) {
   }
 }
 
-// 由 fileList 動態產生顯示用的檔案進度資料
 const fileProgressList = computed(() =>
     fileList.value.map(file => ({
         name: file.name,
@@ -39,31 +37,11 @@ const formatFileSize = (bytes: number): string => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 };
 
-const apiUrl = import.meta.env.VITE_API_URL;
-const uploader = new UploadFileApi(apiUrl);
-
-async function uploadAllFiles() {
-  for (const file of fileList.value) {
-    // 讀取檔案內容為 ArrayBuffer
-    const arrayBuffer = await file.arrayBuffer();
-    const req: UploadFileRequest = {
-      fileName: file.name,
-      fileContent: new Uint8Array(arrayBuffer),
-      offset: 0
-    };
-    try {
-      const resp = await uploader.upload(req);
-      console.log('Uploaded:', resp.fileName);
-    } catch (err) {
-      console.error('Upload failed:', file.name, err);
-    }
+function handleUpload() {
+  if (props.processHandler) {
+    props.processHandler(fileList.value);
   }
-  alert('All files uploaded!');
 }
-
-const isUploading = ref(false);
-
-// 移除檔案功能可留待後續串接 emit 實作
 </script>
 
 <template>
@@ -150,7 +128,7 @@ const isUploading = ref(false);
           </svg>
           <span>Delete</span>
         </button>
-        <button @click="uploadAllFiles" class="ml-4 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded" :disabled="fileList.length === 0">
+        <button @click="handleUpload" class="ml-4 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded" :disabled="fileList.length === 0">
           Upload
         </button>
       </div>
