@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 
-interface FileUploadInstance {
+export interface FileUploadInstance {
   processBarStatus: string;
 }
 
