@@ -51,7 +51,7 @@ function handleAllFileProcess() {
   <!-- File Uploading Progress Form -->
   <div class="flex flex-col bg-[#181c20] border border-[#23272f] shadow-2xs rounded-xl">
     <!-- 上傳按鈕與 input -->
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex justify-end items-center mb-4">
       <label
         class="flex bg-gray-800 hover:bg-gray-700 text-white text-base font-medium px-4 py-2.5 outline-none rounded w-max cursor-pointer mx-0">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 mr-2 fill-white inline" viewBox="0 0 32 32">
