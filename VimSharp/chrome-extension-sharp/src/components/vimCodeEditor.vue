@@ -4,6 +4,7 @@ import { ref, watch } from 'vue'
 import MonacoEditor from 'monaco-editor-vue3'
 import * as monaco from 'monaco-editor'
 import { initVimMode2, VimMode2 } from '@/tools/monaco-vim2'
+import { log } from 'console'
 
 interface VimCodeEditorProps {
   value: string
@@ -37,7 +38,7 @@ function onEditorMount(editor: monaco.editor.IStandaloneCodeEditor) {
 </script>
 
 <template>
-  <div class="vim-editor-root" style="height: 600px;">
+  <div class="vim-editor-root w-full h-full">
     <MonacoEditor
       ref="monacoRef"
       v-model:value="innerValue"

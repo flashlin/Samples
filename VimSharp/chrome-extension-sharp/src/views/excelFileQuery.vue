@@ -2,6 +2,7 @@
 import FileUpload, { FileUploadInstance } from '@/components/FileUpload.vue';
 import { ExcelSheet, getExcelFileAsync } from '@/tools/excel';
 import { ref } from 'vue';
+import VimCodeEditor from '@/components/vimCodeEditor.vue';
 
 interface ExcelFile {
   fileName: string;
@@ -9,6 +10,7 @@ interface ExcelFile {
 }
 
 const excelFiles = ref<ExcelFile[]>([]);
+const code = ref('from tb1 in test select tb1')
 
 async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) {
   const initialStatus = 'Uploading...';
@@ -33,6 +35,9 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
       <div class="w-full mx-auto border border-gray-700 shadow-lg rounded-xl p-6 flex justify-center" style="background:#2d333b;">
         <FileUpload accept=".xlsx,.csv" :processHandler="uploadAllExcelFiles" 
           processButtonTitle="Import" style="width:98%;" />
+      </div>
+      <div class="w-full h-96 mx-auto border border-gray-700 shadow-lg rounded-xl p-6 flex justify-center mt-6" style="background:#23272f;">
+        <VimCodeEditor v-model:value="code" :enableVim="false" class="w-full h-full" />
       </div>
     </div>
   </div>
