@@ -26,15 +26,13 @@ namespace VimSharpApp.Databases
 
         public void ImportSheetToDb(DataTable dt, string tableName)
         {
-            // 1. Create table if not exists
-            var columns = new List<string>();
-            foreach (DataColumn col in dt.Columns)
-            {
-                columns.Add($"[{col.ColumnName}] TEXT");
-            }
-            var createTableSql = $"CREATE TABLE IF NOT EXISTS [{tableName}] ({string.Join(",", columns)})";
-            _context.Database.ExecuteSqlRaw(createTableSql);
+            DropTable(tableName);
+            CreateTable(dt, tableName);
+            InsertTable(dt, tableName);
+        }
 
+        private void InsertTable(DataTable dt, string tableName)
+        {
             // 2. Insert data
             foreach (DataRow row in dt.Rows)
             {
@@ -46,6 +44,24 @@ namespace VimSharpApp.Databases
                     .ToArray();
                 _context.Database.ExecuteSqlRaw(insertSql, parameters);
             }
+        }
+
+        private void DropTable(string tableName)
+        {
+            // Drop table if exists
+            var dropTableSql = $"DROP TABLE IF EXISTS [{tableName}]";
+            _context.Database.ExecuteSqlRaw(dropTableSql);
+        }
+
+        private void CreateTable(DataTable dt, string tableName)
+        {
+            var columns = new List<string>();
+            foreach (DataColumn col in dt.Columns)
+            {
+                columns.Add($"[{col.ColumnName}] TEXT");
+            }
+            var createTableSql = $"CREATE TABLE [{tableName}] ({string.Join(",", columns)})";
+            _context.Database.ExecuteSqlRaw(createTableSql);
         }
     }
 } 
