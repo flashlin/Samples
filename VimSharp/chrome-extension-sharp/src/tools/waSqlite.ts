@@ -68,3 +68,19 @@ export async function dropTableAsync(tableName: string) {
   const sql = `DROP TABLE IF EXISTS ${tableName}`;
   await execSqliteAsync(sql);
 }
+
+/**
+ * Insert data into a table using DataTable definition
+ * @param dt - DataTable (需有 data 欄位: 陣列，每個元素為物件)
+ * @param tableName - Table name
+ */
+export async function insertDataTableAsync(dt: DataTable & { data: any[] }, tableName: string) {
+  const name = tableName || dt.tableName;
+  const columns = dt.columns.map(col => col.name);
+  const columnsStr = columns.join(', ');
+  const valuesStr = columns.map(col => `{{${col}}}`).join(', ');
+  const sql = `INSERT INTO ${name} (${columnsStr}) VALUES (${valuesStr})`;
+  for (const row of dt.data) {
+    await execSqliteAsync(sql, row);
+  }
+}
