@@ -2,19 +2,7 @@
 import SQLiteESMFactory from 'wa-sqlite/dist/wa-sqlite.mjs'
 import * as SQLite from 'wa-sqlite'
 import Handlebars from 'handlebars'
-
-// DataTable column interface
-export interface DataTableColumn {
-  name: string; // column name
-  type: string; // column type, e.g. 'TEXT', 'INTEGER'
-}
-
-// DataTable interface
-export interface DataTable {
-  tableName: string;
-  columns: DataTableColumn[];
-  data: any[]; // array of row objects
-}
+import { DataTable } from './dataTypes'
 
 /**
  * Create a table in SQLite database based on DataTable definition
