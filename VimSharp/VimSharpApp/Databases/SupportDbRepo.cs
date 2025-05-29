@@ -33,15 +33,14 @@ namespace VimSharpApp.Databases
 
         private void InsertTable(DataTable dt, string tableName)
         {
-            // 2. Insert data
             foreach (DataRow row in dt.Rows)
             {
                 var colNames = string.Join(",", dt.Columns.Cast<DataColumn>().Select(c => $"[{c.ColumnName}]"));
                 var values = string.Join(",", dt.Columns.Cast<DataColumn>().Select(c => $"@{c.ColumnName}"));
                 var insertSql = $"INSERT INTO [{tableName}] ({colNames}) VALUES ({values})";
                 var parameters = dt.Columns.Cast<DataColumn>()
-                    .Select(c => new Microsoft.Data.Sqlite.SqliteParameter($"@{c.ColumnName}", row[c.ColumnName]?.ToString() ?? ""))
-                    .ToArray();
+                    .Select(c => new Microsoft.Data.Sqlite.SqliteParameter($"@{c.ColumnName}", row[c.ColumnName].ToString() ?? ""))
+                    .ToArray<object?>();
                 _context.Database.ExecuteSqlRaw(insertSql, parameters);
             }
         }
