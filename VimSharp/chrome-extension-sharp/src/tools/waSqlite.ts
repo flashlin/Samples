@@ -81,16 +81,13 @@ export async function insertDataTableAsync(dt: DataTable, tableName: string) {
   const columnsStr = columns.join(', ');
   const valuesStr = columns.map(col => `{{${col}}}`).join(', ');
   const sql = `INSERT INTO ${name} (${columnsStr}) VALUES (${valuesStr})`;
-
-  const module = await SQLiteESMFactory();
-  const sqlite3 = SQLite.Factory(module);
-  const db = await sqlite3.open_v2('supportDb');
   const template = Handlebars.compile(sql);
-  for (const row of dt.data) {
+  await withSQLiteDbAsync(async (sqlite3, db) => {
+    for (const row of dt.data) {
       const lastSql = template(row);
       await sqlite3.exec(db, lastSql);
-  }
-  await sqlite3.close(db);
+    }
+  });
 }
 
 /**
