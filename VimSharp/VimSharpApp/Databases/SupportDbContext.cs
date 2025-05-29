@@ -5,17 +5,16 @@ namespace VimSharpApp.Databases
     // DbContext for SQLite, no DbSet yet
     public class SupportDbContext : DbContext
     {
-        private readonly string _dbFile;
-
-        public SupportDbContext(string dbFile)
-        {
-            _dbFile = dbFile;
-        }
+        private const string DbFile = "./Support.db";
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            if (!File.Exists(DbFile))
+            {
+                Database.EnsureCreated();
+            }
             // Use SQLite database
-            optionsBuilder.UseSqlite($"Data Source={_dbFile}");
+            optionsBuilder.UseSqlite($"Data Source={DbFile}");
         }
     }
 } 
