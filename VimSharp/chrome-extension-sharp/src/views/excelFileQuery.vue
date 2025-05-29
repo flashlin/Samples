@@ -19,6 +19,7 @@ const code = ref('from tb1 in test select tb1')
 async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) {
   const initialStatus = 'Uploading...';
   instance.processBarStatus = initialStatus;
+  let newDataTables: DataTableType[] = [];
   try{
     for (const file of files) {
       const excelSheets = await getExcelFileAsync(file);
@@ -27,11 +28,20 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
         sheets: excelSheets
       });
       const dataTables = excelSheets.map(convertSheetToDataTable);
-      allDataTables.value.push(...dataTables);
+      newDataTables.push(...dataTables);
     }
   }catch(e){
     console.error(e);
   }
+  
+  // Check for duplicate tableNames before pushing to allDataTables
+  for (const newTable of newDataTables) {
+    const isDuplicate = allDataTables.value.some(existingTable => existingTable.tableName === newTable.tableName);
+    if (!isDuplicate) {
+      allDataTables.value.push(newTable);
+    }
+  }
+
   if (instance.processBarStatus === initialStatus) {
     instance.processBarStatus = 'Uploaded!';
   }
