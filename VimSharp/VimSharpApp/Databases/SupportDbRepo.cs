@@ -24,7 +24,7 @@ namespace VimSharpApp.Databases
             return query.ToList();
         }
 
-        public void ImportSheetToDb(string tableName, DataTable dt, string dbFile)
+        public void ImportSheetToDb(DataTable dt, string tableName)
         {
             // 1. Create table if not exists
             var columns = new List<string>();
@@ -32,7 +32,6 @@ namespace VimSharpApp.Databases
             {
                 columns.Add($"[{col.ColumnName}] TEXT");
             }
-                
             var createTableSql = $"CREATE TABLE IF NOT EXISTS [{tableName}] ({string.Join(",", columns)})";
             _context.Database.ExecuteSqlRaw(createTableSql);
 

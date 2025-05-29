@@ -31,7 +31,7 @@ namespace VimSharpApp.Databases
             {
                 var tableName = $"{fileName}_{worksheet.Name}";
                 var dataTable = WorksheetToDataTable(worksheet);
-                _repo.ImportSheetToDb(tableName, dataTable, excelFile);
+                _repo.ImportSheetToDb(dataTable, tableName);
             }
         }
 
