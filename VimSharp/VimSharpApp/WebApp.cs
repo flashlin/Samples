@@ -20,6 +20,10 @@ namespace VimSharpApp
             webBuilder.Logging.ClearProviders();
             webBuilder.Logging.AddDebug();
 
+            // 載入 appSetting.json
+            webBuilder.Configuration.AddJsonFile("appSetting.json", optional: false, reloadOnChange: true);
+            webBuilder.Services.Configure<AppSettingConfig>(webBuilder.Configuration);
+
             webBuilder.WebHost.UseUrls("http://localhost:8080");
             _webApp = webBuilder.Build();
 

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using Microsoft.Extensions.Options;
+using VimSharpApp.ApiHandlers;
 
 namespace VimSharpApp.ApiHandlers;
 
@@ -23,7 +25,12 @@ public class UploadFileResponse
 
 public class UploadFileHandler : IUploadFileHandler
 {
-    private const string UsersFileDir = @"D:\\demo\\UserFiles";
+    private readonly string _usersFileDir;
+
+    public UploadFileHandler(IOptions<AppSettingConfig> config)
+    {
+        _usersFileDir = config.Value.UserFilesPath;
+    }
 
     public async Task<UploadFileResponse> Upload(UploadFileRequest req)
     {
@@ -35,15 +42,15 @@ public class UploadFileHandler : IUploadFileHandler
 
     private void EnsureDirectoryExists()
     {
-        if (!Directory.Exists(UsersFileDir))
+        if (!Directory.Exists(_usersFileDir))
         {
-            Directory.CreateDirectory(UsersFileDir);
+            Directory.CreateDirectory(_usersFileDir);
         }
     }
 
     private string GetFilePath(string fileName)
     {
-        return Path.Combine(UsersFileDir, fileName);
+        return Path.Combine(_usersFileDir, fileName);
     }
 
     private async Task WriteChunkToFile(string filePath, byte[] content, long offset)
