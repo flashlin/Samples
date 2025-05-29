@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import FileUpload, { FileUploadInstance } from '@/components/FileUpload.vue';
 import { ExcelSheet, getExcelFileAsync } from '@/tools/excel';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
 import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import DataTable from '@/components/DataTable.vue';
 
@@ -13,24 +13,6 @@ interface ExcelFile {
 const excelFiles = ref<ExcelFile[]>([]);
 const code = ref('from tb1 in test select tb1')
 
-// 動態同步左右高度
-const leftRef = ref<HTMLElement | null>(null)
-const rightHeight = ref('auto')
-
-function syncRightHeight() {
-  if (leftRef.value) {
-    rightHeight.value = leftRef.value.clientHeight + 'px'
-  }
-  console.log("🚀 ~ syncRightHeight ~ rightHeight.value:", rightHeight.value)
-}
-
-onMounted(() => {
-  syncRightHeight()
-  window.addEventListener('resize', syncRightHeight)
-})
-onUnmounted(() => {
-  window.removeEventListener('resize', syncRightHeight)
-})
 
 async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) {
   const initialStatus = 'Uploading...';
@@ -49,8 +31,6 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
   if (instance.processBarStatus === initialStatus) {
     instance.processBarStatus = 'Uploaded!';
   }
-  console.log("call syncRightHeight")
-  syncRightHeight()
 }
 </script>
 
