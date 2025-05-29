@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { DataTable, DataTableColumn } from './dataTypes';
 
 export interface ExcelSheet {
   name: string;
@@ -29,4 +30,52 @@ export async function getExcelFileAsync(file: File): Promise<ExcelSheet[]> {
     reader.onerror = (err) => reject(err);
     reader.readAsArrayBuffer(file);
   });
+}
+
+/**
+ * 將 ExcelSheet 轉換為 DataTable
+ * @param sheet ExcelSheet
+ * @returns DataTable
+ */
+export function convertSheetToDataTable(sheet: ExcelSheet): DataTable {
+  const columns = buildColumns(sheet.data);
+  const data = buildRows(sheet.data, columns);
+  return {
+    tableName: sheet.name,
+    columns,
+    data
+  };
+}
+
+// 根據第一列推斷欄位資訊
+function buildColumns(data: any[][]): DataTableColumn[] {
+  if (!data || data.length === 0) return [];
+  const headers = data[0];
+  const sampleRow = data[1] || [];
+  return headers.map((header: any, idx: number) => ({
+    name: String(header),
+    type: guessType(sampleRow[idx])
+  }));
+}
+
+// 將資料列轉為物件陣列
+function buildRows(data: any[][], columns: DataTableColumn[]): any[] {
+  if (!data || data.length < 2) return [];
+  return data.slice(1).map(row => {
+    const obj: any = {};
+    columns.forEach((col, idx) => {
+      obj[col.name] = row[idx];
+    });
+    return obj;
+  });
+}
+
+// 推斷型別
+function guessType(value: any): string {
+  if (typeof value === 'number') return 'INTEGER';
+  if (typeof value === 'boolean') return 'BOOLEAN';
+  if (value instanceof Date) return 'DATE';
+  if (!isNaN(Date.parse(value))) return 'DATE';
+  if (!isNaN(Number(value))) return 'INTEGER';
+  return 'TEXT';
 } 
