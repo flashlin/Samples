@@ -2,6 +2,33 @@
 import SQLiteESMFactory from 'wa-sqlite/dist/wa-sqlite.mjs'
 import * as SQLite from 'wa-sqlite'
 
+// DataTable column interface
+export interface DataTableColumn {
+  name: string; // column name
+  type: string; // column type, e.g. 'TEXT', 'INTEGER'
+}
+
+// DataTable interface
+export interface DataTable {
+  tableName: string;
+  columns: DataTableColumn[];
+}
+
+/**
+ * Create a table in SQLite database based on DataTable definition
+ * @param sqlite3 - The sqlite3 instance
+ * @param db - The database handle
+ * @param dt - DataTable definition
+ * @param tableName - Table name (override dt.tableName if provided)
+ */
+export async function createTableAsync(sqlite3: any, db: any, dt: DataTable, tableName?: string) {
+  const name = tableName || dt.tableName;
+  // Compose column definitions
+  const columnsDef = dt.columns.map(col => `${col.name} ${col.type}`).join(', ');
+  const sql = `CREATE TABLE IF NOT EXISTS ${name} (${columnsDef})`;
+  await sqlite3.exec(db, sql);
+}
+
 export async function hello() {
   const module = await SQLiteESMFactory()
   const sqlite3 = SQLite.Factory(module)
