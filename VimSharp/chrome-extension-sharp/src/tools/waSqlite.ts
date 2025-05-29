@@ -13,7 +13,7 @@ export async function createTableAsync(dt: DataTable, tableName?: string) {
   const name = tableName || dt.tableName;
   // Compose column definitions
   const columnsDef = dt.columns.map(col => `${col.name} ${col.type}`).join(', ');
-  const sql = `CREATE TABLE IF NOT EXISTS ${name} (${columnsDef})`;
+  const sql = `CREATE TABLE ${name} (${columnsDef})`;
   await execSqliteAsync(sql);
 }
 
@@ -58,7 +58,9 @@ export async function insertDataTableAsync(dt: DataTable, tableName: string) {
   const name = tableName || dt.tableName;
   const columns = dt.columns.map(col => col.name);
   const columnsStr = columns.join(', ');
-  const valuesStr = columns.map(col => `{{${col}}}`).join(', ');
+  const valuesStr = dt.columns
+    .map(col => (col.type === 'TEXT' || col.type === 'DATE' ? `'{{${col.name}}}'` : `{{${col.name}}}`))
+    .join(', ');
   const sql = `INSERT INTO ${name} (${columnsStr}) VALUES (${valuesStr})`;
   const template = Handlebars.compile(sql);
   await withSQLiteDbAsync(async (sqlite3, db) => {

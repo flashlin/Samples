@@ -22,7 +22,8 @@ export async function getExcelFileAsync(file: File): Promise<ExcelSheet[]> {
           name,
           data: XLSX.utils.sheet_to_json(workbook.Sheets[name], { header: 1 })
         }));
-        resolve(sheets);
+        const filteredSheets = sheets.filter(sheet => Array.isArray(sheet.data) && !isEmptyData(sheet.data));
+        resolve(filteredSheets);
       } catch (err) {
         reject(err);
       }
@@ -30,6 +31,12 @@ export async function getExcelFileAsync(file: File): Promise<ExcelSheet[]> {
     reader.onerror = (err) => reject(err);
     reader.readAsArrayBuffer(file);
   });
+}
+
+function isEmptyData(data: any[][]): boolean {
+  if (!data || data.length === 0) return true;
+  if( data.length === 1 && data[0].length === 0) return true;
+  return false;
 }
 
 /**
