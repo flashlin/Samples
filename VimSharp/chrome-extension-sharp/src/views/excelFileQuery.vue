@@ -56,33 +56,30 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
 
 <template>
   <div class="min-h-screen flex flex-col items-center justify-center bg-gray-900 w-full">
-    <div class="flex flex-row items-stretch w-full max-w-7xl min-h-[600px]">
-      <!-- 左側：原本內容 -->
-      <div ref="leftRef" class="flex flex-col items-center w-1/2 pr-4 h-full">
-        <h1 class="text-2xl font-bold mb-4 text-white text-center">Excel Query</h1>
-        <div class="w-full mx-auto border border-gray-700 shadow-lg rounded-xl p-6 flex justify-center"
-          style="background:#2d333b;">
-          <FileUpload accept=".xlsx,.csv" :processHandler="uploadAllExcelFiles" processButtonTitle="Import"
-            style="width:98%;" />
-        </div>
-      </div>
-      <!-- Layout 右側 -->
-      <div class="flex flex-col w-1/2 pl-4 gap-6 justify-start overflow-y-auto" :style="{height: rightHeight}">
-        <div class="flex-1">
-          <DataTable />
-        </div>
-        <div class="flex-1">
-          <DataTable />
-        </div>
-        <div class="flex-1">
-          <DataTable />
-        </div>
-      </div>
+    <!-- Header -->
+    <div ref="leftRef" class="w-full max-w-7xl border border-gray-700 shadow-lg rounded-xl p-6 flex flex-col items-center mb-4" style="background:#2d333b;">
+      <h1 class="text-2xl font-bold mb-4 text-white text-center">Excel Query</h1>
+      <FileUpload accept=".xlsx,.csv" :processHandler="uploadAllExcelFiles" processButtonTitle="Import" style="width:98%;" />
     </div>
-    <!-- layout 下方 -->
-    <div class="w-full h-96 mx-auto border border-gray-700 shadow-lg rounded-xl p-6 flex justify-center mt-6"
-      style="background:#23272f;">
-      <VimCodeEditor v-model:value="code" :enableVim="false" class="w-full h-full" />
+    <div class="flex flex-row w-full max-w-7xl min-h-[600px] flex-1">
+      <!-- Sidebar -->
+      <div class="flex flex-col w-1/3 pr-4 gap-6 justify-start overflow-y-auto">
+        <div class="flex-1">
+          <DataTable />
+        </div>
+        <div class="flex-1">
+          <DataTable />
+        </div>
+        <div class="flex-1">
+          <DataTable />
+        </div>
+      </div>
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col w-2/3 pl-4">
+        <div class="w-full h-96 border border-gray-700 shadow-lg rounded-xl p-6 flex justify-center mt-0" style="background:#23272f;">
+          <VimCodeEditor v-model:value="code" :enableVim="false" class="w-full h-full" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
