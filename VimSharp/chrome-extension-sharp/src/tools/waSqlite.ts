@@ -59,3 +59,12 @@ export async function execSqliteAsync(sql: string, parameters: any = {}) {
   await sqlite3.exec(db, lastSql);
   await sqlite3.close(db);
 }
+
+/**
+ * Drop a table if it exists
+ * @param tableName - Table name to drop
+ */
+export async function dropTableAsync(tableName: string) {
+  const sql = `DROP TABLE IF EXISTS ${tableName}`;
+  await execSqliteAsync(sql);
+}
