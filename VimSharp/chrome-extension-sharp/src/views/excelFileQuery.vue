@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import FileUpload, { FileUploadInstance } from '@/components/FileUpload.vue';
-import { ExcelSheet, getExcelFileAsync } from '@/tools/excel';
+import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/excel';
 import { ref } from 'vue';
 import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import DataTable from '@/components/DataTable.vue';
 import { hello } from '@/tools/waSqlite';
+import { DataTable as DataTableType } from '@/tools/dataTypes';
 
 interface ExcelFile {
   fileName: string;
@@ -12,8 +13,8 @@ interface ExcelFile {
 }
 
 const excelFiles = ref<ExcelFile[]>([]);
+const allDataTables = ref<DataTableType[]>([]);
 const code = ref('from tb1 in test select tb1')
-
 
 async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) {
   const initialStatus = 'Uploading...';
@@ -25,6 +26,8 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
         fileName: file.name,
         sheets: excelSheets
       });
+      const dataTables = excelSheets.map(convertSheetToDataTable);
+      allDataTables.value.push(...dataTables);
     }
   }catch{
     //
@@ -38,6 +41,7 @@ async function sayHello() {
   await hello()
 }
 </script>
+
 
 <template>
   <div class="min-h-screen flex flex-col items-center justify-center bg-gray-900 w-full">
