@@ -51,14 +51,11 @@ export async function hello() {
  * @param parameters - SQL parameters (object for template context)
  */
 export async function execSqliteAsync(sql: string, parameters: any = {}) {
-  const module = await SQLiteESMFactory();
-  const sqlite3 = SQLite.Factory(module);
-  const db = await sqlite3.open_v2('supportDb');
-  // Use Handlebars to compile and render SQL
   const template = Handlebars.compile(sql);
   const lastSql = template(parameters);
-  await sqlite3.exec(db, lastSql);
-  await sqlite3.close(db);
+  await withSQLiteDbAsync(async (sqlite3, db) => {
+    await sqlite3.exec(db, lastSql);
+  });
 }
 
 /**
