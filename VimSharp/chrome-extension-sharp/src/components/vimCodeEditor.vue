@@ -4,7 +4,6 @@ import { ref, watch } from 'vue'
 import MonacoEditor from 'monaco-editor-vue3'
 import * as monaco from 'monaco-editor'
 import { initVimMode2, VimMode2 } from '@/tools/monaco-vim2'
-import { log } from 'console'
 
 interface VimCodeEditorProps {
   value: string

@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "build:extension": "vite build && node scripts/copy-popup.js",
     "test": "jest",
-    "copy:monaco-workers": "node scripts/copy-monaco-workers.cjs"
+    "copy:monaco-workers": "node scripts/copy-monaco-workers.cjs",
+    "postinstall": "cp node_modules/wa-sqlite/dist/wa-sqlite.wasm public/"
   },
   "dependencies": {
     "@monaco-editor/loader": "^1.5.0",
@@ -22,6 +23,7 @@
     "papaparse": "^5.5.2",
     "vue": "^3.4.21",
     "vue-router": "4",
+    "wa-sqlite": "^1.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

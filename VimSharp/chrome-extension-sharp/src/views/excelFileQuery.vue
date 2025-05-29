@@ -4,6 +4,7 @@ import { ExcelSheet, getExcelFileAsync } from '@/tools/excel';
 import { ref } from 'vue';
 import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import DataTable from '@/components/DataTable.vue';
+import { hello } from '@/tools/waSqlite';
 
 interface ExcelFile {
   fileName: string;
@@ -32,10 +33,15 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
     instance.processBarStatus = 'Uploaded!';
   }
 }
+
+async function sayHello() {
+  await hello()
+}
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col items-center justify-center bg-gray-900 w-full">
+    <button @click="sayHello">hello</button> 
     <!-- Header -->
     <div ref="leftRef" class="w-full max-w-7xl border border-gray-700 shadow-lg rounded-xl p-6 flex flex-col items-center mb-4" style="background:#2d333b;">
       <h1 class="text-2xl font-bold mb-4 text-white text-center">Excel Query</h1>

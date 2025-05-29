@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 import { writeFileSync, copyFileSync } from 'fs'
+import fs from 'fs'
+import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -14,6 +16,33 @@ export default defineConfig({
         copyFileSync('public/popup.html', 'dist/popup.html')
       }
     },
+    {
+      name: 'wasm-mime',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url && req.url.endsWith('.wasm')) {
+            res.setHeader('Content-Type', 'application/wasm');
+          }
+          next();
+        });
+      }
+    },
+    {
+      name: 'wa-sqlite-wasm-alias',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url === '/node_modules/.vite/deps/wa-sqlite.wasm') {
+            const wasmPath = path.resolve(__dirname, 'public/wa-sqlite.wasm')
+            if (fs.existsSync(wasmPath)) {
+              res.setHeader('Content-Type', 'application/wasm')
+              fs.createReadStream(wasmPath).pipe(res)
+              return
+            }
+          }
+          next()
+        })
+      }
+    }
   ],
   resolve: {
     alias: {
@@ -53,5 +82,8 @@ export default defineConfig({
         experimentalDecorators: true
       }
     }
+  },
+  server: {
+    middlewareMode: false,
   }
 })

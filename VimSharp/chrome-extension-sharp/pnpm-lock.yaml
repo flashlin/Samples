@@ -35,6 +35,9 @@ importers:
       vue-router:
         specifier: '4'
         version: 4.5.1(vue@3.5.15(typescript@5.8.3))
+      wa-sqlite:
+        specifier: ^1.0.0
+        version: 1.0.0
       xlsx:
         specifier: ^0.18.5
         version: 0.18.5
@@ -3830,6 +3833,9 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  wa-sqlite@1.0.0:
+    resolution: {integrity: sha512-Kyybo5/BaJp76z7gDWGk2J6Hthl4NIPsE+swgraEjy3IY6r5zIR02wAs1OJH4XtJp1y3puj3Onp5eMGS0z7nUA==}
 
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
@@ -8967,6 +8973,8 @@ snapshots:
       '@vue/shared': 3.5.15
     optionalDependencies:
       typescript: 5.8.3
+
+  wa-sqlite@1.0.0: {}
 
   walker@1.0.8:
     dependencies:
