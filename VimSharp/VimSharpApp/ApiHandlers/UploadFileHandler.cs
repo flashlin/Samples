@@ -48,11 +48,10 @@ public class UploadFileHandler : IUploadFileHandler
 
     private async Task WriteChunkToFile(string filePath, byte[] content, long offset)
     {
-        using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
-        {
-            stream.Seek(offset, SeekOrigin.Begin);
-            await stream.WriteAsync(content, 0, content.Length);
-        }
+        await using var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
+        stream.Seek(offset, SeekOrigin.Begin);
+        await stream.WriteAsync(content, 0, content.Length);
+        await stream.FlushAsync();
     }
 
     public static void MapEndpoints(WebApplication app)
