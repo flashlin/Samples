@@ -29,8 +29,8 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
       const dataTables = excelSheets.map(convertSheetToDataTable);
       allDataTables.value.push(...dataTables);
     }
-  }catch{
-    //
+  }catch(e){
+    console.error(e);
   }
   if (instance.processBarStatus === initialStatus) {
     instance.processBarStatus = 'Uploaded!';
@@ -54,14 +54,8 @@ async function sayHello() {
     <div class="flex flex-row w-full max-w-7xl min-h-[600px] flex-1">
       <!-- Sidebar -->
       <div class="flex flex-col w-1/3 pr-4 gap-6 justify-start overflow-y-auto">
-        <div class="flex-1">
-          <DataTable />
-        </div>
-        <div class="flex-1">
-          <DataTable />
-        </div>
-        <div class="flex-1">
-          <DataTable />
+        <div class="flex-1" v-for="(dt, idx) in allDataTables" :key="dt.tableName + idx">
+          <DataTable :value="dt" />
         </div>
       </div>
       <!-- Main Content -->
