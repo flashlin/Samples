@@ -1,6 +1,7 @@
 // https://github.com/rhashimoto/wa-sqlite
 import SQLiteESMFactory from 'wa-sqlite/dist/wa-sqlite.mjs'
 import * as SQLite from 'wa-sqlite'
+import Handlebars from 'handlebars'
 
 // DataTable column interface
 export interface DataTableColumn {
@@ -16,17 +17,15 @@ export interface DataTable {
 
 /**
  * Create a table in SQLite database based on DataTable definition
- * @param sqlite3 - The sqlite3 instance
- * @param db - The database handle
  * @param dt - DataTable definition
  * @param tableName - Table name (override dt.tableName if provided)
  */
-export async function createTableAsync(sqlite3: any, db: any, dt: DataTable, tableName?: string) {
+export async function createTableAsync(dt: DataTable, tableName?: string) {
   const name = tableName || dt.tableName;
   // Compose column definitions
   const columnsDef = dt.columns.map(col => `${col.name} ${col.type}`).join(', ');
   const sql = `CREATE TABLE IF NOT EXISTS ${name} (${columnsDef})`;
-  await sqlite3.exec(db, sql);
+  await execSqliteAsync(sql);
 }
 
 export async function hello() {
@@ -43,4 +42,20 @@ export async function hello() {
   })
   // 關閉資料庫
   await sqlite3.close(db)
+}
+
+/**
+ * Execute a SQL statement with Handlebars template and auto-close the database
+ * @param sql - SQL statement (Handlebars template)
+ * @param parameters - SQL parameters (object for template context)
+ */
+export async function execSqliteAsync(sql: string, parameters: any = {}) {
+  const module = await SQLiteESMFactory();
+  const sqlite3 = SQLite.Factory(module);
+  const db = await sqlite3.open_v2('supportDb');
+  // Use Handlebars to compile and render SQL
+  const template = Handlebars.compile(sql);
+  const lastSql = template(parameters);
+  await sqlite3.exec(db, lastSql);
+  await sqlite3.close(db);
 }
