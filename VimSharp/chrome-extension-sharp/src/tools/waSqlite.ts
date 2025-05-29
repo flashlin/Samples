@@ -32,7 +32,7 @@ export async function createTableAsync(dt: DataTable, tableName?: string) {
 export async function hello() {
   await withSQLiteDbAsync(async (sqlite3, db) => {
     await sqlite3.exec(db, `CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT)`)
-    await sqlite3.exec(db, `INSERT INTO test (name) VALUES ('Vue3')`)
+    await sqlite3.exec(db, `INSERT INTO test (name) VALUES ('Vue3'), ('React'), ('Angular')`)
     await sqlite3.exec(db, `SELECT * FROM test`, (row, _columns) => {
       console.log(row)
     })
