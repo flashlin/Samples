@@ -4,7 +4,7 @@ import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/
 import { ref } from 'vue';
 import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import DataTable from '@/components/DataTable.vue';
-import { hello } from '@/tools/waSqlite';
+import { createTableAsync, dropTableAsync, hello, insertDataTableAsync } from '@/tools/waSqlite';
 import { DataTable as DataTableType } from '@/tools/dataTypes';
 
 interface ExcelFile {
@@ -39,6 +39,9 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
     const isDuplicate = allDataTables.value.some(existingTable => existingTable.tableName === newTable.tableName);
     if (!isDuplicate) {
       allDataTables.value.push(newTable);
+      await dropTableAsync(newTable.tableName);
+      await createTableAsync(newTable);
+      await insertDataTableAsync(newTable, newTable.tableName);
     }
   }
 

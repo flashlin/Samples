@@ -73,8 +73,8 @@ export async function insertDataTableAsync(dt: DataTable, tableName: string) {
  * Utility function to handle SQLite connection lifecycle
  * @param callback - async function that receives (sqlite3, db)
  */
+const module = await SQLiteESMFactory();
 export async function withSQLiteDbAsync(callback: (sqlite3: SQLiteAPI, db: number) => Promise<void>) {
-  const module = await SQLiteESMFactory();
   const sqlite3 = SQLite.Factory(module);
   const db = await sqlite3.open_v2('supportDb');
   try {
