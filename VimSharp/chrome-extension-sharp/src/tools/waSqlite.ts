@@ -13,6 +13,7 @@ export interface DataTableColumn {
 export interface DataTable {
   tableName: string;
   columns: DataTableColumn[];
+  data: any[]; // array of row objects
 }
 
 /**
@@ -74,7 +75,7 @@ export async function dropTableAsync(tableName: string) {
  * @param dt - DataTable (需有 data 欄位: 陣列，每個元素為物件)
  * @param tableName - Table name
  */
-export async function insertDataTableAsync(dt: DataTable & { data: any[] }, tableName: string) {
+export async function insertDataTableAsync(dt: DataTable, tableName: string) {
   const name = tableName || dt.tableName;
   const columns = dt.columns.map(col => col.name);
   const columnsStr = columns.join(', ');
