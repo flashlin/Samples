@@ -57,6 +57,7 @@ async function executeQuery() {
   try {
     const result = await querySqliteAsync(code.value, {})
     queryResult.value = result;
+    errorMessage.value = '';
   } catch (e) {
     errorMessage.value = e as string;
   }
