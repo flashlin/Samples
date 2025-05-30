@@ -4,7 +4,7 @@ import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/
 import { ref } from 'vue';
 import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import DataTable from '@/components/DataTable.vue';
-import { createTableAsync, dropTableAsync, hello, insertDataTableAsync } from '@/tools/waSqlite';
+import { createTableAsync, dropTableAsync, hello, insertDataTableAsync, querySqliteAsync } from '@/tools/waSqlite';
 import { DataTable as DataTableType } from '@/tools/dataTypes';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 
@@ -15,7 +15,7 @@ interface ExcelFile {
 
 const excelFiles = ref<ExcelFile[]>([]);
 const allDataTables = ref<DataTableType[]>([]);
-const code = ref('from tb1 in test select tb1')
+const code = ref('select * from Sheet1')
 const queryResult = ref<any[]>([]);
 
 async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) {
@@ -52,8 +52,9 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
   }
 }
 
-function executeQuery() {
-  
+async function executeQuery() {
+  const result = await querySqliteAsync(code.value, {})
+  queryResult.value = result;
 }
 
 

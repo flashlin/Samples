@@ -45,8 +45,12 @@ export async function querySqliteAsync(sql: string, parameters: any = {}) {
   const lastSql = template(parameters);
   const result: any[] = [];
   await withSQLiteDbAsync(async (sqlite3, db) => {
-    await sqlite3.exec(db, lastSql, (row, _columns) => {
-      result.push(row)
+    await sqlite3.exec(db, lastSql, (row, columns) => {
+      const obj: any = {};
+      columns.forEach((col, index) => {
+        obj[col] = row[index];
+      });
+      result.push(obj);
     });
   });
   return result;
