@@ -6,20 +6,27 @@ import * as monaco from 'monaco-editor'
 import { initVimMode2, VimMode2 } from '@/tools/monaco-vim2'
 
 interface VimCodeEditorProps {
-  value: string
+  modelValue: string
   enableVim: boolean
 }
 
 const props = withDefaults(defineProps<VimCodeEditorProps>(), {
   enableVim: false
 })
-const innerValue = ref(props.value)
+const emit = defineEmits(['update:modelValue'])
+const innerValue = ref(props.modelValue)
 const monacoRef = ref<any>(null)
 
-watch(() => props.value, newValue => {
+// Sync prop to local value
+watch(() => props.modelValue, newValue => {
   if (newValue !== innerValue.value) {
     innerValue.value = newValue
   }
+})
+
+// Sync local value to parent
+watch(innerValue, (newValue) => {
+  emit('update:modelValue', newValue)
 })
 
 let vimMode: VimMode2 | null = null
