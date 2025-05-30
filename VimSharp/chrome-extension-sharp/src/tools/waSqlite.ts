@@ -2,7 +2,7 @@
 import SQLiteESMFactory from 'wa-sqlite/dist/wa-sqlite.mjs'
 import * as SQLite from 'wa-sqlite'
 import Handlebars from 'handlebars'
-import { DataTable } from './dataTypes'
+import { DataTable, guessType } from './dataTypes'
 
 /**
  * Create a table in SQLite database based on DataTable definition
@@ -40,22 +40,33 @@ export async function execSqliteAsync(sql: string, parameters: any = {}) {
   });
 }
 
-export async function querySqliteAsync(sql: string, parameters: any = {}) {
+export async function querySqliteAsync(sql: string, parameters: any = {}): Promise<DataTable> {
   const template = Handlebars.compile(sql);
   const lastSql = template(parameters);
-  const result: any[] = [];
+  const data: any[] = [];
+  let columns: string[] = [];
+  let columnTypes: string[] = [];
   await withSQLiteDbAsync(async (sqlite3, db) => {
-    await sqlite3.exec(db, lastSql, (row, columns) => {
+    await sqlite3.exec(db, lastSql, (row, cols) => {
+      if (columns.length === 0) {
+        columns = cols;
+        // 只在第一筆資料時推斷型別
+        columnTypes = row.map((v: any) => guessType(v));
+      }
       const obj: any = {};
-      columns.forEach((col, index) => {
+      cols.forEach((col, index) => {
         obj[col] = row[index];
       });
-      result.push(obj);
+      data.push(obj);
     });
   });
-  return result;
+  // 組成 DataTable
+  return {
+    tableName: '', // 查詢無明確表名
+    columns: columns.map((name, idx) => ({ name, type: columnTypes[idx] || 'TEXT' })),
+    data
+  };
 }
-
 
 /**
  * Drop a table if it exists

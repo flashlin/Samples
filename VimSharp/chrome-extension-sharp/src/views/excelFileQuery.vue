@@ -16,7 +16,7 @@ interface ExcelFile {
 const excelFiles = ref<ExcelFile[]>([]);
 const allDataTables = ref<DataTableType[]>([]);
 const code = ref('select * from Sheet123')
-const queryResult = ref<any[]>([]);
+const queryResult = ref<DataTableType | null>(null);
 const errorMessage = ref('');
 
 async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) {
@@ -94,7 +94,7 @@ async function sayHello() {
         <div class="w-full h-96 border border-gray-700 shadow-lg rounded-xl p-6 flex justify-center mt-0" style="background:#23272f;">
           <p class="text-red-500">{{ errorMessage }}</p>
         </div>
-        <LargeDataTable :list="queryResult" />
+        <LargeDataTable :dt="queryResult" />
       </div>
     </div>
   </div>

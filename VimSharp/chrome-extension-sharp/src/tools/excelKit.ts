@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { DataTable, DataTableColumn } from './dataTypes';
+import { DataTable, DataTableColumn, guessType } from './dataTypes';
 
 export interface ExcelSheet {
   name: string;
@@ -75,14 +75,4 @@ function buildRows(data: any[][], columns: DataTableColumn[]): any[] {
     });
     return obj;
   });
-}
-
-// 推斷型別
-function guessType(value: any): string {
-  if (typeof value === 'number') return 'INTEGER';
-  if (typeof value === 'boolean') return 'BOOLEAN';
-  if (value instanceof Date) return 'DATE';
-  if (!isNaN(Date.parse(value))) return 'DATE';
-  if (!isNaN(Number(value))) return 'INTEGER';
-  return 'TEXT';
 } 

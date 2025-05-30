@@ -1,12 +1,12 @@
 <template>
   <div style="height: 300px;">
     <!-- 顯示 keys header -->
-    <div class="user header-row" v-if="list.length > 0">
-      <span v-for="key in getKeys(list[0])" :key="key" style="margin-right: 8px; font-weight: bold;">
-        {{ key }}
+    <div class="user header-row" v-if="dt && dt.columns && dt.columns.length > 0">
+      <span v-for="col in dt.columns" :key="col.name" style="margin-right: 8px; font-weight: bold;">
+        {{ col.name }}
       </span>
     </div>
-    <RecycleScroller class="scroller" :items="list" :item-size="32" key-field="id" v-slot="{ item }">
+    <RecycleScroller v-if="dt && dt.data" class="scroller" :items="dt.data" :item-size="32" key-field="id" v-slot="{ item }">
       <div class="user">
         <span v-for="(value, key) in item" :key="key" style="margin-right: 8px;">
           {{ value }}
@@ -20,14 +20,11 @@
 <script lang="ts" setup>
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { RecycleScroller } from 'vue-virtual-scroller'
+import { DataTable as DataTableType } from '@/tools/dataTypes'
 
 // Define props using TypeScript
 defineProps<{
-  list: Array<{
-    id: string | number
-    name: string
-    // 其他欄位
-  }>
+  dt: DataTableType | null
 }>()
 
 // 取得 keys header
