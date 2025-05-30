@@ -40,6 +40,19 @@ export async function execSqliteAsync(sql: string, parameters: any = {}) {
   });
 }
 
+export async function querySqliteAsync(sql: string, parameters: any = {}) {
+  const template = Handlebars.compile(sql);
+  const lastSql = template(parameters);
+  const result: any[] = [];
+  await withSQLiteDbAsync(async (sqlite3, db) => {
+    await sqlite3.exec(db, lastSql, (row, _columns) => {
+      result.push(row)
+    });
+  });
+  return result;
+}
+
+
 /**
  * Drop a table if it exists
  * @param tableName - Table name to drop

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import FileUpload, { FileUploadInstance } from '@/components/FileUpload.vue';
-import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/excel';
+import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/excelKit';
 import { ref } from 'vue';
 import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import DataTable from '@/components/DataTable.vue';
@@ -16,6 +16,7 @@ interface ExcelFile {
 const excelFiles = ref<ExcelFile[]>([]);
 const allDataTables = ref<DataTableType[]>([]);
 const code = ref('from tb1 in test select tb1')
+const queryResult = ref<any[]>([]);
 
 async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) {
   const initialStatus = 'Uploading...';
@@ -55,13 +56,6 @@ function executeQuery() {
   
 }
 
-const testData = ref<any[]>([]);
-for (let i = 0; i < 1000; i++) {
-  testData.value.push({
-    id: i,
-    name: `test${i}`
-  });
-}
 
 async function sayHello() {
   await hello()
@@ -90,7 +84,7 @@ async function sayHello() {
           <button @click="executeQuery">Execute</button>
           <VimCodeEditor v-model:value="code" :enableVim="false" class="w-full h-full" />
         </div>
-        <LargeDataTable :list="testData" />
+        <LargeDataTable :list="queryResult" />
       </div>
     </div>
   </div>
