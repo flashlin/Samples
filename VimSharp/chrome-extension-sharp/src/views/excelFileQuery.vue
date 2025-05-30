@@ -6,6 +6,7 @@ import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import DataTable from '@/components/DataTable.vue';
 import { createTableAsync, dropTableAsync, hello, insertDataTableAsync } from '@/tools/waSqlite';
 import { DataTable as DataTableType } from '@/tools/dataTypes';
+import LargeDataTable from '@/components/LargeDataTable.vue';
 
 interface ExcelFile {
   fileName: string;
@@ -50,6 +51,18 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
   }
 }
 
+function executeQuery() {
+  
+}
+
+const testData = ref<any[]>([]);
+for (let i = 0; i < 1000; i++) {
+  testData.value.push({
+    id: i,
+    name: `test${i}`
+  });
+}
+
 async function sayHello() {
   await hello()
 }
@@ -74,8 +87,10 @@ async function sayHello() {
       <!-- Main Content -->
       <div class="flex-1 flex flex-col w-2/3 pl-4">
         <div class="w-full h-96 border border-gray-700 shadow-lg rounded-xl p-6 flex justify-center mt-0" style="background:#23272f;">
+          <button @click="executeQuery">Execute</button>
           <VimCodeEditor v-model:value="code" :enableVim="false" class="w-full h-full" />
         </div>
+        <LargeDataTable :list="testData" />
       </div>
     </div>
   </div>
