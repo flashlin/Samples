@@ -1,4 +1,5 @@
 <template>
+  <span v-if="dt">{{ dt.tableName }}</span>
   <div style="height: 300px;">
     <!-- 顯示 keys header -->
     <div class="user header-row" v-if="dt && dt.columns && dt.columns.length > 0">
@@ -26,12 +27,6 @@ import { DataTable as DataTableType } from '@/tools/dataTypes'
 defineProps<{
   dt: DataTableType | null
 }>()
-
-// 取得 keys header
-function getKeys(item: Record<string, any>) {
-  // 過濾掉 __ob__ 等內部屬性
-  return Object.keys(item).filter(k => !k.startsWith('__'))
-}
 </script>
 
 <style scoped>
