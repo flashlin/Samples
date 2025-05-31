@@ -2,8 +2,8 @@
   <span v-if="dt">{{ dt.tableName }}</span>
   <div style="height: 300px;">
     <!-- 顯示 keys header -->
-    <div class="user header-row" v-if="dt && dt.columns && dt.columns.length > 0">
-      <span v-for="col in dt.columns" :key="col.name" style="margin-right: 8px; font-weight: bold;">
+    <div class="header-row" v-if="dt && dt.columns && dt.columns.length > 0">
+      <span v-for="col in dt.columns" :key="col.name" style="margin-right: 8px; font-weight: bold; color: black;">
         {{ col.name }}
       </span>
     </div>
@@ -42,7 +42,8 @@ defineProps<{
 }
 
 .header-row {
-  background: #f5f5f5;
+  background: #464545;
+  color: #fff;
   font-size: 15px;
   border-bottom: 1px solid #ddd;
   margin-bottom: 2px;

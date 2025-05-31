@@ -96,7 +96,7 @@ function handleF8Key(e: KeyboardEvent) {
     <!-- Sidebar -->
     <div class="w-full max-w-7xl border border-gray-700 shadow-lg rounded-xl p-6 flex flex-col gap-6 mb-4" style="background:#23272f; min-height: 200px;">
       <div class="flex-1" v-for="(dt, idx) in allDataTables" :key="dt.tableName + idx">
-        <DataTable :value="dt" />
+        <LargeDataTable :dt="dt" />
       </div>
     </div>
     <!-- Main Content -->
