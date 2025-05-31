@@ -40,23 +40,23 @@ const props = defineProps<{
   dt: DataTableType | null,
   keyField?: string | null
 }>()
-const dt = props.dt
+const dt = computed(() => props.dt)
 
 // 檢查 columns 是否有 id 欄位（改為判斷 props.keyField 是否為 null）
 const hasIdColumn = computed(() => props.keyField !== null && props.keyField !== undefined)
 
 // 若沒有 id 欄位，為每筆 data 加上 _id（流水號），並在 columns 加上 _id 欄位
 watchEffect(() => {
-  if (!dt) return
-  if (!dt.columns) return
+  if (!dt.value) return
+  if (!dt.value.columns) return
   if (!hasIdColumn.value) {
     // 若 columns 沒有 _id 欄位，則加上
-    if (!dt.columns.some((col: any) => col.name === '_id')) {
-      dt.columns.push({ name: '_id', type: 'INTEGER' })
+    if (!dt.value.columns.some((col: any) => col.name === '_id')) {
+      dt.value.columns.push({ name: '_id', type: 'INTEGER' })
     }
     // 為每筆 data 加上 _id
-    if (dt.data) {
-      dt.data.forEach((row: any, idx: number) => {
+    if (dt.value.data) {
+      dt.value.data.forEach((row: any, idx: number) => {
         if (row._id === undefined) row._id = idx + 1
       })
     }
