@@ -103,7 +103,7 @@ function handleF8Key(e: KeyboardEvent) {
     <div class="w-full max-w-7xl flex flex-col gap-4">
       <div class="w-full h-96 border border-gray-700 shadow-lg rounded-xl p-6 flex flex-col justify-center mt-0" style="background:#23272f;">
         <div class="flex flex-row gap-2 mb-2">
-          <button @click="executeQuery">Execute</button>
+          <button @click="executeQuery">Execute (F8)</button>
           <!-- 這裡未來可放更多按鈕 -->
         </div>
         <VimCodeEditor v-model="code" :enableVim="false" class="w-full h-full" />
