@@ -5,7 +5,7 @@
     <div
       v-if="dt && dt.columns && dt.columns.length > 0"
       class="grid px-4 py-2 bg-gray-800 text-white font-semibold text-sm rounded-t-md dark:bg-gray-900 dark:text-gray-100"
-      :class="`grid-cols-${dt.columns.length + 1} gap-4`"
+      :class="`grid-cols-${dt.columns.length} gap-4`"
     >
       <div v-for="col in dt.columns" :key="col.name">{{ col.name }}</div>
     </div>
@@ -16,12 +16,12 @@
       class="divide-y divide-gray-700 dark:divide-gray-800 scroller"
       :items="dt.data"
       :item-size="48"
-      key-field="id"
+      :key-field="keyField"
       v-slot="{ item }"
     >
       <div
         class="grid px-4 py-3 bg-gray-900 text-gray-100 hover:bg-gray-800 transition dark:bg-gray-950 dark:hover:bg-gray-800"
-        :class="`grid-cols-${dt.columns.length + 1} gap-4`"
+        :class="`grid-cols-${dt.columns.length} gap-4`"
       >
         <div v-for="col in dt.columns" :key="col.name">{{ item[col.name] }}</div>
       </div>
@@ -33,11 +33,38 @@
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { RecycleScroller } from 'vue-virtual-scroller'
 import { DataTable as DataTableType } from '@/tools/dataTypes'
+import { computed, watchEffect } from 'vue'
 
 // Define props using TypeScript
-defineProps<{
+const props = defineProps<{
   dt: DataTableType | null
 }>()
+const dt = props.dt
+
+// 檢查 columns 是否有 id 欄位
+const hasIdColumn = computed(() => {
+  return !!(dt && dt.columns && dt.columns.some((col: any) => col.name === 'id'))
+})
+
+// 若沒有 id 欄位，為每筆 data 加上 _id（流水號），並在 columns 加上 _id 欄位
+watchEffect(() => {
+  if (!dt) return
+  if (!dt.columns) return
+  if (!hasIdColumn.value) {
+    // 若 columns 沒有 _id 欄位，則加上
+    if (!dt.columns.some((col: any) => col.name === '_id')) {
+      dt.columns.push({ name: '_id', type: 'INTEGER' })
+    }
+    // 為每筆 data 加上 _id
+    if (dt.data) {
+      dt.data.forEach((row: any, idx: number) => {
+        if (row._id === undefined) row._id = idx + 1
+      })
+    }
+  }
+})
+
+const keyField = computed(() => (hasIdColumn.value ? 'id' : '_id'))
 </script>
 
 <style scoped>
