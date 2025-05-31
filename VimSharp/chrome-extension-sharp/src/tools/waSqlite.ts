@@ -61,7 +61,7 @@ export async function querySqliteAsync(sql: string, parameters: any = {}): Promi
       data.push(obj);
     });
   });
-  console.log("querySqliteAsync result", data)
+  console.log("querySqliteAsync result", columns, data)
   // 組成 DataTable
   return {
     tableName: '', // 查詢無明確表名
