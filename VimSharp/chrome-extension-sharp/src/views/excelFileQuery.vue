@@ -78,24 +78,20 @@ async function sayHello() {
       <h1 class="text-2xl font-bold mb-4 text-white text-center">Excel Query</h1>
       <FileUpload accept=".xlsx,.csv" :processHandler="uploadAllExcelFiles" processButtonTitle="Import" style="width:98%;" />
     </div>
-    <div class="flex flex-row w-full max-w-7xl min-h-[600px] flex-1">
-      <!-- Sidebar -->
-      <div class="flex flex-col w-1/3 pr-4 gap-6 justify-start overflow-y-auto">
-        <div class="flex-1" v-for="(dt, idx) in allDataTables" :key="dt.tableName + idx">
-          <DataTable :value="dt" />
-        </div>
+    <!-- Sidebar -->
+    <div class="w-full max-w-7xl border border-gray-700 shadow-lg rounded-xl p-6 flex flex-col gap-6 mb-4" style="background:#23272f; min-height: 200px;">
+      <div class="flex-1" v-for="(dt, idx) in allDataTables" :key="dt.tableName + idx">
+        <DataTable :value="dt" />
       </div>
-      <!-- Main Content -->
-      <div class="flex-1 flex flex-col w-2/3 pl-4">
-        <div class="w-full h-96 border border-gray-700 shadow-lg rounded-xl p-6 flex justify-center mt-0" style="background:#23272f;">
-          <button @click="executeQuery">Execute</button>
-          <VimCodeEditor v-model="code" :enableVim="false" class="w-full h-full" />
-        </div>
-        <div class="w-full h-96 border border-gray-700 shadow-lg rounded-xl p-6 flex justify-center mt-0" style="background:#23272f;">
-          <p class="text-red-500">{{ errorMessage }}</p>
-        </div>
-        <LargeDataTable :dt="queryResult" />
+    </div>
+    <!-- Main Content -->
+    <div class="w-full max-w-7xl flex flex-col gap-4">
+      <div class="w-full h-96 border border-gray-700 shadow-lg rounded-xl p-6 flex justify-center mt-0" style="background:#23272f;">
+        <button @click="executeQuery">Execute</button>
+        <VimCodeEditor v-model="code" :enableVim="false" class="w-full h-full" />
       </div>
+      <p class="text-red-500">{{ errorMessage }}</p>
+      <LargeDataTable :dt="queryResult" />
     </div>
   </div>
 </template>
