@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import FileUpload, { FileUploadInstance } from '@/components/FileUpload.vue';
 import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/excelKit';
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import DataTable from '@/components/DataTable.vue';
 import { createTableAsync, dropTableAsync, hello, insertDataTableAsync, querySqliteAsync } from '@/tools/waSqlite';
@@ -66,6 +66,21 @@ async function executeQuery() {
 
 async function sayHello() {
   await hello()
+}
+
+onMounted(() => {
+  // F8 快捷鍵監聽
+  window.addEventListener('keydown', handleF8Key);
+});
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleF8Key);
+});
+
+function handleF8Key(e: KeyboardEvent) {
+  // F8 對應 key 為 'F8'
+  if (e.key === 'F8') {
+    executeQuery();
+  }
 }
 </script>
 
