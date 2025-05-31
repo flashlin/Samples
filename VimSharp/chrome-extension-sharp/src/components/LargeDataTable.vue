@@ -37,14 +37,13 @@ import { computed, watchEffect } from 'vue'
 
 // Define props using TypeScript
 const props = defineProps<{
-  dt: DataTableType | null
+  dt: DataTableType | null,
+  keyField?: string | null
 }>()
 const dt = props.dt
 
-// 檢查 columns 是否有 id 欄位
-const hasIdColumn = computed(() => {
-  return !!(dt && dt.columns && dt.columns.some((col: any) => col.name === 'id'))
-})
+// 檢查 columns 是否有 id 欄位（改為判斷 props.keyField 是否為 null）
+const hasIdColumn = computed(() => props.keyField !== null && props.keyField !== undefined)
 
 // 若沒有 id 欄位，為每筆 data 加上 _id（流水號），並在 columns 加上 _id 欄位
 watchEffect(() => {
@@ -64,7 +63,8 @@ watchEffect(() => {
   }
 })
 
-const keyField = computed(() => (hasIdColumn.value ? 'id' : '_id'))
+// keyField 決定邏輯：props.keyField 為 null 或 undefined 則用 _id，否則用 props.keyField
+const keyField = computed(() => (props.keyField == null ? '_id' : props.keyField))
 </script>
 
 <style scoped>
