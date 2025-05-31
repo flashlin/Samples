@@ -8,7 +8,6 @@
       :class="`grid-cols-${dt.columns.length + 1} gap-4`"
     >
       <div v-for="col in dt.columns" :key="col.name">{{ col.name }}</div>
-      <div>操作</div>
     </div>
 
     <!-- Data rows with virtual scroll (dynamic columns) -->
@@ -25,9 +24,6 @@
         :class="`grid-cols-${dt.columns.length + 1} gap-4`"
       >
         <div v-for="col in dt.columns" :key="col.name">{{ item[col.name] }}</div>
-        <div>
-          <button class="px-2 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-500">編輯</button>
-        </div>
       </div>
     </RecycleScroller>
   </div>
