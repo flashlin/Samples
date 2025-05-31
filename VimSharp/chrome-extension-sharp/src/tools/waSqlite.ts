@@ -52,6 +52,7 @@ export async function querySqliteAsync(sql: string, parameters: any = {}): Promi
         columns = cols;
         // 只在第一筆資料時推斷型別
         columnTypes = row.map((v: any) => guessType(v));
+        console.log("querySqliteAsync", lastSql)
       }
       const obj: any = {};
       cols.forEach((col, index) => {
@@ -60,6 +61,7 @@ export async function querySqliteAsync(sql: string, parameters: any = {}): Promi
       data.push(obj);
     });
   });
+  console.log("querySqliteAsync result", data)
   // 組成 DataTable
   return {
     tableName: '', // 查詢無明確表名
