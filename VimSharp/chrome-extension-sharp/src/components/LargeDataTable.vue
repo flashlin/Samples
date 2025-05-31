@@ -1,7 +1,7 @@
 <template>
-  <span v-if="dt">{{ dt.tableName }}</span>
   <div class="w-full max-w-4xl mx-auto mt-8" style="height: 300px;">
     <!-- Header row as grid (dynamic columns) -->
+    <span v-if="dt">{{ dt.tableName }}</span>
     <div
       v-if="dt && dt.columns && dt.columns.length > 0"
       class="grid px-4 py-2 bg-gray-800 text-white font-semibold text-sm rounded-t-md dark:bg-gray-900 dark:text-gray-100"
