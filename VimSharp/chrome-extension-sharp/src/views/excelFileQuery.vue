@@ -74,7 +74,7 @@ async function sayHello() {
   <div class="min-h-screen flex flex-col items-center justify-center bg-gray-900 w-full">
     <button @click="sayHello">hello</button> 
     <!-- Header -->
-    <div ref="leftRef" class="w-full max-w-7xl border border-gray-700 shadow-lg rounded-xl p-6 flex flex-col items-center mb-4" style="background:#2d333b;">
+    <div class="w-full max-w-7xl border border-gray-700 shadow-lg rounded-xl p-6 flex flex-col items-center mb-4" style="background:#2d333b;">
       <h1 class="text-2xl font-bold mb-4 text-white text-center">Excel Query</h1>
       <FileUpload accept=".xlsx,.csv" :processHandler="uploadAllExcelFiles" processButtonTitle="Import" style="width:98%;" />
     </div>
