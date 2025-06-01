@@ -47,7 +47,7 @@ const keyField = computed(resolveKeyField)
 // hasIdColumn 決定邏輯：1. props.keyField 有設定則回傳 true；2. keyField 為 'id' 則回傳 true；3. 否則回傳 false
 const hasIdColumn = computed(() => {
   if (props.keyField != null) return true;
-  return keyField.value === 'id';
+  return false;
 })
 
 // 若沒有 id 欄位，為每筆 data 加上 _id（流水號），並在 columns 加上 _id 欄位
@@ -71,9 +71,6 @@ watchEffect(() => {
 // keyField 決定邏輯：1. props.keyField 不為 null 則用 props.keyField；2. dt.columns 有 'id' 則用 'id'；3. 否則用 '_id'
 function resolveKeyField() {
   if (props.keyField != null) return props.keyField
-  if (dt.value && dt.value.columns && dt.value.columns.some((col: any) => col.name === 'id')) {
-    return 'id'
-  }
   return '_id'
 }
 
