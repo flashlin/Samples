@@ -33,6 +33,7 @@ function onFileChange(e: Event) {
       fileList.value.push(input.files[i]);
     }
   }
+  input.value = '';
 }
 
 const fileProgressList = computed(() =>
@@ -58,6 +59,11 @@ function handleAllFileProcess() {
     props.processHandler(fileList.value, instance);
   }
 }
+
+function removeFile(index: number) {
+  // Remove file from fileList by index
+  fileList.value.splice(index, 1);
+}
 </script>
 
 <template>
@@ -81,7 +87,7 @@ function handleAllFileProcess() {
     </div>
     <!-- Body -->
     <div class="p-2 space-y-2">
-      <div v-for="item in fileProgressList" :key="item.name" class="bg-gray-800 rounded-lg px-4 py-3 flex flex-col gap-1">
+      <div v-for="(item, idx) in fileProgressList" :key="item.name" class="bg-gray-800 rounded-lg px-4 py-3 flex flex-col gap-1">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-x-3">
             <span class="size-7 flex justify-center items-center border border-[#23272f] text-white rounded-lg">
@@ -104,7 +110,7 @@ function handleAllFileProcess() {
               </svg>
               <span class="sr-only">Pause</span>
             </button>
-            <button type="button" class="text-neutral-400 hover:text-red-400">
+            <button type="button" class="text-neutral-400 hover:text-red-400" @click="removeFile(idx)">
               <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 6h18" stroke="currentColor"/>
                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" stroke="currentColor"/>
