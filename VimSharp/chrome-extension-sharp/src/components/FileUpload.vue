@@ -58,6 +58,7 @@ function handleAllFileProcess() {
   if (props.processHandler) {
     props.processHandler(fileList.value, instance);
   }
+  fileList.value = [];
 }
 
 function removeFile(index: number) {
