@@ -49,6 +49,16 @@ fi
 # 匯入歷史記錄到 atuin
 atuin import auto
 
+# 檢查是否已安裝 Hammerspoon，若未安裝則自動下載並解壓縮安裝
+HAMMERSPOON_APP="/Applications/Hammerspoon.app"
+if [ ! -d "$HAMMERSPOON_APP" ]; then
+  echo "⚠️ 尚未偵測到 Hammerspoon，開始下載並安裝..."
+  TMP_ZIP="/tmp/Hammerspoon-1.0.0.zip"
+  curl -L -o "$TMP_ZIP" "https://github.com/Hammerspoon/hammerspoon/releases/download/1.0.0/Hammerspoon-1.0.0.zip"
+  unzip -q "$TMP_ZIP" -d /Applications/
+  rm "$TMP_ZIP"
+  echo "✅ Hammerspoon 已安裝完成！"
+fi
 
 ### ✅ 檢查 Raycast ###
 echo ""
