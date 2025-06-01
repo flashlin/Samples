@@ -55,9 +55,9 @@ watchEffect(() => {
   if (!dt.value) return
   if (!dt.value.columns) return
   if (!hasIdColumn.value) {
-    // 若 columns 沒有 _id 欄位，則加上
+    // 若 columns 沒有 _id 欄位，則加在第一個位置
     if (!dt.value.columns.some((col: any) => col.name === '_id')) {
-      dt.value.columns.push({ name: '_id', type: 'INTEGER' })
+      dt.value.columns.unshift({ name: '_id', type: 'INTEGER' })
     }
     // 為每筆 data 加上 _id
     if (dt.value.data) {
