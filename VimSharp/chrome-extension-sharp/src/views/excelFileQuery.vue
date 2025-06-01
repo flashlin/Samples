@@ -14,7 +14,7 @@ interface ExcelFile {
 
 const excelFiles = ref<ExcelFile[]>([]);
 const allDataTables = ref<DataTableType[]>([]);
-const code = ref('select * from Sheet123')
+const code = ref('')
 const queryResult = ref<DataTableType | null>(null);
 const errorMessage = ref('');
 
