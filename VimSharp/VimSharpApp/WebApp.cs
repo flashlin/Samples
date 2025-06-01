@@ -19,6 +19,7 @@ namespace VimSharpApp
             // 設定日誌，移除 Console 輸出
             webBuilder.Logging.ClearProviders();
             webBuilder.Logging.AddDebug();
+            webBuilder.Logging.AddConsole();
 
             // 載入 appSetting.json
             webBuilder.Configuration.AddJsonFile("appSetting.json", optional: false, reloadOnChange: true);
