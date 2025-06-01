@@ -7,6 +7,7 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/dist/',
   plugins: [
     vue(),
     {
@@ -57,6 +58,7 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       input: {
+        index: resolve(__dirname, 'index.html'),
         popup: resolve(__dirname, 'src/popup.ts'),
         content: resolve(__dirname, 'src/content.ts'),
         background: resolve(__dirname, 'src/background.ts')
