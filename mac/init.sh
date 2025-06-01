@@ -49,4 +49,14 @@ fi
 # 匯入歷史記錄到 atuin
 atuin import auto
 
+
+### ✅ 檢查 Raycast ###
+echo ""
+echo "🔍 檢查是否已安裝 Raycast..."
+if [ ! -d "/Applications/Raycast.app" ]; then
+  echo "⚠️ 尚未偵測到 Raycast"
+  echo "👉 你可以從以下網址下載並安裝 Raycast："
+  echo "   🔗 https://www.raycast.com/download"
+fi
+
 echo "✅ 安裝完成！請重新開啟 Terminal 或執行 'exec zsh' 以啟用所有功能。"
