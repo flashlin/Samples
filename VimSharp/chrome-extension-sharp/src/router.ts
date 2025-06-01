@@ -12,11 +12,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('./components/Excel.vue'),
   },
   {
-    path: '/vim',
-    name: 'VimDemo',
-    component: () => import('./views/demo.vue'),
-  },
-  {
     path: '/fileupload',
     name: 'FileUpload',
     component: () => import('./views/demoFileUpload.vue'),
