@@ -1,0 +1,52 @@
+#!/bin/bash
+
+echo "🚀 開始安裝 zsh + fzf + atuin + autosuggestions + syntax-highlighting..."
+
+# 安裝 Homebrew（如果尚未安裝）
+if ! command -v brew &> /dev/null; then
+  echo "🍺 安裝 Homebrew..."
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# 安裝 zsh（macOS 通常已內建）
+brew install zsh
+
+# 設為預設 shell
+if [[ "$SHELL" != *zsh ]]; then
+  echo "⚙️ 將 zsh 設為預設 shell..."
+  chsh -s "$(which zsh)"
+fi
+
+# 安裝 fzf 並啟用 key bindings 和自動補全
+brew install fzf
+"$(brew --prefix)"/opt/fzf/install --all --no-bash --no-fish
+
+# 安裝 atuin
+brew install atuin
+
+# 加入 atuin 初始化到 zshrc（避免重複加入）
+if ! grep -q "atuin init zsh" ~/.zshrc; then
+  echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
+fi
+
+# 安裝 zsh-autosuggestions
+brew install zsh-autosuggestions
+
+# 安裝 zsh-syntax-highlighting
+brew install zsh-syntax-highlighting
+
+# 加入 plugins 到 zshrc（避免重複）
+if ! grep -q "zsh-autosuggestions" ~/.zshrc; then
+  echo 'source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh' >> ~/.zshrc
+fi
+
+if ! grep -q "zsh-syntax-highlighting" ~/.zshrc; then
+  echo 'source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' >> ~/.zshrc
+fi
+
+# 匯入歷史記錄到 atuin
+atuin import auto
+
+echo "✅ 安裝完成！請重新開啟 Terminal 或執行 'exec zsh' 以啟用所有功能。"
