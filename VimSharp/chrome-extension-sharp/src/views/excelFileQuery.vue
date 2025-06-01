@@ -6,6 +6,7 @@ import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import { createTableAsync, dropTableAsync, insertDataTableAsync, querySqliteAsync } from '@/tools/waSqlite';
 import { DataTable as DataTableType } from '@/tools/dataTypes';
 import LargeDataTable from '@/components/LargeDataTable.vue';
+import { goTo } from '@/tools/visual-router'
 
 interface ExcelFile {
   fileName: string;
@@ -88,6 +89,16 @@ function handleF8Key(e: KeyboardEvent) {
 
 <template>
   <div class="items-center justify-center bg-gray-900 w-full">
+    <!-- Home Button -->
+    <div class="fixed top-4 left-4 z-50">
+      <button
+        @click="goTo('')"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg border border-blue-800"
+        style="min-width: 80px;"
+      >
+        Home
+      </button>
+    </div>
     <!-- Header -->
     <div class="w-full max-w-7xl border border-gray-700 shadow-lg rounded-xl p-6 flex flex-col items-center mb-4" style="background:#2d333b;">
       <h1 class="text-2xl font-bold mb-4 text-white text-center">Excel Query</h1>

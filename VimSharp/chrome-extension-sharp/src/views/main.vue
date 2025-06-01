@@ -10,6 +10,6 @@ const cards = [
 ]
 </script>
 <template>
-  Hello
+  Support Tools
   <CardGrid :cards="cards" />
 </template>
