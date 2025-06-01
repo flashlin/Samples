@@ -18,6 +18,12 @@ namespace VimSharpApp
             var webAppInstance = new WebApp();
             await webAppInstance.StartAsync(args);
 
+            if(Console.IsInputRedirected)
+            {
+                // 等待 Web 應用程式結束
+                await webAppInstance.WaitForShutdownAsync();
+            }
+
             // 如果沒有輸入重定向，則建立及執行 Console 應用程式
             if(!Console.IsInputRedirected)
             {

@@ -55,5 +55,14 @@ namespace VimSharpApp
             // 等待 Web API 完成
             await _webTask;
         }
+
+        // 等待 Web 應用程式結束的方法
+        public async Task WaitForShutdownAsync()
+        {
+            if (_webTask != null)
+            {
+                await _webTask;
+            }
+        }
     }
 } 
