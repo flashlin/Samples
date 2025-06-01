@@ -25,7 +25,7 @@ namespace VimSharpApp
             webBuilder.Configuration.AddJsonFile("appSetting.json", optional: false, reloadOnChange: true);
             webBuilder.Services.Configure<AppSettingConfig>(webBuilder.Configuration);
 
-            webBuilder.WebHost.UseUrls("http://localhost:8080");
+            webBuilder.WebHost.UseUrls("http://*:8080");
             _webApp = webBuilder.Build();
 
             // 註冊 API 端點
