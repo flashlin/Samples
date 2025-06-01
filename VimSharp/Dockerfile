@@ -1,7 +1,9 @@
 # 使用 .NET 9.0 SDK 作為建置階段
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY . .
+COPY VimSharpApp/. ./VimSharpApp/
+COPY VimSharpLib/. ./VimSharpLib/
+WORKDIR /src/VimSharpApp
 RUN dotnet restore VimSharpApp.csproj
 RUN dotnet publish VimSharpApp.csproj -c Release -o /app/publish
 
