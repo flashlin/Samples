@@ -78,7 +78,6 @@ export default defineConfig({
         manualChunks(id) {
           const vendors = ['vue', 'monaco-editor', 'monaco-vim', 'papaparse', 'xlsx', 
             'axios', 'handlebars', 'wa-sqlite', 
-            '@univerjs/presets', 
           ];
           for (const vendor of vendors) {
             if (id.includes(`node_modules/${vendor}`)) {
