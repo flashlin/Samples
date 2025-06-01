@@ -11,7 +11,8 @@
     "build:extension": "vite build && node scripts/copy-popup.js",
     "test": "jest",
     "copy:monaco-workers": "node scripts/copy-monaco-workers.cjs",
-    "postinstall": "node scripts/copy-wa-sqlite-wasm.js"
+    "postinstall": "node scripts/copy-wa-sqlite-wasm.js",
+    "analyze": "npx source-map-explorer dist/assets/vendor.*.js"
   },
   "dependencies": {
     "@monaco-editor/loader": "^1.5.0",

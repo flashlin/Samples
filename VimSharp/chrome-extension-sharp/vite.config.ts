@@ -54,6 +54,7 @@ export default defineConfig({
     emptyOutDir: true,
     cssCodeSplit: false,
     target: 'esnext',
+    sourcemap: true,
     rollupOptions: {
       input: {
         popup: resolve(__dirname, 'src/popup.ts'),
@@ -73,6 +74,17 @@ export default defineConfig({
             return 'popup.css'
           }
           return 'assets/[name].[hash].[ext]'
+        },
+        manualChunks(id) {
+          const vendors = ['vue', 'monaco-editor', 'monaco-vim', 'papaparse', 'xlsx', 
+            'axios', 'handlebars', 'wa-sqlite', 
+            '@univerjs/presets', 
+          ];
+          for (const vendor of vendors) {
+            if (id.includes(`node_modules/${vendor}`)) {
+              return `vendor-${vendor}`;
+            }
+          }
         }
       }
     }
