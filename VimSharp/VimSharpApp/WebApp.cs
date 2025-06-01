@@ -10,6 +10,7 @@ namespace VimSharpApp
     {
         private WebApplication _webApp;
         private Task _webTask;
+        private readonly string _staticFolder = "wwwroot"; // 靜態檔案目錄
 
         // 建立並啟動 Web 應用程式的方法
         public async Task StartAsync(string[] args)
@@ -31,15 +32,15 @@ namespace VimSharpApp
             // 註冊 API 端點
             JobApiHandler.MapEndpoints(_webApp);
 
-            // 提供 public 資料夾的靜態檔案
+            // 提供 wwwroot 資料夾的靜態檔案
             _webApp.UseDefaultFiles(new DefaultFilesOptions
             {
-                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "public")),
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), _staticFolder)),
                 RequestPath = ""
             });
             _webApp.UseStaticFiles(new StaticFileOptions
             {
-                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "public")),
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), _staticFolder)),
                 RequestPath = ""
             });
             
