@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-4xl mx-auto mt-8" style="height: 300px;">
+  <div class="w-full max-w-4xl mx-auto mt-4" style="height: 300px;">
     <!-- Header row as grid (dynamic columns) -->
     <span v-if="dt">{{ dt.tableName }}</span>
     <div
