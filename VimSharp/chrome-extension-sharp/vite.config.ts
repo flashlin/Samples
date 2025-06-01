@@ -53,6 +53,7 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     cssCodeSplit: false,
+    target: 'esnext',
     rollupOptions: {
       input: {
         popup: resolve(__dirname, 'src/popup.ts'),
@@ -77,6 +78,7 @@ export default defineConfig({
     }
   },
   esbuild: {
+    target: 'esnext',
     tsconfigRaw: {
       compilerOptions: {
         experimentalDecorators: true

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useRouter } from 'vue-router'
+import { goTo } from '@/tools/visual-router'
 
 interface CardItem {
   icon: string // icon 路徑
@@ -8,11 +8,10 @@ interface CardItem {
 }
 
 const props = defineProps<{ cards: CardItem[] }>()
-const router = useRouter()
 
 function handleCardClick(card: CardItem) {
   if (card.path) {
-    router.push(card.path)
+    goTo(card.path)
   }
 }
 </script>
