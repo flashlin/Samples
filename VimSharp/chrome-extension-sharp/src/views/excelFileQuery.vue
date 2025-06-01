@@ -127,5 +127,13 @@ function handleF8Key(e: KeyboardEvent) {
         <LargeDataTable :dt="queryResult" />
       </div>
     </div>
+    <!-- 保留底部三行空白 -->
+    <div class="footer-blank"></div>
   </div>
 </template>
+
+<style scoped>
+.footer-blank {
+  min-height: 3em; /* 3行字的高度，可依需求調整 */
+}
+</style>
