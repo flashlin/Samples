@@ -87,7 +87,7 @@ function handleF8Key(e: KeyboardEvent) {
       <FileUpload accept=".xlsx,.csv" :processHandler="uploadAllExcelFiles" processButtonTitle="Import" style="width:98%;" />
     </div>
     <!-- Sidebar -->
-    <div class="w-full max-w-7xl flex-col" style="background:#23272f; min-height: 200px;">
+    <div class="w-full max-w-7xl flex-col" style="background:#23272f;">
       <div class="flex-1" v-for="(dt, idx) in allDataTables" :key="dt.tableName + idx">
         <LargeDataTable :dt="dt" />
       </div>
