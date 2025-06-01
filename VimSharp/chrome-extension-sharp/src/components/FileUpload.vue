@@ -136,7 +136,7 @@ function removeFile(index: number) {
       <!-- Process Status -->
       <div v-if="processBarStatus" class="text-xs text-red-400 mt-1">{{ processBarStatus }}</div>
       <div class="flex items-center gap-x-2">
-        <button type="button" class="text-neutral-400 hover:text-white">
+        <!-- <button type="button" class="text-neutral-400 hover:text-white">
           <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="4" height="16" x="6" y="4" stroke="currentColor"/>
             <rect width="4" height="16" x="14" y="4" stroke="currentColor"/>
@@ -152,7 +152,7 @@ function removeFile(index: number) {
             <line x1="14" x2="14" y1="11" y2="17" stroke="currentColor"/>
           </svg>
           <span>Delete</span>
-        </button>
+        </button> -->
         <button @click="handleAllFileProcess" class="ml-4 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded" :disabled="fileList.length === 0">
           {{ props.processButtonTitle }}
         </button>
