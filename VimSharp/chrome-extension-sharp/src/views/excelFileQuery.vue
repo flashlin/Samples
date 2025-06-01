@@ -3,8 +3,7 @@ import FileUpload, { FileUploadInstance } from '@/components/FileUpload.vue';
 import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/excelKit';
 import { ref, onMounted, onUnmounted } from 'vue';
 import VimCodeEditor from '@/components/vimCodeEditor.vue';
-import DataTable from '@/components/DataTable.vue';
-import { createTableAsync, dropTableAsync, hello, insertDataTableAsync, querySqliteAsync } from '@/tools/waSqlite';
+import { createTableAsync, dropTableAsync, insertDataTableAsync, querySqliteAsync } from '@/tools/waSqlite';
 import { DataTable as DataTableType } from '@/tools/dataTypes';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 
@@ -63,11 +62,6 @@ async function executeQuery() {
   }
 }
 
-
-async function sayHello() {
-  await hello()
-}
-
 onMounted(() => {
   // F8 快捷鍵監聽
   window.addEventListener('keydown', handleF8Key);
@@ -87,14 +81,13 @@ function handleF8Key(e: KeyboardEvent) {
 
 <template>
   <div class="min-h-screen flex flex-col items-center justify-center bg-gray-900 w-full">
-    <button @click="sayHello">hello</button> 
     <!-- Header -->
     <div class="w-full max-w-7xl border border-gray-700 shadow-lg rounded-xl p-6 flex flex-col items-center mb-4" style="background:#2d333b;">
       <h1 class="text-2xl font-bold mb-4 text-white text-center">Excel Query</h1>
       <FileUpload accept=".xlsx,.csv" :processHandler="uploadAllExcelFiles" processButtonTitle="Import" style="width:98%;" />
     </div>
     <!-- Sidebar -->
-    <div class="w-full max-w-7xl border border-gray-700 shadow-lg rounded-xl p-6 flex flex-col gap-6 mb-4" style="background:#23272f; min-height: 200px;">
+    <div class="w-full max-w-7xl flex-col" style="background:#23272f; min-height: 200px;">
       <div class="flex-1" v-for="(dt, idx) in allDataTables" :key="dt.tableName + idx">
         <LargeDataTable :dt="dt" />
       </div>

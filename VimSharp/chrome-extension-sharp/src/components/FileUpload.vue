@@ -68,7 +68,7 @@ function removeFile(index: number) {
 
 <template>
   <!-- File Uploading Progress Form -->
-  <div class="flex flex-col bg-[#181c20] border border-[#23272f] shadow-2xs rounded-xl">
+  <div class="flex flex-col bg-[#181c20] shadow-2xs rounded-xl">
     <!-- 上傳按鈕與 input -->
     <div class="flex justify-end items-center mb-4 mt-4 mr-4">
       <label
@@ -87,7 +87,7 @@ function removeFile(index: number) {
     </div>
     <!-- Body -->
     <div class="p-2 space-y-2">
-      <div v-for="(item, idx) in fileProgressList" :key="item.name" class="bg-gray-800 rounded-lg px-4 py-3 flex flex-col gap-1">
+      <div v-for="(item, idx) in fileProgressList" :key="item.name" class="bg-gray-800 rounded-lg px-2 py-1 flex flex-col gap-1 w-[98%] mx-auto">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-x-3">
             <span class="size-7 flex justify-center items-center border border-[#23272f] text-white rounded-lg">
