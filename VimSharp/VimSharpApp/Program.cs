@@ -18,12 +18,16 @@ namespace VimSharpApp
             var webAppInstance = new WebApp();
             await webAppInstance.StartAsync(args);
 
-            // 建立及執行 Console 應用程式
-            var consoleAppInstance = new ConsoleApp();
-            consoleAppInstance.Start(args);
+            // 如果沒有輸入重定向，則建立及執行 Console 應用程式
+            if(!Console.IsInputRedirected)
+            {
+                // 建立及執行 Console 應用程式
+                var consoleAppInstance = new ConsoleApp();
+                consoleAppInstance.Start(args);
 
-            // 關閉 Web 應用程式
-            await webAppInstance.Shutdown();
+                // 關閉 Web 應用程式
+                await webAppInstance.Shutdown();
+            }
         }
     }
 }

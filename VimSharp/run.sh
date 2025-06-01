@@ -1,1 +1,2 @@
+docker rm -f vim-sharp-app
 docker run -d --name vim-sharp-app -p 8080:80 vim-sharp-app
