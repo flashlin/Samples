@@ -32,7 +32,7 @@ export default defineConfig({
       name: 'wa-sqlite-wasm-alias',
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
-          if (req.url === '/node_modules/.vite/deps/wa-sqlite.wasm') {
+          if (req.url === '/dist/node_modules/.vite/deps/wa-sqlite.wasm') {
             const wasmPath = path.resolve(__dirname, 'public/wa-sqlite.wasm')
             if (fs.existsSync(wasmPath)) {
               res.setHeader('Content-Type', 'application/wasm')
