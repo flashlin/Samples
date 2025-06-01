@@ -62,6 +62,13 @@ async function executeQuery() {
   }
 }
 
+async function deleteTables() {
+  for (const dt of allDataTables.value) {
+    await dropTableAsync(dt.tableName);
+  }
+  allDataTables.value = [];
+}
+
 onMounted(() => {
   // F8 快捷鍵監聽
   window.addEventListener('keydown', handleF8Key);
@@ -97,6 +104,7 @@ function handleF8Key(e: KeyboardEvent) {
       <div class="w-full h-96 border border-gray-700 shadow-lg rounded-xl p-6 flex flex-col justify-center mt-0" style="background:#23272f;">
         <div class="flex flex-row gap-2 mb-2">
           <button @click="executeQuery">Execute (F8)</button>
+          <button @click="deleteTables">Delete (F4)</button>
           <!-- 這裡未來可放更多按鈕 -->
         </div>
         <VimCodeEditor v-model="code" :enableVim="false" class="w-full h-full" />
