@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // https://www.npmjs.com/package/monaco-editor-vue3
-import { ref, watch } from 'vue'
+import { ref, watch, defineExpose } from 'vue'
 import MonacoEditor from 'monaco-editor-vue3'
 import * as monaco from 'monaco-editor'
 import { initVimMode2, VimMode2 } from '@/tools/monaco-vim2'
@@ -41,6 +41,36 @@ function onEditorMount(editor: monaco.editor.IStandaloneCodeEditor) {
     vimMode = initVimMode2(editor, statusNode)
   }
 }
+
+/**
+ * Get the current editor instance from monacoRef
+ */
+function getEditorInstance(): monaco.editor.IStandaloneCodeEditor | null {
+  // monacoRef.value?.editor for monaco-editor-vue3
+  return monacoRef.value?.editor || null
+}
+
+/**
+ * Get the content of the current line with cursor position
+ * @returns [leftContent, rightContent]
+ */
+function getCurrentLineWithCursor(): string[] {
+  const editor = getEditorInstance()
+  if (!editor) return ['', '']
+  const position = editor.getPosition()
+  if (!position) return ['', '']
+  const model = editor.getModel()
+  if (!model) return ['', '']
+  const lineContent = model.getLineContent(position.lineNumber)
+  const cursorIndex = position.column - 1 // column is 1-based
+  const left = lineContent.slice(0, cursorIndex)
+  const right = lineContent.slice(cursorIndex)
+  return [left, right]
+}
+
+defineExpose({
+  getCurrentLineWithCursor
+})
 </script>
 
 <template>
