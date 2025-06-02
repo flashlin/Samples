@@ -2,30 +2,32 @@
   <div class="w-full mt-4" style="max-height:300px; height:auto;">
     <!-- Header row as grid (dynamic columns) -->
     <span v-if="dt">{{ dt.tableName }}</span>
-    <div
-      v-if="dt && dt.columns && dt.columns.length > 0"
-      class="grid px-4 py-2 bg-gray-800 text-white font-semibold text-sm rounded-t-md dark:bg-gray-900 dark:text-gray-100"
-      :class="`grid-cols-${dt.columns.length} gap-4`"
-    >
-      <div v-for="col in dt.columns" :key="col.name">{{ col.name }}</div>
-    </div>
-
-    <!-- Data rows with virtual scroll (dynamic columns) -->
-    <RecycleScroller
-      v-if="dt && dt.data"
-      class="divide-y divide-gray-700 dark:divide-gray-800 scroller"
-      :items="dt.data"
-      :item-size="48"
-      :key-field="keyField"
-      v-slot="{ item }"
-    >
+    <div class="inline-block">
       <div
-        class="grid px-4 py-3 bg-gray-900 text-gray-100 hover:bg-gray-800 transition dark:bg-gray-950 dark:hover:bg-gray-800"
-        :class="`grid-cols-${dt.columns.length} gap-4`"
+        v-if="dt && dt.columns && dt.columns.length > 0"
+        class="grid gap-4"
+        :style="`grid-template-columns: repeat(${dt.columns.length}, minmax(min-content, auto));`"
       >
-        <div v-for="col in dt.columns" :key="col.name">{{ item[col.name] }}</div>
+        <div v-for="(col, idx) in dt.columns" :key="col.name" :style="{ minWidth: columnMinWidths[idx] + 'px' }">{{ col.name }}</div>
       </div>
-    </RecycleScroller>
+
+      <!-- Data rows with virtual scroll (dynamic columns) -->
+      <RecycleScroller
+        v-if="dt && dt.data"
+        class="divide-y divide-gray-700 dark:divide-gray-800 scroller"
+        :items="dt.data"
+        :item-size="48"
+        :key-field="keyField"
+        v-slot="{ item }"
+      >
+        <div
+          class="grid gap-4"
+          :style="`grid-template-columns: repeat(${dt.columns.length}, minmax(min-content, auto));`"
+        >
+          <div v-for="(col, idx) in dt.columns" :key="col.name" :style="{ minWidth: columnMinWidths[idx] + 'px' }">{{ item[col.name] }}</div>
+        </div>
+      </RecycleScroller>
+    </div>
   </div>
 </template>
 
@@ -33,7 +35,7 @@
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { RecycleScroller } from 'vue-virtual-scroller'
 import { DataTable as DataTableType } from '@/tools/dataTypes'
-import { computed, watchEffect } from 'vue'
+import { computed, watchEffect, ref } from 'vue'
 
 // Define props using TypeScript
 const props = defineProps<{
@@ -43,6 +45,20 @@ const props = defineProps<{
 const dt = computed(() => props.dt)
 
 const keyField = computed(resolveKeyField)
+
+// 方法A: 計算每個欄位key的最小寬度(px)
+const columnMinWidths = ref<number[]>([])
+watchEffect(() => {
+  if (!dt.value || !dt.value.columns) {
+    columnMinWidths.value = []
+    return
+  }
+  // 每個key的長度*8px + padding 16px
+  columnMinWidths.value = dt.value.columns.map(col => {
+    const textLen = (col.name || '').toString().length
+    return textLen * 8 + 16
+  })
+})
 
 // hasIdColumn 決定邏輯：1. props.keyField 有設定則回傳 true；2. keyField 為 'id' 則回傳 true；3. 否則回傳 false
 const hasIdColumn = computed(() => {
