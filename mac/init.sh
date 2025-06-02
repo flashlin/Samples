@@ -24,7 +24,8 @@ brew install fzf
 "$(brew --prefix)"/opt/fzf/install --all --no-bash --no-fish
 
 # 安裝 atuin
-brew install atuin
+curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+
 
 # 加入 atuin 初始化到 zshrc（避免重複加入）
 if ! grep -q "atuin init zsh" ~/.zshrc; then
