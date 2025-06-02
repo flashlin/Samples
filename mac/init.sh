@@ -67,6 +67,7 @@ if [ ! -d "/Applications/Raycast.app" ]; then
   echo "⚠️ 尚未偵測到 Raycast"
   echo "👉 你可以從以下網址下載並安裝 Raycast："
   echo "   🔗 https://www.raycast.com/download"
+  echo "在搜尋欄位當中輸入”Settings” 或者”General”，找到 Raycast settings 的 General 就可以進入設定畫面"
 fi
 
 echo "✅ 安裝完成！請重新開啟 Terminal 或執行 'exec zsh' 以啟用所有功能。"
