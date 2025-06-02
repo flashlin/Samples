@@ -5,7 +5,7 @@
     <div class="inline-block">
       <div
         v-if="dt && dt.columns && dt.columns.length > 0"
-        class="grid gap-4"
+        class="grid gap-4 bg-gray-800 text-white font-semibold text-sm rounded-t-md dark:bg-gray-900 dark:text-gray-100"
         :style="`grid-template-columns: repeat(${dt.columns.length}, minmax(min-content, auto));`"
       >
         <div v-for="(col, idx) in dt.columns" :key="col.name" :style="{ minWidth: columnMinWidths[idx] + 'px' }">{{ col.name }}</div>
@@ -18,10 +18,16 @@
         :items="dt.data"
         :item-size="48"
         :key-field="keyField"
-        v-slot="{ item }"
+        v-slot="{ item, index }"
       >
         <div
-          class="grid gap-4"
+          :class="[
+            'grid gap-4',
+            index % 2 === 0
+              ? 'bg-gray-100 dark:bg-gray-800'
+              : 'bg-gray-200 dark:bg-gray-700',
+            'text-gray-900 dark:text-gray-100'
+          ]"
           :style="`grid-template-columns: repeat(${dt.columns.length}, minmax(min-content, auto));`"
         >
           <div v-for="(col, idx) in dt.columns" :key="col.name" :style="{ minWidth: columnMinWidths[idx] + 'px' }">{{ item[col.name] }}</div>
