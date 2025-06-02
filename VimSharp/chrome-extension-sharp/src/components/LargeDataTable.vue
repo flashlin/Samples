@@ -16,13 +16,13 @@
         v-if="dt && dt.data"
         class="divide-y divide-gray-700 dark:divide-gray-800 scroller"
         :items="dt.data"
-        :item-size="48"
+        :item-size="32"
         :key-field="keyField"
         v-slot="{ item, index }"
       >
         <div
           :class="[
-            'grid gap-4 text-sm',
+            'grid gap-px text-sm',
             index % 2 === 0
               ? 'bg-gray-100 dark:bg-gray-800'
               : 'bg-gray-200 dark:bg-gray-700',
