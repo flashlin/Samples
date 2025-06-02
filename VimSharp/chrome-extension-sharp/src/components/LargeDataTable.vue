@@ -5,7 +5,7 @@
     <div class="inline-block">
       <div
         v-if="dt && dt.columns && dt.columns.length > 0"
-        class="grid gap-4 bg-gray-800 text-white font-semibold text-sm rounded-t-md dark:bg-gray-900 dark:text-gray-100"
+        class="grid gap-4 bg-gray-300 text-gray-900 font-semibold text-sm rounded-t-md dark:bg-gray-700 dark:text-gray-100 mb-2"
         :style="`grid-template-columns: repeat(${dt.columns.length}, minmax(min-content, auto));`"
       >
         <div v-for="(col, idx) in dt.columns" :key="col.name" :style="{ minWidth: columnMinWidths[idx] + 'px' }">{{ col.name }}</div>
