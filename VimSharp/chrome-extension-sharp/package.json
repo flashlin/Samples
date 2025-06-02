@@ -10,7 +10,7 @@
     "build:copy": "rimraf ../VimSharpApp/wwwroot/dist && mkdirp ../VimSharpApp/wwwroot/dist && cpy ./dist/** ../VimSharpApp/wwwroot/dist --cwd=. --parents",
     "build": "pnpm run build:only && pnpm run build:copy",
     "preview": "vite preview",
-    "build:extension": "vite build && node scripts/copy-popup.js",
+    "build:extension": "vite build --mode extension && node scripts/copy-popup.js",
     "test": "jest",
     "copy:monaco-workers": "node scripts/copy-monaco-workers.cjs",
     "postinstall": "node scripts/copy-wa-sqlite-wasm.js",

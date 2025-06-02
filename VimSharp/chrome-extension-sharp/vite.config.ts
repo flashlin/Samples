@@ -6,10 +6,20 @@ import fs from 'fs'
 import path from 'path'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   base: '/dist/',
   plugins: [
     vue(),
+    // Copy src/popup/index.html only in extension mode
+    ...(mode === 'extension'
+      ? [{
+          name: 'copy-popup-index-html',
+          closeBundle() {
+            // Copy src/popup/index.html to dist/index.html
+            copyFileSync('src/popup/index.html', 'dist/index.html')
+          }
+        }]
+      : []),
     {
       name: 'copy-popup-html',
       closeBundle() {
@@ -101,4 +111,4 @@ export default defineConfig({
   server: {
     middlewareMode: false,
   }
-})
+}))
