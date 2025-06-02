@@ -8,7 +8,7 @@
         class="grid gap-4 bg-gray-300 text-gray-900 font-semibold text-sm rounded-t-md dark:bg-gray-700 dark:text-gray-100 mb-2"
         :style="`grid-template-columns: repeat(${dt.columns.length}, minmax(min-content, auto));`"
       >
-        <div v-for="(col, idx) in dt.columns" :key="col.name" :style="{ minWidth: columnMinWidths[idx] + 'px' }">{{ col.name }}</div>
+        <div v-for="(col, idx) in dt.columns" :key="col.name" :style="{ minWidth: columnMinWidths[idx] + 'px', maxWidth: columnMinWidths[idx] + 'px' }" class="overflow-x-auto whitespace-nowrap text-ellipsis">{{ col.name }}</div>
       </div>
 
       <!-- Data rows with virtual scroll (dynamic columns) -->
@@ -30,7 +30,7 @@
           ]"
           :style="`grid-template-columns: repeat(${dt.columns.length}, minmax(min-content, auto));`"
         >
-          <div v-for="(col, idx) in dt.columns" :key="col.name" :style="{ minWidth: columnMinWidths[idx] + 'px' }">{{ item[col.name] }}</div>
+          <div v-for="(col, idx) in dt.columns" :key="col.name" :style="{ minWidth: columnMinWidths[idx] + 'px', maxWidth: columnMinWidths[idx] + 'px' }" class="overflow-x-auto whitespace-nowrap">{{ item[col.name] }}</div>
         </div>
       </RecycleScroller>
     </div>
