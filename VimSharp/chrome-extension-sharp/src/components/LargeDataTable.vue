@@ -22,7 +22,7 @@
       >
         <div
           :class="[
-            'grid gap-4',
+            'grid gap-4 text-sm',
             index % 2 === 0
               ? 'bg-gray-100 dark:bg-gray-800'
               : 'bg-gray-200 dark:bg-gray-700',
