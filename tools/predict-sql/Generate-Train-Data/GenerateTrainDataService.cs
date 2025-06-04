@@ -1,4 +1,5 @@
-﻿using T1.SqlSharp.Expressions;
+﻿using SqlSharpLit.Common.ParserLit;
+using T1.SqlSharp.Expressions;
 using T1.SqlSharp.ParserLit;
 
 public class GenerateTrainDataService : IGenerateTrainDataService
@@ -15,6 +16,7 @@ public class GenerateTrainDataService : IGenerateTrainDataService
     {
         foreach (var sqlFile in EnumerateSqlFiles(sqlFolder))
         {
+            new ExtractSqlHelper();
             var sqlResult = new SqlParser(sqlFile).Parse();
             if (sqlResult.HasError)
             {
