@@ -1,9 +1,11 @@
 import os
 from pathlib import Path
 
-# 要添加的 nvm 內容
-content_to_add = '''
-# place this after nvm initialization!
+# 所有模板內容
+templates_content = '''
+# ===== 自定義函數區塊開始 =====
+
+# nvm 自動切換版本
 autoload -U add-zsh-hook
 
 load-nvmrc() {
@@ -27,10 +29,7 @@ load-nvmrc() {
 
 add-zsh-hook chpwd load-nvmrc
 load-nvmrc
-'''
 
-# 要添加的目錄列表指令
-dir_list_content = '''
 # 目錄列表指令
 ld() {
   setopt NULL_GLOB  # 設定空匹配返回空而不是錯誤
@@ -52,10 +51,7 @@ ld() {
   fi
   unsetopt NULL_GLOB  # 恢復原始設定
 }
-'''
 
-# 要添加的檔案搜尋函數
-file_find_content = '''
 # 檔案搜尋函數
 ff() {
   if [ $# -lt 2 ]; then
@@ -69,12 +65,11 @@ ff() {
   find . -type f \( $(printf "! -name %s " "$@") -o -false \) -prune -o -type f \( $(printf "-name %s -o " "$@") -false \) -print \\
     | xargs grep --color=always -n -E "$pattern" 2>/dev/null
 }
-'''
 
-# 要添加的 Rider 快速開啟指令
-rider_content = '''
 # Rider 快速開啟指令
 ro() { open -a "Rider" "${1:-.}"; }
+
+# ===== 自定義函數區塊結束 =====
 '''
 
 # 取得 .zshrc 的完整路徑
@@ -89,44 +84,27 @@ if not os.path.exists(zshrc_path):
 with open(zshrc_path, 'r', encoding='utf-8') as file:
     current_content = file.read()
 
-# 檢查是否已經包含要添加的內容
-changes_made = False
+# 定義區塊的起始和結束標記
+start_marker = "# ===== 自定義函數區塊開始 ====="
+end_marker = "# ===== 自定義函數區塊結束 ====="
 
-if content_to_add.strip() not in current_content:
-    print("未找到 nvm 設定，正在添加...")
-    with open(zshrc_path, 'a', encoding='utf-8') as file:
-        file.write(content_to_add)
-    changes_made = True
-    print("已成功添加 nvm 設定到 .zshrc")
+# 檢查是否已經存在區塊
+if start_marker in current_content and end_marker in current_content:
+    print("找到現有的函數區塊，正在更新...")
+    # 找到區塊的起始和結束位置
+    start_pos = current_content.find(start_marker)
+    end_pos = current_content.find(end_marker) + len(end_marker)
+    # 移除舊的區塊
+    new_content = current_content[:start_pos] + current_content[end_pos:]
+    # 在檔案末尾添加新的區塊
+    with open(zshrc_path, 'w', encoding='utf-8') as file:
+        file.write(new_content + templates_content)
+    print("已更新函數區塊")
 else:
-    print("nvm 設定已存在於 .zshrc 中")
-
-if "ld() {" not in current_content:
-    print("未找到目錄列表指令，正在添加...")
+    print("未找到函數區塊，正在添加...")
+    # 在檔案末尾添加新的區塊
     with open(zshrc_path, 'a', encoding='utf-8') as file:
-        file.write(dir_list_content)
-    changes_made = True
-    print("已成功添加目錄列表指令到 .zshrc")
-else:
-    print("目錄列表指令已存在於 .zshrc 中")
+        file.write(templates_content)
+    print("已添加函數區塊")
 
-if "ff() {" not in current_content:
-    print("未找到檔案搜尋函數，正在添加...")
-    with open(zshrc_path, 'a', encoding='utf-8') as file:
-        file.write(file_find_content)
-    changes_made = True
-    print("已成功添加檔案搜尋函數到 .zshrc")
-else:
-    print("檔案搜尋函數已存在於 .zshrc 中")
-
-if "ro() {" not in current_content:
-    print("未找到 Rider 快速開啟指令，正在添加...")
-    with open(zshrc_path, 'a', encoding='utf-8') as file:
-        file.write(rider_content)
-    changes_made = True
-    print("已成功添加 Rider 快速開啟指令到 .zshrc")
-else:
-    print("Rider 快速開啟指令已存在於 .zshrc 中")
-
-if changes_made:
-    print("完成所有更新，請執行 'source ~/.zshrc' 來套用新的設定")
+print("完成所有更新，請執行 'source ~/.zshrc' 來套用新的設定")
