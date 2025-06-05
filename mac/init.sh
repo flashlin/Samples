@@ -47,6 +47,12 @@ if ! grep -q "zsh-syntax-highlighting" ~/.zshrc; then
   echo 'source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' >> ~/.zshrc
 fi
 
+brew install autojump
+
+echo '[ -s "$(brew --prefix)/etc/profile.d/autojump.sh" ] && . "$(brew --prefix)/etc/profile.d/autojump.sh"' >> ~/.zshrc
+source ~/.zshrc
+
+
 # 匯入歷史記錄到 atuin
 atuin import auto
 
