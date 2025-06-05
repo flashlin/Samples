@@ -54,6 +54,29 @@ ld() {
 }
 '''
 
+# 要添加的檔案搜尋函數
+file_find_content = '''
+# 檔案搜尋函數
+ff() {
+  if [ $# -lt 2 ]; then
+    echo "用法: ff 'regex' '*.ext'"
+    return 1
+  fi
+
+  pattern="$1"
+  shift
+
+  find . -type f \( $(printf "! -name %s " "$@") -o -false \) -prune -o -type f \( $(printf "-name %s -o " "$@") -false \) -print \\
+    | xargs grep --color=always -n -E "$pattern" 2>/dev/null
+}
+'''
+
+# 要添加的 Rider 快速開啟指令
+rider_content = '''
+# Rider 快速開啟指令
+ro() { open -a "Rider" "${1:-.}"; }
+'''
+
 # 取得 .zshrc 的完整路徑
 zshrc_path = os.path.expanduser('~/.zshrc')
 
@@ -86,6 +109,24 @@ if "ld() {" not in current_content:
     print("已成功添加目錄列表指令到 .zshrc")
 else:
     print("目錄列表指令已存在於 .zshrc 中")
+
+if "ff() {" not in current_content:
+    print("未找到檔案搜尋函數，正在添加...")
+    with open(zshrc_path, 'a', encoding='utf-8') as file:
+        file.write(file_find_content)
+    changes_made = True
+    print("已成功添加檔案搜尋函數到 .zshrc")
+else:
+    print("檔案搜尋函數已存在於 .zshrc 中")
+
+if "ro() {" not in current_content:
+    print("未找到 Rider 快速開啟指令，正在添加...")
+    with open(zshrc_path, 'a', encoding='utf-8') as file:
+        file.write(rider_content)
+    changes_made = True
+    print("已成功添加 Rider 快速開啟指令到 .zshrc")
+else:
+    print("Rider 快速開啟指令已存在於 .zshrc 中")
 
 if changes_made:
     print("完成所有更新，請執行 'source ~/.zshrc' 來套用新的設定")
