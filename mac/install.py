@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-# 要添加的內容
+# 要添加的 nvm 內容
 content_to_add = '''
 # place this after nvm initialization!
 autoload -U add-zsh-hook
@@ -29,6 +29,31 @@ add-zsh-hook chpwd load-nvmrc
 load-nvmrc
 '''
 
+# 要添加的目錄列表指令
+dir_list_content = '''
+# 目錄列表指令
+ld() {
+  setopt NULL_GLOB  # 設定空匹配返回空而不是錯誤
+  if [ $# -eq 0 ]; then
+    dirs=(*/)
+    if [ ${#dirs[@]} -eq 0 ]; then
+      echo "當前目錄下沒有子目錄"
+    else
+      ls -d --color=auto */
+    fi
+  else
+    pattern="$*"
+    dirs=(*/)
+    if [ ${#dirs[@]} -eq 0 ]; then
+      echo "當前目錄下沒有子目錄"
+    else
+      ls -d */ | grep --color=auto -E "$pattern"
+    fi
+  fi
+  unsetopt NULL_GLOB  # 恢復原始設定
+}
+'''
+
 # 取得 .zshrc 的完整路徑
 zshrc_path = os.path.expanduser('~/.zshrc')
 
@@ -42,11 +67,25 @@ with open(zshrc_path, 'r', encoding='utf-8') as file:
     current_content = file.read()
 
 # 檢查是否已經包含要添加的內容
+changes_made = False
+
 if content_to_add.strip() not in current_content:
-    print("未找到所需內容，正在添加...")
-    # 在檔案末尾添加新內容
+    print("未找到 nvm 設定，正在添加...")
     with open(zshrc_path, 'a', encoding='utf-8') as file:
         file.write(content_to_add)
-    print("已成功添加內容到 .zshrc")
+    changes_made = True
+    print("已成功添加 nvm 設定到 .zshrc")
 else:
-    print("所需內容已存在於 .zshrc 中")
+    print("nvm 設定已存在於 .zshrc 中")
+
+if "ld() {" not in current_content:
+    print("未找到目錄列表指令，正在添加...")
+    with open(zshrc_path, 'a', encoding='utf-8') as file:
+        file.write(dir_list_content)
+    changes_made = True
+    print("已成功添加目錄列表指令到 .zshrc")
+else:
+    print("目錄列表指令已存在於 .zshrc 中")
+
+if changes_made:
+    print("完成所有更新，請執行 'source ~/.zshrc' 來套用新的設定")
