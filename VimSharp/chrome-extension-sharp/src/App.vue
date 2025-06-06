@@ -1,19 +1,11 @@
 <script setup lang="ts">
-import { StagewiseToolbar } from '@stagewise/toolbar-vue';
-import { VisualRouterView } from '@/tools/visual-router'
-
-const stagewiseConfig = {
-  plugins: []
-};
-
 // 判斷是否為開發模式
 const isDev = import.meta.env.MODE === 'development';
 </script>
 
 <template>
-  <StagewiseToolbar v-if="isDev" :config="stagewiseConfig" />
   <div class="app-container">
-    <VisualRouterView />
+    <RouterView />
   </div>
 </template>
 

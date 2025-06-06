@@ -32,7 +32,6 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@stagewise/toolbar-vue": "^0.1.2",
     "@tailwindcss/postcss": "^4.1.7",
     "@tailwindcss/vite": "^4.1.7",
     "@types/chrome": "^0.0.317",

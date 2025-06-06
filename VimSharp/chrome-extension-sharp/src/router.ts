@@ -21,6 +21,11 @@ const routes: RouteRecordRaw[] = [
     name: 'excel',
     component: () => import('./views/excelFileQuery.vue'),
   },
+  {
+    path: '/mgmtScorePrediction',
+    name: 'mgmtScorePrediction',
+    component: () => import('./views/mgmtScorePrediction.vue'),
+  },
 ]
 
 const router = createRouter({

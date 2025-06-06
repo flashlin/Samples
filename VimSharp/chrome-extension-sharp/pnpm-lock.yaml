@@ -48,9 +48,6 @@ importers:
         specifier: ^0.18.5
         version: 0.18.5
     devDependencies:
-      '@stagewise/toolbar-vue':
-        specifier: ^0.1.2
-        version: 0.1.2(@types/react@19.1.5)(jiti@2.4.2)(postcss@8.5.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@18.3.1))(vite@6.3.5(@types/node@20.17.50)(jiti@2.4.2)(lightningcss@1.30.1)(yaml@2.8.0))(vue@3.5.15(typescript@5.8.3))(yaml@2.8.0)
       '@tailwindcss/postcss':
         specifier: ^4.1.7
         version: 4.1.7
@@ -1135,14 +1132,6 @@ packages:
 
   '@sinonjs/fake-timers@10.3.0':
     resolution: {integrity: sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA==}
-
-  '@stagewise/toolbar-vue@0.1.2':
-    resolution: {integrity: sha512-2SHaaTUZxZE9HSnzKObNAyJctmbqSjNwh9vls7UIkW2j8ooxnYuOgn/c+SK53eUT8HQYBZNnEoXVjEqmdK5BOg==}
-    peerDependencies:
-      vue: '>=3.0.0'
-
-  '@stagewise/toolbar@0.2.1':
-    resolution: {integrity: sha512-ITA68sqtXRklV6TDDyhT+3GDQqdtZFcZY9WBdPv6XUoATBHcOjpblt0yvQoOuMXAohbBGky4qgbDqxYgLsYbGQ==}
 
   '@swc/helpers@0.5.17':
     resolution: {integrity: sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A==}
@@ -5304,62 +5293,6 @@ snapshots:
   '@sinonjs/fake-timers@10.3.0':
     dependencies:
       '@sinonjs/commons': 3.0.1
-
-  '@stagewise/toolbar-vue@0.1.2(@types/react@19.1.5)(jiti@2.4.2)(postcss@8.5.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@18.3.1))(vite@6.3.5(@types/node@20.17.50)(jiti@2.4.2)(lightningcss@1.30.1)(yaml@2.8.0))(vue@3.5.15(typescript@5.8.3))(yaml@2.8.0)':
-    dependencies:
-      '@stagewise/toolbar': 0.2.1(@types/react@19.1.5)(jiti@2.4.2)(postcss@8.5.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@18.3.1))(vite@6.3.5(@types/node@20.17.50)(jiti@2.4.2)(lightningcss@1.30.1)(yaml@2.8.0))(yaml@2.8.0)
-      vue: 3.5.15(typescript@5.8.3)
-    transitivePeerDependencies:
-      - '@microsoft/api-extractor'
-      - '@swc/core'
-      - '@types/react'
-      - encoding
-      - immer
-      - jiti
-      - postcss
-      - react
-      - react-dom
-      - supports-color
-      - tsx
-      - typescript
-      - use-sync-external-store
-      - vite
-      - yaml
-
-  '@stagewise/toolbar@0.2.1(@types/react@19.1.5)(jiti@2.4.2)(postcss@8.5.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@18.3.1))(vite@6.3.5(@types/node@20.17.50)(jiti@2.4.2)(lightningcss@1.30.1)(yaml@2.8.0))(yaml@2.8.0)':
-    dependencies:
-      '@headlessui/react': 2.2.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@preact/compat': 18.3.1(preact@10.26.7)
-      clsx: 2.1.1
-      javascript-time-ago: 2.5.11
-      lucide-react: 0.503.0(react@18.3.1)
-      postcss-prefix-selector: 2.1.1(postcss@8.5.3)
-      preact: 10.26.7
-      react-remove-scroll: 2.7.0(@types/react@19.1.5)(react@18.3.1)
-      superjson: 2.2.2
-      tailwind-merge: 3.3.0
-      tailwindcss: 4.1.7
-      tsup: 8.5.0(jiti@2.4.2)(postcss@8.5.3)(typescript@5.8.3)(yaml@2.8.0)
-      ua-parser-js: 2.0.3
-      vite-plugin-css-injected-by-js: 3.5.2(vite@6.3.5(@types/node@20.17.50)(jiti@2.4.2)(lightningcss@1.30.1)(yaml@2.8.0))
-      zod: 3.25.32
-      zustand: 5.0.5(@types/react@19.1.5)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
-    transitivePeerDependencies:
-      - '@microsoft/api-extractor'
-      - '@swc/core'
-      - '@types/react'
-      - encoding
-      - immer
-      - jiti
-      - postcss
-      - react
-      - react-dom
-      - supports-color
-      - tsx
-      - typescript
-      - use-sync-external-store
-      - vite
-      - yaml
 
   '@swc/helpers@0.5.17':
     dependencies:
