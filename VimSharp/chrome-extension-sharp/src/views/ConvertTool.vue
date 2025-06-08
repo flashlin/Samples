@@ -4,7 +4,7 @@ import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson
   convertCsvFormatToTable, convertCsvFormatToSql, getCsvHeadersName, cutCsvText } from '../tools/textTool'
 import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
 import { translateToEnAsync, translateToZhAsync } from '../tools/translateApi'
-import Loading from './Loading.vue'
+import Loading from '@/components/Loading.vue'
 
 defineProps<{ msg: string }>()
 
@@ -66,10 +66,8 @@ const tabList: TabItem[] = [
 
 function clickTableToCsv() {
   const inputText = code.value
-  code.value = convertTableFormatToCsv(inputText, inputDelimiter.value);
-  if (code.value !== inputText) {
-    pasteToClipboard(code.value);
-  }
+  const result = convertTableFormatToCsv(inputText, inputDelimiter.value);
+  changeCode(result);
   csvText.value = code.value
   csvHeaders.value = getCsvHeadersName(csvText.value, ',')
   selectedHeaders.value = csvHeaders.value
@@ -77,34 +75,26 @@ function clickTableToCsv() {
 
 function clickJsonToCsv() {
   const inputText = code.value
-  code.value = convertJsonFormatToCsv(inputText);
-  if (code.value !== inputText) {
-    pasteToClipboard(code.value);
-  }
+  const result = convertJsonFormatToCsv(inputText);
+  changeCode(result);
 }
 
 function clickCsvToJson() {
   const inputText = code.value
-  code.value = convertCsvFormatToJson(inputText);
-  if (code.value !== inputText) {
-    pasteToClipboard(code.value);
-  }
+  const result = convertCsvFormatToJson(inputText);
+  changeCode(result);
 }
 
 function clickCsvToTable() {
   const inputText = code.value
-  code.value = convertCsvFormatToTable(inputText, inputDelimiter.value);
-  if (code.value !== inputText) {
-    pasteToClipboard(code.value);
-  }
+  const result = convertCsvFormatToTable(inputText, inputDelimiter.value);
+  changeCode(result);
 }
 
 function clickCsvToSql() {
   const inputText = code.value
-  code.value = convertCsvFormatToSql(inputText, tableName.value);
-  if (code.value !== inputText) {
-    pasteToClipboard(code.value);
-  }
+  const result = convertCsvFormatToSql(inputText, tableName.value);
+  changeCode(result);
 }
 
 
@@ -112,22 +102,14 @@ async function clickTranslateToEn() {
   isLoading.value = true;
   const inputText = code.value;
   const result = await translateToEnAsync(inputText);
-  code.value = result;
-  if (code.value !== inputText) {
-    pasteToClipboard(code.value);
-  }
-  isLoading.value = false;
+  changeCode(result);
 }
 
 async function clickTranslateToZh() {
   isLoading.value = true;
   const inputText = code.value;
   const result = await translateToZhAsync(inputText);
-  code.value = result;
-  if (code.value !== inputText) {
-    pasteToClipboard(code.value);
-  }
-  isLoading.value = false;
+  changeCode(result);
 }
 
 async function handleCopyFromClipboard() {
@@ -143,17 +125,26 @@ async function handleCopyFromClipboard() {
 }
 
 function clickUndo() {
-  code.value = codeHistory.value.shift() || ''
+  if (codeHistory.value.length === 0) {
+    return
+  } else if (codeHistory.value.length === 1) {
+    code.value = codeHistory.value[0]
+  } else {
+    code.value = codeHistory.value.shift() || ''
+  }
 }
 
-function handleCodeChange(event: Event) {
-  const target = event.target as HTMLTextAreaElement
-  code.value = target.value
+function changeCode(newCode: string) {
   // 記錄到 codeHistory，只保留最近 10 筆
   codeHistory.value.unshift(code.value)
   if (codeHistory.value.length > 10) {
     codeHistory.value.length = 10
   }
+  code.value = newCode
+  if (code.value !== newCode) {
+    pasteToClipboard(code.value);
+  }
+  isLoading.value = false;
 }
 
 function runCode() {
@@ -253,7 +244,6 @@ function runCode() {
     <textarea 
       class="code-editor" 
       v-model="code" 
-      @input="handleCodeChange"
       spellcheck="false"
     ></textarea>
     <div class="editor-actions">
