@@ -7,6 +7,7 @@ import { createTableAsync, dropTableAsync, insertDataTableAsync, querySqliteAsyn
 import { DataTable as DataTableType } from '@/tools/dataTypes';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 import { goTo } from '@/tools/visual-router'
+import { useSupportStore } from '@/SupportStore';
 
 interface ExcelFile {
   fileName: string;
@@ -16,8 +17,8 @@ interface ExcelFile {
 const excelFiles = ref<ExcelFile[]>([]);
 const allDataTables = ref<DataTableType[]>([]);
 const code = ref('')
-const queryResult = ref<DataTableType | null>(null);
 const errorMessage = ref('');
+const supportStore = useSupportStore();
 
 async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) {
   const initialStatus = 'Uploading...';
@@ -56,7 +57,7 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
 async function executeQuery() {
   try {
     const result = await querySqliteAsync(code.value, {})
-    queryResult.value = result;
+    supportStore.setQueryResult(result);
     errorMessage.value = '';
   } catch (e) {
     errorMessage.value = e as string;
@@ -124,7 +125,7 @@ function handleF8Key(e: KeyboardEvent) {
         <p class="text-red-500">{{ errorMessage }}</p>
       </div>
       <div class="w-full">
-        <LargeDataTable :dt="queryResult" />
+        <LargeDataTable :dt="supportStore.queryResult" />
       </div>
     </div>
     <!-- 保留底部三行空白 -->

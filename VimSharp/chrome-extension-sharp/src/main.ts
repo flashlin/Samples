@@ -8,6 +8,7 @@ import JsonWorker from './monaco-workers/json.worker?worker'
 import CssWorker from './monaco-workers/css.worker?worker'
 import HtmlWorker from './monaco-workers/html.worker?worker'
 import TsWorker from './monaco-workers/ts.worker?worker'
+import { createPinia } from 'pinia'
 
 // Monaco Editor worker 設定 (ESM)
 self.MonacoEnvironment = {
@@ -32,4 +33,5 @@ self.MonacoEnvironment = {
   }
 }
 
-createApp(App).use(router).mount('#app')
+const pinia = createPinia()
+createApp(App).use(pinia).use(router).mount('#app')
