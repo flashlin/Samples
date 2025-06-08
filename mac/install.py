@@ -69,6 +69,15 @@ ff() {
 # Rider 快速開啟指令
 ro() { open -a "Rider" "${1:-.}"; }
 
+# Python 快速執行指令
+py() {
+  if [ $# -eq 0 ]; then
+    echo "用法: py <檔案路徑> [參數...]"
+    return 1
+  fi
+  python "$@"
+}
+
 # ===== 自定義函數區塊結束 =====
 '''
 
