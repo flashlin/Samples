@@ -1,0 +1,1 @@
+// 對應 C# 的 ForXmlType.cs（原始檔案為空） 
