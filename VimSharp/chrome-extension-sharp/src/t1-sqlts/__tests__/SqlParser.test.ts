@@ -1,4 +1,4 @@
-import { createParseInput, parseIntValue, parseSql } from '../SqlParser';
+import { createParseInput, parseIntValue } from '../SqlParser';
 import { SqlType, SqlExpr } from '../Expressions/SqlType';
 import { TextSpan } from '../StringParser';
 
