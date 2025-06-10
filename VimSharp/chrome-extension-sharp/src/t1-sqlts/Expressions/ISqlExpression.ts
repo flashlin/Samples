@@ -1,9 +1,12 @@
 import { SqlType } from './SqlType';
 import { TextSpan } from '../StringParser';
 
-export interface ISqlExpression {
+export interface ISqlExpr {
     SqlType: SqlType;
     Span: TextSpan;
+}
+
+export interface ISqlExpression extends ISqlExpr {
     Accept(visitor: any): void;
     ToSql(): string;
 }

@@ -1,7 +1,7 @@
-// 此檔案自動轉換自 C# 的 SqlType.cs
-// 對應 C# 的 SqlType Enum
+import { TextSpan } from "../StringParser";
+
 export enum SqlType {
-    None,
+    TextSpan,
     Field,
     Function,
     Select,
@@ -65,5 +65,25 @@ export enum SqlType {
     ForXmlPathClause,
     ForXmlAutoClause,
     ForXmlRootDirective,
-    UnionSelect
+    UnionSelect,
+    AllClause,
+    DistinctClause,
+    NoneClause
+}
+
+export class ParseError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'ParseError';
+    }
 } 
+
+export class SqlExpr
+{
+    constructor(sqlType: SqlType, span: TextSpan) {
+        this.SqlType = sqlType;
+        this.Span = span;
+    }
+    SqlType: SqlType;
+    Span: TextSpan;
+}
