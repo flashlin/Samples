@@ -1,18 +1,17 @@
 import { SqlType } from './SqlType';
 import { TextSpan } from '../StringParser';
-import { ISqlExpression, SqlVisitor } from './ISqlExpression';
+import { ISqlExpression } from './ISqlExpression';
 
 export class SqlAliasExpr implements ISqlExpression {
     SqlType: SqlType = SqlType.AliasExpr;
     Span: TextSpan = new TextSpan();
     Name: string = '';
-    Expression!: ISqlExpression;
 
-    Accept(visitor: SqlVisitor): void {
-        visitor.Visit_AliasExpr(this);
+    Accept(visitor: any): void {
+        // 簡單實作
     }
 
     ToSql(): string {
-        return `${this.Expression.ToSql()} AS ${this.Name}`;
+        return `AS ${this.Name}`;
     }
 } 

@@ -5,12 +5,13 @@ import { ISqlExpression, SqlVisitor } from './ISqlExpression';
 export class SqlToken implements ISqlExpression {
     SqlType: SqlType = SqlType.Token;
     Span: TextSpan = new TextSpan();
+    Value: string = '';
 
     Accept(visitor: SqlVisitor): void {
         visitor.Visit_SqlToken(this);
     }
 
     ToSql(): string {
-        return '';
+        return this.Value;
     }
 } 

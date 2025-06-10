@@ -1,7 +1,10 @@
 import { SqlType } from './SqlType';
 import { TextSpan } from '../StringParser';
-import { ISqlExpression, SqlVisitor } from './ISqlExpression';
-import { UnaryOperator } from './UnaryOperator';
+import { ISqlExpression } from './ISqlExpression';
+
+export enum UnaryOperator {
+    BitwiseNot
+}
 
 export class SqlUnaryExpr implements ISqlExpression {
     SqlType: SqlType = SqlType.UnaryExpression;
@@ -9,11 +12,16 @@ export class SqlUnaryExpr implements ISqlExpression {
     Operator: UnaryOperator = UnaryOperator.BitwiseNot;
     Operand!: ISqlExpression;
 
-    Accept(visitor: SqlVisitor): void {
-        visitor.Visit_UnaryExpr(this);
+    Accept(visitor: any): void {
+        // 簡單實作
     }
 
     ToSql(): string {
-        return `${this.Operator} ${this.Operand.ToSql()}`;
+        switch (this.Operator) {
+            case UnaryOperator.BitwiseNot:
+                return `~${this.Operand.ToSql()}`;
+            default:
+                return this.Operand.ToSql();
+        }
     }
 } 
