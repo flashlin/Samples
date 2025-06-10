@@ -92,7 +92,7 @@ function or(...fns: ParseSqlFn[]): ParseSqlFn
     }
 }
 
-function parseIntValue(): ParseSqlFn
+export function parseIntValue(): ParseSqlFn
 {
     return (input: ParseSqlInput) => {
         const text = input.text;
@@ -173,9 +173,14 @@ function parseSelectTypeClause(): ParseSqlFn
 //     };
 // }
 
-export function parseSql(sql: string): SqlExpr[] {
+export function createParseInput(sql: string): ParseSqlInput
+{
     const text = new StringParser(sql);
-    const input = new ParseSqlInput(text);
+    return new ParseSqlInput(text);
+}
+
+export function parseSql(sql: string): SqlExpr[] {
+    const input = createParseInput(sql);
     const result = parseIntValue()(input);
     return [result.value!];
 }
