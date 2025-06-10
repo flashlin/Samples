@@ -71,3 +71,4 @@ game-sudoku/app/build/kotlin
 game-sudoku/app/build/tmp
 game-sudoku/app/build/intermediates
 game-sudoku/app/build/reports
+.DS_Store
