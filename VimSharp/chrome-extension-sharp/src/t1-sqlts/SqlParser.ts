@@ -1,5 +1,5 @@
-import { StringParser, TextSpan } from "../StringParser";
-import { ParseError, SqlType, SqlExpr } from './SqlType';
+import { StringParser, TextSpan } from "./StringParser";
+import { ParseError, SqlType, SqlExpr } from './Expressions/SqlType';
 
 class ParseSqlInput
 {
