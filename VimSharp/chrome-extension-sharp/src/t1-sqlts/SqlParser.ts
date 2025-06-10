@@ -173,8 +173,9 @@ function parseSelectTypeClause(): ParseSqlFn
 //     };
 // }
 
-// export function parseSql(sql: string): ISqlExpr[] {
-//     const text = new StringParser(sql);
-//     const input = new ParseSqlInput(text);
-//     return [];    
-// }
+export function parseSql(sql: string): SqlExpr[] {
+    const text = new StringParser(sql);
+    const input = new ParseSqlInput(text);
+    const result = parseIntValue()(input);
+    return [result.value!];
+}

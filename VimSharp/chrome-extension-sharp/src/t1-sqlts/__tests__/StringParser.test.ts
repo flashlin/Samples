@@ -1,4 +1,4 @@
-import { StringParser, TextSpan } from '../StringParser';
+import { StringParser } from '../StringParser';
 
 describe('StringParser', () => {
     it('readIdentifier() 應該正確解析 select', () => {
