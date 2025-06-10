@@ -13,12 +13,14 @@ describe('SqlParser', () => {
       
       // 驗證
       expect(result).toHaveLength(1);
-      expect(result[0]).toBeInstanceOf(SqlExpr);
-      expect(result[0].SqlType).toBe(SqlType.IntValue);
-      expect(result[0].Span).toBeInstanceOf(TextSpan);
-      expect(result[0].Span.Offset).toBe(0);
-      expect(result[0].Span.Length).toBe(3);
-      expect(result[0].Span.Word).toBe("123");
+      
+      // 使用簡潔的方式驗證 SqlExpr 物件
+      expect(result[0]).toEqual(
+        new SqlExpr(
+          SqlType.IntValue, 
+          new TextSpan("123", 0, 3)
+        )
+      );
     });
   });
 }); 
