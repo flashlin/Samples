@@ -78,6 +78,11 @@ py() {
   python "$@"
 }
 
+# 列出正在監聽的 TCP 連接埠
+port() {
+  sudo lsof -nP -iTCP -sTCP:LISTEN
+}
+
 # ===== 自定義函數區塊結束 =====
 '''
 
