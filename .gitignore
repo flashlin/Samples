@@ -72,3 +72,4 @@ game-sudoku/app/build/tmp
 game-sudoku/app/build/intermediates
 game-sudoku/app/build/reports
 .DS_Store
+gsoft/interactive-feedback-mcp
