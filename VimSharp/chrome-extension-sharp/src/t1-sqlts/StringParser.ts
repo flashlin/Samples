@@ -411,7 +411,6 @@ export class StringParser {
 
     readSymbol(length: number): TextSpan {
         this.skipWhitespace();
-        const startPosition = this._position;
         const symbol = this.nextText(length);
         return symbol;
     }
