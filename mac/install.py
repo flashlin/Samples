@@ -56,15 +56,18 @@ ld() {
 ff() {
   if [ $# -lt 2 ]; then
     echo "用法: ff 'regex' '*.ext'"
+    echo "請注意：副檔名 pattern 請用引號包住，如 ff '關鍵字' '*.py'"
     return 1
   fi
 
   pattern="$1"
   shift
 
-  cmd="find . -type f \( $(printf '-name %s -o ' \"$@\") -false \) -print | tee /dev/tty | xargs grep --color=always -n -E '$pattern' 2>/dev/null"
-  echo "正在執行: $cmd"
-  eval $cmd
+  set -f  # 關閉 filename expansion
+  find_cmd="find . -type f \( $(printf -- "-name '%s' -o " "$@") -false \) -print"
+  echo "正在執行: $find_cmd | tee /dev/tty | xargs grep --color=always -n -E '$pattern' 2>/dev/null"
+  eval $find_cmd | tee /dev/tty | xargs grep --color=always -n -E "$pattern" 2>/dev/null
+  set +f  # 恢復 filename expansion
 }
 
 # Rider 快速開啟指令
