@@ -62,8 +62,9 @@ ff() {
   pattern="$1"
   shift
 
-  find . -type f \( $(printf "! -name %s " "$@") -o -false \) -prune -o -type f \( $(printf "-name %s -o " "$@") -false \) -print \\
-    | xargs grep --color=always -n -E "$pattern" 2>/dev/null
+  cmd="find . -type f \( $(printf '-name %s -o ' \"$@\") -false \) -print | tee /dev/tty | xargs grep --color=always -n -E '$pattern' 2>/dev/null"
+  echo "正在執行: $cmd"
+  eval $cmd
 }
 
 # Rider 快速開啟指令
