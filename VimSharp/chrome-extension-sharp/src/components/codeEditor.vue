@@ -86,6 +86,14 @@ function handleCtrlJ(e: KeyboardEvent) {
   }
 }
 
+function getContextWithCursor(): [string, string] {
+  if (!view) return ['', '']
+  const state = view.state
+  const pos = state.selection.main.head
+  const doc = state.doc.toString()
+  return [doc.slice(0, pos), doc.slice(pos)]
+}
+
 onMounted(() => {
   window.addEventListener('keydown', handleCtrlJ)
   if (editorRoot.value) {
@@ -120,6 +128,11 @@ onUnmounted(() => {
     view.destroy()
     view = null
   }
+})
+
+// expose 方法
+defineExpose({
+  getContextWithCursor
 })
 </script>
 
