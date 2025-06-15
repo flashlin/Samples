@@ -105,6 +105,18 @@ dkll() {
     | xargs -r docker logs
 }
 
+# Docker 正常運作容器日誌快速查詢
+# dkl: 選擇 Status 為 Up（正在運作中）的容器，顯示 logs（僅顯示最後 30 行）
+# 需安裝 fzf
+# 用法：dkl
+#
+dkl() {
+  docker ps --filter "status=running" --format '{{.ID}} {{.Names}}' \
+    | fzf --ansi --prompt='選擇正常容器: ' --header='hashid name' \
+    | awk '{print $1}' \
+    | xargs -r docker logs --tail 30
+}
+
 # Python 快速執行指令
 py() {
   if [ $# -eq 0 ]; then
