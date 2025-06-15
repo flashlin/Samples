@@ -2,7 +2,8 @@
 import FileUpload, { FileUploadInstance } from '@/components/FileUpload.vue';
 import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/excelKit';
 import { ref, onMounted, onUnmounted } from 'vue';
-import VimCodeEditor from '@/components/vimCodeEditor.vue';
+//import VimCodeEditor from '@/components/vimCodeEditor.vue';
+import VimCodeEditor from '@/components/codeEditor.vue';
 import { createTableAsync, dropTableAsync, insertDataTableAsync, querySqliteAsync } from '@/tools/waSqlite';
 import { DataTable as DataTableType } from '@/tools/dataTypes';
 import LargeDataTable from '@/components/LargeDataTable.vue';
