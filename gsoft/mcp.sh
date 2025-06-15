@@ -1,3 +1,5 @@
 npx playwright-mcp &
 cd interactive-feeback-mcp
-uv run server.py &
+# uv run fastmcp dev server.py
+uv run ./server.py &
+cd ..
