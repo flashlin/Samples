@@ -1,11 +1,11 @@
 <template>
   <div class="vim-editor-root" style="height: 600px;">
-    <div ref="editorRoot" class="codemirror-editor" style="height:100%"></div>
+    <div ref="editorRoot" class="" style="height:100%"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
 import { EditorView, keymap, ViewUpdate } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
 import { lineNumbers, highlightActiveLineGutter } from '@codemirror/view'
@@ -14,6 +14,11 @@ import { autocompletion, CompletionContext, CompletionResult, Completion } from 
 import { oneDark } from '@codemirror/theme-one-dark'
 import { startCompletion } from '@codemirror/autocomplete'
 
+interface IntellisenseItem {
+  title: string
+  context: string
+}
+
 interface VimCodeEditorProps {
   modelValue: string
 }
@@ -21,7 +26,7 @@ interface VimCodeEditorProps {
 const props = withDefaults(defineProps<VimCodeEditorProps>(), {})
 const emit = defineEmits(['update:modelValue'])
 const innerValue = ref(props.modelValue)
-const suggestionsRef = ref<any[]>([])
+const suggestionsRef = ref<IntellisenseItem[]>([])
 
 // 雙向綁定
 watch(() => props.modelValue, newValue => {
@@ -43,43 +48,30 @@ watch(innerValue, (newValue) => {
 const editorRoot = ref<HTMLElement | null>(null)
 let view: EditorView | null = null
 
-// 動態自動完成來源
-let currentIntellisense: { items: IntellisenseItem[] } = { items: suggestionsRef.value }
-
 interface IntellisenseItem {
   title: string
   context: string
 }
 
 function codemirrorCompletion(context: CompletionContext): CompletionResult | null {
-  // 只在 Ctrl+J 或 showIntellisense 時觸發
-  if (!currentIntellisense.items.length) return null
-  const word = context.matchBefore(/\w*/)
-  let wordFrom = 0
-  if (word) {
-    wordFrom = word.from
-  }
+  if (!suggestionsRef.value.length) return null
+  console.log('aaa', suggestionsRef.value)
   return {
-    from: wordFrom,
-    options: currentIntellisense.items.map((item, idx) => ({
-      label: item.title,  // 顯示在選單的主文字
-      type: 'text',
-      apply: item.context,
-      info: '' // 顯示在右側的說明
+    from: context.pos, // 直接用游標位置
+    options: suggestionsRef.value.map((item, idx) => ({
+      label: item.title,
+      apply: item.context
     }))
   }
 }
 
 function showIntellisense(items: IntellisenseItem[]): void {
-  currentIntellisense.items = items
+  suggestionsRef.value = items
   if (view) {
-    // 觸發自動完成
     view.dispatch({
       effects: [],
-      // 用 startCompletion 指令
       scrollIntoView: true
     })
-    // 直接執行 startCompletion 指令
     startCompletion(view)
   }
 }
@@ -88,8 +80,8 @@ function handleCtrlJ(e: KeyboardEvent) {
   if (e.metaKey && (e.key === 'j' || e.key === 'J')) {
     e.preventDefault()
     showIntellisense([
-      { title: 'abc', context: 'abc123' },
-      { title: '123', context: 'You are winner' }
+      { title: 'a', context: 'from customer' },
+      { title: 'b', context: 'You are winner' }
     ])
   }
 }
@@ -139,5 +131,28 @@ onUnmounted(() => {
   border: 1px solid #222;
   background: #181c24 !important;
   padding: 8px 0 0 0;
+}
+/* 暗黑主題下的反白選單樣式 */
+.cm-tooltip-autocomplete .cm-completionLabel[aria-selected="true"],
+.cm-tooltip-autocomplete .cm-completionSelected {
+  background: #2d333b !important;
+  color: #ffeb3b !important;
+  border-radius: 4px;
+  font-weight: bold;
+}
+</style>
+
+<style>
+.cm-tooltip-autocomplete {
+  min-width: 120px !important;
+  font-family: 'JetBrains Mono', 'Fira Mono', 'Consolas', 'monospace' !important;
+  font-size: 15px !important;
+  letter-spacing: 1px;
+}
+.cm-completionLabel {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  letter-spacing: inherit !important;
+  padding-right: 8px !important;
 }
 </style> 
