@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // https://www.npmjs.com/package/monaco-editor-vue3
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import MonacoEditor from 'monaco-editor-vue3'
 import * as monaco from 'monaco-editor'
 import { initVimMode2, VimMode2 } from '@/tools/monaco-vim2'
@@ -87,9 +87,59 @@ function getContextWithCursor(): string[] {
   return [left, right]
 }
 
+// IntellisenseItem 型別
+interface IntellisenseItem {
+  title: string
+  context: string
+}
+
+// suggestionsRef 用於動態提供 suggestions
+const suggestionsRef = ref<any[]>([])
+let providerDispose: monaco.IDisposable | null = null
+
+onMounted(() => {
+  providerDispose = monaco.languages.registerCompletionItemProvider('typescript', {
+    provideCompletionItems: (model, position) => {
+      // 產生 range
+      const word = model.getWordAtPosition(position)
+      const range = word
+        ? new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn)
+        : new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column)
+      // 將 suggestionsRef 內容包裝成 CompletionItem
+      const suggestions = suggestionsRef.value.map((item, idx) => ({
+        label: item.title,
+        kind: monaco.languages.CompletionItemKind.Text,
+        insertText: item.context,
+        sortText: idx.toString().padStart(4, '0'),
+        range
+      }))
+      return { suggestions }
+    },
+    triggerCharacters: ['.']
+  })
+})
+
+onUnmounted(() => {
+  if (providerDispose) {
+    providerDispose.dispose()
+    providerDispose = null
+  }
+})
+
+/**
+ * 於游標位置顯示智慧感知清單，選取後插入 context
+ */
+function showIntellisense(items: IntellisenseItem[]): void {
+  const editor = getEditorInstance()
+  if (!editor) return
+  suggestionsRef.value = items
+  editor.trigger('keyboard', 'editor.action.triggerSuggest', {})
+}
+
 defineExpose({
   getCurrentLineWithCursor,
-  getContextWithCursor
+  getContextWithCursor,
+  showIntellisense
 })
 </script>
 

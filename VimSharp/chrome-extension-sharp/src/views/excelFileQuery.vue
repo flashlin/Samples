@@ -19,6 +19,7 @@ const allDataTables = ref<DataTableType[]>([]);
 const code = ref('')
 const errorMessage = ref('');
 const supportStore = useSupportStore();
+const vimEditorRef = ref<any>(null)
 
 async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) {
   const initialStatus = 'Uploading...';
@@ -71,6 +72,13 @@ async function deleteTables() {
   allDataTables.value = [];
 }
 
+function test() {
+  vimEditorRef.value?.showIntellisense([
+    { title: 'abc', context: 'abc123' },
+    { title: '123', context: 'You are winner' }
+  ])
+}
+
 onMounted(() => {
   // F8 快捷鍵監聽
   window.addEventListener('keydown', handleF8Key);
@@ -117,9 +125,10 @@ function handleF8Key(e: KeyboardEvent) {
         <div class="flex flex-row gap-2 mb-2">
           <button @click="executeQuery">Execute (F8)</button>
           <button @click="deleteTables">Delete (F4)</button>
+          <button @click="test">Test Intellisense</button>
           <!-- 這裡未來可放更多按鈕 -->
         </div>
-        <VimCodeEditor v-model="code" :enableVim="false" class="w-full h-full" />
+        <VimCodeEditor ref="vimEditorRef" v-model="code" :enableVim="false" class="w-full h-full" />
       </div>
       <div v-if="errorMessage" class="w-full flex flex-col justify-center mt-0" style="background:#23272f; min-height: 48px;">
         <p class="text-red-500">{{ errorMessage }}</p>
