@@ -66,6 +66,25 @@ ff() {
   set -f  # 關閉 filename expansion
   find_cmd="find . -type f \( $(printf -- "-name '%s' -o " "$@") -false \) -print"
   echo "正在執行: $find_cmd | tee /dev/tty | xargs grep --color=always -n -E '$pattern' 2>/dev/null"
+
+  # 宣告要排除的目錄陣列
+  exclude_dirs=(.git node_modules obj bin .venv)
+  # 組合 find 的 -prune 條件
+  prune_expr=""
+  for d in "${exclude_dirs[@]}"; do
+    prune_expr+="-name $d -o "
+  done
+  # 移除最後一個 -o
+  prune_expr=${prune_expr::-4}
+
+  # 動態列印目錄名稱，每次覆蓋同一行
+  eval "find . -type d \
+    ( $prune_expr ) -prune -false -o -print" |
+    while read dir; do
+      echo -ne "\r\033[2K目錄: $dir "
+    done
+  echo # 最後補一個換行
+
   eval $find_cmd | tee /dev/tty | xargs grep --color=always -n -E "$pattern" 2>/dev/null
   set +f  # 恢復 filename expansion
 }
