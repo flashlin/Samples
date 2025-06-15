@@ -68,8 +68,28 @@ function getCurrentLineWithCursor(): string[] {
   return [left, right]
 }
 
+/**
+ * 取得從第一個字元到 cursor 前一個字元，以及 cursor 後到內容結尾的字串
+ * @returns [leftContent, rightContent]
+ */
+function getContextWithCursor(): string[] {
+  const editor = getEditorInstance()
+  if (!editor) return ['', '']
+  const position = editor.getPosition()
+  if (!position) return ['', '']
+  const model = editor.getModel()
+  if (!model) return ['', '']
+  const fullText = model.getValue()
+  // 計算 cursor 在全文的 offset
+  const offset = model.getOffsetAt(position)
+  const left = fullText.slice(0, offset)
+  const right = fullText.slice(offset)
+  return [left, right]
+}
+
 defineExpose({
-  getCurrentLineWithCursor
+  getCurrentLineWithCursor,
+  getContextWithCursor
 })
 </script>
 
