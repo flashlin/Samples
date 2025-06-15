@@ -12,6 +12,7 @@ import { lineNumbers, highlightActiveLineGutter } from '@codemirror/view'
 import { defaultKeymap } from '@codemirror/commands'
 import { autocompletion, CompletionContext, CompletionResult, Completion } from '@codemirror/autocomplete'
 import { oneDark } from '@codemirror/theme-one-dark'
+import { startCompletion } from '@codemirror/autocomplete'
 
 interface VimCodeEditorProps {
   modelValue: string
@@ -61,10 +62,10 @@ function codemirrorCompletion(context: CompletionContext): CompletionResult | nu
   return {
     from: wordFrom,
     options: currentIntellisense.items.map((item, idx) => ({
-      label: item.title,
+      label: item.title,  // 顯示在選單的主文字
       type: 'text',
       apply: item.context,
-      info: item.title
+      info: '' // 顯示在右側的說明
     }))
   }
 }
@@ -79,9 +80,7 @@ function showIntellisense(items: IntellisenseItem[]): void {
       scrollIntoView: true
     })
     // 直接執行 startCompletion 指令
-    import('@codemirror/autocomplete').then(({ startCompletion }) => {
-      if (view) startCompletion(view)
-    })
+    startCompletion(view)
   }
 }
 
