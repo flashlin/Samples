@@ -75,8 +75,8 @@ async function deleteTables() {
 
 function test() {
   vimEditorRef.value?.showIntellisense([
-    { title: 'abc', context: 'abc123' },
-    { title: '123', context: 'You are winner' }
+    { title: 'a', context: 'abc123' },
+    { title: 'b', context: 'You are winner' }
   ])
 }
 
