@@ -31,6 +31,7 @@ watch(innerValue, (newValue) => {
 
 let vimMode: VimMode2 | null = null
 function onEditorMount(editor: monaco.editor.IStandaloneCodeEditor) {
+  registerCompletionItemProvider()
   if (!props.enableVim) return
   if (!vimMode) {
     editor.focus()
@@ -94,12 +95,29 @@ interface IntellisenseItem {
 }
 
 // suggestionsRef 用於動態提供 suggestions
-const suggestionsRef = ref<any[]>([])
+const suggestionsRef = ref<any[]>([
+  { title: 'abc', context: 'abc123' },
+  { title: '123', context: 'You are winner' }
+])
 let providerDispose: monaco.IDisposable | null = null
 
-onMounted(() => {
-  providerDispose = monaco.languages.registerCompletionItemProvider('typescript', {
+function handleCtrlJ(e: KeyboardEvent) {
+  if (e.metaKey && (e.key === 'j' || e.key === 'J')) {
+    console.log('handleCtrlJ')
+    e.preventDefault()
+    // 彈出預設 suggestions
+    showIntellisense([
+      { title: 'abc', context: 'abc123' },
+      { title: '123', context: 'You are winner' }
+    ])
+  }
+}
+
+function registerCompletionItemProvider() {
+  console.log('registerCompletionItemProvider', monaco.languages)
+  providerDispose = monaco.languages.registerCompletionItemProvider('plaintext', {
     provideCompletionItems: (model, position) => {
+      console.log('start provideCompletionItems')
       // 產生 range
       const word = model.getWordAtPosition(position)
       const range = word
@@ -113,13 +131,20 @@ onMounted(() => {
         sortText: idx.toString().padStart(4, '0'),
         range
       }))
+      console.log('suggestions', suggestions)
       return { suggestions }
     },
-    triggerCharacters: ['.']
+    triggerCharacters: []
   })
+}
+
+onMounted(() => {
+  console.log('onMounted')
+  window.addEventListener('keydown', handleCtrlJ)
 })
 
 onUnmounted(() => {
+  window.removeEventListener('keydown', handleCtrlJ)
   if (providerDispose) {
     providerDispose.dispose()
     providerDispose = null
@@ -131,9 +156,13 @@ onUnmounted(() => {
  */
 function showIntellisense(items: IntellisenseItem[]): void {
   const editor = getEditorInstance()
+  console.log('languageId:', editor?.getModel()?.getLanguageId())
   if (!editor) return
   suggestionsRef.value = items
-  editor.trigger('keyboard', 'editor.action.triggerSuggest', {})
+  console.log('triggerSuggest')
+  setTimeout(() => {
+    editor.trigger('keyboard', 'editor.action.triggerSuggest', {})
+  }, 1000)
 }
 
 defineExpose({
@@ -148,7 +177,7 @@ defineExpose({
     <MonacoEditor
       ref="monacoRef"
       v-model:value="innerValue"
-      language="typescript"
+      language="plaintext"
       theme="vs-dark"
       height="100%"
       @editorDidMount="onEditorMount"

@@ -79,6 +79,13 @@ function test() {
   ])
 }
 
+function handleF8Key(e: KeyboardEvent) {
+  // F8 對應 key 為 'F8'
+  if (e.key === 'F8') {
+    executeQuery();
+  }
+}
+
 onMounted(() => {
   // F8 快捷鍵監聽
   window.addEventListener('keydown', handleF8Key);
@@ -86,13 +93,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleF8Key);
 });
-
-function handleF8Key(e: KeyboardEvent) {
-  // F8 對應 key 為 'F8'
-  if (e.key === 'F8') {
-    executeQuery();
-  }
-}
 </script>
 
 
