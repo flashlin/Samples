@@ -117,6 +117,22 @@ dkl() {
     | xargs -r docker logs --tail 30
 }
 
+# 進入容器 bash 指令
+# dkbash: 選擇任一 container，進入 /bin/bash
+# 需安裝 fzf
+# 用法：dkbash
+#
+dkbash() {
+  local selected
+  selected=$(docker ps -a --format '{{.ID}} {{.Names}}' \
+    | fzf --ansi --prompt='選擇要進入的容器: ' --header='hashid name')
+  if [ -n "$selected" ]; then
+    local cname
+    cname=$(echo "$selected" | awk '{print $2}')
+    docker exec -it "$cname" /bin/bash
+  fi
+}
+
 # Python 快速執行指令
 py() {
   if [ $# -eq 0 ]; then
