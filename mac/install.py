@@ -92,6 +92,19 @@ ff() {
 # Rider 快速開啟指令
 ro() { open -a "Rider" "${1:-.}"; }
 
+# Docker 異常容器日誌快速查詢
+# dkl: 選擇 Status 為 Exited 的容器，顯示 logs
+# 需安裝 fzf
+# 用法：dkl
+#
+dkl() {
+  docker ps -a --format '{{.ID}} {{.Names}} {{.Status}}' \
+    | awk '$3 ~ /^Exited/' \
+    | fzf --ansi --prompt='選擇異常容器: ' --header='hashid name' \
+    | awk '{print $1}' \
+    | xargs -r docker logs
+}
+
 # Python 快速執行指令
 py() {
   if [ $# -eq 0 ]; then
