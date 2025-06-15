@@ -132,27 +132,6 @@ onUnmounted(() => {
   background: #181c24 !important;
   padding: 8px 0 0 0;
 }
-/* 暗黑主題下的反白選單樣式 */
-.cm-tooltip-autocomplete .cm-completionLabel[aria-selected="true"],
-.cm-tooltip-autocomplete .cm-completionSelected {
-  background: #2d333b !important;
-  color: #ffeb3b !important;
-  border-radius: 4px;
-  font-weight: bold;
-}
 </style>
 
-<style>
-.cm-tooltip-autocomplete {
-  min-width: 120px !important;
-  font-family: 'JetBrains Mono', 'Fira Mono', 'Consolas', 'monospace' !important;
-  font-size: 15px !important;
-  letter-spacing: 1px;
-}
-.cm-completionLabel {
-  font-family: inherit !important;
-  font-size: inherit !important;
-  letter-spacing: inherit !important;
-  padding-right: 8px !important;
-}
-</style> 
+ 
