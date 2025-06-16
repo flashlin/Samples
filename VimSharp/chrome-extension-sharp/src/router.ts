@@ -17,6 +17,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('./views/ConvertTool.vue'),
   },
   {
+    path: '/csv',
+    name: 'csv',
+    component: () => import('./views/CsvTool.vue'),
+  },
+  {
     path: '/excel',
     name: 'Excel',
     component: () => import('./components/Excel.vue'),

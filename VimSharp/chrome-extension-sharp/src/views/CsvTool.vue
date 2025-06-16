@@ -1,0 +1,249 @@
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson, 
+  convertCsvFormatToTable, convertCsvFormatToSql, getCsvHeadersName, cutCsvText } from '../tools/textTool'
+import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
+import Loading from '@/components/Loading.vue'
+import CodeEditor from '@/components/codeEditor.vue';
+
+defineProps<{ msg: string }>()
+const generateTemplateEditorRef = ref<any>(null)
+const resultEditorRef = ref<any>(null)
+
+const csvText = ref(`id name age
+1 flash 10
+2 jack 11
+3 jerry 12
+`)
+const generateTemplate = ref(``)
+const result = ref(``)
+const generateTemplateHistory = ref<string[]>([])
+const inputDelimiter = ref('\t')
+const inputDelimiterDisplay = ref('\\t')
+const isLoading = ref(false)
+
+// 監聽顯示值的變化並更新實際值
+watch(inputDelimiterDisplay, (newValue) => {
+  // 將顯示的轉義字符轉換為實際的分隔符
+  switch (newValue) {
+    case '\\t':
+      inputDelimiter.value = '\t'
+      break
+    case '\\n':
+      inputDelimiter.value = '\n'
+      break
+    case '\\r':
+      inputDelimiter.value = '\r'
+      break
+    default:
+      inputDelimiter.value = newValue
+  }
+})
+
+
+function clickJsonToCsv() {
+  const inputText = csvText.value
+  const result = convertJsonFormatToCsv(inputText);
+  changeGenerateTemplate(result);
+}
+
+function clickCsvToJson() {
+  const inputText = csvText.value
+  const result = convertCsvFormatToJson(inputText);
+  changeGenerateTemplate(result);
+}
+
+function clickCsvToTable() {
+  const inputText = csvText.value
+  const result = convertCsvFormatToTable(inputText, inputDelimiter.value);
+  changeGenerateTemplate(result);
+}
+
+
+function changeGenerateTemplate(newGenerateTemplate: string) {
+  // 記錄到 codeHistory，只保留最近 10 筆
+  generateTemplateHistory.value.unshift(csvText.value)
+  if (generateTemplateHistory.value.length > 10) {
+    generateTemplateHistory.value.length = 10
+  }
+  generateTemplate.value = newGenerateTemplate
+  isLoading.value = false;
+}
+
+function generate() {
+  
+}
+</script>
+
+<template>
+  <Loading v-if="isLoading" />
+  <div class="editor-container" style="display: flex; flex-direction: column; gap: 10px;">
+
+    <div class="delimiter-row">
+      <label for="delimiter-input">Table delimiter:</label>
+      <input 
+        id="delimiter-input"
+        type="text" 
+        v-model="inputDelimiterDisplay"
+        class="delimiter-input"
+        title="使用 \t 表示 Tab，\n 表示換行"
+      />
+    </div>
+
+
+    Csv Content:
+    <textarea 
+      class="code-editor" 
+      v-model="csvText" 
+      spellcheck="false"
+    ></textarea>
+
+    Generate template:
+    <div style="height: 200px;">
+      <CodeEditor ref="generateTemplateEditorRef" v-model="generateTemplate" class="w-full h-full" />
+    </div>
+    <div class="editor-actions">
+      <button @click="generate" class="run-button">Generate</button>
+    </div>
+
+    Result:
+    <div style="height: 300px;">
+      <CodeEditor ref="resultEditorRef" v-model="result" class="w-full h-full" />
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.read-the-docs {
+  color: #888;
+}
+
+.editor-container {
+  margin: 20px auto;
+  width: 90%;
+  min-width: 400px;
+}
+
+.editor-container h2 {
+  margin-bottom: 10px;
+}
+
+.code-editor {
+  width: 100%;
+  height: 200px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 10px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  resize: vertical;
+  tab-size: 2;
+  overflow: auto;
+}
+
+.editor-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.run-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.run-button:hover {
+  background-color: #45a049;
+}
+
+.error-message {
+  margin: 0;
+  padding: 8px;
+  color: #ff6b6b;
+}
+
+@media (min-width: 768px) {
+  .card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .code-editor {
+    height: 200px;
+  }
+}
+
+.buttons-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+}
+
+.delimiter-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+}
+
+.delimiter-row label {
+  color: #d4d4d4;
+  font-size: 14px;
+}
+
+.delimiter-input {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  color: #d4d4d4;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 60px;
+  transition: border-color 0.3s ease;
+}
+
+.delimiter-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.delimiter-input:hover {
+  border-color: #666;
+}
+
+.buttons-row button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.buttons-row button:hover {
+  background-color: #45a049;
+}
+
+.code-editor {
+  border-color: #333;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+}
+</style>
