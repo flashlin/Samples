@@ -55,7 +55,6 @@ interface IntellisenseItem {
 
 function codemirrorCompletion(context: CompletionContext): CompletionResult | null {
   if (!suggestionsRef.value.length) return null
-  console.log('aaa', suggestionsRef.value)
   return {
     from: context.pos, // 直接用游標位置
     options: suggestionsRef.value.map((item, idx) => ({
@@ -76,15 +75,18 @@ function showIntellisense(items: IntellisenseItem[]): void {
   }
 }
 
-function handleCtrlJ(e: KeyboardEvent) {
-  if (e.metaKey && (e.key === 'j' || e.key === 'J')) {
-    e.preventDefault()
-    showIntellisense([
-      { title: 'a', context: 'from customer' },
-      { title: 'b', context: 'You are winner' }
-    ])
+const customKeymap = [
+  {
+    key: "Mod-j", // Mod 代表 Ctrl(Win/Linux) 或 Cmd(Mac)
+    run: () => {
+      showIntellisense([
+        { title: 'a', context: 'from customer' },
+        { title: 'b', context: 'You are winner' }
+      ])
+      return true // 阻止預設行為
+    }
   }
-}
+]
 
 function getContextWithCursor(): [string, string] {
   if (!view) return ['', '']
@@ -95,7 +97,6 @@ function getContextWithCursor(): [string, string] {
 }
 
 onMounted(() => {
-  window.addEventListener('keydown', handleCtrlJ)
   if (editorRoot.value) {
     view = new EditorView({
       state: EditorState.create({
@@ -103,7 +104,7 @@ onMounted(() => {
         extensions: [
           lineNumbers(),
           highlightActiveLineGutter(),
-          keymap.of([...defaultKeymap]),
+          keymap.of([...defaultKeymap, ...customKeymap]),
           oneDark,
           EditorView.lineWrapping,
           EditorView.updateListener.of((v: ViewUpdate) => {
@@ -123,7 +124,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleCtrlJ)
   if (view) {
     view.destroy()
     view = null
