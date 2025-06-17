@@ -9,14 +9,11 @@ import { DataTable as DataTableType } from '@/tools/dataTypes';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 import { goTo } from '@/tools/visual-router'
 import { useSupportStore } from '@/SupportStore';
+import type { IntellisenseContext } from '@/components/codeEditor.vue';
 
 interface ExcelFile {
   fileName: string;
   sheets: ExcelSheet[];
-}
-
-interface IntellisenseContext {
-  context: string[]
 }
 
 const excelFiles = ref<ExcelFile[]>([]);
@@ -86,8 +83,8 @@ function test() {
 
 function handleMyIntellisense(context: IntellisenseContext): Promise<any[]> {
   return Promise.resolve([
-    { title: 'a', context: 'abc123' },
-    { title: 'b', context: 'You are winner' }
+    { title: 'a', context: context.content[0] },
+    { title: 'b', context: context.content[1] }
   ])
 }
 

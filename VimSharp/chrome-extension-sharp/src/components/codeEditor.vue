@@ -14,13 +14,13 @@ import { autocompletion, CompletionContext, CompletionResult, Completion } from 
 import { oneDark } from '@codemirror/theme-one-dark'
 import { startCompletion } from '@codemirror/autocomplete'
 
-interface IntellisenseItem {
+export interface IntellisenseItem {
   title: string
   context: string
 }
 
-interface IntellisenseContext {
-  context: string[]
+export interface IntellisenseContext {
+  content: string[]
 }
 
 interface VimCodeEditorProps {
@@ -53,11 +53,6 @@ watch(innerValue, (newValue) => {
 const editorRoot = ref<HTMLElement | null>(null)
 let view: EditorView | null = null
 
-interface IntellisenseItem {
-  title: string
-  context: string
-}
-
 function codemirrorCompletion(context: CompletionContext): CompletionResult | null {
   if (!suggestionsRef.value.length) return null
   return {
@@ -86,7 +81,7 @@ async function handleShowIntellisense() {
   let items: IntellisenseItem[] = []
   if (props.onShowIntellisense) {
     // 呼叫外部 delegate
-    const result = await props.onShowIntellisense({ context: [before, after] })
+    const result = await props.onShowIntellisense({ content: [before, after] })
     if (Array.isArray(result)) items = result
   }  
   showIntellisense(items)
