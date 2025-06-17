@@ -450,3 +450,30 @@ export function cutCsvText(csvText: string, headers: string[], delimiter: string
     newline: '\n'
   });
 }
+
+export function processCsvRowsToString(
+  csvText: string,
+  delimiter: string = '\t',
+  rowHandler: (row: any, headers: string[]) => string
+): string {
+  const result = Papa.parse(csvText, {
+    delimiter: delimiter,
+    skipEmptyLines: true,
+    header: true
+  });
+  if (!result.data || result.data.length === 0) {
+    return '';
+  }
+  // 取得 headers
+  let headers: string[] = [];
+  if (result.meta && Array.isArray((result.meta as any).fields)) {
+    headers = (result.meta as any).fields as string[];
+  } else if (Array.isArray(result.data) && result.data.length > 0 && typeof result.data[0] === 'object' && result.data[0] !== null) {
+    headers = Object.keys(result.data[0] as object);
+  }
+  let buffer = '';
+  (result.data as any[]).forEach(row => {
+    buffer += rowHandler(row, headers);
+  });
+  return buffer;
+}

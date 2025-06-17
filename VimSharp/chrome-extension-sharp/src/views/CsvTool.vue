@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson, 
-  convertCsvFormatToTable, convertCsvFormatToSql, getCsvHeadersName, cutCsvText } from '../tools/textTool'
+  convertCsvFormatToTable, convertCsvFormatToSql, getCsvHeadersName, cutCsvText, 
+  processCsvRowsToString} from '../tools/textTool'
 import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
 import Loading from '@/components/Loading.vue'
 import CodeEditor from '@/components/codeEditor.vue';
+import Handlebars from 'handlebars';
 
 defineProps<{ msg: string }>()
 const generateTemplateEditorRef = ref<any>(null)
@@ -75,7 +77,16 @@ function changeGenerateTemplate(newGenerateTemplate: string) {
 }
 
 function generate() {
-  
+  const template = Handlebars.compile(generateTemplate.value); 
+  const output = processCsvRowsToString(csvText.value, inputDelimiter.value, (row: any, headers: string[]) => {
+    const rowData: Record<string, any> = {};
+    headers.forEach(header => {
+      rowData[header] = row[header];
+    });
+    const rowString = template(rowData);
+    return rowString;
+  });
+  result.value = output;
 }
 </script>
 
