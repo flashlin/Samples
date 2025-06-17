@@ -47,10 +47,14 @@ function clickJsonToCsv() {
   changeGenerateTemplate(result);
 }
 
-function clickCsvToJson() {
-  const inputText = csvText.value
-  const result = convertCsvFormatToJson(inputText);
-  changeGenerateTemplate(result);
+function clickGenerateCsvToJsonTemplate() {
+  const headers = getCsvHeadersName(csvText.value, inputDelimiter.value)
+  // 轉換 headers 為 "${header}": {{${header}}}
+  const templateBody = headers.map(header => `"${header}": {{${header}}}`).join(",\n");
+  const jsonTemplate = `{
+${templateBody}
+}`;
+  generateTemplate.value = jsonTemplate;
 }
 
 function clickCsvToTable() {
@@ -99,6 +103,7 @@ function generate() {
     ></textarea>
 
     Generate template:
+    <button @click="clickGenerateCsvToJsonTemplate">Json Template</button>
     <div style="height: 200px;">
       <CodeEditor ref="generateTemplateEditorRef" v-model="generateTemplate" class="w-full h-full" />
     </div>
