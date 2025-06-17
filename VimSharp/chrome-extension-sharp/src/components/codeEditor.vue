@@ -5,12 +5,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { EditorView, keymap, ViewUpdate } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
 import { lineNumbers, highlightActiveLineGutter } from '@codemirror/view'
 import { defaultKeymap } from '@codemirror/commands'
-import { autocompletion, CompletionContext, CompletionResult, Completion, closeCompletion } from '@codemirror/autocomplete'
+import { autocompletion, CompletionContext, CompletionResult, closeCompletion } from '@codemirror/autocomplete'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { startCompletion } from '@codemirror/autocomplete'
 
@@ -97,6 +97,13 @@ const customKeymap = [
     run: () => {
       handleShowIntellisense()
       return true // 阻止預設行為
+    }
+  },
+  {
+    key: "Mod-k",
+    run: () => {
+      if (view) closeCompletion(view)
+      return true
     }
   }
 ]
