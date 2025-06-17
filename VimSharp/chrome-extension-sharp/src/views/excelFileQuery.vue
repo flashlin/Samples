@@ -87,10 +87,17 @@ async function handleMyIntellisense(context: IntellisenseContext): Promise<any[]
   const question = `${context.content[0]}{{cursor}}${context.content[1]}`;
   try {
     const resp = await intellisenseApi.getIntellisenseList({ question });
-    return resp.items.map(item => ({
+    const result = resp.items.map(item => ({
       title: `${item.confidence_score} ${item.context.substring(0, 30)}`,
       context: item.context
     }));
+    if( result.length == 0 )
+    {
+      return [
+        { title: '<No result>', context: '' }
+      ]
+    }
+    return result;
   } catch (e) {
     return [];
   }

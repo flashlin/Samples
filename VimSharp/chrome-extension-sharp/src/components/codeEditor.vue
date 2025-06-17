@@ -10,7 +10,7 @@ import { EditorView, keymap, ViewUpdate } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
 import { lineNumbers, highlightActiveLineGutter } from '@codemirror/view'
 import { defaultKeymap } from '@codemirror/commands'
-import { autocompletion, CompletionContext, CompletionResult, Completion } from '@codemirror/autocomplete'
+import { autocompletion, CompletionContext, CompletionResult, Completion, closeCompletion } from '@codemirror/autocomplete'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { startCompletion } from '@codemirror/autocomplete'
 
@@ -59,7 +59,11 @@ function codemirrorCompletion(context: CompletionContext): CompletionResult | nu
     from: context.pos, // 直接用游標位置
     options: suggestionsRef.value.map((item, idx) => ({
       label: item.title,
-      apply: item.context
+      apply: item.context === '' ? (view) => {
+        closeCompletion(view)
+        return true;
+       } 
+      : item.context
     }))
   }
 }
