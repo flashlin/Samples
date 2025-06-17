@@ -19,8 +19,13 @@ interface IntellisenseItem {
   context: string
 }
 
+interface IntellisenseContext {
+  context: string[]
+}
+
 interface VimCodeEditorProps {
   modelValue: string
+  onShowIntellisense?: (context: IntellisenseContext) => Promise<IntellisenseItem[]>
 }
 
 const props = withDefaults(defineProps<VimCodeEditorProps>(), {})
@@ -75,11 +80,16 @@ function showIntellisense(items: IntellisenseItem[]): void {
   }
 }
 
-function handleShowIntellisense() {
-  showIntellisense([
-    { title: 'a', context: 'from customer' },
-    { title: 'b', context: 'You are winner' }
-  ])
+async function handleShowIntellisense() {
+  // 取得游標前後 context
+  const [before, after] = getContextWithCursor()
+  let items: IntellisenseItem[] = []
+  if (props.onShowIntellisense) {
+    // 呼叫外部 delegate
+    const result = await props.onShowIntellisense({ context: [before, after] })
+    if (Array.isArray(result)) items = result
+  }  
+  showIntellisense(items)
 }
 
 const customKeymap = [
