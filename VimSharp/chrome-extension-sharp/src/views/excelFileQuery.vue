@@ -15,6 +15,10 @@ interface ExcelFile {
   sheets: ExcelSheet[];
 }
 
+interface IntellisenseContext {
+  context: string[]
+}
+
 const excelFiles = ref<ExcelFile[]>([]);
 const allDataTables = ref<DataTableType[]>([]);
 const code = ref('')
@@ -80,6 +84,13 @@ function test() {
   ])
 }
 
+function handleMyIntellisense(context: IntellisenseContext): Promise<any[]> {
+  return Promise.resolve([
+    { title: 'a', context: 'abc123' },
+    { title: 'b', context: 'You are winner' }
+  ])
+}
+
 function handleF8Key(e: KeyboardEvent) {
   // F8 對應 key 為 'F8'
   if (e.key === 'F8') {
@@ -129,7 +140,7 @@ onUnmounted(() => {
           <button @click="test">Test Intellisense</button>
           <!-- 這裡未來可放更多按鈕 -->
         </div>
-        <VimCodeEditor ref="vimEditorRef" v-model="code" :enableVim="false" class="w-full h-full" />
+        <VimCodeEditor ref="vimEditorRef" v-model="code" :enableVim="false" class="w-full h-full" :onShowIntellisense="handleMyIntellisense" />
       </div>
       <div v-if="errorMessage" class="w-full flex flex-col justify-center mt-0" style="background:#23272f; min-height: 48px;">
         <p class="text-red-500">{{ errorMessage }}</p>
