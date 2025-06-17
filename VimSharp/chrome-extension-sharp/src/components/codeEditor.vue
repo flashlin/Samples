@@ -75,14 +75,18 @@ function showIntellisense(items: IntellisenseItem[]): void {
   }
 }
 
+function handleShowIntellisense() {
+  showIntellisense([
+    { title: 'a', context: 'from customer' },
+    { title: 'b', context: 'You are winner' }
+  ])
+}
+
 const customKeymap = [
   {
     key: "Mod-j", // Mod 代表 Ctrl(Win/Linux) 或 Cmd(Mac)
     run: () => {
-      showIntellisense([
-        { title: 'a', context: 'from customer' },
-        { title: 'b', context: 'You are winner' }
-      ])
+      handleShowIntellisense()
       return true // 阻止預設行為
     }
   }
