@@ -10,6 +10,7 @@ import LargeDataTable from '@/components/LargeDataTable.vue';
 import { goTo } from '@/tools/visual-router'
 import { useSupportStore } from '@/SupportStore';
 import type { IntellisenseContext } from '@/components/codeEditor.vue';
+import { useIntellisenseApi } from '@/tools/intellisenseApi';
 
 interface ExcelFile {
   fileName: string;
@@ -22,6 +23,7 @@ const code = ref('')
 const errorMessage = ref('');
 const supportStore = useSupportStore();
 const vimEditorRef = ref<any>(null)
+const intellisenseApi = useIntellisenseApi();
 
 async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) {
   const initialStatus = 'Uploading...';
@@ -81,11 +83,17 @@ function test() {
   ])
 }
 
-function handleMyIntellisense(context: IntellisenseContext): Promise<any[]> {
-  return Promise.resolve([
-    { title: 'a', context: context.content[0] },
-    { title: 'b', context: context.content[1] }
-  ])
+async function handleMyIntellisense(context: IntellisenseContext): Promise<any[]> {
+  const question = `${context.content[0]}{{cursor}}${context.content[1]}`;
+  try {
+    const resp = await intellisenseApi.getIntellisenseList({ question });
+    return resp.items.map(item => ({
+      title: `${item.confidence_score} ${item.context.substring(0, 30)}`,
+      context: item.context
+    }));
+  } catch (e) {
+    return [];
+  }
 }
 
 function handleF8Key(e: KeyboardEvent) {

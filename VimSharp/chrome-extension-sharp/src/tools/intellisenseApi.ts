@@ -39,23 +39,25 @@ export interface GetUserSqlHistoryListResp {
 }
 
 export class IntellisenseApi {
-  private _urlPrefix: string;
   private _jwtApi: JwtApi;
 
   constructor(apiUrl: string = defaultUrl, urlPrefix: string = '/api/') {
-    this._urlPrefix = urlPrefix;
     this._jwtApi = new JwtApi(apiUrl, urlPrefix);
   }
 
   public async addSql(req: AddSqlReq): Promise<{ status: string }> {
-    return this._jwtApi.postAsync(`${this._urlPrefix}addSql`, req)
+    return this._jwtApi.postAsync('addSql', req)
   }
 
   public async getIntellisenseList(req: GetIntellisenseListReq): Promise<GetIntellisenseListResp> {
-    return this._jwtApi.postAsync(`${this._urlPrefix}getIntellisenseList`, req)
+    return this._jwtApi.postAsync('getIntellisenseList', req)
   }
 
   public async getUserSqlHistoryList(req: GetUserSqlHistoryListReq): Promise<GetUserSqlHistoryListResp> {
-    return this._jwtApi.postAsync(`${this._urlPrefix}getUserSqlHistoryList`, req)
+    return this._jwtApi.postAsync('getUserSqlHistoryList', req)
   }
+}
+
+export function useIntellisenseApi() {
+  return new IntellisenseApi();
 }
