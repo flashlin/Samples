@@ -36,6 +36,11 @@ RUN rm -rf /usr/share/nginx/html/*
 # 複製構建好的檔案
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# 創建 dist 目錄並移動除了 index.html 外的所有檔案
+RUN mkdir -p /usr/share/nginx/html/dist && \
+    cd /usr/share/nginx/html && \
+    find . -maxdepth 1 ! -name '.' ! -name 'index.html' ! -name 'dist' -exec mv {} dist/ \;
+
 # 複製 nginx 配置
 COPY nginx.conf /etc/nginx/nginx.conf
 
