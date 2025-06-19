@@ -3,19 +3,19 @@ import { ref, watch } from 'vue'
 import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson, 
   convertCsvFormatToTable, convertCsvFormatToSql, getCsvHeadersName, cutCsvText, 
   processCsvRowsToString} from '../tools/textTool'
-import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
 import Loading from '@/components/Loading.vue'
 import CodeEditor from '@/components/codeEditor.vue';
 import Handlebars from 'handlebars';
 
 defineProps<{ msg: string }>()
 const generateTemplateEditorRef = ref<any>(null)
+const concatTemplate = ref('')
 const resultEditorRef = ref<any>(null)
 
-const csvText = ref(`id name age
-1 flash 10
-2 jack 11
-3 jerry 12
+const csvText = ref(`id\tname\tage
+1\tflash\t10
+2\tjack\t11
+3\tjerry\t12
 `)
 const generateTemplate = ref(``)
 const result = ref(``)
@@ -77,13 +77,17 @@ function changeGenerateTemplate(newGenerateTemplate: string) {
 }
 
 function generate() {
-  const template = Handlebars.compile(generateTemplate.value); 
+  const template = Handlebars.compile(generateTemplate.value);
+  const concatDelimiter = concatTemplate.value;
+  let first = true;
   const output = processCsvRowsToString(csvText.value, inputDelimiter.value, (row: any, headers: string[]) => {
     const rowData: Record<string, any> = {};
     headers.forEach(header => {
       rowData[header] = row[header];
     });
-    const rowString = template(rowData);
+    let concatDelimiterString = first ? '' : concatDelimiter;
+    const rowString = concatDelimiterString +template(rowData);
+    first = false;
     return rowString;
   });
   result.value = output;
@@ -118,6 +122,8 @@ function generate() {
     <div style="height: 200px;">
       <CodeEditor ref="generateTemplateEditorRef" v-model="generateTemplate" class="w-full h-full" />
     </div>
+    Concat template:
+    <textarea class="code-editor" v-model="concatTemplate" ></textarea>
     <div class="editor-actions">
       <button @click="generate" class="run-button">Generate</button>
     </div>
