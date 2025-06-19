@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { convertCsvToDataTable, getCsvDataTableColumns, getCsvHeadersName, processCsvRowsToString } from '../tools/textTool'
+import { getCsvDataTableColumns, processCsvRowsToString } from '../tools/textTool'
 import Loading from '@/components/Loading.vue'
 import CodeEditor from '@/components/codeEditor.vue';
 import Handlebars from 'handlebars';
