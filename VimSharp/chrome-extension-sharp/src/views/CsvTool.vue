@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { getCsvHeadersName, processCsvRowsToString } from '../tools/textTool'
+import { convertCsvToDataTable, getCsvDataTableColumns, getCsvHeadersName, processCsvRowsToString } from '../tools/textTool'
 import Loading from '@/components/Loading.vue'
 import CodeEditor from '@/components/codeEditor.vue';
 import Handlebars from 'handlebars';
 
-defineProps<{ msg: string }>()
 const generateTemplateEditorRef = ref<any>(null)
 const concatTemplate = ref('')
 const resultEditorRef = ref<any>(null)
@@ -40,12 +39,17 @@ watch(inputDelimiterDisplay, (newValue) => {
 })
 
 function clickGenerateCsvToJsonTemplate() {
-  const headers = getCsvHeadersName(csvText.value, inputDelimiter.value)
+  const csvDataColumns = getCsvDataTableColumns(csvText.value, inputDelimiter.value)
+
   // 轉換 headers 為 "${header}": {{${header}}}
-  const templateBody = headers.map(header => `"${header}": {{${header}}}`).join(",\n");
+  const templateBody = csvDataColumns.map(header => {
+    const value = header.type === 'TEXT' ? `"{{${header.name}}}"` : `{{${header.name}}}`;
+    return `  "${header.name}": ${value}`;
+  }).join(",\n");
   const jsonTemplate = `{
 ${templateBody}
 }`;
+
   generateTemplate.value = jsonTemplate;
 }
 
