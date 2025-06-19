@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import { DataTable, DataTableColumn, guessType } from './dataTypes';
 
 /**
  * 檢查文本是否為表格格式（每行有相同數量的分隔符）
@@ -402,6 +403,67 @@ export function convertCsvFormatToSql(text: string, tableName:string): string {
     console.error('CSV 轉 JSON 錯誤:', error);
     return text;
   }
+}
+
+/**
+ * 將 CSV 格式的文本轉換為 DataTable 格式
+ * @param text 要轉換的 CSV 文本
+ * @param delimiter 分隔符，預設為製表符 '\t'
+ * @returns DataTable 物件
+ */
+export function convertCsvToDataTable(text: string, delimiter: string = '\t'): DataTable {
+  // 使用 Papa.parse 解析 CSV 文本
+  const result = Papa.parse(text, {
+    delimiter: delimiter,
+    header: true, // 使用第一行作為標題
+    skipEmptyLines: true,
+    dynamicTyping: true // 自動轉換數字和布林值
+  }) as PapaParseResult;
+
+  if (!result.data || result.data.length === 0) {
+    return {
+      tableName: '',
+      columns: [],
+      data: []
+    };
+  }
+
+  // 取得表頭
+  const headers = Object.keys(result.data[0]);
+  
+  // 建立欄位定義，根據資料內容推測型別
+  const columns: DataTableColumn[] = headers.map(header => {
+    // 取樣前幾筆資料來推測型別
+    const sampleValues = result.data.slice(0, Math.min(10, result.data.length))
+      .map((row: any) => row[header])
+      .filter(value => value !== null && value !== undefined && value !== '');
+    
+    let columnType = 'TEXT'; // 預設型別
+    if (sampleValues.length > 0) {
+      // 使用第一個非空值來推測型別
+      columnType = guessType(sampleValues[0]);
+    }
+
+    return {
+      name: header,
+      type: columnType
+    };
+  });
+
+  // 將每一行轉換為物件
+  const data = result.data.map((row: any) => {
+    const rowObject: any = {};
+    headers.forEach(header => {
+      rowObject[header] = row[header];
+    });
+    return rowObject;
+  });
+
+  return {
+    tableName: 'CsvData',
+    columns: columns,
+    data: data
+  };
 }
 
 export function getCsvHeadersName(csvText: string, delimiter: string = '\t'): string[] {
