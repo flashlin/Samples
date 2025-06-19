@@ -5,3 +5,7 @@ interface ImportMetaEnv {
   VITE_GPTAPI_URL: string;
   VITE_INTELLISENSE_URL: string;
 }
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

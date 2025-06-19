@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:localdev": "vite --mode localdev",
-    "build:only": "vue-tsc && vite build",
+    "build:only": "vue-tsc --project tsconfig.build.json && vite build",
     "build:copy": "rimraf ../VimSharpApp/wwwroot/dist && mkdirp ../VimSharpApp/wwwroot/dist && cpy ./dist/** ../VimSharpApp/wwwroot/dist --cwd=. --parents",
     "build": "pnpm run build:only && pnpm run build:copy",
     "preview": "vite preview",
