@@ -42,13 +42,6 @@ watch(inputDelimiterDisplay, (newValue) => {
   }
 })
 
-
-function clickJsonToCsv() {
-  const inputText = csvText.value
-  const result = convertJsonFormatToCsv(inputText);
-  changeGenerateTemplate(result);
-}
-
 function clickGenerateCsvToJsonTemplate() {
   const headers = getCsvHeadersName(csvText.value, inputDelimiter.value)
   // 轉換 headers 為 "${header}": {{${header}}}
@@ -58,13 +51,6 @@ ${templateBody}
 }`;
   generateTemplate.value = jsonTemplate;
 }
-
-function clickCsvToTable() {
-  const inputText = csvText.value
-  const result = convertCsvFormatToTable(inputText, inputDelimiter.value);
-  changeGenerateTemplate(result);
-}
-
 
 function changeGenerateTemplate(newGenerateTemplate: string) {
   // 記錄到 codeHistory，只保留最近 10 筆
