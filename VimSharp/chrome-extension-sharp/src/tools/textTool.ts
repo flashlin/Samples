@@ -428,27 +428,11 @@ export function convertCsvToDataTable(text: string, delimiter: string = '\t'): D
     };
   }
 
+  // 使用重構後的函數來取得欄位定義
+  const columns = getCsvDataTableColumnsByPapaParseResult(result);
+  
   // 取得表頭
   const headers = Object.keys(result.data[0]);
-  
-  // 建立欄位定義，根據資料內容推測型別
-  const columns: DataTableColumn[] = headers.map(header => {
-    // 取樣前幾筆資料來推測型別
-    const sampleValues = result.data.slice(0, Math.min(10, result.data.length))
-      .map((row: any) => row[header])
-      .filter(value => value !== null && value !== undefined && value !== '');
-    
-    let columnType = 'TEXT'; // 預設型別
-    if (sampleValues.length > 0) {
-      // 使用第一個非空值來推測型別
-      columnType = guessType(sampleValues[0]);
-    }
-
-    return {
-      name: header,
-      type: columnType
-    };
-  });
 
   // 將每一行轉換為物件
   const data = result.data.map((row: any) => {
@@ -472,20 +456,11 @@ export function getCsvHeadersName(csvText: string, delimiter: string = '\t'): st
 }
 
 /**
- * 取得 CSV 表頭並推測每個欄位的資料型別
- * @param csvText CSV 文本
- * @param delimiter 分隔符
+ * 根據 Papa.parse 結果推測每個欄位的資料型別
+ * @param result Papa.parse 的解析結果
  * @returns DataTableColumn 陣列，包含欄位名稱和型別
  */
-export function getCsvDataTableColumns(csvText: string, delimiter: string = '\t'): DataTableColumn[] {
-  // 使用 Papa.parse 解析 CSV 文本
-  const result = Papa.parse(csvText, {
-    delimiter: delimiter,
-    header: true, // 使用第一行作為標題
-    skipEmptyLines: true,
-    dynamicTyping: true // 自動轉換數字和布林值
-  }) as PapaParseResult;
-
+export function getCsvDataTableColumnsByPapaParseResult(result: PapaParseResult): DataTableColumn[] {
   if (!result.data || result.data.length === 0) {
     return [];
   }
@@ -513,6 +488,24 @@ export function getCsvDataTableColumns(csvText: string, delimiter: string = '\t'
   });
 
   return columns;
+}
+
+/**
+ * 取得 CSV 表頭並推測每個欄位的資料型別
+ * @param csvText CSV 文本
+ * @param delimiter 分隔符
+ * @returns DataTableColumn 陣列，包含欄位名稱和型別
+ */
+export function getCsvDataTableColumns(csvText: string, delimiter: string = '\t'): DataTableColumn[] {
+  // 使用 Papa.parse 解析 CSV 文本
+  const result = Papa.parse(csvText, {
+    delimiter: delimiter,
+    header: true, // 使用第一行作為標題
+    skipEmptyLines: true,
+    dynamicTyping: true // 自動轉換數字和布林值
+  }) as PapaParseResult;
+
+  return getCsvDataTableColumnsByPapaParseResult(result);
 }
 
 /**
