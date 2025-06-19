@@ -415,14 +415,6 @@ export class StringParser {
         return symbol;
     }
 
-    private isSymbolEnd(symbolEnd: string): boolean {
-        if (symbolEnd === '\0') return true;
-        if (this.isWordChar(symbolEnd)) return true;
-        if (/\s/.test(symbolEnd)) return true;
-        if (symbolEnd === '\'') return true;
-        return StringParser.Brackets.includes(symbolEnd);
-    }
-
     readSymbols(): TextSpan {
         this.skipWhitespace();
         const offset = this._position;

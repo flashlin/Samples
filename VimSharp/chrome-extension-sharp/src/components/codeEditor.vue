@@ -57,7 +57,7 @@ function codemirrorCompletion(context: CompletionContext): CompletionResult | nu
   if (!suggestionsRef.value.length) return null
   return {
     from: context.pos, // 直接用游標位置
-    options: suggestionsRef.value.map((item, idx) => ({
+    options: suggestionsRef.value.map((item, _idx) => ({
       label: item.title,
       apply: item.context === '' ? (view) => {
         closeCompletion(view)

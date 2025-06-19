@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson, 
-  convertCsvFormatToTable, convertCsvFormatToSql, getCsvHeadersName, cutCsvText, 
-  processCsvRowsToString} from '../tools/textTool'
+import { getCsvHeadersName, processCsvRowsToString } from '../tools/textTool'
 import Loading from '@/components/Loading.vue'
 import CodeEditor from '@/components/codeEditor.vue';
 import Handlebars from 'handlebars';
@@ -19,7 +17,6 @@ const csvText = ref(`id\tname\tage
 `)
 const generateTemplate = ref(``)
 const result = ref(``)
-const generateTemplateHistory = ref<string[]>([])
 const inputDelimiter = ref('\t')
 const inputDelimiterDisplay = ref('\\t')
 const isLoading = ref(false)
@@ -50,16 +47,6 @@ function clickGenerateCsvToJsonTemplate() {
 ${templateBody}
 }`;
   generateTemplate.value = jsonTemplate;
-}
-
-function changeGenerateTemplate(newGenerateTemplate: string) {
-  // 記錄到 codeHistory，只保留最近 10 筆
-  generateTemplateHistory.value.unshift(csvText.value)
-  if (generateTemplateHistory.value.length > 10) {
-    generateTemplateHistory.value.length = 10
-  }
-  generateTemplate.value = newGenerateTemplate
-  isLoading.value = false;
 }
 
 function generate() {
