@@ -8,3 +8,16 @@ cd ..
 # https://chromewebstore.google.com/detail/browser-mcp-automate-your/bjfgambnhccakkhmkepdoekmckoijdlc
 # https://docs.browsermcp.io/setup-extension
 # https://docs.browsermcp.io/setup-server
+
+
+
+# uvx --from git+https://github.com/oraios/serena serena-mcp-server
+# serena: {
+#   "command": "uvx",
+#   "args": ["--from", "git+https://github.com/oraios/serena", "serena-mcp-server"]
+# }
+
+# git clone https://github.com/oraios/serena
+cd serena
+uv run serena-mcp-server &
+cd ..
