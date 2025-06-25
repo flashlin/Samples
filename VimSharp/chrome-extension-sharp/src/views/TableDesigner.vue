@@ -135,7 +135,26 @@ function generateSql() {
   sql += generateCreateTableSql()
   sql += generateCreatePrimaryKeySql()
   sql += generateCreateDescriptionSql()
+  sql += generateUniqueKeySql()
   createTableSqlCode.value = sql
+}
+
+function generateUniqueKeySql() {
+  if( uniqueKeys.value.length === 0 ) {
+    return '';
+  }
+  let createUniqueKeySql = ''
+  const templateBody = uniqueKeys.value.map(key => {
+    const keyDashNames = key.fieldNames.map(name => `${name}`).join('_');
+    const keyNames = key.fieldNames.map(name => `[${name}]`).join(',');
+    return `CREATE UNIQUE INDEX [UIX_${tableName.value}_${keyDashNames}] ON [${tableName.value}] (${keyNames})
+    WITH (PAD_INDEX = OFF, ONLINE = ON, FILLFACTOR = 95) ON [PRIMARY]
+GO
+`
+  }).join("\n");
+  createUniqueKeySql += templateBody
+  createUniqueKeySql += "\n\n\n"
+  return createUniqueKeySql
 }
 </script>
 
