@@ -31,6 +31,7 @@ namespace VimSharpApp
 
             // 註冊 API 端點
             JobApiHandler.MapEndpoints(_webApp);
+            TestApiHandler.MapEndpoints(_webApp);
 
             // 提供 wwwroot 資料夾的靜態檔案
             _webApp.UseDefaultFiles(new DefaultFilesOptions

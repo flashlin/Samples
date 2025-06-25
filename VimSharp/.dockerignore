@@ -1,0 +1,4 @@
+.cursor/
+bin/
+obj/
+chrome-extension-sharp/
