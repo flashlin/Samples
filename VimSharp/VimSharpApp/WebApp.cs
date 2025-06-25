@@ -29,6 +29,9 @@ namespace VimSharpApp
             // 加入 Swagger/OpenAPI 服務
             webBuilder.Services.AddEndpointsApiExplorer();
             webBuilder.Services.AddSwaggerGen();
+            webBuilder.Services.AddHttpClient();
+            var services = webBuilder.Services;
+            services.AddSingleton<ITestApiHandler, TestApiHandler>();
 
             webBuilder.WebHost.UseUrls("http://*:8080");
             _webApp = webBuilder.Build();
