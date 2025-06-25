@@ -175,7 +175,40 @@ function toClassType(dataType: string) {
   if( dataType.includes('varchar') ) {
     return 'string';
   }
+  if( dataType.includes('nvarchar') ) {
+    return 'string';
+  }
   return 'string';
+}
+
+function getMaxLength(dataType: string) {
+  dataType = dataType.toLowerCase();
+  if( dataType.includes('varchar') ) {
+    const match = dataType.match(/varchar\((\d+)\)/i);
+    if (match) {
+      return parseInt(match[1]);
+    }
+    return 255;
+  }
+  if( dataType.includes('nvarchar') ) {
+    const match = dataType.match(/nvarchar\((\d+)\)/i);
+    if (match) {
+      return parseInt(match[1]);
+    }
+    return 255;
+  }
+  if( dataType.includes('decimal') ) {
+    const match1 = dataType.match(/decimal\((\d+)\)/i);
+    if (match1) {
+      return parseInt(match1[1]);
+    }
+    const match2 = dataType.match(/decimal\((\d+\,\d+)\)/i);
+    if (match2) {
+      return parseInt(match2[2]);
+    }
+    return 255;
+  }
+  return 0;
 }
 
 function generateEntityClass() {
@@ -185,12 +218,36 @@ function generateEntityClass() {
     return `  public ${classType} ${field.name} { get; set; }`
   }).join("\n");
   entityClass += templateBody
-  entityClass += "\n}"
+  entityClass += "}\n"
+  entityClass += "\n\n\n"
   return entityClass
 }
 
+function generateEntityConfigurationCode(){
+  let entityConfigurationCode = `public class ${tableName.value}EntityConfiguration : IEntityTypeConfiguration<${tableName.value}Entity> {\n`
+  entityConfigurationCode += `  public void Configure(EntityTypeBuilder<${tableName.value}Entity> builder) {\n`
+  const templateBody = fields.value.map(field => {
+    if( field.isPkKey ){
+      return `    builder.HasKey(e => e.${field.name});`
+    }
+    const classDataType = toClassType(field.dataType);
+    if( classDataType === 'string' ){
+      const maxLength = getMaxLength(field.dataType);
+      return `    builder.Property(x => x.${field.name}).HasMaxLength(${maxLength});`
+    }
+    return `    builder.Property(x => x.${field.name}).HasColumnType("${field.dataType}");`
+  }).join("\n");
+  entityConfigurationCode += templateBody
+  entityConfigurationCode += "  }\n"
+  entityConfigurationCode += "}\n"
+  entityConfigurationCode += "\n\n\n"
+  return entityConfigurationCode
+}
+
 function generateCSharpCode() {
-  let csharpCode = generateEntityClass()
+  let csharpCode = ''
+  csharpCode += generateEntityClass()
+  csharpCode += generateEntityConfigurationCode()
   csharpCode += "\n\n\n"
   cSharpCode.value = csharpCode
 }
