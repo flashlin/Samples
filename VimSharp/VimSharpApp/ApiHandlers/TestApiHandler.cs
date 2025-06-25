@@ -3,14 +3,25 @@ using Microsoft.AspNetCore.Http;
 
 public interface ITestApiHandler
 {
-    Task<string> Test();
+    Task<JsonExampleResponse> Test();
 }
+
+public class JsonExampleResponse
+{
+    public int UserId { get; set; }
+    public int Id { get; set; }
+    public string Title { get; set; }
+    public string Body { get; set; }
+}
+
 
 public class TestApiHandler : ITestApiHandler
 {
-    public Task<string> Test()
+    public async Task<JsonExampleResponse> Test()
     {
-        return Task.FromResult("Hello, World!");
+        var httpClient = new HttpClient();
+        var response = await httpClient.GetFromJsonAsync<JsonExampleResponse>("https://jsonplaceholder.typicode.com/posts/1");
+        return response!;
     }
 
     public static void MapEndpoints(WebApplication app)

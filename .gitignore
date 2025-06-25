@@ -73,3 +73,4 @@ game-sudoku/app/build/intermediates
 game-sudoku/app/build/reports
 .DS_Store
 gsoft/interactive-feedback-mcp
+.serena/
