@@ -92,8 +92,29 @@ function generateCreateTableSql() {
     return `  [${field.name}] ${field.dataType} ${isNull} ${defaultValue} ${isIdentity}`;
   }).join(",\n");
   createTableSql += templateBody
-  createTableSql += `\n);`
-  createTableSqlCode.value = createTableSql;
+  createTableSql += `\n);\n`
+  return createTableSql
+}
+
+function generateCreateDescriptionSql() {
+  let createDescriptionSql = ''
+  const templateBody = fields.value.map(field => {
+    if( field.description === '' ) {
+      return '';
+    }
+    return `EXEC sys.sp_addextendedproperty @name=N'${field.name}', @value=N'${field.description}', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'${tableName.value}'
+GO`;
+  }).join("\n");
+  createDescriptionSql += templateBody
+  return createDescriptionSql
+}
+
+function generateSql() {
+  let sql = ''
+  sql += generateCreateTableSql()
+  sql += '\n\n\n'
+  sql += generateCreateDescriptionSql()
+  createTableSqlCode.value = sql
 }
 </script>
 
@@ -183,7 +204,7 @@ function generateCreateTableSql() {
       </div>
     </div>
 
-    <button @click="generateCreateTableSql" class="btn btn-primary px-3 py-1 bg-blue-500 text-white rounded">Generate</button>
+    <button @click="generateSql" class="btn btn-primary px-3 py-1 bg-blue-500 text-white rounded">Generate</button>
     <CodeEditor v-model="createTableSqlCode" />
   </div>
 </template>
