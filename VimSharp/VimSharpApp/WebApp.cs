@@ -26,8 +26,19 @@ namespace VimSharpApp
             webBuilder.Configuration.AddJsonFile("appSetting.json", optional: false, reloadOnChange: true);
             webBuilder.Services.Configure<AppSettingConfig>(webBuilder.Configuration);
 
+            // 加入 Swagger/OpenAPI 服務
+            webBuilder.Services.AddEndpointsApiExplorer();
+            webBuilder.Services.AddSwaggerGen();
+
             webBuilder.WebHost.UseUrls("http://*:8080");
             _webApp = webBuilder.Build();
+
+            // 啟用 Swagger UI（僅限開發環境）
+            //if (_webApp.Environment.IsDevelopment())
+            {
+                _webApp.UseSwagger();
+                _webApp.UseSwaggerUI();
+            }
 
             // 註冊 API 端點
             JobApiHandler.MapEndpoints(_webApp);

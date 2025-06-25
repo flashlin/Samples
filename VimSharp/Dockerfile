@@ -1,11 +1,11 @@
 # 使用 .NET 9.0 SDK 作為建置階段
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY VimSharpApp/. ./VimSharpApp/
-COPY VimSharpLib/. ./VimSharpLib/
+COPY VimSharpLib/. ./ VimSharpApp/. ./
 WORKDIR /src/VimSharpApp
-RUN dotnet restore VimSharpApp.csproj
-RUN dotnet publish VimSharpApp.csproj -c Release -o /app/publish
+# RUN dotnet restore VimSharpApp.csproj
+RUN --mount=type=cache,target=/root/.nuget/packages \
+    dotnet publish VimSharpApp.csproj -c Release -o /app/publish --verbosity normal
 
 # 使用 .NET 9.0 Runtime 作為執行階段
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
