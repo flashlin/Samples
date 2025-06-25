@@ -23,7 +23,7 @@ interface Key {
 }
 
 const fields = ref<Field[]>([])
-const keys = ref<Key[]>([])
+const uniqueKeys = ref<Key[]>([])
 let fieldId = 1
 let keyId = 1
 const createTableSqlCode = ref('')
@@ -54,7 +54,7 @@ function moveField(idx: number, dir: number) {
 }
 
 function addKeyIndex() {
-  keys.value.push({
+  uniqueKeys.value.push({
     id: keyId++,
     name: '',
     fieldNames: [],
@@ -63,11 +63,11 @@ function addKeyIndex() {
 }
 
 function deleteKeyIndex(idx: number) {
-  keys.value.splice(idx, 1)
+  uniqueKeys.value.splice(idx, 1)
 }
 
 function addTag(keyIdx: number) {
-  const key = keys.value[keyIdx]
+  const key = uniqueKeys.value[keyIdx]
   const val = key.input.trim()
   if (val && !key.fieldNames.includes(val)) {
     key.fieldNames.push(val)
@@ -76,7 +76,7 @@ function addTag(keyIdx: number) {
 }
 
 function removeTag(keyIdx: number, tagIdx: number) {
-  keys.value[keyIdx].fieldNames.splice(tagIdx, 1)
+  uniqueKeys.value[keyIdx].fieldNames.splice(tagIdx, 1)
 }
 
 function onTagInput(keyIdx: number) {
@@ -186,7 +186,7 @@ function generateSql() {
       <button @click="addKeyIndex" class="btn btn-primary px-3 py-1 bg-blue-500 text-white rounded">Add</button>
     </div>
 
-    <!-- Keys Table -->
+    <!-- UNIQUE Keys Table -->
     <div class="overflow-x-auto">
       <div class="min-w-max border rounded">
         <div class="flex font-bold px-2 py-2 bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100">
@@ -195,7 +195,7 @@ function generateSql() {
           <div class="w-64">FieldNames</div>
           <div class="w-24">Action</div>
         </div>
-        <div v-for="(key, idx) in keys" :key="key.id" class="flex items-center border-t px-2 py-1 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+        <div v-for="(key, idx) in uniqueKeys" :key="key.id" class="flex items-center border-t px-2 py-1 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
           <div class="w-10">{{ idx + 1 }}</div>
           <div class="w-40"><input v-model="key.name" type="text" class="input px-1 py-0.5 border rounded w-full" /></div>
           <div class="w-64 flex flex-wrap items-center gap-1">
