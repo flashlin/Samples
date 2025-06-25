@@ -53,7 +53,7 @@ function moveField(idx: number, dir: number) {
   fields.value[newIdx] = temp
 }
 
-function addKey() {
+function addKeyIndex() {
   keys.value.push({
     id: keyId++,
     name: '',
@@ -62,7 +62,7 @@ function addKey() {
   })
 }
 
-function deleteKey(idx: number) {
+function deleteKeyIndex(idx: number) {
   keys.value.splice(idx, 1)
 }
 
@@ -183,7 +183,7 @@ function generateSql() {
     <!-- Key + Add -->
     <div class="flex items-center space-x-4 mt-8">
       <label class="font-bold">Key</label>
-      <button @click="addKey" class="btn btn-primary px-3 py-1 bg-blue-500 text-white rounded">Add</button>
+      <button @click="addKeyIndex" class="btn btn-primary px-3 py-1 bg-blue-500 text-white rounded">Add</button>
     </div>
 
     <!-- Keys Table -->
@@ -219,7 +219,7 @@ function generateSql() {
             </datalist>
           </div>
           <div class="w-24 flex space-x-1">
-            <button @click="deleteKey(idx)" class="btn px-2 py-0.5 bg-red-500 text-white rounded">Delete</button>
+            <button @click="deleteKeyIndex(idx)" class="btn px-2 py-0.5 bg-red-500 text-white rounded">Delete</button>
           </div>
         </div>
       </div>
