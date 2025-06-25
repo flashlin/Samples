@@ -22,6 +22,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('./views/CsvTool.vue'),
   },
   {
+    path: '/tableDesigner',
+    name: 'tableDesigner',
+    component: () => import('./views/TableDesigner.vue'),
+  },
+  {
     path: '/excel',
     name: 'Excel',
     component: () => import('./components/Excel.vue'),
