@@ -138,9 +138,11 @@ function onTagInput(keyIdx: number) {
           <div class="w-10">{{ idx + 1 }}</div>
           <div class="w-40"><input v-model="key.name" type="text" class="input px-1 py-0.5 border rounded w-full" /></div>
           <div class="w-64 flex flex-wrap items-center gap-1">
-            <div v-for="(tag, tIdx) in key.fieldNames" :key="tIdx" class="flex items-center bg-gray-200 dark:bg-gray-700 rounded px-2 py-0.5 mr-1 mb-1">
-              <span>{{ tag }}</span>
-              <button @click="removeTag(idx, tIdx)" class="ml-1 text-gray-500 hover:text-red-500 focus:outline-none">✕</button>
+            <div v-for="(tag, tIdx) in key.fieldNames" :key="tIdx" class="flex items-center bg-gray-200 dark:bg-gray-700 rounded px-1.5 py-0.5 mr-1 mb-1 min-h-6">
+              <span class="text-sm">{{ tag }}</span>
+              <button @click="removeTag(idx, tIdx)" class="ml-1 w-5 h-5 flex items-center justify-center rounded-full bg-gray-300 dark:bg-gray-600 text-gray-500 hover:text-red-500 hover:bg-red-200 dark:hover:bg-red-400 focus:outline-none p-0">
+                <span class="text-xs">✕</span>
+              </button>
             </div>
             <input
               v-model="key.input"
