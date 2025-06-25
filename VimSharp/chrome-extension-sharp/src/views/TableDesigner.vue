@@ -11,6 +11,7 @@ interface Field {
   isIdentify: boolean
   isPkKey: boolean
   description: string
+  isNull: boolean
 }
 
 interface Key {
@@ -33,7 +34,8 @@ function addField() {
     defaultValue: '',
     isIdentify: false,
     isPkKey: false,
-    description: ''
+    description: '',
+    isNull: true
   })
 }
 
@@ -96,8 +98,9 @@ function onTagInput(keyIdx: number) {
           <div class="w-10">No</div>
           <div class="w-32">FieldName</div>
           <div class="w-32">DataType</div>
+          <div class="w-20">IsNull</div>
           <div class="w-32">DefaultValue</div>
-          <div class="w-24">IsIdentify</div>
+          <div class="w-24">IsIdentity</div>
           <div class="w-20">IsPkKey</div>
           <div class="w-40">Description</div>
           <div class="w-32">Action</div>
@@ -106,6 +109,7 @@ function onTagInput(keyIdx: number) {
           <div class="w-10">{{ idx + 1 }}</div>
           <div class="w-32"><input v-model="field.name" type="text" class="input px-1 py-0.5 border rounded w-full" /></div>
           <div class="w-32"><input v-model="field.dataType" type="text" class="input px-1 py-0.5 border rounded w-full" /></div>
+          <div class="w-20 flex justify-center"><input v-model="field.isNull" type="checkbox" class="checkbox" /></div>
           <div class="w-32"><input v-model="field.defaultValue" type="text" class="input px-1 py-0.5 border rounded w-full" /></div>
           <div class="w-24 flex justify-center"><input v-model="field.isIdentify" type="checkbox" class="checkbox" /></div>
           <div class="w-20 flex justify-center"><input v-model="field.isPkKey" type="checkbox" class="checkbox" /></div>
