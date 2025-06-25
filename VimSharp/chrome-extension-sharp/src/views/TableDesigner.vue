@@ -92,7 +92,7 @@ function onTagInput(keyIdx: number) {
     <!-- Fields Table -->
     <div class="overflow-x-auto">
       <div class="min-w-max border rounded">
-        <div class="flex bg-gray-100 font-bold px-2 py-2">
+        <div class="flex font-bold px-2 py-2 bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100">
           <div class="w-10">No</div>
           <div class="w-32">FieldName</div>
           <div class="w-32">DataType</div>
@@ -102,7 +102,7 @@ function onTagInput(keyIdx: number) {
           <div class="w-40">Description</div>
           <div class="w-32">Action</div>
         </div>
-        <div v-for="(field, idx) in fields" :key="field.id" class="flex items-center border-t px-2 py-1">
+        <div v-for="(field, idx) in fields" :key="field.id" class="flex items-center border-t px-2 py-1 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
           <div class="w-10">{{ idx + 1 }}</div>
           <div class="w-32"><input v-model="field.name" type="text" class="input px-1 py-0.5 border rounded w-full" /></div>
           <div class="w-32"><input v-model="field.dataType" type="text" class="input px-1 py-0.5 border rounded w-full" /></div>
@@ -112,8 +112,8 @@ function onTagInput(keyIdx: number) {
           <div class="w-40"><input v-model="field.description" type="text" class="input px-1 py-0.5 border rounded w-full" /></div>
           <div class="w-32 flex space-x-1">
             <button @click="deleteField(idx)" class="btn px-2 py-0.5 bg-red-500 text-white rounded">Delete</button>
-            <button @click="moveField(idx, -1)" :disabled="idx === 0" class="btn px-2 py-0.5 bg-gray-300 rounded">↑</button>
-            <button @click="moveField(idx, 1)" :disabled="idx === fields.length - 1" class="btn px-2 py-0.5 bg-gray-300 rounded">↓</button>
+            <button @click="moveField(idx, -1)" :disabled="idx === 0" class="btn px-2 py-0.5 bg-gray-300 dark:bg-gray-700 dark:text-gray-100 rounded">↑</button>
+            <button @click="moveField(idx, 1)" :disabled="idx === fields.length - 1" class="btn px-2 py-0.5 bg-gray-300 dark:bg-gray-700 dark:text-gray-100 rounded">↓</button>
           </div>
         </div>
       </div>
@@ -128,17 +128,17 @@ function onTagInput(keyIdx: number) {
     <!-- Keys Table -->
     <div class="overflow-x-auto">
       <div class="min-w-max border rounded">
-        <div class="flex bg-gray-100 font-bold px-2 py-2">
+        <div class="flex font-bold px-2 py-2 bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100">
           <div class="w-10">No</div>
           <div class="w-40">IndexName</div>
           <div class="w-64">FieldNames</div>
           <div class="w-24">Action</div>
         </div>
-        <div v-for="(key, idx) in keys" :key="key.id" class="flex items-center border-t px-2 py-1">
+        <div v-for="(key, idx) in keys" :key="key.id" class="flex items-center border-t px-2 py-1 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
           <div class="w-10">{{ idx + 1 }}</div>
           <div class="w-40"><input v-model="key.name" type="text" class="input px-1 py-0.5 border rounded w-full" /></div>
           <div class="w-64 flex flex-wrap items-center gap-1">
-            <div v-for="(tag, tIdx) in key.fieldNames" :key="tIdx" class="flex items-center bg-gray-200 rounded px-2 py-0.5 mr-1 mb-1">
+            <div v-for="(tag, tIdx) in key.fieldNames" :key="tIdx" class="flex items-center bg-gray-200 dark:bg-gray-700 rounded px-2 py-0.5 mr-1 mb-1">
               <span>{{ tag }}</span>
               <button @click="removeTag(idx, tIdx)" class="ml-1 text-gray-500 hover:text-red-500 focus:outline-none">✕</button>
             </div>
