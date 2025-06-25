@@ -84,15 +84,19 @@ function onTagInput(keyIdx: number) {
 }
 
 function generateCreateTableSql() {
+  if( tableName.value === '' ) {
+    return '';
+  }
   let createTableSql = `CREATE TABLE [${tableName.value}] (\n`
   const templateBody = fields.value.map(field => {
-    const isIdentity = field.isIdentify ? 'IDENTITY' : ''
+    const isIdentity = field.isIdentify ? 'IDENTITY(1,1)' : ''
     const defaultValue = field.defaultValue ? `DEFAULT ${field.defaultValue}` : ''
     const isNull = field.isNull ? 'NULL' : 'NOT NULL'
     return `  [${field.name}] ${field.dataType} ${isNull} ${defaultValue} ${isIdentity}`;
   }).join(",\n");
   createTableSql += templateBody
   createTableSql += `\n);\n`
+  createTableSql += "\n\n\n"
   return createTableSql
 }
 
@@ -106,13 +110,30 @@ function generateCreateDescriptionSql() {
 GO`;
   }).join("\n");
   createDescriptionSql += templateBody
+  createDescriptionSql += "\n\n\n"
   return createDescriptionSql
+}
+
+function generateCreatePrimaryKeySql() {
+  let createPrimaryKeySql = `ALTER TABLE [${tableName.value}] ADD CONSTRAINT [PK_${tableName}] PRIMARY KEY CLUSTERED (`
+  const primaryKeys = fields.value.filter(field => field.isPkKey)
+  if( primaryKeys.length === 0 ) {
+    return '';
+  }
+  const templateBody = primaryKeys.map(key => {
+    return `[${key.name}]`
+  }).join(",");
+  createPrimaryKeySql += templateBody
+  createPrimaryKeySql += `);\n`
+  createPrimaryKeySql += "GO\n"
+  createPrimaryKeySql += "\n\n\n"
+  return createPrimaryKeySql
 }
 
 function generateSql() {
   let sql = ''
   sql += generateCreateTableSql()
-  sql += '\n\n\n'
+  sql += generateCreatePrimaryKeySql()
   sql += generateCreateDescriptionSql()
   createTableSqlCode.value = sql
 }
