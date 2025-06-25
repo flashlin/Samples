@@ -27,6 +27,7 @@ const uniqueKeys = ref<Key[]>([])
 let fieldId = 1
 let keyId = 1
 const createTableSqlCode = ref('')
+const cSharpCode = ref('')
 
 function addField() {
   fields.value.push({
@@ -84,7 +85,7 @@ function onTagInput(keyIdx: number) {
 }
 
 function generateCreateTableSql() {
-  if( tableName.value === '' ) {
+  if( fields.value.length === 0 ) {
     return '';
   }
   let createTableSql = `CREATE TABLE [${tableName.value}] (\n`
@@ -155,6 +156,48 @@ GO
   createUniqueKeySql += templateBody
   createUniqueKeySql += "\n\n\n"
   return createUniqueKeySql
+}
+
+function toClassType(dataType: string) {
+  dataType = dataType.toLowerCase();
+  if( dataType.includes('integer') ) {
+    return 'int';
+  }
+  if( dataType.includes('decimal') ) {
+    return 'decimal';
+  }
+  if( dataType.includes('datetime') ) {
+    return 'DateTime';
+  }
+  if( dataType.includes('bit') ) {
+    return 'bool';
+  }
+  if( dataType.includes('varchar') ) {
+    return 'string';
+  }
+  return 'string';
+}
+
+function generateEntityClass() {
+  let entityClass = `public class ${tableName.value}Entity {\n`
+  const templateBody = fields.value.map(field => {
+    const classType = toClassType(field.dataType);
+    return `  public ${classType} ${field.name} { get; set; }`
+  }).join("\n");
+  entityClass += templateBody
+  entityClass += "\n}"
+  return entityClass
+}
+
+function generateCSharpCode() {
+  let csharpCode = generateEntityClass()
+  csharpCode += "\n\n\n"
+  cSharpCode.value = csharpCode
+}
+
+function generateCode(){
+  generateSql()
+  generateCSharpCode()
 }
 </script>
 
@@ -244,8 +287,9 @@ GO
       </div>
     </div>
 
-    <button @click="generateSql" class="btn btn-primary px-3 py-1 bg-blue-500 text-white rounded">Generate</button>
+    <button @click="generateCode" class="btn btn-primary px-3 py-1 bg-blue-500 text-white rounded">Generate</button>
     <CodeEditor v-model="createTableSqlCode" />
+    <CodeEditor v-model="cSharpCode" />
   </div>
 </template>
 
