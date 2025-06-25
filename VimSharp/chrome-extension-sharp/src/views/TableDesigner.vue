@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CodeEditor from '@/components/codeEditor.vue'
 import { ref } from 'vue'
 
 const tableName = ref('')
@@ -25,6 +26,7 @@ const fields = ref<Field[]>([])
 const keys = ref<Key[]>([])
 let fieldId = 1
 let keyId = 1
+const createTableSqlCode = ref('')
 
 function addField() {
   fields.value.push({
@@ -79,6 +81,19 @@ function removeTag(keyIdx: number, tagIdx: number) {
 
 function onTagInput(keyIdx: number) {
   // 可加自動補全邏輯
+}
+
+function generateCreateTableSql() {
+  let createTableSql = `CREATE TABLE [${tableName.value}] (\n`
+  const templateBody = fields.value.map(field => {
+    const isIdentity = field.isIdentify ? 'IDENTITY' : ''
+    const defaultValue = field.defaultValue ? `DEFAULT ${field.defaultValue}` : ''
+    const isNull = field.isNull ? 'NULL' : 'NOT NULL'
+    return `  [${field.name}] ${field.dataType} ${isNull} ${defaultValue} ${isIdentity}`;
+  }).join(",\n");
+  createTableSql += templateBody
+  createTableSql += `\n);`
+  createTableSqlCode.value = createTableSql;
 }
 </script>
 
@@ -167,6 +182,9 @@ function onTagInput(keyIdx: number) {
         </div>
       </div>
     </div>
+
+    <button @click="generateCreateTableSql" class="btn btn-primary px-3 py-1 bg-blue-500 text-white rounded">Generate</button>
+    <CodeEditor v-model="createTableSqlCode" />
   </div>
 </template>
 
