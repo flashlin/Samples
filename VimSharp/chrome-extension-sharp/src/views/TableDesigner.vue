@@ -116,7 +116,7 @@ GO`;
 }
 
 function generateCreatePrimaryKeySql() {
-  let createPrimaryKeySql = `ALTER TABLE [${tableName.value}] ADD CONSTRAINT [PK_${tableName}] PRIMARY KEY CLUSTERED (`
+  let createPrimaryKeySql = `ALTER TABLE [${tableName.value}] ADD CONSTRAINT [PK_${tableName.value}] PRIMARY KEY CLUSTERED (`
   const primaryKeys = fields.value.filter(field => field.isPkKey)
   if( primaryKeys.length === 0 ) {
     return '';
