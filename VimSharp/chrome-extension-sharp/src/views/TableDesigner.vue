@@ -147,8 +147,12 @@ function generateUniqueKeySql() {
   let createUniqueKeySql = ''
   const templateBody = uniqueKeys.value.map(key => {
     const keyDashNames = key.fieldNames.map(name => `${name}`).join('_');
+    let indexName = `UIX_${tableName.value}_${keyDashNames}`
+    if( key.name !== '' ) {
+      indexName = `UIX_${key.name}`
+    }
     const keyNames = key.fieldNames.map(name => `[${name}]`).join(',');
-    return `CREATE UNIQUE INDEX [UIX_${tableName.value}_${keyDashNames}] ON [${tableName.value}] (${keyNames})
+    return `CREATE UNIQUE INDEX [${indexName}] ON [${tableName.value}] (${keyNames})
     WITH (PAD_INDEX = OFF, ONLINE = ON, FILLFACTOR = 95) ON [PRIMARY]
 GO
 `
@@ -218,7 +222,7 @@ function generateEntityClass() {
     return `  public ${classType} ${field.name} { get; set; }`
   }).join("\n");
   entityClass += templateBody
-  entityClass += "}\n"
+  entityClass += "\n}\n"
   entityClass += "\n\n\n"
   return entityClass
 }
