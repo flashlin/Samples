@@ -142,6 +142,12 @@ py() {
   python "$@"
 }
 
+# 複製目前目錄路徑到剪貼簿
+cpwd() {
+  pwd | pbcopy
+  echo "\033[32m已複製到剪貼簿\033[0m"
+}
+
 # 列出正在監聽的 TCP 連接埠
 port() {
   sudo lsof -nP -iTCP -sTCP:LISTEN
