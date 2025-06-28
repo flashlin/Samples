@@ -160,7 +160,15 @@ lf() {
     return 1
   fi
   pattern="$1"
-  find . -type f | awk -F/ '{path=$0; name=$NF; sub(name, "\033[32m" name "\033[0m", path); print path}' | grep -E "$pattern"
+  find . -type f | while read -r filepath; do
+    dir=$(dirname "$filepath")
+    file=$(basename "$filepath")
+    if [[ $file =~ $pattern ]]; then
+      # 將符合 regex 的部分標綠色
+      colored_file=$(echo "$file" | sed -E "s/($pattern)/\x1b[32m\\1\x1b[0m/g")
+      echo -e "$dir/$colored_file"
+    fi
+  done
 }
 
 # ===== 自定義函數區塊結束 =====
