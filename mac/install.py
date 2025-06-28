@@ -153,6 +153,16 @@ port() {
   sudo lsof -nP -iTCP -sTCP:LISTEN
 }
 
+# 以正則表達式搜尋檔名，並用綠色標記符合的名稱
+lf() {
+  if [ $# -eq 0 ]; then
+    echo "用法: lf 'regex'"
+    return 1
+  fi
+  pattern="$1"
+  find . -type f | awk -F/ '{path=$0; name=$NF; sub(name, "\033[32m" name "\033[0m", path); print path}' | grep -E "$pattern"
+}
+
 # ===== 自定義函數區塊結束 =====
 '''
 
