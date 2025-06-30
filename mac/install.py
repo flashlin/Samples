@@ -114,7 +114,7 @@ dkl() {
   docker ps --filter "status=running" --format '{{.ID}} {{.Names}}' \
     | fzf --ansi --prompt='選擇正常容器: ' --header='hashid name' \
     | awk '{print $1}' \
-    | xargs -r docker logs --tail 30
+    | xargs -r docker logs --tail 50
 }
 
 # 進入容器 bash 指令
