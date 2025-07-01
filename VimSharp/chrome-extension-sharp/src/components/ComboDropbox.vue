@@ -1,15 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed, watch, defineProps, defineEmits } from 'vue';
-
-// 新增 DropboxItem class
-export class DropboxItem {
-  label: string;
-  value: string;
-  constructor(label: string, value: string) {
-    this.label = label;
-    this.value = value;
-  }
-}
+import { DropboxItem } from './ComboDropboxTypes';
 
 // 定義 props
 const props = defineProps<{
