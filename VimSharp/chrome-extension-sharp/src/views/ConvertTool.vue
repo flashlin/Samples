@@ -5,6 +5,7 @@ import { convertTableFormatToCsv, convertJsonFormatToCsv, convertCsvFormatToJson
 import { copyFromClipboard, pasteToClipboard } from '../tools/clipboardTool'
 import { translateToEnAsync, translateToZhAsync } from '../tools/translateApi'
 import Loading from '@/components/Loading.vue'
+import TabControl, { TabItem } from '@/components/TabControl.vue'
 
 defineProps<{ msg: string }>()
 
@@ -15,6 +16,11 @@ const code = ref(`id name age
 `)
 const codeHistory = ref<string[]>([])
 const clipboardError = ref('')
+const tabList: TabItem[] = [
+  { id: 'clipboard', name: '剪貼簿' },
+  { id: 'csv', name: 'CSV' },
+  { id: 'translate', name: '翻譯' },
+]
 const activeTab = ref('clipboard')
 const inputDelimiter = ref('\t')
 const inputDelimiterDisplay = ref('\\t')
@@ -51,18 +57,6 @@ watch(selectedHeaders, (newHeaders) => {
     code.value = cutCsvText(csvText.value, orderedHeaders, ',')
   }
 })
-
-// 新增：標籤頁列表
-interface TabItem {
-  id: string
-  name: string
-}
-
-const tabList: TabItem[] = [
-  { id: 'clipboard', name: '剪貼簿' },
-  { id: 'csv', name: 'CSV' },
-  { id: 'translate', name: '翻譯' },
-]
 
 function clickTableToCsv() {
   const inputText = code.value
@@ -164,82 +158,67 @@ function runCode() {
 <template>
   <Loading v-if="isLoading" />
   <div class="control-panel">
-    <div class="tabs">
-      <button 
-        v-for="tab in tabList"
-        :key="tab.id"
-        class="tab-button" 
-        :class="{ active: activeTab === tab.id }"
-        @click="activeTab = tab.id"
-      >
-        {{ tab.name }}
-      </button>
-    </div>
-
-    <div class="tab-panels">
-      <!-- 剪貼簿面板 -->
-      <div v-if="activeTab === 'clipboard'" class="tab-panel">
-        <button type="button" @click="handleCopyFromClipboard">從剪貼簿複製</button>
-        <p v-if="clipboardError" class="error-message">{{ clipboardError }}</p>
-      </div>
-
-      <!-- CSV 面板 -->
-      <div v-if="activeTab === 'csv'" class="tab-panel">
-        <div class="buttons-row">
-          <button type="button" @click="clickTableToCsv">Table To CSV</button>
-          <button type="button" @click="clickJsonToCsv">Json To CSV</button>
-          <button type="button" @click="clickCsvToJson">CSV To Json</button>
-          <button type="button" @click="clickCsvToTable">CSV To Table</button>
-          <button type="button" @click="clickCsvToSql">CSV To SQL</button>
+    <TabControl :tabList="tabList" v-model:activeTab="activeTab">
+      <template #clipboard>
+        <div class="tab-panel">
+          <button type="button" @click="handleCopyFromClipboard">從剪貼簿複製</button>
+          <p v-if="clipboardError" class="error-message">{{ clipboardError }}</p>
         </div>
-        <div class="delimiter-row">
-          <label for="delimiter-input">Table delimiter:</label>
-          <input 
-            id="delimiter-input"
-            type="text" 
-            v-model="inputDelimiterDisplay"
-            class="delimiter-input"
-            title="使用 \t 表示 Tab，\n 表示換行"
-          />
-        </div>
-        <div class="delimiter-row">
-          <label for="delimiter-input">To Table Name:</label>
-          <input 
-            type="text" 
-            v-model="tableName"
-            class="delimiter-input"
-            title="to table name"
-          />
-        </div>
-
-        <!-- 顯示表頭（checkbox 方式，每個 header 一個 checkbox） -->
-        <div class="delimiter-row" style="flex-direction: column; align-items: flex-start;">
-          <label>Table headers:</label>
-          <div style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px;">
-            <div v-for="header in csvHeaders" :key="header">
-              <label>
-                <input type="checkbox" :value="header" v-model="selectedHeaders" />
-                {{ header }}
-              </label>
+      </template>
+      <template #csv>
+        <div class="tab-panel">
+          <div class="buttons-row">
+            <button type="button" @click="clickTableToCsv">Table To CSV</button>
+            <button type="button" @click="clickJsonToCsv">Json To CSV</button>
+            <button type="button" @click="clickCsvToJson">CSV To Json</button>
+            <button type="button" @click="clickCsvToTable">CSV To Table</button>
+            <button type="button" @click="clickCsvToSql">CSV To SQL</button>
+          </div>
+          <div class="delimiter-row">
+            <label for="delimiter-input">Table delimiter:</label>
+            <input 
+              id="delimiter-input"
+              type="text" 
+              v-model="inputDelimiterDisplay"
+              class="delimiter-input"
+              title="使用 \t 表示 Tab，\n 表示換行"
+            />
+          </div>
+          <div class="delimiter-row">
+            <label for="delimiter-input">To Table Name:</label>
+            <input 
+              type="text" 
+              v-model="tableName"
+              class="delimiter-input"
+              title="to table name"
+            />
+          </div>
+          <div class="delimiter-row" style="flex-direction: column; align-items: flex-start;">
+            <label>Table headers:</label>
+            <div style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px;">
+              <div v-for="header in csvHeaders" :key="header">
+                <label>
+                  <input type="checkbox" :value="header" v-model="selectedHeaders" />
+                  {{ header }}
+                </label>
+              </div>
             </div>
           </div>
+          <div class="buttons-row">
+            <button type="button" @click="clickUndo">Undo</button>
+          </div>
         </div>
-        
-        <div class="buttons-row">
-          <button type="button" @click="clickUndo">Undo</button>
+      </template>
+      <template #translate>
+        <div class="tab-panel">
+          <div class="buttons-row">
+            <button type="button" @click="clickTranslateToEn">To 英文</button>
+            <button type="button" @click="clickTranslateToZh">To 中文</button>
+          </div>
         </div>
-      </div>
-
-      <!-- 翻譯面板 -->
-      <div v-if="activeTab === 'translate'" class="tab-panel">
-        <div class="buttons-row">
-          <button type="button" @click="clickTranslateToEn">To 英文</button>
-          <button type="button" @click="clickTranslateToZh">To 中文</button>
-        </div>
-      </div>
-    </div>
+      </template>
+    </TabControl>
   </div>
-
   <div class="editor-container">
     <textarea 
       class="code-editor" 
