@@ -46,6 +46,11 @@ const routes: RouteRecordRaw[] = [
     name: 'mgmtScorePrediction',
     component: () => import('./views/mgmtScorePrediction.vue'),
   },
+  {
+    path: '/test',
+    name: 'test',
+    component: () => import('./views/TestView.vue'),
+  },
 ]
 
 const router = createRouter({

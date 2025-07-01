@@ -19,12 +19,13 @@ export class LoginResp {
 
 // QueryReq
 export class QueryReq {
+  dbFullName!: string;
   sql!: string;
 }
 
 // QueryResp
 export class QueryResp {
-  data?: DataTable | null;
+  data: DataTable | null;
   message: string = "";
 }
 
