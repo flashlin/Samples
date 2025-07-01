@@ -1,9 +1,19 @@
 <script lang="ts" setup>
 import { ref, computed, watch, defineProps, defineEmits } from 'vue';
 
+// 新增 DropboxItem class
+export class DropboxItem {
+  label: string;
+  value: string;
+  constructor(label: string, value: string) {
+    this.label = label;
+    this.value = value;
+  }
+}
+
 // 定義 props
 const props = defineProps<{
-  list: { label: string; value: string }[];
+  list: DropboxItem[];
   modelValue: string;
 }>();
 
@@ -16,7 +26,7 @@ const filteredList = computed(() => {
   return props.list.filter(item => item.label.toLowerCase().includes(inputValue.value.toLowerCase()));
 });
 
-const selectItem = (item: { label: string; value: string }) => {
+const selectItem = (item: DropboxItem) => {
   emit('update:modelValue', item.value);
   emit('onChange', item);
   isOpen.value = false;
