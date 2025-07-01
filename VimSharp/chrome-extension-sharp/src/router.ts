@@ -27,6 +27,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('./views/TableDesigner.vue'),
   },
   {
+    path: '/artemis',
+    name: 'artemis',
+    component: () => import('./views/ArtemisTool.vue'),
+  },
+  {
     path: '/excel',
     name: 'Excel',
     component: () => import('./components/Excel.vue'),

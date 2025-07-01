@@ -8,6 +8,7 @@ const cards = [
   { icon: vueIcon, title: 'Csv', path: 'csv' },
   { icon: vueIcon, title: 'TableDesigner', path: 'tableDesigner' },
   { icon: vueIcon, title: 'ScorePrediction', path: 'mgmtScorePrediction' },
+  { icon: vueIcon, title: 'Artemis', path: 'artemis' },
 ]
 </script>
 <template>
