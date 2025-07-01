@@ -36,25 +36,23 @@ export class GetScreenHistoryResp {
 
 export class ArtemisApi {
     private _jwtApi: JwtApi;
-    private _urlPrefix: string;
   
     constructor(apiUrl: string = defaultUrl, urlPrefix: string = '/api/artemis') {
       this._jwtApi = new JwtApi(apiUrl, urlPrefix);
-      this._urlPrefix = urlPrefix;
     }
 
     // 登入
     async login(req: LoginReq): Promise<LoginResp> {
-      return await this._jwtApi.postAsync<LoginResp>(`${this._urlPrefix}/login`, req);
+      return await this._jwtApi.postAsync<LoginResp>(`/login`, req);
     }
 
     // 查詢
     async query(req: QueryReq): Promise<QueryResp> {
-      return await this._jwtApi.postAsync<QueryResp>(`${this._urlPrefix}/query`, req);
+      return await this._jwtApi.postAsync<QueryResp>(`/query`, req);
     }
 
     // 取得螢幕歷史（回傳 base64 image array）
     async getScreenHistory(): Promise<GetScreenHistoryResp> {
-      return await this._jwtApi.postAsync<GetScreenHistoryResp>(`${this._urlPrefix}/getScreenHistory`, {});
+      return await this._jwtApi.postAsync<GetScreenHistoryResp>(`/getScreenHistory`, {});
     }
 }
