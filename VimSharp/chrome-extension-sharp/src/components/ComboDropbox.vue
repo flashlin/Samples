@@ -6,6 +6,7 @@ import { DropboxItem } from './ComboDropboxTypes';
 const props = defineProps<{
   list: DropboxItem[];
   modelValue: string;
+  placeholder?: string;
 }>();
 
 // 雙向綁定 value
@@ -16,6 +17,9 @@ const filteredList = computed(() => {
   if (!inputValue.value) return props.list;
   return props.list.filter(item => item.label.toLowerCase().includes(inputValue.value.toLowerCase()));
 });
+
+// 預設 placeholder
+const placeholderText = computed(() => props.placeholder ?? 'Please enter keywords...');
 
 const selectItem = (item: DropboxItem) => {
   emit('update:modelValue', item.value);
@@ -88,7 +92,7 @@ watch([filteredList, isOpen], () => {
       @blur="onBlur"
       @keydown="onKeydown"
       style="width: 100%; padding: 8px; border: 1px solid #333; border-radius: 4px; background: #222; color: #eee;"
-      placeholder="Please enter keywords..."
+      :placeholder="placeholderText"
     />
     <ul v-if="isOpen && filteredList.length" class="dropbox-list" style="position: absolute; z-index: 10; width: 100%; background: #222; border: 1px solid #333; border-radius: 4px; max-height: 180px; overflow-y: auto; margin: 0; padding: 0; list-style: none;">
       <li

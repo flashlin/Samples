@@ -85,7 +85,7 @@ async function getScreenHistory() {
 
           <div>
               <label class="block mb-1 font-bold">Use Database</label>
-              <ComboDropbox :list="dbFullNameList" v-model="dbFullNameSelected" />
+              <ComboDropbox :list="dbFullNameList" v-model="dbFullNameSelected" placeholder="please input database name..."/>
           </div>
 
           <div>
