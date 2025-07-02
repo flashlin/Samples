@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 import CodeEditor from '@/components/codeEditor.vue';
 import { DataTable } from '@/tools/dataTypes';
@@ -7,6 +7,7 @@ import { ArtemisApi } from '@/tools/artemisApi';
 import { DropboxItem } from '@/components/ComboDropboxTypes';
 import ComboDropbox from '@/components/ComboDropbox.vue';
 import TabControl from '@/components/TabControl.vue';
+import { LoadingState, ProvideKeys } from '@/tools/ProvideTypes';
 
 const dbFullNameList = ref<DropboxItem[]>([]);
 const dbFullNameSelected = ref<string>('AccountDB (maia-z601)');
@@ -28,8 +29,10 @@ const envNameList = ref<DropboxItem[]>([
   { label: 'Production', value: 'production' }
 ]);
 const loginErrorMessage = ref<string | null>(null);
+const loadingState = inject(ProvideKeys.LoadingState) as LoadingState;
 
 async function login() {
+    loadingState.isLoading = true;
     let artemis = new ArtemisApi();
     try{
       await artemis.login({
@@ -44,6 +47,8 @@ async function login() {
         } else {
             loginErrorMessage.value = '發生未知錯誤';
         }
+    } finally {
+      loadingState.isLoading = false;
     }
 }
 

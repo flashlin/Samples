@@ -1,10 +1,19 @@
 <script setup lang="ts">
+import { provide, ref, reactive } from 'vue';
+import Loading from '@/components/Loading.vue';
+import { ProvideKeys } from '@/tools/ProvideTypes';
 // 判斷是否為開發模式
 // const isDev = import.meta.env.MODE === 'development';
+
+const loadingState = reactive({
+  isLoading: false
+});
+provide(ProvideKeys.LoadingState, loadingState);
 </script>
 
 <template>
   <div class="app-container">
+    <Loading v-if="loadingState.isLoading" />
     <RouterView />
   </div>
 </template>
