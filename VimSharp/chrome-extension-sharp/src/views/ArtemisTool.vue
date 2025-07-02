@@ -27,14 +27,24 @@ const envNameList = ref<DropboxItem[]>([
   { label: 'Staging', value: 'staging' },
   { label: 'Production', value: 'production' }
 ]);
+const loginErrorMessage = ref<string | null>(null);
 
 async function login() {
     let artemis = new ArtemisApi();
-    await artemis.login({
-        env_name: envName.value,
-        username: loginName.value, 
-        password: password.value 
-    });
+    try{
+      await artemis.login({
+          env_name: envName.value,
+          username: loginName.value, 
+          password: password.value 
+      });
+      loginErrorMessage.value = null;
+    } catch(e: unknown){
+        if (e instanceof Error) {
+            loginErrorMessage.value = e.message;
+        } else {
+            loginErrorMessage.value = '發生未知錯誤';
+        }
+    }
 }
 
 async function test() {
@@ -105,6 +115,7 @@ async function getScreenHistory() {
           <label class="font-bold">Password</label>
           <input type="password" v-model="password" class="border rounded px-2 py-1 bg-gray-900 text-white" />
           <button @click="login" class="mt-2 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Login</button>
+          <span v-if="loginErrorMessage" class="text-red-500 mt-1">{{ loginErrorMessage }}</span>
         </div>
       </template>
     </TabControl>
