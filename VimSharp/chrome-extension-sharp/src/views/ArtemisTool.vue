@@ -22,6 +22,10 @@ const dt = ref<DataTable | null>(null);
 const screenHistory = ref<string[]>([]);
 const popupImage = ref<string | null>(null);
 const activeTab = ref('query');
+const envNameList = ref<DropboxItem[]>([
+  { label: 'Staging', value: 'staging' },
+  { label: 'Production', value: 'production' }
+]);
 
 async function login() {
     let artemis = new ArtemisApi();
@@ -94,7 +98,7 @@ async function getScreenHistory() {
       <template #connect>
         <div class="flex flex-col space-y-2 w-64">
           <label class="font-bold">EnvName</label>
-          <input type="text" v-model="envName" class="border rounded px-2 py-1 bg-gray-900 text-white" />
+          <ComboDropbox :list="envNameList" v-model="envName" />
           <label class="font-bold">LoginName</label>
           <input type="text" v-model="loginName" class="border rounded px-2 py-1 bg-gray-900 text-white" />
           <label class="font-bold">Password</label>
