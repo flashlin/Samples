@@ -5,6 +5,7 @@ import CodeEditor from '@/components/codeEditor.vue';
 import { DataTable } from '@/tools/dataTypes';
 import { ArtemisApi } from '@/tools/artemisApi';
 import { DropboxItem } from '@/components/ComboDropboxTypes';
+import ComboDropbox from '@/components/ComboDropbox.vue';
 import TabControl from '@/components/TabControl.vue';
 
 const dbFullNameList = ref<DropboxItem[]>([]);
