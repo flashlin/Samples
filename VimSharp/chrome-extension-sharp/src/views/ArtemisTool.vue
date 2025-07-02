@@ -40,12 +40,12 @@ async function login() {
           username: loginName.value, 
           password: password.value 
       });
-      loginErrorMessage.value = null;
+      loginErrorMessage.value = "Login Success";
     } catch(e: unknown){
         if (e instanceof Error) {
             loginErrorMessage.value = e.message;
         } else {
-            loginErrorMessage.value = '發生未知錯誤';
+            loginErrorMessage.value = null;
         }
     } finally {
       loadingState.isLoading = false;
@@ -75,7 +75,6 @@ async function getScreenHistory() {
       <template #query>
         <div>
           <div>
-              <button @click="login">Login</button>
               <button @click="test">TEST</button>
               <button @click="getScreenHistory">Get Screen History</button>
           </div>
@@ -85,6 +84,7 @@ async function getScreenHistory() {
           </div>
 
           <div>
+              <label class="block mb-1 font-bold">Use Database</label>
               <ComboDropbox :list="dbFullNameList" v-model="dbFullNameSelected" />
           </div>
 
