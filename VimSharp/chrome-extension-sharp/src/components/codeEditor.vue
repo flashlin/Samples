@@ -148,7 +148,7 @@ defineExpose({
   </div>
 </template>
 
-<style>
+<style scoped>
 .codemirror-editor {
   height: 100%;
   border-radius: 8px;
@@ -159,20 +159,20 @@ defineExpose({
 }
 
 /* 覆蓋 CodeMirror completion 的暗黑主題樣式 */
-.cm-tooltip-autocomplete {
-  background: #181c24 !important; /* 彈出清單背景，與編輯器一致 */
-  color: #c9d1d9 !important;      /* 項目文字顏色 */
+:deep(.cm-tooltip-autocomplete) {
+  background: #181c24 !important;
+  color: #c9d1d9 !important;
   border: 1px solid #222 !important;
 }
-.cm-tooltip-autocomplete .cm-completionLabel {
-  color: #c9d1d9 !important;      /* 項目文字顏色 */
+:deep(.cm-tooltip-autocomplete .cm-completionLabel) {
+  color: #c9d1d9 !important;
 }
-.cm-tooltip-autocomplete .cm-completionIcon {
-  color: #8b949e !important;      /* icon 顏色 */
+:deep(.cm-tooltip-autocomplete .cm-completionIcon) {
+  color: #8b949e !important;
 }
-.cm-tooltip-autocomplete .cm-completionSelected {
-  background: #388bfd !important; /* 亮藍色 */
-  color: #fff !important;         /* 亮色文字 */
+:deep(.cm-tooltip-autocomplete .cm-completionSelected) {
+  background: #388bfd !important;
+  color: #fff !important;
 }
 </style>
 
