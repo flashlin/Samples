@@ -1,9 +1,3 @@
-<template>
-  <div class="vim-editor-root" style="height: 600px;">
-    <div ref="editorRoot" class="" style="height:100%"></div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { EditorView, keymap, ViewUpdate } from '@codemirror/view'
@@ -147,6 +141,12 @@ defineExpose({
   getContextWithCursor
 })
 </script>
+
+<template>
+  <div class="vim-editor-root" style="height: 600px;">
+    <div ref="editorRoot" class="" style="height:100%"></div>
+  </div>
+</template>
 
 <style scoped>
 .codemirror-editor {
