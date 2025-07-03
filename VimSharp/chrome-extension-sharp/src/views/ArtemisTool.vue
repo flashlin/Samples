@@ -9,6 +9,7 @@ import ComboDropbox from '@/components/ComboDropbox.vue';
 import TabControl from '@/components/TabControl.vue';
 import { LoadingState, ProvideKeys } from '@/tools/ProvideTypes';
 import { IntellisenseContext } from '@/components/codeEditorTypes';
+import { tokenizeSql } from '@/t1-sqlts/SqlTokenizer';
 
 const dbFullNameList = ref<DropboxItem[]>([]);
 const dbFullNameSelected = ref<string>('AccountDB (maia-z601)');
@@ -71,6 +72,18 @@ async function onShowLinqtsqlIntellisense(context: IntellisenseContext) {
   // 這裡 context.content 是 [before, after]
   // 你可以根據 context 內容回傳 IntellisenseItem[]
   // 例如：
+  const prevTokens = tokenizeSql(context.content[0]);
+  if (prevTokens.length === 0) {
+    return [
+      { title: 'FROM', context: 'FROM ' },
+    ];
+  }
+  if (prevTokens[prevTokens.length - 1] === 'FROM') {
+    return [
+      { title: 'Customer', context: 'Customer ' },
+      { title: 'CustomerExtraInfo', context: 'CustomerExtraInfo ' },
+    ];
+  }
   return [
     { title: 'SELECT', context: 'SELECT ' },
     { title: 'FROM', context: 'FROM ' },

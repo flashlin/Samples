@@ -1,4 +1,4 @@
-import { StringParser, TextSpan } from './StringParser';
+import { StringParser } from './StringParser';
 
 export class SqlTokenizer {
     private _parser: StringParser;
@@ -35,4 +35,15 @@ export class SqlTokenizer {
         this._parser.nextChar();
         return ch;
     }
+}
+
+export function tokenizeSql(sql: string): string[] {
+    const tokenizer = new SqlTokenizer(sql);
+    const tokens: string[] = [];
+    while (true) {
+        const token = tokenizer.nextToken();
+        if (token === '') break;
+        tokens.push(token);
+    }
+    return tokens;
 }
