@@ -13,19 +13,11 @@ import { defaultKeymap } from '@codemirror/commands'
 import { autocompletion, CompletionContext, CompletionResult, closeCompletion } from '@codemirror/autocomplete'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { startCompletion } from '@codemirror/autocomplete'
-
-export interface IntellisenseItem {
-  title: string
-  context: string
-}
-
-export interface IntellisenseContext {
-  content: string[]
-}
+import type { IntellisenseItem, OnShowIntellisenseFn } from './codeEditorTypes'
 
 interface VimCodeEditorProps {
   modelValue: string
-  onShowIntellisense?: (context: IntellisenseContext) => Promise<IntellisenseItem[]>
+  onShowIntellisense?: OnShowIntellisenseFn
 }
 
 const props = withDefaults(defineProps<VimCodeEditorProps>(), {})

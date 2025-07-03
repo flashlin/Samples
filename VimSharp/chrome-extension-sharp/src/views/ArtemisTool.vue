@@ -8,6 +8,7 @@ import { DropboxItem } from '@/components/ComboDropboxTypes';
 import ComboDropbox from '@/components/ComboDropbox.vue';
 import TabControl from '@/components/TabControl.vue';
 import { LoadingState, ProvideKeys } from '@/tools/ProvideTypes';
+import { IntellisenseContext } from '@/components/codeEditorTypes';
 
 const dbFullNameList = ref<DropboxItem[]>([]);
 const dbFullNameSelected = ref<string>('AccountDB (maia-z601)');
@@ -30,6 +31,7 @@ const envNameList = ref<DropboxItem[]>([
 ]);
 const loginErrorMessage = ref<string | null>(null);
 const loadingState = inject(ProvideKeys.LoadingState) as LoadingState;
+const linqtsqlEditorRef = ref()
 
 async function login() {
     loadingState.isLoading = true;
@@ -64,6 +66,23 @@ async function getScreenHistory() {
     let resp = await artemis.getScreenHistory();
     screenHistory.value = resp.history;
 }
+
+async function onShowLinqtsqlIntellisense(context: IntellisenseContext) {
+  // 這裡 context.content 是 [before, after]
+  // 你可以根據 context 內容回傳 IntellisenseItem[]
+  // 例如：
+  return [
+    { title: 'SELECT', context: 'SELECT ' },
+    { title: 'FROM', context: 'FROM ' },
+    { title: 'WHERE', context: 'WHERE ' },
+    { title: 'ORDER BY', context: 'ORDER BY ' },
+    { title: 'GROUP BY', context: 'GROUP BY ' },
+    { title: 'HAVING', context: 'HAVING ' },
+    { title: 'UNION', context: 'UNION ' },
+    { title: 'INTERSECT', context: 'INTERSECT ' },
+    // ...更多提示
+  ]
+}
 </script>
 
 <template>
@@ -91,7 +110,7 @@ async function getScreenHistory() {
           <div>
             <label class="block mb-1 font-bold">Code Editor</label>
             <div style="height: 200px;">
-              <CodeEditor ref="linqtsqlEditorRef" v-model="linqtsql" class="w-full h-full" />
+              <CodeEditor ref="linqtsqlEditorRef" v-model="linqtsql" class="w-full h-full" :onShowIntellisense="onShowLinqtsqlIntellisense" />
             </div>
           </div>
 
