@@ -84,6 +84,8 @@ async function onShowLinqtsqlIntellisense(context: IntellisenseContext) {
       { title: 'CustomerExtraInfo', context: 'CustomerExtraInfo ' },
     ];
   }
+  const question = context.content[0] + " {cursor} " + context.content[1];
+  
   return [
     { title: 'SELECT', context: 'SELECT ' },
     { title: 'FROM', context: 'FROM ' },
