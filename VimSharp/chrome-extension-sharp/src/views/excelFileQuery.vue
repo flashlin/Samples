@@ -3,13 +3,13 @@ import FileUpload, { FileUploadInstance } from '@/components/FileUpload.vue';
 import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/excelKit';
 import { ref, onMounted, onUnmounted } from 'vue';
 //import VimCodeEditor from '@/components/vimCodeEditor.vue';
-import VimCodeEditor from '@/components/CodeEditor1.vue';
+import VimCodeEditor from '@/components/CodeEditor.vue';
 import { createTableAsync, dropTableAsync, insertDataTableAsync, querySqliteAsync } from '@/tools/waSqlite';
 import { DataTable as DataTableType } from '@/tools/dataTypes';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 import { goTo } from '@/tools/visual-router'
 import { useSupportStore } from '@/SupportStore';
-import type { IntellisenseContext } from '@/components/CodeEditor1.vue';
+import type { IntellisenseContext } from '@/components/CodeEditor.vue';
 import { useIntellisenseApi } from '@/tools/intellisenseApi';
 
 interface ExcelFile {

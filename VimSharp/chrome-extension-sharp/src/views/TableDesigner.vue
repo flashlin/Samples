@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CodeEditor from '@/components/CodeEditor1.vue'
+import CodeEditor from '@/components/CodeEditor.vue'
 import { ref } from 'vue'
 
 const tableName = ref('')

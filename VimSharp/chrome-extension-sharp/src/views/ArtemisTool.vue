@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import { inject, ref } from 'vue';
 import LargeDataTable from '@/components/LargeDataTable.vue';
-import CodeEditor from '@/components/CodeEditor1.vue';
+import CodeEditor from '@/components/CodeEditor.vue';
 import { DataTable } from '@/tools/dataTypes';
 import { ArtemisApi } from '@/tools/artemisApi';
 import { DropboxItem } from '@/components/ComboDropboxTypes';
 import ComboDropbox from '@/components/ComboDropbox.vue';
 import TabControl from '@/components/TabControl.vue';
 import { LoadingState, ProvideKeys } from '@/tools/ProvideTypes';
-import { IntellisenseContext } from '@/components/CodeEditorTypes1';
+import { IntellisenseContext } from '@/components/CodeEditorTypes';
 import { tokenizeSql } from '@/t1-sqlts/SqlTokenizer';
 
 const dbFullNameList = ref<DropboxItem[]>([]);
