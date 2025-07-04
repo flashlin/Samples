@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 import { getCsvDataTableColumns, processCsvRowsToString } from '../tools/textTool'
 import Loading from '@/components/Loading.vue'
-import CodeEditor from '@/components/codeEditor.vue';
+import CodeEditor from '@/components/CodeEditor1.vue';
 import Handlebars from 'handlebars';
 
 const generateTemplateEditorRef = ref<any>(null)

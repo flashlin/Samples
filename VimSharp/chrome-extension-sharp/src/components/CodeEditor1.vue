@@ -7,7 +7,7 @@ import { defaultKeymap } from '@codemirror/commands'
 import { autocompletion, CompletionContext, CompletionResult, closeCompletion } from '@codemirror/autocomplete'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { startCompletion } from '@codemirror/autocomplete'
-import type { IntellisenseItem, OnShowIntellisenseFn } from './codeEditorTypes'
+import type { IntellisenseItem, OnShowIntellisenseFn } from './CodeEditorTypes1'
 
 interface VimCodeEditorProps {
   modelValue: string
