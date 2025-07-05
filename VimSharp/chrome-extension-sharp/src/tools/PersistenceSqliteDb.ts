@@ -19,7 +19,8 @@ export class PersistenceSqliteDb {
   private dbName = 'sqlite-schema-db';
   private withSQLiteDbAsync: WithSQLiteDbAsyncFn;
 
-  constructor(withSQLiteDbAsync: WithSQLiteDbAsyncFn) {
+  constructor(dbName: string, withSQLiteDbAsync: WithSQLiteDbAsyncFn) {
+    this.dbName = dbName;
     this.withSQLiteDbAsync = withSQLiteDbAsync;
   }
 

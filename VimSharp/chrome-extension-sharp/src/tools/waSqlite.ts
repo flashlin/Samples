@@ -3,6 +3,7 @@ import SQLiteESMFactory from 'wa-sqlite/dist/wa-sqlite.mjs'
 import * as SQLite from 'wa-sqlite'
 import Handlebars from 'handlebars'
 import { DataTable, guessType } from './dataTypes'
+import { PersistenceSqliteDb } from './PersistenceSqliteDb';
 
 /**
  * Create a table in SQLite database based on DataTable definition
@@ -114,4 +115,12 @@ export async function withSQLiteDbAsync(callback: (sqlite3: SQLiteAPI, db: numbe
   } finally {
     await sqlite3.close(db);
   }
+}
+
+const idb = new PersistenceSqliteDb('supportDb', withSQLiteDbAsync);
+export async function backupSqliteDbAsync() {
+  await idb.saveTableSchemasWithDataAsync();
+}
+export async function restoreSqliteDbAsync() {
+  await idb.restoreTableSchemasWithDataAsync();
 }
