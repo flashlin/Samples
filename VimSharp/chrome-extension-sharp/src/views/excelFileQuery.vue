@@ -9,7 +9,7 @@ import { DataTable as DataTableType } from '@/tools/dataTypes';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 import { goTo } from '@/tools/visual-router'
 import { useSupportStore } from '@/SupportStore';
-import type { IntellisenseContext } from '@/components/CodeEditor.vue';
+import type { IntellisenseContext } from '@/components/CodeEditorTypes';
 import { useIntellisenseApi } from '@/tools/intellisenseApi';
 
 interface ExcelFile {
