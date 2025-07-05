@@ -64,13 +64,20 @@ export class PersistenceSqliteDb {
    * 儲存單一 table schema 到 idb
    */
   async saveTableSchemaAsync(tableSchema: TableSchema) {
-    const idb = await openDB<SchemaDB>(this.dbName, 1, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains('tableSchemas')) {
-          db.createObjectStore('tableSchemas', { keyPath: 'name' });
-        }
-      },
-    });
+    // 先開啟 DB，檢查 object store 是否存在
+    let idb: any;
+    idb = await openDB<SchemaDB>(this.dbName); // 不指定 version
+    if (!idb.objectStoreNames.contains('tableSchemas')) {
+      const newVersion = idb.version + 1;
+      idb.close();
+      idb = await openDB<SchemaDB>(this.dbName, newVersion, {
+        upgrade(db) {
+          if (!db.objectStoreNames.contains('tableSchemas')) {
+            db.createObjectStore('tableSchemas', { keyPath: 'name' });
+          }
+        },
+      });
+    }
     const tx = idb.transaction('tableSchemas', 'readwrite');
     const store = tx.objectStore('tableSchemas');
     await store.put(tableSchema);
@@ -94,13 +101,13 @@ export class PersistenceSqliteDb {
       });
     });
     // 儲存到 idb（每個 table 對應一個 object store，keyPath 設為 'id'）
-    const idb = await openDB(this.dbName, 1, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains(tableName)) {
-          db.createObjectStore(tableName, { keyPath: 'id' });
-        }
-      },
-    });
+    let idb = await openDB(this.dbName); // 不指定 version
+    if (!idb.objectStoreNames.contains(tableName)) {
+      idb = await this.createIdbTable(idb, tableName);
+    } else {
+      // 如果已存在，先清空資料
+      await this.clearIdbTableData(idb, tableName);
+    }
     const tx = idb.transaction(tableName, 'readwrite');
     const store = tx.objectStore(tableName);
     for (const row of rows) {
@@ -110,11 +117,40 @@ export class PersistenceSqliteDb {
   }
 
   /**
+   * 清空指定 object store 的所有資料
+   */
+  private async clearIdbTableData(idb: any, tableName: string) {
+    if (idb.objectStoreNames.contains(tableName)) {
+      const clearTx = idb.transaction(tableName, 'readwrite');
+      await clearTx.objectStore(tableName).clear();
+      await clearTx.done;
+    }
+  }
+
+  /**
+   * 建立指定名稱的 object store（table），若尚未存在
+   * @param tableName
+   * @param idb 已開啟的資料庫實例
+   * @returns 升級後的資料庫實例
+   */
+  private async createIdbTable(idb: any, tableName: string) {
+    const newVersion = idb.version + 1;
+    idb.close();
+    return await openDB(this.dbName, newVersion, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains(tableName)) {
+          db.createObjectStore(tableName, { autoIncrement: true });
+        }
+      },
+    });
+  }
+
+  /**
    * 從 idb 取得所有 table schema 與資料，並還原到 sqlite
    */
   async restoreTableSchemasWithDataAsync() {
     // 1. 取得所有 table schema
-    const idb = await openDB<any>(this.dbName, 1);
+    const idb = await openDB<any>(this.dbName);
     if (!idb.objectStoreNames.contains('tableSchemas')) {
       return;
     }
@@ -127,9 +163,9 @@ export class PersistenceSqliteDb {
           await sqlite3.exec(db, schema.schema);
         }
         // 取得該 table 的所有資料
-        if (idb.objectStoreNames.contains(schema.name)) {
-          const tx = idb.transaction(schema.name as any, 'readonly');
-          const store = tx.objectStore(schema.name as any);
+        if (idb.objectStoreNames.contains(schema.name as string)) {
+          const tx = idb.transaction(schema.name as string, 'readonly');
+          const store = tx.objectStore(schema.name as string);
           const allRows: any[] = await store.getAll();
           await tx.done;
           // 還原資料
