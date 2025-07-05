@@ -115,6 +115,9 @@ export class PersistenceSqliteDb {
   async restoreTableSchemasWithDataAsync() {
     // 1. 取得所有 table schema
     const idb = await openDB<any>(this.dbName, 1);
+    if (!idb.objectStoreNames.contains('tableSchemas')) {
+      return;
+    }
     const allSchemas = await idb.getAll('tableSchemas');
     // 2. 建立所有 sqlite table schema 並還原資料
     await this.withSQLiteDbAsync(async (sqlite3: any, db: any) => {
