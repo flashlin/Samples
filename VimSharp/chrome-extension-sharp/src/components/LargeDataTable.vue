@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full mt-4" style="max-height:300px; height:auto;">
+  <div class="w-full mt-4 scroller-outer">
     <!-- Header row as grid (dynamic columns) -->
     <span v-if="dt">{{ dt.tableName }}</span>
     <div class="inline-block">
@@ -99,6 +99,10 @@ function resolveKeyField() {
 </script>
 
 <style scoped>
+.scroller-outer {
+  max-height: 300px;
+  overflow-y: auto;
+}
 .scroller {
   height: 100%;
 }
