@@ -61,7 +61,6 @@ export async function querySqliteAsync(sql: string, parameters: any = {}): Promi
       data.push(obj);
     });
   });
-  console.log("querySqliteAsync result", columns, data)
   // 組成 DataTable
   return {
     tableName: '', // 查詢無明確表名
@@ -109,7 +108,7 @@ const module = await SQLiteESMFactory();
 export async function withSQLiteDbAsync(callback: (sqlite3: SQLiteAPI, db: number) => Promise<void>) {
   const sqlite3 = SQLite.Factory(module);
   const db = await sqlite3.open_v2('supportDb', 
-    SQLite.SQLITE_OPEN_CREATE | SQLite.SQLITE_OPEN_READWRITE, 'supportDb');
+    SQLite.SQLITE_OPEN_CREATE | SQLite.SQLITE_OPEN_READWRITE);
   try {
     await callback(sqlite3, db);
   } finally {
