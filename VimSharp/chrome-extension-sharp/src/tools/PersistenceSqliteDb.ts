@@ -46,6 +46,15 @@ export class PersistenceSqliteDb {
       }
     });
     // 儲存到 idb
+    for (const schema of tableSchemas) {
+      await this.saveTableSchema(schema);
+    }
+  }
+
+  /**
+   * 儲存單一 table schema 到 idb
+   */
+  async saveTableSchema(tableSchema: TableSchema) {
     const idb = await openDB<SchemaDB>(this.dbName, 1, {
       upgrade(db) {
         if (!db.objectStoreNames.contains('tableSchemas')) {
@@ -55,9 +64,7 @@ export class PersistenceSqliteDb {
     });
     const tx = idb.transaction('tableSchemas', 'readwrite');
     const store = tx.objectStore('tableSchemas');
-    for (const schema of tableSchemas) {
-      await store.put(schema);
-    }
+    await store.put(tableSchema);
     await tx.done;
   }
 } 
