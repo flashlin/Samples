@@ -50,11 +50,12 @@ export class PersistenceSqliteDb {
     return tableSchemas;
   }
 
-  async saveTableSchemas() {
+  async saveTableSchemasWithData() {
     // 取得所有 table 名稱與 schema
     const tableSchemas = await this.getSqliteTableSchemas();
     for (const schema of tableSchemas) {
       await this.saveTableSchema(schema);
+      await this.saveTableData(schema.name);
     }
   }
 
