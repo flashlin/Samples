@@ -108,7 +108,8 @@ export async function insertDataTableAsync(dt: DataTable, tableName: string) {
 const module = await SQLiteESMFactory();
 export async function withSQLiteDbAsync(callback: (sqlite3: SQLiteAPI, db: number) => Promise<void>) {
   const sqlite3 = SQLite.Factory(module);
-  const db = await sqlite3.open_v2('supportDb', undefined, 'supportDb');
+  const db = await sqlite3.open_v2('supportDb', 
+    SQLite.SQLITE_OPEN_CREATE | SQLite.SQLITE_OPEN_READWRITE, 'supportDb');
   try {
     await callback(sqlite3, db);
   } finally {
