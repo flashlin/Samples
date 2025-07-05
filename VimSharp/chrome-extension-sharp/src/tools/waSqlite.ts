@@ -2,7 +2,7 @@
 import SQLiteESMFactory from 'wa-sqlite/dist/wa-sqlite.mjs'
 import * as SQLite from 'wa-sqlite'
 import Handlebars from 'handlebars'
-import { DataTable, guessType } from './dataTypes'
+import { DataTable, DataTableColumn, guessType } from './dataTypes'
 import { PersistenceSqliteDb } from './PersistenceSqliteDb';
 
 /**
@@ -16,16 +16,6 @@ export async function createTableAsync(dt: DataTable, tableName?: string) {
   const columnsDef = dt.columns.map(col => `${col.name} ${col.type}`).join(', ');
   const sql = `CREATE TABLE ${name} (${columnsDef})`;
   await execSqliteAsync(sql);
-}
-
-export async function hello() {
-  await withSQLiteDbAsync(async (sqlite3, db) => {
-    await sqlite3.exec(db, `CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT)`)
-    await sqlite3.exec(db, `INSERT INTO test (name) VALUES ('Vue3'), ('React'), ('Angular')`)
-    await sqlite3.exec(db, `SELECT * FROM test`, (row, _columns) => {
-      console.log(row)
-    })
-  });
 }
 
 /**
@@ -101,6 +91,23 @@ export async function insertDataTableAsync(dt: DataTable, tableName: string) {
   });
 }
 
+async function getTableSchemaAsync(tableName: string): Promise<DataTableColumn[]> {
+  const columns: DataTableColumn[] = [];
+  await withSQLiteDbAsync(async (sqlite3, db) => {
+    await sqlite3.exec(db, `PRAGMA table_info(${tableName});`, (row: any, cols: string[]) => {
+      const obj: any = {};
+      cols.forEach((col, idx) => {
+        obj[col] = row[idx];
+      });
+      columns.push({
+        name: obj.name,
+        type: obj.type,
+      });
+    });
+  });
+  return columns;
+}
+
 /**
  * Utility function to handle SQLite connection lifecycle
  * @param callback - async function that receives (sqlite3, db)
@@ -117,10 +124,10 @@ export async function withSQLiteDbAsync(callback: (sqlite3: SQLiteAPI, db: numbe
   }
 }
 
-const idb = new PersistenceSqliteDb('supportDb', withSQLiteDbAsync);
-export async function backupSqliteDbAsync() {
-  await idb.saveTableSchemasWithDataAsync();
-}
-export async function restoreSqliteDbAsync() {
-  await idb.restoreTableSchemasWithDataAsync();
-}
+// const idb = new PersistenceSqliteDb('supportDb', withSQLiteDbAsync);
+// export async function backupSqliteDbAsync() {
+//   await idb.saveTableSchemasWithDataAsync();
+// }
+// export async function restoreSqliteDbAsync() {
+//   await idb.restoreTableSchemasWithDataAsync();
+// }

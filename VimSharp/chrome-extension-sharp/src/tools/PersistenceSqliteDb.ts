@@ -1,4 +1,5 @@
-import { openDB, DBSchema } from 'idb';
+import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import { DataTable } from './dataTypes';
 
 // 提取 withSQLiteDbAsync 型別
 export type WithSQLiteDbAsyncFn = (callback: (sqlite3: any, db: any) => Promise<void>) => Promise<void>;
@@ -15,13 +16,76 @@ interface SchemaDB extends DBSchema {
   };
 }
 
-export class PersistenceSqliteDb {
-  private dbName = 'sqlite-schema-db';
-  private withSQLiteDbAsync: WithSQLiteDbAsyncFn;
+class IdbConext {
+  private idb: IDBPDatabase<unknown> | null = null;
+  private dbName: string = '';
+  async openAsync(dbName: string) {
+    this.dbName = dbName;
+    this.idb = await openDB(this.dbName);
+  }
+  async closeAsync() {
+    if (this.idb) {
+      await this.idb.close();
+      this.idb = null;
+    }
+  }
+  async createTableAsync(tableName: string, keyField: string='id') {
+    if( this.idb == null) {
+      throw new Error('idb not open');
+    }
+    const newVersion = this.idb.version + 1;
+    this.idb.close();
+    this.idb = await openDB(this.dbName, newVersion, {
+      upgrade(db) {
+        db.createObjectStore(tableName, { keyPath: keyField, autoIncrement: true });
+      },
+    });
+  }
+  async deleteTableAsync(tableName: string) {
+    if( this.idb == null) {
+      throw new Error('idb not open');
+    }
+    const tx = this.idb.transaction(tableName, 'readwrite');
+    await tx.objectStore(tableName).clear();
+    await tx.done;
+  }
+  async saveTableAsync(dt: DataTable, tableName: string) {
+    if( this.idb == null) {
+      throw new Error('idb not open');
+    }
+    await this.deleteTableAsync(tableName);
+    const tx = this.idb.transaction(tableName, 'readwrite');
+    const store = tx.objectStore(tableName);
+    for (const row of dt.data) {
+      await store.add(row);
+    }
+    await tx.done;
+  }
+  async getTableAsync(tableName: string): Promise<DataTable> {
+    if( this.idb == null) {
+      throw new Error('idb not open');
+    }
+    const tx = this.idb.transaction(tableName, 'readonly');
+    const store = tx.objectStore(tableName);
+    const rows = await store.getAll();
+    return {
+      tableName: tableName,
+      columns: [],
+      data: rows,
+    };
+  }
+}
 
-  constructor(dbName: string, withSQLiteDbAsync: WithSQLiteDbAsyncFn) {
+export class PersistenceSqliteDb {
+  private dbName: string = '';
+  private withSQLiteDbAsync: WithSQLiteDbAsyncFn = null!;
+  private _idbContext: IdbConext = null!;
+
+  async openAsync(dbName: string, withSQLiteDbAsync: WithSQLiteDbAsyncFn) {
     this.dbName = dbName;
     this.withSQLiteDbAsync = withSQLiteDbAsync;
+    this._idbContext = new IdbConext();
+    await this._idbContext.openAsync(dbName);
   }
 
   /**
