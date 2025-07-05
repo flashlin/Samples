@@ -21,6 +21,7 @@ export async function getExcelFileAsync(file: File): Promise<ExcelSheet[]> {
         const sheets: ExcelSheet[] = workbook.SheetNames.map((name: string) => ({
           name,
           data: XLSX.utils.sheet_to_json(workbook.Sheets[name], { header: 1 })
+            .filter((row: unknown) => Array.isArray(row) && row.some(cell => cell !== undefined && cell !== null && cell !== '')) as any[][]
         }));
         const filteredSheets = sheets.filter(sheet => Array.isArray(sheet.data) && !isEmptyData(sheet.data));
         resolve(filteredSheets);
