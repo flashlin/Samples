@@ -15,6 +15,7 @@ export class PersistenceSupportDb {
     if (this._idbConext.isTableExists(tableName)) {
       await this._idbConext.dropTableAsync(tableName);
     }
+    await this.saveTableSchemaAsync(tableName, dt.columns);
     await this._idbConext.createTableAsync(dt.tableName);
     await this._idbConext.saveTableAsync(dt, dt.tableName);
   }
