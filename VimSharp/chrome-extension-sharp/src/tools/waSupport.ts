@@ -1,7 +1,8 @@
 // https://github.com/rhashimoto/wa-sqlite
 import { DataTable } from './dataTypes'
 import { WaSqliteContext } from './waSqliteKit';
-import { PersistenceSqliteDb } from './PersistenceSqliteDb';
+import { PersistenceSupportDb } from './PersistenceSupportDb';
+import { IdbConext } from './IdbKit';
 
 const waSqlite = new WaSqliteContext();
 await waSqlite.openAsync('supportDb');
@@ -51,10 +52,6 @@ export async function insertDataTableAsync(dt: DataTable, tableName: string) {
 }
 
 
-// const idb = new PersistenceSqliteDb('supportDb', withSQLiteDbAsync);
-// export async function backupSqliteDbAsync() {
-//   await idb.saveTableSchemasWithDataAsync();
-// }
-// export async function restoreSqliteDbAsync() {
-//   await idb.restoreTableSchemasWithDataAsync();
-// }
+const idb = new IdbConext();
+await idb.openAsync('supportDb');
+export const persistenceSupportDb = new PersistenceSupportDb(idb, waSqlite);

@@ -4,7 +4,7 @@ import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/
 import { ref, onMounted, onUnmounted } from 'vue';
 //import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import VimCodeEditor from '@/components/CodeEditor.vue';
-import { createTableAsync, dropTableAsync, insertDataTableAsync, querySqliteAsync } from '@/tools/waSupport';
+import { createTableAsync, dropTableAsync, insertDataTableAsync, persistenceSupportDb, querySqliteAsync } from '@/tools/waSupport';
 import { DataTable as DataTableType } from '@/tools/dataTypes';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 import { goTo } from '@/tools/visual-router'
@@ -51,6 +51,8 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
       await dropTableAsync(newTable.tableName);
       await createTableAsync(newTable);
       await insertDataTableAsync(newTable, newTable.tableName);
+
+      await persistenceSupportDb.saveTableAsync(newTable.tableName);
     }
   }
 

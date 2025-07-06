@@ -117,6 +117,28 @@ export class WaSqliteContext
     return columns;
   }
 
+  async getDataTableAsync(tableName: string): Promise<DataTable> {
+    // 取得欄位資訊
+    const columns = await this.getTableSchemaAsync(tableName);
+    // 查詢所有資料
+    const data: any[] = [];
+    await this.withSQLiteDbAsync(async (sqlite3, db) => {
+      await sqlite3.exec(db, `SELECT * FROM ${tableName}`, (row: any, cols: string[]) => {
+        const obj: any = {};
+        cols.forEach((col, idx) => {
+          obj[col] = row[idx];
+        });
+        data.push(obj);
+      });
+    });
+    // 組成 DataTable
+    return {
+      tableName,
+      columns,
+      data
+    };
+  }
+
   async withSQLiteDbAsync(callback: (sqlite3: SQLiteAPI, db: number) => Promise<void>) {
     const sqlite3 = SQLite.Factory(this._module);
     const db = await sqlite3.open_v2(this._dbName, 
