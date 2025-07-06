@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import FileUpload, { FileUploadInstance } from '@/components/FileUpload.vue';
-import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/excelKit';
+import { convertDataTableToWorkbook, convertSheetToDataTable, downloadWorkbook, ExcelSheet, getExcelFileAsync } from '@/tools/excelKit';
 import { ref, onMounted, onUnmounted } from 'vue';
 //import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import VimCodeEditor from '@/components/CodeEditor.vue';
@@ -72,15 +72,6 @@ async function executeQuery() {
   }
 }
 
-async function runExecute() {
-  try {
-    await execSqliteAsync(code.value, {})
-    errorMessage.value = '';
-  } catch (e) {
-    errorMessage.value = e as string;
-  }
-}
-
 async function deleteTables() {
   for (const dt of allDataTables.value) {
     await dropTableAsync(dt.tableName);
@@ -88,11 +79,12 @@ async function deleteTables() {
   allDataTables.value = [];
 }
 
-function test() {
-  vimEditorRef.value?.showIntellisense([
-    { title: 'a', context: 'abc123' },
-    { title: 'b', context: 'You are winner' }
-  ])
+async function exportResult() {
+  if (supportStore.queryResult) {
+    console.log("export")
+    const workbook = convertDataTableToWorkbook([supportStore.queryResult]);
+    downloadWorkbook(workbook, 'query_result.xlsx');
+  }
 }
 
 async function handleMyIntellisense(context: IntellisenseContext): Promise<any[]> {
@@ -119,9 +111,6 @@ function handleF8Key(e: KeyboardEvent) {
   // F8 對應 key 為 'F8'
   if (e.key === 'F8') {
     executeQuery();
-  }
-  if( e.key === 'F9') {
-    runExecute();
   }
 }
 
@@ -156,7 +145,7 @@ onUnmounted(() => {
         <div class="flex flex-row gap-2 mb-2">
           <button @click="executeQuery">Execute (F8)</button>
           <button @click="deleteTables">Delete (F4)</button>
-          <button @click="test">Test Intellisense</button>
+          <button @click="exportResult">Export</button>
           <!-- 這裡未來可放更多按鈕 -->
         </div>
         <VimCodeEditor ref="vimEditorRef" v-model="code" :enableVim="false" class="w-full h-full" :onShowIntellisense="handleMyIntellisense" />

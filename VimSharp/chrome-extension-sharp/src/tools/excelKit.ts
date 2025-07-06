@@ -99,3 +99,15 @@ export function convertDataTableToWorkbook(dataTableList: DataTable[]): XLSX.Wor
   }
   return workbook;
 } 
+
+export function downloadWorkbook(workbook: XLSX.WorkBook, fileName: string) {
+  const blob = new Blob([XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click(); // 這行很重要，會觸發下載
+  URL.revokeObjectURL(url); // 釋放資源
+}
