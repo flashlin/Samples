@@ -78,6 +78,9 @@ export class PersistenceSupportDb {
   }
 
   async getAllTableSchemasAsync(): Promise<TableSchema[]> {
+    if (!this._idbConext.isTableExists(tableSchemaName)) {
+      return [];
+    }
     const tableSchemaList = await this._idbConext.getRowsAsync(tableSchemaName);
     return tableSchemaList;
   }
