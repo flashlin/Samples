@@ -45,15 +45,15 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
   
   // Check for duplicate tableNames before pushing to allDataTables
   for (const newTable of newDataTables) {
-    const isDuplicate = allDataTables.value.some(existingTable => existingTable.tableName === newTable.tableName);
-    if (!isDuplicate) {
-      allDataTables.value.push(newTable);
-      await dropTableAsync(newTable.tableName);
-      await createTableAsync(newTable);
-      await insertDataTableAsync(newTable, newTable.tableName);
-
-      await persistenceSupportDb.saveTableAsync(newTable);
+    const existingIndex = allDataTables.value.findIndex(existingTable => existingTable.tableName === newTable.tableName);
+    if (existingIndex !== -1) {
+      allDataTables.value.splice(existingIndex, 1);
     }
+    allDataTables.value.push(newTable);
+    await dropTableAsync(newTable.tableName);
+    await createTableAsync(newTable);
+    await insertDataTableAsync(newTable, newTable.tableName);
+    await persistenceSupportDb.saveTableAsync(newTable);
   }
 
   if (instance.processBarStatus === initialStatus) {
