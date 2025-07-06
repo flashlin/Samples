@@ -52,6 +52,7 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
       await createTableAsync(newTable);
       await insertDataTableAsync(newTable, newTable.tableName);
 
+      await persistenceSupportDb.saveTableSchemaAsync(newTable.tableName, newTable.columns);
       await persistenceSupportDb.saveTableAsync(newTable.tableName);
     }
   }
@@ -116,7 +117,7 @@ function handleF8Key(e: KeyboardEvent) {
 onMounted(async () => {
   // F8 快捷鍵監聽
   window.addEventListener('keydown', handleF8Key);
-  //await restoreSqliteDbAsync();
+  //await persistenceSupportDb.restoreAllTablesAsync();
 });
 onUnmounted(() => {
   window.removeEventListener('keydown', handleF8Key);

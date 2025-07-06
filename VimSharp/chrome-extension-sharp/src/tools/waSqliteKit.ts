@@ -95,6 +95,7 @@ export class WaSqliteContext
     await this.withSQLiteDbAsync(async (sqlite3, db) => {
       for (const row of dt.data) {
         const lastSql = template(row);
+        console.info("waSqliteKit::insertDataTableAsync", lastSql);
         await sqlite3.exec(db, lastSql);
       }
     });

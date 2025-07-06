@@ -39,11 +39,21 @@ export class IdbConext {
     if( this._idb == null) {
       throw new Error('idb not open');
     }
+    console.info("IdbConext::saveTableAsync", dt, tableName);
     const tx = this._idb.transaction(tableName, 'readwrite');
     const store = tx.objectStore(tableName);
     for (const row of dt.data) {
       await store.add(row);
     }
+    await tx.done;
+  }
+  async addRowAsync(tableName: string, row: any) {
+    if( this._idb == null) {
+      throw new Error('idb not open');
+    }
+    const tx = this._idb.transaction(tableName, 'readwrite');
+    const store = tx.objectStore(tableName);
+    await store.add(row);
     await tx.done;
   }
   async getTableAsync(tableName: string): Promise<DataTable> {
@@ -58,6 +68,45 @@ export class IdbConext {
       columns: [],
       data: rows,
     };
+  }
+  async upsertRowAsync(tableName: string, row: any) {
+    if (this._idb == null) {
+      throw new Error('idb not open');
+    }
+    const tx = this._idb.transaction(tableName, 'readwrite');
+    const store = tx.objectStore(tableName);
+    // 取得 keyPath
+    const keyPath = store.keyPath as string;
+    if (!keyPath) {
+      throw new Error('table has no keyPath');
+    }
+    const keyValue = row[keyPath];
+    let exists = false;
+    if (keyValue !== undefined) {
+      const existing = await store.get(keyValue);
+      exists = !!existing;
+    }
+    if (exists) {
+      await store.put(row); // 更新
+    } else {
+      await store.add(row); // 新增
+    }
+    await tx.done;
+  }
+  async dropTableAsync(tableName: string) {
+    if (this._idb == null) {
+      throw new Error('idb not open');
+    }
+    // 刪除 objectStore 需要升級資料庫版本
+    const newVersion = this._idb.version + 1;
+    this._idb.close();
+    this._idb = await openDB(this._dbName, newVersion, {
+      upgrade(db) {
+        if (db.objectStoreNames.contains(tableName)) {
+          db.deleteObjectStore(tableName);
+        }
+      },
+    });
   }
   isTableExists(tableName: string): boolean {
     if (this._idb == null) {
