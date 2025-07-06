@@ -76,4 +76,26 @@ function buildRows(data: any[][], columns: DataTableColumn[]): any[] {
     });
     return obj;
   });
+}
+
+/**
+ * 將多個 DataTable 轉換為 XLSX workbook
+ * @param dataTableList DataTable 陣列
+ * @returns XLSX.WorkBook
+ */
+export function convertDataTableToWorkbook(dataTableList: DataTable[]): XLSX.WorkBook {
+  const workbook = XLSX.utils.book_new();
+  for (const dt of dataTableList) {
+    // 準備 header row
+    const headers = dt.columns.map(col => col.name);
+    // 準備 data rows
+    const dataRows = dt.data.map(rowObj => headers.map(h => rowObj[h]));
+    // 合併 header 與資料
+    const sheetData = [headers, ...dataRows];
+    // 產生 worksheet
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    // 加入 workbook
+    XLSX.utils.book_append_sheet(workbook, ws, dt.tableName);
+  }
+  return workbook;
 } 
