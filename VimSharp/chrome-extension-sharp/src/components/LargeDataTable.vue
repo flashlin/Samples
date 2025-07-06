@@ -1,7 +1,7 @@
 <template>
   <div class="w-full mt-4 scroller-outer">
-    <!-- Header row as grid (dynamic columns) -->
-    <span v-if="dt">{{ dt.tableName }}</span>
+    <!-- tableName 獨立一行，左靠 -->
+    <div v-if="dt" class="table-title">{{ dt.tableName }}</div>
     <div class="inline-block">
       <div
         v-if="dt && dt.columns && dt.columns.length > 0"
@@ -99,6 +99,11 @@ function resolveKeyField() {
 </script>
 
 <style scoped>
+.table-title {
+  text-align: left;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
 .scroller-outer {
   max-height: 300px;
   overflow-y: auto;
