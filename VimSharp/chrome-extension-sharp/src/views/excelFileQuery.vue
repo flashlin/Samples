@@ -52,8 +52,7 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
       await createTableAsync(newTable);
       await insertDataTableAsync(newTable, newTable.tableName);
 
-      await persistenceSupportDb.saveTableSchemaAsync(newTable.tableName, newTable.columns);
-      await persistenceSupportDb.saveTableAsync(newTable.tableName);
+      await persistenceSupportDb.saveTableAsync(newTable);
     }
   }
 

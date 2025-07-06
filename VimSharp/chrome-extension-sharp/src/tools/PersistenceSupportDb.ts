@@ -1,4 +1,4 @@
-import { DataTableColumn } from './dataTypes';
+import { DataTable, DataTableColumn } from './dataTypes';
 import { IdbConext } from './IdbKit';
 import { WaSqliteContext } from './waSqliteKit';
 
@@ -10,11 +10,11 @@ export class PersistenceSupportDb {
     this._sqliteDb = sqliteDb;
   }
 
-  async saveTableAsync(tableName: string) {
+  async saveTableAsync(dt: DataTable) {
+    const tableName = dt.tableName;
     if (this._idbConext.isTableExists(tableName)) {
       await this._idbConext.dropTableAsync(tableName);
     }
-    const dt = await this._sqliteDb.getDataTableAsync(tableName);
     await this._idbConext.createTableAsync(dt.tableName);
     await this._idbConext.saveTableAsync(dt, dt.tableName);
   }
