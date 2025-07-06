@@ -27,6 +27,13 @@ export class WaSqliteContext
     });
   }
 
+
+  /**
+   * 執行 SQL 查詢並回傳 DataTable 結果
+   * @param sql - SQL 查詢語句（可使用 Handlebars 模板語法）
+   * @param parameters - 傳入模板的參數物件（可選，預設為空物件）
+   * @returns Promise<DataTable> 查詢結果，包含欄位資訊與資料陣列
+   */
   async queryAsync(sql: string, parameters: any = {}): Promise<DataTable> {
     const template = Handlebars.compile(sql);
     const lastSql = template(parameters);
@@ -149,5 +156,16 @@ export class WaSqliteContext
     } finally {
       await sqlite3.close(db);
     }
+  }
+
+  /**
+   * 檢查指定的資料表是否存在
+   * @param tableName 資料表名稱
+   * @returns Promise<boolean> 是否存在
+   */
+  async isTableExistsAsync(tableName: string): Promise<boolean> {
+    const sql = `SELECT name FROM sqlite_master WHERE type='table' AND name='{{tableName}}'`;
+    const result = await this.queryAsync(sql, { tableName });
+    return result.data.length > 0;
   }
 }

@@ -2,9 +2,11 @@ import { DataTable, DataTableColumn } from './dataTypes';
 import { IdbConext } from './IdbKit';
 import { WaSqliteContext } from './waSqliteKit';
 
+const tableSchemaName = 'tableSchemas';
 export class PersistenceSupportDb {
   private _idbConext: IdbConext;
   private _sqliteDb: WaSqliteContext;
+
   constructor(idbConext: IdbConext, sqliteDb: WaSqliteContext) {
     this._idbConext = idbConext;
     this._sqliteDb = sqliteDb;
@@ -21,7 +23,6 @@ export class PersistenceSupportDb {
   }
 
   async saveTableSchemaAsync(tableName: string, columns: DataTableColumn[]) {
-    const tableSchemaName = 'tableSchemas';
     if (!this._idbConext.isTableExists(tableSchemaName)) {
       await this._idbConext.createTableAsync(tableSchemaName, "name");
     }
@@ -33,12 +34,21 @@ export class PersistenceSupportDb {
   }
 
   async restoreAllTablesAsync() {
-    const tableNames = this._idbConext.getAllTableNames();
-    for (const tableName of tableNames) {
-      const dt = await this._idbConext.getTableAsync(tableName);
-      console.info("PersistenceSupportDb::restoreAllTablesAsync", dt);
-      await this._sqliteDb.dropTableAsync(tableName);
-      await this._sqliteDb.insertDataTableAsync(dt, tableName);
+    const tableSchemaList = await this._idbConext.getRowsAsync(tableSchemaName);
+    for(const tableSchema of tableSchemaList) {
+      const tableName = tableSchema.name;
+      const columns = tableSchema.columns;
+      const rows = await this._idbConext.getRowsAsync(tableName);
+      const dataTable = {
+        tableName,
+        columns,
+        data: rows
+      }
+      if( await this._sqliteDb.isTableExistsAsync(tableName)) {
+        await this._sqliteDb.dropTableAsync(tableName);
+      }
+      await this._sqliteDb.createTableAsync(dataTable);
+      this._sqliteDb.insertDataTableAsync(dataTable, tableName);
     }
   }
 } 

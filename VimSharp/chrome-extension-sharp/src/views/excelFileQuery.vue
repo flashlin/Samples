@@ -58,7 +58,6 @@ async function uploadAllExcelFiles(files: File[], instance: FileUploadInstance) 
 
   if (instance.processBarStatus === initialStatus) {
     instance.processBarStatus = 'Uploaded!';
-    //await backupSqliteDbAsync();
   }
 }
 
@@ -116,7 +115,7 @@ function handleF8Key(e: KeyboardEvent) {
 onMounted(async () => {
   // F8 快捷鍵監聽
   window.addEventListener('keydown', handleF8Key);
-  //await persistenceSupportDb.restoreAllTablesAsync();
+  await persistenceSupportDb.restoreAllTablesAsync();
 });
 onUnmounted(() => {
   window.removeEventListener('keydown', handleF8Key);

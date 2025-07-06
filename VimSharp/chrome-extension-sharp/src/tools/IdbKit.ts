@@ -56,18 +56,14 @@ export class IdbConext {
     await store.add(row);
     await tx.done;
   }
-  async getTableAsync(tableName: string): Promise<DataTable> {
+  async getRowsAsync(tableName: string): Promise<any[]> {
     if( this._idb == null) {
       throw new Error('idb not open');
     }
     const tx = this._idb.transaction(tableName, 'readonly');
     const store = tx.objectStore(tableName);
     const rows = await store.getAll();
-    return {
-      tableName: tableName,
-      columns: [],
-      data: rows,
-    };
+    return rows;
   }
   async upsertRowAsync(tableName: string, row: any) {
     if (this._idb == null) {
