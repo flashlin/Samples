@@ -65,4 +65,11 @@ export class IdbConext {
     }
     return this._idb.objectStoreNames.contains(tableName);
   }
+  getAllTableNames(): string[] {
+    if (this._idb == null) {
+      throw new Error('idb not open');
+    }
+    // objectStoreNames 是一個 DOMStringList，要轉成陣列
+    return Array.from(this._idb.objectStoreNames);
+  }
 }
