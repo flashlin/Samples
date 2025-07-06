@@ -89,6 +89,15 @@ export class IdbConext {
     }
     await tx.done;
   }
+  async deleteRowAsync(tableName: string, key: string) {
+    if (this._idb == null) {
+      throw new Error('idb not open');
+    }
+    const tx = this._idb.transaction(tableName, 'readwrite');
+    const store = tx.objectStore(tableName);
+    await store.delete(key);
+    await tx.done;
+  }
   async dropTableAsync(tableName: string) {
     if (this._idb == null) {
       throw new Error('idb not open');

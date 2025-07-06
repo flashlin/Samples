@@ -4,7 +4,7 @@ import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/
 import { ref, onMounted, onUnmounted } from 'vue';
 //import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import VimCodeEditor from '@/components/CodeEditor.vue';
-import { createTableAsync, dropTableAsync, getAllDataTablesAsync, insertDataTableAsync, persistenceSupportDb, querySqliteAsync } from '@/tools/waSupport';
+import { createTableAsync, dropTableAsync, execSqliteAsync, getAllDataTablesAsync, insertDataTableAsync, persistenceSupportDb, querySqliteAsync } from '@/tools/waSupport';
 import { DataTable as DataTableType } from '@/tools/dataTypes';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 import { goTo } from '@/tools/visual-router'
@@ -65,6 +65,16 @@ async function executeQuery() {
   try {
     const result = await querySqliteAsync(code.value, {})
     supportStore.setQueryResult(result);
+    await persistenceSupportDb.syncFromSqliteTablesAsync();
+    errorMessage.value = '';
+  } catch (e) {
+    errorMessage.value = e as string;
+  }
+}
+
+async function runExecute() {
+  try {
+    await execSqliteAsync(code.value, {})
     errorMessage.value = '';
   } catch (e) {
     errorMessage.value = e as string;
@@ -109,6 +119,9 @@ function handleF8Key(e: KeyboardEvent) {
   // F8 對應 key 為 'F8'
   if (e.key === 'F8') {
     executeQuery();
+  }
+  if( e.key === 'F9') {
+    runExecute();
   }
 }
 
