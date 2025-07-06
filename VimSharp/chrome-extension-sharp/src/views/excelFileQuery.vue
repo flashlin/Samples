@@ -4,7 +4,7 @@ import { convertSheetToDataTable, ExcelSheet, getExcelFileAsync } from '@/tools/
 import { ref, onMounted, onUnmounted } from 'vue';
 //import VimCodeEditor from '@/components/vimCodeEditor.vue';
 import VimCodeEditor from '@/components/CodeEditor.vue';
-import { createTableAsync, dropTableAsync, insertDataTableAsync, persistenceSupportDb, querySqliteAsync } from '@/tools/waSupport';
+import { createTableAsync, dropTableAsync, getAllDataTablesAsync, insertDataTableAsync, persistenceSupportDb, querySqliteAsync } from '@/tools/waSupport';
 import { DataTable as DataTableType } from '@/tools/dataTypes';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 import { goTo } from '@/tools/visual-router'
@@ -116,6 +116,7 @@ onMounted(async () => {
   // F8 快捷鍵監聽
   window.addEventListener('keydown', handleF8Key);
   await persistenceSupportDb.restoreAllTablesAsync();
+  allDataTables.value = await getAllDataTablesAsync();
 });
 onUnmounted(() => {
   window.removeEventListener('keydown', handleF8Key);

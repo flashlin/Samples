@@ -51,6 +51,15 @@ export async function insertDataTableAsync(dt: DataTable, tableName: string) {
   await waSqlite.insertDataTableAsync(dt, tableName);
 }
 
+export async function getAllDataTablesAsync() {
+  const tableNames = await waSqlite.getAllTableNamesAsync();
+  const dataTables = [];
+  for(const tableName of tableNames) {
+    const dt = await waSqlite.getDataTableAsync(tableName);
+    dataTables.push(dt);
+  }
+  return dataTables;
+}
 
 const idb = new IdbConext();
 await idb.openAsync('supportDb');

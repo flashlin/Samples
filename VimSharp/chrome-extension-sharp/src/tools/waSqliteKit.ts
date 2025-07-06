@@ -147,6 +147,16 @@ export class WaSqliteContext
     };
   }
 
+  /**
+   * 取得所有資料表名稱
+   * @returns Promise<string[]> 資料表名稱陣列
+   */
+  async getAllTableNamesAsync(): Promise<string[]> {
+    const sql = `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`;
+    const result = await this.queryAsync(sql);
+    return result.data.map(row => row.name);
+  }
+
   async withSQLiteDbAsync(callback: (sqlite3: SQLiteAPI, db: number) => Promise<void>) {
     const sqlite3 = SQLite.Factory(this._module);
     const db = await sqlite3.open_v2(this._dbName, 
