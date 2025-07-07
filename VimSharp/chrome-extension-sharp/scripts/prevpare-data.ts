@@ -15,25 +15,33 @@ const DIRECTORY = ''; // 目錄名稱
 const GITLAB_USER = process.env.GITLAB_USER;
 const GITLAB_TOKEN = process.env.GITLAB_TOKEN;
 
+async function getAllFiles() {
+    let allFiles: any[] = [];
+    let page = 1;
+    const perPage = 100;
+
+    while (true) {
+        const url = `${GITLAB_HOST}/api/v4/projects/${PROJECT_PATH_ENCODED}/repository/tree?path=${DIRECTORY}&ref=${BRANCH}&per_page=${perPage}&page=${page}`;
+        const response = await axios.get(url, {
+            headers: {
+                'Private-Token': GITLAB_TOKEN,
+            }
+        });
+        const files = response.data;
+        allFiles = allFiles.concat(files);
+        if (!files || files.length < perPage) break;
+        page++;
+    }
+    return allFiles;
+}
+
 async function getDatabaseNamesByTxtFileNames() {
     if (!GITLAB_USER || !GITLAB_TOKEN) {
         console.error('錯誤：請在 .env 檔案中設定 GITLAB_USER 和 GITLAB_TOKEN。');
         return;
     }
 
-    // GitLab API 取得儲存庫樹狀結構的端點
-    // path 參數用於指定要查詢的目錄
-    const url = `${GITLAB_HOST}/api/v4/projects/${PROJECT_PATH_ENCODED}/repository/tree?path=${DIRECTORY}&ref=${BRANCH}`;
-
-    const response = await axios.get(url, {
-        headers: {
-            'Private-Token': GITLAB_TOKEN, // 使用私有存取令牌進行驗證
-            // 'User-Agent': GITLAB_USER // 雖然不強制，但有些API服務會建議提供
-        }
-    });
-
-    const files = response.data;
-    console.log("files", files);
+    const files = await getAllFiles();
 
     if (files && Array.isArray(files)) {
         const txtFiles = files

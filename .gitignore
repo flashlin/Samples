@@ -74,3 +74,4 @@ game-sudoku/app/build/reports
 .DS_Store
 gsoft/interactive-feedback-mcp
 .serena/
+VimSharp/chrome-extension-sharp/build
