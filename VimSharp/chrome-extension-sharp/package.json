@@ -14,7 +14,8 @@
     "test": "jest",
     "copy:monaco-workers": "node scripts/copy-monaco-workers.cjs",
     "postinstall": "node scripts/copy-wa-sqlite-wasm.js",
-    "analyze": "npx source-map-explorer dist/assets/vendor.*.js"
+    "analyze": "npx source-map-explorer dist/assets/vendor.*.js",
+    "data": "mkdir -p build &&tsc scripts/prevpare-data.ts && mv scripts/prevpare-data.js build/prevpare-data.cjs && node build/prevpare-data.cjs"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.18.6",
@@ -26,6 +27,7 @@
     "@univerjs/presets": "^0.7.0",
     "axios": "^1.8.4",
     "codemirror": "^6.0.1",
+    "dotenv": "^17.0.1",
     "handlebars": "^4.7.8",
     "idb": "^8.0.3",
     "papaparse": "^5.5.2",
