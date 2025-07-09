@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch, defineProps, defineEmits } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { DropboxItem } from './ComboDropboxTypes';
 
 // 定義 props
