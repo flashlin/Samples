@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { inject, ref } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 import CodeEditor from '@/components/CodeEditor.vue';
 import { DataTable } from '@/tools/dataTypes';
@@ -10,8 +10,11 @@ import TabControl from '@/components/TabControl.vue';
 import { LoadingState, ProvideKeys } from '@/tools/ProvideTypes';
 import { IntellisenseContext } from '@/components/CodeEditorTypes';
 import { tokenizeSql } from '@/t1-sqlts/SqlTokenizer';
+import { provideIntellisenseAsync, dbSchemaJson } from '@/tools/linqtsqlIntellisenseProvider';
 
-const dbFullNameList = ref<DropboxItem[]>([]);
+const dbFullNameList = ref<DropboxItem[]>([
+  { label: 'AccountDB (maia-z601)', value: 'AccountDB (maia-z601)' },
+]);
 const dbFullNameSelected = ref<string>('AccountDB (maia-z601)');
 const dbName = computed(() => {
   return dbFullNameSelected.value.split('(')[0].trim();
@@ -87,20 +90,16 @@ async function onShowLinqtsqlIntellisense(context: IntellisenseContext) {
       { title: 'CustomerExtraInfo', context: 'CustomerExtraInfo ' },
     ];
   }
-  const question = context.content[0] + " {cursor} " + context.content[1];
-  
-  return [
-    { title: 'SELECT', context: 'SELECT ' },
-    { title: 'FROM', context: 'FROM ' },
-    { title: 'WHERE', context: 'WHERE ' },
-    { title: 'ORDER BY', context: 'ORDER BY ' },
-    { title: 'GROUP BY', context: 'GROUP BY ' },
-    { title: 'HAVING', context: 'HAVING ' },
-    { title: 'UNION', context: 'UNION ' },
-    { title: 'INTERSECT', context: 'INTERSECT ' },
-    // ...更多提示
-  ]
+  const resp = await provideIntellisenseAsync({
+    dbName: dbName.value,
+    prevTokens: prevTokens,
+    prevText: context.content[0],
+    nextTokens: [],
+    nextText: context.content[1]
+  });
+  return resp.items;
 }
+
 </script>
 
 <template>

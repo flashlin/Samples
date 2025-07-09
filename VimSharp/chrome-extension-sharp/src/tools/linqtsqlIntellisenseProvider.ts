@@ -72,7 +72,10 @@ export interface DbSchema {
 
 async function getDbSchemaJsonAsync(): Promise<DbSchema[]> {
     const now = Date.now();
-    const response = await fetch(`/data/db_schema.json?t=${now}`);
+    // 使用 GET 請求取得 /data/db_schema.json?t=${now}
+    const response = await fetch(`/data/db_schema.json?t=${now}`, {
+        method: 'GET'
+    });
     if (!response.ok) {
         return [];
     }
@@ -80,9 +83,9 @@ async function getDbSchemaJsonAsync(): Promise<DbSchema[]> {
     return data as DbSchema[];
 }
 
-const dbSchemaJson = await getDbSchemaJsonAsync();
+export const dbSchemaJson = await getDbSchemaJsonAsync();
 
-function _empty(req: IntellisenseReq): IntellisenseResp {
+async function _empty(req: IntellisenseReq): Promise<IntellisenseResp> {
     if( req.prevTokens.length !== 0 ) {
         return {
             items: []
@@ -103,7 +106,7 @@ function _empty(req: IntellisenseReq): IntellisenseResp {
     }
 }
 
-function _from(req: IntellisenseReq): IntellisenseResp {
+async function _from(req: IntellisenseReq): Promise<IntellisenseResp> {
     if( req.prevTokens.length === 0 ) {
         return {
             items: []
@@ -131,6 +134,42 @@ function _from(req: IntellisenseReq): IntellisenseResp {
     }
 }
 
-function provideIntellisense(req: IntellisenseReq): IntellisenseResp {
-    
+async function _from_table_sel(req: IntellisenseReq): Promise<IntellisenseResp> {
+    if( req.prevTokens.length === 0 ) {
+        return {
+            items: []
+        }
+    }
+    const prevToken = req.prevTokens[req.prevTokens.length - 1];
+    if( prevToken !== 'sel' ) {
+        return {
+            items: []
+        }
+    }
+    return{
+        items: [
+            {
+                title: 'select',
+                context: 'ect '
+            }
+        ]
+    }
+}
+
+const _intellisenseArr: Array<(req: IntellisenseReq) => Promise<IntellisenseResp>> = [
+    _empty,
+    _from,
+    _from_table_sel
+];
+
+export async function provideIntellisenseAsync(req: IntellisenseReq): Promise<IntellisenseResp> {
+    for(let item of _intellisenseArr) {
+        const resp = await item(req);
+        if( resp.items.length > 0 ) {
+            return resp;
+        }
+    }
+    return {
+        items: []
+    }
 }

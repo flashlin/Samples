@@ -6,8 +6,8 @@ import fs from 'fs'
 import path from 'path'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  base: '/dist/',
+export default defineConfig(({ mode, command }) => ({
+  base: command === 'serve' ? '/' : '/dist/',
   plugins: [
     vue(),
     // Copy src/popup/index.html only in extension mode
