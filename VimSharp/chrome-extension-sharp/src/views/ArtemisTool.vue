@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, inject, onMounted, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 import LargeDataTable from '@/components/LargeDataTable.vue';
 import CodeEditor from '@/components/CodeEditor.vue';
 import { DataTable } from '@/tools/dataTypes';
@@ -10,7 +10,7 @@ import TabControl from '@/components/TabControl.vue';
 import { LoadingState, ProvideKeys } from '@/tools/ProvideTypes';
 import { IntellisenseContext } from '@/components/CodeEditorTypes';
 import { tokenizeSql } from '@/t1-sqlts/SqlTokenizer';
-import { provideIntellisenseAsync, dbSchemaJson } from '@/tools/linqtsqlIntellisenseProvider';
+import { provideIntellisenseAsync } from '@/tools/linqtsqlIntellisenseProvider';
 
 const dbFullNameList = ref<DropboxItem[]>([
   { label: 'AccountDB (maia-z601)', value: 'AccountDB (maia-z601)' },
