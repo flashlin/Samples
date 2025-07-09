@@ -1,6 +1,8 @@
 export interface IntellisenseItem {
   title: string
   context: string
+  from?: number
+  to?: number
 }
 
 export interface IntellisenseContext {

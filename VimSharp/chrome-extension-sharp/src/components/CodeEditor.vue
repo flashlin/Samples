@@ -42,14 +42,20 @@ let view: EditorView | null = null
 function codemirrorCompletion(context: CompletionContext): CompletionResult | null {
   if (!suggestionsRef.value.length) return null
   return {
-    from: context.pos, // 直接用游標位置
+    from: context.pos, // 這個是 fallback，實際上每個 option 可以自訂 apply
     options: suggestionsRef.value.map((item, _idx) => ({
       label: item.title,
-      apply: item.context === '' ? (view) => {
+      apply: (view: EditorView, _completion: any, from: number, to: number) => {
+        const realFrom = item.from ?? from
+        const realTo = item.to ?? to
+        const insertText = item.context
+        view.dispatch({
+          changes: { from: realFrom, to: realTo, insert: insertText },
+          selection: { anchor: realFrom + insertText.length } // 游標移到插入內容後
+        })
         closeCompletion(view)
-        return true;
-       } 
-      : item.context
+        return true
+      }
     }))
   }
 }
