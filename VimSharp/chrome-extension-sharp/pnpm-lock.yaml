@@ -26,6 +26,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.37.2
         version: 6.37.2
+      '@msgpack/msgpack':
+        specifier: ^3.1.2
+        version: 3.1.2
       '@univerjs/presets':
         specifier: ^0.7.0
         version: 0.7.0(@grpc/grpc-js@1.13.4)(@types/react@19.1.5)(@wendellhu/redi@0.18.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rxjs@7.8.2)(typescript@5.8.3)
@@ -44,6 +47,9 @@ importers:
       idb:
         specifier: ^8.0.3
         version: 8.0.3
+      lz4js:
+        specifier: ^0.2.0
+        version: 0.2.0
       papaparse:
         specifier: ^5.5.2
         version: 5.5.3
@@ -620,6 +626,10 @@ packages:
 
   '@marijn/find-cluster-break@1.0.2':
     resolution: {integrity: sha512-l0h88YhZFyKdXIFNfSWpyjStDjGHwZ/U7iobcK1cQQD8sejsONdQtTVU+1wVN1PBw40PiiHB1vA5S7VTfQiP9g==}
+
+  '@msgpack/msgpack@3.1.2':
+    resolution: {integrity: sha512-JEW4DEtBzfe8HvUYecLU9e6+XJnKDlUAIve8FvPzF3Kzs6Xo/KuZkZJsDH0wJXl/qEZbeeE7edxDNY3kMs39hQ==}
+    engines: {node: '>= 18'}
 
   '@noble/ed25519@2.2.3':
     resolution: {integrity: sha512-iHV8eI2mRcUmOx159QNrU8vTpQ/Xm70yJ2cTk3Trc86++02usfqFoNl6x0p3JN81ZDS/1gx6xiK0OwrgqCT43g==}
@@ -2976,6 +2986,9 @@ packages:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
 
+  lz4js@0.2.0:
+    resolution: {integrity: sha512-gY2Ia9Lm7Ep8qMiuGRhvUq0Q7qUereeldZPP1PMEJxPtEWHJLqw9pgX68oHajBH0nzJK4MaZEA/YNV3jT8u8Bg==}
+
   magic-string@0.30.17:
     resolution: {integrity: sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==}
 
@@ -4669,6 +4682,8 @@ snapshots:
       '@lezer/common': 1.2.3
 
   '@marijn/find-cluster-break@1.0.2': {}
+
+  '@msgpack/msgpack@3.1.2': {}
 
   '@noble/ed25519@2.2.3': {}
 
@@ -8275,6 +8290,8 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
+
+  lz4js@0.2.0: {}
 
   magic-string@0.30.17:
     dependencies:

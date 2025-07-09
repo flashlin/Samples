@@ -2,6 +2,7 @@ import { IntellisenseItem } from "@/components/CodeEditorTypes"
 import { IdbConext } from "./IdbKit"
 
 interface IntellisenseReq {
+    dbName: string
     prevTokens: string[]
     prevText: string
     nextTokens: string[]
@@ -46,7 +47,42 @@ class LinqtsqlIntellisenseStorege {
     }
 }
 
-function empty(req: IntellisenseReq): IntellisenseResp {
+
+export interface FieldSchema {
+    fieldName: string
+    dataType: string
+    size: number
+    scaleSize: number
+    isPrimaryKey: boolean
+    isNull: boolean
+    defaultValue: string | null
+    isIdentity: boolean
+    description: string
+}
+
+export interface TableSchema {
+    tableName: string
+    fields: FieldSchema[]
+}
+
+export interface DbSchema {
+    dbName: string
+    tables: TableSchema[]
+}
+
+async function getDbSchemaJsonAsync(): Promise<DbSchema[]> {
+    const now = Date.now();
+    const response = await fetch(`/data/db_schema.json?t=${now}`);
+    if (!response.ok) {
+        return [];
+    }
+    const data = await response.json();
+    return data as DbSchema[];
+}
+
+const dbSchemaJson = await getDbSchemaJsonAsync();
+
+function _empty(req: IntellisenseReq): IntellisenseResp {
     if( req.prevTokens.length !== 0 ) {
         return {
             items: []
@@ -67,3 +103,34 @@ function empty(req: IntellisenseReq): IntellisenseResp {
     }
 }
 
+function _from(req: IntellisenseReq): IntellisenseResp {
+    if( req.prevTokens.length === 0 ) {
+        return {
+            items: []
+        }
+    }
+    const prevToken = req.prevTokens[req.prevTokens.length - 1];
+    if( prevToken.toUpperCase() !== 'FROM' ) {
+        return {
+            items: []
+        }
+    }
+    const dbName = req.dbName;
+    const dbSchema = dbSchemaJson.find(db => db.dbName === dbName);
+    if( !dbSchema ) {
+        return {
+            items: []
+        }
+    }
+    const tableList = dbSchema.tables.map(table => table.tableName);
+    return {
+        items: tableList.map(table => ({
+            title: table,
+            context: `${table} `
+        }))
+    }
+}
+
+function provideIntellisense(req: IntellisenseReq): IntellisenseResp {
+    
+}

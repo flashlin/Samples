@@ -13,6 +13,9 @@ import { tokenizeSql } from '@/t1-sqlts/SqlTokenizer';
 
 const dbFullNameList = ref<DropboxItem[]>([]);
 const dbFullNameSelected = ref<string>('AccountDB (maia-z601)');
+const dbName = computed(() => {
+  return dbFullNameSelected.value.split('(')[0].trim();
+})
 const envName = ref<string>('staging');
 const loginName = ref<string>('flash');
 const password = ref<string>('123456');
