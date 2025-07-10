@@ -156,10 +156,51 @@ async function _from_table_sel(req: IntellisenseReq): Promise<IntellisenseResp> 
     }
 }
 
+async function _from_table_select(req: IntellisenseReq): Promise<IntellisenseResp> {
+    if( req.prevTokens.length === 0 ) {
+        return {
+            items: []
+        }
+    }
+    const prevToken = req.prevTokens[req.prevTokens.length - 1];
+    if( prevToken !== 'select' ) {
+        return {
+            items: []
+        }
+    }
+    // search tables from SQL (use LLM to fetch tables)
+    const prompt = `content:
+    ${req.prevText}
+
+instruction:
+以上是 SQL 語句，請你分析出 SQL 語句中使用的 tables 和 alias names，並回傳 tables 和 alias names 列表。
+回傳 JSON 格式為：
+[
+    {
+        table: string,
+        aliasName: string
+    }
+]
+    `
+
+    // search query SQL from HistoryDB by req.dbName and tables
+    // if query SQL is found, use LLM fetch fields from query History then return
+
+    // search fields of tables from tableSchemas
+    // check tables 是否有 alias name ?
+    // if alias name is found, use alias name + '.' + field name
+
+    return {
+        items: []
+    }
+}
+
+
 const _intellisenseArr: Array<(req: IntellisenseReq) => Promise<IntellisenseResp>> = [
     _empty,
     _from,
-    _from_table_sel
+    _from_table_sel,
+    _from_table_select
 ];
 
 export async function provideIntellisenseAsync(req: IntellisenseReq): Promise<IntellisenseResp> {
