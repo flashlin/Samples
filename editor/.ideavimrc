@@ -330,3 +330,8 @@ endfunction
 nmap <Leader>cp kma:action MethodUp<CR>
 nmap <Leader>cp2 ^v`ayP`a:action MethodUp<CR>
 nnoremap <Leader>gc :action Git.Commit.Stage<CR>
+
+
+" 將 gtp 綁定為 Git fetch
+map gtp :action Vcs.UpdateProject<CR>
+map gta :action CheckinProject<CR>
