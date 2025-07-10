@@ -79,22 +79,12 @@ async function onShowLinqtsqlIntellisense(context: IntellisenseContext) {
   // 你可以根據 context 內容回傳 IntellisenseItem[]
   // 例如：
   const prevTokens = tokenizeSql(context.content[0]);
-  if (prevTokens.length === 0) {
-    return [
-      { title: 'FROM', context: 'FROM ' },
-    ];
-  }
-  if (prevTokens[prevTokens.length - 1] === 'FROM') {
-    return [
-      { title: 'Customer', context: 'Customer ' },
-      { title: 'CustomerExtraInfo', context: 'CustomerExtraInfo ' },
-    ];
-  }
+  const nextTokens = tokenizeSql(context.content[1]);
   const resp = await provideIntellisenseAsync({
     dbName: dbName.value,
     prevTokens: prevTokens,
     prevText: context.content[0],
-    nextTokens: [],
+    nextTokens: nextTokens,
     nextText: context.content[1]
   });
   return resp.items;

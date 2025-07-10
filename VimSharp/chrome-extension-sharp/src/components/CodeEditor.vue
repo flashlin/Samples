@@ -46,9 +46,9 @@ function codemirrorCompletion(context: CompletionContext): CompletionResult | nu
     options: suggestionsRef.value.map((item, _idx) => ({
       label: item.title,
       apply: (view: EditorView, _completion: any, from: number, to: number) => {
-        const realFrom = item.from ?? from
-        const realTo = item.to ?? to
-        const insertText = item.context
+        const realFrom = item.getFromPosition ? item.getFromPosition(from) : from
+        const realTo = to
+        const insertText = item.getContext()
         view.dispatch({
           changes: { from: realFrom, to: realTo, insert: insertText },
           selection: { anchor: realFrom + insertText.length } // 游標移到插入內容後

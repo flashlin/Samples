@@ -19,7 +19,7 @@ interface DatabaseTable {
     tableName: string
 }
 
-class LinqtsqlIntellisenseStorege {
+class LinqtsqlIntellisenseStorage {
     private _idb: IdbConext;
     private _databaseTableList: DatabaseTable[] = [];
     constructor() {
@@ -100,7 +100,7 @@ async function _empty(req: IntellisenseReq): Promise<IntellisenseResp> {
         items: [
             {
                 title: 'FROM',
-                context: 'FROM '
+                getContext: () => 'FROM '
             }
         ]
     }
@@ -129,7 +129,7 @@ async function _from(req: IntellisenseReq): Promise<IntellisenseResp> {
     return {
         items: tableList.map(table => ({
             title: table,
-            context: `${table} `
+            getContext: () => `${table} `
         }))
     }
 }
@@ -150,7 +150,7 @@ async function _from_table_sel(req: IntellisenseReq): Promise<IntellisenseResp> 
         items: [
             {
                 title: 'select',
-                context: 'ect '
+                getContext: () => 'ect '
             }
         ]
     }
@@ -170,6 +170,11 @@ export async function provideIntellisenseAsync(req: IntellisenseReq): Promise<In
         }
     }
     return {
-        items: []
+        items: [
+            {
+                title: '<No Result>',
+                getContext: () => ''
+            }
+        ]
     }
 }

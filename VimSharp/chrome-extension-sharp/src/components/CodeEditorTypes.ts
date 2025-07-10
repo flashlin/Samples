@@ -1,8 +1,7 @@
 export interface IntellisenseItem {
   title: string
-  context: string
-  from?: number
-  to?: number
+  getFromPosition?: (fromPosition: number) => number  
+  getContext(): string
 }
 
 export interface IntellisenseContext {
