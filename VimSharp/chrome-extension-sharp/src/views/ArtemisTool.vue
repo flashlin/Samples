@@ -14,6 +14,7 @@ import { provideIntellisenseAsync } from '@/tools/linqtsqlIntellisenseProvider';
 
 const dbFullNameList = ref<DropboxItem[]>([
   { label: 'AccountDB (maia-z601)', value: 'AccountDB (maia-z601)' },
+  { label: 'MembersInfoDB (maia-z606)', value: 'MembersInfoDB (maia-z606)' },
 ]);
 const dbFullNameSelected = ref<string>('AccountDB (maia-z601)');
 const dbName = computed(() => {
