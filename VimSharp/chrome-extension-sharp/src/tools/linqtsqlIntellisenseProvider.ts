@@ -4,11 +4,7 @@ import { AskLlmReq, useIntellisenseApi } from "./intellisenseApi";
 
 const intellisenseApi = useIntellisenseApi();
 async function askLlmAsync<T>(req: AskLlmReq): Promise<T> {
-    console.info(req.instruction + ' ' + req.question);
     const resp = await intellisenseApi.askLlm(req);
-    console.info(resp.answer);
-    // 檢查 resp.answer 是否以 "```json" 開頭，如果是則移除開頭的 "```json"
-    // 並且如果結尾是 "```" 則移除結尾的 "```"
     let answerText = resp.answer.trim();
     if (answerText.startsWith('```json')) {
         answerText = answerText.substring(7).trim();
