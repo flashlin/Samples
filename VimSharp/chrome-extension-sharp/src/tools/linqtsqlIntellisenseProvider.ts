@@ -12,8 +12,15 @@ async function askLlmAsync<T>(req: AskLlmReq): Promise<T> {
     if (answerText.endsWith('```')) {
         answerText = answerText.substring(0, answerText.length - 3).trim();
     }
-    const answer = JSON.parse(answerText);
-    return answer;
+    try {
+        const answer = JSON.parse(answerText);
+        return answer;
+    } catch (error) {
+        console.info(`${req.instruction}${req.question}`)
+        console.info(answerText);
+        console.error(error);
+        return [] as T;
+    }
 }
 
 interface IntellisenseReq {
@@ -171,10 +178,60 @@ async function _from_table_sel(req: IntellisenseReq): Promise<IntellisenseResp> 
     }
 }
 
-interface TableAlias {
-    table: string
-    aliasName: string
+async function askLlmForFromTablesAsync(prevText: string) {
+    const prompt = `content:
+    ${prevText}
+
+instruction:
+以上是 SQL 語句，請你分析出 SQL 語句中使用的 tables 和 alias names，並回傳 tables 和 alias names 列表。
+回傳 JSON 格式為：
+[
+    {
+        table: string,
+        aliasName: string
+    }
+]
+    `
+    const userQueryTableList = await askLlmAsync<{ table: string, aliasName: string }[]>({
+        user: 'support',
+        instruction: '',
+        question: prompt,
+        model_name: 'gemma-3n-e4b-it-text'
+    });
+
+    return userQueryTableList;
 }
+
+
+async function askLlmForSelectFieldsAsync(sql: string) {
+    const prompt = `我有一段 SQL 語句，其中包含 {cursor}，請你協助分析：
+請找出 {cursor} 後面是否有 SELECT 欄位。
+
+如果有欄位，請列出這些欄位所屬的資料表（table）、欄位名稱（fieldName）及別名（aliasName，若無別名請與欄位名稱相同）。
+
+如果 {cursor} 後面沒有任何 SELECT 欄位（例如只有 JOIN、WHERE、GROUP BY 等），請回傳空陣列 []。
+請以以下 JSON 格式回傳結果, 不要多作說明：
+[
+    {
+        table: string,
+        fieldName: string,
+        aliasName: string
+    }
+]
+
+範例語句：
+{cursor} ${sql}`;
+    const fields = await askLlmAsync<{ table: string, fieldName: string, aliasName: string }[]>({
+        user: 'support',
+        instruction: '',
+        question: prompt,
+        model_name: 'gemma-3n-e4b-it-text'
+    });
+    return fields;
+}
+
+
+
 async function _from_table_select(req: IntellisenseReq): Promise<IntellisenseResp> {
     if( req.prevTokens.length === 0 ) {
         return {
@@ -188,25 +245,7 @@ async function _from_table_select(req: IntellisenseReq): Promise<IntellisenseRes
         }
     }
     // search tables from SQL (use LLM to fetch tables)
-    const prompt = `content:
-    ${req.prevText}
-
-instruction:
-以上是 SQL 語句，請你分析出 SQL 語句中使用的 tables 和 alias names，並回傳 tables 和 alias names 列表。
-回傳 JSON 格式為：
-[
-    {
-        table: string,
-        aliasName: string
-    }
-]
-    `
-    const userQueryTableList = await askLlmAsync<TableAlias[]>({
-        user: 'support',
-        instruction: '',
-        question: prompt,
-        model_name: 'gemma-3n-e4b-it-text'
-    });
+    const userQueryTableList = await askLlmForFromTablesAsync(req.prevText);
 
     // search query SQL from HistoryDB by req.dbName and tables
     // if query SQL is found, use LLM fetch fields from query History then return
@@ -238,6 +277,16 @@ instruction:
         }
     }
     fieldList.sort();
+
+
+    const selectFields = await askLlmForSelectFieldsAsync(req.nextText);
+    // 解析 selectFields，假設 selectFields 是類似 ['table1.field1', 'table2.field2'] 的格式
+    const selectedSet = new Set(
+        selectFields
+            .map(f => `${f.table}.${f.fieldName}`)
+    );
+    fieldList = fieldList.filter(f => !selectedSet.has(f));
+
 
     const title = fieldList.length > 9
         ? fieldList.slice(0, 9).join(', ') + '...'
