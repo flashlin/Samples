@@ -6,6 +6,12 @@ const intellisenseApi = useIntellisenseApi();
 async function askLlmAsync<T>(req: AskLlmReq): Promise<T> {
     const resp = await intellisenseApi.askLlm(req);
     let answerText = resp.answer.trim();
+
+    // 如果 answerText 包含 <think> 和 </think>，就移除這段內容
+    if (answerText.includes('<think>') && answerText.includes('</think>')) {
+        answerText = answerText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+    }
+
     if (answerText.startsWith('```json')) {
         answerText = answerText.substring(7).trim();
     }
@@ -172,7 +178,7 @@ async function _from_table_sel(req: IntellisenseReq): Promise<IntellisenseResp> 
         items: [
             {
                 title: 'select',
-                getContext: () => 'ect '
+                getContext: () => 'select '
             }
         ]
     }
@@ -191,6 +197,8 @@ instruction:
         aliasName: string
     }
 ]
+
+不要多做額外說明
     `
     const userQueryTableList = await askLlmAsync<{ table: string, aliasName: string }[]>({
         user: 'support',
@@ -203,29 +211,41 @@ instruction:
 }
 
 
-async function askLlmForSelectFieldsAsync(sql: string) {
-    const prompt = `我有一段 SQL 語句，其中包含 {cursor}，請你協助分析：
-請找出 {cursor} 後面是否有 SELECT 欄位。
 
-如果有欄位，請列出這些欄位所屬的資料表（table）、欄位名稱（fieldName）及別名（aliasName，若無別名請與欄位名稱相同）。
+async function askLlmForSelectFieldsAsync(tableSchemaList: { tableName: string, fields: string[] }[], 
+    sql: string) {
+    const tableSchemaStr = tableSchemaList.map(table => `table ${table.tableName} 
+${table.fields.join(', ')}
+`).join('\n');
 
-如果 {cursor} 後面沒有任何 SELECT 欄位（例如只有 JOIN、WHERE、GROUP BY 等），請回傳空陣列 []。
-請以以下 JSON 格式回答, 不要多作說明：
+    const prompt = `information:
+${tableSchemaStr}
+
+context:
+${sql}
+
+以上是 table information and context SQL 語句，請你分析出預測 SQL 語句中 {cursor} 使用的 fields ，並回傳 table field 和 alias file names 列表。
+預測的內容從 information 取得, 並且不要和 {cursor} 附近的 field names 重複
+
+回傳 JSON 格式為：
 [
     {
         table: string,
+        tableAliasName: string,
         fieldName: string,
         aliasName: string
     }
 ]
 
-範例語句：
-{cursor} ${sql}`;
-    const fields = await askLlmAsync<{ table: string, fieldName: string, aliasName: string }[]>({
+不要多做額外說明
+`;
+    const fields = await askLlmAsync<{ table: string, tableAliasName: string, fieldName: string, aliasName: string }[]>({
         user: 'support',
         instruction: '',
         question: prompt,
-        model_name: 'gemma-3n-e4b-it-text'
+        //model_name: 'gemma-3n-e4b-it-text'
+        //model_name: 'qwen3-8b'
+        model_name: 'gemma-3-12b-it'
     });
     return fields;
 }
@@ -265,6 +285,13 @@ async function _from_table_select(req: IntellisenseReq): Promise<IntellisenseRes
             return 0;
         });
     }
+
+    const tableSchemaList = sortedTableSchema?.map((table: TableSchema) => ({
+        tableName: table.tableName,
+        fields: table.fields.map(field => field.fieldName)
+    })) ?? [];
+
+
     // check tables 是否有 alias name ?
     // if alias name is found, use alias name + '.' + field name
     let fieldList: string[] = [];
@@ -279,13 +306,16 @@ async function _from_table_select(req: IntellisenseReq): Promise<IntellisenseRes
     fieldList.sort();
 
 
-    const selectFields = await askLlmForSelectFieldsAsync(req.nextText);
+    const selectFields = await askLlmForSelectFieldsAsync(tableSchemaList, req.prevText + " {cursor}" + req.nextText);
     // 解析 selectFields，假設 selectFields 是類似 ['table1.field1', 'table2.field2'] 的格式
-    const selectedSet = new Set(
-        selectFields
-            .map(f => `${f.table}.${f.fieldName}`)
-    );
-    fieldList = fieldList.filter(f => !selectedSet.has(f));
+    fieldList =
+        selectFields.map(f => {
+            let base = f.tableAliasName != null ? `${f.tableAliasName}.${f.fieldName}` : `${f.table}.${f.fieldName}`;
+            if (f.aliasName != null) {
+                base += ` as ${f.aliasName}`;
+            }
+            return base;
+        });
 
 
     const title = fieldList.length > 9
