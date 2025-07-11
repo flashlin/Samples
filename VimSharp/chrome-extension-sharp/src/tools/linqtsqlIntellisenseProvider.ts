@@ -210,7 +210,7 @@ async function askLlmForSelectFieldsAsync(sql: string) {
 如果有欄位，請列出這些欄位所屬的資料表（table）、欄位名稱（fieldName）及別名（aliasName，若無別名請與欄位名稱相同）。
 
 如果 {cursor} 後面沒有任何 SELECT 欄位（例如只有 JOIN、WHERE、GROUP BY 等），請回傳空陣列 []。
-請以以下 JSON 格式回傳結果, 不要多作說明：
+請以以下 JSON 格式回答, 不要多作說明：
 [
     {
         table: string,

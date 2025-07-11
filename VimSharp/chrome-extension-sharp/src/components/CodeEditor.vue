@@ -18,6 +18,8 @@ const props = withDefaults(defineProps<VimCodeEditorProps>(), {})
 const emit = defineEmits(['update:modelValue'])
 const innerValue = ref(props.modelValue)
 const suggestionsRef = ref<IntellisenseItem[]>([])
+// 新增 loading 狀態
+const isLoading = ref(false)
 
 // 雙向綁定
 watch(() => props.modelValue, newValue => {
@@ -40,6 +42,15 @@ const editorRoot = ref<HTMLElement | null>(null)
 let view: EditorView | null = null
 
 function codemirrorCompletion(context: CompletionContext): CompletionResult | null {
+  if (isLoading.value) {
+    return {
+      from: context.pos,
+      options: [{
+        label: 'Loading...',
+        apply: () => false // 不可選
+      }]
+    }
+  }
   if (!suggestionsRef.value.length) return null
   return {
     from: context.pos, // 這個是 fallback，實際上每個 option 可以自訂 apply
@@ -60,6 +71,19 @@ function codemirrorCompletion(context: CompletionContext): CompletionResult | nu
   }
 }
 
+// 顯示 loading intellisense
+function showLoadingIntellisense() {
+  isLoading.value = true
+  suggestionsRef.value = [{
+    title: 'Loading...',
+    getContext: () => '',
+    getFromPosition: (from: number) => from
+  }]
+  if (view) {
+    startCompletion(view)
+  }
+}
+
 function showIntellisense(items: IntellisenseItem[]): void {
   suggestionsRef.value = items
   if (view) {
@@ -72,14 +96,18 @@ function showIntellisense(items: IntellisenseItem[]): void {
 }
 
 async function handleShowIntellisense() {
+  if (isLoading.value) return // 正在 loading 就不再觸發
+  showLoadingIntellisense()
   // 取得游標前後 context
   const [before, after] = getContextWithCursor()
   let items: IntellisenseItem[] = []
   if (props.onShowIntellisense) {
     // 呼叫外部 delegate
+    console.log('invoke')
     const result = await props.onShowIntellisense({ content: [before, after] })
     if (Array.isArray(result)) items = result
-  }  
+  }
+  isLoading.value = false
   showIntellisense(items)
 }
 
