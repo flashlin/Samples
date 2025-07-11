@@ -11,13 +11,14 @@ async function askLlmAsync<T>(req: AskLlmReq): Promise<T> {
     if (answerText.includes('<think>') && answerText.includes('</think>')) {
         answerText = answerText.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
     }
-
     if (answerText.startsWith('```json')) {
         answerText = answerText.substring(7).trim();
     }
     if (answerText.endsWith('```')) {
         answerText = answerText.substring(0, answerText.length - 3).trim();
     }
+
+    answerText = answerText.trim();
     try {
         const answer = JSON.parse(answerText);
         return answer;
@@ -243,9 +244,9 @@ ${sql}
         user: 'support',
         instruction: '',
         question: prompt,
+        model_name: 'mistralai/devstral-small-2505'
         //model_name: 'gemma-3n-e4b-it-text'
         //model_name: 'qwen3-8b'
-        model_name: 'gemma-3-12b-it'
     });
     return fields;
 }

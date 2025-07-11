@@ -125,7 +125,10 @@ async function handleShowIntellisense() {
   showLoadingIntellisense()
   // 取得游標前後 context
   const [before, after] = getContextWithCursor()
-  let items: IntellisenseItem[] = []
+  let items: IntellisenseItem[] = [{
+    title: '<No Suggestions>',
+    getContext: () => '',
+  }]
   if (props.onShowIntellisense) {
     // 呼叫外部 delegate
     try{ 
