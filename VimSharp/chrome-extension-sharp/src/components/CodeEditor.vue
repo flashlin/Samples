@@ -128,9 +128,12 @@ async function handleShowIntellisense() {
   let items: IntellisenseItem[] = []
   if (props.onShowIntellisense) {
     // 呼叫外部 delegate
-    console.log('invoke')
-    const result = await props.onShowIntellisense({ content: [before, after] })
-    if (Array.isArray(result)) items = result
+    try{ 
+      const result = await props.onShowIntellisense({ content: [before, after] })
+      if (Array.isArray(result)) items = result
+    } catch (error) {
+      console.error('handleShowIntellisense error', error)
+    }
   }
   isLoading.value = false
   showIntellisense(items)
