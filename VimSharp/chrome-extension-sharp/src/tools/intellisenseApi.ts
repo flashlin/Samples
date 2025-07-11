@@ -38,6 +38,20 @@ export interface GetUserSqlHistoryListResp {
   items: SqlHistoryRowResp[]
 }
 
+export interface AskLlmReq {
+  user: string
+  instruction: string
+  question: string
+  model_name: string
+  temperature?: number
+  max_tokens?: number
+}
+
+export interface AskLlmResp {
+  answer: string
+}
+
+
 export class IntellisenseApi {
   private _jwtApi: JwtApi;
 
@@ -55,6 +69,10 @@ export class IntellisenseApi {
 
   public async getUserSqlHistoryList(req: GetUserSqlHistoryListReq): Promise<GetUserSqlHistoryListResp> {
     return this._jwtApi.postAsync('getUserSqlHistoryList', req)
+  }
+
+  public async askLlm(req: AskLlmReq): Promise<AskLlmResp> {
+    return this._jwtApi.postAsync('askLlm', req)
   }
 }
 

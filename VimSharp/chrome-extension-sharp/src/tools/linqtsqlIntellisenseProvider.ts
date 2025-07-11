@@ -1,5 +1,24 @@
 import { IntellisenseItem } from "@/components/CodeEditorTypes"
 import { IdbConext } from "./IdbKit"
+import { AskLlmReq, useIntellisenseApi } from "./intellisenseApi";
+
+const intellisenseApi = useIntellisenseApi();
+async function askLlmAsync<T>(req: AskLlmReq): Promise<T> {
+    console.info(req.instruction + ' ' + req.question);
+    const resp = await intellisenseApi.askLlm(req);
+    console.info(resp.answer);
+    // 檢查 resp.answer 是否以 "```json" 開頭，如果是則移除開頭的 "```json"
+    // 並且如果結尾是 "```" 則移除結尾的 "```"
+    let answerText = resp.answer.trim();
+    if (answerText.startsWith('```json')) {
+        answerText = answerText.substring(7).trim();
+    }
+    if (answerText.endsWith('```')) {
+        answerText = answerText.substring(0, answerText.length - 3).trim();
+    }
+    const answer = JSON.parse(answerText);
+    return answer;
+}
 
 interface IntellisenseReq {
     dbName: string
@@ -156,6 +175,10 @@ async function _from_table_sel(req: IntellisenseReq): Promise<IntellisenseResp> 
     }
 }
 
+interface TableAlias {
+    table: string
+    aliasName: string
+}
 async function _from_table_select(req: IntellisenseReq): Promise<IntellisenseResp> {
     if( req.prevTokens.length === 0 ) {
         return {
@@ -182,16 +205,58 @@ instruction:
     }
 ]
     `
+    const userQueryTableList = await askLlmAsync<TableAlias[]>({
+        user: 'support',
+        instruction: '',
+        question: prompt,
+        model_name: 'gemma-3n-e4b-it-text'
+    });
 
     // search query SQL from HistoryDB by req.dbName and tables
     // if query SQL is found, use LLM fetch fields from query History then return
 
     // search fields of tables from tableSchemas
+    const tableSchema = dbSchemaJson.find(db => db.dbName === req.dbName)
+        ?.tables.find(table => table.tableName === userQueryTableList[0].table);
+
+    // 依照 tableName 排序 tableSchema
+    let sortedTableSchema = undefined;
+    if (tableSchema) {
+        // 如果 tableSchema 是陣列，排序；否則包成陣列再排序
+        const schemas = Array.isArray(tableSchema) ? tableSchema : [tableSchema];
+        sortedTableSchema = schemas.sort((a, b) => {
+            if (a.tableName < b.tableName) return -1;
+            if (a.tableName > b.tableName) return 1;
+            return 0;
+        });
+    }
     // check tables 是否有 alias name ?
     // if alias name is found, use alias name + '.' + field name
+    let fieldList: string[] = [];
+    if( sortedTableSchema ) {
+        for(let table of sortedTableSchema) {
+            for(let field of table.fields) {
+                const aliasName = userQueryTableList.find(t => t.table === table.tableName)?.aliasName ?? table.tableName;
+                fieldList.push(`${aliasName}.${field.fieldName}`);
+            }
+        }
+    }
+    fieldList.sort();
 
+    const title = fieldList.length > 9
+        ? fieldList.slice(0, 9).join(', ') + '...'
+        : fieldList.join(', ');
+    const context = fieldList.join(', ');
+    const getContext = () => {
+        return context;
+    }
     return {
-        items: []
+        items: [
+            {
+                title: title,
+                getContext: getContext
+            }
+        ]
     }
 }
 
