@@ -41,6 +41,18 @@ watch(innerValue, (newValue) => {
 const editorRoot = ref<HTMLElement | null>(null)
 let view: EditorView | null = null
 
+// 簡單模糊比對函式
+function fuzzyMatch(text: string, pattern: string) {
+  let t = 0, p = 0
+  text = text.toLowerCase()
+  pattern = pattern.toLowerCase()
+  while (t < text.length && p < pattern.length) {
+    if (text[t] === pattern[p]) p++
+    t++
+  }
+  return p === pattern.length
+}
+
 function codemirrorCompletion(context: CompletionContext): CompletionResult | null {
   if (isLoading.value) {
     return {
@@ -52,9 +64,22 @@ function codemirrorCompletion(context: CompletionContext): CompletionResult | nu
     }
   }
   if (!suggestionsRef.value.length) return null
+
+  // 取得目前游標前的文字
+  const word = context.matchBefore(/[^\s]*/)?.text ?? ''
+  // 多字詞切割
+  const keywords = word.trim().split(/\s+/).filter(Boolean)
+  // 多字詞模糊比對
+  const filtered = suggestionsRef.value.filter(item =>
+    keywords.every(kw => fuzzyMatch(item.title, kw))
+  )
+
+  // 沒有符合就全部顯示
+  const suggestionList = filtered.length ? filtered : suggestionsRef.value
+
   return {
-    from: context.pos, // 這個是 fallback，實際上每個 option 可以自訂 apply
-    options: suggestionsRef.value.map((item, _idx) => ({
+    from: context.pos - word.length,
+    options: suggestionList.map((item, _idx) => ({
       label: item.title,
       apply: (view: EditorView, _completion: any, from: number, to: number) => {
         const realFrom = item.getFromPosition ? item.getFromPosition(from) : from
@@ -62,7 +87,7 @@ function codemirrorCompletion(context: CompletionContext): CompletionResult | nu
         const insertText = item.getContext()
         view.dispatch({
           changes: { from: realFrom, to: realTo, insert: insertText },
-          selection: { anchor: realFrom + insertText.length } // 游標移到插入內容後
+          selection: { anchor: realFrom + insertText.length }
         })
         closeCompletion(view)
         return true
