@@ -319,7 +319,8 @@ ${sql}
         //model_name: 'mistralai/devstral-small-2505'
         //model_name: 'gemma-3n-e4b-it-text'
         //model_name: 'qwen3-8b'
-        model_name: 'qwen3-14b-mlx'
+        //model_name: 'qwen3-14b-mlx'
+        model_name: 'mistral-7b-instruct-v0.3'
     });
     return fields;
 }
@@ -390,6 +391,16 @@ async function _from_table_select(req: IntellisenseReq): Promise<IntellisenseRes
             return base;
         });
 
+    if( fieldList.length === 0) {
+        return {
+            items: [
+                {
+                    title: '<No Result>',
+                    getContext: () => ''
+                }
+            ]
+        }
+    }    
 
     const title = fieldList.length > 9
         ? fieldList.slice(0, 9).join(', ') + '...'
