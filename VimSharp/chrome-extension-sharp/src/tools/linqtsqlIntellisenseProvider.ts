@@ -1,6 +1,67 @@
 import { IntellisenseItem } from "@/components/CodeEditorTypes"
 import { IdbConext } from "./IdbKit"
 import { AskLlmReq, useIntellisenseApi } from "./intellisenseApi";
+import JSON5 from 'json5';
+
+// 解析 TypeScript interface 為 JSON Schema 格式
+function createStructuredJsonSchema(input: any): any {
+    // input 為 interface 物件（例如: { title: "string", author: "string", year: "integer" }）
+    // 這裡假設 input 是一個物件，key 為屬性名稱，value 為型別字串
+    const schema: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: { [key: string]: { type: string } },
+        required: string[]
+      }
+    } = {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {},
+        required: []
+      }
+    }
+
+    for (const key in input) {
+        if (input.hasOwnProperty(key)) {
+            let typeStr = input[key];
+            // 型別轉換
+            let type: string;
+            switch (typeStr.toLowerCase()) {
+                case "string":
+                    type = "string";
+                    break;
+                case "number":
+                case "float":
+                case "double":
+                    type = "number";
+                    break;
+                case "integer":
+                case "int":
+                    type = "integer";
+                    break;
+                case "boolean":
+                case "bool":
+                    type = "boolean";
+                    break;
+                case "array":
+                    type = "array";
+                    break;
+                case "object":
+                    type = "object";
+                    break;
+                default:
+                    type = "string"; // 預設為 string
+            }
+            schema.items.properties[key] = { type };
+            schema.items.required.push(key);
+        }
+    }
+    return schema;
+}
+
+
 
 const intellisenseApi = useIntellisenseApi();
 async function askLlmAsync<T>(req: AskLlmReq): Promise<T> {
@@ -20,11 +81,13 @@ async function askLlmAsync<T>(req: AskLlmReq): Promise<T> {
 
     answerText = answerText.trim();
     try {
-        const answer = JSON.parse(answerText);
+        //const answer = JSON.parse(answerText);
+        const answer = JSON5.parse(answerText);
+        console.info(`answer: ${JSON.stringify(answer)}`);
         return answer;
     } catch (error) {
-        console.info(`${req.instruction}${req.question}`)
-        console.info(answerText);
+        console.info(`req: ${req.instruction}${req.question}`)
+        console.info(`answerText: ${answerText}`);
         console.error(error);
         return [] as T;
     }
@@ -240,13 +303,23 @@ ${sql}
 
 不要多做額外說明
 `;
+
+    const jsonSchema = createStructuredJsonSchema({
+        table: "string",
+        tableAliasName: "string",
+        fieldName: "string",
+        aliasName: "string"
+    });
+
     const fields = await askLlmAsync<{ table: string, tableAliasName: string, fieldName: string, aliasName: string }[]>({
         user: 'support',
         instruction: '',
         question: prompt,
-        model_name: 'mistralai/devstral-small-2505'
+        json_schema: JSON.stringify(jsonSchema),
+        //model_name: 'mistralai/devstral-small-2505'
         //model_name: 'gemma-3n-e4b-it-text'
         //model_name: 'qwen3-8b'
+        model_name: 'qwen3-14b-mlx'
     });
     return fields;
 }
@@ -267,7 +340,6 @@ async function _from_table_select(req: IntellisenseReq): Promise<IntellisenseRes
     }
     // search tables from SQL (use LLM to fetch tables)
     const userQueryTableList = await askLlmForFromTablesAsync(req.prevText);
-
     // search query SQL from HistoryDB by req.dbName and tables
     // if query SQL is found, use LLM fetch fields from query History then return
 

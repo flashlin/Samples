@@ -47,6 +47,9 @@ importers:
       idb:
         specifier: ^8.0.3
         version: 8.0.3
+      json5:
+        specifier: ^2.2.3
+        version: 2.2.3
       lz4js:
         specifier: ^0.2.0
         version: 0.2.0

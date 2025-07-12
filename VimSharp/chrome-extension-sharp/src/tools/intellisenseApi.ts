@@ -44,7 +44,8 @@ export interface AskLlmReq {
   question: string
   model_name: string
   temperature?: number
-  max_tokens?: number
+  max_tokens?: number,
+  json_schema?: string
 }
 
 export interface AskLlmResp {

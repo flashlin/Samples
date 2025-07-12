@@ -120,22 +120,42 @@ function showIntellisense(items: IntellisenseItem[]): void {
   }
 }
 
+// 快取 Map，key 為序列化參數，value 為結果
+const intellisenseCache = new Map<string, any>()
+async function getCachedIntellisenseResult(
+  delegate: (arg: any) => Promise<any>,
+  param: any
+): Promise<any> {
+  const key = JSON.stringify(param)
+  if (intellisenseCache.has(key)) {
+    return intellisenseCache.get(key)
+  }
+  const result = await delegate(param)
+  intellisenseCache.set(key, result)
+  if (intellisenseCache.size > 100) {
+    const firstKey = intellisenseCache.keys().next().value!
+    intellisenseCache.delete(firstKey)
+  }
+  return result
+}
+
 async function handleShowIntellisense() {
   if (isLoading.value) return // 正在 loading 就不再觸發
   showLoadingIntellisense()
   // 取得游標前後 context
   const [before, after] = getContextWithCursor()
-  let items: IntellisenseItem[] = [{
-    title: '<No Suggestions>',
-    getContext: () => '',
-  }]
+  let items: IntellisenseItem[] = []
   if (props.onShowIntellisense) {
     // 呼叫外部 delegate
     try{ 
-      const result = await props.onShowIntellisense({ content: [before, after] })
-      if (Array.isArray(result)) items = result
+      const result = await getCachedIntellisenseResult(props.onShowIntellisense, { content: [before, after] })
+      items = result
     } catch (error) {
       console.error('handleShowIntellisense error', error)
+      items = [{
+        title: '<No Suggestions>',
+        getContext: () => '',
+      }]
     }
   }
   isLoading.value = false
