@@ -315,7 +315,7 @@ ${sql}
         user: 'support',
         instruction: '',
         question: prompt,
-        json_schema: JSON.stringify(jsonSchema),
+        //json_schema: JSON.stringify(jsonSchema),
         //model_name: 'mistralai/devstral-small-2505'
         //model_name: 'gemma-3n-e4b-it-text'
         //model_name: 'qwen3-8b'
