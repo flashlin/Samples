@@ -12,6 +12,7 @@ if [ ! -d ~/miniconda3 ]; then
     conda init --all
 fi
 
+brew install zsh-autosuggestions
 uv run ./install.py
 
 echo "Install done"
