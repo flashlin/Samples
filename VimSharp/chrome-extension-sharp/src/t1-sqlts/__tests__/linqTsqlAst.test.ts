@@ -255,43 +255,26 @@ describe('LINQ T-SQL AST Parser', () => {
             const result = parse(sql);
             const ast = expectSuccess(result);
             
-            // 驗證 WHERE 條件存在
-            expect(ast.where).toBeDefined();
-            expect(ast.where!.condition).toBeDefined();
-            
-            const condition = ast.where!.condition;
-            
-            // NOT 運算符應該被解析為一元運算符
-            expect(condition.type).toBe('unary');
-            
-            // 由於上面已經斷言類型是 'unary'，可以直接進行類型轉換
-            const unaryCondition = condition as UnaryExpression;
-            
-            // 驗證運算符是 NOT
-            expect(unaryCondition.operator).toBe('NOT');
-            
-            // 驗證操作數是一個比較表達式
-            expect(unaryCondition.operand).toBeDefined();
-            expect(unaryCondition.operand.type).toBe('binary');
-            
-            // 由於已經斷言操作數類型是 'binary'，可以直接進行類型轉換
-            const binaryOperand = unaryCondition.operand as BinaryExpression;
-            
-            // 驗證比較表達式的結構：u.IsDeleted = 1
-            expect(binaryOperand.operator).toBe('=');
-            expect(binaryOperand.left.type).toBe('column');
-            expect(binaryOperand.right.type).toBe('literal');
-            
-            // 驗證左側欄位引用
-            const leftColumn = binaryOperand.left as ColumnReference;
-            expect(leftColumn.name).toBe('u.IsDeleted');
-            
-            // 驗證右側字面值
-            const rightLiteral = binaryOperand.right as Literal;
-            expect(rightLiteral.value).toBe(1);
+            // 驗證 WHERE 條件的 JSON 結構
+            expect(ast.where?.condition).toMatchObject({
+                type: 'unary',
+                operator: 'NOT',
+                operand: {
+                    type: 'binary',
+                    operator: '=',
+                    left: {
+                        type: 'column',
+                        name: 'u.IsDeleted'
+                    },
+                    right: {
+                        type: 'literal',
+                        value: 1
+                    }
+                }
+            });
             
             // 驗證整個表達式的語義：NOT (u.IsDeleted = 1)
-            // 測試通過，NOT 運算符被正確解析為一元運算符
+            // 這個 JSON 結構清楚地表示了正確的解析結果
         });
 
         test('Query with various comparison operators', () => {
