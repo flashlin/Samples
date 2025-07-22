@@ -264,29 +264,31 @@ describe('LINQ T-SQL AST Parser', () => {
             // NOT 運算符應該被解析為一元運算符
             expect(condition.type).toBe('unary');
             
-            if (condition.type === 'unary') {
-                // 驗證運算符是 NOT
-                expect(condition.operator).toBe('NOT');
-                
-                // 驗證操作數是一個比較表達式
-                expect(condition.operand).toBeDefined();
-                expect(condition.operand.type).toBe('binary');
-                
-                if (condition.operand.type === 'binary') {
-                    // 驗證比較表達式的結構：u.IsDeleted = 1
-                    expect(condition.operand.operator).toBe('=');
-                    expect(condition.operand.left.type).toBe('column');
-                    expect(condition.operand.right.type).toBe('literal');
-                    
-                    if (condition.operand.left.type === 'column') {
-                        expect(condition.operand.left.name).toBe('u.IsDeleted');
-                    }
-                    
-                    if (condition.operand.right.type === 'literal') {
-                        expect(condition.operand.right.value).toBe(1);
-                    }
-                }
-            }
+            // 由於上面已經斷言類型是 'unary'，可以直接進行類型轉換
+            const unaryCondition = condition as UnaryExpression;
+            
+            // 驗證運算符是 NOT
+            expect(unaryCondition.operator).toBe('NOT');
+            
+            // 驗證操作數是一個比較表達式
+            expect(unaryCondition.operand).toBeDefined();
+            expect(unaryCondition.operand.type).toBe('binary');
+            
+            // 由於已經斷言操作數類型是 'binary'，可以直接進行類型轉換
+            const binaryOperand = unaryCondition.operand as BinaryExpression;
+            
+            // 驗證比較表達式的結構：u.IsDeleted = 1
+            expect(binaryOperand.operator).toBe('=');
+            expect(binaryOperand.left.type).toBe('column');
+            expect(binaryOperand.right.type).toBe('literal');
+            
+            // 驗證左側欄位引用
+            const leftColumn = binaryOperand.left as ColumnReference;
+            expect(leftColumn.name).toBe('u.IsDeleted');
+            
+            // 驗證右側字面值
+            const rightLiteral = binaryOperand.right as Literal;
+            expect(rightLiteral.value).toBe(1);
             
             // 驗證整個表達式的語義：NOT (u.IsDeleted = 1)
             // 測試通過，NOT 運算符被正確解析為一元運算符
