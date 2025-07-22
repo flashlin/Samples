@@ -272,9 +272,6 @@ describe('LINQ T-SQL AST Parser', () => {
                     }
                 }
             });
-            
-            // 驗證整個表達式的語義：NOT (u.IsDeleted = 1)
-            // 這個 JSON 結構清楚地表示了正確的解析結果
         });
 
         test('Query with various comparison operators', () => {
