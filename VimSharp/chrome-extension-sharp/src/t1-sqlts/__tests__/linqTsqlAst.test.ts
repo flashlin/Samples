@@ -243,11 +243,53 @@ describe('LINQ T-SQL AST Parser', () => {
             const result = parse(sql);
             const ast = expectSuccess(result);
             
-            expect(ast.where).toBeDefined();
-            expect(ast.where!.condition.type).toBe('binary');
-            if (ast.where!.condition.type === 'binary') {
-                expect(ast.where!.condition.operator).toBe('OR');
-            }
+            // 驗證 WHERE 條件的 JSON 結構：(u.Age > 18 AND u.IsActive = 1) OR u.Role = 2
+            expect(ast.where?.condition).toMatchObject({
+                type: 'binary',
+                operator: 'OR',
+                left: {
+                    type: 'binary',
+                    operator: 'AND',
+                    left: {
+                        type: 'binary',
+                        operator: '>',
+                        left: {
+                            type: 'column',
+                            name: 'u.Age'
+                        },
+                        right: {
+                            type: 'literal',
+                            value: 18
+                        }
+                    },
+                    right: {
+                        type: 'binary',
+                        operator: '=',
+                        left: {
+                            type: 'column',
+                            name: 'u.IsActive'
+                        },
+                        right: {
+                            type: 'literal',
+                            value: 1
+                        }
+                    }
+                },
+                right: {
+                    type: 'binary',
+                    operator: '=',
+                    left: {
+                        type: 'column',
+                        name: 'u.Role'
+                    },
+                    right: {
+                        type: 'literal',
+                        value: 2
+                    }
+                }
+            });
+            
+            // 這個 JSON 結構清楚地展示了括號和運算符優先級的正確解析
         });
 
         test('Query with NOT operator', () => {
