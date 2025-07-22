@@ -5,6 +5,9 @@ from pathlib import Path
 templates_content = '''
 # ===== 自定義函數區塊開始 =====
 
+# dk alias - 執行自定義 dk 腳本
+alias dk='/Users/flash/vdisk/github/Samples/gsoft/dk'
+
 # nvm 自動切換版本
 autoload -U add-zsh-hook
 
@@ -91,47 +94,6 @@ ff() {
 
 # Rider 快速開啟指令
 ro() { open -a "Rider" "${1:-.}"; }
-
-# Docker 異常容器日誌快速查詢
-# dkl: 選擇 Status 為 Exited 的容器，顯示 logs
-# 需安裝 fzf
-# 用法：dkll
-#
-dkll() {
-  docker ps -a --format '{{.ID}} {{.Names}} {{.Status}}' \
-    | awk '$3 ~ /^Exited/' \
-    | fzf --ansi --prompt='選擇異常容器: ' --header='hashid name' \
-    | awk '{print $1}' \
-    | xargs -r docker logs
-}
-
-# Docker 正常運作容器日誌快速查詢
-# dkl: 選擇 Status 為 Up（正在運作中）的容器，顯示 logs（僅顯示最後 30 行）
-# 需安裝 fzf
-# 用法：dkl
-#
-dkl() {
-  docker ps --filter "status=running" --format '{{.ID}} {{.Names}}' \
-    | fzf --ansi --prompt='選擇正常容器: ' --header='hashid name' \
-    | awk '{print $1}' \
-    | xargs -r docker logs --tail 50
-}
-
-# 進入容器 bash 指令
-# dkbash: 選擇任一 container，進入 /bin/bash
-# 需安裝 fzf
-# 用法：dkbash
-#
-dkbash() {
-  local selected
-  selected=$(docker ps -a --format '{{.ID}} {{.Names}}' \
-    | fzf --ansi --prompt='選擇要進入的容器: ' --header='hashid name')
-  if [ -n "$selected" ]; then
-    local cname
-    cname=$(echo "$selected" | awk '{print $2}')
-    docker exec -it "$cname" /bin/bash
-  fi
-}
 
 # Python 快速執行指令
 py() {
