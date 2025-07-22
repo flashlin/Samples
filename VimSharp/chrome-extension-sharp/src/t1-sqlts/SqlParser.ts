@@ -142,9 +142,7 @@ function parseSelectTypeClause(): ParseSqlFn
                 new SqlExpr(SqlType.DistinctClause, resultDistinct.value.Span)
             );
         }
-        return new ParseSqlResult(input.text, 
-            new SqlExpr(SqlType.NoneClause, TextSpan.None)
-        );
+        return none(input);
     };
 }
 
@@ -182,5 +180,8 @@ export function createParseInput(sql: string): ParseSqlInput
 export function parseSql(sql: string): SqlExpr[] {
     const input = createParseInput(sql);
     const result = parseIntValue()(input);
-    return [result.value!];
+    if( result.value ) {
+        return [result.value];
+    }
+    return [];
 }
