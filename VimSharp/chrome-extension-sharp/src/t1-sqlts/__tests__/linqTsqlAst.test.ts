@@ -1,4 +1,4 @@
-import { parse, ParseResult, TsqlAst, ParseError } from '../linqTsqlAst';
+import { parse, ParseResult, TsqlAst, ParseError, UnaryExpression, BinaryExpression, ColumnReference, Literal } from '../linqTsqlAst';
 
 describe('LINQ T-SQL AST Parser', () => {
     
