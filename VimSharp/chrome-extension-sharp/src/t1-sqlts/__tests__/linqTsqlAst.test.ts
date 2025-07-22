@@ -329,10 +329,21 @@ describe('LINQ T-SQL AST Parser', () => {
             const result = parse(sql);
             const ast = expectSuccess(result);
             
-            expect(ast.where).toBeDefined();
-            if (ast.where!.condition.type === 'binary') {
-                expect(ast.where!.condition.operator).toBe('LIKE');
-            }
+            // 驗證 WHERE 條件的 JSON 結構：u.Name LIKE 'John%'
+            expect(ast.where?.condition).toMatchObject({
+                type: 'binary',
+                operator: 'LIKE',
+                left: {
+                    type: 'column',
+                    name: 'u.Name'
+                },
+                right: {
+                    type: 'literal',
+                    value: 'John%'
+                }
+            });
+            
+            // 這個 JSON 結構展示了 LIKE 運算符和字串模式匹配的正確解析
         });
     });
 
