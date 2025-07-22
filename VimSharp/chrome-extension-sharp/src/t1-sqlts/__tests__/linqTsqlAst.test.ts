@@ -255,13 +255,41 @@ describe('LINQ T-SQL AST Parser', () => {
             const result = parse(sql);
             const ast = expectSuccess(result);
             
-            // NOT 運算符應該被解析，檢查 WHERE 條件存在
+            // 驗證 WHERE 條件存在
             expect(ast.where).toBeDefined();
             expect(ast.where!.condition).toBeDefined();
             
-            // 由於運算符優先級，這可能被解析為 NOT (u.IsDeleted = 1) 或其他形式
-            // 只要有 WHERE 條件就算成功
-            expect(ast.where!.condition.type).toMatch(/^(unary|binary)$/);
+            const condition = ast.where!.condition;
+            
+            // NOT 運算符應該被解析為一元運算符
+            expect(condition.type).toBe('unary');
+            
+            if (condition.type === 'unary') {
+                // 驗證運算符是 NOT
+                expect(condition.operator).toBe('NOT');
+                
+                // 驗證操作數是一個比較表達式
+                expect(condition.operand).toBeDefined();
+                expect(condition.operand.type).toBe('binary');
+                
+                if (condition.operand.type === 'binary') {
+                    // 驗證比較表達式的結構：u.IsDeleted = 1
+                    expect(condition.operand.operator).toBe('=');
+                    expect(condition.operand.left.type).toBe('column');
+                    expect(condition.operand.right.type).toBe('literal');
+                    
+                    if (condition.operand.left.type === 'column') {
+                        expect(condition.operand.left.name).toBe('u.IsDeleted');
+                    }
+                    
+                    if (condition.operand.right.type === 'literal') {
+                        expect(condition.operand.right.value).toBe(1);
+                    }
+                }
+            }
+            
+            // 驗證整個表達式的語義：NOT (u.IsDeleted = 1)
+            // 測試通過，NOT 運算符被正確解析為一元運算符
         });
 
         test('Query with various comparison operators', () => {

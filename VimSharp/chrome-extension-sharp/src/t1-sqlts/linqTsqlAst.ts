@@ -734,11 +734,11 @@ export class LinqTsqlParser {
 
     // 解析 AND 表達式
     private parseAndExpression(): Expression {
-        let left = this.parseComparisonExpression();
+        let left = this.parseNotExpression();
         
         while (this.tryKeyword('AND')) {
             this.skipWhitespaceAndComments();
-            const right = this.parseComparisonExpression();
+            const right = this.parseNotExpression();
             const span = new TextSpan('', left.span.Offset, 0); // 簡化處理
             left = {
                 type: 'binary',
@@ -752,9 +752,30 @@ export class LinqTsqlParser {
         return left;
     }
 
+    // 解析 NOT 表達式
+    private parseNotExpression(): Expression {
+        this.skipWhitespaceAndComments();
+        const startPos = this.parser.position;
+        
+        // 檢查 NOT 運算符
+        if (this.tryKeyword('NOT')) {
+            this.skipWhitespaceAndComments();
+            const operand = this.parseNotExpression(); // 支援多重 NOT
+            const span = new TextSpan('', startPos, this.parser.position - startPos);
+            return {
+                type: 'unary',
+                span,
+                operator: 'NOT',
+                operand
+            };
+        }
+        
+        return this.parseComparisonExpression();
+    }
+
     // 解析比較表達式
     private parseComparisonExpression(): Expression {
-        let left = this.parseUnaryExpression();
+        let left = this.parsePrimaryExpression();
         
         this.skipWhitespaceAndComments();
         
@@ -763,7 +784,7 @@ export class LinqTsqlParser {
         for (const op of operators) {
             if (this.tryKeyword(op) || this.trySymbol(op)) {
                 this.skipWhitespaceAndComments();
-                const right = this.parseUnaryExpression();
+                const right = this.parsePrimaryExpression();
                 const span = new TextSpan('', left.span.Offset, 0); // 簡化處理
                 return {
                     type: 'binary',
@@ -776,27 +797,6 @@ export class LinqTsqlParser {
         }
         
         return left;
-    }
-
-    // 解析一元表達式
-    private parseUnaryExpression(): Expression {
-        this.skipWhitespaceAndComments();
-        const startPos = this.parser.position;
-        
-        // 檢查 NOT 運算符
-        if (this.tryKeyword('NOT')) {
-            this.skipWhitespaceAndComments();
-            const operand = this.parseUnaryExpression();
-            const span = new TextSpan('', startPos, this.parser.position - startPos);
-            return {
-                type: 'unary',
-                span,
-                operator: 'NOT',
-                operand
-            };
-        }
-        
-        return this.parsePrimaryExpression();
     }
 
     // 解析基本表達式
