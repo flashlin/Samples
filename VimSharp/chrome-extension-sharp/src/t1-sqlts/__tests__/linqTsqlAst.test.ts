@@ -321,7 +321,51 @@ describe('LINQ T-SQL AST Parser', () => {
             const result = parse(sql);
             const ast = expectSuccess(result);
             
-            expect(ast.where).toBeDefined();
+            // 驗證 WHERE 條件的 JSON 結構：u.Age >= 18 AND u.Score <= 100 AND u.Name <> 'Admin'
+            expect(ast.where?.condition).toMatchObject({
+                type: 'binary',
+                operator: 'AND',
+                left: {
+                    type: 'binary',
+                    operator: 'AND',
+                    left: {
+                        type: 'binary',
+                        operator: '>=',
+                        left: {
+                            type: 'column',
+                            name: 'u.Age'
+                        },
+                        right: {
+                            type: 'literal',
+                            value: 18
+                        }
+                    },
+                    right: {
+                        type: 'binary',
+                        operator: '<=',
+                        left: {
+                            type: 'column',
+                            name: 'u.Score'
+                        },
+                        right: {
+                            type: 'literal',
+                            value: 100
+                        }
+                    }
+                },
+                right: {
+                    type: 'binary',
+                    operator: '<>',
+                    left: {
+                        type: 'column',
+                        name: 'u.Name'
+                    },
+                    right: {
+                        type: 'literal',
+                        value: 'Admin'
+                    }
+                }
+            });
         });
 
         test('Query with LIKE operator', () => {
