@@ -510,9 +510,10 @@ export class LinqTsqlParser {
         
         // 檢查是否有點號（表示表別名.欄位名）
         if (this.trySymbol('.')) {
-            const fieldSpan = this.expectIdentifier('field name after dot');
+            const fieldSpan = this.parser.readSqlIdentifier();
             if (fieldSpan.Length === 0) {
-                // 錯誤已記錄，使用原始名稱
+                // 點號後沒有欄位名，記錄錯誤
+                this.addError('Expected field name after dot', 'field name', this.getCurrentToken(), 'field name after dot');
                 name = nameSpan.Word;
             } else {
                 name = `${nameSpan.Word}.${fieldSpan.Word}`;
@@ -602,9 +603,10 @@ export class LinqTsqlParser {
             
             // 檢查是否有點號（表示表別名.欄位名）
             if (this.trySymbol('.')) {
-                const nameSpan = this.expectIdentifier('field name after dot in GROUP BY');
+                const nameSpan = this.parser.readSqlIdentifier();
                 if (nameSpan.Length === 0) {
-                    // 錯誤已記錄，使用原始名稱
+                    // 點號後沒有欄位名，記錄錯誤
+                    this.addError('Expected field name after dot in GROUP BY', 'field name', this.getCurrentToken(), 'field name after dot in GROUP BY');
                     fieldName = fieldSpan.Word;
                 } else {
                     fieldName = `${fieldSpan.Word}.${nameSpan.Word}`;
@@ -671,9 +673,10 @@ export class LinqTsqlParser {
         
         // 檢查是否有點號（表示表別名.欄位名）
         if (this.trySymbol('.')) {
-            const nameSpan = this.expectIdentifier('field name after dot in ORDER BY');
+            const nameSpan = this.parser.readSqlIdentifier();
             if (nameSpan.Length === 0) {
-                // 錯誤已記錄，使用原始名稱
+                // 點號後沒有欄位名，記錄錯誤
+                this.addError('Expected field name after dot in ORDER BY', 'field name', this.getCurrentToken(), 'field name after dot in ORDER BY');
                 fieldName = fieldSpan.Word;
             } else {
                 fieldName = `${fieldSpan.Word}.${nameSpan.Word}`;
@@ -751,7 +754,7 @@ export class LinqTsqlParser {
 
     // 解析比較表達式
     private parseComparisonExpression(): Expression {
-        let left = this.parsePrimaryExpression();
+        let left = this.parseUnaryExpression();
         
         this.skipWhitespaceAndComments();
         
@@ -760,7 +763,7 @@ export class LinqTsqlParser {
         for (const op of operators) {
             if (this.tryKeyword(op) || this.trySymbol(op)) {
                 this.skipWhitespaceAndComments();
-                const right = this.parsePrimaryExpression();
+                const right = this.parseUnaryExpression();
                 const span = new TextSpan('', left.span.Offset, 0); // 簡化處理
                 return {
                     type: 'binary',
@@ -775,15 +778,15 @@ export class LinqTsqlParser {
         return left;
     }
 
-    // 解析基本表達式
-    private parsePrimaryExpression(): Expression {
+    // 解析一元表達式
+    private parseUnaryExpression(): Expression {
         this.skipWhitespaceAndComments();
         const startPos = this.parser.position;
         
         // 檢查 NOT 運算符
         if (this.tryKeyword('NOT')) {
             this.skipWhitespaceAndComments();
-            const operand = this.parsePrimaryExpression();
+            const operand = this.parseUnaryExpression();
             const span = new TextSpan('', startPos, this.parser.position - startPos);
             return {
                 type: 'unary',
@@ -792,6 +795,14 @@ export class LinqTsqlParser {
                 operand
             };
         }
+        
+        return this.parsePrimaryExpression();
+    }
+
+    // 解析基本表達式
+    private parsePrimaryExpression(): Expression {
+        this.skipWhitespaceAndComments();
+        const startPos = this.parser.position;
         
         // 檢查括號表達式
         if (this.trySymbol('(')) {
@@ -814,7 +825,22 @@ export class LinqTsqlParser {
             };
         }
         
-        // 嘗試解析數字字面值
+        // 嘗試解析負數
+        if (this.trySymbol('-')) {
+            const numberSpan = this.parser.readInt();
+            if (numberSpan.Length > 0) {
+                const span = new TextSpan('-' + numberSpan.Word, startPos, this.parser.position - startPos);
+                return {
+                    type: 'literal',
+                    span,
+                    value: -parseInt(numberSpan.Word)
+                };
+            } else {
+                // 回退位置，這不是負數
+                this.parser.position = startPos;
+            }
+        }
+        
         const numberSpan = this.parser.readInt();
         if (numberSpan.Length > 0) {
             return {
@@ -839,9 +865,10 @@ export class LinqTsqlParser {
         
         // 檢查是否有點號（表示表別名.欄位名）
         if (this.trySymbol('.')) {
-            const fieldSpan = this.expectIdentifier('field name after dot');
+            const fieldSpan = this.parser.readSqlIdentifier();
             if (fieldSpan.Length === 0) {
-                // 錯誤已記錄，使用原始名稱
+                // 點號後沒有欄位名，記錄錯誤
+                this.addError('Expected field name after dot', 'field name', this.getCurrentToken(), 'field name after dot');
                 name = identifierSpan.Word;
             } else {
                 name = `${identifierSpan.Word}.${fieldSpan.Word}`;
