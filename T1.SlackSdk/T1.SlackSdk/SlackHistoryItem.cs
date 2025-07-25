@@ -7,4 +7,5 @@ public class SlackHistoryItem
     public string Text { get; set; } = string.Empty;
     public DateTime Time { get; set; }
     public List<SlackMessage> ThreadMessages { get; set; } = [];
+    public string Ts { get; set; } = string.Empty;
 }

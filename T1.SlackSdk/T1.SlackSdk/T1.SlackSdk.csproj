@@ -8,9 +8,10 @@
         <Description>let SlackNet more easy</Description>
         <Copyright>2024</Copyright>
         <License>https://choosealicense.com/licenses/mit/</License>
-        <AssemblyVersion>1.0.3</AssemblyVersion>
-        <FileVersion>1.0.3</FileVersion>
-        <Version>1.0.4</Version>
+        <AssemblyVersion>1.0.5</AssemblyVersion>
+        <FileVersion>1.0.5</FileVersion>
+        <Version>1.0.5</Version>
+        <PackageReleaseNotes>add send progress</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>

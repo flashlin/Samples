@@ -5,4 +5,5 @@ public class SlackMessage
     public SlackUser User { get; set; } = SlackUser.Empty;
     public string Text { get; set; } = string.Empty;
     public DateTime Time { get; set; }
+    public string Ts { get; set; } = string.Empty;
 }

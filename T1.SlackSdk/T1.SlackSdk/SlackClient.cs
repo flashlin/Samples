@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using SlackNet;
+using SlackNet.WebApi;
 using T1.Standard.Common;
 using T1.Standard.Extensions;
 
@@ -18,32 +19,42 @@ public class SlackClient : ISlackClient
     public Task<List<SlackHistoryItem>> GetHistoryAsync(GetHistoryArgs args)
     {
         return InternalGetHistoryAsync(args.ChannelId, args.Range);
-        // var count = 0;
-        // var currentRange = args.Range;
-        // var result = new Dictionary<Guid, SlackHistoryItem>();
-        // while (count < args.Limit)
-        // {
-        //     var subResult = await InternalGetHistoryAsync(args.ChannelId, currentRange);
-        //     if (subResult.Count == 0)
-        //     {
-        //         break;
-        //     }
-        //     foreach (var item in subResult)
-        //     {
-        //         result[item.Id] = item;
-        //     }
-        //     count += subResult.Count;
-        //     if (subResult.Count < args.Limit)
-        //     {
-        //         break;
-        //     }
-        //     currentRange = new DateTimeRange
-        //     {
-        //         Start = subResult[^1].Time,
-        //         End = args.Range.End
-        //     };
-        // }
-        // return result.Values.ToList();
+    }
+
+    public async Task SendProgressMessageAsync(SendProgressMessageArgs args)
+    {
+        if (string.IsNullOrEmpty(args.ProgressMessage))
+        {
+            args.ProgressMessage = "🔄 開始處理任務中...";
+        }
+        await _client.Chat.PostMessage(new Message
+        {
+            Channel = args.ChannelId,
+            Text = args.ProgressMessage,
+            LinkNames = false,
+            Username = args.Username,
+            ThreadTs = args.Ts,
+        });
+    }
+
+    public async Task SendFinishProgressMessageAsync(SendFinishProgressMessageArgs args)
+    {
+        if (string.IsNullOrEmpty(args.FinishMessage))
+        {
+            args.FinishMessage = "✅ 處理完成！";
+        }
+        await _client.Chat.Update(new MessageUpdate
+        {
+            ChannelId = args.ChannelId,
+            Ts = args.Ts,
+            Text = args.FinishMessage,
+        });
+        await _client.Chat.PostMessage(new Message
+        {
+            Channel = args.ChannelId,
+            ThreadTs = args.Ts,
+            Text = args.Message
+        }); 
     }
 
     private async Task<List<SlackHistoryItem>> InternalGetHistoryAsync(string channelId, DateTimeRange range)
@@ -71,6 +82,7 @@ public class SlackClient : ISlackClient
                 User = userInfo,
                 Text = message.Text,
                 Time = message.Ts.SlackTsToDateTime(),
+                Ts = message.Ts,
                 ThreadMessages = historyMessages.Skip(1).ToList()
             };
             item.ThreadMessages.Sort((a, b) => a.Time.CompareTo(b.Time));
@@ -107,7 +119,8 @@ public class SlackClient : ISlackClient
             {
                 User = userInfo,
                 Text = threadMessage.Text,
-                Time = threadMessage.Ts.SlackTsToDateTime()
+                Time = threadMessage.Ts.SlackTsToDateTime(),
+                Ts = threadMessage.Ts
             };
         }
     }
