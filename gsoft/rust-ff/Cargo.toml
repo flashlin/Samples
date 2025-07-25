@@ -1,0 +1,9 @@
+[package]
+name = "ff"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+regex = "1.10"
+walkdir = "2.4"
+colored = "2.0"
