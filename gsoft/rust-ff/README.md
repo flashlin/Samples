@@ -10,6 +10,7 @@ A Rust console application that searches for content within files using regular 
 - Real-time progress display during search with terminal width awareness
 - Colored output with highlighted matches
 - Smart progress message truncation to prevent line wrapping
+- Robust file handling (automatically skips binary and non-UTF-8 files)
 - Cross-platform compatibility
 
 ## Usage

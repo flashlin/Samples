@@ -1,7 +1,7 @@
 use regex::Regex;
 use std::env;
-use std::fs::File;
-use std::io::{self, BufRead, BufReader, Write};
+use std::fs;
+use std::io::{self, Write};
 use walkdir::WalkDir;
 use colored::*;
 use terminal_size::{Width, terminal_size};
@@ -95,15 +95,26 @@ fn main() {
 }
 
 fn search_file_content(path: &std::path::Path, regex: &Regex, _pattern: &str) -> io::Result<usize> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
+    // Try to read file as UTF-8, skip if it's not valid UTF-8
+    let content = match fs::read_to_string(path) {
+        Ok(content) => content,
+        Err(e) => {
+            // Check if it's a UTF-8 error
+            if e.kind() == io::ErrorKind::InvalidData {
+                // Skip binary or non-UTF-8 files silently
+                return Ok(0);
+            } else {
+                // Return other IO errors
+                return Err(e);
+            }
+        }
+    };
+    
     let mut matches = 0;
     let mut first_match = true;
     
-    for (line_number, line) in reader.lines().enumerate() {
-        let line = line?;
-        
-        if regex.is_match(&line) {
+    for (line_number, line) in content.lines().enumerate() {
+        if regex.is_match(line) {
             matches += 1;
             
             // Clear progress line and add newline before first match in this file
@@ -120,7 +131,7 @@ fn search_file_content(path: &std::path::Path, regex: &Regex, _pattern: &str) ->
             
             // Highlight matching parts in green, rest in white
             let mut last_end = 0;
-            for mat in regex.find_iter(&line) {
+            for mat in regex.find_iter(line) {
                 // Print text before match in white
                 print!("{}", &line[last_end..mat.start()].white());
                 // Print match in green
