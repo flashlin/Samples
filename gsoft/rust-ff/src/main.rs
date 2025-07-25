@@ -4,6 +4,7 @@ use std::fs::File;
 use std::io::{self, BufRead, BufReader, Write};
 use walkdir::WalkDir;
 use colored::*;
+use terminal_size::{Width, terminal_size};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -49,8 +50,8 @@ fn main() {
         
         // Show progress for directories
         if path.is_dir() {
-            print!("\rSearching: {}", path.display());
-            io::stdout().flush().unwrap();
+            let message = format!("Searching: {}", path.display());
+            print_progress(&message);
         }
         
         // Only process files, skip directories
@@ -62,8 +63,8 @@ fn main() {
                     // Check if filename matches the regex pattern
                     if filename_regex.is_match(file_name_str) {
                         // Show current file being processed
-                        print!("\rProcessing: {}", path.display());
-                        io::stdout().flush().unwrap();
+                        let message = format!("Processing: {}", path.display());
+                        print_progress(&message);
                         
                         // Search content within the file
                         match search_file_content(&path, &content_regex, content_pattern) {
@@ -83,7 +84,7 @@ fn main() {
     }
     
     // Clear the progress line
-    print!("\r{}\r", " ".repeat(80));
+    clear_progress_line();
     
     println!();
     if total_matches == 0 {
@@ -97,12 +98,19 @@ fn search_file_content(path: &std::path::Path, regex: &Regex, _pattern: &str) ->
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     let mut matches = 0;
+    let mut first_match = true;
     
     for (line_number, line) in reader.lines().enumerate() {
         let line = line?;
         
         if regex.is_match(&line) {
             matches += 1;
+            
+            // Clear progress line and add newline before first match in this file
+            if first_match {
+                clear_progress_line();
+                first_match = false;
+            }
             
             // Print filename, line number, and highlighted content
             print!("{} {} ", 
@@ -125,4 +133,34 @@ fn search_file_content(path: &std::path::Path, regex: &Regex, _pattern: &str) ->
     }
     
     Ok(matches)
+}
+
+fn get_terminal_width() -> usize {
+    if let Some((Width(w), _)) = terminal_size() {
+        w as usize
+    } else {
+        80 // Default width if unable to detect
+    }
+}
+
+fn print_progress(message: &str) {
+    let terminal_width = get_terminal_width();
+    let max_width = terminal_width.saturating_sub(1); // Leave space for cursor
+    
+    let display_message = if message.len() > max_width {
+        // If message is too long, show only the end part
+        let start_pos = message.len() - max_width;
+        &message[start_pos..]
+    } else {
+        message
+    };
+    
+    print!("\r{}", display_message);
+    io::stdout().flush().unwrap();
+}
+
+fn clear_progress_line() {
+    let terminal_width = get_terminal_width();
+    print!("\r{}\r", " ".repeat(terminal_width));
+    io::stdout().flush().unwrap();
 }

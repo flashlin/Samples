@@ -3,8 +3,8 @@
 # Build script for Rust project
 echo "Building Rust project..."
 
-# Run cargo build
-cargo build
+# Run cargo build in release mode
+cargo build --release
 
 # Check if build was successful
 if [ $? -eq 0 ]; then
@@ -14,4 +14,4 @@ else
     exit 1
 fi
 
-cargo run
+cargo run --release

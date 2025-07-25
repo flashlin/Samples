@@ -7,8 +7,9 @@ A Rust console application that searches for content within files using regular 
 - Search file content using regular expressions
 - Filter files by filename patterns using regular expressions
 - Recursive search through directories and subdirectories
-- Real-time progress display during search
+- Real-time progress display during search with terminal width awareness
 - Colored output with highlighted matches
+- Smart progress message truncation to prevent line wrapping
 - Cross-platform compatibility
 
 ## Usage
@@ -53,6 +54,8 @@ cargo run -- ".*" "^test.*"
 
 The program displays:
 - Real-time search progress (directories being searched)
+  - Progress messages automatically truncate to fit terminal width
+  - Long paths show only the end portion to prevent line wrapping
 - File processing progress (current file being processed)
 - Matches in format: `filename line_number content`
   - Filename in blue
@@ -74,3 +77,4 @@ The executable will be located at `target/release/ff`.
 - `regex`: For regular expression matching
 - `walkdir`: For recursive directory traversal
 - `colored`: For colored terminal output
+- `terminal_size`: For detecting terminal width and smart progress display
