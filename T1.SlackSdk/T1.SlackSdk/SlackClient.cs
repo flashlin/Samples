@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Castle.Core.Internal;
+using Microsoft.Extensions.Options;
 using SlackNet;
 using SlackNet.WebApi;
 using T1.Standard.Common;
@@ -133,11 +134,36 @@ public class SlackClient : ISlackClient
         }
 
         var userInfo = await _client.Users.Info(userId);
-        var userName = userInfo.Profile.DisplayName ?? userInfo.Profile.RealName;
+        var userName = GetUserName(userInfo.Profile);
         return new SlackUser
         {
             Id = userId,
             Name = userName,
         };
+    }
+
+    private string GetUserName(UserProfile userProfile)
+    {
+        if (!string.IsNullOrEmpty(userProfile.DisplayName))
+        {
+            return userProfile.DisplayName;
+        }
+
+        if (!string.IsNullOrEmpty(userProfile.RealName))
+        {
+            return userProfile.RealName;
+        }
+
+        var userName = string.Empty;
+        if (!string.IsNullOrEmpty(userProfile.LastName))
+        {
+            userName = userProfile.LastName;
+        }
+        if (!string.IsNullOrEmpty(userProfile.FirstName))
+        {
+            userName += " " + userProfile.FirstName;
+        }
+        userName = userName.Trim();
+        return userName;
     }
 }

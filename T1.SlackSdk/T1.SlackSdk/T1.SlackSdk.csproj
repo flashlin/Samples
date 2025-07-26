@@ -10,8 +10,8 @@
         <License>https://choosealicense.com/licenses/mit/</License>
         <AssemblyVersion>1.0.5</AssemblyVersion>
         <FileVersion>1.0.5</FileVersion>
-        <Version>1.0.5</Version>
-        <PackageReleaseNotes>add send progress</PackageReleaseNotes>
+        <Version>1.0.6</Version>
+        <PackageReleaseNotes>try get UserName</PackageReleaseNotes>
         <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
     </PropertyGroup>
 
