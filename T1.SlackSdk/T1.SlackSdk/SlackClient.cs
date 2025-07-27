@@ -153,6 +153,7 @@ public class SlackClient : ISlackClient
         {
             Id = userId,
             Name = userName,
+            IsBot = userInfo.IsBot,
         };
     }
 
