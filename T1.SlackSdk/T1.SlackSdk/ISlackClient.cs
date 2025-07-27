@@ -8,4 +8,5 @@ public interface ISlackClient
     Task<SlackUser> GetUserInfoAsync(string userId);
     Task SendProgressMessageAsync(SendProgressMessageArgs args);
     Task SendFinishProgressMessageAsync(SendFinishProgressMessageArgs args);
+    Task<string> ReplaceLabelTextAsync(string text, Func<string, Task<string>> getLabelValueFn);
 }

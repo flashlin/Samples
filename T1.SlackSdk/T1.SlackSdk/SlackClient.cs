@@ -180,4 +180,51 @@ public class SlackClient : ISlackClient
         userName = userName.Trim();
         return userName;
     }
+
+    /// <summary>
+    /// Replace user mentions in text with custom replacement function
+    /// </summary>
+    /// <param name="text">Original text containing user mentions</param>
+    /// <param name="getLabelValueFn">Function to replace user mention with custom value</param>
+    /// <returns>Text with replaced user mentions</returns>
+    public async Task<string> ReplaceLabelTextAsync(string text, Func<string, Task<string>> getLabelValueFn)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return text;
+        }
+
+        var buffer = new System.Text.StringBuilder();
+        var offset = 0;
+        while (offset < text.Length)
+        {
+            var mentionStart = text.IndexOf("<@", offset, StringComparison.Ordinal);
+            if (mentionStart == -1)
+            {
+                buffer.Append(text.Substring(offset));
+                break;
+            }
+
+            // Append text before mention
+            buffer.Append(text.Substring(offset, mentionStart - offset));
+            // Find mention end
+            var mentionEnd = text.IndexOf(">", mentionStart, StringComparison.Ordinal);
+            if (mentionEnd == -1)
+            {
+                // Invalid mention format, append as-is
+                buffer.Append(text.Substring(mentionStart));
+                break;
+            }
+
+            // Extract mention key
+            var key = text.Substring(mentionStart + 2, mentionEnd - mentionStart - 2);
+            // Get replacement value
+            var value = await getLabelValueFn(key);
+            buffer.Append(value);
+
+            // Move offset to after mention
+            offset = mentionEnd + 1;
+        }
+        return buffer.ToString();
+    }
 }
