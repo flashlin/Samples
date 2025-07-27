@@ -8,10 +8,11 @@
         <Description>let SlackNet more easy</Description>
         <Copyright>2024</Copyright>
         <License>https://choosealicense.com/licenses/mit/</License>
-        <AssemblyVersion>1.0.5</AssemblyVersion>
-        <FileVersion>1.0.5</FileVersion>
+        <AssemblyVersion>1.0.6</AssemblyVersion>
+        <FileVersion>1.0.6</FileVersion>
         <Version>1.0.6</Version>
-        <PackageReleaseNotes>try get UserName</PackageReleaseNotes>
+        <PackageReleaseNotes>try get UserName
+and add getHistory size</PackageReleaseNotes>
         <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
     </PropertyGroup>
 

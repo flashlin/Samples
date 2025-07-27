@@ -65,6 +65,7 @@ publish_to_nuget() {
     
     # Pack the project
     echo "Packing project..."
+    rm -rf ./nupkg
     dotnet pack --configuration Release --output ./nupkg
     
     if [ $? -ne 0 ]; then
