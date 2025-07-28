@@ -8,10 +8,10 @@
         <Description>let SlackNet more easy</Description>
         <Copyright>2024</Copyright>
         <License>https://choosealicense.com/licenses/mit/</License>
-        <AssemblyVersion>1.0.7</AssemblyVersion>
-        <FileVersion>1.0.7</FileVersion>
-        <Version>1.0.7</Version>
-        <PackageReleaseNotes>add ReplaceLabelText</PackageReleaseNotes>
+        <AssemblyVersion>1.0.8</AssemblyVersion>
+        <FileVersion>1.0.8</FileVersion>
+        <Version>1.0.8</Version>
+        <PackageReleaseNotes>add ReplaceUserLabelTextAsync</PackageReleaseNotes>
         <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
     </PropertyGroup>
 

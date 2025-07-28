@@ -188,7 +188,7 @@ public class SlackClient : ISlackClient
     /// <param name="text">Original text containing user mentions</param>
     /// <param name="getLabelValueFn">Function to replace user mention with custom value</param>
     /// <returns>Text with replaced user mentions</returns>
-    public async Task<string> ReplaceLabelTextAsync(string text, Func<string, Task<string>> getLabelValueFn)
+    public async Task<string> ReplaceUserLabelTextAsync(string text, Func<string, Task<string>> getLabelValueFn)
     {
         if (string.IsNullOrEmpty(text))
         {
