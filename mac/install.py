@@ -97,6 +97,7 @@ lf() {
   done
 }
 
+PROMPT=$'%F{cyan}%~%f\n%F{green}%#%f '
 # ===== 自定義函數區塊結束 =====
 '''
 
