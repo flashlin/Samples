@@ -30,7 +30,7 @@ public class SlackClient : ISlackClient
             }
             result.AddRange(data);
             count -= data.Count;
-        } while (count > 0);
+        } while (count > 0 || args.Limit == -1);
         return result;
     }
 
