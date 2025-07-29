@@ -70,6 +70,23 @@ public class SlackClient : ISlackClient
         }); 
     }
 
+    /// <summary>
+    /// Send a reply message to a specific thread
+    /// </summary>
+    /// <param name="args">Arguments containing channel ID, thread timestamp, message and optional username</param>
+    /// <returns>Task representing the async operation</returns>
+    public async Task SendReplayThreadMessage(SendReplayThreadMessageArgs args)
+    {
+        await _client.Chat.PostMessage(new Message
+        {
+            Channel = args.ChannelId,
+            ThreadTs = args.Ts,
+            Text = args.Message,
+            Username = args.Username,
+            LinkNames = false
+        });
+    }
+
     private async Task<List<SlackHistoryItem>> InternalGetHistoryAsync(string channelId, DateTimeRange range,
         int limit)
     {
