@@ -19,19 +19,9 @@ public class SlackClient : ISlackClient
 
     public async Task<List<SlackHistoryItem>> GetHistoryAsync(GetHistoryArgs args)
     {
-        var result = new List<SlackHistoryItem>();
-        var count = args.Limit;
-        do
-        {
-            var data = await InternalGetHistoryAsync(args.ChannelId, args.Range, count);
-            if (data.Count == 0)
-            {
-                break;
-            }
-            result.AddRange(data);
-            count -= data.Count;
-        } while (count > 0 || args.Limit == -1);
-        return result;
+        return await InternalGetHistoryAsync(args.ChannelId,
+            args.Range,
+            args.Limit);
     }
 
     public async Task SendProgressMessageAsync(SendProgressMessageArgs args)
@@ -92,13 +82,12 @@ public class SlackClient : ISlackClient
     {
         var oldest = range.Start.ToSlackTs();
         var latest = range.End.ToSlackTs();
-        var maxLimit = 100;
         var response = await _client.Conversations.History(
             channelId,
             latest,
             oldest,
             inclusive: true,
-            limit: limit > maxLimit ? maxLimit : limit,
+            limit: limit,
             includeAllMetadata: true
         );
 
