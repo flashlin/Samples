@@ -8,6 +8,7 @@ templates_content = '''
 # dk alias - 執行自定義 dk 腳本
 alias dk='/Users/flash/vdisk/github/Samples/gsoft/dk'
 alias ff='/Users/flash/vdisk/github/Samples/gsoft/ff'
+alias lf='/Users/flash/vdisk/github/Samples/gsoft/lf'
 
 # nvm 自動切換版本
 autoload -U add-zsh-hook
@@ -79,23 +80,6 @@ port() {
   sudo lsof -nP -iTCP -sTCP:LISTEN
 }
 
-# 以正則表達式搜尋檔名，並用綠色標記符合的名稱
-lf() {
-  if [ $# -eq 0 ]; then
-    echo "用法: lf 'regex'"
-    return 1
-  fi
-  pattern="$1"
-  find . -type f | while read -r filepath; do
-    dir=$(dirname "$filepath")
-    file=$(basename "$filepath")
-    if [[ $file =~ $pattern ]]; then
-      # 將符合 regex 的部分標綠色
-      colored_file=$(echo "$file" | sed -E "s/($pattern)/\x1b[32m\\1\x1b[0m/g")
-      echo -e "$dir/$colored_file"
-    fi
-  done
-}
 
 PROMPT=$'%F{cyan}%~%f\n%F{green}%#%f '
 # ===== 自定義函數區塊結束 =====
