@@ -31,6 +31,8 @@ enum Commands {
     },
     /// Restart containers interactively
     Restart,
+    /// Clean up Docker images and build cache
+    Clean,
 }
 
 #[tokio::main]
@@ -55,6 +57,9 @@ async fn main() -> Result<()> {
         }
         Some(Commands::Restart) => {
             restart_command().await?;
+        }
+        Some(Commands::Clean) => {
+            clean_command().await?;
         }
     }
     

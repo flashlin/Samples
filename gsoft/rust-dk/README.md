@@ -10,6 +10,7 @@ A friendly and interactive Docker container management tool written in Rust.
 - 🖥️ **Shell Access**: Enter container bash/shell environments easily
 - 🗑️ **Safe Container Removal**: Remove containers with confirmation prompts
 - 🔄 **Container Restart**: Restart containers interactively
+- 🧹 **Docker Cleanup**: Clean up dangling images and build cache
 - 🔍 **Real-time Filtering**: Filter containers by name or ID
 - ⌨️ **Keyboard Navigation**: Full keyboard-driven interface
 
@@ -70,6 +71,15 @@ dk rm -f     # Force removal with confirmation
 dk restart
 ```
 
+#### Clean Docker Resources
+```bash
+dk clean
+```
+Cleans up Docker resources including:
+- Dangling images (`<none>` images)
+- Build cache older than 2 months
+- System-wide unused resources
+
 ### Interactive Features
 
 #### Navigation
@@ -118,6 +128,27 @@ $ dk rm
 # Opens interactive selection with multi-select
 # Use Space to select multiple containers
 # Confirms before removal
+```
+
+### Clean Docker resources
+```bash
+$ dk clean
+🧹 Starting Docker cleanup...
+
+1. Cleaning up dangling images (<none>)...
+   Found 5 dangling images
+   Remove these dangling images? [y/N]: y
+   ✓ Removed 5 dangling images
+
+2. Cleaning up build cache older than 2 months...
+   ✓ Build cache cleanup completed
+   Total reclaimed space: 2.5GB
+
+3. Running system prune...
+   ✓ System cleanup completed
+   Total reclaimed space: 1.2GB
+
+🎉 Docker cleanup completed!
 ```
 
 ## Configuration

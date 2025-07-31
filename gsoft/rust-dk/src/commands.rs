@@ -152,7 +152,23 @@ pub async fn rm_command(force: bool) -> Result<()> {
             // Show confirmation
             println!("\nSelected containers to {}:", action);
             for container in &selected {
-                println!("  - {} ({})", container.display_name(), container.short_id());
+                println!("  - {} ({}) - {}", container.display_name(), container.short_id(), container.status.display_string());
+            }
+            
+            // Check for running containers when not using force
+            if !force {
+                let running_containers: Vec<_> = selected.iter()
+                    .filter(|c| c.status.is_running())
+                    .collect();
+                
+                if !running_containers.is_empty() {
+                    println!("\n⚠️  Warning: The following containers are running:");
+                    for container in &running_containers {
+                        println!("  - {} ({})", container.display_name(), container.short_id());
+                    }
+                    println!("Running containers cannot be removed without force. Use 'dk rm -f' to force remove.");
+                    return Ok(());
+                }
             }
             
             print!("\nAre you sure you want to {} these containers? [y/N]: ", action);
@@ -162,6 +178,9 @@ pub async fn rm_command(force: bool) -> Result<()> {
             io::stdin().read_line(&mut input)?;
             
             if input.trim().to_lowercase() == "y" || input.trim().to_lowercase() == "yes" {
+                let mut success_count = 0;
+                let mut failed_count = 0;
+                
                 for container in selected {
                     print!("{}ing container {} ... ", if force { "Force remov" } else { "Remov" }, container.display_name());
                     io::stdout().flush()?;
@@ -172,23 +191,29 @@ pub async fn rm_command(force: bool) -> Result<()> {
                     }
                     args.push(&container.id);
                     
-                    let status = tokio::process::Command::new("docker")
+                    let output = tokio::process::Command::new("docker")
                         .args(&args)
-                        .status()
+                        .output()
                         .await;
                     
-                    match status {
-                        Ok(exit_status) if exit_status.success() => {
+                    match output {
+                        Ok(output) if output.status.success() => {
                             println!("✓ Done");
+                            success_count += 1;
                         }
-                        Ok(_) => {
-                            println!("✗ Failed");
+                        Ok(output) => {
+                            let error_msg = String::from_utf8_lossy(&output.stderr);
+                            println!("✗ Failed: {}", error_msg.trim());
+                            failed_count += 1;
                         }
                         Err(e) => {
                             println!("✗ Error: {}", e);
+                            failed_count += 1;
                         }
                     }
                 }
+                
+                println!("\nSummary: {} containers removed successfully, {} failed.", success_count, failed_count);
             } else {
                 println!("Operation cancelled.");
             }
@@ -260,5 +285,120 @@ pub async fn restart_command() -> Result<()> {
         },
     ).await?;
     
+    Ok(())
+}
+
+pub async fn clean_command() -> Result<()> {
+    println!("🧹 Starting Docker cleanup...\n");
+    
+    // Clean up dangling images (<none>)
+    println!("1. Cleaning up dangling images (<none>)...");
+    let dangling_output = tokio::process::Command::new("docker")
+        .args(&["images", "-f", "dangling=true", "-q"])
+        .output()
+        .await;
+    
+    match dangling_output {
+        Ok(output) if output.status.success() => {
+            let dangling_ids = String::from_utf8_lossy(&output.stdout);
+            let ids: Vec<&str> = dangling_ids.lines().filter(|id| !id.is_empty()).collect();
+            
+            if ids.is_empty() {
+                println!("   ✓ No dangling images found");
+            } else {
+                println!("   Found {} dangling images", ids.len());
+                
+                // Show confirmation for dangling images
+                print!("   Remove these dangling images? [y/N]: ");
+                io::stdout().flush()?;
+                
+                let mut input = String::new();
+                io::stdin().read_line(&mut input)?;
+                
+                if input.trim().to_lowercase() == "y" || input.trim().to_lowercase() == "yes" {
+                    let mut success_count = 0;
+                    for id in ids {
+                        print!("   Removing {} ... ", id);
+                        io::stdout().flush()?;
+                        
+                        let rm_output = tokio::process::Command::new("docker")
+                            .args(&["rmi", id])
+                            .output()
+                            .await;
+                        
+                        match rm_output {
+                            Ok(rm_output) if rm_output.status.success() => {
+                                println!("✓ Done");
+                                success_count += 1;
+                            }
+                            Ok(rm_output) => {
+                                let error_msg = String::from_utf8_lossy(&rm_output.stderr);
+                                println!("✗ Failed: {}", error_msg.trim());
+                            }
+                            Err(e) => {
+                                println!("✗ Error: {}", e);
+                            }
+                        }
+                    }
+                    println!("   ✓ Removed {} dangling images", success_count);
+                } else {
+                    println!("   Skipped dangling images removal");
+                }
+            }
+        }
+        Ok(output) => {
+            let error_msg = String::from_utf8_lossy(&output.stderr);
+            println!("   ✗ Failed to list dangling images: {}", error_msg.trim());
+        }
+        Err(e) => {
+            println!("   ✗ Error listing dangling images: {}", e);
+        }
+    }
+    
+    // Clean up build cache older than 2 months
+    println!("\n2. Cleaning up build cache older than 2 months...");
+    let builder_output = tokio::process::Command::new("docker")
+        .args(&["builder", "prune", "-f", "--filter", "until=2m"])
+        .output()
+        .await;
+    
+    match builder_output {
+        Ok(output) if output.status.success() => {
+            let result = String::from_utf8_lossy(&output.stdout);
+            println!("   ✓ Build cache cleanup completed");
+            println!("   {}", result.trim());
+        }
+        Ok(output) => {
+            let error_msg = String::from_utf8_lossy(&output.stderr);
+            println!("   ✗ Failed to clean build cache: {}", error_msg.trim());
+        }
+        Err(e) => {
+            println!("   ✗ Error cleaning build cache: {}", e);
+        }
+    }
+    
+    // Additional cleanup: system prune
+    println!("\n3. Running system prune...");
+    let system_output = tokio::process::Command::new("docker")
+        .args(&["system", "prune", "-f"])
+        .output()
+        .await;
+    
+    match system_output {
+        Ok(output) if output.status.success() => {
+            let result = String::from_utf8_lossy(&output.stdout);
+            println!("   ✓ System cleanup completed");
+            println!("   {}", result.trim());
+        }
+        Ok(output) => {
+            let error_msg = String::from_utf8_lossy(&output.stderr);
+            println!("   ✗ Failed to run system prune: {}", error_msg.trim());
+        }
+        Err(e) => {
+            println!("   ✗ Error running system prune: {}", e);
+        }
+    }
+    
+    println!("\n🎉 Docker cleanup completed!");
     Ok(())
 }
