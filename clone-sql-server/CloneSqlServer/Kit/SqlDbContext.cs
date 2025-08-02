@@ -29,6 +29,12 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         return GroupTableSchemas(schemaInfoList);
     }
 
+    public async Task<List<ForeignKey>> QueryForeignKeyAsync()
+    {
+        var foreignKeyInfoList = await QueryForeignKeyInfoAsync();
+        return GroupForeignKeys(foreignKeyInfoList);
+    }
+
     private static List<TableSchema> GroupTableSchemas(List<TableSchemaInfo> schemaInfoList)
     {
         return schemaInfoList
@@ -48,6 +54,21 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
                     DefaultValue = info.DefaultValue,
                     Description = info.Description
                 }).ToList()
+            })
+            .ToList();
+    }
+
+    private static List<ForeignKey> GroupForeignKeys(List<ForeignKeyInfo> foreignKeyInfoList)
+    {
+        return foreignKeyInfoList
+            .GroupBy(info => info.DefineName)
+            .Select(group => new ForeignKey
+            {
+                DefineName = group.Key,
+                ForeignTableName = group.First().ForeignTableName,
+                PrimaryTableName = group.First().PrimaryTableName,
+                ForeignKeyNames = group.Select(info => info.ForeignKeyName).ToList(),
+                PrimaryKeyNames = group.Select(info => info.PrimaryKeyName).ToList()
             })
             .ToList();
     }
