@@ -167,11 +167,16 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         }
     }
 
-    public static string BuildConnectionString(string server, string saPassword)
+    public static string BuildConnectionString(string server, string sa, string saPassword)
     {
         var serverParts = server.Split(':');
         var serverName = serverParts[0];
         var port = serverParts.Length > 1 ? $",{serverParts[1]}" : string.Empty;
-        return $"Server={serverName}{port};User ID=sa;Password={saPassword};TrustServerCertificate=True;";
+        return $"Server={serverName}{port};User ID={sa};Password={saPassword};TrustServerCertificate=True;";
+    }
+
+    public async Task ExecuteAsync(string sql)
+    {
+        await _connection!.ExecuteAsync(sql);
     }
 }

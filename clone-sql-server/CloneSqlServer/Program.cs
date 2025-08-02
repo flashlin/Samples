@@ -33,7 +33,7 @@ class Program
         }
 
         var env = SqlBoxerEnv.LoadFromEnvironment();
-        var connectionString = SqlDbContext.BuildConnectionString(args[0], env.SqlSaPassword);
+        var connectionString = SqlDbContext.BuildConnectionString(args[0], "sa", env.SqlSaPassword);
         var targetPath = args[1];
 
         // 確保目標目錄存在
