@@ -101,6 +101,38 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         return q.ToList();
     }
 
+    private async Task<List<ForeignKeyInfo>> QueryForeignKeyInfoAsync()
+    {
+        var sql = """
+                 SELECT
+                     fk.name AS DefineName,
+                     ft.name AS ForeignTableName,
+                     fc.name AS ForeignKeyName,
+                     pt.name AS PrimaryTableName,
+                     pc.name AS PrimaryKeyName
+                 FROM
+                     sys.foreign_keys AS fk
+                 INNER JOIN
+                     sys.foreign_key_columns AS fkc ON fk.object_id = fkc.constraint_object_id
+                 INNER JOIN
+                     sys.tables AS ft ON fk.parent_object_id = ft.object_id
+                 INNER JOIN
+                     sys.columns AS fc ON fkc.parent_object_id = fc.object_id AND fkc.parent_column_id = fc.column_id
+                 INNER JOIN
+                     sys.tables AS pt ON fk.referenced_object_id = pt.object_id
+                 INNER JOIN
+                     sys.columns AS pc ON fkc.referenced_object_id = pc.object_id AND fkc.referenced_column_id = pc.column_id
+                 WHERE
+                     ft.is_ms_shipped = 0 -- 排除系統內建的 Table
+                     AND pt.is_ms_shipped = 0 -- 排除系統內建的 Table
+                 ORDER BY
+                     fk.name,
+                     fkc.constraint_column_id;
+                 """;
+        var q = await _connection!.QueryAsync<ForeignKeyInfo>(sql);
+        return q.ToList();
+    }
+
     public void Dispose()
     {
         _connection?.Dispose();
