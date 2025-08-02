@@ -23,6 +23,42 @@ public class Tests
                                        CREATE DATABASE [test];
                                    END
                                    """);
+
+        await _localDb.ExecuteAsync("""
+                                   USE [test];
+                                   
+                                   -- Create Customer table
+                                   IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Customer' AND xtype='U')
+                                   BEGIN
+                                       CREATE TABLE Customer (
+                                           id INT IDENTITY(1,1) PRIMARY KEY,
+                                           name NVARCHAR(100) NOT NULL,
+                                           birth DATE NULL
+                                       );
+                                   END
+                                   
+                                   -- Create Product table
+                                   IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Product' AND xtype='U')
+                                   BEGIN
+                                       CREATE TABLE Product (
+                                           id INT IDENTITY(1,1) PRIMARY KEY,
+                                           CustomerId INT NOT NULL,
+                                           ProductName NVARCHAR(200) NOT NULL,
+                                           Price DECIMAL(10,2) NOT NULL,
+                                           BuyDate DATETIME NOT NULL DEFAULT GETDATE()
+                                       );
+                                   END
+                                   
+                                   -- Create foreign key constraint
+                                   IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_Product_Customer')
+                                   BEGIN
+                                       ALTER TABLE Product
+                                       ADD CONSTRAINT FK_Product_Customer
+                                       FOREIGN KEY (CustomerId) REFERENCES Customer(id);
+                                   END
+                                   """);
+         
+                 
     }
 
     [TearDown]
