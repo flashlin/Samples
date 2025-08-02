@@ -240,4 +240,12 @@ public class Tests
             }
         });
     }
+
+    [Test]
+    public async Task TableDependency()
+    {
+        var tables = await _localDb.QueryTableSchemaAsync();
+        var fkList = await _localDb.QueryForeignKeyAsync();
+        var tableList = _localDb.GetTablesInDependencyOrder(tables, fkList);
+    }
 }

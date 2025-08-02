@@ -35,6 +35,78 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         return GroupForeignKeys(foreignKeyInfoList);
     }
 
+    public List<TableSchema> GetTablesInDependencyOrder(List<TableSchema> tables, List<ForeignKey> foreignKeys)
+    {
+        // Build dependency graph
+        var dependencies = new Dictionary<string, HashSet<string>>();
+        var inDegree = new Dictionary<string, int>(); //被依賴的次數
+        
+        // Initialize all tables with zero dependencies
+        foreach (var table in tables)
+        {
+            dependencies[table.Name] = new HashSet<string>();
+            inDegree[table.Name] = 0;
+        }
+        
+        // Build dependency relationships from foreign keys
+        foreach (var fk in foreignKeys)
+        {
+            // Foreign table depends on primary table
+            if (dependencies.ContainsKey(fk.ForeignTableName) && 
+                inDegree.ContainsKey(fk.PrimaryTableName))
+            {
+                if (dependencies[fk.ForeignTableName].Add(fk.PrimaryTableName))
+                {
+                    inDegree[fk.ForeignTableName]++;
+                }
+            }
+        }
+        
+        // Topological sort using Kahn's algorithm
+        var queue = new Queue<string>();
+        var result = new List<TableSchema>();
+        // Start with tables that have no dependencies
+        foreach (var kvp in inDegree.Where(x => x.Value == 0))
+        {
+            queue.Enqueue(kvp.Key);
+        }
+        
+        while (queue.Count > 0)
+        {
+            var currentTable = queue.Dequeue();
+            var tableSchema = tables.FirstOrDefault(t => t.Name == currentTable);
+            if (tableSchema != null)
+            {
+                result.Add(tableSchema);
+            }
+            
+            // Process all tables that depend on current table
+            foreach (var dependentTable in dependencies.Keys)
+            {
+                if (dependencies[dependentTable].Contains(currentTable))
+                {
+                    dependencies[dependentTable].Remove(currentTable);
+                    inDegree[dependentTable]--;
+                    
+                    if (inDegree[dependentTable] == 0)
+                    {
+                        queue.Enqueue(dependentTable);
+                    }
+                }
+            }
+        }
+        
+        // Check for circular dependencies
+        if (result.Count != tables.Count)
+        {
+            // Add remaining tables (those with circular dependencies) at the end
+            var remainingTables = tables.Where(t => !result.Any(r => r.Name == t.Name));
+            result.AddRange(remainingTables);
+        }
+        
+        return result;
+    }
+
     private static List<TableSchema> GroupTableSchemas(List<TableSchemaInfo> schemaInfoList)
     {
         return schemaInfoList
