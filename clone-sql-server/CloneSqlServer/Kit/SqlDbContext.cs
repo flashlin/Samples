@@ -1,3 +1,4 @@
+using Dapper;
 using Microsoft.Data.SqlClient;
 
 namespace CloneSqlServer.Kit;
@@ -20,6 +21,55 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
             return;
         }
         await _connection.CloseAsync();
+    }
+
+    public async Task<List<TableSchemaInfo>> QueryTableSchema()
+    {
+        var sql = """
+                 SELECT
+                     t.name AS TableName,
+                     c.name AS FieldName,
+                     ty.name AS FieldDataType,
+                     c.max_length AS FieldDataSize,
+                     c.scale AS FieldDataScale,
+                     CASE 
+                         WHEN pk.column_id IS NOT NULL THEN 1
+                         ELSE 0
+                     END AS IsPrimaryKey,
+                     c.is_nullable AS IsNullable,
+                     c.is_identity AS IsIdentity,
+                     ISNULL(def.definition, '') AS DefaultValue,
+                     ISNULL(p.value, '') AS Description
+                 FROM
+                     sys.tables AS t
+                 INNER JOIN
+                     sys.columns AS c ON t.object_id = c.object_id
+                 INNER JOIN
+                     sys.types AS ty ON c.user_type_id = ty.user_type_id
+                 LEFT JOIN
+                     sys.default_constraints AS def ON c.default_object_id = def.object_id
+                 LEFT JOIN
+                     sys.extended_properties AS p ON p.major_id = t.object_id AND p.minor_id = c.column_id AND p.name = 'MS_Description'
+                 LEFT JOIN
+                     (
+                         SELECT
+                             ic.object_id,
+                             ic.column_id
+                         FROM
+                             sys.indexes AS i
+                         INNER JOIN
+                             sys.index_columns AS ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+                         WHERE
+                             i.is_primary_key = 1
+                     ) AS pk ON pk.object_id = t.object_id AND pk.column_id = c.column_id
+                 WHERE
+                     t.is_ms_shipped = 0 -- 排除系統內建的 Table
+                 ORDER BY
+                     TableName,
+                     c.column_id;
+                 """;
+        var q = await _connection!.QueryAsync<TableSchemaInfo>(sql);
+        return q.ToList();
     }
 
     public void Dispose()
