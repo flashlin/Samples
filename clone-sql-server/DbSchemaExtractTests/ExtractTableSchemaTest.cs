@@ -71,7 +71,118 @@ public class Tests
     public async Task TableSchema()
     {
         var tableSchemaList = await _localDb.QueryTableSchemaAsync();
-        tableSchemaList.Should().BeEquivalentTo(
-            new List<TableSchema>());
+        tableSchemaList.Should().BeEquivalentTo(new List<TableSchema>
+        {
+            new TableSchema
+            {
+                Name = "Customer",
+                Fields = new List<FieldSchema>
+                {
+                    new FieldSchema
+                    {
+                        Name = "id",
+                        DataType = "int",
+                        DataSize = 4,
+                        DataScale = 0,
+                        IsNullable = false,
+                        IsPrimaryKey = true,
+                        IsIdentity = true,
+                        DefaultValue = "",
+                        Description = ""
+                    },
+                    new FieldSchema
+                    {
+                        Name = "name",
+                        DataType = "nvarchar",
+                        DataSize = 200,
+                        DataScale = 0,
+                        IsNullable = false,
+                        IsPrimaryKey = false,
+                        IsIdentity = false,
+                        DefaultValue = "",
+                        Description = ""
+                    },
+                    new FieldSchema
+                    {
+                        Name = "birth",
+                        DataType = "date",
+                        DataSize = 3,
+                        DataScale = 0,
+                        IsNullable = true,
+                        IsPrimaryKey = false,
+                        IsIdentity = false,
+                        DefaultValue = "",
+                        Description = ""
+                    }
+                }
+            },
+            new TableSchema
+            {
+                Name = "Product",
+                Fields = new List<FieldSchema>
+                {
+                    new FieldSchema
+                    {
+                        Name = "id",
+                        DataType = "int",
+                        DataSize = 4,
+                        DataScale = 0,
+                        IsNullable = false,
+                        IsPrimaryKey = true,
+                        IsIdentity = true,
+                        DefaultValue = "",
+                        Description = ""
+                    },
+                    new FieldSchema
+                    {
+                        Name = "CustomerId",
+                        DataType = "int",
+                        DataSize = 4,
+                        DataScale = 0,
+                        IsNullable = false,
+                        IsPrimaryKey = false,
+                        IsIdentity = false,
+                        DefaultValue = "",
+                        Description = ""
+                    },
+                    new FieldSchema
+                    {
+                        Name = "ProductName",
+                        DataType = "nvarchar",
+                        DataSize = 400,
+                        DataScale = 0,
+                        IsNullable = false,
+                        IsPrimaryKey = false,
+                        IsIdentity = false,
+                        DefaultValue = "",
+                        Description = ""
+                    },
+                    new FieldSchema
+                    {
+                        Name = "Price",
+                        DataType = "decimal",
+                        DataSize = 9,
+                        DataScale = 2,
+                        IsNullable = false,
+                        IsPrimaryKey = false,
+                        IsIdentity = false,
+                        DefaultValue = "",
+                        Description = ""
+                    },
+                    new FieldSchema
+                    {
+                        Name = "BuyDate",
+                        DataType = "datetime",
+                        DataSize = 8,
+                        DataScale = 3,
+                        IsNullable = false,
+                        IsPrimaryKey = false,
+                        IsIdentity = false,
+                        DefaultValue = "(getdate())",
+                        Description = ""
+                    }
+                }
+            }
+        });
     }
 }
