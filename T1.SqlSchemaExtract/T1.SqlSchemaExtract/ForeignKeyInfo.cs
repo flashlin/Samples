@@ -1,10 +1,10 @@
-namespace CloneSqlServer.Kit;
+namespace T1.SqlSchemaExtract;
 
-public class ForeignKey
+public class ForeignKeyInfo
 {
     public string DefineName { get; set; } = string.Empty;
     public string ForeignTableName { get; set; } = string.Empty;
+    public string ForeignKeyName { get; set; } = string.Empty;
     public string PrimaryTableName { get; set; } = string.Empty;
-    public List<string> ForeignKeyNames { get; set; } = [];
-    public List<string> PrimaryKeyNames { get; set; } = [];
+    public string PrimaryKeyName { get; set; } = string.Empty;
 }

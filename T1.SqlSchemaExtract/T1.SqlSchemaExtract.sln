@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T1.SqlSchemaExtract", "T1.SqlSchemaExtract\T1.SqlSchemaExtract.csproj", "{F4B4C599-8966-45D5-A5F2-0FF13774DCA4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbSchemaExtractTests", "DbSchemaExtractTests\DbSchemaExtractTests.csproj", "{67C9D644-0ABF-454F-BA05-5816E3E15987}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F4B4C599-8966-45D5-A5F2-0FF13774DCA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4B4C599-8966-45D5-A5F2-0FF13774DCA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4B4C599-8966-45D5-A5F2-0FF13774DCA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4B4C599-8966-45D5-A5F2-0FF13774DCA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67C9D644-0ABF-454F-BA05-5816E3E15987}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67C9D644-0ABF-454F-BA05-5816E3E15987}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67C9D644-0ABF-454F-BA05-5816E3E15987}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67C9D644-0ABF-454F-BA05-5816E3E15987}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

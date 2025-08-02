@@ -1,4 +1,4 @@
-namespace CloneSqlServer.Kit;
+namespace T1.SqlSchemaExtract;
 
 public class TableSchema
 {

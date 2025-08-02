@@ -1,5 +1,5 @@
-﻿using CloneSqlServer.Kit;
-using FluentAssertions;
+﻿using FluentAssertions;
+using T1.SqlSchemaExtract;
 
 namespace DbSchemaExtractTests;
 

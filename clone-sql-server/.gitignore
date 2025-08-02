@@ -1,7 +1,0 @@
-﻿CloneSqlServer/obj
-
-*/bin
-*/obj
-.idea
-LocalSqlServer/CreateDatabase.sql
-LocalSqlServer/*_Schema.sql

@@ -22,7 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CloneSqlServer\CloneSqlServer.csproj" />
+      <ProjectReference Include="..\T1.SqlSchemaExtract\T1.SqlSchemaExtract.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-namespace CloneSqlServer.Kit;
+namespace T1.SqlSchemaExtract;
 
 /// <summary>
 /// Represents table schema information retrieved from SQL Server system tables
