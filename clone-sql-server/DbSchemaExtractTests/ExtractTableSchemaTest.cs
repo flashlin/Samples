@@ -26,28 +26,30 @@ public class Tests
 
         await _localDb.ExecuteAsync("""
                                    USE [test];
+
                                    
-                                   -- Create Customer table
-                                   IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Customer' AND xtype='U')
-                                   BEGIN
-                                       CREATE TABLE Customer (
-                                           id INT IDENTITY(1,1) PRIMARY KEY,
-                                           name NVARCHAR(100) NOT NULL,
-                                           birth DATE NULL
-                                       );
-                                   END
                                    
-                                   -- Create Product table
-                                   IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Product' AND xtype='U')
-                                   BEGIN
-                                       CREATE TABLE Product (
-                                           id INT IDENTITY(1,1) PRIMARY KEY,
-                                           CustomerId INT NOT NULL,
-                                           ProductName NVARCHAR(200) NOT NULL,
-                                           Price DECIMAL(10,2) NOT NULL,
-                                           BuyDate DATETIME NOT NULL DEFAULT GETDATE()
-                                       );
-                                   END
+                                   -- Drop and recreate Product table
+                                   IF OBJECT_ID('Product', 'U') IS NOT NULL
+                                       DROP TABLE Product;
+                                   
+                                   CREATE TABLE Product (
+                                       id INT IDENTITY(1,1) PRIMARY KEY,
+                                       CustomerId INT NOT NULL,
+                                       ProductName NVARCHAR(200) NOT NULL,
+                                       Price DECIMAL(10,2) NOT NULL,
+                                       BuyDate DATETIME NOT NULL DEFAULT GETDATE()
+                                   );
+                                   
+                                   -- Drop and recreate Customer table
+                                   IF OBJECT_ID('Customer', 'U') IS NOT NULL
+                                       DROP TABLE Customer;
+                                   
+                                   CREATE TABLE Customer (
+                                       id INT IDENTITY(1,1) PRIMARY KEY,
+                                       name NVARCHAR(100) NOT NULL,
+                                       birth DATE NULL
+                                   );
                                    
                                    -- Create foreign key constraint
                                    IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_Product_Customer')
