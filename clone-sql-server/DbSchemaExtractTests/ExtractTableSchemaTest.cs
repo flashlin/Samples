@@ -247,5 +247,16 @@ public class Tests
         var tables = await _localDb.QueryTableSchemaAsync();
         var fkList = await _localDb.QueryForeignKeyAsync();
         var tableList = _localDb.GetTablesInDependencyOrder(tables, fkList);
+        
+        // Verify the correct dependency order
+        tableList.Should().HaveCount(3);
+        
+        // loginLog has no dependencies, so it can be at any position after Customer
+        tableList.Should().Contain(t => t.Name == "loginLog");
+        
+        // Verify that Customer comes before BProduct (dependency order)
+        var customerIndex = tableList.FindIndex(t => t.Name == "Customer");
+        var bproductIndex = tableList.FindIndex(t => t.Name == "BProduct");
+        customerIndex.Should().BeLessThan(bproductIndex);
     }
 }
