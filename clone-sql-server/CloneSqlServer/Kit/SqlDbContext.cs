@@ -23,9 +23,33 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         await _connection.CloseAsync();
     }
 
-    public async Task QueryTableSchemaAsync()
+    public async Task<List<TableSchema>> QueryTableSchemaAsync()
     {
-        var schema = await QueryTableSchemaInfoAsync();
+        var schemaInfoList = await QueryTableSchemaInfoAsync();
+        return GroupTableSchemas(schemaInfoList);
+    }
+
+    private static List<TableSchema> GroupTableSchemas(List<TableSchemaInfo> schemaInfoList)
+    {
+        return schemaInfoList
+            .GroupBy(info => info.TableName)
+            .Select(group => new TableSchema
+            {
+                Name = group.Key,
+                Fields = group.Select(info => new FieldSchema
+                {
+                    Name = info.FieldName,
+                    DataType = info.FieldDataType,
+                    DataSize = info.FieldDataSize,
+                    DataScale = info.FieldDataScale,
+                    IsPrimaryKey = info.IsPrimaryKey,
+                    IsNullable = info.IsNullable,
+                    IsIdentity = info.IsIdentity,
+                    DefaultValue = info.DefaultValue,
+                    Description = info.Description
+                }).ToList()
+            })
+            .ToList();
     }
 
     private async Task<List<TableSchemaInfo>> QueryTableSchemaInfoAsync()
