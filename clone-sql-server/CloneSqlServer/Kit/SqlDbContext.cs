@@ -23,7 +23,12 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         await _connection.CloseAsync();
     }
 
-    public async Task<List<TableSchemaInfo>> QueryTableSchema()
+    public async Task QueryTableSchemaAsync()
+    {
+        var schema = await QueryTableSchemaInfoAsync();
+    }
+
+    private async Task<List<TableSchemaInfo>> QueryTableSchemaInfoAsync()
     {
         var sql = """
                  SELECT
