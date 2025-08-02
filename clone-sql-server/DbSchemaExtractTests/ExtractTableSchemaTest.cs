@@ -27,8 +27,6 @@ public class Tests
         await _localDb.ExecuteAsync("""
                                    USE [test];
 
-                                   
-                                   
                                    -- Drop and recreate Product table
                                    IF OBJECT_ID('Product', 'U') IS NOT NULL
                                        DROP TABLE Product;
@@ -49,6 +47,16 @@ public class Tests
                                        id INT IDENTITY(1,1) PRIMARY KEY,
                                        name NVARCHAR(100) NOT NULL,
                                        birth DATE NULL
+                                   );
+                                   
+                                   -- Drop and recreate loginLog table
+                                   IF OBJECT_ID('loginLog', 'U') IS NOT NULL
+                                       DROP TABLE loginLog;
+                                   
+                                   CREATE TABLE loginLog (
+                                       id INT IDENTITY(1,1) PRIMARY KEY,
+                                       loginName NVARCHAR(100) NOT NULL,
+                                       loginTime DATETIME NOT NULL DEFAULT GETDATE()
                                    );
                                    
                                    -- Create foreign key constraint
@@ -174,6 +182,49 @@ public class Tests
                     new FieldSchema
                     {
                         Name = "BuyDate",
+                        DataType = "datetime",
+                        DataSize = 8,
+                        DataScale = 3,
+                        IsNullable = false,
+                        IsPrimaryKey = false,
+                        IsIdentity = false,
+                        DefaultValue = "(getdate())",
+                        Description = ""
+                    }
+                }
+            },
+            new TableSchema
+            {
+                Name = "loginLog",
+                Fields = new List<FieldSchema>
+                {
+                    new FieldSchema
+                    {
+                        Name = "id",
+                        DataType = "int",
+                        DataSize = 4,
+                        DataScale = 0,
+                        IsNullable = false,
+                        IsPrimaryKey = true,
+                        IsIdentity = true,
+                        DefaultValue = "",
+                        Description = ""
+                    },
+                    new FieldSchema
+                    {
+                        Name = "loginName",
+                        DataType = "nvarchar",
+                        DataSize = 200,
+                        DataScale = 0,
+                        IsNullable = false,
+                        IsPrimaryKey = false,
+                        IsIdentity = false,
+                        DefaultValue = "",
+                        Description = ""
+                    },
+                    new FieldSchema
+                    {
+                        Name = "loginTime",
                         DataType = "datetime",
                         DataSize = 8,
                         DataScale = 3,
