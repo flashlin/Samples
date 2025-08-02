@@ -1,4 +1,5 @@
 ﻿using CloneSqlServer.Kit;
+using FluentAssertions;
 
 namespace DbSchemaExtractTests;
 
@@ -17,13 +18,24 @@ public class Tests
         await _localDb.OpenAsync(connectionString);
 
         await _localDb.ExecuteAsync("""
-                                   CREATE DATABASE [test];
+                                   IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'test')
+                                   BEGIN
+                                       CREATE DATABASE [test];
+                                   END
                                    """);
     }
 
-    [Test]
-    public void Test1()
+    [TearDown]
+    public async Task TearDown()
     {
-        Assert.Pass();
+        await _localDb.DisposeAsync();
+    }
+
+    [Test]
+    public async Task TableSchema()
+    {
+        var tableSchemaList = await _localDb.QueryTableSchemaAsync();
+        tableSchemaList.Should().BeEquivalentTo(
+            new List<TableSchema>());
     }
 }
