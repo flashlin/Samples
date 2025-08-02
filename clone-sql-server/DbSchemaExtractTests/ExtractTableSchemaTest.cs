@@ -18,20 +18,22 @@ public class Tests
         await _localDb.OpenAsync(connectionString);
 
         await _localDb.ExecuteAsync("""
-                                   IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'test')
+                                   IF EXISTS (SELECT name FROM sys.databases WHERE name = N'test')
                                    BEGIN
-                                       CREATE DATABASE [test];
+                                       ALTER DATABASE [test] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+                                       DROP DATABASE [test];
                                    END
+                                   CREATE DATABASE [test];
                                    """);
 
         await _localDb.ExecuteAsync("""
                                    USE [test];
 
-                                   -- Drop and recreate Product table
-                                   IF OBJECT_ID('Product', 'U') IS NOT NULL
-                                       DROP TABLE Product;
+                                   -- Drop and recreate BProduct table
+                                   IF OBJECT_ID('BProduct', 'U') IS NOT NULL
+                                       DROP TABLE BProduct;
                                    
-                                   CREATE TABLE Product (
+                                   CREATE TABLE BProduct (
                                        id INT IDENTITY(1,1) PRIMARY KEY,
                                        CustomerId INT NOT NULL,
                                        ProductName NVARCHAR(200) NOT NULL,
@@ -60,10 +62,10 @@ public class Tests
                                    );
                                    
                                    -- Create foreign key constraint
-                                   IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_Product_Customer')
+                                   IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_BProduct_Customer')
                                    BEGIN
-                                       ALTER TABLE Product
-                                       ADD CONSTRAINT FK_Product_Customer
+                                       ALTER TABLE BProduct
+                                       ADD CONSTRAINT FK_BProduct_Customer
                                        FOREIGN KEY (CustomerId) REFERENCES Customer(id);
                                    END
                                    """);
@@ -128,7 +130,7 @@ public class Tests
             },
             new TableSchema
             {
-                Name = "Product",
+                Name = "BProduct",
                 Fields = new List<FieldSchema>
                 {
                     new FieldSchema

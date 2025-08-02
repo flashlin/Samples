@@ -114,9 +114,6 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
                      ) AS pk ON pk.object_id = t.object_id AND pk.column_id = c.column_id
                  WHERE
                      t.is_ms_shipped = 0 -- 排除系統內建的 Table
-                 ORDER BY
-                     TableName,
-                     c.column_id;
                  """;
         var q = await _connection!.QueryAsync<TableSchemaInfo>(sql);
         return q.ToList();
