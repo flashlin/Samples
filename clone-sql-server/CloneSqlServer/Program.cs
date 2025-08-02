@@ -33,8 +33,8 @@ class Program
         }
 
         var env = SqlBoxerEnv.LoadFromEnvironment();
-        string connectionString = BuildConnectionString(args[0], env);
-        string targetPath = args[1];
+        var connectionString = SqlDbContext.BuildConnectionString(args[0], env.SqlSaPassword);
+        var targetPath = args[1];
 
         // 確保目標目錄存在
         Directory.CreateDirectory(targetPath);
@@ -43,13 +43,5 @@ class Program
         await using var db = new SqlDbContext();
         await db.OpenAsync(connectionString);
         Console.WriteLine("成功連接到 SQL Server");
-    }
-
-    private static string BuildConnectionString(string server, SqlBoxerEnv env)
-    {
-        var serverParts = server.Split(':');
-        var serverName = serverParts[0];
-        var port = serverParts.Length > 1 ? $",{serverParts[1]}" : string.Empty;
-        return $"Server={serverName}{port};User ID=sa;Password={env.SqlSaPassword};TrustServerCertificate=True;";
     }
 }
