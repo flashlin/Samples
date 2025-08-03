@@ -33,6 +33,8 @@ enum Commands {
     Restart,
     /// Clean up Docker images and build cache
     Clean,
+    /// Show container statistics and usage info
+    Status,
 }
 
 #[tokio::main]
@@ -60,6 +62,9 @@ async fn main() -> Result<()> {
         }
         Some(Commands::Clean) => {
             clean_command().await?;
+        }
+        Some(Commands::Status) => {
+            status_command().await?;
         }
     }
     

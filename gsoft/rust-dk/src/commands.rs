@@ -402,3 +402,165 @@ pub async fn clean_command() -> Result<()> {
     println!("\n🎉 Docker cleanup completed!");
     Ok(())
 }
+
+pub async fn status_command() -> Result<()> {
+    // First, get and display the formatted table output
+    let table_output = tokio::process::Command::new("docker")
+        .args(&["stats", "--no-stream"])
+        .output()
+        .await;
+
+    match table_output {
+        Ok(output) if output.status.success() => {
+            let table_data = String::from_utf8_lossy(&output.stdout);
+            println!("{}", table_data);
+        }
+        _ => {
+            println!("No running containers found.");
+            return Ok(());
+        }
+    }
+
+    // Then, get CSV format for parsing statistics
+    let csv_output = tokio::process::Command::new("docker")
+        .args(&["stats", "--no-stream", "--format", "{{.Container}},{{.Name}},{{.CPUPerc}},{{.MemUsage}},{{.NetIO}},{{.BlockIO}},{{.PIDs}}"])
+        .output()
+        .await;
+
+    match csv_output {
+        Ok(output) if output.status.success() => {
+            let stats_output = String::from_utf8_lossy(&output.stdout);
+            let lines: Vec<&str> = stats_output.lines().filter(|line| !line.is_empty()).collect();
+            
+            if lines.is_empty() {
+                return Ok(());
+            }
+            
+            // Calculate totals from all CSV lines
+            let mut total_cpu = 0.0;
+            let mut total_mem_usage = 0;
+            let mut total_net_in = 0;
+            let mut total_net_out = 0;
+            let mut total_block_in = 0;
+            let mut total_block_out = 0;
+            
+            for line in lines {
+                // CSV format: CONTAINER,NAME,CPU%,MEM USAGE / LIMIT,NET I/O,BLOCK I/O,PIDS
+                let parts: Vec<&str> = line.split(',').collect();
+                if parts.len() >= 6 {
+                    // Parse CPU percentage (remove % sign) - parts[2]
+                    if let Some(cpu_str) = parts[2].strip_suffix('%') {
+                        if let Ok(cpu) = cpu_str.parse::<f64>() {
+                            total_cpu += cpu;
+                        }
+                    }
+                    
+                    // Parse memory usage (format: "123.4MiB / 1.234GiB") - parts[3]
+                    if let Some(mem_part) = parts[3].split(" / ").next() {
+                        total_mem_usage += parse_memory_size(mem_part);
+                    }
+                    
+                    // Parse network I/O (format: "1.23kB / 4.56MB") - parts[4]
+                    let net_parts: Vec<&str> = parts[4].split(" / ").collect();
+                    if net_parts.len() == 2 {
+                        total_net_in += parse_byte_size(net_parts[0]);
+                        total_net_out += parse_byte_size(net_parts[1]);
+                    }
+                    
+                    // Parse block I/O (format: "1.23MB / 4.56GB") - parts[5]
+                    let block_parts: Vec<&str> = parts[5].split(" / ").collect();
+                    if block_parts.len() == 2 {
+                        total_block_in += parse_byte_size(block_parts[0]);
+                        total_block_out += parse_byte_size(block_parts[1]);
+                    }
+                }
+            }
+            
+            // Print totals
+            println!("\n📊 Total Statistics:");
+            println!("CPU: {:.2}%", total_cpu);
+            println!("MEM USAGE: {}", format_byte_size(total_mem_usage));
+            println!("NET I/O: {} / {}", format_byte_size(total_net_in), format_byte_size(total_net_out));
+            println!("BLOCK I/O: {} / {}", format_byte_size(total_block_in), format_byte_size(total_block_out));
+        }
+        Ok(output) => {
+            let error_msg = String::from_utf8_lossy(&output.stderr);
+            eprintln!("Failed to get container statistics: {}", error_msg.trim());
+        }
+        Err(e) => {
+            eprintln!("Error executing docker stats: {}", e);
+        }
+    }
+    
+    Ok(())
+}
+
+// Helper function to parse memory size (e.g., "123.4MiB" -> bytes)
+fn parse_memory_size(size_str: &str) -> u64 {
+    let size_str = size_str.trim();
+    if let Some(pos) = size_str.find(|c: char| c.is_alphabetic()) {
+        let (number_part, unit_part) = size_str.split_at(pos);
+        if let Ok(number) = number_part.parse::<f64>() {
+            let multiplier = match unit_part.to_uppercase().as_str() {
+                "B" => 1,
+                "KIB" | "KB" => 1_024,
+                "MIB" | "MB" => 1_024 * 1_024,
+                "GIB" | "GB" => 1_024 * 1_024 * 1_024,
+                "TIB" | "TB" => 1_024_u64.pow(4),
+                _ => 1,
+            };
+            return (number * multiplier as f64) as u64;
+        }
+    }
+    0
+}
+
+// Helper function to parse byte size (e.g., "1.23kB" -> bytes)
+fn parse_byte_size(size_str: &str) -> u64 {
+    let size_str = size_str.trim();
+    if let Some(pos) = size_str.find(|c: char| c.is_alphabetic()) {
+        let (number_part, unit_part) = size_str.split_at(pos);
+        if let Ok(number) = number_part.parse::<f64>() {
+            let multiplier = match unit_part.to_uppercase().as_str() {
+                "B" => 1,
+                "KB" => 1_000,
+                "MB" => 1_000_000,
+                "GB" => 1_000_000_000,
+                "TB" => 1_000_000_000_000,
+                "KIB" => 1_024,
+                "MIB" => 1_024 * 1_024,
+                "GIB" => 1_024 * 1_024 * 1_024,
+                "TIB" => 1_024_u64.pow(4),
+                _ => 1,
+            };
+            return (number * multiplier as f64) as u64;
+        }
+    }
+    0
+}
+
+// Helper function to format bytes to human readable format
+fn format_byte_size(bytes: u64) -> String {
+    const UNITS: &[&str] = &["B", "KB", "MB", "GB", "TB"];
+    const THRESHOLD: f64 = 1000.0;
+    
+    if bytes == 0 {
+        return "0B".to_string();
+    }
+    
+    let mut size = bytes as f64;
+    let mut unit_index = 0;
+    
+    while size >= THRESHOLD && unit_index < UNITS.len() - 1 {
+        size /= THRESHOLD;
+        unit_index += 1;
+    }
+    
+    if size >= 100.0 {
+        format!("{:.0}{}", size, UNITS[unit_index])
+    } else if size >= 10.0 {
+        format!("{:.1}{}", size, UNITS[unit_index])
+    } else {
+        format!("{:.2}{}", size, UNITS[unit_index])
+    }
+}
