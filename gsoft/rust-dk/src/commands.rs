@@ -143,7 +143,7 @@ pub async fn rm_command(force: bool) -> Result<()> {
     run_interactive_selection(
         containers,
         &format!("Select containers to {}", action),
-        true,
+        false,
         |selected| async move {
             if selected.is_empty() {
                 return Ok(());
@@ -155,21 +155,8 @@ pub async fn rm_command(force: bool) -> Result<()> {
                 println!("  - {} ({}) - {}", container.display_name(), container.short_id(), container.status.display_string());
             }
             
-            // Check for running containers when not using force
-            if !force {
-                let running_containers: Vec<_> = selected.iter()
-                    .filter(|c| c.status.is_running())
-                    .collect();
-                
-                if !running_containers.is_empty() {
-                    println!("\n⚠️  Warning: The following containers are running:");
-                    for container in &running_containers {
-                        println!("  - {} ({})", container.display_name(), container.short_id());
-                    }
-                    println!("Running containers cannot be removed without force. Use 'dk rm -f' to force remove.");
-                    return Ok(());
-                }
-            }
+            // Always force remove all selected containers
+            let removable_containers = selected;
             
             print!("\nAre you sure you want to {} these containers? [y/N]: ", action);
             io::stdout().flush()?;
@@ -181,14 +168,11 @@ pub async fn rm_command(force: bool) -> Result<()> {
                 let mut success_count = 0;
                 let mut failed_count = 0;
                 
-                for container in selected {
+                for container in removable_containers {
                     print!("{}ing container {} ... ", if force { "Force remov" } else { "Remov" }, container.display_name());
                     io::stdout().flush()?;
                     
-                    let mut args = vec!["rm"];
-                    if force {
-                        args.push("-f");
-                    }
+                    let mut args = vec!["rm", "-f"];
                     args.push(&container.id);
                     
                     let output = tokio::process::Command::new("docker")
