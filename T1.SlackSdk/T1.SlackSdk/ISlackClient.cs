@@ -10,4 +10,5 @@ public interface ISlackClient
     Task SendFinishProgressMessageAsync(SendFinishProgressMessageArgs args);
     Task<string> ReplaceUserLabelTextAsync(string text, Func<string, Task<string>> getLabelValueFn);
     Task SendReplayThreadMessage(SendReplayThreadMessageArgs args);
+    Task<bool> DownloadFileAsync(string url, string fileName);
 }

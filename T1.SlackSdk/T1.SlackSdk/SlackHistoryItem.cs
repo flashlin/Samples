@@ -8,4 +8,5 @@ public class SlackHistoryItem
     public DateTime Time { get; set; }
     public List<SlackMessage> ThreadMessages { get; set; } = [];
     public string Ts { get; set; } = string.Empty;
+    public List<SlackFileItem> Files { get; set; } = [];
 }

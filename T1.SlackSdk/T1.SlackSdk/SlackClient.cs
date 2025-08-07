@@ -11,10 +11,18 @@ public class SlackClient : ISlackClient
 {
     private readonly SlackApiClient _client;
     private readonly MethodCache _methodCache = new(TimeSpan.FromMinutes(10));
+    private readonly SlackConfig _config;
 
     public SlackClient(IOptions<SlackConfig> config)
     {
-        _client = new SlackApiClient(config.Value.Token);
+        _config = config.Value;
+        _client = new SlackApiClient(_config.BotToken);
+    }
+
+    public Task<bool> DownloadFileAsync(string url, string fileName)
+    {
+        var downloader = new SlackFileDownloader(_config.BotToken);
+        return downloader.DownloadFileAsync(url, fileName);
     }
 
     public async Task<List<SlackHistoryItem>> GetHistoryAsync(GetHistoryArgs args)
@@ -104,9 +112,27 @@ public class SlackClient : ISlackClient
                 Text = message.Text,
                 Time = message.Ts.SlackTsToDateTime(),
                 Ts = message.Ts,
-                ThreadMessages = historyMessages.Skip(1).ToList()
+                ThreadMessages = historyMessages.Skip(1).ToList(),
             };
             item.ThreadMessages.Sort((a, b) => a.Time.CompareTo(b.Time));
+
+
+            if (message.Files != null)
+            {
+                foreach (var file in message.Files)
+                {
+                    var fileItem = new SlackFileItem
+                    {
+                        Id = file.Id,
+                        Name = file.Name,
+                        Title = file.Title,
+                        IsPublic = file.IsPublic,
+                        UrlPrivate = file.UrlPrivate,
+                    };
+                    item.Files.Add(fileItem);
+                }
+            }
+            
             result.Add(item);
         }
 
