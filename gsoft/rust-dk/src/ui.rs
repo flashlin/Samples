@@ -244,7 +244,11 @@ fn ui(f: &mut Frame, app: &App, title: &str) {
             };
             
             let style = if list_idx == app.selected {
+                // 當前選中的行：藍色背景
                 Style::default().bg(Color::Blue).fg(Color::White)
+            } else if app.multi_select_mode && app.selected_items[container_idx] {
+                // 多選模式下已選取的項目：綠色背景
+                Style::default().bg(Color::Green).fg(Color::Black)
             } else if container.status.is_running() {
                 Style::default().fg(Color::Green)
             } else {

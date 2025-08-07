@@ -143,7 +143,7 @@ pub async fn rm_command(force: bool) -> Result<()> {
     run_interactive_selection(
         containers,
         &format!("Select containers to {}", action),
-        false,
+        true,
         |selected| async move {
             if selected.is_empty() {
                 return Ok(());
