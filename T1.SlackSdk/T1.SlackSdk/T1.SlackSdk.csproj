@@ -10,7 +10,7 @@
         <License>https://choosealicense.com/licenses/mit/</License>
         <AssemblyVersion>1.0.11</AssemblyVersion>
         <FileVersion>1.0.11</FileVersion>
-        <Version>1.0.11</Version>
+        <Version>1.0.12</Version>
         <PackageReleaseNotes>add limit</PackageReleaseNotes>
         <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
     </PropertyGroup>
