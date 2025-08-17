@@ -23,6 +23,8 @@ pub struct App {
     pub show_filter: bool,
     pub selected_items: Vec<bool>, // for multi-select
     pub multi_select_mode: bool,
+    pub command_mode: bool,
+    pub command: String,
 }
 
 impl App {
@@ -38,6 +40,8 @@ impl App {
             show_filter: false,
             selected_items,
             multi_select_mode: multi_select,
+            command_mode: false,
+            command: String::new(),
         }
     }
     
@@ -170,20 +174,34 @@ fn run_app<B: Backend>(
         if let Event::Key(key) = event::read()? {
             if key.kind == KeyEventKind::Press {
                 match key.code {
+                    KeyCode::Esc if app.command_mode => {
+                        app.command_mode = false;
+                        app.command.clear();
+                    }
                     KeyCode::Esc if app.show_filter => {
                         app.show_filter = false;
                         app.filter.clear();
                         app.update_filter(String::new());
                     }
-                    KeyCode::Char('q') | KeyCode::Esc => return Ok(false),
+                    KeyCode::Esc => return Ok(false),
+                    KeyCode::Enter if app.command_mode => {
+                        if app.command.trim() == "q" {
+                            return Ok(false);
+                        }
+                        // 其他命令可以在這裡處理
+                        app.command_mode = false;
+                        app.command.clear();
+                    }
                     KeyCode::Enter => return Ok(true),
-                    KeyCode::Up => app.previous(),
-                    KeyCode::Down => app.next(),
-                    KeyCode::Char(' ') if app.multi_select_mode => app.toggle_selected(),
-                    KeyCode::Char('/') => {
-                        app.show_filter = true;
-                        app.filter.clear();
-                        app.update_filter(String::new());
+                    KeyCode::Up if !app.command_mode => app.previous(),
+                    KeyCode::Down if !app.command_mode => app.next(),
+                    KeyCode::Char(' ') if app.multi_select_mode && !app.command_mode => app.toggle_selected(),
+                    KeyCode::Char('/') if !app.command_mode => {
+                        app.command_mode = true;
+                        app.command.clear();
+                    }
+                    KeyCode::Char(c) if app.command_mode => {
+                        app.command.push(c);
                     }
                     KeyCode::Char(c) if app.show_filter => {
                         app.filter.push(c);
@@ -195,6 +213,9 @@ fn run_app<B: Backend>(
                         app.filter.clear();
                         app.filter.push(c);
                         app.update_filter(app.filter.clone());
+                    }
+                    KeyCode::Backspace if app.command_mode => {
+                        app.command.pop();
                     }
                     KeyCode::Backspace if app.show_filter => {
                         app.filter.pop();
@@ -286,12 +307,14 @@ fn ui(f: &mut Frame, app: &App, title: &str) {
     f.render_widget(table, chunks[1]);
     
     // Help text
-    let help_text = if app.show_filter {
-        format!("Filter: {} | ESC: clear filter | Enter: select | q: quit", app.filter)
+    let help_text = if app.command_mode {
+        format!("Command: /{} | Enter: execute | ESC: cancel", app.command)
+    } else if app.show_filter {
+        format!("Filter: {} | ESC: clear filter | Enter: select", app.filter)
     } else if app.multi_select_mode {
-        "↑↓: navigate | Space: toggle | /: filter | Enter: confirm | q: quit".to_string()
+        "↑↓: navigate | Space: toggle | /: command mode | Enter: confirm | ESC: quit".to_string()
     } else {
-        "↑↓: navigate | /: filter | Enter: select | q: quit".to_string()
+        "↑↓: navigate | /: command mode | Enter: select | ESC: quit".to_string()
     };
     
     let help = Paragraph::new(help_text)
