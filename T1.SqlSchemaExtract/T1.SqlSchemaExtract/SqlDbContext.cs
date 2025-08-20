@@ -255,11 +255,58 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         return GroupTableIndexes(indexInfoList);
     }
 
+    public async Task<List<ClusteredIndexInfo>> QueryClusteredIndexesAsync()
+    {
+        var sql = """
+                  SELECT
+                      t.name AS TableName,
+                      i.name AS IndexName,
+                      c.name AS FieldName,
+                      ic.is_descending_key AS IsDesc
+                  FROM
+                      sys.tables AS t
+                  INNER JOIN
+                      sys.indexes AS i ON t.object_id = i.object_id
+                  INNER JOIN
+                      sys.index_columns AS ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+                  INNER JOIN
+                      sys.columns AS c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+                  WHERE
+                      t.is_ms_shipped = 0 -- 排除系統內建的 Table
+                      AND i.is_hypothetical = 0 -- 排除假設的索引
+                      AND i.type = 1 -- 只取叢集索引 (1=叢集, 2=非叢集)
+                  ORDER BY
+                      t.name,
+                      i.name,
+                      ic.key_ordinal;
+                  """;
+        var q = await _connection!.QueryAsync<TableIndexInfoRaw>(sql);
+        var indexInfoList = q.ToList();
+        return GroupClusteredIndexes(indexInfoList);
+    }
+
     private static List<NonClusteredIndexInfo> GroupTableIndexes(List<TableIndexInfoRaw> indexInfoList)
     {
         return indexInfoList
             .GroupBy(info => new { info.TableName, info.IndexName })
             .Select(group => new NonClusteredIndexInfo
+            {
+                TableName = group.Key.TableName,
+                IndexName = group.Key.IndexName,
+                IndexFields = group.Select(info => new FieldIndexInfo
+                {
+                    FieldName = info.FieldName,
+                    IsDesc = info.IsDesc
+                }).ToList()
+            })
+            .ToList();
+    }
+
+    private static List<ClusteredIndexInfo> GroupClusteredIndexes(List<TableIndexInfoRaw> indexInfoList)
+    {
+        return indexInfoList
+            .GroupBy(info => new { info.TableName, info.IndexName })
+            .Select(group => new ClusteredIndexInfo
             {
                 TableName = group.Key.TableName,
                 IndexName = group.Key.IndexName,
