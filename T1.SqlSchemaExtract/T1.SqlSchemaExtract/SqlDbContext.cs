@@ -333,6 +333,29 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         return ParseSynonymInfo(synonymInfoList);
     }
 
+    public async Task<List<StoreProcedureInfo>> QueryStoredProceduresWithSynonymsAsync()
+    {
+        var sql = """
+                  SELECT 
+                      p.name AS ProcedureName,
+                      s.name AS SchemaName,
+                      sn.name AS SynonymName,
+                      sn.base_object_name AS SynonymTarget,
+                      OBJECT_DEFINITION(p.object_id) AS ProcedureBody
+                  FROM sys.procedures p
+                  INNER JOIN sys.schemas s ON p.schema_id = s.schema_id
+                  INNER JOIN sys.sql_expression_dependencies d ON p.object_id = d.referencing_id
+                  INNER JOIN sys.synonyms sn ON d.referenced_id = sn.object_id
+                  WHERE
+                      p.is_ms_shipped = 0 -- 排除系統內建的預存程式
+                  ORDER BY p.name, sn.name;
+                  """;
+        var q = await _connection!.QueryAsync<StoredProcedureWithSynonymRaw>(sql);
+        var procedureSynonymList = q.ToList();
+
+        return GroupProceduresWithSynonyms(procedureSynonymList);
+    }
+
     private static List<NonClusteredIndexInfo> GroupTableIndexes(List<TableIndexInfoRaw> indexInfoList)
     {
         return indexInfoList
@@ -446,6 +469,75 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         return value.Trim('[', ']');
     }
 
+    private static List<StoreProcedureInfo> GroupProceduresWithSynonyms(List<StoredProcedureWithSynonymRaw> procedureSynonymList)
+    {
+        return procedureSynonymList
+            .GroupBy(info => new { info.ProcedureName, info.SchemaName, info.ProcedureBody })
+            .Select(group => new StoreProcedureInfo
+            {
+                Name = group.Key.ProcedureName,
+                Body = group.Key.ProcedureBody,
+                Synonyms = group.Select(info => ParseSynonymFromTarget(info.SynonymName, info.SynonymTarget)).ToList()
+            })
+            .ToList();
+    }
+
+    private static SynonymInfo ParseSynonymFromTarget(string synonymName, string baseObjectName)
+    {
+        var synonymInfo = new SynonymInfo
+        {
+            Name = synonymName,
+            ServerName = string.Empty,
+            DatabaseName = string.Empty,
+            SchemaName = string.Empty,
+            ObjectType = string.Empty,
+            ObjectName = string.Empty
+        };
+
+        if (string.IsNullOrEmpty(baseObjectName))
+            return synonymInfo;
+
+        // 解析 base_object_name 格式: [server].[database].[schema].[object]
+        var parts = baseObjectName.Split('.');
+        
+        if (parts.Length >= 4)
+        {
+            // 完整格式: [server].[database].[schema].[object]
+            synonymInfo.ServerName = RemoveBrackets(parts[0]);
+            synonymInfo.DatabaseName = RemoveBrackets(parts[1]);
+            synonymInfo.SchemaName = RemoveBrackets(parts[2]);
+            synonymInfo.ObjectName = RemoveBrackets(parts[3]);
+        }
+        else if (parts.Length == 3)
+        {
+            // 格式: [database].[schema].[object]
+            synonymInfo.DatabaseName = RemoveBrackets(parts[0]);
+            synonymInfo.SchemaName = RemoveBrackets(parts[1]);
+            synonymInfo.ObjectName = RemoveBrackets(parts[2]);
+        }
+        else if (parts.Length == 2)
+        {
+            // 格式: [schema].[object]
+            synonymInfo.SchemaName = RemoveBrackets(parts[0]);
+            synonymInfo.ObjectName = RemoveBrackets(parts[1]);
+        }
+        else if (parts.Length == 1)
+        {
+            // 格式: [object]
+            synonymInfo.ObjectName = RemoveBrackets(parts[0]);
+        }
+
+        // 根據物件名稱推測物件類型
+        if (synonymInfo.ObjectName.StartsWith("sp_") || synonymInfo.ObjectName.StartsWith("xp_"))
+            synonymInfo.ObjectType = "PROCEDURE";
+        else if (synonymInfo.ObjectName.StartsWith("fn_") || synonymInfo.ObjectName.StartsWith("tf_"))
+            synonymInfo.ObjectType = "FUNCTION";
+        else
+            synonymInfo.ObjectType = "TABLE";
+
+        return synonymInfo;
+    }
+
     private async Task<List<TableIndexInfoRaw>> QueryTableIndexInfoAsync()
     {
         var sql = """
@@ -494,6 +586,15 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
     {
         public string Name { get; set; } = string.Empty;
         public string BaseObjectName { get; set; } = string.Empty;
+    }
+
+    private class StoredProcedureWithSynonymRaw
+    {
+        public string ProcedureName { get; set; } = string.Empty;
+        public string SchemaName { get; set; } = string.Empty;
+        public string SynonymName { get; set; } = string.Empty;
+        public string SynonymTarget { get; set; } = string.Empty;
+        public string ProcedureBody { get; set; } = string.Empty;
     }
 
     private class TableConstraintInfoRaw
