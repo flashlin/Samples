@@ -285,31 +285,6 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         return GroupClusteredIndexes(indexInfoList);
     }
 
-    public async Task<List<TableConstraintInfo>> QueryTableConstraintsAsync()
-    {
-        var sql = """
-                  SELECT
-                      t.name AS TableName,
-                      cc.name AS ConstraintName,
-                      c.name AS FieldName
-                  FROM
-                      sys.tables AS t
-                  INNER JOIN
-                      sys.check_constraints AS cc ON t.object_id = cc.parent_object_id
-                  INNER JOIN
-                      sys.columns AS c ON cc.parent_object_id = c.object_id
-                  WHERE
-                      t.is_ms_shipped = 0 -- 排除系統內建的 Table
-                  ORDER BY
-                      t.name,
-                      cc.name,
-                      c.column_id;
-                  """;
-        var q = await _connection!.QueryAsync<TableConstraintInfoRaw>(sql);
-        var constraintInfoList = q.ToList();
-        return GroupTableConstraints(constraintInfoList);
-    }
-
     private static List<NonClusteredIndexInfo> GroupTableIndexes(List<TableIndexInfoRaw> indexInfoList)
     {
         return indexInfoList
@@ -340,19 +315,6 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
                     FieldName = info.FieldName,
                     IsDesc = info.IsDesc
                 }).ToList()
-            })
-            .ToList();
-    }
-
-    private static List<TableConstraintInfo> GroupTableConstraints(List<TableConstraintInfoRaw> constraintInfoList)
-    {
-        return constraintInfoList
-            .GroupBy(info => new { info.TableName, info.ConstraintName })
-            .Select(group => new TableConstraintInfo
-            {
-                TableName = group.Key.TableName,
-                ConstraintName = group.Key.ConstraintName,
-                FieldNames = group.Select(info => info.FieldName).ToList()
             })
             .ToList();
     }
