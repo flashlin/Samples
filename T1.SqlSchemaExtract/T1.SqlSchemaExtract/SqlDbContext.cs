@@ -285,6 +285,36 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         return GroupClusteredIndexes(indexInfoList);
     }
 
+    public async Task<List<UniqueTableInfo>> QueryUniqueConstraintsAsync()
+    {
+        var sql = """
+                  SELECT
+                      t.name AS TableName,
+                      i.name AS ConstraintName,
+                      c.name AS FieldName
+                  FROM
+                      sys.tables AS t
+                  INNER JOIN
+                      sys.indexes AS i ON t.object_id = i.object_id
+                  INNER JOIN
+                      sys.index_columns AS ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+                  INNER JOIN
+                      sys.columns AS c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+                  WHERE
+                      t.is_ms_shipped = 0 -- 排除系統內建的 Table
+                      AND i.is_hypothetical = 0 -- 排除假設的索引
+                      AND i.is_unique = 1 -- 只取 UNIQUE 約束
+                      AND i.is_primary_key = 0 -- 排除主鍵 (因為主鍵也是 UNIQUE)
+                  ORDER BY
+                      t.name,
+                      i.name,
+                      ic.key_ordinal;
+                  """;
+        var q = await _connection!.QueryAsync<UniqueConstraintInfoRaw>(sql);
+        var constraintInfoList = q.ToList();
+        return GroupUniqueConstraints(constraintInfoList);
+    }
+
     private static List<NonClusteredIndexInfo> GroupTableIndexes(List<TableIndexInfoRaw> indexInfoList)
     {
         return indexInfoList
@@ -315,6 +345,19 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
                     FieldName = info.FieldName,
                     IsDesc = info.IsDesc
                 }).ToList()
+            })
+            .ToList();
+    }
+
+    private static List<UniqueTableInfo> GroupUniqueConstraints(List<UniqueConstraintInfoRaw> constraintInfoList)
+    {
+        return constraintInfoList
+            .GroupBy(info => new { info.TableName, info.ConstraintName })
+            .Select(group => new UniqueTableInfo
+            {
+                TableName = group.Key.TableName,
+                ConstraintName = group.Key.ConstraintName,
+                Fields = group.Select(info => info.FieldName).ToList()
             })
             .ToList();
     }
@@ -354,6 +397,13 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         public string IndexName { get; set; } = string.Empty;
         public string FieldName { get; set; } = string.Empty;
         public bool IsDesc { get; set; }
+    }
+
+    private class UniqueConstraintInfoRaw
+    {
+        public string TableName { get; set; } = string.Empty;
+        public string ConstraintName { get; set; } = string.Empty;
+        public string FieldName { get; set; } = string.Empty;
     }
 
     private class TableConstraintInfoRaw
