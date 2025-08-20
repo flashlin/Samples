@@ -100,7 +100,7 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         if (result.Count != tables.Count)
         {
             // Add remaining tables (those with circular dependencies) at the end
-            var remainingTables = tables.Where(t => !result.Any(r => r.Name == t.Name));
+            var remainingTables = tables.Where(t => result.All(r => r.Name != t.Name));
             result.AddRange(remainingTables);
         }
         
