@@ -11,4 +11,19 @@ public class FieldSchema
     public bool IsIdentity { get; set; }
     public string DefaultValue { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+
+    public string GetDataDeclareType()
+    {
+        if (DataSize==0 && DataScale == 0)
+        {
+            return DataType;
+        }
+
+        if (DataScale == 0)
+        {
+            return $"{DataType}({DataSize})";
+        }
+        
+        return $"{DataType}({DataSize},{DataScale})";
+    }
 }
