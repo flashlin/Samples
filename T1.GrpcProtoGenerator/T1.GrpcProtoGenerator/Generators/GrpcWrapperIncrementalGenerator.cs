@@ -20,18 +20,26 @@ namespace T1.GrpcProtoGenerator.Generators
             var protoFiles = context.AdditionalTextsProvider
                 .Where(f => f.Path.EndsWith(".proto"));
 
-            var protoTexts = protoFiles.Select((text, _) => text.GetText()!.ToString());
+            var protoFilesWithContent = protoFiles.Select((text, _) => new
+            {
+                Path = text.Path,
+                Content = text.GetText()!.ToString()
+            });
 
-            context.RegisterSourceOutput(protoTexts, (spc, protoText) =>
+            context.RegisterSourceOutput(protoFilesWithContent, (spc, protoInfo) =>
             {
                 // Add debug output to see if generator is being called
                 spc.AddSource("Debug_Generator_Called.cs", 
                     SourceText.From("// Generator was called at " + System.DateTime.Now, Encoding.UTF8));
                 
-                var model = ProtoParser.ParseProtoText(protoText);
+                var model = ProtoParser.ParseProtoText(protoInfo.Content);
                 var source = GenerateWrapperSource(model);
-                spc.AddSource("Generated_" + model.Services.FirstOrDefault()?.Name + ".cs",
-                              SourceText.From(source, Encoding.UTF8));
+                
+                // Extract proto file name without extension for better file naming
+                var protoFileName = System.IO.Path.GetFileNameWithoutExtension(protoInfo.Path);
+                var fileName = $"Generated_{protoFileName}.cs";
+                
+                spc.AddSource(fileName, SourceText.From(source, Encoding.UTF8));
             });
         }
 
@@ -43,10 +51,12 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.Threading;");
             sb.AppendLine("using System.Threading.Tasks;");
-            sb.AppendLine("using DemoServer;");
             sb.AppendLine("using Grpc.Core;");
             sb.AppendLine();
-            sb.AppendLine("namespace ProtoWrapGen.Generated");
+            
+            // Use the csharp_namespace from proto file, fallback to default if not specified
+            var targetNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? model.CsharpNamespace : "Generated";
+            sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
             // DTOs
@@ -70,29 +80,58 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.AppendLine("}");
             }
 
-            // Interfaces & wrappers
+            // Service implementations
             foreach (var svc in model.Services)
             {
+                var serviceClass = $"{svc.Name}Service";
+                var baseClass = $"{svc.Name}.{svc.Name}Base";
+                sb.AppendLine($"public class {serviceClass} : {baseClass} {{");
+                sb.AppendLine($"    private readonly ILogger<{serviceClass}> _logger;");
+                sb.AppendLine();
+                sb.AppendLine($"    public {serviceClass}(ILogger<{serviceClass}> logger)");
+                sb.AppendLine($"    {{");
+                sb.AppendLine($"        _logger = logger;");
+                sb.AppendLine($"    }}");
+                sb.AppendLine();
+
+                foreach (var rpc in svc.Rpcs)
+                {
+                    sb.AppendLine($"    public override Task<{rpc.ResponseType}> {rpc.Name}({rpc.RequestType} request, ServerCallContext context)");
+                    sb.AppendLine($"    {{");
+                    sb.AppendLine($"        // TODO: Implement {rpc.Name} logic here");
+                    sb.AppendLine($"        return Task.FromResult(new {rpc.ResponseType}());");
+                    sb.AppendLine($"    }}");
+                    sb.AppendLine();
+                }
+                sb.AppendLine("}");
+                sb.AppendLine();
+                
+                // Also generate client wrapper for convenience
                 var iface = $"I{svc.Name}Client";
                 sb.AppendLine($"public interface {iface} {{");
                 foreach (var rpc in svc.Rpcs)
                     sb.AppendLine($"    Task<{rpc.ResponseType}Dto> {rpc.Name}Async({rpc.RequestType}Dto request, CancellationToken cancellationToken = default);");
                 sb.AppendLine("}");
+                sb.AppendLine();
 
                 var wrapper = $"{svc.Name}ClientWrapper";
-                var grpcClient = $"DemoServer.{svc.Name}.{svc.Name}Client";
+                var grpcClient = $"{svc.Name}.{svc.Name}Client";
                 sb.AppendLine($"public class {wrapper} : {iface} {{");
                 sb.AppendLine($"    private readonly {grpcClient} _inner;");
                 sb.AppendLine($"    public {wrapper}({grpcClient} inner) {{ _inner = inner; }}");
+                sb.AppendLine();
 
                 foreach (var rpc in svc.Rpcs)
                 {
                     sb.AppendLine($"    public async Task<{rpc.ResponseType}Dto> {rpc.Name}Async({rpc.RequestType}Dto request, CancellationToken cancellationToken = default) {{");
-                    sb.AppendLine($"        var grpcReq = new DemoServer.{rpc.RequestType}();");
+                    sb.AppendLine($"        var grpcReq = new {rpc.RequestType}();");
+                    sb.AppendLine($"        // TODO: Map from DTO to gRPC request");
                     sb.AppendLine($"        var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
                     sb.AppendLine($"        var dto = new {rpc.ResponseType}Dto();");
+                    sb.AppendLine($"        // TODO: Map from gRPC response to DTO");
                     sb.AppendLine($"        return dto;");
                     sb.AppendLine($"    }}");
+                    sb.AppendLine();
                 }
                 sb.AppendLine("}");
             }

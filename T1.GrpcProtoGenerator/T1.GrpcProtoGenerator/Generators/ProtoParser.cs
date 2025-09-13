@@ -7,6 +7,7 @@ namespace T1.GrpcProtoGenerator.Generators
     internal static class ProtoParser
     {
         private static readonly Regex PackageRegex = new Regex(@"package\s+(?<pkg>[\w\.]+)\s*;", RegexOptions.Compiled);
+        private static readonly Regex CsharpNamespaceRegex = new Regex(@"option\s+csharp_namespace\s*=\s*""(?<namespace>[^""]+)""\s*;", RegexOptions.Compiled);
         private static readonly Regex MessageRegex = new Regex(@"message\s+(?<name>\w+)\s*\{(?<body>[\s\S]*?)\}", RegexOptions.Compiled);
         private static readonly Regex FieldRegex = new Regex(@"(?<repeated>repeated\s+)?(?<type>\w+)\s+(?<name>\w+)\s*=\s*(?<tag>\d+);", RegexOptions.Compiled);
         private static readonly Regex ServiceRegex = new Regex(@"service\s+(?<name>\w+)\s*\{(?<body>[\s\S]*?)\}", RegexOptions.Compiled);
@@ -19,6 +20,10 @@ namespace T1.GrpcProtoGenerator.Generators
             var model = new ProtoModel();
             var packageMatch = PackageRegex.Match(protoText);
             string pkg = packageMatch.Success ? packageMatch.Groups["pkg"].Value : null;
+            
+            // Parse csharp_namespace option
+            var csharpNamespaceMatch = CsharpNamespaceRegex.Match(protoText);
+            model.CsharpNamespace = csharpNamespaceMatch.Success ? csharpNamespaceMatch.Groups["namespace"].Value : pkg;
 
             // Parse messages
             foreach (Match m in MessageRegex.Matches(protoText))

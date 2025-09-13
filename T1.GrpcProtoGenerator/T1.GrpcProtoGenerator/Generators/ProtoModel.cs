@@ -7,6 +7,7 @@ namespace T1.GrpcProtoGenerator.Generators
 {
     internal class ProtoModel
     {
+        public string CsharpNamespace { get; set; } = string.Empty;
         public List<ProtoMessage> Messages { get; } = new List<ProtoMessage>();
         public List<ProtoService> Services { get; } = new List<ProtoService>();
         public List<ProtoEnum> Enums { get; } = new List<ProtoEnum>();

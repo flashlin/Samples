@@ -20,11 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="build\T1.GrpcProtoGenerator.props" Pack="true" PackagePath="build\" />
-    <None Include="build\T1.GrpcProtoGenerator.targets" Pack="true" PackagePath="build\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="..\..\..\T1.Standard\T1.Standard\Extensions\RegexPattern.cs">
       <Link>Common\RegexPattern.cs</Link>
     </Compile>

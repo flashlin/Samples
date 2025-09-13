@@ -5,6 +5,9 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <!-- Force source generator output for better IDE support -->
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,6 +31,10 @@
     <ItemGroup>
       <ProjectReference Include="..\T1.GrpcProtoGenerator\T1.GrpcProtoGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
       <Analyzer Include="..\T1.GrpcProtoGenerator\bin\Debug\netstandard2.0\T1.GrpcProtoGenerator.dll" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Generated\" />
     </ItemGroup>
 
 </Project>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <!-- Improved Source Generator support for Rider -->
+    <EmitCompilerGeneratedFiles Condition="'$(Configuration)' == 'Debug'">true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath Condition="'$(Configuration)' == 'Debug'">Generated</CompilerGeneratedFilesOutputPath>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

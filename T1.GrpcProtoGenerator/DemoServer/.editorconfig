@@ -1,0 +1,9 @@
+# Editor configuration for Source Generators
+root = true
+
+[*.cs]
+# Enable source generator support
+dotnet_analyzer_diagnostic.category-sourcegenerator.severity = suggestion
+
+# Ensure generated files are treated as source files
+generated_code = true
