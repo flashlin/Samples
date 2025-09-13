@@ -8,7 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Protobuf Include="Protos\greet.proto" GrpcServices="Server"/>
+        <Protobuf Include="Protos\greet.proto" GrpcServices="Both"/>
+        <AdditionalFiles Include="Protos\greet.proto" />
     </ItemGroup>
 
     <ItemGroup>
@@ -22,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\T1.GrpcProtoGenerator\T1.GrpcProtoGenerator.csproj" />
+      <ProjectReference Include="..\T1.GrpcProtoGenerator\T1.GrpcProtoGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
 </Project>
