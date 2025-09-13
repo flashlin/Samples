@@ -20,7 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="Protos\*.proto" />
+    <None Include="build\T1.GrpcProtoGenerator.props" Pack="true" PackagePath="build\" />
+    <None Include="build\T1.GrpcProtoGenerator.targets" Pack="true" PackagePath="build\" />
   </ItemGroup>
 
   <ItemGroup>
