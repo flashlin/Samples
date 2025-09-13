@@ -10,13 +10,6 @@ namespace T1.GrpcProtoGenerator.Generators
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            // Always generate a debug file to see if generator is loaded
-            context.RegisterPostInitializationOutput(ctx =>
-            {
-                ctx.AddSource("Debug_Generator_Loaded.cs", 
-                    SourceText.From("// Generator was loaded at " + System.DateTime.Now, Encoding.UTF8));
-            });
-
             var protoFiles = context.AdditionalTextsProvider
                 .Where(f => f.Path.EndsWith(".proto"));
 
@@ -28,10 +21,6 @@ namespace T1.GrpcProtoGenerator.Generators
 
             context.RegisterSourceOutput(protoFilesWithContent, (spc, protoInfo) =>
             {
-                // Add debug output to see if generator is being called
-                spc.AddSource("Debug_Generator_Called.cs", 
-                    SourceText.From("// Generator was called at " + System.DateTime.Now, Encoding.UTF8));
-                
                 var model = ProtoParser.ParseProtoText(protoInfo.Content);
                 var source = GenerateWrapperSource(model);
                 
