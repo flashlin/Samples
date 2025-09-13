@@ -333,6 +333,20 @@ public class SqlDbContext : IDisposable, IAsyncDisposable
         return ParseSynonymInfo(synonymInfoList);
     }
 
+    public async Task<List<string>> QueryDatabaseNamesAsync()
+    {
+        var sql = """
+                  SELECT name
+                  FROM sys.databases
+                  WHERE database_id > 4 -- Exclude system databases (master, tempdb, model, msdb)
+                  AND state = 0 -- Only include online databases
+                  AND name NOT IN ('distribution', 'ReportServer', 'ReportServerTempDB') -- Exclude common system databases
+                  ORDER BY name;
+                  """;
+        var q = await _connection!.QueryAsync<string>(sql);
+        return q.ToList();
+    }
+
     public async Task<List<StoreProcedureInfo>> QueryStoredProceduresWithSynonymsAsync()
     {
         var sql = """

@@ -14,6 +14,12 @@ public class FieldSchema
 
     public string GetDataDeclareType()
     {
+        var primaryTypes = new[] { "int", "bit", "bigint", "datatime", "long", "short" };
+        if (primaryTypes.Contains(DataType.ToLower()))
+        {
+            return DataType;
+        }
+        
         if (DataSize==0 && DataScale == 0)
         {
             return DataType;
