@@ -9,6 +9,8 @@
     <Description>Generates C# clean SDK wrappers from .proto files</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <RootNamespace>T1.GrpcProtoGenerator</RootNamespace>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,5 +42,6 @@
       <Link>Common\StringTemplate.cs</Link>
     </Compile>
   </ItemGroup>
+
 
 </Project>
