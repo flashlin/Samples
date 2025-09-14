@@ -47,8 +47,8 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using Microsoft.Extensions.Logging;");
             sb.AppendLine();
             
-            // Use the csharp_namespace from proto file, fallback to default if not specified
-            var targetNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? model.CsharpNamespace : "Generated";
+            // Use a different namespace to avoid conflicts with built-in gRPC generator
+            var targetNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? $"{model.CsharpNamespace}.Generated" : "Generated";
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
@@ -73,33 +73,12 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.AppendLine("}");
             }
 
-            // Service implementations
+            // Client interfaces and wrappers only (no service implementations)
             foreach (var svc in model.Services)
             {
-                var serviceClass = $"{svc.Name}Service";
-                var baseClass = $"{svc.Name}.{svc.Name}Base";
-                sb.AppendLine($"public class {serviceClass} : {baseClass} {{");
-                sb.AppendLine($"    private readonly ILogger<{serviceClass}> _logger;");
-                sb.AppendLine();
-                sb.AppendLine($"    public {serviceClass}(ILogger<{serviceClass}> logger)");
-                sb.AppendLine($"    {{");
-                sb.AppendLine($"        _logger = logger;");
-                sb.AppendLine($"    }}");
-                sb.AppendLine();
-
-                foreach (var rpc in svc.Rpcs)
-                {
-                    sb.AppendLine($"    public override Task<{rpc.ResponseType}> {rpc.Name}({rpc.RequestType} request, ServerCallContext context)");
-                    sb.AppendLine($"    {{");
-                    sb.AppendLine($"        // TODO: Implement {rpc.Name} logic here");
-                    sb.AppendLine($"        return Task.FromResult(new {rpc.ResponseType}());");
-                    sb.AppendLine($"    }}");
-                    sb.AppendLine();
-                }
-                sb.AppendLine("}");
-                sb.AppendLine();
+                var originalNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? model.CsharpNamespace : "Generated";
                 
-                // Also generate client wrapper for convenience
+                // Generate client interface
                 var iface = $"I{svc.Name}Client";
                 sb.AppendLine($"public interface {iface} {{");
                 foreach (var rpc in svc.Rpcs)
@@ -107,8 +86,9 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.AppendLine("}");
                 sb.AppendLine();
 
+                // Generate client wrapper
                 var wrapper = $"{svc.Name}ClientWrapper";
-                var grpcClient = $"{svc.Name}.{svc.Name}Client";
+                var grpcClient = $"{originalNamespace}.{svc.Name}.{svc.Name}Client";
                 sb.AppendLine($"public class {wrapper} : {iface} {{");
                 sb.AppendLine($"    private readonly {grpcClient} _inner;");
                 sb.AppendLine($"    public {wrapper}({grpcClient} inner) {{ _inner = inner; }}");
@@ -117,7 +97,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 foreach (var rpc in svc.Rpcs)
                 {
                     sb.AppendLine($"    public async Task<{rpc.ResponseType}Dto> {rpc.Name}Async({rpc.RequestType}Dto request, CancellationToken cancellationToken = default) {{");
-                    sb.AppendLine($"        var grpcReq = new {rpc.RequestType}();");
+                    sb.AppendLine($"        var grpcReq = new {originalNamespace}.{rpc.RequestType}();");
                     sb.AppendLine($"        // TODO: Map from DTO to gRPC request");
                     sb.AppendLine($"        var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
                     sb.AppendLine($"        var dto = new {rpc.ResponseType}Dto();");

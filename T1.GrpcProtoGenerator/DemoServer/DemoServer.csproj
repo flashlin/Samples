@@ -11,10 +11,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Protobuf Include="Protos\greet.proto" GrpcServices="Both"/>
-    </ItemGroup>
-    
-    <ItemGroup>
+        <!-- Keep standard Protobuf compilation for base types (both client and server) -->
+        <Protobuf Include="Protos\greet.proto" GrpcServices="Both" />
+        <!-- Also use as AdditionalFiles for our custom source generator -->
         <AdditionalFiles Include="Protos\greet.proto" />
     </ItemGroup>
 
@@ -36,9 +35,8 @@
       <Folder Include="Generated\" />
     </ItemGroup>
 
-    <!-- Normal compilation but exclude deep directory to avoid duplicates -->
+    <!-- Exclude the deep generator directory from compilation to avoid conflicts -->
     <ItemGroup>
-        <!-- Exclude the deep generator directory from automatic compilation -->
         <Compile Remove="Generated\T1.GrpcProtoGenerator\**" />
         <EmbeddedResource Remove="Generated\T1.GrpcProtoGenerator\**" />
         <None Remove="Generated\T1.GrpcProtoGenerator\**" />
