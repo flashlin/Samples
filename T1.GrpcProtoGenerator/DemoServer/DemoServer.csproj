@@ -28,18 +28,16 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\T1.GrpcProtoGenerator\T1.GrpcProtoGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\T1.GrpcProtoGenerator\T1.GrpcProtoGenerator.csproj" 
+        OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Generated\" />
-    </ItemGroup>
-
-    <!-- Exclude the deep generator directory from compilation to avoid conflicts -->
-    <ItemGroup>
-        <Compile Remove="Generated\T1.GrpcProtoGenerator\**" />
-        <EmbeddedResource Remove="Generated\T1.GrpcProtoGenerator\**" />
-        <None Remove="Generated\T1.GrpcProtoGenerator\**" />
+      <!-- Exclude Generated folder from compilation to prevent duplicate compilation -->
+      <Compile Remove="Generated\**" />
+      <Content Remove="Generated\**" />
+      <EmbeddedResource Remove="Generated\**" />
+      <None Remove="Generated\**" />
     </ItemGroup>
 
 </Project>
