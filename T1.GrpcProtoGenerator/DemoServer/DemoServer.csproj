@@ -37,11 +37,22 @@
       <Folder Include="Generated\" />
     </ItemGroup>
 
-    <!-- Exclude the deep generator directory from compilation to avoid conflicts -->
+    <!-- Simple solution: Disable default compile items and manually control what gets compiled -->
+    <PropertyGroup>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    </PropertyGroup>
+    
+    <!-- Manually include source files we want to compile -->
     <ItemGroup>
-        <Compile Remove="Generated\T1.GrpcProtoGenerator\**" />
-        <EmbeddedResource Remove="Generated\T1.GrpcProtoGenerator\**" />
-        <None Remove="Generated\T1.GrpcProtoGenerator\**" />
+        <Compile Include="Program.cs" />
+        <Compile Include="Services\**\*.cs" Condition="Exists('Services')" />
+    </ItemGroup>
+    
+    <!-- Include generated files as content for browsing only -->
+    <ItemGroup>
+        <Content Include="Generated\**\*.cs">
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
 </Project>
