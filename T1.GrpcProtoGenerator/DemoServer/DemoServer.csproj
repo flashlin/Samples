@@ -37,22 +37,12 @@
       <Folder Include="Generated\" />
     </ItemGroup>
 
-    <!-- Simple solution: Disable default compile items and manually control what gets compiled -->
-    <PropertyGroup>
-        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    </PropertyGroup>
-    
-    <!-- Manually include source files we want to compile -->
+    <!-- Normal compilation but exclude deep directory to avoid duplicates -->
     <ItemGroup>
-        <Compile Include="Program.cs" />
-        <Compile Include="Services\**\*.cs" Condition="Exists('Services')" />
-    </ItemGroup>
-    
-    <!-- Include generated files as content for browsing only -->
-    <ItemGroup>
-        <Content Include="Generated\**\*.cs">
-            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-        </Content>
+        <!-- Exclude the deep generator directory from automatic compilation -->
+        <Compile Remove="Generated\T1.GrpcProtoGenerator\**" />
+        <EmbeddedResource Remove="Generated\T1.GrpcProtoGenerator\**" />
+        <None Remove="Generated\T1.GrpcProtoGenerator\**" />
     </ItemGroup>
 
 </Project>
