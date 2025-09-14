@@ -37,4 +37,11 @@
       <Folder Include="Generated\" />
     </ItemGroup>
 
+    <!-- Exclude the deep generator directory from compilation to avoid conflicts -->
+    <ItemGroup>
+        <Compile Remove="Generated\T1.GrpcProtoGenerator\**" />
+        <EmbeddedResource Remove="Generated\T1.GrpcProtoGenerator\**" />
+        <None Remove="Generated\T1.GrpcProtoGenerator\**" />
+    </ItemGroup>
+
 </Project>

@@ -13,7 +13,7 @@ namespace T1.GrpcProtoGenerator.Generators
             var protoFiles = context.AdditionalTextsProvider
                 .Where(f => f.Path.EndsWith(".proto"));
 
-            var protoFilesWithContent = protoFiles.Select((text, _) => new
+            var protoFilesWithContent = protoFiles.Select((text, _) => new ProtoFileInfo
             {
                 Path = text.Path,
                 Content = text.GetText()!.ToString()
@@ -25,7 +25,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var source = GenerateWrapperSource(model);
                 
                 // Extract proto file name without extension for better file naming
-                var protoFileName = System.IO.Path.GetFileNameWithoutExtension(protoInfo.Path);
+                var protoFileName = protoInfo.GetProtoFileName();
                 var fileName = $"Generated_{protoFileName}.cs";
                 
                 spc.AddSource(fileName, SourceText.From(source, Encoding.UTF8));
@@ -127,6 +127,17 @@ namespace T1.GrpcProtoGenerator.Generators
 
             sb.AppendLine("}");
             return sb.ToString();
+        }
+    }
+
+    public class ProtoFileInfo
+    {
+        public string Path { get; set; }
+        public string Content { get; set; }
+
+        public string GetProtoFileName()
+        {
+            return System.IO.Path.GetFileNameWithoutExtension(Path);
         }
     }
 }
