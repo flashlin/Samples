@@ -73,23 +73,55 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.AppendLine("}");
             }
 
-            // Client interfaces and wrappers only (no service implementations)
+            // Service interfaces and implementations
             foreach (var svc in model.Services)
             {
                 var originalNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? model.CsharpNamespace : "Generated";
                 
-                // Generate client interface
-                var iface = $"I{svc.Name}Client";
-                sb.AppendLine($"public interface {iface} {{");
+                // Generate service interface (IxxxGrpcService)
+                var serviceInterface = $"I{svc.Name}GrpcService";
+                sb.AppendLine($"public interface {serviceInterface} {{");
+                foreach (var rpc in svc.Rpcs)
+                {
+                    sb.AppendLine($"    Task<{originalNamespace}.{rpc.ResponseType}> {rpc.Name}({originalNamespace}.{rpc.RequestType} request, ServerCallContext context);");
+                }
+                sb.AppendLine("}");
+                sb.AppendLine();
+
+                // Generate service implementation (xxxService : xxx.xxxBase)
+                var serviceClass = $"{svc.Name}Service";
+                var baseClass = $"{originalNamespace}.{svc.Name}.{svc.Name}Base";
+                sb.AppendLine($"public class {serviceClass} : {baseClass} {{");
+                sb.AppendLine($"    private readonly {serviceInterface} _instance;");
+                sb.AppendLine();
+                sb.AppendLine($"    public {serviceClass}({serviceInterface} instance)");
+                sb.AppendLine($"    {{");
+                sb.AppendLine($"        _instance = instance;");
+                sb.AppendLine($"    }}");
+                sb.AppendLine();
+
+                foreach (var rpc in svc.Rpcs)
+                {
+                    sb.AppendLine($"    public override Task<{originalNamespace}.{rpc.ResponseType}> {rpc.Name}({originalNamespace}.{rpc.RequestType} request, ServerCallContext context)");
+                    sb.AppendLine($"    {{");
+                    sb.AppendLine($"        return _instance.{rpc.Name}(request, context);");
+                    sb.AppendLine($"    }}");
+                    sb.AppendLine();
+                }
+                sb.AppendLine("}");
+                sb.AppendLine();
+                
+                // Generate client interface and wrapper for completeness
+                var clientInterface = $"I{svc.Name}Client";
+                sb.AppendLine($"public interface {clientInterface} {{");
                 foreach (var rpc in svc.Rpcs)
                     sb.AppendLine($"    Task<{rpc.ResponseType}Dto> {rpc.Name}Async({rpc.RequestType}Dto request, CancellationToken cancellationToken = default);");
                 sb.AppendLine("}");
                 sb.AppendLine();
 
-                // Generate client wrapper
                 var wrapper = $"{svc.Name}ClientWrapper";
                 var grpcClient = $"{originalNamespace}.{svc.Name}.{svc.Name}Client";
-                sb.AppendLine($"public class {wrapper} : {iface} {{");
+                sb.AppendLine($"public class {wrapper} : {clientInterface} {{");
                 sb.AppendLine($"    private readonly {grpcClient} _inner;");
                 sb.AppendLine($"    public {wrapper}({grpcClient} inner) {{ _inner = inner; }}");
                 sb.AppendLine();
