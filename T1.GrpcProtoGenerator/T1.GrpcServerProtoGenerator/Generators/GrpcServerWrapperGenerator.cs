@@ -98,7 +98,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.AppendLine("    {");
                 foreach (var rpc in svc.Rpcs)
                 {
-                    sb.AppendLine($"        Task<{originalNamespace}.{rpc.ResponseType}> {rpc.Name}({originalNamespace}.{rpc.RequestType} request, ServerCallContext context);");
+                    sb.AppendLine($"        Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}({rpc.RequestType}GrpcMessage request, ServerCallContext context);");
                 }
                 sb.AppendLine("    }");
                 sb.AppendLine();
@@ -117,9 +117,12 @@ namespace T1.GrpcProtoGenerator.Generators
 
                 foreach (var rpc in svc.Rpcs)
                 {
-                    sb.AppendLine($"        public override Task<{originalNamespace}.{rpc.ResponseType}> {rpc.Name}({originalNamespace}.{rpc.RequestType} request, ServerCallContext context)");
+                    sb.AppendLine($"        public override async Task<{originalNamespace}.{rpc.ResponseType}> {rpc.Name}({originalNamespace}.{rpc.RequestType} request, ServerCallContext context)");
                     sb.AppendLine("        {");
-                    sb.AppendLine($"            return _instance.{rpc.Name}(request, context);");
+                    sb.AppendLine($"            var dtoRequest = new {rpc.RequestType}GrpcMessage();");
+                    sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest, context);");
+                    sb.AppendLine($"            var grpcResponse = new {originalNamespace}.{rpc.ResponseType}();");
+                    sb.AppendLine("            return grpcResponse;");
                     sb.AppendLine("        }");
                     sb.AppendLine();
                 }

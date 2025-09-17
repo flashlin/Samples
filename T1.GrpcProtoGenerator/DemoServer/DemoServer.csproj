@@ -33,11 +33,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <!-- Exclude Generated folder from compilation to prevent duplicate compilation -->
       <Compile Remove="Generated\**" />
-      <Content Remove="Generated\**" />
-      <EmbeddedResource Remove="Generated\**" />
-      <None Remove="Generated\**" />
     </ItemGroup>
 
 </Project>
