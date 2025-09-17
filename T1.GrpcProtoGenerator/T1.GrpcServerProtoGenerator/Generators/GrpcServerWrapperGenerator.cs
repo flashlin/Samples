@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace T1.GrpcProtoGenerator.Generators
 {
     [Generator]
-    public class GrpcWrapperIncrementalGenerator : IIncrementalGenerator
+    public class GrpcServerWrapperGenerator : IIncrementalGenerator
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
