@@ -302,7 +302,7 @@ namespace T1.GrpcProtoGenerator.Generators
 
         private static string GetTypeNamespace(string typeName, string defaultNamespace)
         {
-            // Map specific types to their correct namespaces
+            // Map specific types to their correct namespaces for modular design
             return typeName switch
             {
                 "EligibilityRequest" => "DemoServer.Protos.Messages",
@@ -348,6 +348,7 @@ namespace T1.GrpcProtoGenerator.Generators
                     break;
             }
         }
+
     }
 
     public class ProtoFileInfo

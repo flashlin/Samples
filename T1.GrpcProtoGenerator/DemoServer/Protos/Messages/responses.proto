@@ -1,15 +1,15 @@
 syntax = "proto3";
 
-import "Protos/Models/RebateCustomer.proto";
-import "Protos/Models/RebateIncomingCreditOn.proto";
-import "Protos/Models/StatusType.proto";
+import "Models/RebateCustomer.proto";
+import "Models/RebateIncomingCreditOn.proto";
+import "Models/StatusType.proto";
 import "google/protobuf/timestamp.proto";
-import "Protos/Models/RebateStatus.proto";
-import "Protos/CustomTypes/decimal_value.proto";
-import "Protos/Models/RebateHistoryMessage.proto";
-import "Protos/Models/RebateBatchListResponse.proto";
-import "Protos/Models/ExcludeResultType.proto";
-import "Protos/Models/CasinoRebateReportDetail.proto";
+import "Models/RebateStatus.proto";
+import "CustomTypes/decimal_value.proto";
+import "Models/RebateHistoryMessage.proto";
+import "Models/RebateBatchListResponse.proto";
+import "Models/ExcludeResultType.proto";
+import "Models/CasinoRebateReportDetail.proto";
 option csharp_namespace = "DemoServer.Protos.Messages";
 
 message GetSettledBetResponse {

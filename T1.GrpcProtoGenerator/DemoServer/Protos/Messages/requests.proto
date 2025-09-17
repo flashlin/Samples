@@ -1,8 +1,8 @@
 ﻿syntax = "proto3";
 
-import "Protos/Models/Period.proto";
+import "Models/Period.proto";
 import "google/protobuf/timestamp.proto";
-import "Protos/Models/Product.proto";
+import "Models/Product.proto";
 option csharp_namespace = "DemoServer.Protos.Messages";
 
 message GetSettledBetRequest {
