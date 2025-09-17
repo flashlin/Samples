@@ -4,15 +4,11 @@ import "Protos/Messages/requests.proto";
 import "Protos/Messages/responses.proto";
 import "Protos/Models/Period.proto";
 
-option csharp_namespace = "Roger.Protos";
+option csharp_namespace = "DemoServer.Services";
 
 service Rebate {
-  rpc DailyUpdateRebate(Null) returns (Void);
   rpc GetCustomersWithSettledBet(GetCustomersWithSettledBetRequest) returns (GetCustomersWithSettledBetResponse);
-  rpc CreateRebateBatchUsers(Null) returns (Void);
-  rpc UpdateComplianceResult(Null) returns (Void);
-  rpc UpdateCasinoRebate(Null) returns (Void);
-  rpc UpdateSportsRebate(Null) returns (Void);
+  rpc CreateBatchUsers(Null) returns (Void);
   rpc ApproveRebateBatch(IntRequest) returns (Void);
   rpc IsEligibleRebate(RebateEligibilityRequest) returns (RebateEligibilityResponse);
   rpc GetRebateStatus(RebateStatusRequest) returns (RebateStatusResponse);

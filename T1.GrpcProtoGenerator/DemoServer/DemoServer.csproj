@@ -17,7 +17,6 @@
         <AdditionalFiles Include="Protos\greet.proto" />
         <Protobuf Include="Protos\rebate.proto" GrpcServices="Both" />
         <AdditionalFiles Include="Protos\rebate.proto" />
-        <Protobuf Include="Protos\reportScheduler.proto" GrpcServices="Both" />
         <AdditionalFiles Remove="Protos\reportScheduler.proto" />
     </ItemGroup>
 
