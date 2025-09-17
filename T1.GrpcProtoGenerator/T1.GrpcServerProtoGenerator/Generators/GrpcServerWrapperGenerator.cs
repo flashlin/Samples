@@ -23,19 +23,16 @@ namespace T1.GrpcProtoGenerator.Generators
             {
                 var model = ProtoParser.ParseProtoText(protoInfo.Content);
                 var protoFileName = protoInfo.GetProtoFileName();
-                
-                var messagesSource = GenerateWrapperGrpcMessageSource(model);
-                var messagesFileName = $"Generated_{protoFileName}_messages.cs";
-                spc.AddSource(messagesFileName, SourceText.From(messagesSource, Encoding.UTF8));
-                
-                var serverSource = GenerateWrapperServerSource(model);
-                var serverFileName = $"Generated_{protoFileName}.cs";
-                spc.AddSource(serverFileName, SourceText.From(serverSource, Encoding.UTF8));
-                
-                var clientSource = GenerateWrapperClientSource(model);
-                var clientFileName = $"Generated_{protoFileName}_client.cs";
-                spc.AddSource(clientFileName, SourceText.From(clientSource, Encoding.UTF8));
+
+                AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(model), $"Generated_{protoFileName}_messages.cs");
+                AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model), $"Generated_{protoFileName}.cs");
+                AddGeneratedSourceFile(spc, GenerateWrapperClientSource(model), $"Generated_{protoFileName}_client.cs");
             });
+        }
+
+        private static void AddGeneratedSourceFile(SourceProductionContext spc, string messagesSource, string sourceFileName)
+        {
+            spc.AddSource(sourceFileName, SourceText.From(messagesSource, Encoding.UTF8));
         }
 
         private string GenerateWrapperGrpcMessageSource(ProtoModel model)
