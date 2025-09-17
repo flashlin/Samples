@@ -17,11 +17,16 @@
         <AdditionalFiles Include="Protos\greet.proto" />
         <Protobuf Include="Protos\rebate.proto" GrpcServices="Both" />
         <AdditionalFiles Include="Protos\rebate.proto" />
-        <AdditionalFiles Remove="Protos\reportScheduler.proto" />
+        <AdditionalFiles Include="Protos\reportScheduler.proto" />
+        <Protobuf Include="Protos\google\api\annotations.proto" />
+        <AdditionalFiles Include="Protos\google\api\annotations.proto" />
+        <Protobuf Include="Protos\google\api\http.proto" />
+        <AdditionalFiles Include="Protos\google\api\http.proto" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Grpc.AspNetCore" Version="2.64.0"/>
+        <PackageReference Include="Google.Api.CommonProtos" Version="2.15.0"/>
     </ItemGroup>
 
     <ItemGroup>
