@@ -14,6 +14,11 @@ namespace T1.GrpcProtoGenerator.Generators
 
         public ProtoMessage FindMessage(string name)
             => Messages.FirstOrDefault(m => m.Name == name) ?? Messages.FirstOrDefault(m => m.FullName == name);
+
+        public string GetTatgetNamespace()
+        {
+            return !string.IsNullOrEmpty(CsharpNamespace) ? $"{CsharpNamespace}" : "Generated";
+        }
     }
 
     internal class ProtoMessage

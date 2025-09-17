@@ -25,7 +25,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var protoFileName = protoInfo.GetProtoFileName();
 
                 AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(model), $"Generated_{protoFileName}_messages.cs");
-                AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model), $"Generated_{protoFileName}.cs");
+                AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model), $"Generated_{protoFileName}_server.cs");
                 AddGeneratedSourceFile(spc, GenerateWrapperClientSource(model), $"Generated_{protoFileName}_client.cs");
             });
         }
@@ -43,7 +43,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine();
             
-            var targetNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? $"{model.CsharpNamespace}.Generated" : "Generated";
+            var targetNamespace = model.GetTatgetNamespace();
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
@@ -85,7 +85,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using Grpc.Core;");
             sb.AppendLine();
             
-            var targetNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? $"{model.CsharpNamespace}.Generated" : "Generated";
+            var targetNamespace = model.GetTatgetNamespace();
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
@@ -161,7 +161,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using Microsoft.Extensions.Logging;");
             sb.AppendLine();
             
-            var targetNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? $"{model.CsharpNamespace}.Generated" : "Generated";
+            var targetNamespace = model.GetTatgetNamespace();
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
