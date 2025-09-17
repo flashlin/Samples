@@ -7,20 +7,20 @@ import "Protos/Models/Period.proto";
 option csharp_namespace = "DemoServer.Services";
 
 service Rebate {
-  rpc GetCustomersWithSettledBet(GetCustomersWithSettledBetRequest) returns (GetCustomersWithSettledBetResponse);
-  rpc CreateBatchUsers(Null) returns (Void);
-  rpc ApproveRebateBatch(IntRequest) returns (Void);
-  rpc IsEligibleRebate(RebateEligibilityRequest) returns (RebateEligibilityResponse);
-  rpc GetRebateStatus(RebateStatusRequest) returns (RebateStatusResponse);
+  rpc GetSettledBet(GetCustomersWithSettledBetRequest) returns (GetCustomersWithSettledBetResponse);
+  rpc CreateBatch(Null) returns (Void);
+  rpc Approve(IntRequest) returns (Void);
+  rpc IsEligible(RebateEligibilityRequest) returns (RebateEligibilityResponse);
+  rpc GetStatus(RebateStatusRequest) returns (RebateStatusResponse);
   rpc GetRebateDetails(RebateDetailsRequest) returns (RebateDetailsResponse);
-  rpc GetRebateBatchList(Null) returns (RebateBatchListResponse);
+  rpc GetBatchList(Null) returns (RebateBatchListResponse);
   rpc ExcludeByUsernames(ExcludeByUsernamesRequest) returns (ExcludeByUsernamesResponse);
-  rpc AuditAndGenerateRebateReport(BatchId) returns (AuditAndGenerateRebateReportResponse);
-  rpc GetCasinoRebateReport(Period) returns (CasinoRebateReportResponse);
-  rpc SendRebateSummaryEmail(Period) returns (Void);
-  rpc GetRebatableTurnover(GetRebatableTurnoverRequest) returns (stream GetRebatableTurnoverResponse);
-  rpc UpdateSettlementProgress(UpdateSettlementProgressRequest) returns(Void);
-  rpc GetCurrentGamesRebateConfig(Null) returns (CurrentGamesRebateConfigResponse){
+  rpc Audit(BatchId) returns (AuditAndGenerateRebateReportResponse);
+  rpc GetReport(Period) returns (CasinoRebateReportResponse);
+  rpc SendSummaryEmail(Period) returns (Void);
+  rpc GetTurnover(GetRebatableTurnoverRequest) returns (stream GetRebatableTurnoverResponse);
+  rpc UpdateProgress(UpdateSettlementProgressRequest) returns(Void);
+  rpc GetConfig(Null) returns (CurrentGamesRebateConfigResponse){
     option(google.api.http) = {
       post: "/api/rebate/GetCurrentGamesRebateConfig",
       body: "*"
