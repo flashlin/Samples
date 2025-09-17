@@ -22,19 +22,22 @@ namespace T1.GrpcProtoGenerator.Generators
             context.RegisterSourceOutput(protoFilesWithContent, (spc, protoInfo) =>
             {
                 var model = ProtoParser.ParseProtoText(protoInfo.Content);
-                var source = GenerateWrapperSource(model);
-                var messagesSource = GenerateWrapperGrpcRequestSource(model);
+                var source = GenerateWrapperServerSource(model);
+                var clientSource = GenerateWrapperClientSource(model);
+                var messagesSource = GenerateWrapperGrpcMessageSource(model);
                 
                 var protoFileName = protoInfo.GetProtoFileName();
                 var fileName = $"Generated_{protoFileName}.cs";
+                var clientFileName = $"Generated_{protoFileName}_client.cs";
                 var messagesFileName = $"Generated_{protoFileName}_messages.cs";
                 
                 spc.AddSource(fileName, SourceText.From(source, Encoding.UTF8));
+                spc.AddSource(clientFileName, SourceText.From(clientSource, Encoding.UTF8));
                 spc.AddSource(messagesFileName, SourceText.From(messagesSource, Encoding.UTF8));
             });
         }
 
-        private string GenerateWrapperGrpcRequestSource(ProtoModel model)
+        private string GenerateWrapperGrpcMessageSource(ProtoModel model)
         {
             var sb = new StringBuilder();
             sb.AppendLine("#nullable enable");
@@ -73,7 +76,82 @@ namespace T1.GrpcProtoGenerator.Generators
             return sb.ToString();
         }
 
-        private string GenerateWrapperSource(ProtoModel model)
+        private string GenerateWrapperClientSource(ProtoModel model)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("#nullable enable");
+            sb.AppendLine("using System;");
+            sb.AppendLine("using System.Collections.Generic;");
+            sb.AppendLine("using System.Threading;");
+            sb.AppendLine("using System.Threading.Tasks;");
+            sb.AppendLine("using Grpc.Core;");
+            sb.AppendLine();
+            
+            var targetNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? $"{model.CsharpNamespace}.Generated" : "Generated";
+            sb.AppendLine($"namespace {targetNamespace}");
+            sb.AppendLine("{");
+
+            foreach (var svc in model.Services)
+            {
+                var originalNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? model.CsharpNamespace : "Generated";
+                
+                var clientInterface = $"I{svc.Name}Client";
+                sb.AppendLine($"    public interface {clientInterface}");
+                sb.AppendLine("    {");
+                foreach (var rpc in svc.Rpcs)
+                    sb.AppendLine($"        Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default);");
+                sb.AppendLine("    }");
+                sb.AppendLine();
+
+                var wrapper = $"{svc.Name}ClientWrapper";
+                var grpcClient = $"{originalNamespace}.{svc.Name}.{svc.Name}Client";
+                sb.AppendLine($"    public class {wrapper} : {clientInterface}");
+                sb.AppendLine("    {");
+                sb.AppendLine($"        private readonly {grpcClient} _inner;");
+                sb.AppendLine($"        public {wrapper}({grpcClient} inner) {{ _inner = inner; }}");
+                sb.AppendLine();
+
+                foreach (var rpc in svc.Rpcs)
+                {
+                    sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default)");
+                    sb.AppendLine("        {");
+                    sb.AppendLine($"            var grpcReq = new {originalNamespace}.{rpc.RequestType}();");
+                    
+                    var requestMessage = model.FindMessage(rpc.RequestType);
+                    if (requestMessage != null)
+                    {
+                        foreach (var field in requestMessage.Fields)
+                        {
+                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                            sb.AppendLine($"            grpcReq.{propName} = request.{propName};");
+                        }
+                    }
+                    
+                    sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
+                    sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcMessage();");
+                    
+                    var responseMessage = model.FindMessage(rpc.ResponseType);
+                    if (responseMessage != null)
+                    {
+                        foreach (var field in responseMessage.Fields)
+                        {
+                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                            sb.AppendLine($"            dto.{propName} = grpcResp.{propName};");
+                        }
+                    }
+                    
+                    sb.AppendLine("            return dto;");
+                    sb.AppendLine("        }");
+                    sb.AppendLine();
+                }
+                sb.AppendLine("    }");
+            }
+
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
+
+        private string GenerateWrapperServerSource(ProtoModel model)
         {
             var sb = new StringBuilder();
             sb.AppendLine("#nullable enable");
@@ -150,57 +228,6 @@ namespace T1.GrpcProtoGenerator.Generators
                 }
                 sb.AppendLine("    }");
                 sb.AppendLine();
-                
-                var clientInterface = $"I{svc.Name}Client";
-                sb.AppendLine($"    public interface {clientInterface}");
-                sb.AppendLine("    {");
-                foreach (var rpc in svc.Rpcs)
-                    sb.AppendLine($"        Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default);");
-                sb.AppendLine("    }");
-                sb.AppendLine();
-
-                var wrapper = $"{svc.Name}ClientWrapper";
-                var grpcClient = $"{originalNamespace}.{svc.Name}.{svc.Name}Client";
-                sb.AppendLine($"    public class {wrapper} : {clientInterface}");
-                sb.AppendLine("    {");
-                sb.AppendLine($"        private readonly {grpcClient} _inner;");
-                sb.AppendLine($"        public {wrapper}({grpcClient} inner) {{ _inner = inner; }}");
-                sb.AppendLine();
-
-                foreach (var rpc in svc.Rpcs)
-                {
-                    sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default)");
-                    sb.AppendLine("        {");
-                    sb.AppendLine($"            var grpcReq = new {originalNamespace}.{rpc.RequestType}();");
-                    
-                    var requestMessage = model.FindMessage(rpc.RequestType);
-                    if (requestMessage != null)
-                    {
-                        foreach (var field in requestMessage.Fields)
-                        {
-                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                            sb.AppendLine($"            grpcReq.{propName} = request.{propName};");
-                        }
-                    }
-                    
-                    sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
-                    sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcMessage();");
-                    
-                    var responseMessage = model.FindMessage(rpc.ResponseType);
-                    if (responseMessage != null)
-                    {
-                        foreach (var field in responseMessage.Fields)
-                        {
-                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                            sb.AppendLine($"            dto.{propName} = grpcResp.{propName};");
-                        }
-                    }
-                    
-                    sb.AppendLine("            return dto;");
-                    sb.AppendLine("        }");
-                    sb.AppendLine();
-                }
-                sb.AppendLine("    }");
             }
 
             sb.AppendLine("}");
