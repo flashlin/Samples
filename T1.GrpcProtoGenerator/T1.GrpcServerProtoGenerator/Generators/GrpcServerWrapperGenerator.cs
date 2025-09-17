@@ -179,7 +179,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.AppendLine("    }");
                 sb.AppendLine();
 
-                var serviceClass = $"{svc.Name}Service";
+                var serviceClass = $"{svc.Name}GrpcNativeService";
                 var baseClass = $"{originalNamespace}.{svc.Name}.{svc.Name}Base";
                 sb.AppendLine($"    public class {serviceClass} : {baseClass}");
                 sb.AppendLine("    {");
