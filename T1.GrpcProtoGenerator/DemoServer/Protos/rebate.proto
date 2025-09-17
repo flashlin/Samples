@@ -1,29 +1,28 @@
 syntax = "proto3";
-import "google/api/annotations.proto";
+// import "google/api/annotations.proto";
 import "Protos/Messages/requests.proto";
 import "Protos/Messages/responses.proto";
-import "Protos/Models/Period.proto";
 
 option csharp_namespace = "DemoServer.Services";
 
+// Define messages directly in this file for now
+message RebateRequest {
+  int32 id = 1;
+  string name = 2;
+}
+
+message RebateResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message EmptyRequest {}
+
+message EmptyResponse {}
+
 service Rebate {
-  rpc GetSettledBet(GetSettledBetRequest) returns (GetSettledBetResponse);
-  rpc CreateBatch(Null) returns (Void);
-  rpc Approve(IntRequest) returns (Void);
+  rpc GetRebate(RebateRequest) returns (RebateResponse);
+  rpc CreateRebate(RebateRequest) returns (RebateResponse);
+  rpc GetAll(EmptyRequest) returns (EmptyResponse);
   rpc IsEligible(EligibilityRequest) returns (EligibilityResponse);
-  rpc GetStatus(RebateStatusRequest) returns (RebateStatusResponse);
-  rpc GetRebateDetails(RebateDetailsRequest) returns (RebateDetailsResponse);
-  rpc GetBatchList(Null) returns (RebateBatchListResponse);
-  rpc ExcludeByUsernames(ExcludeByUsernamesRequest) returns (ExcludeByUsernamesResponse);
-  rpc Audit(BatchId) returns (AuditAndGenerateRebateReportResponse);
-  rpc GetReport(Period) returns (CasinoRebateReportResponse);
-  rpc SendSummaryEmail(Period) returns (Void);
-  rpc GetTurnover(GetRebatableTurnoverRequest) returns (stream GetRebatableTurnoverResponse);
-  rpc UpdateProgress(UpdateSettlementProgressRequest) returns(Void);
-  rpc GetConfig(Null) returns (CurrentGamesRebateConfigResponse){
-    option(google.api.http) = {
-      post: "/api/rebate/GetCurrentGamesRebateConfig",
-      body: "*"
-    };
-  };
 }

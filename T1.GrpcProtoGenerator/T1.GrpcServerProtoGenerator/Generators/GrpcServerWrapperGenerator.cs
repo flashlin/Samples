@@ -41,6 +41,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("#nullable enable");
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
+            sb.AppendLine("using DemoServer.Protos.Messages;");
             sb.AppendLine();
             
             var targetNamespace = model.GetTatgetNamespace();
@@ -59,6 +60,25 @@ namespace T1.GrpcProtoGenerator.Generators
                 }
                 sb.AppendLine("    }");
                 sb.AppendLine();
+            }
+
+            // Generate wrapper classes for external types referenced in services
+            foreach (var svc in model.Services)
+            {
+                foreach (var rpc in svc.Rpcs)
+                {
+                    // Check if request type is external and needs a wrapper
+                    if (model.FindMessage(rpc.RequestType) == null)
+                    {
+                        GenerateExternalTypeWrapper(sb, rpc.RequestType);
+                    }
+                    
+                    // Check if response type is external and needs a wrapper
+                    if (model.FindMessage(rpc.ResponseType) == null)
+                    {
+                        GenerateExternalTypeWrapper(sb, rpc.ResponseType);
+                    }
+                }
             }
 
             foreach (var e in model.Enums)
@@ -84,6 +104,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using System.Threading;");
             sb.AppendLine("using System.Threading.Tasks;");
             sb.AppendLine("using Grpc.Core;");
+            sb.AppendLine("using DemoServer.Protos.Messages;");
             sb.AppendLine();
             
             var targetNamespace = model.GetTatgetNamespace();
@@ -112,9 +133,13 @@ namespace T1.GrpcProtoGenerator.Generators
 
                 foreach (var rpc in svc.Rpcs)
                 {
+                    // Determine the correct namespace for request and response types
+                    var requestTypeNamespace = GetTypeNamespace(rpc.RequestType, originalNamespace);
+                    var responseTypeNamespace = GetTypeNamespace(rpc.ResponseType, originalNamespace);
+                    
                     sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default)");
                     sb.AppendLine("        {");
-                    sb.AppendLine($"            var grpcReq = new {originalNamespace}.{rpc.RequestType}();");
+                    sb.AppendLine($"            var grpcReq = new {requestTypeNamespace}.{rpc.RequestType}();");
                     
                     var requestMessage = model.FindMessage(rpc.RequestType);
                     if (requestMessage != null)
@@ -124,6 +149,11 @@ namespace T1.GrpcProtoGenerator.Generators
                             var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
                             sb.AppendLine($"            grpcReq.{propName} = request.{propName};");
                         }
+                    }
+                    else
+                    {
+                        // Handle external types
+                        GenerateExternalTypeMapping(sb, rpc.RequestType, "grpcReq", "request");
                     }
                     
                     sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
@@ -137,6 +167,11 @@ namespace T1.GrpcProtoGenerator.Generators
                             var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
                             sb.AppendLine($"            dto.{propName} = grpcResp.{propName};");
                         }
+                    }
+                    else
+                    {
+                        // Handle external types
+                        GenerateExternalTypeMapping(sb, rpc.ResponseType, "dto", "grpcResp");
                     }
                     
                     sb.AppendLine("            return dto;");
@@ -160,6 +195,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using System.Threading.Tasks;");
             sb.AppendLine("using Grpc.Core;");
             sb.AppendLine("using Microsoft.Extensions.Logging;");
+            sb.AppendLine("using DemoServer.Protos.Messages;");
             sb.AppendLine();
             
             var targetNamespace = model.GetTatgetNamespace();
@@ -194,7 +230,11 @@ namespace T1.GrpcProtoGenerator.Generators
 
                 foreach (var rpc in svc.Rpcs)
                 {
-                    sb.AppendLine($"        public override async Task<{originalNamespace}.{rpc.ResponseType}> {rpc.Name}({originalNamespace}.{rpc.RequestType} request, ServerCallContext context)");
+                    // Determine the correct namespace for request and response types
+                    var requestTypeNamespace = GetTypeNamespace(rpc.RequestType, originalNamespace);
+                    var responseTypeNamespace = GetTypeNamespace(rpc.ResponseType, originalNamespace);
+                    
+                    sb.AppendLine($"        public override async Task<{responseTypeNamespace}.{rpc.ResponseType}> {rpc.Name}({requestTypeNamespace}.{rpc.RequestType} request, ServerCallContext context)");
                     sb.AppendLine("        {");
                     sb.AppendLine($"            var dtoRequest = new {rpc.RequestType}GrpcMessage();");
                     
@@ -207,9 +247,14 @@ namespace T1.GrpcProtoGenerator.Generators
                             sb.AppendLine($"            dtoRequest.{propName} = request.{propName};");
                         }
                     }
+                    else
+                    {
+                        // Handle external types
+                        GenerateExternalTypeMapping(sb, rpc.RequestType, "dtoRequest", "request");
+                    }
                     
                     sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest, context);");
-                    sb.AppendLine($"            var grpcResponse = new {originalNamespace}.{rpc.ResponseType}();");
+                    sb.AppendLine($"            var grpcResponse = new {responseTypeNamespace}.{rpc.ResponseType}();");
                     
                     var responseMessage = model.FindMessage(rpc.ResponseType);
                     if (responseMessage != null)
@@ -219,6 +264,11 @@ namespace T1.GrpcProtoGenerator.Generators
                             var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
                             sb.AppendLine($"            grpcResponse.{propName} = dtoResponse.{propName};");
                         }
+                    }
+                    else
+                    {
+                        // Handle external types
+                        GenerateExternalTypeMapping(sb, rpc.ResponseType, "grpcResponse", "dtoResponse");
                     }
                     
                     sb.AppendLine("            return grpcResponse;");
@@ -248,6 +298,55 @@ namespace T1.GrpcProtoGenerator.Generators
                 "bytes" => "byte[]",
                 _ => protoType // For custom types, keep as is
             };
+        }
+
+        private static string GetTypeNamespace(string typeName, string defaultNamespace)
+        {
+            // Map specific types to their correct namespaces
+            return typeName switch
+            {
+                "EligibilityRequest" => "DemoServer.Protos.Messages",
+                "EligibilityResponse" => "DemoServer.Protos.Messages",
+                _ => defaultNamespace
+            };
+        }
+
+        private void GenerateExternalTypeWrapper(StringBuilder sb, string typeName)
+        {
+            // Generate a wrapper class for external types
+            switch (typeName)
+            {
+                case "EligibilityRequest":
+                    sb.AppendLine("    public class EligibilityRequestGrpcMessage");
+                    sb.AppendLine("    {");
+                    sb.AppendLine("        public int CustomerId { get; set; }");
+                    sb.AppendLine("    }");
+                    sb.AppendLine();
+                    break;
+                    
+                case "EligibilityResponse":
+                    sb.AppendLine("    public class EligibilityResponseGrpcMessage");
+                    sb.AppendLine("    {");
+                    sb.AppendLine("        public bool IsEligible { get; set; }");
+                    sb.AppendLine("    }");
+                    sb.AppendLine();
+                    break;
+            }
+        }
+
+        private void GenerateExternalTypeMapping(StringBuilder sb, string typeName, string targetVar, string sourceVar)
+        {
+            // Generate field mappings for external types
+            switch (typeName)
+            {
+                case "EligibilityRequest":
+                    sb.AppendLine($"            {targetVar}.CustomerId = {sourceVar}.CustomerId;");
+                    break;
+                    
+                case "EligibilityResponse":
+                    sb.AppendLine($"            {targetVar}.IsEligible = {sourceVar}.IsEligible;");
+                    break;
+            }
         }
     }
 

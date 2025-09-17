@@ -15,18 +15,31 @@
         <Protobuf Include="Protos\greet.proto" GrpcServices="Both" />
         <!-- Also use as AdditionalFiles for our custom source generator -->
         <AdditionalFiles Include="Protos\greet.proto" />
-        <Protobuf Include="Protos\rebate.proto" GrpcServices="Both" />
+        <Protobuf Include="Protos\rebate.proto" GrpcServices="Both" ProtoRoot="." />
         <AdditionalFiles Include="Protos\rebate.proto" />
-        <AdditionalFiles Include="Protos\reportScheduler.proto" />
-        <Protobuf Include="Protos\google\api\annotations.proto" />
-        <AdditionalFiles Include="Protos\google\api\annotations.proto" />
-        <Protobuf Include="Protos\google\api\http.proto" />
-        <AdditionalFiles Include="Protos\google\api\http.proto" />
+        <!-- Include message proto files -->
+        <Protobuf Include="Protos\Messages\requests.proto" GrpcServices="None" ProtoRoot="." />
+        <Protobuf Include="Protos\Messages\responses.proto" GrpcServices="None" ProtoRoot="." />
+        <!-- Include model proto files -->
+        <Protobuf Include="Protos\Models\Period.proto" GrpcServices="None" ProtoRoot="." />
+        <Protobuf Include="Protos\Models\Product.proto" GrpcServices="None" ProtoRoot="." />
+        <Protobuf Include="Protos\Models\RebateCustomer.proto" GrpcServices="None" ProtoRoot="." />
+        <Protobuf Include="Protos\Models\RebateIncomingCreditOn.proto" GrpcServices="None" ProtoRoot="." />
+        <Protobuf Include="Protos\Models\StatusType.proto" GrpcServices="None" ProtoRoot="." />
+        <Protobuf Include="Protos\Models\RebateStatus.proto" GrpcServices="None" ProtoRoot="." />
+        <Protobuf Include="Protos\Models\RebateHistoryMessage.proto" GrpcServices="None" ProtoRoot="." />
+        <Protobuf Include="Protos\Models\RebateBatchListResponse.proto" GrpcServices="None" ProtoRoot="." />
+        <Protobuf Include="Protos\Models\ExcludeResultType.proto" GrpcServices="None" ProtoRoot="." />
+        <Protobuf Include="Protos\Models\CasinoRebateReportDetail.proto" GrpcServices="None" ProtoRoot="." />
+        <Protobuf Include="Protos\Models\ProductDetailMessage.proto" GrpcServices="None" ProtoRoot="." />
+        <!-- Include custom types -->
+        <Protobuf Include="Protos\CustomTypes\decimal_value.proto" GrpcServices="None" ProtoRoot="." />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Grpc.AspNetCore" Version="2.64.0"/>
         <PackageReference Include="Google.Api.CommonProtos" Version="2.15.0"/>
+        <PackageReference Include="Grpc.AspNetCore.Web" Version="2.64.0"/>
     </ItemGroup>
 
     <ItemGroup>
