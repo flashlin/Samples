@@ -10,7 +10,7 @@ import "Protos/Models/RebateHistoryMessage.proto";
 import "Protos/Models/RebateBatchListResponse.proto";
 import "Protos/Models/ExcludeResultType.proto";
 import "Protos/Models/CasinoRebateReportDetail.proto";
-option csharp_namespace = "DemoServer.Messages";
+option csharp_namespace = "DemoServer.Protos.Messages";
 
 message GetSettledBetResponse {
   repeated RebateCustomer rebateCustomers = 1;
@@ -34,9 +34,6 @@ message RebateDetailsResponse{
   RebateIncomingCreditOn rebateIncomingCreditOn = 4;
 }
 
-message BatchId{
-  int32 batchId = 1;
-}
 
 message RebateBatchListResponse {
   repeated RebateBatch batches = 1;
@@ -79,7 +76,4 @@ message VipGamesRates {
   int32 sapphireRate = 5;
   int32 diamondRate = 6;
   int32 infinityRate = 7;
-}
-
-  message Void{
 }

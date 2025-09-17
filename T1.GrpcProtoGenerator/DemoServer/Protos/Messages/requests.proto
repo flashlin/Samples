@@ -44,4 +44,10 @@ message UpdateSettlementProgressRequest {
   repeated ProductSettlement productSettlements = 1;
 }
 
-message Null {};
+message Null {}
+
+message Void {}
+
+message BatchId {
+  int32 batchId = 1;
+}

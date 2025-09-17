@@ -53,7 +53,8 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.AppendLine("    {");
                 foreach (var f in msg.Fields)
                 {
-                    var csType = f.IsRepeated ? $"List<{f.Type}>" : f.Type;
+                    var baseType = MapProtoCTypeToCSharp(f.Type);
+                    var csType = f.IsRepeated ? $"List<{baseType}>" : baseType;
                     sb.AppendLine($"        public {csType} {char.ToUpper(f.Name[0]) + f.Name.Substring(1)} {{ get; set; }}");
                 }
                 sb.AppendLine("    }");
@@ -230,6 +231,23 @@ namespace T1.GrpcProtoGenerator.Generators
 
             sb.AppendLine("}");
             return sb.ToString();
+        }
+
+        private static string MapProtoCTypeToCSharp(string protoType)
+        {
+            return protoType switch
+            {
+                "int32" => "int",
+                "int64" => "long",
+                "uint32" => "uint",
+                "uint64" => "ulong",
+                "float" => "float",
+                "double" => "double",
+                "bool" => "bool",
+                "string" => "string",
+                "bytes" => "byte[]",
+                _ => protoType // For custom types, keep as is
+            };
         }
     }
 
