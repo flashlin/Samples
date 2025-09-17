@@ -1,3 +1,10 @@
+using System.Collections.Concurrent;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
+
 namespace T1.EfCore.NPlus1Detector;
 
 public sealed class NPlusOneDetectorInterceptor : DbCommandInterceptor, IDisposable

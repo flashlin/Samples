@@ -18,6 +18,7 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.8" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.8" />
       <None Include="ReadMe.md" Pack="true" PackagePath="\"/>
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.1" />
     </ItemGroup>
     
 
