@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+import "Protos/Models/RebateCustomer.proto";
+import "Protos/Models/RebateIncomingCreditOn.proto";
+import "Protos/Models/StatusType.proto";
+import "google/protobuf/timestamp.proto";
+import "Protos/Models/RebateStatus.proto";
+import "Protos/CustomTypes/decimal_value.proto";
+import "Protos/Models/RebateHistoryMessage.proto";
+import "Protos/Models/RebateBatchListResponse.proto";
+import "Protos/Models/ExcludeResultType.proto";
+import "Protos/Models/CasinoRebateReportDetail.proto";
+option csharp_namespace = "Roger.Protos.Messages";
+
+message GetCustomersWithSettledBetResponse {
+  repeated RebateCustomer rebateCustomers = 1;
+}
+
+message RebateEligibilityResponse{
+  bool isRebateEligible= 1;
+}
+
+message RebateStatusResponse{
+  StatusType sportsStatus = 1;
+  StatusType casinoStatus = 2;
+  optional google.protobuf.Timestamp nextCreditOn = 3;
+  StatusType gamesStatus = 4;
+}
+
+message RebateDetailsResponse{
+  RebateStatus rebateStatus = 1;
+  DecimalValue accumulatedAmount = 2;
+  repeated RebateHistoryMessage rebateHistory = 3;
+  RebateIncomingCreditOn rebateIncomingCreditOn = 4;
+}
+
+message BatchId{
+  int32 batchId = 1;
+}
+
+message RebateBatchListResponse {
+  repeated RebateBatch batches = 1;
+}
+
+message AuditAndGenerateRebateReportResponse{
+  bytes fileContent = 1;
+  string fileName = 2;
+}
+
+message ExcludeByUsernamesResponse{
+  ExcludeResultType result = 1;
+  string message = 2;
+}
+
+message CasinoRebateReportResponse
+{
+  int32 ErrorCode = 1;
+  string ErrorMessage = 2;
+  repeated CasinoRebateReportDetail Data  = 3;
+}
+
+message GetRebatableTurnoverResponse
+{
+  int32 CustomerId = 1;
+  DecimalValue ValidTurnover = 2;
+  string Currency = 3;
+}
+
+message CurrentGamesRebateConfigResponse{
+  repeated VipGamesRates vipGamesRates = 1;
+  repeated string productFactors = 2;
+}
+
+message VipGamesRates {
+  string isoCurrency = 1;
+  int32 gameTag = 2;
+  int32 emeraldRate = 3;
+  int32 rubyRate = 4;
+  int32 sapphireRate = 5;
+  int32 diamondRate = 6;
+  int32 infinityRate = 7;
+}
+
+  message Void{
+}

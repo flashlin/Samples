@@ -1,0 +1,47 @@
+﻿syntax = "proto3";
+
+import "Protos/Models/Period.proto";
+import "google/protobuf/timestamp.proto";
+import "Protos/Models/Product.proto";
+option csharp_namespace = "Roger.Protos.Messages";
+
+message GetCustomersWithSettledBetRequest {
+  Period period = 1;
+}
+
+message IntRequest {
+  int32 value = 1;
+}
+
+message RebateEligibilityRequest{
+  int32 customerId = 1;
+}
+message RebateStatusRequest{
+  int32 customerId = 1;
+}
+
+message RebateDetailsRequest{
+  int32 customerId = 1;
+}
+
+message ExcludeByUsernamesRequest{
+  int32 batchId = 1;
+  repeated string usernames = 2;
+}
+  
+message GetRebatableTurnoverRequest{
+  google.protobuf.Timestamp StartTime = 1;
+  Product product = 2;
+}
+
+message ProductSettlement{
+  Product product = 1;
+  repeated int32 customerIds = 2;
+  google.protobuf.Timestamp winloseDate = 3;
+}
+
+message UpdateSettlementProgressRequest {
+  repeated ProductSettlement productSettlements = 1;
+}
+
+message Null {};

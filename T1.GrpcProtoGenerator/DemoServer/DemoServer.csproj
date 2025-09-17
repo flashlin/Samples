@@ -15,6 +15,10 @@
         <Protobuf Include="Protos\greet.proto" GrpcServices="Both" />
         <!-- Also use as AdditionalFiles for our custom source generator -->
         <AdditionalFiles Include="Protos\greet.proto" />
+        <Protobuf Include="Protos\rebate.proto" GrpcServices="Both" />
+        <AdditionalFiles Include="Protos\rebate.proto" />
+        <Protobuf Include="Protos\reportScheduler.proto" GrpcServices="Both" />
+        <AdditionalFiles Remove="Protos\reportScheduler.proto" />
     </ItemGroup>
 
     <ItemGroup>
