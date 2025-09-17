@@ -19,26 +19,4 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\..\..\T1.Standard\T1.Standard\Extensions\RegexPattern.cs">
-      <Link>Common\RegexPattern.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\T1.Standard\T1.Standard\Extensions\StreamReaderExtensions.cs">
-      <Link>Common\StreamReaderExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\T1.Standard\T1.Standard\Extensions\StringExtension.cs">
-      <Link>Common\StringExtension.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\T1.Standard\T1.Standard\Extensions\TypeExtension.cs">
-      <Link>Common\TypeExtension.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\T1.Standard\T1.Standard\IO\IndentStringBuilder.cs">
-      <Link>Common\IndentStringBuilder.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\T1.Standard\T1.Standard\IO\StringTemplate.cs">
-      <Link>Common\StringTemplate.cs</Link>
-    </Compile>
-  </ItemGroup>
-
-
 </Project>

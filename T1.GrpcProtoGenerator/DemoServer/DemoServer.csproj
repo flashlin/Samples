@@ -28,7 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\T1.GrpcProtoGenerator\T1.GrpcProtoGenerator.csproj" 
+      <ProjectReference Include="..\T1.GrpcServerProtoGenerator\T1.GrpcServerProtoGenerator.csproj" 
         OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
     </ItemGroup>
 
