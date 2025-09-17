@@ -120,8 +120,30 @@ namespace T1.GrpcProtoGenerator.Generators
                     sb.AppendLine($"        public override async Task<{originalNamespace}.{rpc.ResponseType}> {rpc.Name}({originalNamespace}.{rpc.RequestType} request, ServerCallContext context)");
                     sb.AppendLine("        {");
                     sb.AppendLine($"            var dtoRequest = new {rpc.RequestType}GrpcMessage();");
+                    
+                    var requestMessage = model.FindMessage(rpc.RequestType);
+                    if (requestMessage != null)
+                    {
+                        foreach (var field in requestMessage.Fields)
+                        {
+                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                            sb.AppendLine($"            dtoRequest.{propName} = request.{propName};");
+                        }
+                    }
+                    
                     sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest, context);");
                     sb.AppendLine($"            var grpcResponse = new {originalNamespace}.{rpc.ResponseType}();");
+                    
+                    var responseMessage = model.FindMessage(rpc.ResponseType);
+                    if (responseMessage != null)
+                    {
+                        foreach (var field in responseMessage.Fields)
+                        {
+                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                            sb.AppendLine($"            grpcResponse.{propName} = dtoResponse.{propName};");
+                        }
+                    }
+                    
                     sb.AppendLine("            return grpcResponse;");
                     sb.AppendLine("        }");
                     sb.AppendLine();
@@ -150,8 +172,30 @@ namespace T1.GrpcProtoGenerator.Generators
                     sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default)");
                     sb.AppendLine("        {");
                     sb.AppendLine($"            var grpcReq = new {originalNamespace}.{rpc.RequestType}();");
+                    
+                    var requestMessage = model.FindMessage(rpc.RequestType);
+                    if (requestMessage != null)
+                    {
+                        foreach (var field in requestMessage.Fields)
+                        {
+                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                            sb.AppendLine($"            grpcReq.{propName} = request.{propName};");
+                        }
+                    }
+                    
                     sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
                     sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcMessage();");
+                    
+                    var responseMessage = model.FindMessage(rpc.ResponseType);
+                    if (responseMessage != null)
+                    {
+                        foreach (var field in responseMessage.Fields)
+                        {
+                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                            sb.AppendLine($"            dto.{propName} = grpcResp.{propName};");
+                        }
+                    }
+                    
                     sb.AppendLine("            return dto;");
                     sb.AppendLine("        }");
                     sb.AppendLine();
