@@ -195,7 +195,6 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using System.Threading.Tasks;");
             sb.AppendLine("using Grpc.Core;");
             sb.AppendLine("using Microsoft.Extensions.Logging;");
-            sb.AppendLine("using DemoServer.Protos.Messages;");
             sb.AppendLine();
             
             var targetNamespace = model.GetTatgetNamespace();
@@ -216,7 +215,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.AppendLine("    }");
                 sb.AppendLine();
 
-                var serviceClass = $"{svc.Name}GrpcNativeService";
+                var serviceClass = $"{svc.Name}NativeGrpcService";
                 var baseClass = $"{originalNamespace}.{svc.Name}.{svc.Name}Base";
                 sb.AppendLine($"    public class {serviceClass} : {baseClass}");
                 sb.AppendLine("    {");
