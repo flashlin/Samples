@@ -7,10 +7,10 @@ import "Protos/Models/Period.proto";
 option csharp_namespace = "DemoServer.Services";
 
 service Rebate {
-  rpc GetSettledBet(GetCustomersWithSettledBetRequest) returns (GetCustomersWithSettledBetResponse);
+  rpc GetSettledBet(GetSettledBetRequest) returns (GetSettledBetResponse);
   rpc CreateBatch(Null) returns (Void);
   rpc Approve(IntRequest) returns (Void);
-  rpc IsEligible(RebateEligibilityRequest) returns (RebateEligibilityResponse);
+  rpc IsEligible(EligibilityRequest) returns (EligibilityResponse);
   rpc GetStatus(RebateStatusRequest) returns (RebateStatusResponse);
   rpc GetRebateDetails(RebateDetailsRequest) returns (RebateDetailsResponse);
   rpc GetBatchList(Null) returns (RebateBatchListResponse);

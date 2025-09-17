@@ -10,14 +10,14 @@ import "Protos/Models/RebateHistoryMessage.proto";
 import "Protos/Models/RebateBatchListResponse.proto";
 import "Protos/Models/ExcludeResultType.proto";
 import "Protos/Models/CasinoRebateReportDetail.proto";
-option csharp_namespace = "Roger.Protos.Messages";
+option csharp_namespace = "DemoServer.Messages";
 
-message GetCustomersWithSettledBetResponse {
+message GetSettledBetResponse {
   repeated RebateCustomer rebateCustomers = 1;
 }
 
-message RebateEligibilityResponse{
-  bool isRebateEligible= 1;
+message EligibilityResponse{
+  bool isEligible= 1;
 }
 
 message RebateStatusResponse{
