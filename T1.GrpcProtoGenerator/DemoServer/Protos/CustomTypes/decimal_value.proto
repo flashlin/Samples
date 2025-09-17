@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Roger.Protos.CustomTypes";
+option csharp_namespace = "DemoServer.Protos.CustomTypes";
 
 // Example: 12345.6789 -> { units = 12345, nanos = 678900000 }
 message DecimalValue {

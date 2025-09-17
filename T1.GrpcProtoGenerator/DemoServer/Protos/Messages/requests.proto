@@ -3,7 +3,7 @@
 import "Protos/Models/Period.proto";
 import "google/protobuf/timestamp.proto";
 import "Protos/Models/Product.proto";
-option csharp_namespace = "Roger.Protos.Messages";
+option csharp_namespace = "DemoServer.Protos.Messages";
 
 message GetSettledBetRequest {
   Period period = 1;

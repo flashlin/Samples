@@ -1,4 +1,4 @@
-﻿namespace Roger.Protos.CustomTypes
+﻿namespace DemoServer.Protos.CustomTypes
 {
     public partial class DecimalValue
     {
