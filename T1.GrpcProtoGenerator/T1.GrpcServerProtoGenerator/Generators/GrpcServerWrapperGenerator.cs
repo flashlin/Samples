@@ -50,12 +50,37 @@ namespace T1.GrpcProtoGenerator.Generators
         {
             var sb = new StringBuilder();
             
-            // Generate basic using statements without import namespaces
+            // Generate using statements
+            GenerateBasicUsingStatements(sb);
+            
+            // Generate message classes grouped by namespace
+            GenerateMessageClasses(sb, model);
+            
+            // Generate external type wrappers
+            GenerateExternalTypeWrappers(sb, model);
+            
+            // Generate enums grouped by namespace
+            GenerateEnumClasses(sb, model);
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Generate basic using statements for message source files
+        /// </summary>
+        private void GenerateBasicUsingStatements(StringBuilder sb)
+        {
             sb.AppendLine("#nullable enable");
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine();
-            
+        }
+
+        /// <summary>
+        /// Generate message classes grouped by namespace
+        /// </summary>
+        private void GenerateMessageClasses(StringBuilder sb, ProtoModel model)
+        {
             // Group messages by CsharpNamespace
             var messagesByNamespace = model.Messages
                 .GroupBy(msg => msg.CsharpNamespace.GetTargetNamespace())
@@ -71,24 +96,39 @@ namespace T1.GrpcProtoGenerator.Generators
                 // Generate all GrpcMessage classes for this namespace
                 foreach (var msg in namespaceGroup)
                 {
-                    sb.AppendLine($"    public class {msg.Name}GrpcMessage");
-                    sb.AppendLine("    {");
-                    foreach (var f in msg.Fields)
-                    {
-                        var baseType = MapProtoCTypeToCSharp(f.Type);
-                        var csType = f.IsRepeated ? $"List<{baseType}>" : baseType;
-                        sb.AppendLine($"        public {csType} {char.ToUpper(f.Name[0]) + f.Name.Substring(1)} {{ get; set; }}");
-                    }
-                    sb.AppendLine("    }");
-                    sb.AppendLine();
+                    GenerateSingleMessageClass(sb, msg);
                 }
 
                 sb.AppendLine("}");
                 sb.AppendLine();
             }
+        }
 
-            // Generate wrapper classes for external types referenced in services
-            // Use a default namespace for external types
+        /// <summary>
+        /// Generate a single message class with its properties
+        /// </summary>
+        private void GenerateSingleMessageClass(StringBuilder sb, ProtoMessage msg)
+        {
+            sb.AppendLine($"    public class {msg.Name}GrpcMessage");
+            sb.AppendLine("    {");
+            
+            foreach (var field in msg.Fields)
+            {
+                var baseType = MapProtoCTypeToCSharp(field.Type);
+                var csType = field.IsRepeated ? $"List<{baseType}>" : baseType;
+                var propertyName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                sb.AppendLine($"        public {csType} {propertyName} {{ get; set; }}");
+            }
+            
+            sb.AppendLine("    }");
+            sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Generate wrapper classes for external types referenced in services
+        /// </summary>
+        private void GenerateExternalTypeWrappers(StringBuilder sb, ProtoModel model)
+        {
             var hasExternalTypes = false;
             var externalTypesSb = new StringBuilder();
             
@@ -115,15 +155,21 @@ namespace T1.GrpcProtoGenerator.Generators
             // If we have external types, wrap them in a namespace
             if (hasExternalTypes)
             {
-                var defaultNamespace = messagesByNamespace.Any() ? messagesByNamespace.First().Key : "Generated";
+                var defaultNamespace = GetDefaultNamespaceForExternalTypes(model);
                 sb.AppendLine($"namespace {defaultNamespace}");
                 sb.AppendLine("{");
                 sb.Append(externalTypesSb.ToString());
                 sb.AppendLine("}");
                 sb.AppendLine();
             }
+        }
 
-            // Group enums by CsharpNamespace and generate them
+        /// <summary>
+        /// Generate enum classes grouped by namespace
+        /// </summary>
+        private void GenerateEnumClasses(StringBuilder sb, ProtoModel model)
+        {
+            // Group enums by CsharpNamespace
             var enumsByNamespace = model.Enums
                 .GroupBy(e => e.CsharpNamespace.GetTargetNamespace())
                 .ToList();
@@ -134,21 +180,43 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.AppendLine($"namespace {namespaceValue}");
                 sb.AppendLine("{");
 
-                foreach (var e in namespaceGroup)
+                foreach (var enumDef in namespaceGroup)
                 {
-                    sb.AppendLine($"    public enum {e.Name}");
-                    sb.AppendLine("    {");
-                    foreach (var val in e.Values)
-                        sb.AppendLine($"        {val.Name} = {val.Value},");
-                    sb.AppendLine("    }");
-                    sb.AppendLine();
+                    GenerateSingleEnumClass(sb, enumDef);
                 }
 
                 sb.AppendLine("}");
                 sb.AppendLine();
             }
+        }
 
-            return sb.ToString();
+        /// <summary>
+        /// Generate a single enum class with its values
+        /// </summary>
+        private void GenerateSingleEnumClass(StringBuilder sb, ProtoEnum enumDef)
+        {
+            sb.AppendLine($"    public enum {enumDef.Name}");
+            sb.AppendLine("    {");
+            
+            foreach (var val in enumDef.Values)
+            {
+                sb.AppendLine($"        {val.Name} = {val.Value},");
+            }
+            
+            sb.AppendLine("    }");
+            sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Get default namespace for external types
+        /// </summary>
+        private string GetDefaultNamespaceForExternalTypes(ProtoModel model)
+        {
+            var messagesByNamespace = model.Messages
+                .GroupBy(msg => msg.CsharpNamespace.GetTargetNamespace())
+                .ToList();
+                
+            return messagesByNamespace.Any() ? messagesByNamespace.First().Key : "Generated";
         }
 
         private string GenerateWrapperClientSource(ProtoModel model, ProtoImportResolver resolver, string protoPath)
