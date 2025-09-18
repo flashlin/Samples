@@ -220,7 +220,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.AppendLine("    {");
                 foreach (var rpc in svc.Rpcs)
                 {
-                    sb.AppendLine($"        Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}({rpc.RequestType}GrpcMessage request, ServerCallContext context);");
+                    sb.AppendLine($"        Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}({rpc.RequestType}GrpcMessage request);");
                 }
                 sb.AppendLine("    }");
                 sb.AppendLine();
@@ -262,7 +262,7 @@ namespace T1.GrpcProtoGenerator.Generators
                         GenerateExternalTypeMapping(sb, rpc.RequestType, "dtoRequest", "request");
                     }
                     
-                    sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest, context);");
+                    sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
                     sb.AppendLine($"            var grpcResponse = new {responseTypeNamespace}.{rpc.ResponseType}();");
                     
                     var responseMessage = model.FindMessage(rpc.ResponseType);
