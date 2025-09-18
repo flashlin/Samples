@@ -19,71 +19,116 @@ namespace T1.GrpcProtoGenerator.Generators
         public static ProtoModel ParseProtoText(string protoText)
         {
             var model = new ProtoModel();
+            var packageName = ParsePackageAndNamespace(protoText, model);
+            
+            ParseImports(protoText, model);
+            ParseMessages(protoText, model, packageName);
+            ParseEnums(protoText, model);
+            ParseServices(protoText, model);
+
+            return model;
+        }
+
+        private static string ParsePackageAndNamespace(string protoText, ProtoModel model)
+        {
             var packageMatch = PackageRegex.Match(protoText);
-            var pkg = packageMatch.Success ? packageMatch.Groups["pkg"].Value : null;
+            var packageName = packageMatch.Success ? packageMatch.Groups["pkg"].Value : null;
             
             // Parse csharp_namespace option
             var csharpNamespaceMatch = CsharpNamespaceRegex.Match(protoText);
-            model.CsharpNamespace = csharpNamespaceMatch.Success ? csharpNamespaceMatch.Groups["namespace"].Value : pkg;
+            model.CsharpNamespace = csharpNamespaceMatch.Success ? csharpNamespaceMatch.Groups["namespace"].Value : packageName;
 
-            // Parse imports
+            return packageName;
+        }
+
+        private static void ParseImports(string protoText, ProtoModel model)
+        {
             foreach (Match importMatch in ImportRegex.Matches(protoText))
             {
                 var importPath = importMatch.Groups["path"].Value;
                 model.Imports.Add(importPath);
             }
+        }
 
-            // Parse messages
-            foreach (Match m in MessageRegex.Matches(protoText))
+        private static void ParseMessages(string protoText, ProtoModel model, string packageName)
+        {
+            foreach (Match messageMatch in MessageRegex.Matches(protoText))
             {
-                var name = m.Groups["name"].Value;
-                var body = m.Groups["body"].Value;
-                var pm = new ProtoMessage { Name = name, FullName = pkg != null ? pkg + "." + name : name };
-                foreach (Match f in FieldRegex.Matches(body))
-                {
-                    pm.Fields.Add(new ProtoField
-                    {
-                        Type = f.Groups["type"].Value,
-                        Name = f.Groups["name"].Value,
-                        Tag = int.Parse(f.Groups["tag"].Value),
-                        IsRepeated = !string.IsNullOrEmpty(f.Groups["repeated"].Value)
-                    });
-                }
-                model.Messages.Add(pm);
+                var name = messageMatch.Groups["name"].Value;
+                var body = messageMatch.Groups["body"].Value;
+                var protoMessage = new ProtoMessage 
+                { 
+                    Name = name, 
+                    FullName = packageName != null ? packageName + "." + name : name 
+                };
+                
+                ParseMessageFields(body, protoMessage);
+                model.Messages.Add(protoMessage);
             }
+        }
 
-            // Parse enums
-            foreach (Match e in EnumRegex.Matches(protoText))
+        private static void ParseMessageFields(string messageBody, ProtoMessage protoMessage)
+        {
+            foreach (Match fieldMatch in FieldRegex.Matches(messageBody))
             {
-                var enumName = e.Groups["name"].Value;
-                var body = e.Groups["body"].Value;
-                var pe = new ProtoEnum { Name = enumName };
-                foreach (Match ef in EnumFieldRegex.Matches(body))
+                protoMessage.Fields.Add(new ProtoField
                 {
-                    pe.Values.Add((ef.Groups["name"].Value, int.Parse(ef.Groups["value"].Value)));
-                }
-                model.Enums.Add(pe);
+                    Type = fieldMatch.Groups["type"].Value,
+                    Name = fieldMatch.Groups["name"].Value,
+                    Tag = int.Parse(fieldMatch.Groups["tag"].Value),
+                    IsRepeated = !string.IsNullOrEmpty(fieldMatch.Groups["repeated"].Value)
+                });
             }
+        }
 
-            // Parse services
-            foreach (Match s in ServiceRegex.Matches(protoText))
+        private static void ParseEnums(string protoText, ProtoModel model)
+        {
+            foreach (Match enumMatch in EnumRegex.Matches(protoText))
             {
-                var sname = s.Groups["name"].Value;
-                var sbody = s.Groups["body"].Value;
-                var ps = new ProtoService { Name = sname };
-                foreach (Match r in RpcRegex.Matches(sbody))
-                {
-                    ps.Rpcs.Add(new ProtoRpc
-                    {
-                        Name = r.Groups["name"].Value,
-                        RequestType = r.Groups["req"].Value,
-                        ResponseType = r.Groups["resp"].Value
-                    });
-                }
-                model.Services.Add(ps);
+                var enumName = enumMatch.Groups["name"].Value;
+                var body = enumMatch.Groups["body"].Value;
+                var protoEnum = new ProtoEnum { Name = enumName };
+                
+                ParseEnumFields(body, protoEnum);
+                model.Enums.Add(protoEnum);
             }
+        }
 
-            return model;
+        private static void ParseEnumFields(string enumBody, ProtoEnum protoEnum)
+        {
+            foreach (Match enumFieldMatch in EnumFieldRegex.Matches(enumBody))
+            {
+                protoEnum.Values.Add((
+                    enumFieldMatch.Groups["name"].Value, 
+                    int.Parse(enumFieldMatch.Groups["value"].Value)
+                ));
+            }
+        }
+
+        private static void ParseServices(string protoText, ProtoModel model)
+        {
+            foreach (Match serviceMatch in ServiceRegex.Matches(protoText))
+            {
+                var serviceName = serviceMatch.Groups["name"].Value;
+                var serviceBody = serviceMatch.Groups["body"].Value;
+                var protoService = new ProtoService { Name = serviceName };
+                
+                ParseServiceRpcs(serviceBody, protoService);
+                model.Services.Add(protoService);
+            }
+        }
+
+        private static void ParseServiceRpcs(string serviceBody, ProtoService protoService)
+        {
+            foreach (Match rpcMatch in RpcRegex.Matches(serviceBody))
+            {
+                protoService.Rpcs.Add(new ProtoRpc
+                {
+                    Name = rpcMatch.Groups["name"].Value,
+                    RequestType = rpcMatch.Groups["req"].Value,
+                    ResponseType = rpcMatch.Groups["resp"].Value
+                });
+            }
         }
     }
 }
