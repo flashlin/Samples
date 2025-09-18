@@ -20,6 +20,7 @@ namespace T1.GrpcProtoGenerator.Generators
         {
             var model = new ProtoModel();
             var packageName = ParsePackageAndNamespace(protoText, out var csharpNamespace);
+            csharpNamespace = NormalCsharpNamespace(csharpNamespace);
             
             ParseImports(protoText, model);
             ParseMessages(protoText, model, packageName, csharpNamespace);
@@ -59,13 +60,17 @@ namespace T1.GrpcProtoGenerator.Generators
                 var protoMessage = new ProtoMessage 
                 { 
                     Name = name, 
-                    FullName = packageName != null ? packageName + "." + name : name,
-                    CsharpNamespace = csharpNamespace ?? "Generated"
+                    CsharpNamespace = csharpNamespace
                 };
                 
                 ParseMessageFields(body, protoMessage);
                 model.Messages.Add(protoMessage);
             }
+        }
+
+        private static string NormalCsharpNamespace(string protoText)
+        {
+            return protoText ?? "Generated"; 
         }
 
         private static void ParseMessageFields(string messageBody, ProtoMessage protoMessage)
@@ -91,7 +96,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var protoEnum = new ProtoEnum 
                 { 
                     Name = enumName,
-                    CsharpNamespace = csharpNamespace ?? "Generated"
+                    CsharpNamespace = csharpNamespace
                 };
                 
                 ParseEnumFields(body, protoEnum);
@@ -119,7 +124,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var protoService = new ProtoService 
                 { 
                     Name = serviceName,
-                    CsharpNamespace = csharpNamespace ?? "Generated"
+                    CsharpNamespace = csharpNamespace
                 };
                 
                 ParseServiceRpcs(serviceBody, protoService);

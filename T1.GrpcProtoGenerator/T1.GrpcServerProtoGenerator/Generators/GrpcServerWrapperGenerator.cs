@@ -45,7 +45,7 @@ namespace T1.GrpcProtoGenerator.Generators
                     
                     logger.LogDebug($"Generating server and client files for {protoFileName}");
                     // Generate server and client files per proto file
-                    AddGeneratedSourceFile(spc, GenerateWrapperServerSource(enrichedModel, combinedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_server.cs");
+                    AddGeneratedSourceFile(spc, GenerateWrapperServerSource(enrichedModel, combinedModel), $"Generated_{protoFileName}_server.cs");
                     AddGeneratedSourceFile(spc, GenerateWrapperClientSource(enrichedModel, combinedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_client.cs");
                 }
                 
@@ -63,17 +63,19 @@ namespace T1.GrpcProtoGenerator.Generators
             // Collect all messages and enums from all proto files
             var allMessages = new List<ProtoMessage>();
             var allEnums = new List<ProtoEnum>();
+            var allSvcs = new List<ProtoService>();
             
             foreach (var protoInfo in allProtos)
             {
                 var model = ProtoParser.ParseProtoText(protoInfo.Content);
                 allMessages.AddRange(model.Messages);
                 allEnums.AddRange(model.Enums);
+                allSvcs.AddRange(model.Services);
             }
             
             // Add unique messages (based on FullName or Name)
             var uniqueMessages = allMessages
-                .GroupBy(m => !string.IsNullOrEmpty(m.FullName) ? m.FullName : m.Name)
+                .GroupBy(m => m.GetFullName())
                 .Select(g => g.First())
                 .ToList();
             
@@ -84,13 +86,23 @@ namespace T1.GrpcProtoGenerator.Generators
             
             // Add unique enums (based on Name and Namespace)
             var uniqueEnums = allEnums
-                .GroupBy(e => $"{e.CsharpNamespace}.{e.Name}")
+                .GroupBy(e => $"{e.GetFullName()}")
                 .Select(g => g.First())
                 .ToList();
             
             foreach (var enumDef in uniqueEnums)
             {
                 combinedModel.Enums.Add(enumDef);
+            }
+
+            foreach (var svc in allSvcs)
+            {
+                foreach (var rpc in svc.Rpcs)
+                {
+                    rpc.RequestFullTypename = combinedModel.FindRpcFullTypename(rpc.RequestType);
+                    rpc.ResponseFullTypename = combinedModel.FindRpcFullTypename(rpc.ResponseType);
+                }
+                combinedModel.Services.Add(svc);
             }
             
             return combinedModel;
@@ -105,7 +117,7 @@ namespace T1.GrpcProtoGenerator.Generators
             spc.AddSource(sourceFileName, SourceText.From(messagesSource, Encoding.UTF8));
         }
 
-        private string GenerateWrapperGrpcMessageSource(ProtoModel model)
+        private string GenerateWrapperGrpcMessageSource(ProtoModel combineModel)
         {
             var sb = new StringBuilder();
             
@@ -113,15 +125,14 @@ namespace T1.GrpcProtoGenerator.Generators
             GenerateBasicUsingStatements(sb);
             
             // Generate message classes and enums grouped by namespace
-            var allNamespaces = CollectAllUniqueNamespaces(model.Messages, model.Enums);
-            
+            var allNamespaces = CollectAllUniqueNamespaces(combineModel.Messages, combineModel.Enums);
             foreach (var namespaceValue in allNamespaces)
             {
                 sb.AppendLine($"namespace {namespaceValue}");
                 sb.AppendLine("{");
 
-                GenerateMessagesForNamespace(sb, model.Messages, namespaceValue);
-                GenerateEnumsForNamespace(sb, model.Enums, namespaceValue);
+                GenerateMessagesForNamespace(sb, combineModel.Messages, namespaceValue, combineModel);
+                GenerateEnumsForNamespace(sb, combineModel.Enums, namespaceValue);
 
                 sb.AppendLine("}");
                 sb.AppendLine();
@@ -147,11 +158,11 @@ namespace T1.GrpcProtoGenerator.Generators
         private List<string> CollectAllUniqueNamespaces(List<ProtoMessage> modelMessages, List<ProtoEnum> modelEnums)
         {
             var messageNamespaces = modelMessages
-                .Select(msg => msg.CsharpNamespace.GetTargetNamespace())
+                .Select(msg => msg.CsharpNamespace)
                 .ToHashSet();
             
             var enumNamespaces = modelEnums
-                .Select(e => e.CsharpNamespace.GetTargetNamespace())
+                .Select(e => e.CsharpNamespace)
                 .ToHashSet();
             
             return messageNamespaces.Union(enumNamespaces).OrderBy(ns => ns).ToList();
@@ -160,15 +171,16 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate all message classes for a specific namespace
         /// </summary>
-        private void GenerateMessagesForNamespace(StringBuilder sb, List<ProtoMessage> modelMessages, string namespaceValue)
+        private void GenerateMessagesForNamespace(StringBuilder sb, List<ProtoMessage> modelMessages,
+            string namespaceValue, ProtoModel combineModel)
         {
             var messagesInNamespace = modelMessages
-                .Where(msg => msg.CsharpNamespace.GetTargetNamespace() == namespaceValue)
+                .Where(msg => msg.CsharpNamespace == namespaceValue)
                 .ToList();
             
             foreach (var msg in messagesInNamespace)
             {
-                GenerateSingleMessageClass(sb, msg);
+                GenerateSingleMessageClass(sb, msg, combineModel);
             }
         }
 
@@ -178,7 +190,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private void GenerateEnumsForNamespace(StringBuilder sb, List<ProtoEnum> modelEnums, string namespaceValue)
         {
             var enumsInNamespace = modelEnums
-                .Where(e => e.CsharpNamespace.GetTargetNamespace() == namespaceValue)
+                .Where(e => e.CsharpNamespace == namespaceValue)
                 .ToList();
             
             foreach (var enumDef in enumsInNamespace)
@@ -190,14 +202,14 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate a single message class with its properties
         /// </summary>
-        private void GenerateSingleMessageClass(StringBuilder sb, ProtoMessage msg)
+        private void GenerateSingleMessageClass(StringBuilder sb, ProtoMessage msg, ProtoModel combineModel)
         {
-            sb.AppendLine($"    public class {msg.Name}GrpcDto");
+            sb.AppendLine($"    public class {msg.GetCsharpTypeName()}");
             sb.AppendLine("    {");
             
             foreach (var field in msg.Fields)
             {
-                var baseType = MapProtoCTypeToCSharp(field.Type);
+                var baseType = MapProtoCTypeToCSharp(field.Type, combineModel);
                 var csType = field.IsRepeated ? $"List<{baseType}>" : baseType;
                 var propertyName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
                 sb.AppendLine($"        public {csType} {propertyName} {{ get; set; }}");
@@ -212,7 +224,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateSingleEnumClass(StringBuilder sb, ProtoEnum enumDef)
         {
-            sb.AppendLine($"    public enum {enumDef.Name}");
+            sb.AppendLine($"    public enum {enumDef.GetCsharpTypeName()}");
             sb.AppendLine("    {");
             
             foreach (var val in enumDef.Values)
@@ -245,7 +257,7 @@ namespace T1.GrpcProtoGenerator.Generators
             
             // Group services by CsharpNamespace
             var servicesByNamespace = model.Services
-                .GroupBy(svc => svc.CsharpNamespace.GetTargetNamespace())
+                .GroupBy(svc => svc.CsharpNamespace)
                 .ToList();
 
             // Generate namespace blocks for each group
@@ -292,7 +304,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateClientWrapper(StringBuilder sb, ProtoService svc, ProtoModel model)
         {
-            var originalNamespace = svc.CsharpNamespace.GetTargetNamespace();
+            var originalNamespace = svc.CsharpNamespace;
             var clientInterface = $"I{svc.Name}Client";
             var wrapper = $"{svc.Name}ClientWrapper";
             var grpcClient = $"{originalNamespace}.{svc.Name}.{svc.Name}Client";
@@ -360,7 +372,8 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine();
         }
 
-        private string GenerateWrapperServerSource(ProtoModel model, ProtoModel combinedModel, ProtoImportResolver resolver, string protoPath)
+        private string GenerateWrapperServerSource(ProtoModel model, 
+            ProtoModel combineModel)
         {
             if (!model.Services.Any())
             {
@@ -370,7 +383,7 @@ namespace T1.GrpcProtoGenerator.Generators
             var sb = new StringBuilder();
             
             // Collect import namespaces for messages and enums only
-            var importNamespaces = CollectImportNamespacesForServer(combinedModel);
+            var importNamespaces = CollectImportNamespacesForServer(combineModel);
             
             // Add specific using statements for server generation
             importNamespaces.Add("System.Threading");
@@ -382,7 +395,7 @@ namespace T1.GrpcProtoGenerator.Generators
             
             // Group services by CsharpNamespace
             var servicesByNamespace = model.Services
-                .GroupBy(svc => svc.CsharpNamespace.GetTargetNamespace())
+                .GroupBy(svc => svc.CsharpNamespace)
                 .ToList();
 
             // Generate namespace blocks for each group
@@ -395,8 +408,8 @@ namespace T1.GrpcProtoGenerator.Generators
                 // Generate all services for this namespace
                 foreach (var svc in namespaceGroup)
                 {
-                    GenerateServiceInterface(sb, svc);
-                    GenerateServiceImplementation(sb, svc, model);
+                    GenerateServiceInterface(sb, svc, combineModel);
+                    GenerateServiceImplementation(sb, svc, model, combineModel);
                 }
 
                 sb.AppendLine("}");
@@ -409,7 +422,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate service interface for a given service
         /// </summary>
-        private void GenerateServiceInterface(StringBuilder sb, ProtoService svc)
+        private void GenerateServiceInterface(StringBuilder sb, ProtoService svc, ProtoModel messagesModel)
         {
             var serviceInterface = $"I{svc.Name}GrpcService";
             sb.AppendLine($"    public interface {serviceInterface}");
@@ -417,7 +430,9 @@ namespace T1.GrpcProtoGenerator.Generators
             
             foreach (var rpc in svc.Rpcs)
             {
-                sb.AppendLine($"        Task<{rpc.ResponseType}GrpcDto> {rpc.Name}({rpc.RequestType}GrpcDto request);");
+                var rpcRequestType = messagesModel.FindCsharpTypeName(rpc.RequestType);
+                var rpcResponseType= messagesModel.FindCsharpTypeName(rpc.ResponseType);
+                sb.AppendLine($"        Task<{rpcResponseType}> {rpc.Name}({rpcRequestType} request);");
             }
             
             sb.AppendLine("    }");
@@ -427,9 +442,10 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate service implementation class for a given service
         /// </summary>
-        private void GenerateServiceImplementation(StringBuilder sb, ProtoService svc, ProtoModel model)
+        private void GenerateServiceImplementation(StringBuilder sb, ProtoService svc, ProtoModel model,
+            ProtoModel combineModel)
         {
-            var originalNamespace = svc.CsharpNamespace.GetTargetNamespace();
+            var originalNamespace = svc.CsharpNamespace;
             var serviceInterface = $"I{svc.Name}GrpcService";
             var serviceClass = $"{svc.Name}NativeGrpcService";
             var baseClass = $"{originalNamespace}.{svc.Name}.{svc.Name}Base";
@@ -446,7 +462,7 @@ namespace T1.GrpcProtoGenerator.Generators
 
             foreach (var rpc in svc.Rpcs)
             {
-                GenerateServiceMethod(sb, rpc, model, originalNamespace);
+                GenerateServiceMethod(sb, rpc, model, originalNamespace, combineModel);
             }
             
             sb.AppendLine("    }");
@@ -456,11 +472,18 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate a single service method implementation
         /// </summary>
-        private void GenerateServiceMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel model, string originalNamespace)
+        private void GenerateServiceMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel model, string originalNamespace,
+            ProtoModel combineModel)
         {
-            sb.AppendLine($"        public override async Task<{originalNamespace}.{rpc.ResponseType}> {rpc.Name}({originalNamespace}.{rpc.RequestType} request, ServerCallContext context)");
+            var rpcRequestFullType = combineModel.FindRpcFullTypename(rpc.RequestType);
+            var rpcResponseFullType = combineModel.FindRpcFullTypename(rpc.ResponseType);
+            
+            var requestType = combineModel.FindCsharpTypeName(rpc.RequestType);
+            var responseType = combineModel.FindCsharpTypeName(rpc.ResponseType);
+            
+            sb.AppendLine($"        public override async Task<{rpcResponseFullType}> {rpc.Name}({rpcRequestFullType} request, ServerCallContext context)");
             sb.AppendLine("        {");
-            sb.AppendLine($"            var dtoRequest = new {rpc.RequestType}GrpcDto();");
+            sb.AppendLine($"            var dtoRequest = new {requestType}();");
             
             // Map request fields
             var requestMessage = model.FindMessage(rpc.RequestType);
@@ -478,7 +501,7 @@ namespace T1.GrpcProtoGenerator.Generators
             }
             
             sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
-            sb.AppendLine($"            var grpcResponse = new {originalNamespace}.{rpc.ResponseType}();");
+            sb.AppendLine($"            var grpcResponse = new {rpcResponseFullType}();");
             
             // Map response fields
             var responseMessage = model.FindMessage(rpc.ResponseType);
@@ -500,8 +523,14 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine();
         }
 
-        private static string MapProtoCTypeToCSharp(string protoType)
+        private static string MapProtoCTypeToCSharp(string protoType, ProtoModel combineModel)
         {
+            var csType= combineModel.FindCsharpTypeFullName(protoType);
+            if (csType != null)
+            {
+                return csType;
+            }
+            
             return protoType switch
             {
                 "int32" => "int",
@@ -513,8 +542,9 @@ namespace T1.GrpcProtoGenerator.Generators
                 "bool" => "bool",
                 "string" => "string",
                 "bytes" => "byte[]",
+                "sfixed32" => "int",
                 "Timestamp" => "DateTime",
-                _ => protoType + "GrpcDto"
+                _ => protoType
             };
         }
 
@@ -528,21 +558,13 @@ namespace T1.GrpcProtoGenerator.Generators
             // Collect namespaces from all messages in combined model
             foreach (var message in combinedModel.Messages)
             {
-                var targetNamespace = message.CsharpNamespace.GetTargetNamespace();
-                if (!string.IsNullOrEmpty(targetNamespace))
-                {
-                    namespaces.Add(targetNamespace);
-                }
+                namespaces.Add(message.CsharpNamespace);
             }
             
             // Collect namespaces from all enums in combined model
             foreach (var enumDef in combinedModel.Enums)
             {
-                var targetNamespace = enumDef.CsharpNamespace.GetTargetNamespace();
-                if (!string.IsNullOrEmpty(targetNamespace))
-                {
-                    namespaces.Add(targetNamespace);
-                }
+                namespaces.Add(enumDef.CsharpNamespace);
             }
             
             return namespaces;
