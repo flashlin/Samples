@@ -56,11 +56,8 @@ namespace T1.GrpcProtoGenerator.Generators
             // Generate message classes grouped by namespace
             GenerateMessageClasses(sb, model.Messages);
             
-            // Generate external type wrappers
-            GenerateExternalTypeWrappers(sb, model);
-            
             // Generate enums grouped by namespace
-            GenerateEnumClasses(sb, model);
+            GenerateEnumClasses(sb, model.Enums);
 
             return sb.ToString();
         }
@@ -125,50 +122,12 @@ namespace T1.GrpcProtoGenerator.Generators
         }
 
         /// <summary>
-        /// Generate wrapper classes for external types referenced in services
-        /// </summary>
-        private void GenerateExternalTypeWrappers(StringBuilder sb, ProtoModel model)
-        {
-            var hasExternalTypes = false;
-            var externalTypesSb = new StringBuilder();
-            
-            foreach (var svc in model.Services)
-            {
-                foreach (var rpc in svc.Rpcs)
-                {
-                    // Check if request type is external and needs a wrapper
-                    if (model.FindMessage(rpc.RequestType) == null)
-                    {
-                        hasExternalTypes = true;
-                    }
-                    
-                    // Check if response type is external and needs a wrapper
-                    if (model.FindMessage(rpc.ResponseType) == null)
-                    {
-                        hasExternalTypes = true;
-                    }
-                }
-            }
-
-            // If we have external types, wrap them in a namespace
-            if (hasExternalTypes)
-            {
-                var defaultNamespace = GetDefaultNamespaceForExternalTypes(model);
-                sb.AppendLine($"namespace {defaultNamespace}");
-                sb.AppendLine("{");
-                sb.Append(externalTypesSb.ToString());
-                sb.AppendLine("}");
-                sb.AppendLine();
-            }
-        }
-
-        /// <summary>
         /// Generate enum classes grouped by namespace
         /// </summary>
-        private void GenerateEnumClasses(StringBuilder sb, ProtoModel model)
+        private void GenerateEnumClasses(StringBuilder sb, List<ProtoEnum> modelEnums)
         {
             // Group enums by CsharpNamespace
-            var enumsByNamespace = model.Enums
+            var enumsByNamespace = modelEnums
                 .GroupBy(e => e.CsharpNamespace.GetTargetNamespace())
                 .ToList();
 
