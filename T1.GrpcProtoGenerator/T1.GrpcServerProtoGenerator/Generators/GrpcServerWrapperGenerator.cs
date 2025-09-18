@@ -20,24 +20,34 @@ namespace T1.GrpcProtoGenerator.Generators
                 Path = text.Path,
                 Content = text.GetText()!.ToString()
             });
-
+            
             // Collect all proto files and process them together to handle imports
             var allProtoFiles = protoFilesWithContent.Collect();
 
             context.RegisterSourceOutput(allProtoFiles, (spc, allProtos) =>
             {
+                // Create logger for this execution context
+                ISourceGeneratorLogger logger = new SourceGeneratorLogger(spc.ReportDiagnostic, nameof(GrpcServerWrapperGenerator));
+                
+                logger.LogWarning($"Starting source generation for {allProtos.Length} proto files");
+                
                 // Collect all messages and enums from all proto files
                 var allMessages = new List<ProtoMessage>();
                 var allEnums = new List<ProtoEnum>();
                 
                 foreach (var protoInfo in allProtos)
                 {
+                    logger.LogDebug($"Parsing proto file: {protoInfo.Path}");
                     var model = ProtoParser.ParseProtoText(protoInfo.Content);
                     allMessages.AddRange(model.Messages);
                     allEnums.AddRange(model.Enums);
+                    logger.LogDebug($"Found {model.Messages.Count} messages and {model.Enums.Count} enums in {protoInfo.GetProtoFileName()}");
                 }
+                
                 // Generate a single combined messages file for all proto files
+                logger.LogInfo($"Creating combined model with {allMessages.Count} total messages and {allEnums.Count} total enums");
                 var combinedModel = CreateCombinedModel(allMessages, allEnums);
+                logger.LogWarning($"Generated combined messages file with {combinedModel.Messages.Count} unique messages and {combinedModel.Enums.Count} unique enums");
                 AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(combinedModel), "Generated_messages.cs");
                 
                 var protoResolver = new ProtoImportResolver(allProtos);
@@ -46,10 +56,14 @@ namespace T1.GrpcProtoGenerator.Generators
                     var model = ProtoParser.ParseProtoText(protoInfo.Content);
                     var enrichedModel = protoResolver.EnrichModelWithImports(model, protoInfo.Path);
                     var protoFileName = protoInfo.GetProtoFileName();
+                    
+                    logger.LogDebug($"Generating server and client files for {protoFileName}");
                     // Generate server and client files per proto file
                     AddGeneratedSourceFile(spc, GenerateWrapperServerSource(enrichedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_server.cs");
                     AddGeneratedSourceFile(spc, GenerateWrapperClientSource(enrichedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_client.cs");
                 }
+                
+                logger.LogInfo("Source generation completed successfully");
             });
         }
 
