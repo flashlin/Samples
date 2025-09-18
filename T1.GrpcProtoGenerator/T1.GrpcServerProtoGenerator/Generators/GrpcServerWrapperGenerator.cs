@@ -327,89 +327,130 @@ namespace T1.GrpcProtoGenerator.Generators
             
             GenerateUsingStatements(sb, importNamespaces);
             
-            var targetNamespace = model.Services.Any() ? model.Services.First().CsharpNamespace.GetTargetNamespace() : "Generated";
-            sb.AppendLine($"namespace {targetNamespace}");
-            sb.AppendLine("{");
+            // Group services by CsharpNamespace
+            var servicesByNamespace = model.Services
+                .GroupBy(svc => svc.CsharpNamespace.GetTargetNamespace())
+                .ToList();
 
-            foreach (var svc in model.Services)
+            // Generate namespace blocks for each group
+            foreach (var namespaceGroup in servicesByNamespace)
             {
-                var originalNamespace = svc.CsharpNamespace.GetTargetNamespace();
-                
-                var serviceInterface = $"I{svc.Name}GrpcService";
-                sb.AppendLine($"    public interface {serviceInterface}");
-                sb.AppendLine("    {");
-                foreach (var rpc in svc.Rpcs)
-                {
-                    sb.AppendLine($"        Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}({rpc.RequestType}GrpcMessage request);");
-                }
-                sb.AppendLine("    }");
-                sb.AppendLine();
+                var namespaceValue = namespaceGroup.Key;
+                sb.AppendLine($"namespace {namespaceValue}");
+                sb.AppendLine("{");
 
-                var serviceClass = $"{svc.Name}NativeGrpcService";
-                var baseClass = $"{originalNamespace}.{svc.Name}.{svc.Name}Base";
-                sb.AppendLine($"    public class {serviceClass} : {baseClass}");
-                sb.AppendLine("    {");
-                sb.AppendLine($"        private readonly {serviceInterface} _instance;");
-                sb.AppendLine();
-                sb.AppendLine($"        public {serviceClass}({serviceInterface} instance)");
-                sb.AppendLine("        {");
-                sb.AppendLine("            _instance = instance;");
-                sb.AppendLine("        }");
-                sb.AppendLine();
-
-                foreach (var rpc in svc.Rpcs)
+                // Generate all services for this namespace
+                foreach (var svc in namespaceGroup)
                 {
-                    // Determine the correct namespace for request and response types
-                    var requestTypeNamespace = GetTypeNamespace(rpc.RequestType, originalNamespace);
-                    var responseTypeNamespace = GetTypeNamespace(rpc.ResponseType, originalNamespace);
-                    
-                    sb.AppendLine($"        public override async Task<{responseTypeNamespace}.{rpc.ResponseType}> {rpc.Name}({requestTypeNamespace}.{rpc.RequestType} request, ServerCallContext context)");
-                    sb.AppendLine("        {");
-                    sb.AppendLine($"            var dtoRequest = new {rpc.RequestType}GrpcMessage();");
-                    
-                    var requestMessage = model.FindMessage(rpc.RequestType);
-                    if (requestMessage != null)
-                    {
-                        foreach (var field in requestMessage.Fields)
-                        {
-                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                            sb.AppendLine($"            dtoRequest.{propName} = request.{propName};");
-                        }
-                    }
-                    else
-                    {
-                        // Handle external types
-                        GenerateExternalTypeMapping(sb, rpc.RequestType, "dtoRequest", "request");
-                    }
-                    
-                    sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
-                    sb.AppendLine($"            var grpcResponse = new {responseTypeNamespace}.{rpc.ResponseType}();");
-                    
-                    var responseMessage = model.FindMessage(rpc.ResponseType);
-                    if (responseMessage != null)
-                    {
-                        foreach (var field in responseMessage.Fields)
-                        {
-                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                            sb.AppendLine($"            grpcResponse.{propName} = dtoResponse.{propName};");
-                        }
-                    }
-                    else
-                    {
-                        // Handle external types
-                        GenerateExternalTypeMapping(sb, rpc.ResponseType, "grpcResponse", "dtoResponse");
-                    }
-                    
-                    sb.AppendLine("            return grpcResponse;");
-                    sb.AppendLine("        }");
-                    sb.AppendLine();
+                    GenerateServiceInterface(sb, svc);
+                    GenerateServiceImplementation(sb, svc, model);
                 }
-                sb.AppendLine("    }");
+
+                sb.AppendLine("}");
                 sb.AppendLine();
             }
 
-            sb.AppendLine("}");
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Generate service interface for a given service
+        /// </summary>
+        private void GenerateServiceInterface(StringBuilder sb, ProtoService svc)
+        {
+            var serviceInterface = $"I{svc.Name}GrpcService";
+            sb.AppendLine($"    public interface {serviceInterface}");
+            sb.AppendLine("    {");
+            
+            foreach (var rpc in svc.Rpcs)
+            {
+                sb.AppendLine($"        Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}({rpc.RequestType}GrpcMessage request);");
+            }
+            
+            sb.AppendLine("    }");
+            sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Generate service implementation class for a given service
+        /// </summary>
+        private void GenerateServiceImplementation(StringBuilder sb, ProtoService svc, ProtoModel model)
+        {
+            var originalNamespace = svc.CsharpNamespace.GetTargetNamespace();
+            var serviceInterface = $"I{svc.Name}GrpcService";
+            var serviceClass = $"{svc.Name}NativeGrpcService";
+            var baseClass = $"{originalNamespace}.{svc.Name}.{svc.Name}Base";
+            
+            sb.AppendLine($"    public class {serviceClass} : {baseClass}");
+            sb.AppendLine("    {");
+            sb.AppendLine($"        private readonly {serviceInterface} _instance;");
+            sb.AppendLine();
+            sb.AppendLine($"        public {serviceClass}({serviceInterface} instance)");
+            sb.AppendLine("        {");
+            sb.AppendLine("            _instance = instance;");
+            sb.AppendLine("        }");
+            sb.AppendLine();
+
+            foreach (var rpc in svc.Rpcs)
+            {
+                GenerateServiceMethod(sb, rpc, model, originalNamespace);
+            }
+            
+            sb.AppendLine("    }");
+            sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Generate a single service method implementation
+        /// </summary>
+        private void GenerateServiceMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel model, string originalNamespace)
+        {
+            // Determine the correct namespace for request and response types
+            var requestTypeNamespace = GetTypeNamespace(rpc.RequestType, originalNamespace);
+            var responseTypeNamespace = GetTypeNamespace(rpc.ResponseType, originalNamespace);
+            
+            sb.AppendLine($"        public override async Task<{responseTypeNamespace}.{rpc.ResponseType}> {rpc.Name}({requestTypeNamespace}.{rpc.RequestType} request, ServerCallContext context)");
+            sb.AppendLine("        {");
+            sb.AppendLine($"            var dtoRequest = new {rpc.RequestType}GrpcMessage();");
+            
+            // Map request fields
+            var requestMessage = model.FindMessage(rpc.RequestType);
+            if (requestMessage != null)
+            {
+                foreach (var field in requestMessage.Fields)
+                {
+                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    sb.AppendLine($"            dtoRequest.{propName} = request.{propName};");
+                }
+            }
+            else
+            {
+                // Handle external types
+                GenerateExternalTypeMapping(sb, rpc.RequestType, "dtoRequest", "request");
+            }
+            
+            sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
+            sb.AppendLine($"            var grpcResponse = new {responseTypeNamespace}.{rpc.ResponseType}();");
+            
+            // Map response fields
+            var responseMessage = model.FindMessage(rpc.ResponseType);
+            if (responseMessage != null)
+            {
+                foreach (var field in responseMessage.Fields)
+                {
+                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    sb.AppendLine($"            grpcResponse.{propName} = dtoResponse.{propName};");
+                }
+            }
+            else
+            {
+                // Handle external types
+                GenerateExternalTypeMapping(sb, rpc.ResponseType, "grpcResponse", "dtoResponse");
+            }
+            
+            sb.AppendLine("            return grpcResponse;");
+            sb.AppendLine("        }");
+            sb.AppendLine();
         }
 
         private static string MapProtoCTypeToCSharp(string protoType)
