@@ -52,7 +52,6 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("#nullable enable");
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
-            sb.AppendLine("using DemoServer.Protos.Messages;");
             sb.AppendLine();
             
             var targetNamespace = model.Messages.First().CsharpNamespace.GetTargetNamespace();
