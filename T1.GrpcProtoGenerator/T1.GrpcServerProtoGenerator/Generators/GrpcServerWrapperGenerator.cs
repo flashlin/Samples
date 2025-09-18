@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -31,23 +32,8 @@ namespace T1.GrpcProtoGenerator.Generators
                 
                 logger.LogWarning($"Starting source generation for {allProtos.Length} proto files");
                 
-                // Collect all messages and enums from all proto files
-                var allMessages = new List<ProtoMessage>();
-                var allEnums = new List<ProtoEnum>();
-                
-                foreach (var protoInfo in allProtos)
-                {
-                    logger.LogDebug($"Parsing proto file: {protoInfo.Path}");
-                    var model = ProtoParser.ParseProtoText(protoInfo.Content);
-                    allMessages.AddRange(model.Messages);
-                    allEnums.AddRange(model.Enums);
-                    logger.LogDebug($"Found {model.Messages.Count} messages and {model.Enums.Count} enums in {protoInfo.GetProtoFileName()}");
-                }
-                
                 // Generate a single combined messages file for all proto files
-                logger.LogWarning($"Creating combined model with {allMessages.Count} total messages and {allEnums.Count} total enums");
-                var combinedModel = CreateCombinedModel(allMessages, allEnums);
-                logger.LogWarning($"Generated combined messages file with {combinedModel.Messages.Count} unique messages and {combinedModel.Enums.Count} unique enums");
+                var combinedModel = CreateCombinedModel(allProtos);
                 AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(combinedModel), "Generated_messages.cs");
                 
                 var protoResolver = new ProtoImportResolver(allProtos);
@@ -70,9 +56,20 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Create a combined model with unique messages and enums from all proto files
         /// </summary>
-        private ProtoModel CreateCombinedModel(List<ProtoMessage> allMessages, List<ProtoEnum> allEnums)
+        private ProtoModel CreateCombinedModel(ImmutableArray<ProtoFileInfo> allProtos)
         {
             var combinedModel = new ProtoModel();
+            
+            // Collect all messages and enums from all proto files
+            var allMessages = new List<ProtoMessage>();
+            var allEnums = new List<ProtoEnum>();
+            
+            foreach (var protoInfo in allProtos)
+            {
+                var model = ProtoParser.ParseProtoText(protoInfo.Content);
+                allMessages.AddRange(model.Messages);
+                allEnums.AddRange(model.Enums);
+            }
             
             // Add unique messages (based on FullName or Name)
             var uniqueMessages = allMessages
