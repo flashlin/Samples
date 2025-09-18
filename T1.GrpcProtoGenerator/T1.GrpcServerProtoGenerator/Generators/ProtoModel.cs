@@ -14,24 +14,6 @@ namespace T1.GrpcProtoGenerator.Generators
 
         public ProtoMessage FindMessage(string name)
             => Messages.FirstOrDefault(m => m.Name == name) ?? Messages.FirstOrDefault(m => m.FullName == name);
-
-        public string GetTatgetNamespace()
-        {
-            // Get namespace from first available element
-            var firstMessage = Messages.FirstOrDefault();
-            if (firstMessage != null && !string.IsNullOrEmpty(firstMessage.CsharpNamespace))
-                return firstMessage.CsharpNamespace;
-                
-            var firstEnum = Enums.FirstOrDefault();
-            if (firstEnum != null && !string.IsNullOrEmpty(firstEnum.CsharpNamespace))
-                return firstEnum.CsharpNamespace;
-                
-            var firstService = Services.FirstOrDefault();
-            if (firstService != null && !string.IsNullOrEmpty(firstService.CsharpNamespace))
-                return firstService.CsharpNamespace;
-                
-            return "Generated";
-        }
     }
 
     internal class ProtoMessage

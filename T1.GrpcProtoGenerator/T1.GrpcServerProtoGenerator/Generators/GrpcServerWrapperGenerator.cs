@@ -55,7 +55,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using DemoServer.Protos.Messages;");
             sb.AppendLine();
             
-            var targetNamespace = model.GetTatgetNamespace();
+            var targetNamespace = model.Messages.First().CsharpNamespace;
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
@@ -118,7 +118,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using DemoServer.Protos.Messages;");
             sb.AppendLine();
             
-            var targetNamespace = model.GetTatgetNamespace();
+            var targetNamespace = model.Services.First().CsharpNamespace;
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
@@ -208,7 +208,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using Microsoft.Extensions.Logging;");
             sb.AppendLine();
             
-            var targetNamespace = model.GetTatgetNamespace();
+            var targetNamespace = model.Services.First().CsharpNamespace;
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
