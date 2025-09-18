@@ -34,7 +34,7 @@ namespace T1.GrpcProtoGenerator.Generators
                     var enrichedModel = protoResolver.EnrichModelWithImports(model, protoInfo.Path);
                     var protoFileName = protoInfo.GetProtoFileName();
 
-                    AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(enrichedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_messages.cs");
+                    AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(enrichedModel), $"Generated_{protoFileName}_messages.cs");
                     AddGeneratedSourceFile(spc, GenerateWrapperServerSource(enrichedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_server.cs");
                     AddGeneratedSourceFile(spc, GenerateWrapperClientSource(enrichedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_client.cs");
                 }
@@ -46,7 +46,7 @@ namespace T1.GrpcProtoGenerator.Generators
             spc.AddSource(sourceFileName, SourceText.From(messagesSource, Encoding.UTF8));
         }
 
-        private string GenerateWrapperGrpcMessageSource(ProtoModel model, ProtoImportResolver resolver, string protoPath)
+        private string GenerateWrapperGrpcMessageSource(ProtoModel model)
         {
             var sb = new StringBuilder();
             
@@ -364,57 +364,6 @@ namespace T1.GrpcProtoGenerator.Generators
                     sb.AppendLine($"            {targetVar}.IsEligible = {sourceVar}.IsEligible;");
                     break;
             }
-        }
-
-        /// <summary>
-        /// Collect all unique target namespaces from imported models
-        /// </summary>
-        private HashSet<string> CollectImportNamespaces(ProtoModel model, ProtoImportResolver resolver, string currentProtoPath)
-        {
-            var namespaces = new HashSet<string>();
-            
-            foreach (var importPath in model.Imports)
-            {
-                var resolvedImport = resolver.ResolveImportPath(importPath, currentProtoPath);
-                if (resolvedImport != null)
-                {
-                    var importedModel = resolver.GetOrParseModel(resolvedImport);
-                    if (importedModel != null)
-                    {
-                        // Collect namespaces from imported messages
-                        foreach (var message in importedModel.Messages)
-                        {
-                            var targetNamespace = message.CsharpNamespace.GetTargetNamespace();
-                            if (!string.IsNullOrEmpty(targetNamespace))
-                            {
-                                namespaces.Add(targetNamespace);
-                            }
-                        }
-                        
-                        // Collect namespaces from imported services
-                        foreach (var service in importedModel.Services)
-                        {
-                            var targetNamespace = service.CsharpNamespace.GetTargetNamespace();
-                            if (!string.IsNullOrEmpty(targetNamespace))
-                            {
-                                namespaces.Add(targetNamespace);
-                            }
-                        }
-                        
-                        // Collect namespaces from imported enums
-                        foreach (var enumDef in importedModel.Enums)
-                        {
-                            var targetNamespace = enumDef.CsharpNamespace.GetTargetNamespace();
-                            if (!string.IsNullOrEmpty(targetNamespace))
-                            {
-                                namespaces.Add(targetNamespace);
-                            }
-                        }
-                    }
-                }
-            }
-            
-            return namespaces;
         }
 
         /// <summary>
