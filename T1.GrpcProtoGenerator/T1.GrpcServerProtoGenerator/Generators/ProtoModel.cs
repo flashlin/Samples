@@ -7,7 +7,6 @@ namespace T1.GrpcProtoGenerator.Generators
 {
     internal class ProtoModel
     {
-        public string CsharpNamespace { get; set; } = string.Empty;
         public List<string> Imports { get; } = new List<string>();
         public List<ProtoMessage> Messages { get; } = new List<ProtoMessage>();
         public List<ProtoService> Services { get; } = new List<ProtoService>();
@@ -18,7 +17,20 @@ namespace T1.GrpcProtoGenerator.Generators
 
         public string GetTatgetNamespace()
         {
-            return !string.IsNullOrEmpty(CsharpNamespace) ? $"{CsharpNamespace}" : "Generated";
+            // Get namespace from first available element
+            var firstMessage = Messages.FirstOrDefault();
+            if (firstMessage != null && !string.IsNullOrEmpty(firstMessage.CsharpNamespace))
+                return firstMessage.CsharpNamespace;
+                
+            var firstEnum = Enums.FirstOrDefault();
+            if (firstEnum != null && !string.IsNullOrEmpty(firstEnum.CsharpNamespace))
+                return firstEnum.CsharpNamespace;
+                
+            var firstService = Services.FirstOrDefault();
+            if (firstService != null && !string.IsNullOrEmpty(firstService.CsharpNamespace))
+                return firstService.CsharpNamespace;
+                
+            return "Generated";
         }
     }
 

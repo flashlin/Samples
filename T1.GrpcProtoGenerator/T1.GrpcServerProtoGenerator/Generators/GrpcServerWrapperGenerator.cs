@@ -124,7 +124,7 @@ namespace T1.GrpcProtoGenerator.Generators
 
             foreach (var svc in model.Services)
             {
-                var originalNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? model.CsharpNamespace : "Generated";
+                var originalNamespace = !string.IsNullOrEmpty(svc.CsharpNamespace) ? svc.CsharpNamespace : "Generated";
                 
                 var clientInterface = $"I{svc.Name}Client";
                 sb.AppendLine($"    public interface {clientInterface}");
@@ -214,7 +214,7 @@ namespace T1.GrpcProtoGenerator.Generators
 
             foreach (var svc in model.Services)
             {
-                var originalNamespace = !string.IsNullOrEmpty(model.CsharpNamespace) ? model.CsharpNamespace : "Generated";
+                var originalNamespace = !string.IsNullOrEmpty(svc.CsharpNamespace) ? svc.CsharpNamespace : "Generated";
                 
                 var serviceInterface = $"I{svc.Name}GrpcService";
                 sb.AppendLine($"    public interface {serviceInterface}");
@@ -392,10 +392,7 @@ namespace T1.GrpcProtoGenerator.Generators
 
         public ProtoModel EnrichModelWithImports(ProtoModel mainModel, string mainProtoPath)
         {
-            var enrichedModel = new ProtoModel
-            {
-                CsharpNamespace = mainModel.CsharpNamespace
-            };
+            var enrichedModel = new ProtoModel();
 
             // Copy original items
             foreach (var import in mainModel.Imports)

@@ -19,24 +19,24 @@ namespace T1.GrpcProtoGenerator.Generators
         public static ProtoModel ParseProtoText(string protoText)
         {
             var model = new ProtoModel();
-            var packageName = ParsePackageAndNamespace(protoText, model);
+            var packageName = ParsePackageAndNamespace(protoText, out var csharpNamespace);
             
             ParseImports(protoText, model);
-            ParseMessages(protoText, model, packageName);
-            ParseEnums(protoText, model);
-            ParseServices(protoText, model);
+            ParseMessages(protoText, model, packageName, csharpNamespace);
+            ParseEnums(protoText, model, csharpNamespace);
+            ParseServices(protoText, model, csharpNamespace);
 
             return model;
         }
 
-        private static string ParsePackageAndNamespace(string protoText, ProtoModel model)
+        private static string ParsePackageAndNamespace(string protoText, out string csharpNamespace)
         {
             var packageMatch = PackageRegex.Match(protoText);
             var packageName = packageMatch.Success ? packageMatch.Groups["pkg"].Value : null;
             
             // Parse csharp_namespace option
             var csharpNamespaceMatch = CsharpNamespaceRegex.Match(protoText);
-            model.CsharpNamespace = csharpNamespaceMatch.Success ? csharpNamespaceMatch.Groups["namespace"].Value : packageName;
+            csharpNamespace = csharpNamespaceMatch.Success ? csharpNamespaceMatch.Groups["namespace"].Value : packageName;
 
             return packageName;
         }
@@ -50,7 +50,7 @@ namespace T1.GrpcProtoGenerator.Generators
             }
         }
 
-        private static void ParseMessages(string protoText, ProtoModel model, string packageName)
+        private static void ParseMessages(string protoText, ProtoModel model, string packageName, string csharpNamespace)
         {
             foreach (Match messageMatch in MessageRegex.Matches(protoText))
             {
@@ -60,7 +60,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 { 
                     Name = name, 
                     FullName = packageName != null ? packageName + "." + name : name,
-                    CsharpNamespace = model.CsharpNamespace
+                    CsharpNamespace = csharpNamespace ?? "Generated"
                 };
                 
                 ParseMessageFields(body, protoMessage);
@@ -82,7 +82,7 @@ namespace T1.GrpcProtoGenerator.Generators
             }
         }
 
-        private static void ParseEnums(string protoText, ProtoModel model)
+        private static void ParseEnums(string protoText, ProtoModel model, string csharpNamespace)
         {
             foreach (Match enumMatch in EnumRegex.Matches(protoText))
             {
@@ -91,7 +91,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var protoEnum = new ProtoEnum 
                 { 
                     Name = enumName,
-                    CsharpNamespace = model.CsharpNamespace
+                    CsharpNamespace = csharpNamespace ?? "Generated"
                 };
                 
                 ParseEnumFields(body, protoEnum);
@@ -110,7 +110,7 @@ namespace T1.GrpcProtoGenerator.Generators
             }
         }
 
-        private static void ParseServices(string protoText, ProtoModel model)
+        private static void ParseServices(string protoText, ProtoModel model, string csharpNamespace)
         {
             foreach (Match serviceMatch in ServiceRegex.Matches(protoText))
             {
@@ -119,7 +119,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var protoService = new ProtoService 
                 { 
                     Name = serviceName,
-                    CsharpNamespace = model.CsharpNamespace
+                    CsharpNamespace = csharpNamespace ?? "Generated"
                 };
                 
                 ParseServiceRpcs(serviceBody, protoService);
