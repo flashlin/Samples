@@ -55,7 +55,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using DemoServer.Protos.Messages;");
             sb.AppendLine();
             
-            var targetNamespace = model.Messages.First().CsharpNamespace;
+            var targetNamespace = model.Messages.First().CsharpNamespace.GetTargetNamespace();
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
@@ -118,13 +118,13 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using DemoServer.Protos.Messages;");
             sb.AppendLine();
             
-            var targetNamespace = model.Services.First().CsharpNamespace;
+            var targetNamespace = model.Services.First().CsharpNamespace.GetTargetNamespace();
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
             foreach (var svc in model.Services)
             {
-                var originalNamespace = !string.IsNullOrEmpty(svc.CsharpNamespace) ? svc.CsharpNamespace : "Generated";
+                var originalNamespace = svc.CsharpNamespace.GetTargetNamespace();
                 
                 var clientInterface = $"I{svc.Name}Client";
                 sb.AppendLine($"    public interface {clientInterface}");
@@ -214,7 +214,7 @@ namespace T1.GrpcProtoGenerator.Generators
 
             foreach (var svc in model.Services)
             {
-                var originalNamespace = !string.IsNullOrEmpty(svc.CsharpNamespace) ? svc.CsharpNamespace : "Generated";
+                var originalNamespace = svc.CsharpNamespace.GetTargetNamespace();
                 
                 var serviceInterface = $"I{svc.Name}GrpcService";
                 sb.AppendLine($"    public interface {serviceInterface}");

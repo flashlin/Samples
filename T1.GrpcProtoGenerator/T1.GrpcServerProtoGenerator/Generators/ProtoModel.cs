@@ -52,4 +52,12 @@ namespace T1.GrpcProtoGenerator.Generators
         public string CsharpNamespace { get; set; } = string.Empty;
         public List<(string Name, int Value)> Values { get; } = new List<(string, int)>();
     }
+
+    public static class ProtoExtensions
+    {
+        public static string GetTargetNamespace(this string csharpNamespace)
+        {
+            return !string.IsNullOrEmpty(csharpNamespace) ? csharpNamespace : "Generated";
+        }
+    }
 }
