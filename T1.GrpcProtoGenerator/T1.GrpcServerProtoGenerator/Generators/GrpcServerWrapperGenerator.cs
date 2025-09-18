@@ -233,82 +233,126 @@ namespace T1.GrpcProtoGenerator.Generators
             
             GenerateUsingStatements(sb, importNamespaces);
             
-            var targetNamespace = model.Services.Any() ? model.Services.First().CsharpNamespace.GetTargetNamespace() : "Generated";
-            sb.AppendLine($"namespace {targetNamespace}");
-            sb.AppendLine("{");
+            // Group services by CsharpNamespace
+            var servicesByNamespace = model.Services
+                .GroupBy(svc => svc.CsharpNamespace.GetTargetNamespace())
+                .ToList();
 
-            foreach (var svc in model.Services)
+            // Generate namespace blocks for each group
+            foreach (var namespaceGroup in servicesByNamespace)
             {
-                var originalNamespace = svc.CsharpNamespace.GetTargetNamespace();
-                
-                var clientInterface = $"I{svc.Name}Client";
-                sb.AppendLine($"    public interface {clientInterface}");
-                sb.AppendLine("    {");
-                foreach (var rpc in svc.Rpcs)
-                    sb.AppendLine($"        Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default);");
-                sb.AppendLine("    }");
-                sb.AppendLine();
+                var namespaceValue = namespaceGroup.Key;
+                sb.AppendLine($"namespace {namespaceValue}");
+                sb.AppendLine("{");
 
-                var wrapper = $"{svc.Name}ClientWrapper";
-                var grpcClient = $"{originalNamespace}.{svc.Name}.{svc.Name}Client";
-                sb.AppendLine($"    public class {wrapper} : {clientInterface}");
-                sb.AppendLine("    {");
-                sb.AppendLine($"        private readonly {grpcClient} _inner;");
-                sb.AppendLine($"        public {wrapper}({grpcClient} inner) {{ _inner = inner; }}");
-                sb.AppendLine();
-
-                foreach (var rpc in svc.Rpcs)
+                // Generate all client interfaces and wrappers for this namespace
+                foreach (var svc in namespaceGroup)
                 {
-                    // Determine the correct namespace for request and response types
-                    var requestTypeNamespace = GetTypeNamespace(rpc.RequestType, originalNamespace);
-                    var responseTypeNamespace = GetTypeNamespace(rpc.ResponseType, originalNamespace);
-                    
-                    sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default)");
-                    sb.AppendLine("        {");
-                    sb.AppendLine($"            var grpcReq = new {requestTypeNamespace}.{rpc.RequestType}();");
-                    
-                    var requestMessage = model.FindMessage(rpc.RequestType);
-                    if (requestMessage != null)
-                    {
-                        foreach (var field in requestMessage.Fields)
-                        {
-                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                            sb.AppendLine($"            grpcReq.{propName} = request.{propName};");
-                        }
-                    }
-                    else
-                    {
-                        // Handle external types
-                        GenerateExternalTypeMapping(sb, rpc.RequestType, "grpcReq", "request");
-                    }
-                    
-                    sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
-                    sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcMessage();");
-                    
-                    var responseMessage = model.FindMessage(rpc.ResponseType);
-                    if (responseMessage != null)
-                    {
-                        foreach (var field in responseMessage.Fields)
-                        {
-                            var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                            sb.AppendLine($"            dto.{propName} = grpcResp.{propName};");
-                        }
-                    }
-                    else
-                    {
-                        // Handle external types
-                        GenerateExternalTypeMapping(sb, rpc.ResponseType, "dto", "grpcResp");
-                    }
-                    
-                    sb.AppendLine("            return dto;");
-                    sb.AppendLine("        }");
-                    sb.AppendLine();
+                    GenerateClientInterface(sb, svc);
+                    GenerateClientWrapper(sb, svc, model);
                 }
-                sb.AppendLine("    }");
+
+                sb.AppendLine("}");
+                sb.AppendLine();
             }
 
-            sb.AppendLine("}");
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Generate client interface for a given service
+        /// </summary>
+        private void GenerateClientInterface(StringBuilder sb, ProtoService svc)
+        {
+            var clientInterface = $"I{svc.Name}Client";
+            sb.AppendLine($"    public interface {clientInterface}");
+            sb.AppendLine("    {");
+            
+            foreach (var rpc in svc.Rpcs)
+            {
+                sb.AppendLine($"        Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default);");
+            }
+            
+            sb.AppendLine("    }");
+            sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Generate client wrapper class for a given service
+        /// </summary>
+        private void GenerateClientWrapper(StringBuilder sb, ProtoService svc, ProtoModel model)
+        {
+            var originalNamespace = svc.CsharpNamespace.GetTargetNamespace();
+            var clientInterface = $"I{svc.Name}Client";
+            var wrapper = $"{svc.Name}ClientWrapper";
+            var grpcClient = $"{originalNamespace}.{svc.Name}.{svc.Name}Client";
+            
+            sb.AppendLine($"    public class {wrapper} : {clientInterface}");
+            sb.AppendLine("    {");
+            sb.AppendLine($"        private readonly {grpcClient} _inner;");
+            sb.AppendLine($"        public {wrapper}({grpcClient} inner) {{ _inner = inner; }}");
+            sb.AppendLine();
+
+            foreach (var rpc in svc.Rpcs)
+            {
+                GenerateClientMethod(sb, rpc, model, originalNamespace);
+            }
+            
+            sb.AppendLine("    }");
+            sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Generate a single client method implementation
+        /// </summary>
+        private void GenerateClientMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel model, string originalNamespace)
+        {
+            // Determine the correct namespace for request and response types
+            var requestTypeNamespace = GetTypeNamespace(rpc.RequestType, originalNamespace);
+            var responseTypeNamespace = GetTypeNamespace(rpc.ResponseType, originalNamespace);
+            
+            sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default)");
+            sb.AppendLine("        {");
+            sb.AppendLine($"            var grpcReq = new {requestTypeNamespace}.{rpc.RequestType}();");
+            
+            // Map request fields
+            var requestMessage = model.FindMessage(rpc.RequestType);
+            if (requestMessage != null)
+            {
+                foreach (var field in requestMessage.Fields)
+                {
+                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    sb.AppendLine($"            grpcReq.{propName} = request.{propName};");
+                }
+            }
+            else
+            {
+                // Handle external types
+                GenerateExternalTypeMapping(sb, rpc.RequestType, "grpcReq", "request");
+            }
+            
+            sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
+            sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcMessage();");
+            
+            // Map response fields
+            var responseMessage = model.FindMessage(rpc.ResponseType);
+            if (responseMessage != null)
+            {
+                foreach (var field in responseMessage.Fields)
+                {
+                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    sb.AppendLine($"            dto.{propName} = grpcResp.{propName};");
+                }
+            }
+            else
+            {
+                // Handle external types
+                GenerateExternalTypeMapping(sb, rpc.ResponseType, "dto", "grpcResp");
+            }
+            
+            sb.AppendLine("            return dto;");
+            sb.AppendLine("        }");
+            sb.AppendLine();
         }
 
         private string GenerateWrapperServerSource(ProtoModel model, ProtoImportResolver resolver, string protoPath)
