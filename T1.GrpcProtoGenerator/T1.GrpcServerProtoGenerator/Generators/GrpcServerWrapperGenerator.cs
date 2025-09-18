@@ -192,7 +192,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateSingleMessageClass(StringBuilder sb, ProtoMessage msg)
         {
-            sb.AppendLine($"    public class {msg.Name}GrpcMessage");
+            sb.AppendLine($"    public class {msg.Name}GrpcDto");
             sb.AppendLine("    {");
             
             foreach (var field in msg.Fields)
