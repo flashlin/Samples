@@ -54,6 +54,7 @@ namespace T1.GrpcProtoGenerator.Generators
     internal class ProtoEnum
     {
         public string Name { get; set; } = string.Empty;
+        public string CsharpNamespace { get; set; } = string.Empty;
         public List<(string Name, int Value)> Values { get; } = new List<(string, int)>();
     }
 }

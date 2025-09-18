@@ -88,7 +88,11 @@ namespace T1.GrpcProtoGenerator.Generators
             {
                 var enumName = enumMatch.Groups["name"].Value;
                 var body = enumMatch.Groups["body"].Value;
-                var protoEnum = new ProtoEnum { Name = enumName };
+                var protoEnum = new ProtoEnum 
+                { 
+                    Name = enumName,
+                    CsharpNamespace = model.CsharpNamespace
+                };
                 
                 ParseEnumFields(body, protoEnum);
                 model.Enums.Add(protoEnum);
