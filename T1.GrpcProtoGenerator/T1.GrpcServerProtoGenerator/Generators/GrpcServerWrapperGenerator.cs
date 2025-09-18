@@ -230,7 +230,6 @@ namespace T1.GrpcProtoGenerator.Generators
             importNamespaces.Add("System.Threading");
             importNamespaces.Add("System.Threading.Tasks");
             importNamespaces.Add("Grpc.Core");
-            importNamespaces.Add("DemoServer.Protos.Messages");
             
             GenerateUsingStatements(sb, importNamespaces);
             
