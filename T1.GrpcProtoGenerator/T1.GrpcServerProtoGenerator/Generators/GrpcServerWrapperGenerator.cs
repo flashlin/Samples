@@ -621,7 +621,6 @@ namespace T1.GrpcProtoGenerator.Generators
             
             sb.AppendLine();
         }
-
     }
 
     public class ProtoFileInfo
@@ -637,8 +636,8 @@ namespace T1.GrpcProtoGenerator.Generators
 
     internal class ProtoImportResolver
     {
-        private readonly Dictionary<string, ProtoFileInfo> _protoFiles;
         private readonly Dictionary<string, ProtoModel> _parsedModels;
+        private readonly Dictionary<string, ProtoFileInfo> _protoFiles;
 
         public ProtoImportResolver(IEnumerable<ProtoFileInfo> protoFiles)
         {
@@ -705,23 +704,6 @@ namespace T1.GrpcProtoGenerator.Generators
             return enrichedModel;
         }
 
-        private string NormalizeProtoPath(string path)
-        {
-            // Extract relative path from full path
-            // This handles cases where we have full absolute paths
-            var segments = path.Replace('\\', '/').Split('/');
-            
-            // Find the "Protos" directory and take everything after it
-            var protosIndex = Array.FindIndex(segments, s => s.Equals("Protos", StringComparison.OrdinalIgnoreCase));
-            if (protosIndex >= 0 && protosIndex < segments.Length - 1)
-            {
-                return string.Join("/", segments.Skip(protosIndex + 1));
-            }
-            
-            // Fallback: just take the filename
-            return System.IO.Path.GetFileName(path);
-        }
-
         public ProtoFileInfo ResolveImportPath(string importPath, string currentProtoPath)
         {
             // Try exact match first
@@ -755,6 +737,23 @@ namespace T1.GrpcProtoGenerator.Generators
                 _parsedModels[protoFile.Path] = model;
             }
             return model;
+        }
+
+        private string NormalizeProtoPath(string path)
+        {
+            // Extract relative path from full path
+            // This handles cases where we have full absolute paths
+            var segments = path.Replace('\\', '/').Split('/');
+            
+            // Find the "Protos" directory and take everything after it
+            var protosIndex = Array.FindIndex(segments, s => s.Equals("Protos", StringComparison.OrdinalIgnoreCase));
+            if (protosIndex >= 0 && protosIndex < segments.Length - 1)
+            {
+                return string.Join("/", segments.Skip(protosIndex + 1));
+            }
+            
+            // Fallback: just take the filename
+            return System.IO.Path.GetFileName(path);
         }
     }
 }
