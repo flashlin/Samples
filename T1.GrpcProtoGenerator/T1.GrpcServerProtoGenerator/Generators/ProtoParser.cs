@@ -59,7 +59,8 @@ namespace T1.GrpcProtoGenerator.Generators
                 var protoMessage = new ProtoMessage 
                 { 
                     Name = name, 
-                    FullName = packageName != null ? packageName + "." + name : name 
+                    FullName = packageName != null ? packageName + "." + name : name,
+                    CsharpNamespace = model.CsharpNamespace
                 };
                 
                 ParseMessageFields(body, protoMessage);

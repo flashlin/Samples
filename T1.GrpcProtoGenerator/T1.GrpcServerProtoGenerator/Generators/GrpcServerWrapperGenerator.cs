@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -19,14 +21,23 @@ namespace T1.GrpcProtoGenerator.Generators
                 Content = text.GetText()!.ToString()
             });
 
-            context.RegisterSourceOutput(protoFilesWithContent, (spc, protoInfo) =>
-            {
-                var model = ProtoParser.ParseProtoText(protoInfo.Content);
-                var protoFileName = protoInfo.GetProtoFileName();
+            // Collect all proto files and process them together to handle imports
+            var allProtoFiles = protoFilesWithContent.Collect();
 
-                AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(model), $"Generated_{protoFileName}_messages.cs");
-                AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model), $"Generated_{protoFileName}_server.cs");
-                AddGeneratedSourceFile(spc, GenerateWrapperClientSource(model), $"Generated_{protoFileName}_client.cs");
+            context.RegisterSourceOutput(allProtoFiles, (spc, allProtos) =>
+            {
+                var protoResolver = new ProtoImportResolver(allProtos);
+                
+                foreach (var protoInfo in allProtos)
+                {
+                    var model = ProtoParser.ParseProtoText(protoInfo.Content);
+                    var enrichedModel = protoResolver.EnrichModelWithImports(model, protoInfo.Path);
+                    var protoFileName = protoInfo.GetProtoFileName();
+
+                    AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(model), $"Generated_{protoFileName}_messages.cs");
+                    AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model), $"Generated_{protoFileName}_server.cs");
+                    AddGeneratedSourceFile(spc, GenerateWrapperClientSource(model), $"Generated_{protoFileName}_client.cs");
+                }
             });
         }
 
@@ -358,6 +369,132 @@ namespace T1.GrpcProtoGenerator.Generators
         public string GetProtoFileName()
         {
             return System.IO.Path.GetFileNameWithoutExtension(Path);
+        }
+    }
+
+    internal class ProtoImportResolver
+    {
+        private readonly Dictionary<string, ProtoFileInfo> _protoFiles;
+        private readonly Dictionary<string, ProtoModel> _parsedModels;
+
+        public ProtoImportResolver(IEnumerable<ProtoFileInfo> protoFiles)
+        {
+            _protoFiles = new Dictionary<string, ProtoFileInfo>();
+            _parsedModels = new Dictionary<string, ProtoModel>();
+
+            // Build a mapping of relative paths to proto files
+            foreach (var protoFile in protoFiles)
+            {
+                var relativePath = NormalizeProtoPath(protoFile.Path);
+                _protoFiles[relativePath] = protoFile;
+            }
+        }
+
+        public ProtoModel EnrichModelWithImports(ProtoModel mainModel, string mainProtoPath)
+        {
+            var enrichedModel = new ProtoModel
+            {
+                CsharpNamespace = mainModel.CsharpNamespace
+            };
+
+            // Copy original items
+            foreach (var import in mainModel.Imports)
+                enrichedModel.Imports.Add(import);
+            
+            foreach (var message in mainModel.Messages)
+                enrichedModel.Messages.Add(message);
+            
+            foreach (var service in mainModel.Services)
+                enrichedModel.Services.Add(service);
+            
+            foreach (var enumDef in mainModel.Enums)
+                enrichedModel.Enums.Add(enumDef);
+
+            // Add imported messages, services, and enums to the main model
+            foreach (var importPath in mainModel.Imports)
+            {
+                var resolvedImport = ResolveImportPath(importPath, mainProtoPath);
+                if (resolvedImport != null)
+                {
+                    var importedModel = GetOrParseModel(resolvedImport);
+                    if (importedModel != null)
+                    {
+                        // Add imported messages with namespace prefix if needed
+                        foreach (var message in importedModel.Messages)
+                        {
+                            if (!enrichedModel.Messages.Any(m => m.Name == message.Name))
+                            {
+                                enrichedModel.Messages.Add(message);
+                            }
+                        }
+
+                        // Add imported enums
+                        foreach (var enumDef in importedModel.Enums)
+                        {
+                            if (!enrichedModel.Enums.Any(e => e.Name == enumDef.Name))
+                            {
+                                enrichedModel.Enums.Add(enumDef);
+                            }
+                        }
+
+                        // Note: Services are typically not imported, but we could add them if needed
+                    }
+                }
+            }
+
+            return enrichedModel;
+        }
+
+        private string NormalizeProtoPath(string path)
+        {
+            // Extract relative path from full path
+            // This handles cases where we have full absolute paths
+            var segments = path.Replace('\\', '/').Split('/');
+            
+            // Find the "Protos" directory and take everything after it
+            var protosIndex = Array.FindIndex(segments, s => s.Equals("Protos", StringComparison.OrdinalIgnoreCase));
+            if (protosIndex >= 0 && protosIndex < segments.Length - 1)
+            {
+                return string.Join("/", segments.Skip(protosIndex + 1));
+            }
+            
+            // Fallback: just take the filename
+            return System.IO.Path.GetFileName(path);
+        }
+
+        private ProtoFileInfo ResolveImportPath(string importPath, string currentProtoPath)
+        {
+            // Try exact match first
+            if (_protoFiles.TryGetValue(importPath, out var exactMatch))
+            {
+                return exactMatch;
+            }
+
+            // Try to resolve relative to current file's directory
+            var currentDir = System.IO.Path.GetDirectoryName(NormalizeProtoPath(currentProtoPath));
+            if (!string.IsNullOrEmpty(currentDir))
+            {
+                var relativePath = System.IO.Path.Combine(currentDir, importPath).Replace('\\', '/');
+                if (_protoFiles.TryGetValue(relativePath, out var relativeMatch))
+                {
+                    return relativeMatch;
+                }
+            }
+
+            // Try filename only match as fallback
+            var importFileName = System.IO.Path.GetFileName(importPath);
+            return _protoFiles.Values.FirstOrDefault(f => 
+                System.IO.Path.GetFileName(f.Path).Equals(importFileName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private ProtoModel GetOrParseModel(ProtoFileInfo protoFile)
+        {
+            if (!_parsedModels.TryGetValue(protoFile.Path, out var model))
+            {
+                model = ProtoParser.ParseProtoText(protoFile.Content);
+                _parsedModels[protoFile.Path] = model;
+            }
+            return model;
         }
     }
 }

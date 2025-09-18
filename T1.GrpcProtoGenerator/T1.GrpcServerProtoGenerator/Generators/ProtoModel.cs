@@ -26,6 +26,7 @@ namespace T1.GrpcProtoGenerator.Generators
     {
         public string Name { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
+        public string CsharpNamespace { get; set; } = string.Empty;
         public List<ProtoField> Fields { get; } = new List<ProtoField>();
     }
 
