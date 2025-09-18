@@ -41,6 +41,7 @@ namespace T1.GrpcProtoGenerator.Generators
     internal class ProtoService
     {
         public string Name { get; set; } = string.Empty;
+        public string CsharpNamespace { get; set; } = string.Empty;
         public List<ProtoRpc> Rpcs { get; } = new List<ProtoRpc>();
     }
 

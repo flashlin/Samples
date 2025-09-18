@@ -116,7 +116,11 @@ namespace T1.GrpcProtoGenerator.Generators
             {
                 var serviceName = serviceMatch.Groups["name"].Value;
                 var serviceBody = serviceMatch.Groups["body"].Value;
-                var protoService = new ProtoService { Name = serviceName };
+                var protoService = new ProtoService 
+                { 
+                    Name = serviceName,
+                    CsharpNamespace = model.CsharpNamespace
+                };
                 
                 ParseServiceRpcs(serviceBody, protoService);
                 model.Services.Add(protoService);
