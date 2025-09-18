@@ -54,7 +54,7 @@ namespace T1.GrpcProtoGenerator.Generators
             GenerateBasicUsingStatements(sb);
             
             // Generate message classes grouped by namespace
-            GenerateMessageClasses(sb, model);
+            GenerateMessageClasses(sb, model.Messages);
             
             // Generate external type wrappers
             GenerateExternalTypeWrappers(sb, model);
@@ -79,10 +79,10 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate message classes grouped by namespace
         /// </summary>
-        private void GenerateMessageClasses(StringBuilder sb, ProtoModel model)
+        private void GenerateMessageClasses(StringBuilder sb, List<ProtoMessage> modelMessages)
         {
             // Group messages by CsharpNamespace
-            var messagesByNamespace = model.Messages
+            var messagesByNamespace = modelMessages
                 .GroupBy(msg => msg.CsharpNamespace.GetTargetNamespace())
                 .ToList();
 
@@ -139,14 +139,12 @@ namespace T1.GrpcProtoGenerator.Generators
                     // Check if request type is external and needs a wrapper
                     if (model.FindMessage(rpc.RequestType) == null)
                     {
-                        GenerateExternalTypeWrapper(externalTypesSb, rpc.RequestType);
                         hasExternalTypes = true;
                     }
                     
                     // Check if response type is external and needs a wrapper
                     if (model.FindMessage(rpc.ResponseType) == null)
                     {
-                        GenerateExternalTypeWrapper(externalTypesSb, rpc.ResponseType);
                         hasExternalTypes = true;
                     }
                 }
@@ -308,12 +306,9 @@ namespace T1.GrpcProtoGenerator.Generators
         private void GenerateClientMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel model, string originalNamespace)
         {
             // Determine the correct namespace for request and response types
-            var requestTypeNamespace = GetTypeNamespace(rpc.RequestType, originalNamespace);
-            var responseTypeNamespace = GetTypeNamespace(rpc.ResponseType, originalNamespace);
-            
             sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default)");
             sb.AppendLine("        {");
-            sb.AppendLine($"            var grpcReq = new {requestTypeNamespace}.{rpc.RequestType}();");
+            sb.AppendLine($"            var grpcReq = new {originalNamespace}.{rpc.RequestType}();");
             
             // Map request fields
             var requestMessage = model.FindMessage(rpc.RequestType);
@@ -328,7 +323,6 @@ namespace T1.GrpcProtoGenerator.Generators
             else
             {
                 // Handle external types
-                GenerateExternalTypeMapping(sb, rpc.RequestType, "grpcReq", "request");
             }
             
             sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
@@ -347,7 +341,6 @@ namespace T1.GrpcProtoGenerator.Generators
             else
             {
                 // Handle external types
-                GenerateExternalTypeMapping(sb, rpc.ResponseType, "dto", "grpcResp");
             }
             
             sb.AppendLine("            return dto;");
@@ -448,11 +441,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateServiceMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel model, string originalNamespace)
         {
-            // Determine the correct namespace for request and response types
-            var requestTypeNamespace = GetTypeNamespace(rpc.RequestType, originalNamespace);
-            var responseTypeNamespace = GetTypeNamespace(rpc.ResponseType, originalNamespace);
-            
-            sb.AppendLine($"        public override async Task<{responseTypeNamespace}.{rpc.ResponseType}> {rpc.Name}({requestTypeNamespace}.{rpc.RequestType} request, ServerCallContext context)");
+            sb.AppendLine($"        public override async Task<{originalNamespace}.{rpc.ResponseType}> {rpc.Name}({originalNamespace}.{rpc.RequestType} request, ServerCallContext context)");
             sb.AppendLine("        {");
             sb.AppendLine($"            var dtoRequest = new {rpc.RequestType}GrpcMessage();");
             
@@ -469,11 +458,10 @@ namespace T1.GrpcProtoGenerator.Generators
             else
             {
                 // Handle external types
-                GenerateExternalTypeMapping(sb, rpc.RequestType, "dtoRequest", "request");
             }
             
             sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
-            sb.AppendLine($"            var grpcResponse = new {responseTypeNamespace}.{rpc.ResponseType}();");
+            sb.AppendLine($"            var grpcResponse = new {originalNamespace}.{rpc.ResponseType}();");
             
             // Map response fields
             var responseMessage = model.FindMessage(rpc.ResponseType);
@@ -488,7 +476,6 @@ namespace T1.GrpcProtoGenerator.Generators
             else
             {
                 // Handle external types
-                GenerateExternalTypeMapping(sb, rpc.ResponseType, "grpcResponse", "dtoResponse");
             }
             
             sb.AppendLine("            return grpcResponse;");
@@ -511,55 +498,6 @@ namespace T1.GrpcProtoGenerator.Generators
                 "bytes" => "byte[]",
                 _ => protoType // For custom types, keep as is
             };
-        }
-
-        private static string GetTypeNamespace(string typeName, string defaultNamespace)
-        {
-            // Map specific types to their correct namespaces for modular design
-            return typeName switch
-            {
-                "EligibilityRequest" => "DemoServer.Protos.Messages",
-                "EligibilityResponse" => "DemoServer.Protos.Messages",
-                _ => defaultNamespace
-            };
-        }
-
-        private void GenerateExternalTypeWrapper(StringBuilder sb, string typeName)
-        {
-            // Generate a wrapper class for external types
-            switch (typeName)
-            {
-                case "EligibilityRequest":
-                    sb.AppendLine("    public class EligibilityRequestGrpcMessage");
-                    sb.AppendLine("    {");
-                    sb.AppendLine("        public int CustomerId { get; set; }");
-                    sb.AppendLine("    }");
-                    sb.AppendLine();
-                    break;
-                    
-                case "EligibilityResponse":
-                    sb.AppendLine("    public class EligibilityResponseGrpcMessage");
-                    sb.AppendLine("    {");
-                    sb.AppendLine("        public bool IsEligible { get; set; }");
-                    sb.AppendLine("    }");
-                    sb.AppendLine();
-                    break;
-            }
-        }
-
-        private void GenerateExternalTypeMapping(StringBuilder sb, string typeName, string targetVar, string sourceVar)
-        {
-            // Generate field mappings for external types
-            switch (typeName)
-            {
-                case "EligibilityRequest":
-                    sb.AppendLine($"            {targetVar}.CustomerId = {sourceVar}.CustomerId;");
-                    break;
-                    
-                case "EligibilityResponse":
-                    sb.AppendLine($"            {targetVar}.IsEligible = {sourceVar}.IsEligible;");
-                    break;
-            }
         }
 
         /// <summary>
