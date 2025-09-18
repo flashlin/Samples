@@ -513,7 +513,8 @@ namespace T1.GrpcProtoGenerator.Generators
                 "bool" => "bool",
                 "string" => "string",
                 "bytes" => "byte[]",
-                _ => protoType // For custom types, keep as is
+                "Timestamp" => "DateTime",
+                _ => protoType + "GrpcDto"
             };
         }
 
