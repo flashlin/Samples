@@ -280,7 +280,7 @@ namespace T1.GrpcProtoGenerator.Generators
             
             foreach (var rpc in svc.Rpcs)
             {
-                sb.AppendLine($"        Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default);");
+                sb.AppendLine($"        Task<{rpc.ResponseType}GrpcDto> {rpc.Name}Async({rpc.RequestType}GrpcDto request, CancellationToken cancellationToken = default);");
             }
             
             sb.AppendLine("    }");
@@ -318,7 +318,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private void GenerateClientMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel model, string originalNamespace)
         {
             // Determine the correct namespace for request and response types
-            sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}Async({rpc.RequestType}GrpcMessage request, CancellationToken cancellationToken = default)");
+            sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcDto> {rpc.Name}Async({rpc.RequestType}GrpcDto request, CancellationToken cancellationToken = default)");
             sb.AppendLine("        {");
             sb.AppendLine($"            var grpcReq = new {originalNamespace}.{rpc.RequestType}();");
             
@@ -338,7 +338,7 @@ namespace T1.GrpcProtoGenerator.Generators
             }
             
             sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
-            sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcMessage();");
+            sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcDto();");
             
             // Map response fields
             var responseMessage = model.FindMessage(rpc.ResponseType);
@@ -417,7 +417,7 @@ namespace T1.GrpcProtoGenerator.Generators
             
             foreach (var rpc in svc.Rpcs)
             {
-                sb.AppendLine($"        Task<{rpc.ResponseType}GrpcMessage> {rpc.Name}({rpc.RequestType}GrpcMessage request);");
+                sb.AppendLine($"        Task<{rpc.ResponseType}GrpcDto> {rpc.Name}({rpc.RequestType}GrpcDto request);");
             }
             
             sb.AppendLine("    }");
@@ -460,7 +460,7 @@ namespace T1.GrpcProtoGenerator.Generators
         {
             sb.AppendLine($"        public override async Task<{originalNamespace}.{rpc.ResponseType}> {rpc.Name}({originalNamespace}.{rpc.RequestType} request, ServerCallContext context)");
             sb.AppendLine("        {");
-            sb.AppendLine($"            var dtoRequest = new {rpc.RequestType}GrpcMessage();");
+            sb.AppendLine($"            var dtoRequest = new {rpc.RequestType}GrpcDto();");
             
             // Map request fields
             var requestMessage = model.FindMessage(rpc.RequestType);
