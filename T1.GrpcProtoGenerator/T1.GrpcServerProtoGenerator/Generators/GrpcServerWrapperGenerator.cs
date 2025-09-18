@@ -34,9 +34,9 @@ namespace T1.GrpcProtoGenerator.Generators
                     var enrichedModel = protoResolver.EnrichModelWithImports(model, protoInfo.Path);
                     var protoFileName = protoInfo.GetProtoFileName();
 
-                    AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(model), $"Generated_{protoFileName}_messages.cs");
-                    AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model), $"Generated_{protoFileName}_server.cs");
-                    AddGeneratedSourceFile(spc, GenerateWrapperClientSource(model), $"Generated_{protoFileName}_client.cs");
+                    AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(enrichedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_messages.cs");
+                    AddGeneratedSourceFile(spc, GenerateWrapperServerSource(enrichedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_server.cs");
+                    AddGeneratedSourceFile(spc, GenerateWrapperClientSource(enrichedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_client.cs");
                 }
             });
         }
@@ -46,15 +46,17 @@ namespace T1.GrpcProtoGenerator.Generators
             spc.AddSource(sourceFileName, SourceText.From(messagesSource, Encoding.UTF8));
         }
 
-        private string GenerateWrapperGrpcMessageSource(ProtoModel model)
+        private string GenerateWrapperGrpcMessageSource(ProtoModel model, ProtoImportResolver resolver, string protoPath)
         {
             var sb = new StringBuilder();
+            
+            // Generate basic using statements without import namespaces
             sb.AppendLine("#nullable enable");
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine();
             
-            var targetNamespace = model.Messages.First().CsharpNamespace.GetTargetNamespace();
+            var targetNamespace = model.Messages.Any() ? model.Messages.First().CsharpNamespace.GetTargetNamespace() : "Generated";
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
@@ -105,19 +107,22 @@ namespace T1.GrpcProtoGenerator.Generators
             return sb.ToString();
         }
 
-        private string GenerateWrapperClientSource(ProtoModel model)
+        private string GenerateWrapperClientSource(ProtoModel model, ProtoImportResolver resolver, string protoPath)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("#nullable enable");
-            sb.AppendLine("using System;");
-            sb.AppendLine("using System.Collections.Generic;");
-            sb.AppendLine("using System.Threading;");
-            sb.AppendLine("using System.Threading.Tasks;");
-            sb.AppendLine("using Grpc.Core;");
-            sb.AppendLine("using DemoServer.Protos.Messages;");
-            sb.AppendLine();
             
-            var targetNamespace = model.Services.First().CsharpNamespace.GetTargetNamespace();
+            // Collect import namespaces for messages and enums only
+            var importNamespaces = CollectImportNamespacesForServer(model, resolver, protoPath);
+            
+            // Add specific using statements for client generation
+            importNamespaces.Add("System.Threading");
+            importNamespaces.Add("System.Threading.Tasks");
+            importNamespaces.Add("Grpc.Core");
+            importNamespaces.Add("DemoServer.Protos.Messages");
+            
+            GenerateUsingStatements(sb, importNamespaces);
+            
+            var targetNamespace = model.Services.Any() ? model.Services.First().CsharpNamespace.GetTargetNamespace() : "Generated";
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
@@ -195,19 +200,22 @@ namespace T1.GrpcProtoGenerator.Generators
             return sb.ToString();
         }
 
-        private string GenerateWrapperServerSource(ProtoModel model)
+        private string GenerateWrapperServerSource(ProtoModel model, ProtoImportResolver resolver, string protoPath)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("#nullable enable");
-            sb.AppendLine("using System;");
-            sb.AppendLine("using System.Collections.Generic;");
-            sb.AppendLine("using System.Threading;");
-            sb.AppendLine("using System.Threading.Tasks;");
-            sb.AppendLine("using Grpc.Core;");
-            sb.AppendLine("using Microsoft.Extensions.Logging;");
-            sb.AppendLine();
             
-            var targetNamespace = model.Services.First().CsharpNamespace;
+            // Collect import namespaces for messages and enums only
+            var importNamespaces = CollectImportNamespacesForServer(model, resolver, protoPath);
+            
+            // Add specific using statements for server generation
+            importNamespaces.Add("System.Threading");
+            importNamespaces.Add("System.Threading.Tasks");
+            importNamespaces.Add("Grpc.Core");
+            importNamespaces.Add("Microsoft.Extensions.Logging");
+            
+            GenerateUsingStatements(sb, importNamespaces);
+            
+            var targetNamespace = model.Services.Any() ? model.Services.First().CsharpNamespace.GetTargetNamespace() : "Generated";
             sb.AppendLine($"namespace {targetNamespace}");
             sb.AppendLine("{");
 
@@ -358,6 +366,117 @@ namespace T1.GrpcProtoGenerator.Generators
             }
         }
 
+        /// <summary>
+        /// Collect all unique target namespaces from imported models
+        /// </summary>
+        private HashSet<string> CollectImportNamespaces(ProtoModel model, ProtoImportResolver resolver, string currentProtoPath)
+        {
+            var namespaces = new HashSet<string>();
+            
+            foreach (var importPath in model.Imports)
+            {
+                var resolvedImport = resolver.ResolveImportPath(importPath, currentProtoPath);
+                if (resolvedImport != null)
+                {
+                    var importedModel = resolver.GetOrParseModel(resolvedImport);
+                    if (importedModel != null)
+                    {
+                        // Collect namespaces from imported messages
+                        foreach (var message in importedModel.Messages)
+                        {
+                            var targetNamespace = message.CsharpNamespace.GetTargetNamespace();
+                            if (!string.IsNullOrEmpty(targetNamespace))
+                            {
+                                namespaces.Add(targetNamespace);
+                            }
+                        }
+                        
+                        // Collect namespaces from imported services
+                        foreach (var service in importedModel.Services)
+                        {
+                            var targetNamespace = service.CsharpNamespace.GetTargetNamespace();
+                            if (!string.IsNullOrEmpty(targetNamespace))
+                            {
+                                namespaces.Add(targetNamespace);
+                            }
+                        }
+                        
+                        // Collect namespaces from imported enums
+                        foreach (var enumDef in importedModel.Enums)
+                        {
+                            var targetNamespace = enumDef.CsharpNamespace.GetTargetNamespace();
+                            if (!string.IsNullOrEmpty(targetNamespace))
+                            {
+                                namespaces.Add(targetNamespace);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return namespaces;
+        }
+
+        /// <summary>
+        /// Collect namespaces from imported messages and enums only (for server generation)
+        /// </summary>
+        private HashSet<string> CollectImportNamespacesForServer(ProtoModel model, ProtoImportResolver resolver, string currentProtoPath)
+        {
+            var namespaces = new HashSet<string>();
+            
+            foreach (var importPath in model.Imports)
+            {
+                var resolvedImport = resolver.ResolveImportPath(importPath, currentProtoPath);
+                if (resolvedImport != null)
+                {
+                    var importedModel = resolver.GetOrParseModel(resolvedImport);
+                    if (importedModel != null)
+                    {
+                        // Collect namespaces from imported messages only
+                        foreach (var message in importedModel.Messages)
+                        {
+                            var targetNamespace = message.CsharpNamespace.GetTargetNamespace();
+                            if (!string.IsNullOrEmpty(targetNamespace))
+                            {
+                                namespaces.Add(targetNamespace);
+                            }
+                        }
+                        
+                        // Collect namespaces from imported enums only
+                        foreach (var enumDef in importedModel.Enums)
+                        {
+                            var targetNamespace = enumDef.CsharpNamespace.GetTargetNamespace();
+                            if (!string.IsNullOrEmpty(targetNamespace))
+                            {
+                                namespaces.Add(targetNamespace);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return namespaces;
+        }
+
+        /// <summary>
+        /// Generate using statements from the collected namespaces
+        /// </summary>
+        private void GenerateUsingStatements(StringBuilder sb, HashSet<string> namespaces)
+        {
+            // Add default using statements
+            sb.AppendLine("#nullable enable");
+            sb.AppendLine("using System;");
+            sb.AppendLine("using System.Collections.Generic;");
+            
+            // Add collected import namespaces (sorted for consistency)
+            foreach (var ns in namespaces.OrderBy(x => x))
+            {
+                sb.AppendLine($"using {ns};");
+            }
+            
+            sb.AppendLine();
+        }
+
     }
 
     public class ProtoFileInfo
@@ -458,7 +577,7 @@ namespace T1.GrpcProtoGenerator.Generators
             return System.IO.Path.GetFileName(path);
         }
 
-        private ProtoFileInfo ResolveImportPath(string importPath, string currentProtoPath)
+        public ProtoFileInfo ResolveImportPath(string importPath, string currentProtoPath)
         {
             // Try exact match first
             if (_protoFiles.TryGetValue(importPath, out var exactMatch))
@@ -483,7 +602,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 System.IO.Path.GetFileName(f.Path).Equals(importFileName, StringComparison.OrdinalIgnoreCase));
         }
 
-        private ProtoModel GetOrParseModel(ProtoFileInfo protoFile)
+        public ProtoModel GetOrParseModel(ProtoFileInfo protoFile)
         {
             if (!_parsedModels.TryGetValue(protoFile.Path, out var model))
             {
