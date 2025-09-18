@@ -98,6 +98,10 @@ namespace T1.GrpcProtoGenerator.Generators
 
         private static void AddGeneratedSourceFile(SourceProductionContext spc, string messagesSource, string sourceFileName)
         {
+            if (string.IsNullOrEmpty(messagesSource))
+            {
+                return;
+            }
             spc.AddSource(sourceFileName, SourceText.From(messagesSource, Encoding.UTF8));
         }
 
@@ -138,26 +142,6 @@ namespace T1.GrpcProtoGenerator.Generators
         }
 
         /// <summary>
-        /// Generate message classes and enums grouped by namespace
-        /// </summary>
-        private void GenerateMessageAndEnumClasses(StringBuilder sb, List<ProtoMessage> modelMessages, List<ProtoEnum> modelEnums)
-        {
-            var allNamespaces = CollectAllUniqueNamespaces(modelMessages, modelEnums);
-            
-            foreach (var namespaceValue in allNamespaces)
-            {
-                sb.AppendLine($"namespace {namespaceValue}");
-                sb.AppendLine("{");
-
-                GenerateMessagesForNamespace(sb, modelMessages, namespaceValue);
-                GenerateEnumsForNamespace(sb, modelEnums, namespaceValue);
-
-                sb.AppendLine("}");
-                sb.AppendLine();
-            }
-        }
-
-        /// <summary>
         /// Collect all unique namespaces from messages and enums
         /// </summary>
         private List<string> CollectAllUniqueNamespaces(List<ProtoMessage> modelMessages, List<ProtoEnum> modelEnums)
@@ -171,21 +155,6 @@ namespace T1.GrpcProtoGenerator.Generators
                 .ToHashSet();
             
             return messageNamespaces.Union(enumNamespaces).OrderBy(ns => ns).ToList();
-        }
-
-        /// <summary>
-        /// Generate a single namespace block with all its messages and enums
-        /// </summary>
-        private void GenerateNamespaceWithContent(StringBuilder sb, string namespaceValue, List<ProtoMessage> modelMessages, List<ProtoEnum> modelEnums)
-        {
-            sb.AppendLine($"namespace {namespaceValue}");
-            sb.AppendLine("{");
-
-            GenerateMessagesForNamespace(sb, modelMessages, namespaceValue);
-            GenerateEnumsForNamespace(sb, modelEnums, namespaceValue);
-
-            sb.AppendLine("}");
-            sb.AppendLine();
         }
 
         /// <summary>
@@ -219,34 +188,6 @@ namespace T1.GrpcProtoGenerator.Generators
         }
 
         /// <summary>
-        /// Generate message classes grouped by namespace
-        /// </summary>
-        private void GenerateMessageClasses(StringBuilder sb, List<ProtoMessage> modelMessages)
-        {
-            // Group messages by CsharpNamespace
-            var messagesByNamespace = modelMessages
-                .GroupBy(msg => msg.CsharpNamespace.GetTargetNamespace())
-                .ToList();
-
-            // Generate namespace blocks for each group
-            foreach (var namespaceGroup in messagesByNamespace)
-            {
-                var namespaceValue = namespaceGroup.Key;
-                sb.AppendLine($"namespace {namespaceValue}");
-                sb.AppendLine("{");
-
-                // Generate all GrpcMessage classes for this namespace
-                foreach (var msg in namespaceGroup)
-                {
-                    GenerateSingleMessageClass(sb, msg);
-                }
-
-                sb.AppendLine("}");
-                sb.AppendLine();
-            }
-        }
-
-        /// <summary>
         /// Generate a single message class with its properties
         /// </summary>
         private void GenerateSingleMessageClass(StringBuilder sb, ProtoMessage msg)
@@ -267,32 +208,6 @@ namespace T1.GrpcProtoGenerator.Generators
         }
 
         /// <summary>
-        /// Generate enum classes grouped by namespace
-        /// </summary>
-        private void GenerateEnumClasses(StringBuilder sb, List<ProtoEnum> modelEnums)
-        {
-            // Group enums by CsharpNamespace
-            var enumsByNamespace = modelEnums
-                .GroupBy(e => e.CsharpNamespace.GetTargetNamespace())
-                .ToList();
-
-            foreach (var namespaceGroup in enumsByNamespace)
-            {
-                var namespaceValue = namespaceGroup.Key;
-                sb.AppendLine($"namespace {namespaceValue}");
-                sb.AppendLine("{");
-
-                foreach (var enumDef in namespaceGroup)
-                {
-                    GenerateSingleEnumClass(sb, enumDef);
-                }
-
-                sb.AppendLine("}");
-                sb.AppendLine();
-            }
-        }
-
-        /// <summary>
         /// Generate a single enum class with its values
         /// </summary>
         private void GenerateSingleEnumClass(StringBuilder sb, ProtoEnum enumDef)
@@ -309,20 +224,13 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine();
         }
 
-        /// <summary>
-        /// Get default namespace for external types
-        /// </summary>
-        private string GetDefaultNamespaceForExternalTypes(ProtoModel model)
-        {
-            var messagesByNamespace = model.Messages
-                .GroupBy(msg => msg.CsharpNamespace.GetTargetNamespace())
-                .ToList();
-                
-            return messagesByNamespace.Any() ? messagesByNamespace.First().Key : "Generated";
-        }
-
         private string GenerateWrapperClientSource(ProtoModel model, ProtoImportResolver resolver, string protoPath)
         {
+            if (!model.Services.Any())
+            {
+                return string.Empty;
+            }
+            
             var sb = new StringBuilder();
             
             // Collect import namespaces for messages and enums only
@@ -454,6 +362,11 @@ namespace T1.GrpcProtoGenerator.Generators
 
         private string GenerateWrapperServerSource(ProtoModel model, ProtoImportResolver resolver, string protoPath)
         {
+            if (!model.Services.Any())
+            {
+                return string.Empty;
+            }
+            
             var sb = new StringBuilder();
             
             // Collect import namespaces for messages and enums only
