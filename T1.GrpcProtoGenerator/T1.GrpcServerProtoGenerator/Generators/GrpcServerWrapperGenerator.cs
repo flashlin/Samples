@@ -63,14 +63,14 @@ namespace T1.GrpcProtoGenerator.Generators
             // Collect all messages and enums from all proto files
             var allMessages = new List<ProtoMessage>();
             var allEnums = new List<ProtoEnum>();
-            var allSvcs = new List<ProtoService>();
+            var allSvcList = new List<ProtoService>();
             
             foreach (var protoInfo in allProtos)
             {
                 var model = ProtoParser.ParseProtoText(protoInfo.Content);
                 allMessages.AddRange(model.Messages);
                 allEnums.AddRange(model.Enums);
-                allSvcs.AddRange(model.Services);
+                allSvcList.AddRange(model.Services);
             }
             
             // Add unique messages (based on FullName or Name)
@@ -95,7 +95,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 combinedModel.Enums.Add(enumDef);
             }
 
-            foreach (var svc in allSvcs)
+            foreach (var svc in allSvcList)
             {
                 foreach (var rpc in svc.Rpcs)
                 {
