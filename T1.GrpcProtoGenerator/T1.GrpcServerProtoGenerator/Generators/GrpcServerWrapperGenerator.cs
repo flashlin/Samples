@@ -26,19 +26,63 @@ namespace T1.GrpcProtoGenerator.Generators
 
             context.RegisterSourceOutput(allProtoFiles, (spc, allProtos) =>
             {
-                var protoResolver = new ProtoImportResolver(allProtos);
+                // Collect all messages and enums from all proto files
+                var allMessages = new List<ProtoMessage>();
+                var allEnums = new List<ProtoEnum>();
                 
+                foreach (var protoInfo in allProtos)
+                {
+                    var model = ProtoParser.ParseProtoText(protoInfo.Content);
+                    allMessages.AddRange(model.Messages);
+                    allEnums.AddRange(model.Enums);
+                }
+                // Generate a single combined messages file for all proto files
+                var combinedModel = CreateCombinedModel(allMessages, allEnums);
+                AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(combinedModel), "Generated_messages.cs");
+                
+                var protoResolver = new ProtoImportResolver(allProtos);
                 foreach (var protoInfo in allProtos)
                 {
                     var model = ProtoParser.ParseProtoText(protoInfo.Content);
                     var enrichedModel = protoResolver.EnrichModelWithImports(model, protoInfo.Path);
                     var protoFileName = protoInfo.GetProtoFileName();
-
-                    AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(enrichedModel), $"Generated_{protoFileName}_messages.cs");
+                    // Generate server and client files per proto file
                     AddGeneratedSourceFile(spc, GenerateWrapperServerSource(enrichedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_server.cs");
                     AddGeneratedSourceFile(spc, GenerateWrapperClientSource(enrichedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_client.cs");
                 }
             });
+        }
+
+        /// <summary>
+        /// Create a combined model with unique messages and enums from all proto files
+        /// </summary>
+        private ProtoModel CreateCombinedModel(List<ProtoMessage> allMessages, List<ProtoEnum> allEnums)
+        {
+            var combinedModel = new ProtoModel();
+            
+            // Add unique messages (based on FullName or Name)
+            var uniqueMessages = allMessages
+                .GroupBy(m => !string.IsNullOrEmpty(m.FullName) ? m.FullName : m.Name)
+                .Select(g => g.First())
+                .ToList();
+            
+            foreach (var message in uniqueMessages)
+            {
+                combinedModel.Messages.Add(message);
+            }
+            
+            // Add unique enums (based on Name and Namespace)
+            var uniqueEnums = allEnums
+                .GroupBy(e => $"{e.CsharpNamespace}.{e.Name}")
+                .Select(g => g.First())
+                .ToList();
+            
+            foreach (var enumDef in uniqueEnums)
+            {
+                combinedModel.Enums.Add(enumDef);
+            }
+            
+            return combinedModel;
         }
 
         private static void AddGeneratedSourceFile(SourceProductionContext spc, string messagesSource, string sourceFileName)
