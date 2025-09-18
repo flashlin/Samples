@@ -45,7 +45,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 }
                 
                 // Generate a single combined messages file for all proto files
-                logger.LogInfo($"Creating combined model with {allMessages.Count} total messages and {allEnums.Count} total enums");
+                logger.LogWarning($"Creating combined model with {allMessages.Count} total messages and {allEnums.Count} total enums");
                 var combinedModel = CreateCombinedModel(allMessages, allEnums);
                 logger.LogWarning($"Generated combined messages file with {combinedModel.Messages.Count} unique messages and {combinedModel.Enums.Count} unique enums");
                 AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(combinedModel), "Generated_messages.cs");

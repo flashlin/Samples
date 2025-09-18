@@ -13,11 +13,7 @@
     <ItemGroup>
         <!-- Keep standard Protobuf compilation for base types (both client and server) -->
         <Protobuf Include="Protos\greet.proto" GrpcServices="Both" />
-        <!-- Also use as AdditionalFiles for our custom source generator -->
-        <AdditionalFiles Include="Protos\greet.proto" />
         <Protobuf Include="Protos\rebate.proto" GrpcServices="Both" ProtoRoot="Protos" />
-        <AdditionalFiles Include="Protos\rebate.proto" />
-        <!-- Include message proto files -->
         <Protobuf Include="Protos\Messages\requests.proto" GrpcServices="None" ProtoRoot="Protos" />
         <Protobuf Include="Protos\Messages\responses.proto" GrpcServices="None" ProtoRoot="Protos" />
         <Protobuf Include="Protos\Models\Period.proto" GrpcServices="None" ProtoRoot="Protos" />
@@ -32,6 +28,7 @@
         <Protobuf Include="Protos\Models\CasinoRebateReportDetail.proto" GrpcServices="None" ProtoRoot="Protos" />
         <Protobuf Include="Protos\Models\ProductDetailMessage.proto" GrpcServices="None" ProtoRoot="Protos" />
         <Protobuf Include="Protos\CustomTypes\decimal_value.proto" GrpcServices="None" ProtoRoot="Protos" />
+        <AdditionalFiles Include="Protos\**\*.proto" />
     </ItemGroup>
 
     <ItemGroup>
