@@ -53,11 +53,20 @@ namespace T1.GrpcProtoGenerator.Generators
             // Generate using statements
             GenerateBasicUsingStatements(sb);
             
-            // Generate message classes grouped by namespace
-            GenerateMessageClasses(sb, model.Messages);
+            // Generate message classes and enums grouped by namespace
+            var allNamespaces = CollectAllUniqueNamespaces(model.Messages, model.Enums);
             
-            // Generate enums grouped by namespace
-            GenerateEnumClasses(sb, model.Enums);
+            foreach (var namespaceValue in allNamespaces)
+            {
+                sb.AppendLine($"namespace {namespaceValue}");
+                sb.AppendLine("{");
+
+                GenerateMessagesForNamespace(sb, model.Messages, namespaceValue);
+                GenerateEnumsForNamespace(sb, model.Enums, namespaceValue);
+
+                sb.AppendLine("}");
+                sb.AppendLine();
+            }
 
             return sb.ToString();
         }
@@ -71,6 +80,87 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Generate message classes and enums grouped by namespace
+        /// </summary>
+        private void GenerateMessageAndEnumClasses(StringBuilder sb, List<ProtoMessage> modelMessages, List<ProtoEnum> modelEnums)
+        {
+            var allNamespaces = CollectAllUniqueNamespaces(modelMessages, modelEnums);
+            
+            foreach (var namespaceValue in allNamespaces)
+            {
+                sb.AppendLine($"namespace {namespaceValue}");
+                sb.AppendLine("{");
+
+                GenerateMessagesForNamespace(sb, modelMessages, namespaceValue);
+                GenerateEnumsForNamespace(sb, modelEnums, namespaceValue);
+
+                sb.AppendLine("}");
+                sb.AppendLine();
+            }
+        }
+
+        /// <summary>
+        /// Collect all unique namespaces from messages and enums
+        /// </summary>
+        private List<string> CollectAllUniqueNamespaces(List<ProtoMessage> modelMessages, List<ProtoEnum> modelEnums)
+        {
+            var messageNamespaces = modelMessages
+                .Select(msg => msg.CsharpNamespace.GetTargetNamespace())
+                .ToHashSet();
+            
+            var enumNamespaces = modelEnums
+                .Select(e => e.CsharpNamespace.GetTargetNamespace())
+                .ToHashSet();
+            
+            return messageNamespaces.Union(enumNamespaces).OrderBy(ns => ns).ToList();
+        }
+
+        /// <summary>
+        /// Generate a single namespace block with all its messages and enums
+        /// </summary>
+        private void GenerateNamespaceWithContent(StringBuilder sb, string namespaceValue, List<ProtoMessage> modelMessages, List<ProtoEnum> modelEnums)
+        {
+            sb.AppendLine($"namespace {namespaceValue}");
+            sb.AppendLine("{");
+
+            GenerateMessagesForNamespace(sb, modelMessages, namespaceValue);
+            GenerateEnumsForNamespace(sb, modelEnums, namespaceValue);
+
+            sb.AppendLine("}");
+            sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Generate all message classes for a specific namespace
+        /// </summary>
+        private void GenerateMessagesForNamespace(StringBuilder sb, List<ProtoMessage> modelMessages, string namespaceValue)
+        {
+            var messagesInNamespace = modelMessages
+                .Where(msg => msg.CsharpNamespace.GetTargetNamespace() == namespaceValue)
+                .ToList();
+            
+            foreach (var msg in messagesInNamespace)
+            {
+                GenerateSingleMessageClass(sb, msg);
+            }
+        }
+
+        /// <summary>
+        /// Generate all enum classes for a specific namespace
+        /// </summary>
+        private void GenerateEnumsForNamespace(StringBuilder sb, List<ProtoEnum> modelEnums, string namespaceValue)
+        {
+            var enumsInNamespace = modelEnums
+                .Where(e => e.CsharpNamespace.GetTargetNamespace() == namespaceValue)
+                .ToList();
+            
+            foreach (var enumDef in enumsInNamespace)
+            {
+                GenerateSingleEnumClass(sb, enumDef);
+            }
         }
 
         /// <summary>
