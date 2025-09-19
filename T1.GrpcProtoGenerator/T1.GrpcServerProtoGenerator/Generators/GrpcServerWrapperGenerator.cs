@@ -356,26 +356,16 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("        {");
             // Map request fields using object initializer
             var requestMessage = combineModel.FindMessage(rpc.RequestType);
-            if (requestMessage != null)
+            sb.AppendLine($"            var grpcReq = new {rpc.RequestType}");
+            sb.AppendLine("            {");
+            for (int i = 0; i < requestMessage.Fields.Count; i++)
             {
-                sb.AppendLine($"            var grpcReq = new {rpc.RequestType}");
-                sb.AppendLine("            {");
-                
-                for (int i = 0; i < requestMessage.Fields.Count; i++)
-                {
-                    var field = requestMessage.Fields[i];
-                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    var comma = i < requestMessage.Fields.Count - 1 ? "," : "";
-                    sb.AppendLine($"                {propName} = request.{propName}{comma}");
-                }
-                
-                sb.AppendLine("            };");
+                var field = requestMessage.Fields[i];
+                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var comma = i < requestMessage.Fields.Count - 1 ? "," : "";
+                sb.AppendLine($"                {propName} = request.{propName}{comma}");
             }
-            else
-            {
-                // Handle external types - fallback to simple constructor
-                sb.AppendLine($"            var grpcReq = new {rpc.RequestType}();");
-            }
+            sb.AppendLine("            };");
             
             sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
             // Map response fields using object initializer
