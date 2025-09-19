@@ -26,39 +26,76 @@ namespace T1.GrpcProtoGenerator.Generators
 
             context.RegisterSourceOutput(allProtoFiles, (spc, allProtos) =>
             {
-                // Create logger for this execution context
-                ISourceGeneratorLogger logger = new SourceGeneratorLogger(spc.ReportDiagnostic, nameof(GrpcServerWrapperGenerator));
-                
+                var logger = InitializeLogger(spc);
                 logger.LogWarning($"Starting source generation for {allProtos.Length} proto files");
                 
-                // Generate a single combined messages file for all proto files
                 var combinedModel = CreateCombinedModel(allProtos);
-                foreach (var messageModel in combinedModel.Messages)
-                {
-                    AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(messageModel, combinedModel), 
-                        $"Generated_message_{messageModel.Name}.cs");
-                }
                 
-                
-                foreach (var enumModel in combinedModel.Enums)
-                {
-                    AddGeneratedSourceFile(spc, GenerateWrapperGrpcEnumSource(enumModel), 
-                        $"Generated_enum_{enumModel.Name}.cs");
-                }
-                
-                foreach (var protoInfo in allProtos)
-                {
-                    var model = ProtoParser.ParseProtoText(protoInfo.Content, protoInfo.Path);
-                    var protoFileName = protoInfo.GetProtoFileName();
-                    
-                    logger.LogDebug($"Generating server and client files for {protoFileName}");
-                    // Generate server and client files per proto file
-                    AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model, combinedModel), $"Generated_{protoFileName}_server.cs");
-                    AddGeneratedSourceFile(spc, GenerateWrapperClientSource(model, combinedModel), $"Generated_{protoFileName}_client.cs");
-                }
+                GenerateMessageFiles(spc, combinedModel, logger);
+                GenerateEnumFiles(spc, combinedModel, logger);
+                GenerateServiceFiles(spc, allProtos, combinedModel, logger);
                 
                 logger.LogInfo("Source generation completed successfully");
             });
+        }
+
+        /// <summary>
+        /// Initialize logger for source generation
+        /// </summary>
+        private ISourceGeneratorLogger InitializeLogger(SourceProductionContext spc)
+        {
+            return new SourceGeneratorLogger(spc.ReportDiagnostic, nameof(GrpcServerWrapperGenerator));
+        }
+
+        /// <summary>
+        /// Generate message files for all messages in the combined model
+        /// </summary>
+        private void GenerateMessageFiles(SourceProductionContext spc, ProtoModel combinedModel, ISourceGeneratorLogger logger)
+        {
+            logger.LogDebug($"Generating {combinedModel.Messages.Count} message files");
+            
+            foreach (var messageModel in combinedModel.Messages)
+            {
+                AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(messageModel, combinedModel), 
+                    $"Generated_message_{messageModel.Name}.cs");
+            }
+        }
+
+        /// <summary>
+        /// Generate enum files for all enums in the combined model
+        /// </summary>
+        private void GenerateEnumFiles(SourceProductionContext spc, ProtoModel combinedModel, ISourceGeneratorLogger logger)
+        {
+            logger.LogDebug($"Generating {combinedModel.Enums.Count} enum files");
+            
+            foreach (var enumModel in combinedModel.Enums)
+            {
+                AddGeneratedSourceFile(spc, GenerateWrapperGrpcEnumSource(enumModel), 
+                    $"Generated_enum_{enumModel.Name}.cs");
+            }
+        }
+
+        /// <summary>
+        /// Generate server and client files for all proto files
+        /// </summary>
+        private void GenerateServiceFiles(SourceProductionContext spc, ImmutableArray<ProtoFileInfo> allProtos, 
+            ProtoModel combinedModel, ISourceGeneratorLogger logger)
+        {
+            logger.LogDebug($"Generating service files for {allProtos.Length} proto files");
+            
+            foreach (var protoInfo in allProtos)
+            {
+                var model = ProtoParser.ParseProtoText(protoInfo.Content, protoInfo.Path);
+                var protoFileName = protoInfo.GetProtoFileName();
+                
+                logger.LogDebug($"Generating server and client files for {protoFileName}");
+                
+                // Generate server and client files per proto file
+                AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model, combinedModel), 
+                    $"Generated_{protoFileName}_server.cs");
+                AddGeneratedSourceFile(spc, GenerateWrapperClientSource(model, combinedModel), 
+                    $"Generated_{protoFileName}_client.cs");
+            }
         }
 
         /// <summary>
