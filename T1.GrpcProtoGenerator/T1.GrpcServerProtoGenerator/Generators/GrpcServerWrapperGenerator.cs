@@ -211,53 +211,6 @@ namespace T1.GrpcProtoGenerator.Generators
         }
 
         /// <summary>
-        /// Collect all unique namespaces from messages and enums
-        /// </summary>
-        private List<string> CollectAllUniqueNamespaces(List<ProtoMessage> modelMessages, List<ProtoEnum> modelEnums)
-        {
-            var messageNamespaces = modelMessages
-                .Select(msg => msg.CsharpNamespace)
-                .ToHashSet();
-            
-            var enumNamespaces = modelEnums
-                .Select(e => e.CsharpNamespace)
-                .ToHashSet();
-            
-            return messageNamespaces.Union(enumNamespaces).OrderBy(ns => ns).ToList();
-        }
-
-        /// <summary>
-        /// Generate all message classes for a specific namespace
-        /// </summary>
-        private void GenerateMessagesForNamespace(StringBuilder sb, List<ProtoMessage> modelMessages,
-            string namespaceValue, ProtoModel combineModel)
-        {
-            var messagesInNamespace = modelMessages
-                .Where(msg => msg.CsharpNamespace == namespaceValue)
-                .ToList();
-            
-            foreach (var msg in messagesInNamespace)
-            {
-                GenerateSingleMessageClass(sb, msg, combineModel);
-            }
-        }
-
-        /// <summary>
-        /// Generate all enum classes for a specific namespace
-        /// </summary>
-        private void GenerateEnumsForNamespace(StringBuilder sb, List<ProtoEnum> modelEnums, string namespaceValue)
-        {
-            var enumsInNamespace = modelEnums
-                .Where(e => e.CsharpNamespace == namespaceValue)
-                .ToList();
-            
-            foreach (var enumDef in enumsInNamespace)
-            {
-                GenerateSingleEnumClass(sb, enumDef);
-            }
-        }
-
-        /// <summary>
         /// Generate a single message class with its properties
         /// </summary>
         private void GenerateSingleMessageClass(StringBuilder sb, ProtoMessage msg, ProtoModel combineModel)
