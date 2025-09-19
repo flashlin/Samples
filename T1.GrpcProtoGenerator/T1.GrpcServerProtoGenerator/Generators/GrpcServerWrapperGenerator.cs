@@ -401,31 +401,51 @@ namespace T1.GrpcProtoGenerator.Generators
             // Determine the correct namespace for request and response types
             sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcDto> {rpc.Name}Async({rpc.RequestType}GrpcDto request, CancellationToken cancellationToken = default)");
             sb.AppendLine("        {");
-            sb.AppendLine($"            var grpcReq = new {rpc.RequestType}();");
-            
-            // Map request fields
+            // Map request fields using object initializer
             var requestMessage = model.FindMessage(rpc.RequestType);
             if (requestMessage != null)
             {
-                foreach (var field in requestMessage.Fields)
+                sb.AppendLine($"            var grpcReq = new {rpc.RequestType}");
+                sb.AppendLine("            {");
+                
+                for (int i = 0; i < requestMessage.Fields.Count; i++)
                 {
+                    var field = requestMessage.Fields[i];
                     var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    sb.AppendLine($"            grpcReq.{propName} = request.{propName};");
+                    var comma = i < requestMessage.Fields.Count - 1 ? "," : "";
+                    sb.AppendLine($"                {propName} = request.{propName}{comma}");
                 }
+                
+                sb.AppendLine("            };");
+            }
+            else
+            {
+                // Handle external types - fallback to simple constructor
+                sb.AppendLine($"            var grpcReq = new {rpc.RequestType}();");
             }
             
             sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
-            sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcDto();");
-            
-            // Map response fields
+            // Map response fields using object initializer
             var responseMessage = model.FindMessage(rpc.ResponseType);
             if (responseMessage != null)
             {
-                foreach (var field in responseMessage.Fields)
+                sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcDto");
+                sb.AppendLine("            {");
+                
+                for (int i = 0; i < responseMessage.Fields.Count; i++)
                 {
+                    var field = responseMessage.Fields[i];
                     var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    sb.AppendLine($"            dto.{propName} = grpcResp.{propName};");
+                    var comma = i < responseMessage.Fields.Count - 1 ? "," : "";
+                    sb.AppendLine($"                {propName} = grpcResp.{propName}{comma}");
                 }
+                
+                sb.AppendLine("            };");
+            }
+            else
+            {
+                // Handle external types - fallback to simple constructor
+                sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcDto();");
             }
             
             sb.AppendLine("            return dto;");
@@ -560,6 +580,10 @@ namespace T1.GrpcProtoGenerator.Generators
                 }
                 
                 sb.AppendLine("            };");
+            }
+            else
+            {
+                sb.AppendLine($"            var dtoRequest = new {requestType}();");
             }
             
             sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
