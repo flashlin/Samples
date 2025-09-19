@@ -81,6 +81,7 @@ namespace T1.GrpcProtoGenerator.Generators
         }
         public string CsharpNamespace { get; set; } = string.Empty;
         public List<ProtoField> Fields { get; } = new List<ProtoField>();
+        public string ProtoPath { get; set; } = string.Empty;
 
         public string GetFullName()
         {
@@ -106,6 +107,7 @@ namespace T1.GrpcProtoGenerator.Generators
         public string Name { get; set; } = string.Empty;
         public string CsharpNamespace { get; set; } = string.Empty;
         public List<ProtoRpc> Rpcs { get; } = new List<ProtoRpc>();
+        public string ProtoPath { get; set; } = string.Empty;
     }
 
     internal class ProtoRpc
@@ -122,6 +124,7 @@ namespace T1.GrpcProtoGenerator.Generators
         public string Name { get; set; } = string.Empty;
         public string CsharpNamespace { get; set; } = string.Empty;
         public List<(string Name, int Value)> Values { get; } = new List<(string, int)>();
+        public string ProtoPath { get; set; } = string.Empty;
 
         public string GetCsharpTypeFullname()
         {

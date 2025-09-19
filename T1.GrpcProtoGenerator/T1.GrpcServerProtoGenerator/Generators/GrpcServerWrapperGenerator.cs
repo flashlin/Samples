@@ -39,14 +39,13 @@ namespace T1.GrpcProtoGenerator.Generators
                 var protoResolver = new ProtoImportResolver(allProtos);
                 foreach (var protoInfo in allProtos)
                 {
-                    var model = ProtoParser.ParseProtoText(protoInfo.Content);
-                    var enrichedModel = protoResolver.EnrichModelWithImports(model, protoInfo.Path);
+                    var model = ProtoParser.ParseProtoText(protoInfo.Content, protoInfo.Path);
                     var protoFileName = protoInfo.GetProtoFileName();
                     
                     logger.LogDebug($"Generating server and client files for {protoFileName}");
                     // Generate server and client files per proto file
-                    AddGeneratedSourceFile(spc, GenerateWrapperServerSource(enrichedModel, combinedModel), $"Generated_{protoFileName}_server.cs");
-                    AddGeneratedSourceFile(spc, GenerateWrapperClientSource(enrichedModel, combinedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_client.cs");
+                    AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model, combinedModel), $"Generated_{protoFileName}_server.cs");
+                    AddGeneratedSourceFile(spc, GenerateWrapperClientSource(model, combinedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_client.cs");
                 }
                 
                 logger.LogInfo("Source generation completed successfully");
@@ -67,7 +66,7 @@ namespace T1.GrpcProtoGenerator.Generators
             
             foreach (var protoInfo in allProtos)
             {
-                var model = ProtoParser.ParseProtoText(protoInfo.Content);
+                var model = ProtoParser.ParseProtoText(protoInfo.Content, protoInfo.Path);
                 allMessages.AddRange(model.Messages);
                 allEnums.AddRange(model.Enums);
                 allSvcList.AddRange(model.Services);
@@ -617,93 +616,6 @@ namespace T1.GrpcProtoGenerator.Generators
                 var relativePath = NormalizeProtoPath(protoFile.Path);
                 _protoFiles[relativePath] = protoFile;
             }
-        }
-
-        public ProtoModel EnrichModelWithImports(ProtoModel mainModel, string mainProtoPath)
-        {
-            var enrichedModel = new ProtoModel();
-
-            // Copy original items
-            foreach (var import in mainModel.Imports)
-                enrichedModel.Imports.Add(import);
-            
-            foreach (var message in mainModel.Messages)
-                enrichedModel.Messages.Add(message);
-            
-            foreach (var service in mainModel.Services)
-                enrichedModel.Services.Add(service);
-            
-            foreach (var enumDef in mainModel.Enums)
-                enrichedModel.Enums.Add(enumDef);
-
-            // Add imported messages, services, and enums to the main model
-            foreach (var importPath in mainModel.Imports)
-            {
-                var resolvedImport = ResolveImportPath(importPath, mainProtoPath);
-                if (resolvedImport != null)
-                {
-                    var importedModel = GetOrParseModel(resolvedImport);
-                    if (importedModel != null)
-                    {
-                        // Add imported messages with namespace prefix if needed
-                        foreach (var message in importedModel.Messages)
-                        {
-                            if (!enrichedModel.Messages.Any(m => m.Name == message.Name))
-                            {
-                                enrichedModel.Messages.Add(message);
-                            }
-                        }
-
-                        // Add imported enums
-                        foreach (var enumDef in importedModel.Enums)
-                        {
-                            if (!enrichedModel.Enums.Any(e => e.Name == enumDef.Name))
-                            {
-                                enrichedModel.Enums.Add(enumDef);
-                            }
-                        }
-
-                        // Note: Services are typically not imported, but we could add them if needed
-                    }
-                }
-            }
-
-            return enrichedModel;
-        }
-
-        public ProtoFileInfo ResolveImportPath(string importPath, string currentProtoPath)
-        {
-            // Try exact match first
-            if (_protoFiles.TryGetValue(importPath, out var exactMatch))
-            {
-                return exactMatch;
-            }
-
-            // Try to resolve relative to current file's directory
-            var currentDir = System.IO.Path.GetDirectoryName(NormalizeProtoPath(currentProtoPath));
-            if (!string.IsNullOrEmpty(currentDir))
-            {
-                var relativePath = System.IO.Path.Combine(currentDir, importPath).Replace('\\', '/');
-                if (_protoFiles.TryGetValue(relativePath, out var relativeMatch))
-                {
-                    return relativeMatch;
-                }
-            }
-
-            // Try filename only match as fallback
-            var importFileName = System.IO.Path.GetFileName(importPath);
-            return _protoFiles.Values.FirstOrDefault(f => 
-                System.IO.Path.GetFileName(f.Path).Equals(importFileName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        public ProtoModel GetOrParseModel(ProtoFileInfo protoFile)
-        {
-            if (!_parsedModels.TryGetValue(protoFile.Path, out var model))
-            {
-                model = ProtoParser.ParseProtoText(protoFile.Content);
-                _parsedModels[protoFile.Path] = model;
-            }
-            return model;
         }
 
         private string NormalizeProtoPath(string path)

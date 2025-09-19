@@ -16,16 +16,16 @@ namespace T1.GrpcProtoGenerator.Generators
         private static readonly Regex EnumRegex = new Regex(@"enum\s+(?<name>\w+)\s*\{(?<body>[\s\S]*?)\}", RegexOptions.Compiled);
         private static readonly Regex EnumFieldRegex = new Regex(@"(?<name>\w+)\s*=\s*(?<value>\d+);", RegexOptions.Compiled);
 
-        public static ProtoModel ParseProtoText(string protoText)
+        public static ProtoModel ParseProtoText(string protoText, string protoInfoPath)
         {
             var model = new ProtoModel();
             var packageName = ParsePackageAndNamespace(protoText, out var csharpNamespace);
             csharpNamespace = NormalCsharpNamespace(csharpNamespace);
             
             ParseImports(protoText, model);
-            ParseMessages(protoText, model, packageName, csharpNamespace);
-            ParseEnums(protoText, model, csharpNamespace);
-            ParseServices(protoText, model, csharpNamespace);
+            ParseMessages(protoText, model, csharpNamespace, protoInfoPath);
+            ParseEnums(protoText, model, csharpNamespace, protoInfoPath);
+            ParseServices(protoText, model, csharpNamespace, protoInfoPath);
 
             return model;
         }
@@ -51,7 +51,8 @@ namespace T1.GrpcProtoGenerator.Generators
             }
         }
 
-        private static void ParseMessages(string protoText, ProtoModel model, string packageName, string csharpNamespace)
+        private static void ParseMessages(string protoText, ProtoModel model,
+            string csharpNamespace, string protoInfoPath)
         {
             foreach (Match messageMatch in MessageRegex.Matches(protoText))
             {
@@ -59,6 +60,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var body = messageMatch.Groups["body"].Value;
                 var protoMessage = new ProtoMessage 
                 { 
+                    ProtoPath = protoInfoPath,
                     Name = name, 
                     CsharpNamespace = csharpNamespace
                 };
@@ -87,7 +89,7 @@ namespace T1.GrpcProtoGenerator.Generators
             }
         }
 
-        private static void ParseEnums(string protoText, ProtoModel model, string csharpNamespace)
+        private static void ParseEnums(string protoText, ProtoModel model, string csharpNamespace, string protoInfoPath)
         {
             foreach (Match enumMatch in EnumRegex.Matches(protoText))
             {
@@ -95,6 +97,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var body = enumMatch.Groups["body"].Value;
                 var protoEnum = new ProtoEnum 
                 { 
+                    ProtoPath = protoInfoPath,
                     Name = enumName,
                     CsharpNamespace = csharpNamespace
                 };
@@ -115,7 +118,8 @@ namespace T1.GrpcProtoGenerator.Generators
             }
         }
 
-        private static void ParseServices(string protoText, ProtoModel model, string csharpNamespace)
+        private static void ParseServices(string protoText, ProtoModel model, string csharpNamespace,
+            string protoInfoPath)
         {
             foreach (Match serviceMatch in ServiceRegex.Matches(protoText))
             {
@@ -123,6 +127,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var serviceBody = serviceMatch.Groups["body"].Value;
                 var protoService = new ProtoService 
                 { 
+                    ProtoPath = protoInfoPath,
                     Name = serviceName,
                     CsharpNamespace = csharpNamespace
                 };
