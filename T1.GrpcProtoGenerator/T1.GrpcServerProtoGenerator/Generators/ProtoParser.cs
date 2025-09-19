@@ -10,7 +10,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private static readonly Regex CsharpNamespaceRegex = new Regex(@"option\s+csharp_namespace\s*=\s*""(?<namespace>[^""]+)""\s*;", RegexOptions.Compiled);
         private static readonly Regex ImportRegex = new Regex(@"import\s+""(?<path>[^""]+)""\s*;", RegexOptions.Compiled);
         private static readonly Regex MessageRegex = new Regex(@"message\s+(?<name>\w+)\s*\{(?<body>[\s\S]*?)\}", RegexOptions.Compiled);
-        private static readonly Regex FieldRegex = new Regex(@"(?<repeated>repeated\s+)?(?<type>\w+)\s+(?<name>\w+)\s*=\s*(?<tag>\d+);", RegexOptions.Compiled);
+        private static readonly Regex FieldRegex = new Regex(@"(?<optional>optional\s+)?(?<repeated>repeated\s+)?(?<type>\w+)\s+(?<name>\w+)\s*=\s*(?<tag>\d+);", RegexOptions.Compiled);
         private static readonly Regex ServiceRegex = new Regex(@"service\s+(?<name>\w+)\s*\{(?<body>[\s\S]*?)\}", RegexOptions.Compiled);
         private static readonly Regex RpcRegex = new Regex(@"rpc\s+(?<name>\w+)\s*\(\s*(?<req>\w+)\s*\)\s*returns\s*\(\s*(?<resp>\w+)\s*\)\s*;", RegexOptions.Compiled);
         private static readonly Regex EnumRegex = new Regex(@"enum\s+(?<name>\w+)\s*\{(?<body>[\s\S]*?)\}", RegexOptions.Compiled);
@@ -84,7 +84,8 @@ namespace T1.GrpcProtoGenerator.Generators
                     Type = fieldMatch.Groups["type"].Value,
                     Name = fieldMatch.Groups["name"].Value,
                     Tag = int.Parse(fieldMatch.Groups["tag"].Value),
-                    IsRepeated = !string.IsNullOrEmpty(fieldMatch.Groups["repeated"].Value)
+                    IsRepeated = !string.IsNullOrEmpty(fieldMatch.Groups["repeated"].Value),
+                    IsOption = !string.IsNullOrEmpty(fieldMatch.Groups["optional"].Value)
                 });
             }
         }

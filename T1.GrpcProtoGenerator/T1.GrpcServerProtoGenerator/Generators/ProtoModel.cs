@@ -100,6 +100,7 @@ namespace T1.GrpcProtoGenerator.Generators
         public string Type { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public bool IsRepeated { get; set; } = false;
+        public bool IsOption { get; set; } = false;
     }
 
     internal class ProtoService
