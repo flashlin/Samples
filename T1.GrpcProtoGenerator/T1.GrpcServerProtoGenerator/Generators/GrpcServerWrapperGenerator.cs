@@ -455,8 +455,27 @@ namespace T1.GrpcProtoGenerator.Generators
             foreach (var rpc in svc.Rpcs)
             {
                 var rpcRequestType = messagesModel.FindCsharpTypeName(rpc.RequestType);
-                var rpcResponseType= messagesModel.FindCsharpTypeName(rpc.ResponseType);
-                sb.AppendLine($"        Task<{rpcResponseType}> {rpc.Name}({rpcRequestType} request);");
+                var rpcResponseType = messagesModel.FindCsharpTypeName(rpc.ResponseType);
+                
+                // Handle request parameter - skip parameter if request type is "Null"
+                string parameterPart = "";
+                if (!rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase))
+                {
+                    parameterPart = $"{rpcRequestType} request";
+                }
+                
+                // Handle return type - use Task instead of Task<T> if response type is "Void"
+                string returnType;
+                if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase))
+                {
+                    returnType = "Task";
+                }
+                else
+                {
+                    returnType = $"Task<{rpcResponseType}>";
+                }
+                
+                sb.AppendLine($"        {returnType} {rpc.Name}({parameterPart});");
             }
             
             sb.AppendLine("    }");
