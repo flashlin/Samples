@@ -524,40 +524,77 @@ namespace T1.GrpcProtoGenerator.Generators
             var requestType = combineModel.FindCsharpTypeName(rpc.RequestType);
             var responseType = combineModel.FindCsharpTypeName(rpc.ResponseType);
             
+            // Determine method signature based on request/response types
+            bool isNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase);
+            bool isVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase);
+            
+            // Generate method signature - override always has full signature
             sb.AppendLine($"        public override async Task<{rpcResponseFullType}> {rpc.Name}({rpcRequestFullType} request, ServerCallContext context)");
             sb.AppendLine("        {");
-            // Map request fields using object initializer
-            var requestMessage = combineModel.FindMessage(rpc.RequestType);
-            sb.AppendLine($"            var dtoRequest = new {requestType}");
-            sb.AppendLine("            {");
-                
-            for (int i = 0; i < requestMessage.Fields.Count; i++)
-            {
-                var field = requestMessage.Fields[i];
-                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                var comma = i < requestMessage.Fields.Count - 1 ? "," : "";
-                sb.AppendLine($"                {propName} = request.{propName}{comma}");
-            }
-                
-            sb.AppendLine("            };");
             
-            sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
-            // Map response fields using object initializer
-            var responseMessage = combineModel.FindMessage(rpc.ResponseType);
-            sb.AppendLine($"            var grpcResponse = new {rpcResponseFullType}");
-            sb.AppendLine("            {");
-                
-            for (int i = 0; i < responseMessage.Fields.Count; i++)
+            // Handle request parameter creation
+            if (!isNullRequest)
             {
-                var field = responseMessage.Fields[i];
-                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                var comma = i < responseMessage.Fields.Count - 1 ? "," : "";
-                sb.AppendLine($"                {propName} = dtoResponse.{propName}{comma}");
+                // Map request fields using object initializer
+                var requestMessage = combineModel.FindMessage(rpc.RequestType);
+                sb.AppendLine($"            var dtoRequest = new {requestType}");
+                sb.AppendLine("            {");
+                    
+                for (int i = 0; i < requestMessage.Fields.Count; i++)
+                {
+                    var field = requestMessage.Fields[i];
+                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    var comma = i < requestMessage.Fields.Count - 1 ? "," : "";
+                    sb.AppendLine($"                {propName} = request.{propName}{comma}");
+                }
+                    
+                sb.AppendLine("            };");
             }
-                
-            sb.AppendLine("            };");
             
-            sb.AppendLine("            return grpcResponse;");
+            // Call the service method
+            if (isVoidResponse)
+            {
+                // For Void response, call without expecting return value
+                if (isNullRequest)
+                {
+                    sb.AppendLine($"            await _instance.{rpc.Name}();");
+                }
+                else
+                {
+                    sb.AppendLine($"            await _instance.{rpc.Name}(dtoRequest);");
+                }
+                // Return a new Void instance
+                sb.AppendLine($"            return new {rpcResponseFullType}();");
+            }
+            else
+            {
+                // For normal response, call and get return value
+                if (isNullRequest)
+                {
+                    sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}();");
+                }
+                else
+                {
+                    sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
+                }
+                
+                // Map response fields using object initializer
+                var responseMessage = combineModel.FindMessage(rpc.ResponseType);
+                sb.AppendLine($"            var grpcResponse = new {rpcResponseFullType}");
+                sb.AppendLine("            {");
+                    
+                for (int i = 0; i < responseMessage.Fields.Count; i++)
+                {
+                    var field = responseMessage.Fields[i];
+                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    var comma = i < responseMessage.Fields.Count - 1 ? "," : "";
+                    sb.AppendLine($"                {propName} = dtoResponse.{propName}{comma}");
+                }
+                    
+                sb.AppendLine("            };");
+                sb.AppendLine("            return grpcResponse;");
+            }
+            
             sb.AppendLine("        }");
             sb.AppendLine();
         }
