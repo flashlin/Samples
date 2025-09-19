@@ -379,10 +379,6 @@ namespace T1.GrpcProtoGenerator.Generators
                     sb.AppendLine($"            dto.{propName} = grpcResp.{propName};");
                 }
             }
-            else
-            {
-                // Handle external types
-            }
             
             sb.AppendLine("            return dto;");
             sb.AppendLine("        }");
