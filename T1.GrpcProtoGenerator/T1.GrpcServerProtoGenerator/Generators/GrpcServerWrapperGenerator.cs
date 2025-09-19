@@ -33,7 +33,12 @@ namespace T1.GrpcProtoGenerator.Generators
                 
                 // Generate a single combined messages file for all proto files
                 var combinedModel = CreateCombinedModel(allProtos);
-                AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(combinedModel), "Generated_messages.cs");
+                foreach (var messageModel in combinedModel.Messages)
+                {
+                    AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(messageModel, combinedModel), 
+                        $"Generated_message_{messageModel.Name}.cs");
+                }
+                //AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageAndEnumsSource(combinedModel), "Generated_messages.cs");
                 
                 foreach (var protoInfo in allProtos)
                 {
@@ -113,8 +118,27 @@ namespace T1.GrpcProtoGenerator.Generators
             }
             spc.AddSource(sourceFileName, SourceText.From(messagesSource, Encoding.UTF8));
         }
+        
+        
+        private string GenerateWrapperGrpcMessageSource(ProtoMessage messageModel, ProtoModel combinedModel)
+        {
+            var sb = new StringBuilder();
+            
+            // Generate using statements
+            GenerateBasicUsingStatements(sb);
+            
+            sb.AppendLine($"namespace {messageModel.CsharpNamespace}");
+            sb.AppendLine("{");
 
-        private string GenerateWrapperGrpcMessageSource(ProtoModel combineModel)
+            GenerateSingleMessageClass(sb, messageModel, combinedModel);
+
+            sb.AppendLine("}");
+            sb.AppendLine();
+
+            return sb.ToString();
+        }
+
+        private string GenerateWrapperGrpcMessageAndEnumsSource(ProtoModel combineModel)
         {
             var sb = new StringBuilder();
             
