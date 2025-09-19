@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -36,7 +35,6 @@ namespace T1.GrpcProtoGenerator.Generators
                 var combinedModel = CreateCombinedModel(allProtos);
                 AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(combinedModel), "Generated_messages.cs");
                 
-                var protoResolver = new ProtoImportResolver(allProtos);
                 foreach (var protoInfo in allProtos)
                 {
                     var model = ProtoParser.ParseProtoText(protoInfo.Content, protoInfo.Path);
@@ -45,7 +43,7 @@ namespace T1.GrpcProtoGenerator.Generators
                     logger.LogDebug($"Generating server and client files for {protoFileName}");
                     // Generate server and client files per proto file
                     AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model, combinedModel), $"Generated_{protoFileName}_server.cs");
-                    AddGeneratedSourceFile(spc, GenerateWrapperClientSource(model, combinedModel, protoResolver, protoInfo.Path), $"Generated_{protoFileName}_client.cs");
+                    AddGeneratedSourceFile(spc, GenerateWrapperClientSource(model, combinedModel), $"Generated_{protoFileName}_client.cs");
                 }
                 
                 logger.LogInfo("Source generation completed successfully");
@@ -235,7 +233,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine();
         }
 
-        private string GenerateWrapperClientSource(ProtoModel model, ProtoModel combinedModel, ProtoImportResolver resolver, string protoPath)
+        private string GenerateWrapperClientSource(ProtoModel model, ProtoModel combinedModel)
         {
             if (!model.Services.Any())
             {
@@ -597,42 +595,6 @@ namespace T1.GrpcProtoGenerator.Generators
         public string GetProtoFileName()
         {
             return System.IO.Path.GetFileNameWithoutExtension(Path);
-        }
-    }
-
-    internal class ProtoImportResolver
-    {
-        private readonly Dictionary<string, ProtoModel> _parsedModels;
-        private readonly Dictionary<string, ProtoFileInfo> _protoFiles;
-
-        public ProtoImportResolver(IEnumerable<ProtoFileInfo> protoFiles)
-        {
-            _protoFiles = new Dictionary<string, ProtoFileInfo>();
-            _parsedModels = new Dictionary<string, ProtoModel>();
-
-            // Build a mapping of relative paths to proto files
-            foreach (var protoFile in protoFiles)
-            {
-                var relativePath = NormalizeProtoPath(protoFile.Path);
-                _protoFiles[relativePath] = protoFile;
-            }
-        }
-
-        private string NormalizeProtoPath(string path)
-        {
-            // Extract relative path from full path
-            // This handles cases where we have full absolute paths
-            var segments = path.Replace('\\', '/').Split('/');
-            
-            // Find the "Protos" directory and take everything after it
-            var protosIndex = Array.FindIndex(segments, s => s.Equals("Protos", StringComparison.OrdinalIgnoreCase));
-            if (protosIndex >= 0 && protosIndex < segments.Length - 1)
-            {
-                return string.Join("/", segments.Skip(protosIndex + 1));
-            }
-            
-            // Fallback: just take the filename
-            return System.IO.Path.GetFileName(path);
         }
     }
 }
