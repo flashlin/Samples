@@ -268,9 +268,20 @@ namespace T1.GrpcProtoGenerator.Generators
             foreach (var field in msg.Fields)
             {
                 var baseType = MapProtoCTypeToCSharp(field.Type, combineModel);
+                if (field.IsOption)
+                {
+                    baseType += "?";
+                }
                 var csType = field.IsRepeated ? $"List<{baseType}>" : baseType;
                 var propertyName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                sb.AppendLine($"        public {csType} {propertyName} {{ get; set; }}");
+                if (field.IsOption)
+                {
+                    sb.AppendLine($"        public {csType} {propertyName} {{ get; set; }}");
+                }
+                else
+                {
+                    sb.AppendLine($"        public required {csType} {propertyName} {{ get; set; }}");
+                }
             }
             
             sb.AppendLine("    }");
