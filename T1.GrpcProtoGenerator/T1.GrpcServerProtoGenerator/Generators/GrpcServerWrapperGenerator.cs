@@ -338,7 +338,7 @@ namespace T1.GrpcProtoGenerator.Generators
 
             foreach (var rpc in svc.Rpcs)
             {
-                GenerateClientMethod(sb, rpc, model, originalNamespace);
+                GenerateClientMethod(sb, rpc, model);
             }
             
             sb.AppendLine("    }");
@@ -348,12 +348,12 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate a single client method implementation
         /// </summary>
-        private void GenerateClientMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel model, string originalNamespace)
+        private void GenerateClientMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel model)
         {
             // Determine the correct namespace for request and response types
             sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcDto> {rpc.Name}Async({rpc.RequestType}GrpcDto request, CancellationToken cancellationToken = default)");
             sb.AppendLine("        {");
-            sb.AppendLine($"            var grpcReq = new {originalNamespace}.{rpc.RequestType}();");
+            sb.AppendLine($"            var grpcReq = new {rpc.RequestType}();");
             
             // Map request fields
             var requestMessage = model.FindMessage(rpc.RequestType);
@@ -364,10 +364,6 @@ namespace T1.GrpcProtoGenerator.Generators
                     var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
                     sb.AppendLine($"            grpcReq.{propName} = request.{propName};");
                 }
-            }
-            else
-            {
-                // Handle external types
             }
             
             sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
