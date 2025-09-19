@@ -45,7 +45,6 @@ namespace T1.GrpcProtoGenerator.Generators
                     AddGeneratedSourceFile(spc, GenerateWrapperGrpcEnumSource(enumModel), 
                         $"Generated_enum_{enumModel.Name}.cs");
                 }
-                //AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageAndEnumsSource(combinedModel), "Generated_messages.cs");
                 
                 foreach (var protoInfo in allProtos)
                 {
@@ -159,30 +158,6 @@ namespace T1.GrpcProtoGenerator.Generators
 
             sb.AppendLine("}");
             sb.AppendLine();
-
-            return sb.ToString();
-        }
-
-        private string GenerateWrapperGrpcMessageAndEnumsSource(ProtoModel combineModel)
-        {
-            var sb = new StringBuilder();
-            
-            // Generate using statements
-            GenerateBasicUsingStatements(sb);
-            
-            // Generate message classes and enums grouped by namespace
-            var allNamespaces = CollectAllUniqueNamespaces(combineModel.Messages, combineModel.Enums);
-            foreach (var namespaceValue in allNamespaces)
-            {
-                sb.AppendLine($"namespace {namespaceValue}");
-                sb.AppendLine("{");
-
-                GenerateMessagesForNamespace(sb, combineModel.Messages, namespaceValue, combineModel);
-                GenerateEnumsForNamespace(sb, combineModel.Enums, namespaceValue);
-
-                sb.AppendLine("}");
-                sb.AppendLine();
-            }
 
             return sb.ToString();
         }
