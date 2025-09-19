@@ -544,39 +544,46 @@ namespace T1.GrpcProtoGenerator.Generators
             
             sb.AppendLine($"        public override async Task<{rpcResponseFullType}> {rpc.Name}({rpcRequestFullType} request, ServerCallContext context)");
             sb.AppendLine("        {");
-            sb.AppendLine($"            var dtoRequest = new {requestType}();");
-            
-            // Map request fields
+            // Map request fields using object initializer
             var requestMessage = model.FindMessage(rpc.RequestType);
             if (requestMessage != null)
             {
-                foreach (var field in requestMessage.Fields)
+                sb.AppendLine($"            var dtoRequest = new {requestType}");
+                sb.AppendLine("            {");
+                
+                for (int i = 0; i < requestMessage.Fields.Count; i++)
                 {
+                    var field = requestMessage.Fields[i];
                     var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    sb.AppendLine($"            dtoRequest.{propName} = request.{propName};");
+                    var comma = i < requestMessage.Fields.Count - 1 ? "," : "";
+                    sb.AppendLine($"                {propName} = request.{propName}{comma}");
                 }
-            }
-            else
-            {
-                // Handle external types
+                
+                sb.AppendLine("            };");
             }
             
             sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
-            sb.AppendLine($"            var grpcResponse = new {rpcResponseFullType}();");
-            
-            // Map response fields
+            // Map response fields using object initializer
             var responseMessage = model.FindMessage(rpc.ResponseType);
             if (responseMessage != null)
             {
-                foreach (var field in responseMessage.Fields)
+                sb.AppendLine($"            var grpcResponse = new {rpcResponseFullType}");
+                sb.AppendLine("            {");
+                
+                for (int i = 0; i < responseMessage.Fields.Count; i++)
                 {
+                    var field = responseMessage.Fields[i];
                     var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    sb.AppendLine($"            grpcResponse.{propName} = dtoResponse.{propName};");
+                    var comma = i < responseMessage.Fields.Count - 1 ? "," : "";
+                    sb.AppendLine($"                {propName} = dtoResponse.{propName}{comma}");
                 }
+                
+                sb.AppendLine("            };");
             }
             else
             {
-                // Handle external types
+                // Handle external types - fallback to simple constructor
+                sb.AppendLine($"            var grpcResponse = new {rpcResponseFullType}();");
             }
             
             sb.AppendLine("            return grpcResponse;");
