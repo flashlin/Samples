@@ -161,8 +161,8 @@ namespace T1.GrpcProtoGenerator.Generators
             }
             spc.AddSource(sourceFileName, SourceText.From(messagesSource, Encoding.UTF8));
         }
-        
-        
+
+
         private string GenerateWrapperGrpcMessageSource(ProtoMessage messageModel, ProtoModel combinedModel)
         {
             var sb = new StringBuilder();
@@ -180,7 +180,7 @@ namespace T1.GrpcProtoGenerator.Generators
 
             return sb.ToString();
         }
-        
+
         private string GenerateWrapperGrpcEnumSource(ProtoEnum enumModel)
         {
             var sb = new StringBuilder();
