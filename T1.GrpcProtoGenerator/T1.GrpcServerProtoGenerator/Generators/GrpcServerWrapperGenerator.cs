@@ -38,6 +38,13 @@ namespace T1.GrpcProtoGenerator.Generators
                     AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageSource(messageModel, combinedModel), 
                         $"Generated_message_{messageModel.Name}.cs");
                 }
+                
+                
+                foreach (var enumModel in combinedModel.Enums)
+                {
+                    AddGeneratedSourceFile(spc, GenerateWrapperGrpcEnumSource(enumModel), 
+                        $"Generated_enum_{enumModel.Name}.cs");
+                }
                 //AddGeneratedSourceFile(spc, GenerateWrapperGrpcMessageAndEnumsSource(combinedModel), "Generated_messages.cs");
                 
                 foreach (var protoInfo in allProtos)
@@ -131,6 +138,24 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine("{");
 
             GenerateSingleMessageClass(sb, messageModel, combinedModel);
+
+            sb.AppendLine("}");
+            sb.AppendLine();
+
+            return sb.ToString();
+        }
+        
+        private string GenerateWrapperGrpcEnumSource(ProtoEnum enumModel)
+        {
+            var sb = new StringBuilder();
+            
+            // Generate using statements
+            GenerateBasicUsingStatements(sb);
+            
+            sb.AppendLine($"namespace {enumModel.CsharpNamespace}");
+            sb.AppendLine("{");
+
+            GenerateSingleEnumClass(sb, enumModel);
 
             sb.AppendLine("}");
             sb.AppendLine();
