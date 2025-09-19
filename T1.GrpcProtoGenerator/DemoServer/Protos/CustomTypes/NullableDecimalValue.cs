@@ -11,7 +11,7 @@
             IsNull = isNull;
         }
 
-        public static implicit operator decimal?(NullableDecimalValue? grpcDecimal)
+        public static implicit operator decimal?(NullableDecimalValue grpcDecimal)
         {
             if (grpcDecimal == null || grpcDecimal.IsNull)
                 return null;
@@ -19,7 +19,7 @@
             return grpcDecimal.Units + grpcDecimal.Nanos / NanoFactor;
         }
 
-        public static implicit operator NullableDecimalValue?(decimal? value)
+        public static implicit operator NullableDecimalValue(decimal? value)
         {
             if (!value.HasValue)
             {
