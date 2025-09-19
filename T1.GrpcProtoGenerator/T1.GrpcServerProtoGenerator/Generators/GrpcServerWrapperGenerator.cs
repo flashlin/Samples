@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -215,6 +216,13 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateSingleMessageClass(StringBuilder sb, ProtoMessage msg, ProtoModel combineModel)
         {
+            // Skip generating DTO for Google Void/Null types as they correspond to no C# class needed
+            if (msg.Name.Equals("Void", StringComparison.OrdinalIgnoreCase) || 
+                msg.Name.Equals("Null", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+            
             sb.AppendLine($"    public class {msg.GetCsharpTypeName()}");
             sb.AppendLine("    {");
             
