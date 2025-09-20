@@ -561,88 +561,147 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate a single service method implementation
         /// </summary>
-        private void GenerateServiceMethod(StringBuilder sb, ProtoRpc rpc,
-            ProtoModel combineModel)
+        private void GenerateServiceMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
         {
-            var rpcRequestFullType = combineModel.FindRpcFullTypename(rpc.RequestType);
-            var rpcResponseFullType = combineModel.FindRpcFullTypename(rpc.ResponseType);
+            var methodInfo = GetServiceMethodInfo(rpc, combineModel);
             
-            var requestType = combineModel.FindCsharpTypeName(rpc.RequestType);
-            var responseType = combineModel.FindCsharpTypeName(rpc.ResponseType);
+            // Generate method signature
+            GenerateServiceMethodSignature(sb, rpc, methodInfo);
             
-            // Determine method signature based on request/response types
-            bool isNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase);
-            bool isVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase);
-            
-            // Generate method signature - override always has full signature
-            sb.AppendLine($"        public override async Task<{rpcResponseFullType}> {rpc.Name}({rpcRequestFullType} request, ServerCallContext context)");
+            // Generate method body
             sb.AppendLine("        {");
             
-            // Handle request parameter creation
-            if (!isNullRequest)
-            {
-                // Map request fields using object initializer
-                var requestMessage = combineModel.FindMessage(rpc.RequestType);
-                sb.AppendLine($"            var dtoRequest = new {requestType}");
-                sb.AppendLine("            {");
-                    
-                for (int i = 0; i < requestMessage.Fields.Count; i++)
-                {
-                    var field = requestMessage.Fields[i];
-                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    var comma = i < requestMessage.Fields.Count - 1 ? "," : "";
-                    sb.AppendLine($"                {propName} = request.{propName}{comma}");
-                }
-                    
-                sb.AppendLine("            };");
-            }
+            // Generate request mapping
+            GenerateRequestMapping(sb, rpc, methodInfo, combineModel);
             
-            // Call the service method
-            if (isVoidResponse)
-            {
-                // For Void response, call without expecting return value
-                if (isNullRequest)
-                {
-                    sb.AppendLine($"            await _instance.{rpc.Name}();");
-                }
-                else
-                {
-                    sb.AppendLine($"            await _instance.{rpc.Name}(dtoRequest);");
-                }
-                // Return a new Void instance
-                sb.AppendLine($"            return new {rpcResponseFullType}();");
-            }
-            else
-            {
-                // For normal response, call and get return value
-                if (isNullRequest)
-                {
-                    sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}();");
-                }
-                else
-                {
-                    sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
-                }
-                
-                // Map response fields using object initializer
-                var responseMessage = combineModel.FindMessage(rpc.ResponseType);
-                sb.AppendLine($"            var grpcResponse = new {rpcResponseFullType}");
-                sb.AppendLine("            {");
-                    
-                for (int i = 0; i < responseMessage.Fields.Count; i++)
-                {
-                    var field = responseMessage.Fields[i];
-                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    var comma = i < responseMessage.Fields.Count - 1 ? "," : "";
-                    sb.AppendLine($"                {propName} = dtoResponse.{propName}{comma}");
-                }
-                    
-                sb.AppendLine("            };");
-                sb.AppendLine("            return grpcResponse;");
-            }
+            // Generate service call and response handling
+            GenerateServiceCallAndResponse(sb, rpc, methodInfo, combineModel);
             
             sb.AppendLine("        }");
             sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Get service method information including type names and flags
+        /// </summary>
+        private ServiceMethodInfo GetServiceMethodInfo(ProtoRpc rpc, ProtoModel combineModel)
+        {
+            return new ServiceMethodInfo
+            {
+                RequestFullType = combineModel.FindRpcFullTypename(rpc.RequestType),
+                ResponseFullType = combineModel.FindRpcFullTypename(rpc.ResponseType),
+                RequestType = combineModel.FindCsharpTypeName(rpc.RequestType),
+                ResponseType = combineModel.FindCsharpTypeName(rpc.ResponseType),
+                IsNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase),
+                IsVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase)
+            };
+        }
+
+        /// <summary>
+        /// Generate service method signature
+        /// </summary>
+        private void GenerateServiceMethodSignature(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo)
+        {
+            sb.AppendLine($"        public override async Task<{methodInfo.ResponseFullType}> {rpc.Name}({methodInfo.RequestFullType} request, ServerCallContext context)");
+        }
+
+        /// <summary>
+        /// Generate request parameter mapping from gRPC to DTO
+        /// </summary>
+        private void GenerateRequestMapping(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
+        {
+            if (!methodInfo.IsNullRequest)
+            {
+                var requestMessage = combineModel.FindMessage(rpc.RequestType);
+                sb.AppendLine($"            var dtoRequest = new {methodInfo.RequestType}");
+                sb.AppendLine("            {");
+                
+                GenerateFieldMappings(sb, requestMessage.Fields, "request");
+                
+                sb.AppendLine("            };");
+            }
+        }
+
+        /// <summary>
+        /// Generate service call and response handling
+        /// </summary>
+        private void GenerateServiceCallAndResponse(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
+        {
+            if (methodInfo.IsVoidResponse)
+            {
+                GenerateVoidServiceCall(sb, rpc, methodInfo);
+            }
+            else
+            {
+                GenerateNormalServiceCall(sb, rpc, methodInfo, combineModel);
+            }
+        }
+
+        /// <summary>
+        /// Generate service call for void response methods
+        /// </summary>
+        private void GenerateVoidServiceCall(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo)
+        {
+            // Call service method without expecting return value
+            if (methodInfo.IsNullRequest)
+            {
+                sb.AppendLine($"            await _instance.{rpc.Name}();");
+            }
+            else
+            {
+                sb.AppendLine($"            await _instance.{rpc.Name}(dtoRequest);");
+            }
+            
+            // Return empty response instance
+            sb.AppendLine($"            return new {methodInfo.ResponseFullType}();");
+        }
+
+        /// <summary>
+        /// Generate service call for normal response methods
+        /// </summary>
+        private void GenerateNormalServiceCall(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
+        {
+            // Call service method and get return value
+            if (methodInfo.IsNullRequest)
+            {
+                sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}();");
+            }
+            else
+            {
+                sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
+            }
+            
+            // Generate response mapping
+            GenerateResponseMapping(sb, rpc, methodInfo, combineModel);
+        }
+
+        /// <summary>
+        /// Generate response mapping from DTO to gRPC
+        /// </summary>
+        private void GenerateResponseMapping(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
+        {
+            var responseMessage = combineModel.FindMessage(rpc.ResponseType);
+            sb.AppendLine($"            var grpcResponse = new {methodInfo.ResponseFullType}");
+            sb.AppendLine("            {");
+            
+            GenerateFieldMappings(sb, responseMessage.Fields, "dtoResponse");
+            
+            sb.AppendLine("            };");
+            sb.AppendLine("            return grpcResponse;");
+        }
+
+        /// <summary>
+        /// Generate field mappings for object initializer
+        /// </summary>
+        private void GenerateFieldMappings(StringBuilder sb, List<ProtoField> fields, string sourceObject)
+        {
+            for (int i = 0; i < fields.Count; i++)
+            {
+                var field = fields[i];
+                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var comma = i < fields.Count - 1 ? "," : "";
+                sb.AppendLine($"                {propName} = {sourceObject}.{propName}{comma}");
+            }
         }
 
         private static string MapProtoCTypeToCSharp(string protoType, ProtoModel combineModel)
@@ -721,5 +780,18 @@ namespace T1.GrpcProtoGenerator.Generators
         {
             return System.IO.Path.GetFileNameWithoutExtension(Path);
         }
+    }
+
+    /// <summary>
+    /// Service method information for code generation
+    /// </summary>
+    internal class ServiceMethodInfo
+    {
+        public string RequestFullType { get; set; } = string.Empty;
+        public string ResponseFullType { get; set; } = string.Empty;
+        public string RequestType { get; set; } = string.Empty;
+        public string ResponseType { get; set; } = string.Empty;
+        public bool IsNullRequest { get; set; }
+        public bool IsVoidResponse { get; set; }
     }
 }
