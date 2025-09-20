@@ -6,14 +6,14 @@ using System;
 
 namespace DemoSDK;
 
-public class StartupExample
+public class GreeterGrpcConfig
 {
-    public class GreeterGrpcConfig
-    {
-        public string ServerUrl { get; set; } = "https://localhost:7001";
-    }
-    
-    public void AddGreeterGrpcSdk(IServiceCollection services)
+    public string ServerUrl { get; set; } = "https://localhost:7001";
+}
+
+public static class GreeterGrpcExtension
+{
+    public static void AddGreeterGrpcSdk(this IServiceCollection services)
     {
         services.AddTransient<Greeter.GreeterClient>(provider =>
         {
