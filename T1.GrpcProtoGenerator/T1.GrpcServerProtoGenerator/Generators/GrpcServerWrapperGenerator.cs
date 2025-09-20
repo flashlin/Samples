@@ -494,36 +494,89 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateServiceInterface(StringBuilder sb, ProtoService svc, ProtoModel messagesModel)
         {
+            GenerateInterfaceDeclaration(sb, svc);
+            GenerateInterfaceMethods(sb, svc, messagesModel);
+            GenerateInterfaceClosing(sb);
+        }
+
+        /// <summary>
+        /// Generate interface declaration and opening brace
+        /// </summary>
+        private void GenerateInterfaceDeclaration(StringBuilder sb, ProtoService svc)
+        {
             var serviceInterface = $"I{svc.Name}GrpcService";
             sb.AppendLine($"    public interface {serviceInterface}");
             sb.AppendLine("    {");
-            
+        }
+
+        /// <summary>
+        /// Generate all interface methods for the service
+        /// </summary>
+        private void GenerateInterfaceMethods(StringBuilder sb, ProtoService svc, ProtoModel messagesModel)
+        {
             foreach (var rpc in svc.Rpcs)
             {
-                var rpcRequestType = messagesModel.FindCsharpTypeName(rpc.RequestType);
-                var rpcResponseType = messagesModel.FindCsharpTypeName(rpc.ResponseType);
-                
-                // Handle request parameter - skip parameter if request type is "Null"
-                string parameterPart = "";
-                if (!rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase))
-                {
-                    parameterPart = $"{rpcRequestType} request";
-                }
-                
-                // Handle return type - use Task instead of Task<T> if response type is "Void"
-                string returnType;
-                if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase))
-                {
-                    returnType = "Task";
-                }
-                else
-                {
-                    returnType = $"Task<{rpcResponseType}>";
-                }
-                
-                sb.AppendLine($"        {returnType} {rpc.Name}({parameterPart});");
+                GenerateSingleInterfaceMethod(sb, rpc, messagesModel);
+            }
+        }
+
+        /// <summary>
+        /// Generate a single interface method signature
+        /// </summary>
+        private void GenerateSingleInterfaceMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel messagesModel)
+        {
+            var methodSignature = CreateInterfaceMethodSignature(rpc, messagesModel);
+            sb.AppendLine($"        {methodSignature.ReturnType} {rpc.Name}({methodSignature.Parameters});");
+        }
+
+        /// <summary>
+        /// Create method signature information for interface method
+        /// </summary>
+        private InterfaceMethodSignature CreateInterfaceMethodSignature(ProtoRpc rpc, ProtoModel messagesModel)
+        {
+            var rpcRequestType = messagesModel.FindCsharpTypeName(rpc.RequestType);
+            var rpcResponseType = messagesModel.FindCsharpTypeName(rpc.ResponseType);
+
+            return new InterfaceMethodSignature
+            {
+                Parameters = GenerateInterfaceMethodParameters(rpc, rpcRequestType),
+                ReturnType = GenerateInterfaceMethodReturnType(rpc, rpcResponseType)
+            };
+        }
+
+        /// <summary>
+        /// Generate parameters for interface method
+        /// </summary>
+        private string GenerateInterfaceMethodParameters(ProtoRpc rpc, string rpcRequestType)
+        {
+            // Skip parameter if request type is "Null"
+            if (rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase))
+            {
+                return "";
             }
             
+            return $"{rpcRequestType} request";
+        }
+
+        /// <summary>
+        /// Generate return type for interface method
+        /// </summary>
+        private string GenerateInterfaceMethodReturnType(ProtoRpc rpc, string rpcResponseType)
+        {
+            // Use Task instead of Task<T> if response type is "Void"
+            if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Task";
+            }
+            
+            return $"Task<{rpcResponseType}>";
+        }
+
+        /// <summary>
+        /// Generate interface closing brace
+        /// </summary>
+        private void GenerateInterfaceClosing(StringBuilder sb)
+        {
             sb.AppendLine("    }");
             sb.AppendLine();
         }
@@ -793,5 +846,14 @@ namespace T1.GrpcProtoGenerator.Generators
         public string ResponseType { get; set; } = string.Empty;
         public bool IsNullRequest { get; set; }
         public bool IsVoidResponse { get; set; }
+    }
+
+    /// <summary>
+    /// Interface method signature information
+    /// </summary>
+    internal class InterfaceMethodSignature
+    {
+        public string Parameters { get; set; } = string.Empty;
+        public string ReturnType { get; set; } = string.Empty;
     }
 }
