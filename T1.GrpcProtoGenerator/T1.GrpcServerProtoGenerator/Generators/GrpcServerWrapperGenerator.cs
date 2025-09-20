@@ -301,7 +301,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 return string.Empty;
             }
             
-            var sb = new StringBuilder();
+            var sb = new IndentStringBuilder();
             
             // Setup using statements
             SetupClientSourceUsingStatements(sb, combinedModel);
@@ -324,7 +324,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Setup using statements for client source generation
         /// </summary>
-        private void SetupClientSourceUsingStatements(StringBuilder sb, ProtoModel combinedModel)
+        private void SetupClientSourceUsingStatements(IndentStringBuilder sb, ProtoModel combinedModel)
         {
             var importNamespaces = CollectImportNamespacesForServer(combinedModel);
             AddClientSpecificNamespaces(importNamespaces);
@@ -344,7 +344,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate client namespace blocks with their contained services
         /// </summary>
-        private void GenerateClientNamespaceBlocks(StringBuilder sb, 
+        private void GenerateClientNamespaceBlocks(IndentStringBuilder sb, 
             List<IGrouping<string, ProtoService>> servicesByNamespace, 
             ProtoModel combinedModel)
         {
@@ -352,23 +352,24 @@ namespace T1.GrpcProtoGenerator.Generators
             {
                 GenerateClientNamespaceDeclaration(sb, namespaceGroup.Key);
                 GenerateClientServicesInNamespace(sb, namespaceGroup, combinedModel);
-                GenerateNamespaceClosing(sb);
+                GenerateClientNamespaceClosing(sb);
             }
         }
 
         /// <summary>
         /// Generate client namespace declaration
         /// </summary>
-        private void GenerateClientNamespaceDeclaration(StringBuilder sb, string namespaceValue)
+        private void GenerateClientNamespaceDeclaration(IndentStringBuilder sb, string namespaceValue)
         {
-            sb.AppendLine($"namespace {namespaceValue}");
-            sb.AppendLine("{");
+            sb.WriteLine($"namespace {namespaceValue}");
+            sb.WriteLine("{");
+            sb.Indent++;
         }
 
         /// <summary>
         /// Generate all client services within a namespace
         /// </summary>
-        private void GenerateClientServicesInNamespace(StringBuilder sb, 
+        private void GenerateClientServicesInNamespace(IndentStringBuilder sb, 
             IGrouping<string, ProtoService> namespaceGroup, 
             ProtoModel combinedModel)
         {
@@ -380,9 +381,19 @@ namespace T1.GrpcProtoGenerator.Generators
         }
 
         /// <summary>
+        /// Generate client namespace closing brace
+        /// </summary>
+        private void GenerateClientNamespaceClosing(IndentStringBuilder sb)
+        {
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
+        }
+
+        /// <summary>
         /// Generate client interface for a given service
         /// </summary>
-        private void GenerateClientInterface(StringBuilder sb, ProtoService svc)
+        private void GenerateClientInterface(IndentStringBuilder sb, ProtoService svc)
         {
             GenerateClientInterfaceDeclaration(sb, svc);
             GenerateClientInterfaceMethods(sb, svc);
@@ -392,17 +403,18 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate client interface declaration and opening brace
         /// </summary>
-        private void GenerateClientInterfaceDeclaration(StringBuilder sb, ProtoService svc)
+        private void GenerateClientInterfaceDeclaration(IndentStringBuilder sb, ProtoService svc)
         {
             var clientInterface = $"I{svc.Name}Client";
-            sb.AppendLine($"    public interface {clientInterface}");
-            sb.AppendLine("    {");
+            sb.WriteLine($"public interface {clientInterface}");
+            sb.WriteLine("{");
+            sb.Indent++;
         }
 
         /// <summary>
         /// Generate all client interface methods for the service
         /// </summary>
-        private void GenerateClientInterfaceMethods(StringBuilder sb, ProtoService svc)
+        private void GenerateClientInterfaceMethods(IndentStringBuilder sb, ProtoService svc)
         {
             foreach (var rpc in svc.Rpcs)
             {
@@ -413,10 +425,10 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate a single client interface method signature
         /// </summary>
-        private void GenerateSingleClientInterfaceMethod(StringBuilder sb, ProtoRpc rpc)
+        private void GenerateSingleClientInterfaceMethod(IndentStringBuilder sb, ProtoRpc rpc)
         {
             var methodSignature = CreateClientInterfaceMethodSignature(rpc);
-            sb.AppendLine($"        {methodSignature.ReturnType} {rpc.Name}Async({methodSignature.Parameters}CancellationToken cancellationToken = default);");
+            sb.WriteLine($"{methodSignature.ReturnType} {rpc.Name}Async({methodSignature.Parameters}CancellationToken cancellationToken = default);");
         }
 
         /// <summary>
@@ -462,41 +474,44 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate client interface closing brace
         /// </summary>
-        private void GenerateClientInterfaceClosing(StringBuilder sb)
+        private void GenerateClientInterfaceClosing(IndentStringBuilder sb)
         {
-            sb.AppendLine("    }");
-            sb.AppendLine();
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         /// <summary>
         /// Generate client wrapper class for a given service
         /// </summary>
-        private void GenerateClientWrapper(StringBuilder sb, ProtoService svc, ProtoModel combineModel)
+        private void GenerateClientWrapper(IndentStringBuilder sb, ProtoService svc, ProtoModel combineModel)
         {
             var originalNamespace = svc.CsharpNamespace;
             var clientInterface = $"I{svc.Name}Client";
             var wrapper = $"{svc.Name}ClientWrapper";
             var grpcClient = $"{originalNamespace}.{svc.Name}.{svc.Name}Client";
             
-            sb.AppendLine($"    public class {wrapper} : {clientInterface}");
-            sb.AppendLine("    {");
-            sb.AppendLine($"        private readonly {grpcClient} _inner;");
-            sb.AppendLine($"        public {wrapper}({grpcClient} inner) {{ _inner = inner; }}");
-            sb.AppendLine();
+            sb.WriteLine($"public class {wrapper} : {clientInterface}");
+            sb.WriteLine("{");
+            sb.Indent++;
+            sb.WriteLine($"private readonly {grpcClient} _inner;");
+            sb.WriteLine($"public {wrapper}({grpcClient} inner) {{ _inner = inner; }}");
+            sb.WriteLine();
 
             foreach (var rpc in svc.Rpcs)
             {
                 GenerateClientMethod(sb, rpc, combineModel);
             }
             
-            sb.AppendLine("    }");
-            sb.AppendLine();
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         /// <summary>
         /// Generate a single client method implementation
         /// </summary>
-        private void GenerateClientMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
+        private void GenerateClientMethod(IndentStringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
         {
             var clientMethodInfo = GetClientMethodInfo(rpc);
             
@@ -504,7 +519,8 @@ namespace T1.GrpcProtoGenerator.Generators
             GenerateClientMethodSignature(sb, rpc, clientMethodInfo);
             
             // Generate method body
-            sb.AppendLine("        {");
+            sb.WriteLine("{");
+            sb.Indent++;
             
             // Generate request mapping
             GenerateClientRequestMapping(sb, rpc, clientMethodInfo, combineModel);
@@ -512,8 +528,9 @@ namespace T1.GrpcProtoGenerator.Generators
             // Generate service call and response handling
             GenerateClientServiceCallAndResponse(sb, rpc, clientMethodInfo, combineModel);
             
-            sb.AppendLine("        }");
-            sb.AppendLine();
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         /// <summary>
@@ -531,18 +548,18 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate client method signature
         /// </summary>
-        private void GenerateClientMethodSignature(StringBuilder sb, ProtoRpc rpc, ClientMethodInfo methodInfo)
+        private void GenerateClientMethodSignature(IndentStringBuilder sb, ProtoRpc rpc, ClientMethodInfo methodInfo)
         {
             var parameterPart = methodInfo.IsNullRequest ? "" : $"{rpc.RequestType}GrpcDto request, ";
             var returnType = methodInfo.IsVoidResponse ? "Task" : $"Task<{rpc.ResponseType}GrpcDto>";
             
-            sb.AppendLine($"        public async {returnType} {rpc.Name}Async({parameterPart}CancellationToken cancellationToken = default)");
+            sb.WriteLine($"public async {returnType} {rpc.Name}Async({parameterPart}CancellationToken cancellationToken = default)");
         }
 
         /// <summary>
         /// Generate client request mapping from DTO to gRPC
         /// </summary>
-        private void GenerateClientRequestMapping(StringBuilder sb, ProtoRpc rpc, ClientMethodInfo methodInfo, ProtoModel combineModel)
+        private void GenerateClientRequestMapping(IndentStringBuilder sb, ProtoRpc rpc, ClientMethodInfo methodInfo, ProtoModel combineModel)
         {
             if (!methodInfo.IsNullRequest)
             {
@@ -557,29 +574,31 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate client request object mapping for non-null requests
         /// </summary>
-        private void GenerateClientRequestObjectMapping(StringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
+        private void GenerateClientRequestObjectMapping(IndentStringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
         {
             var requestMessage = combineModel.FindMessage(rpc.RequestType);
-            sb.AppendLine($"            var grpcReq = new {rpc.RequestType}");
-            sb.AppendLine("            {");
+            sb.WriteLine($"var grpcReq = new {rpc.RequestType}");
+            sb.WriteLine("{");
+            sb.Indent++;
             
             GenerateFieldMappings(sb, requestMessage.Fields, "request");
             
-            sb.AppendLine("            };");
+            sb.Indent--;
+            sb.WriteLine("};");
         }
 
         /// <summary>
         /// Generate client request mapping for null requests
         /// </summary>
-        private void GenerateClientNullRequestMapping(StringBuilder sb, ProtoRpc rpc)
+        private void GenerateClientNullRequestMapping(IndentStringBuilder sb, ProtoRpc rpc)
         {
-            sb.AppendLine($"            var grpcReq = new {rpc.RequestType}();");
+            sb.WriteLine($"var grpcReq = new {rpc.RequestType}();");
         }
 
         /// <summary>
         /// Generate client service call and response handling
         /// </summary>
-        private void GenerateClientServiceCallAndResponse(StringBuilder sb, ProtoRpc rpc, ClientMethodInfo methodInfo, ProtoModel combineModel)
+        private void GenerateClientServiceCallAndResponse(IndentStringBuilder sb, ProtoRpc rpc, ClientMethodInfo methodInfo, ProtoModel combineModel)
         {
             if (methodInfo.IsVoidResponse)
             {
@@ -594,17 +613,17 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate client service call for void response methods
         /// </summary>
-        private void GenerateClientVoidServiceCall(StringBuilder sb, ProtoRpc rpc)
+        private void GenerateClientVoidServiceCall(IndentStringBuilder sb, ProtoRpc rpc)
         {
-            sb.AppendLine($"            await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
+            sb.WriteLine($"await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
         }
 
         /// <summary>
         /// Generate client service call for normal response methods
         /// </summary>
-        private void GenerateClientNormalServiceCall(StringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
+        private void GenerateClientNormalServiceCall(IndentStringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
         {
-            sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
+            sb.WriteLine($"var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
             
             // Generate response mapping
             GenerateClientResponseMapping(sb, rpc, combineModel);
@@ -613,16 +632,18 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate client response mapping from gRPC to DTO
         /// </summary>
-        private void GenerateClientResponseMapping(StringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
+        private void GenerateClientResponseMapping(IndentStringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
         {
             var responseMessage = combineModel.FindMessage(rpc.ResponseType);
-            sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcDto");
-            sb.AppendLine("            {");
+            sb.WriteLine($"var dto = new {rpc.ResponseType}GrpcDto");
+            sb.WriteLine("{");
+            sb.Indent++;
             
             GenerateFieldMappings(sb, responseMessage.Fields, "grpcResp");
             
-            sb.AppendLine("            };");
-            sb.AppendLine("            return dto;");
+            sb.Indent--;
+            sb.WriteLine("};");
+            sb.WriteLine("return dto;");
         }
 
         private string GenerateWrapperServerSource(ProtoModel model, ProtoModel combineModel)
@@ -632,7 +653,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 return string.Empty;
             }
             
-            var sb = new StringBuilder();
+            var sb = new IndentStringBuilder();
             
             // Setup using statements
             SetupServerSourceUsingStatements(sb, combineModel);
@@ -655,7 +676,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Setup using statements for server source generation
         /// </summary>
-        private void SetupServerSourceUsingStatements(StringBuilder sb, ProtoModel combineModel)
+        private void SetupServerSourceUsingStatements(IndentStringBuilder sb, ProtoModel combineModel)
         {
             var importNamespaces = CollectImportNamespacesForServer(combineModel);
             AddServerSpecificNamespaces(importNamespaces);
@@ -686,7 +707,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate namespace blocks with their contained services
         /// </summary>
-        private void GenerateNamespaceBlocks(StringBuilder sb, 
+        private void GenerateNamespaceBlocks(IndentStringBuilder sb, 
             List<IGrouping<string, ProtoService>> servicesByNamespace, 
             ProtoModel combineModel)
         {
@@ -701,16 +722,17 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate namespace declaration
         /// </summary>
-        private void GenerateNamespaceDeclaration(StringBuilder sb, string namespaceValue)
+        private void GenerateNamespaceDeclaration(IndentStringBuilder sb, string namespaceValue)
         {
-            sb.AppendLine($"namespace {namespaceValue}");
-            sb.AppendLine("{");
+            sb.WriteLine($"namespace {namespaceValue}");
+            sb.WriteLine("{");
+            sb.Indent++;
         }
 
         /// <summary>
         /// Generate all services within a namespace
         /// </summary>
-        private void GenerateServicesInNamespace(StringBuilder sb, 
+        private void GenerateServicesInNamespace(IndentStringBuilder sb, 
             IGrouping<string, ProtoService> namespaceGroup, 
             ProtoModel combineModel)
         {
@@ -724,16 +746,17 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate namespace closing brace
         /// </summary>
-        private void GenerateNamespaceClosing(StringBuilder sb)
+        private void GenerateNamespaceClosing(IndentStringBuilder sb)
         {
-            sb.AppendLine("}");
-            sb.AppendLine();
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         /// <summary>
         /// Generate service interface for a given service
         /// </summary>
-        private void GenerateServiceInterface(StringBuilder sb, ProtoService svc, ProtoModel messagesModel)
+        private void GenerateServiceInterface(IndentStringBuilder sb, ProtoService svc, ProtoModel messagesModel)
         {
             GenerateInterfaceDeclaration(sb, svc);
             GenerateInterfaceMethods(sb, svc, messagesModel);
@@ -743,17 +766,18 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate interface declaration and opening brace
         /// </summary>
-        private void GenerateInterfaceDeclaration(StringBuilder sb, ProtoService svc)
+        private void GenerateInterfaceDeclaration(IndentStringBuilder sb, ProtoService svc)
         {
             var serviceInterface = $"I{svc.Name}GrpcService";
-            sb.AppendLine($"    public interface {serviceInterface}");
-            sb.AppendLine("    {");
+            sb.WriteLine($"public interface {serviceInterface}");
+            sb.WriteLine("{");
+            sb.Indent++;
         }
 
         /// <summary>
         /// Generate all interface methods for the service
         /// </summary>
-        private void GenerateInterfaceMethods(StringBuilder sb, ProtoService svc, ProtoModel messagesModel)
+        private void GenerateInterfaceMethods(IndentStringBuilder sb, ProtoService svc, ProtoModel messagesModel)
         {
             foreach (var rpc in svc.Rpcs)
             {
@@ -764,10 +788,10 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate a single interface method signature
         /// </summary>
-        private void GenerateSingleInterfaceMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel messagesModel)
+        private void GenerateSingleInterfaceMethod(IndentStringBuilder sb, ProtoRpc rpc, ProtoModel messagesModel)
         {
             var methodSignature = CreateInterfaceMethodSignature(rpc, messagesModel);
-            sb.AppendLine($"        {methodSignature.ReturnType} {rpc.Name}({methodSignature.Parameters});");
+            sb.WriteLine($"{methodSignature.ReturnType} {rpc.Name}({methodSignature.Parameters});");
         }
 
         /// <summary>
@@ -816,16 +840,17 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate interface closing brace
         /// </summary>
-        private void GenerateInterfaceClosing(StringBuilder sb)
+        private void GenerateInterfaceClosing(IndentStringBuilder sb)
         {
-            sb.AppendLine("    }");
-            sb.AppendLine();
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         /// <summary>
         /// Generate service implementation class for a given service
         /// </summary>
-        private void GenerateServiceImplementation(StringBuilder sb, ProtoService svc,
+        private void GenerateServiceImplementation(IndentStringBuilder sb, ProtoService svc,
             ProtoModel combineModel)
         {
             var originalNamespace = svc.CsharpNamespace;
@@ -833,29 +858,33 @@ namespace T1.GrpcProtoGenerator.Generators
             var serviceClass = $"{svc.Name}NativeGrpcService";
             var baseClass = $"{originalNamespace}.{svc.Name}.{svc.Name}Base";
             
-            sb.AppendLine($"    public class {serviceClass} : {baseClass}");
-            sb.AppendLine("    {");
-            sb.AppendLine($"        private readonly {serviceInterface} _instance;");
-            sb.AppendLine();
-            sb.AppendLine($"        public {serviceClass}({serviceInterface} instance)");
-            sb.AppendLine("        {");
-            sb.AppendLine("            _instance = instance;");
-            sb.AppendLine("        }");
-            sb.AppendLine();
+            sb.WriteLine($"public class {serviceClass} : {baseClass}");
+            sb.WriteLine("{");
+            sb.Indent++;
+            sb.WriteLine($"private readonly {serviceInterface} _instance;");
+            sb.WriteLine();
+            sb.WriteLine($"public {serviceClass}({serviceInterface} instance)");
+            sb.WriteLine("{");
+            sb.Indent++;
+            sb.WriteLine("_instance = instance;");
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
 
             foreach (var rpc in svc.Rpcs)
             {
                 GenerateServiceMethod(sb, rpc, combineModel);
             }
             
-            sb.AppendLine("    }");
-            sb.AppendLine();
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         /// <summary>
         /// Generate a single service method implementation
         /// </summary>
-        private void GenerateServiceMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
+        private void GenerateServiceMethod(IndentStringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
         {
             var methodInfo = GetServiceMethodInfo(rpc, combineModel);
             
@@ -863,7 +892,8 @@ namespace T1.GrpcProtoGenerator.Generators
             GenerateServiceMethodSignature(sb, rpc, methodInfo);
             
             // Generate method body
-            sb.AppendLine("        {");
+            sb.WriteLine("{");
+            sb.Indent++;
             
             // Generate request mapping
             GenerateRequestMapping(sb, rpc, methodInfo, combineModel);
@@ -871,8 +901,9 @@ namespace T1.GrpcProtoGenerator.Generators
             // Generate service call and response handling
             GenerateServiceCallAndResponse(sb, rpc, methodInfo, combineModel);
             
-            sb.AppendLine("        }");
-            sb.AppendLine();
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         /// <summary>
@@ -894,32 +925,34 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate service method signature
         /// </summary>
-        private void GenerateServiceMethodSignature(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo)
+        private void GenerateServiceMethodSignature(IndentStringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo)
         {
-            sb.AppendLine($"        public override async Task<{methodInfo.ResponseFullType}> {rpc.Name}({methodInfo.RequestFullType} request, ServerCallContext context)");
+            sb.WriteLine($"public override async Task<{methodInfo.ResponseFullType}> {rpc.Name}({methodInfo.RequestFullType} request, ServerCallContext context)");
         }
 
         /// <summary>
         /// Generate request parameter mapping from gRPC to DTO
         /// </summary>
-        private void GenerateRequestMapping(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
+        private void GenerateRequestMapping(IndentStringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
         {
             if (!methodInfo.IsNullRequest)
             {
                 var requestMessage = combineModel.FindMessage(rpc.RequestType);
-                sb.AppendLine($"            var dtoRequest = new {methodInfo.RequestType}");
-                sb.AppendLine("            {");
+                sb.WriteLine($"var dtoRequest = new {methodInfo.RequestType}");
+                sb.WriteLine("{");
+                sb.Indent++;
                 
                 GenerateFieldMappings(sb, requestMessage.Fields, "request");
                 
-                sb.AppendLine("            };");
+                sb.Indent--;
+                sb.WriteLine("};");
             }
         }
 
         /// <summary>
         /// Generate service call and response handling
         /// </summary>
-        private void GenerateServiceCallAndResponse(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
+        private void GenerateServiceCallAndResponse(IndentStringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
         {
             if (methodInfo.IsVoidResponse)
             {
@@ -934,35 +967,35 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate service call for void response methods
         /// </summary>
-        private void GenerateVoidServiceCall(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo)
+        private void GenerateVoidServiceCall(IndentStringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo)
         {
             // Call service method without expecting return value
             if (methodInfo.IsNullRequest)
             {
-                sb.AppendLine($"            await _instance.{rpc.Name}();");
+                sb.WriteLine($"await _instance.{rpc.Name}();");
             }
             else
             {
-                sb.AppendLine($"            await _instance.{rpc.Name}(dtoRequest);");
+                sb.WriteLine($"await _instance.{rpc.Name}(dtoRequest);");
             }
             
             // Return empty response instance
-            sb.AppendLine($"            return new {methodInfo.ResponseFullType}();");
+            sb.WriteLine($"return new {methodInfo.ResponseFullType}();");
         }
 
         /// <summary>
         /// Generate service call for normal response methods
         /// </summary>
-        private void GenerateNormalServiceCall(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
+        private void GenerateNormalServiceCall(IndentStringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
         {
             // Call service method and get return value
             if (methodInfo.IsNullRequest)
             {
-                sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}();");
+                sb.WriteLine($"var dtoResponse = await _instance.{rpc.Name}();");
             }
             else
             {
-                sb.AppendLine($"            var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
+                sb.WriteLine($"var dtoResponse = await _instance.{rpc.Name}(dtoRequest);");
             }
             
             // Generate response mapping
@@ -972,29 +1005,31 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate response mapping from DTO to gRPC
         /// </summary>
-        private void GenerateResponseMapping(StringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
+        private void GenerateResponseMapping(IndentStringBuilder sb, ProtoRpc rpc, ServiceMethodInfo methodInfo, ProtoModel combineModel)
         {
             var responseMessage = combineModel.FindMessage(rpc.ResponseType);
-            sb.AppendLine($"            var grpcResponse = new {methodInfo.ResponseFullType}");
-            sb.AppendLine("            {");
+            sb.WriteLine($"var grpcResponse = new {methodInfo.ResponseFullType}");
+            sb.WriteLine("{");
+            sb.Indent++;
             
             GenerateFieldMappings(sb, responseMessage.Fields, "dtoResponse");
             
-            sb.AppendLine("            };");
-            sb.AppendLine("            return grpcResponse;");
+            sb.Indent--;
+            sb.WriteLine("};");
+            sb.WriteLine("return grpcResponse;");
         }
 
         /// <summary>
         /// Generate field mappings for object initializer
         /// </summary>
-        private void GenerateFieldMappings(StringBuilder sb, List<ProtoField> fields, string sourceObject)
+        private void GenerateFieldMappings(IndentStringBuilder sb, List<ProtoField> fields, string sourceObject)
         {
             for (int i = 0; i < fields.Count; i++)
             {
                 var field = fields[i];
                 var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
                 var comma = i < fields.Count - 1 ? "," : "";
-                sb.AppendLine($"                {propName} = {sourceObject}.{propName}{comma}");
+                sb.WriteLine($"{propName} = {sourceObject}.{propName}{comma}");
             }
         }
 
@@ -1048,20 +1083,20 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate using statements from the collected namespaces
         /// </summary>
-        private void GenerateUsingStatements(StringBuilder sb, HashSet<string> namespaces)
+        private void GenerateUsingStatements(IndentStringBuilder sb, HashSet<string> namespaces)
         {
             // Add default using statements
-            sb.AppendLine("#nullable enable");
-            sb.AppendLine("using System;");
-            sb.AppendLine("using System.Collections.Generic;");
+            sb.WriteLine("#nullable enable");
+            sb.WriteLine("using System;");
+            sb.WriteLine("using System.Collections.Generic;");
             
             // Add collected import namespaces (sorted for consistency)
             foreach (var ns in namespaces.OrderBy(x => x))
             {
-                sb.AppendLine($"using {ns};");
+                sb.WriteLine($"using {ns};");
             }
             
-            sb.AppendLine();
+            sb.WriteLine();
         }
     }
 
