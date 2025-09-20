@@ -19,6 +19,7 @@ fi
 projectNames=(
     "T1.Standard"
     "T1.SlackSDK"
+    "T1.GrpcProtoGenerator"
 )
 
 # Show project selection with fzf
