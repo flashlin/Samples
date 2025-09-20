@@ -6,7 +6,7 @@ namespace DemoSDK;
 
 public class StartupExample
 {
-    public void AddSdk(IServiceCollection services, string grpcServerAddress = "https://localhost:7001")
+    public void AddGreeterGrpcSdk(IServiceCollection services, string grpcServerAddress = "https://localhost:7001")
     {
         // Register gRPC Channel
         services.AddSingleton(provider => GrpcChannel.ForAddress(grpcServerAddress));
