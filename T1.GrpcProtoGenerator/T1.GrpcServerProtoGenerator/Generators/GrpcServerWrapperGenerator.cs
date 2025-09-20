@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
+using T1.Standard.IO;
 
 namespace T1.GrpcProtoGenerator.Generators
 {
@@ -112,36 +113,40 @@ namespace T1.GrpcProtoGenerator.Generators
 
         private string GenerateWrapperGrpcMessageSource(ProtoMessage messageModel, ProtoModel combinedModel)
         {
-            var sb = new StringBuilder();
+            var sb = new IndentStringBuilder();
             
             // Generate using statements
             GenerateBasicUsingStatements(sb);
             
-            sb.AppendLine($"namespace {messageModel.CsharpNamespace}");
-            sb.AppendLine("{");
+            sb.WriteLine($"namespace {messageModel.CsharpNamespace}");
+            sb.WriteLine("{");
+            sb.Indent++;
 
             GenerateSingleMessageClass(sb, messageModel, combinedModel);
 
-            sb.AppendLine("}");
-            sb.AppendLine();
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
 
             return sb.ToString();
         }
 
         private string GenerateWrapperGrpcEnumSource(ProtoEnum enumModel)
         {
-            var sb = new StringBuilder();
+            var sb = new IndentStringBuilder();
             
             // Generate using statements
             GenerateBasicUsingStatements(sb);
             
-            sb.AppendLine($"namespace {enumModel.CsharpNamespace}");
-            sb.AppendLine("{");
+            sb.WriteLine($"namespace {enumModel.CsharpNamespace}");
+            sb.WriteLine("{");
+            sb.Indent++;
 
             GenerateSingleEnumClass(sb, enumModel);
 
-            sb.AppendLine("}");
-            sb.AppendLine();
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
 
             return sb.ToString();
         }
@@ -149,18 +154,18 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate basic using statements for message source files
         /// </summary>
-        private void GenerateBasicUsingStatements(StringBuilder sb)
+        private void GenerateBasicUsingStatements(IndentStringBuilder sb)
         {
-            sb.AppendLine("#nullable enable");
-            sb.AppendLine("using System;");
-            sb.AppendLine("using System.Collections.Generic;");
-            sb.AppendLine();
+            sb.WriteLine("#nullable enable");
+            sb.WriteLine("using System;");
+            sb.WriteLine("using System.Collections.Generic;");
+            sb.WriteLine();
         }
 
         /// <summary>
         /// Generate a single message class with its properties
         /// </summary>
-        private void GenerateSingleMessageClass(StringBuilder sb, ProtoMessage msg, ProtoModel combineModel)
+        private void GenerateSingleMessageClass(IndentStringBuilder sb, ProtoMessage msg, ProtoModel combineModel)
         {
             if (!ShouldGenerateMessageClass(msg))
             {
@@ -185,16 +190,17 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate message class declaration and opening brace
         /// </summary>
-        private void GenerateMessageClassDeclaration(StringBuilder sb, ProtoMessage msg)
+        private void GenerateMessageClassDeclaration(IndentStringBuilder sb, ProtoMessage msg)
         {
-            sb.AppendLine($"    public class {msg.GetCsharpTypeName()}");
-            sb.AppendLine("    {");
+            sb.WriteLine($"public class {msg.GetCsharpTypeName()}");
+            sb.WriteLine("{");
+            sb.Indent++;
         }
 
         /// <summary>
         /// Generate all properties for the message class
         /// </summary>
-        private void GenerateMessageClassProperties(StringBuilder sb, ProtoMessage msg, ProtoModel combineModel)
+        private void GenerateMessageClassProperties(IndentStringBuilder sb, ProtoMessage msg, ProtoModel combineModel)
         {
             foreach (var field in msg.Fields)
             {
@@ -205,11 +211,11 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate a single property for the message class
         /// </summary>
-        private void GenerateSingleMessageProperty(StringBuilder sb, ProtoField field, ProtoModel combineModel)
+        private void GenerateSingleMessageProperty(IndentStringBuilder sb, ProtoField field, ProtoModel combineModel)
         {
             var propertyInfo = CreateMessagePropertyInfo(field, combineModel);
             var propertyDeclaration = CreatePropertyDeclaration(propertyInfo);
-            sb.AppendLine($"        {propertyDeclaration}");
+            sb.WriteLine(propertyDeclaration);
         }
 
         /// <summary>
@@ -262,27 +268,30 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate message class closing brace
         /// </summary>
-        private void GenerateMessageClassClosing(StringBuilder sb)
+        private void GenerateMessageClassClosing(IndentStringBuilder sb)
         {
-            sb.AppendLine("    }");
-            sb.AppendLine();
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         /// <summary>
         /// Generate a single enum class with its values
         /// </summary>
-        private void GenerateSingleEnumClass(StringBuilder sb, ProtoEnum enumDef)
+        private void GenerateSingleEnumClass(IndentStringBuilder sb, ProtoEnum enumDef)
         {
-            sb.AppendLine($"    public enum {enumDef.GetCsharpTypeName()}");
-            sb.AppendLine("    {");
+            sb.WriteLine($"public enum {enumDef.GetCsharpTypeName()}");
+            sb.WriteLine("{");
+            sb.Indent++;
             
             foreach (var val in enumDef.Values)
             {
-                sb.AppendLine($"        {val.Name} = {val.Value},");
+                sb.WriteLine($"{val.Name} = {val.Value},");
             }
             
-            sb.AppendLine("    }");
-            sb.AppendLine();
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         private string GenerateWrapperClientSource(ProtoModel model, ProtoModel combinedModel)
