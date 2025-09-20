@@ -322,7 +322,25 @@ namespace T1.GrpcProtoGenerator.Generators
             
             foreach (var rpc in svc.Rpcs)
             {
-                sb.AppendLine($"        Task<{rpc.ResponseType}GrpcDto> {rpc.Name}Async({rpc.RequestType}GrpcDto request, CancellationToken cancellationToken = default);");
+                // Handle request parameter - skip parameter if request type is "Null"
+                string parameterPart = "";
+                if (!rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase))
+                {
+                    parameterPart = $"{rpc.RequestType}GrpcDto request, ";
+                }
+                
+                // Handle return type - use Task instead of Task<T> if response type is "Void"
+                string returnType;
+                if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase))
+                {
+                    returnType = "Task";
+                }
+                else
+                {
+                    returnType = $"Task<{rpc.ResponseType}GrpcDto>";
+                }
+                
+                sb.AppendLine($"        {returnType} {rpc.Name}Async({parameterPart}CancellationToken cancellationToken = default);");
             }
             
             sb.AppendLine("    }");
@@ -359,39 +377,67 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateClientMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
         {
-            // Determine the correct namespace for request and response types
-            sb.AppendLine($"        public async Task<{rpc.ResponseType}GrpcDto> {rpc.Name}Async({rpc.RequestType}GrpcDto request, CancellationToken cancellationToken = default)");
+            // Determine method signature based on request/response types
+            bool isNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase);
+            bool isVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase);
+            
+            // Generate method signature
+            string parameterPart = isNullRequest ? "" : $"{rpc.RequestType}GrpcDto request, ";
+            string returnType = isVoidResponse ? "Task" : $"Task<{rpc.ResponseType}GrpcDto>";
+            
+            sb.AppendLine($"        public async {returnType} {rpc.Name}Async({parameterPart}CancellationToken cancellationToken = default)");
             sb.AppendLine("        {");
-            // Map request fields using object initializer
-            var requestMessage = combineModel.FindMessage(rpc.RequestType);
-            sb.AppendLine($"            var grpcReq = new {rpc.RequestType}");
-            sb.AppendLine("            {");
-            for (int i = 0; i < requestMessage.Fields.Count; i++)
-            {
-                var field = requestMessage.Fields[i];
-                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                var comma = i < requestMessage.Fields.Count - 1 ? "," : "";
-                sb.AppendLine($"                {propName} = request.{propName}{comma}");
-            }
-            sb.AppendLine("            };");
             
-            sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
-            // Map response fields using object initializer
-            var responseMessage = combineModel.FindMessage(rpc.ResponseType);
-            sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcDto");
-            sb.AppendLine("            {");
-                
-            for (int i = 0; i < responseMessage.Fields.Count; i++)
+            // Handle request parameter creation
+            if (!isNullRequest)
             {
-                var field = responseMessage.Fields[i];
-                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                var comma = i < responseMessage.Fields.Count - 1 ? "," : "";
-                sb.AppendLine($"                {propName} = grpcResp.{propName}{comma}");
-            }
+                // Map request fields using object initializer
+                var requestMessage = combineModel.FindMessage(rpc.RequestType);
+                sb.AppendLine($"            var grpcReq = new {rpc.RequestType}");
+                sb.AppendLine("            {");
                 
-            sb.AppendLine("            };");
+                for (int i = 0; i < requestMessage.Fields.Count; i++)
+                {
+                    var field = requestMessage.Fields[i];
+                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    var comma = i < requestMessage.Fields.Count - 1 ? "," : "";
+                    sb.AppendLine($"                {propName} = request.{propName}{comma}");
+                }
+                
+                sb.AppendLine("            };");
+            }
+            else
+            {
+                // For Null request, create an empty request object
+                sb.AppendLine($"            var grpcReq = new {rpc.RequestType}();");
+            }
             
-            sb.AppendLine("            return dto;");
+            // Call the gRPC service
+            if (isVoidResponse)
+            {
+                sb.AppendLine($"            await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
+            }
+            else
+            {
+                sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
+                
+                // Map response fields using object initializer
+                var responseMessage = combineModel.FindMessage(rpc.ResponseType);
+                sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcDto");
+                sb.AppendLine("            {");
+                    
+                for (int i = 0; i < responseMessage.Fields.Count; i++)
+                {
+                    var field = responseMessage.Fields[i];
+                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    var comma = i < responseMessage.Fields.Count - 1 ? "," : "";
+                    sb.AppendLine($"                {propName} = grpcResp.{propName}{comma}");
+                }
+                    
+                sb.AppendLine("            };");
+                sb.AppendLine("            return dto;");
+            }
+            
             sb.AppendLine("        }");
             sb.AppendLine();
         }
