@@ -405,7 +405,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateClientInterfaceDeclaration(IndentStringBuilder sb, ProtoService svc)
         {
-            var clientInterface = $"I{svc.Name}Client";
+            var clientInterface = $"I{svc.Name}GrpcClient";
             sb.WriteLine($"public interface {clientInterface}");
             sb.WriteLine("{");
             sb.Indent++;
