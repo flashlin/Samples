@@ -5,35 +5,10 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-        <!-- Force source generator output for better IDE support -->
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
 
     <ItemGroup>
-        <!-- Keep standard Protobuf compilation for base types (both client and server) -->
-        <Protobuf Include="Protos\greet.proto" GrpcServices="Both" />
-        <Protobuf Include="Protos\greet2.proto" GrpcServices="Both" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Messages\requests.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Messages\responses.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Models\Period.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Models\Product.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Models\RebateCustomer.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Models\RebateIncomingCreditOn.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Models\StatusType.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Models\RebateStatus.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Models\RebateHistoryMessage.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Models\RebateBatchListResponse.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Models\ExcludeResultType.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Models\CasinoRebateReportDetail.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\Models\ProductDetailMessage.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <Protobuf Include="Protos\CustomTypes\decimal_value.proto" GrpcServices="None" ProtoRoot="Protos" />
-        <AdditionalFiles Include="Protos\**\*.proto" />
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="Grpc.AspNetCore" Version="2.64.0"/>
-        <PackageReference Include="Google.Api.CommonProtos" Version="2.15.0"/>
         <PackageReference Include="Grpc.AspNetCore.Web" Version="2.64.0"/>
     </ItemGroup>
 
@@ -44,12 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\T1.GrpcServerProtoGenerator\T1.GrpcServerProtoGenerator.csproj" 
-        OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Generated\**" />
+      <ProjectReference Include="..\MyProtoContracts\MyProtoContracts.csproj" />
     </ItemGroup>
 
 </Project>

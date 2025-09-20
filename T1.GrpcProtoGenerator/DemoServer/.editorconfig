@@ -5,5 +5,8 @@ root = true
 # Enable source generator support
 dotnet_analyzer_diagnostic.category-sourcegenerator.severity = suggestion
 
+# Show Source Generator diagnostics
+dotnet_diagnostic.SG003.severity = suggestion
+
 # Ensure generated files are treated as source files
 generated_code = true
