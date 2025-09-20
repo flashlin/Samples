@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace T1.GrpcProtoGenerator.Generators
 {
-    internal class ProtoModel
+    public class ProtoModel
     {
         public List<string> Imports { get; } = new List<string>();
         public List<ProtoMessage> Messages { get; } = new List<ProtoMessage>();
@@ -71,7 +71,7 @@ namespace T1.GrpcProtoGenerator.Generators
         }
     }
 
-    internal class ProtoMessage
+    public class ProtoMessage
     {
         public string Name { get; set; } = string.Empty;
 
@@ -94,7 +94,7 @@ namespace T1.GrpcProtoGenerator.Generators
         }
     }
 
-    internal class ProtoField
+    public class ProtoField
     {
         public int Tag { get; set; }
         public string Type { get; set; } = string.Empty;
@@ -103,7 +103,7 @@ namespace T1.GrpcProtoGenerator.Generators
         public bool IsOption { get; set; } = false;
     }
 
-    internal class ProtoService
+    public class ProtoService
     {
         public string Name { get; set; } = string.Empty;
         public string CsharpNamespace { get; set; } = string.Empty;
@@ -111,7 +111,7 @@ namespace T1.GrpcProtoGenerator.Generators
         public string ProtoPath { get; set; } = string.Empty;
     }
 
-    internal class ProtoRpc
+    public class ProtoRpc
     {
         public string Name { get; set; } = string.Empty;
         public string RequestType { get; set; } = string.Empty;
@@ -120,7 +120,7 @@ namespace T1.GrpcProtoGenerator.Generators
         public string ResponseFullTypename { get; set; } = string.Empty;
     }
 
-    internal class ProtoEnum
+    public class ProtoEnum
     {
         public string Name { get; set; } = string.Empty;
         public string CsharpNamespace { get; set; } = string.Empty;
