@@ -31,11 +31,34 @@ Install-Package T1.GrpcProtoGenerator
 
 ```xml
 <ItemGroup>
-  <Protobuf Include="Protos\greet.proto" GrpcServices="Client" />
+    <!-- Keep standard Protobuf compilation for base types (both client and server) -->
+    <Protobuf Include="Protos\greet.proto" GrpcServices="Both" ProtoRoot="Protos" />
+    <Protobuf Include="Protos\Messages\requests.proto" GrpcServices="None" ProtoRoot="Protos" />
+    <Protobuf Include="Protos\Messages\responses.proto" GrpcServices="None" ProtoRoot="Protos" />
+    <AdditionalFiles Include="Protos\**\*.proto" />
+</ItemGroup>
+
+<ItemGroup>
+<PackageReference Include="Grpc.AspNetCore" Version="2.64.0"/>
+<PackageReference Include="Google.Api.CommonProtos" Version="2.15.0"/>
+<PackageReference Include="Grpc.AspNetCore.Web" Version="2.64.0"/>
+</ItemGroup>
+
+<ItemGroup>
+<Compile Remove="Generated\**" />
 </ItemGroup>
 ```
 
 2. **Build your project** - the source generator will automatically create wrapper classes for your gRPC services.
+
+3. **Use the generated server wrappers**:
+
+```csharp
+// Generated wrapper provides a clean, easy-to-use API
+var client = new GreeterServiceClient("https://localhost:5001");
+var response = await client.SayHelloAsync(new HelloRequest { Name = "World" });
+Console.WriteLine(response.Message);
+```
 
 3. **Use the generated client wrappers**:
 
