@@ -377,69 +377,131 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateClientMethod(StringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
         {
-            // Determine method signature based on request/response types
-            bool isNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase);
-            bool isVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase);
+            var clientMethodInfo = GetClientMethodInfo(rpc);
             
             // Generate method signature
-            string parameterPart = isNullRequest ? "" : $"{rpc.RequestType}GrpcDto request, ";
-            string returnType = isVoidResponse ? "Task" : $"Task<{rpc.ResponseType}GrpcDto>";
+            GenerateClientMethodSignature(sb, rpc, clientMethodInfo);
             
-            sb.AppendLine($"        public async {returnType} {rpc.Name}Async({parameterPart}CancellationToken cancellationToken = default)");
+            // Generate method body
             sb.AppendLine("        {");
             
-            // Handle request parameter creation
-            if (!isNullRequest)
-            {
-                // Map request fields using object initializer
-                var requestMessage = combineModel.FindMessage(rpc.RequestType);
-                sb.AppendLine($"            var grpcReq = new {rpc.RequestType}");
-                sb.AppendLine("            {");
-                
-                for (int i = 0; i < requestMessage.Fields.Count; i++)
-                {
-                    var field = requestMessage.Fields[i];
-                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    var comma = i < requestMessage.Fields.Count - 1 ? "," : "";
-                    sb.AppendLine($"                {propName} = request.{propName}{comma}");
-                }
-                
-                sb.AppendLine("            };");
-            }
-            else
-            {
-                // For Null request, create an empty request object
-                sb.AppendLine($"            var grpcReq = new {rpc.RequestType}();");
-            }
+            // Generate request mapping
+            GenerateClientRequestMapping(sb, rpc, clientMethodInfo, combineModel);
             
-            // Call the gRPC service
-            if (isVoidResponse)
-            {
-                sb.AppendLine($"            await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
-            }
-            else
-            {
-                sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
-                
-                // Map response fields using object initializer
-                var responseMessage = combineModel.FindMessage(rpc.ResponseType);
-                sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcDto");
-                sb.AppendLine("            {");
-                    
-                for (int i = 0; i < responseMessage.Fields.Count; i++)
-                {
-                    var field = responseMessage.Fields[i];
-                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    var comma = i < responseMessage.Fields.Count - 1 ? "," : "";
-                    sb.AppendLine($"                {propName} = grpcResp.{propName}{comma}");
-                }
-                    
-                sb.AppendLine("            };");
-                sb.AppendLine("            return dto;");
-            }
+            // Generate service call and response handling
+            GenerateClientServiceCallAndResponse(sb, rpc, clientMethodInfo, combineModel);
             
             sb.AppendLine("        }");
             sb.AppendLine();
+        }
+
+        /// <summary>
+        /// Get client method information including type flags
+        /// </summary>
+        private ClientMethodInfo GetClientMethodInfo(ProtoRpc rpc)
+        {
+            return new ClientMethodInfo
+            {
+                IsNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase),
+                IsVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase)
+            };
+        }
+
+        /// <summary>
+        /// Generate client method signature
+        /// </summary>
+        private void GenerateClientMethodSignature(StringBuilder sb, ProtoRpc rpc, ClientMethodInfo methodInfo)
+        {
+            var parameterPart = methodInfo.IsNullRequest ? "" : $"{rpc.RequestType}GrpcDto request, ";
+            var returnType = methodInfo.IsVoidResponse ? "Task" : $"Task<{rpc.ResponseType}GrpcDto>";
+            
+            sb.AppendLine($"        public async {returnType} {rpc.Name}Async({parameterPart}CancellationToken cancellationToken = default)");
+        }
+
+        /// <summary>
+        /// Generate client request mapping from DTO to gRPC
+        /// </summary>
+        private void GenerateClientRequestMapping(StringBuilder sb, ProtoRpc rpc, ClientMethodInfo methodInfo, ProtoModel combineModel)
+        {
+            if (!methodInfo.IsNullRequest)
+            {
+                GenerateClientRequestObjectMapping(sb, rpc, combineModel);
+            }
+            else
+            {
+                GenerateClientNullRequestMapping(sb, rpc);
+            }
+        }
+
+        /// <summary>
+        /// Generate client request object mapping for non-null requests
+        /// </summary>
+        private void GenerateClientRequestObjectMapping(StringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
+        {
+            var requestMessage = combineModel.FindMessage(rpc.RequestType);
+            sb.AppendLine($"            var grpcReq = new {rpc.RequestType}");
+            sb.AppendLine("            {");
+            
+            GenerateFieldMappings(sb, requestMessage.Fields, "request");
+            
+            sb.AppendLine("            };");
+        }
+
+        /// <summary>
+        /// Generate client request mapping for null requests
+        /// </summary>
+        private void GenerateClientNullRequestMapping(StringBuilder sb, ProtoRpc rpc)
+        {
+            sb.AppendLine($"            var grpcReq = new {rpc.RequestType}();");
+        }
+
+        /// <summary>
+        /// Generate client service call and response handling
+        /// </summary>
+        private void GenerateClientServiceCallAndResponse(StringBuilder sb, ProtoRpc rpc, ClientMethodInfo methodInfo, ProtoModel combineModel)
+        {
+            if (methodInfo.IsVoidResponse)
+            {
+                GenerateClientVoidServiceCall(sb, rpc);
+            }
+            else
+            {
+                GenerateClientNormalServiceCall(sb, rpc, combineModel);
+            }
+        }
+
+        /// <summary>
+        /// Generate client service call for void response methods
+        /// </summary>
+        private void GenerateClientVoidServiceCall(StringBuilder sb, ProtoRpc rpc)
+        {
+            sb.AppendLine($"            await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
+        }
+
+        /// <summary>
+        /// Generate client service call for normal response methods
+        /// </summary>
+        private void GenerateClientNormalServiceCall(StringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
+        {
+            sb.AppendLine($"            var grpcResp = await _inner.{rpc.Name}Async(grpcReq, cancellationToken: cancellationToken);");
+            
+            // Generate response mapping
+            GenerateClientResponseMapping(sb, rpc, combineModel);
+        }
+
+        /// <summary>
+        /// Generate client response mapping from gRPC to DTO
+        /// </summary>
+        private void GenerateClientResponseMapping(StringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
+        {
+            var responseMessage = combineModel.FindMessage(rpc.ResponseType);
+            sb.AppendLine($"            var dto = new {rpc.ResponseType}GrpcDto");
+            sb.AppendLine("            {");
+            
+            GenerateFieldMappings(sb, responseMessage.Fields, "grpcResp");
+            
+            sb.AppendLine("            };");
+            sb.AppendLine("            return dto;");
         }
 
         private string GenerateWrapperServerSource(ProtoModel model, ProtoModel combineModel)
@@ -913,5 +975,14 @@ namespace T1.GrpcProtoGenerator.Generators
     {
         public string Parameters { get; set; } = string.Empty;
         public string ReturnType { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Client method information for code generation
+    /// </summary>
+    internal class ClientMethodInfo
+    {
+        public bool IsNullRequest { get; set; }
+        public bool IsVoidResponse { get; set; }
     }
 }
