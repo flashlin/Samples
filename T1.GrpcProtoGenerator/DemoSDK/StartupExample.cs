@@ -2,6 +2,7 @@
 using DemoServer.Services;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Options;
+using System;
 
 namespace DemoSDK;
 
@@ -14,21 +15,12 @@ public class StartupExample
     
     public void AddGreeterGrpcSdk(IServiceCollection services)
     {
-        // Register gRPC Channel
-        services.AddSingleton(provider =>
-        {
-            var config = provider.GetRequiredService<IOptions<GreeterGrpcConfig>>();
-            return GrpcChannel.ForAddress(config.Value.ServerUrl);
-        });
-
-        // Register the original gRPC Client generated from proto
         services.AddTransient<Greeter.GreeterClient>(provider =>
         {
-            var channel = provider.GetRequiredService<GrpcChannel>();
+            var config = provider.GetRequiredService<IOptions<GreeterGrpcConfig>>();
+            var channel = GrpcChannel.ForAddress(config.Value.ServerUrl);
             return new Greeter.GreeterClient(channel);
         });
-
-        // Register the wrapper gRPC Client interface and implementation
         services.AddTransient<IGreeterGrpcClient, GreeterGrpcClient>();
     }
 }
