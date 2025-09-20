@@ -487,7 +487,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private void GenerateClientWrapper(IndentStringBuilder sb, ProtoService svc, ProtoModel combineModel)
         {
             var originalNamespace = svc.CsharpNamespace;
-            var clientInterface = $"I{svc.Name}Client";
+            var clientInterface = $"I{svc.Name}GrpcClient";
             var wrapper = $"{svc.Name}GrpcClient";
             var grpcClient = $"{originalNamespace}.{svc.Name}.{svc.Name}Client";
             
