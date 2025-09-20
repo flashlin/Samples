@@ -268,47 +268,87 @@ namespace T1.GrpcProtoGenerator.Generators
 
         private string GenerateWrapperClientSource(ProtoModel model, ProtoModel combinedModel)
         {
-            if (!model.Services.Any())
+            if (!ValidateClientSourceGeneration(model))
             {
                 return string.Empty;
             }
             
             var sb = new StringBuilder();
             
-            // Collect import namespaces for messages and enums only
-            var importNamespaces = CollectImportNamespacesForServer(combinedModel);
+            // Setup using statements
+            SetupClientSourceUsingStatements(sb, combinedModel);
             
-            // Add specific using statements for client generation
+            // Group and generate services by namespace
+            var servicesByNamespace = GroupServicesByNamespace(model);
+            GenerateClientNamespaceBlocks(sb, servicesByNamespace, combinedModel);
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Validate if client source generation is needed
+        /// </summary>
+        private bool ValidateClientSourceGeneration(ProtoModel model)
+        {
+            return model.Services.Any();
+        }
+
+        /// <summary>
+        /// Setup using statements for client source generation
+        /// </summary>
+        private void SetupClientSourceUsingStatements(StringBuilder sb, ProtoModel combinedModel)
+        {
+            var importNamespaces = CollectImportNamespacesForServer(combinedModel);
+            AddClientSpecificNamespaces(importNamespaces);
+            GenerateUsingStatements(sb, importNamespaces);
+        }
+
+        /// <summary>
+        /// Add client-specific namespaces to the import list
+        /// </summary>
+        private void AddClientSpecificNamespaces(HashSet<string> importNamespaces)
+        {
             importNamespaces.Add("System.Threading");
             importNamespaces.Add("System.Threading.Tasks");
             importNamespaces.Add("Grpc.Core");
-            
-            GenerateUsingStatements(sb, importNamespaces);
-            
-            // Group services by CsharpNamespace
-            var servicesByNamespace = model.Services
-                .GroupBy(svc => svc.CsharpNamespace)
-                .ToList();
+        }
 
-            // Generate namespace blocks for each group
+        /// <summary>
+        /// Generate client namespace blocks with their contained services
+        /// </summary>
+        private void GenerateClientNamespaceBlocks(StringBuilder sb, 
+            List<IGrouping<string, ProtoService>> servicesByNamespace, 
+            ProtoModel combinedModel)
+        {
             foreach (var namespaceGroup in servicesByNamespace)
             {
-                var namespaceValue = namespaceGroup.Key;
-                sb.AppendLine($"namespace {namespaceValue}");
-                sb.AppendLine("{");
-
-                // Generate all client interfaces and wrappers for this namespace
-                foreach (var svc in namespaceGroup)
-                {
-                    GenerateClientInterface(sb, svc);
-                    GenerateClientWrapper(sb, svc, combinedModel);
-                }
-
-                sb.AppendLine("}");
-                sb.AppendLine();
+                GenerateClientNamespaceDeclaration(sb, namespaceGroup.Key);
+                GenerateClientServicesInNamespace(sb, namespaceGroup, combinedModel);
+                GenerateNamespaceClosing(sb);
             }
+        }
 
-            return sb.ToString();
+        /// <summary>
+        /// Generate client namespace declaration
+        /// </summary>
+        private void GenerateClientNamespaceDeclaration(StringBuilder sb, string namespaceValue)
+        {
+            sb.AppendLine($"namespace {namespaceValue}");
+            sb.AppendLine("{");
+        }
+
+        /// <summary>
+        /// Generate all client services within a namespace
+        /// </summary>
+        private void GenerateClientServicesInNamespace(StringBuilder sb, 
+            IGrouping<string, ProtoService> namespaceGroup, 
+            ProtoModel combinedModel)
+        {
+            foreach (var svc in namespaceGroup)
+            {
+                GenerateClientInterface(sb, svc);
+                GenerateClientWrapper(sb, svc, combinedModel);
+            }
         }
 
         /// <summary>
@@ -1048,3 +1088,4 @@ namespace T1.GrpcProtoGenerator.Generators
         public string ReturnType { get; set; } = string.Empty;
     }
 }
+
