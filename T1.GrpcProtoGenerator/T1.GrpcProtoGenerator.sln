@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoServer", "DemoServer\De
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoSDK", "DemoSDK\DemoSDK.csproj", "{07C28354-96DB-46C5-8799-F6935D657BF0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyProtoContracts", "MyProtoContracts\MyProtoContracts.csproj", "{0EA11AE6-D299-496C-BADE-6CAEEC027221}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{07C28354-96DB-46C5-8799-F6935D657BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07C28354-96DB-46C5-8799-F6935D657BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07C28354-96DB-46C5-8799-F6935D657BF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EA11AE6-D299-496C-BADE-6CAEEC027221}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EA11AE6-D299-496C-BADE-6CAEEC027221}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EA11AE6-D299-496C-BADE-6CAEEC027221}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EA11AE6-D299-496C-BADE-6CAEEC027221}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
