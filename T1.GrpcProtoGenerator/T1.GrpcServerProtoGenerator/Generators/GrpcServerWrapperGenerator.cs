@@ -316,33 +316,86 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateClientInterface(StringBuilder sb, ProtoService svc)
         {
+            GenerateClientInterfaceDeclaration(sb, svc);
+            GenerateClientInterfaceMethods(sb, svc);
+            GenerateClientInterfaceClosing(sb);
+        }
+
+        /// <summary>
+        /// Generate client interface declaration and opening brace
+        /// </summary>
+        private void GenerateClientInterfaceDeclaration(StringBuilder sb, ProtoService svc)
+        {
             var clientInterface = $"I{svc.Name}Client";
             sb.AppendLine($"    public interface {clientInterface}");
             sb.AppendLine("    {");
-            
+        }
+
+        /// <summary>
+        /// Generate all client interface methods for the service
+        /// </summary>
+        private void GenerateClientInterfaceMethods(StringBuilder sb, ProtoService svc)
+        {
             foreach (var rpc in svc.Rpcs)
             {
-                // Handle request parameter - skip parameter if request type is "Null"
-                string parameterPart = "";
-                if (!rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase))
-                {
-                    parameterPart = $"{rpc.RequestType}GrpcDto request, ";
-                }
-                
-                // Handle return type - use Task instead of Task<T> if response type is "Void"
-                string returnType;
-                if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase))
-                {
-                    returnType = "Task";
-                }
-                else
-                {
-                    returnType = $"Task<{rpc.ResponseType}GrpcDto>";
-                }
-                
-                sb.AppendLine($"        {returnType} {rpc.Name}Async({parameterPart}CancellationToken cancellationToken = default);");
+                GenerateSingleClientInterfaceMethod(sb, rpc);
+            }
+        }
+
+        /// <summary>
+        /// Generate a single client interface method signature
+        /// </summary>
+        private void GenerateSingleClientInterfaceMethod(StringBuilder sb, ProtoRpc rpc)
+        {
+            var methodSignature = CreateClientInterfaceMethodSignature(rpc);
+            sb.AppendLine($"        {methodSignature.ReturnType} {rpc.Name}Async({methodSignature.Parameters}CancellationToken cancellationToken = default);");
+        }
+
+        /// <summary>
+        /// Create method signature information for client interface method
+        /// </summary>
+        private ClientInterfaceMethodSignature CreateClientInterfaceMethodSignature(ProtoRpc rpc)
+        {
+            return new ClientInterfaceMethodSignature
+            {
+                Parameters = GenerateClientInterfaceMethodParameters(rpc),
+                ReturnType = GenerateClientInterfaceMethodReturnType(rpc)
+            };
+        }
+
+        /// <summary>
+        /// Generate parameters for client interface method
+        /// </summary>
+        private string GenerateClientInterfaceMethodParameters(ProtoRpc rpc)
+        {
+            // Skip parameter if request type is "Null"
+            if (rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase))
+            {
+                return "";
             }
             
+            return $"{rpc.RequestType}GrpcDto request, ";
+        }
+
+        /// <summary>
+        /// Generate return type for client interface method
+        /// </summary>
+        private string GenerateClientInterfaceMethodReturnType(ProtoRpc rpc)
+        {
+            // Use Task instead of Task<T> if response type is "Void"
+            if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Task";
+            }
+            
+            return $"Task<{rpc.ResponseType}GrpcDto>";
+        }
+
+        /// <summary>
+        /// Generate client interface closing brace
+        /// </summary>
+        private void GenerateClientInterfaceClosing(StringBuilder sb)
+        {
             sb.AppendLine("    }");
             sb.AppendLine();
         }
@@ -984,5 +1037,14 @@ namespace T1.GrpcProtoGenerator.Generators
     {
         public bool IsNullRequest { get; set; }
         public bool IsVoidResponse { get; set; }
+    }
+
+    /// <summary>
+    /// Client interface method signature information
+    /// </summary>
+    internal class ClientInterfaceMethodSignature
+    {
+        public string Parameters { get; set; } = string.Empty;
+        public string ReturnType { get; set; } = string.Empty;
     }
 }
