@@ -216,35 +216,108 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateSingleMessageClass(StringBuilder sb, ProtoMessage msg, ProtoModel combineModel)
         {
-            // Skip generating DTO for Google Void/Null types as they correspond to no C# class needed
-            if (msg.Name.Equals("Void", StringComparison.OrdinalIgnoreCase) || 
-                msg.Name.Equals("Null", StringComparison.OrdinalIgnoreCase))
+            if (!ShouldGenerateMessageClass(msg))
             {
                 return;
             }
             
+            GenerateMessageClassDeclaration(sb, msg);
+            GenerateMessageClassProperties(sb, msg, combineModel);
+            GenerateMessageClassClosing(sb);
+        }
+
+        /// <summary>
+        /// Check if message class should be generated
+        /// </summary>
+        private bool ShouldGenerateMessageClass(ProtoMessage msg)
+        {
+            // Skip generating DTO for Google Void/Null types as they correspond to no C# class needed
+            return !msg.Name.Equals("Void", StringComparison.OrdinalIgnoreCase) && 
+                   !msg.Name.Equals("Null", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Generate message class declaration and opening brace
+        /// </summary>
+        private void GenerateMessageClassDeclaration(StringBuilder sb, ProtoMessage msg)
+        {
             sb.AppendLine($"    public class {msg.GetCsharpTypeName()}");
             sb.AppendLine("    {");
-            
+        }
+
+        /// <summary>
+        /// Generate all properties for the message class
+        /// </summary>
+        private void GenerateMessageClassProperties(StringBuilder sb, ProtoMessage msg, ProtoModel combineModel)
+        {
             foreach (var field in msg.Fields)
             {
-                var baseType = MapProtoCTypeToCSharp(field.Type, combineModel);
-                if (field.IsOption)
-                {
-                    baseType += "?";
-                }
-                var csType = field.IsRepeated ? $"List<{baseType}>" : baseType;
-                var propertyName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                if (field.IsOption)
-                {
-                    sb.AppendLine($"        public {csType} {propertyName} {{ get; set; }}");
-                }
-                else
-                {
-                    sb.AppendLine($"        public required {csType} {propertyName} {{ get; set; }}");
-                }
+                GenerateSingleMessageProperty(sb, field, combineModel);
+            }
+        }
+
+        /// <summary>
+        /// Generate a single property for the message class
+        /// </summary>
+        private void GenerateSingleMessageProperty(StringBuilder sb, ProtoField field, ProtoModel combineModel)
+        {
+            var propertyInfo = CreateMessagePropertyInfo(field, combineModel);
+            var propertyDeclaration = CreatePropertyDeclaration(propertyInfo);
+            sb.AppendLine($"        {propertyDeclaration}");
+        }
+
+        /// <summary>
+        /// Create property information for message field
+        /// </summary>
+        private MessagePropertyInfo CreateMessagePropertyInfo(ProtoField field, ProtoModel combineModel)
+        {
+            var baseType = MapProtoCTypeToCSharp(field.Type, combineModel);
+            var finalType = ApplyFieldModifiers(baseType, field);
+            var propertyName = FormatPropertyName(field.Name);
+
+            return new MessagePropertyInfo
+            {
+                Type = finalType,
+                Name = propertyName,
+                IsOptional = field.IsOption
+            };
+        }
+
+        /// <summary>
+        /// Apply field modifiers to the base type
+        /// </summary>
+        private string ApplyFieldModifiers(string baseType, ProtoField field)
+        {
+            if (field.IsOption)
+            {
+                baseType += "?";
             }
             
+            return field.IsRepeated ? $"List<{baseType}>" : baseType;
+        }
+
+        /// <summary>
+        /// Format field name to property name (PascalCase)
+        /// </summary>
+        private string FormatPropertyName(string fieldName)
+        {
+            return char.ToUpper(fieldName[0]) + fieldName.Substring(1);
+        }
+
+        /// <summary>
+        /// Create property declaration string
+        /// </summary>
+        private string CreatePropertyDeclaration(MessagePropertyInfo propertyInfo)
+        {
+            var modifier = propertyInfo.IsOptional ? "" : "required ";
+            return $"public {modifier}{propertyInfo.Type} {propertyInfo.Name} {{ get; set; }}";
+        }
+
+        /// <summary>
+        /// Generate message class closing brace
+        /// </summary>
+        private void GenerateMessageClassClosing(StringBuilder sb)
+        {
             sb.AppendLine("    }");
             sb.AppendLine();
         }
@@ -1086,6 +1159,16 @@ namespace T1.GrpcProtoGenerator.Generators
     {
         public string Parameters { get; set; } = string.Empty;
         public string ReturnType { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Message property information for code generation
+    /// </summary>
+    internal class MessagePropertyInfo
+    {
+        public string Type { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public bool IsOptional { get; set; }
     }
 }
 
