@@ -488,7 +488,7 @@ namespace T1.GrpcProtoGenerator.Generators
         {
             var originalNamespace = svc.CsharpNamespace;
             var clientInterface = $"I{svc.Name}Client";
-            var wrapper = $"{svc.Name}ClientWrapper";
+            var wrapper = $"{svc.Name}GrpcClient";
             var grpcClient = $"{originalNamespace}.{svc.Name}.{svc.Name}Client";
             
             sb.WriteLine($"public class {wrapper} : {clientInterface}");
