@@ -6,6 +6,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "T1.GrpcServerProtoGenerator
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoServer", "DemoServer\DemoServer.csproj", "{1F3E3C82-709C-4D75-B308-72F5E8441C60}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoSDK", "DemoSDK\DemoSDK.csproj", "{07C28354-96DB-46C5-8799-F6935D657BF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{1F3E3C82-709C-4D75-B308-72F5E8441C60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F3E3C82-709C-4D75-B308-72F5E8441C60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F3E3C82-709C-4D75-B308-72F5E8441C60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07C28354-96DB-46C5-8799-F6935D657BF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07C28354-96DB-46C5-8799-F6935D657BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07C28354-96DB-46C5-8799-F6935D657BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07C28354-96DB-46C5-8799-F6935D657BF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
