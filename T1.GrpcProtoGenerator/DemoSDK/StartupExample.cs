@@ -1,15 +1,25 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using DemoServer.Services;
 using Grpc.Net.Client;
+using Microsoft.Extensions.Options;
 
 namespace DemoSDK;
 
 public class StartupExample
 {
-    public void AddGreeterGrpcSdk(IServiceCollection services, string grpcServerAddress = "https://localhost:7001")
+    public class GreeterGrpcConfig
+    {
+        public string ServerUrl { get; set; } = "https://localhost:7001";
+    }
+    
+    public void AddGreeterGrpcSdk(IServiceCollection services)
     {
         // Register gRPC Channel
-        services.AddSingleton(provider => GrpcChannel.ForAddress(grpcServerAddress));
+        services.AddSingleton(provider =>
+        {
+            var config = provider.GetRequiredService<IOptions<GreeterGrpcConfig>>();
+            return GrpcChannel.ForAddress(config.Value.ServerUrl);
+        });
 
         // Register the original gRPC Client generated from proto
         services.AddTransient<Greeter.GreeterClient>(provider =>
