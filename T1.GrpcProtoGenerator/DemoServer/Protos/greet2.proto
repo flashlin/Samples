@@ -1,5 +1,5 @@
 syntax = "proto3";
-// import "google/api/annotations.proto";
+//import "google/api/annotations.proto";
 import "Messages/requests.proto";
 import "Messages/responses.proto";
 
@@ -16,13 +16,11 @@ message RebateResponse {
   string message = 2;
 }
 
-message EmptyRequest {}
-
 message EmptyResponse {}
 
-service Rebate {
+service Greeter2 {
   rpc GetRebate(RebateRequest) returns (RebateResponse);
   rpc CreateRebate(RebateRequest) returns (RebateResponse);
-  rpc GetAll(EmptyRequest) returns (EmptyResponse);
+  rpc GetAll(Null) returns (Void);
   rpc IsEligible(EligibilityRequest) returns (EligibilityResponse);
 }
