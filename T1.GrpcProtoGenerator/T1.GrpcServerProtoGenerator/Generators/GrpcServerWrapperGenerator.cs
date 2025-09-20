@@ -105,53 +105,103 @@ namespace T1.GrpcProtoGenerator.Generators
         private ProtoModel CreateCombinedModel(ImmutableArray<ProtoFileInfo> allProtos)
         {
             var combinedModel = new ProtoModel();
+            var collectedElements = CollectAllProtoElements(allProtos);
             
-            // Collect all messages and enums from all proto files
-            var allMessages = new List<ProtoMessage>();
-            var allEnums = new List<ProtoEnum>();
-            var allSvcList = new List<ProtoService>();
+            AddUniqueMessagesToModel(combinedModel, collectedElements.Messages);
+            AddUniqueEnumsToModel(combinedModel, collectedElements.Enums);
+            ProcessAndAddServices(combinedModel, collectedElements.Services);
+            
+            return combinedModel;
+        }
+
+        /// <summary>
+        /// Collect all proto elements from all proto files
+        /// </summary>
+        private ProtoElementCollection CollectAllProtoElements(ImmutableArray<ProtoFileInfo> allProtos)
+        {
+            var collection = new ProtoElementCollection();
             
             foreach (var protoInfo in allProtos)
             {
                 var model = ProtoParser.ParseProtoText(protoInfo.Content, protoInfo.Path);
-                allMessages.AddRange(model.Messages);
-                allEnums.AddRange(model.Enums);
-                allSvcList.AddRange(model.Services);
+                collection.Messages.AddRange(model.Messages);
+                collection.Enums.AddRange(model.Enums);
+                collection.Services.AddRange(model.Services);
             }
             
-            // Add unique messages (based on FullName or Name)
-            var uniqueMessages = allMessages
-                .GroupBy(m => m.GetFullName())
-                .Select(g => g.First())
-                .ToList();
+            return collection;
+        }
+
+        /// <summary>
+        /// Add unique messages to the combined model
+        /// </summary>
+        private void AddUniqueMessagesToModel(ProtoModel combinedModel, List<ProtoMessage> allMessages)
+        {
+            var uniqueMessages = GetUniqueMessages(allMessages);
             
             foreach (var message in uniqueMessages)
             {
                 combinedModel.Messages.Add(message);
             }
-            
-            // Add unique enums (based on Name and Namespace)
-            var uniqueEnums = allEnums
-                .GroupBy(e => $"{e.GetFullName()}")
+        }
+
+        /// <summary>
+        /// Get unique messages based on full name
+        /// </summary>
+        private List<ProtoMessage> GetUniqueMessages(List<ProtoMessage> allMessages)
+        {
+            return allMessages
+                .GroupBy(m => m.GetFullName())
                 .Select(g => g.First())
                 .ToList();
+        }
+
+        /// <summary>
+        /// Add unique enums to the combined model
+        /// </summary>
+        private void AddUniqueEnumsToModel(ProtoModel combinedModel, List<ProtoEnum> allEnums)
+        {
+            var uniqueEnums = GetUniqueEnums(allEnums);
             
             foreach (var enumDef in uniqueEnums)
             {
                 combinedModel.Enums.Add(enumDef);
             }
+        }
 
-            foreach (var svc in allSvcList)
+        /// <summary>
+        /// Get unique enums based on full name
+        /// </summary>
+        private List<ProtoEnum> GetUniqueEnums(List<ProtoEnum> allEnums)
+        {
+            return allEnums
+                .GroupBy(e => e.GetFullName())
+                .Select(g => g.First())
+                .ToList();
+        }
+
+        /// <summary>
+        /// Process services and add them to the combined model
+        /// </summary>
+        private void ProcessAndAddServices(ProtoModel combinedModel, List<ProtoService> allServices)
+        {
+            foreach (var svc in allServices)
             {
-                foreach (var rpc in svc.Rpcs)
-                {
-                    rpc.RequestFullTypename = combinedModel.FindRpcFullTypename(rpc.RequestType);
-                    rpc.ResponseFullTypename = combinedModel.FindRpcFullTypename(rpc.ResponseType);
-                }
+                ProcessServiceRpcTypes(combinedModel, svc);
                 combinedModel.Services.Add(svc);
             }
-            
-            return combinedModel;
+        }
+
+        /// <summary>
+        /// Process RPC types for a service
+        /// </summary>
+        private void ProcessServiceRpcTypes(ProtoModel combinedModel, ProtoService svc)
+        {
+            foreach (var rpc in svc.Rpcs)
+            {
+                rpc.RequestFullTypename = combinedModel.FindRpcFullTypename(rpc.RequestType);
+                rpc.ResponseFullTypename = combinedModel.FindRpcFullTypename(rpc.ResponseType);
+            }
         }
 
         private static void AddGeneratedSourceFile(SourceProductionContext spc, string messagesSource, string sourceFileName)
@@ -1169,6 +1219,16 @@ namespace T1.GrpcProtoGenerator.Generators
         public string Type { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public bool IsOptional { get; set; }
+    }
+
+    /// <summary>
+    /// Collection of proto elements from all proto files
+    /// </summary>
+    internal class ProtoElementCollection
+    {
+        public List<ProtoMessage> Messages { get; set; } = new List<ProtoMessage>();
+        public List<ProtoEnum> Enums { get; set; } = new List<ProtoEnum>();
+        public List<ProtoService> Services { get; set; } = new List<ProtoService>();
     }
 }
 
