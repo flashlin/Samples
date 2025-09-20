@@ -442,51 +442,119 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.AppendLine();
         }
 
-        private string GenerateWrapperServerSource(ProtoModel model, 
-            ProtoModel combineModel)
+        private string GenerateWrapperServerSource(ProtoModel model, ProtoModel combineModel)
         {
-            if (!model.Services.Any())
+            if (!ValidateServerSourceGeneration(model))
             {
                 return string.Empty;
             }
             
             var sb = new StringBuilder();
             
-            // Collect import namespaces for messages and enums only
-            var importNamespaces = CollectImportNamespacesForServer(combineModel);
+            // Setup using statements
+            SetupServerSourceUsingStatements(sb, combineModel);
             
-            // Add specific using statements for server generation
+            // Group and generate services by namespace
+            var servicesByNamespace = GroupServicesByNamespace(model);
+            GenerateNamespaceBlocks(sb, servicesByNamespace, combineModel);
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Validate if server source generation is needed
+        /// </summary>
+        private bool ValidateServerSourceGeneration(ProtoModel model)
+        {
+            return model.Services.Any();
+        }
+
+        /// <summary>
+        /// Setup using statements for server source generation
+        /// </summary>
+        private void SetupServerSourceUsingStatements(StringBuilder sb, ProtoModel combineModel)
+        {
+            var importNamespaces = CollectImportNamespacesForServer(combineModel);
+            AddServerSpecificNamespaces(importNamespaces);
+            GenerateUsingStatements(sb, importNamespaces);
+        }
+
+        /// <summary>
+        /// Add server-specific namespaces to the import list
+        /// </summary>
+        private void AddServerSpecificNamespaces(HashSet<string> importNamespaces)
+        {
             importNamespaces.Add("System.Threading");
             importNamespaces.Add("System.Threading.Tasks");
             importNamespaces.Add("Grpc.Core");
             importNamespaces.Add("Microsoft.Extensions.Logging");
-            
-            GenerateUsingStatements(sb, importNamespaces);
-            
-            // Group services by CsharpNamespace
-            var servicesByNamespace = model.Services
+        }
+
+        /// <summary>
+        /// Group services by their C# namespace
+        /// </summary>
+        private List<IGrouping<string, ProtoService>> GroupServicesByNamespace(ProtoModel model)
+        {
+            return model.Services
                 .GroupBy(svc => svc.CsharpNamespace)
                 .ToList();
+        }
 
-            // Generate namespace blocks for each group
+        /// <summary>
+        /// Generate namespace blocks with their contained services
+        /// </summary>
+        private void GenerateNamespaceBlocks(StringBuilder sb, 
+            List<IGrouping<string, ProtoService>> servicesByNamespace, 
+            ProtoModel combineModel)
+        {
             foreach (var namespaceGroup in servicesByNamespace)
             {
-                var namespaceValue = namespaceGroup.Key;
-                sb.AppendLine($"namespace {namespaceValue}");
-                sb.AppendLine("{");
-
-                // Generate all services for this namespace
-                foreach (var svc in namespaceGroup)
-                {
-                    GenerateServiceInterface(sb, svc, combineModel);
-                    GenerateServiceImplementation(sb, svc, combineModel);
-                }
-
-                sb.AppendLine("}");
-                sb.AppendLine();
+                GenerateSingleNamespaceBlock(sb, namespaceGroup, combineModel);
             }
+        }
 
-            return sb.ToString();
+        /// <summary>
+        /// Generate a single namespace block with its services
+        /// </summary>
+        private void GenerateSingleNamespaceBlock(StringBuilder sb, 
+            IGrouping<string, ProtoService> namespaceGroup, 
+            ProtoModel combineModel)
+        {
+            GenerateNamespaceDeclaration(sb, namespaceGroup.Key);
+            GenerateServicesInNamespace(sb, namespaceGroup, combineModel);
+            GenerateNamespaceClosing(sb);
+        }
+
+        /// <summary>
+        /// Generate namespace declaration
+        /// </summary>
+        private void GenerateNamespaceDeclaration(StringBuilder sb, string namespaceValue)
+        {
+            sb.AppendLine($"namespace {namespaceValue}");
+            sb.AppendLine("{");
+        }
+
+        /// <summary>
+        /// Generate all services within a namespace
+        /// </summary>
+        private void GenerateServicesInNamespace(StringBuilder sb, 
+            IGrouping<string, ProtoService> namespaceGroup, 
+            ProtoModel combineModel)
+        {
+            foreach (var svc in namespaceGroup)
+            {
+                GenerateServiceInterface(sb, svc, combineModel);
+                GenerateServiceImplementation(sb, svc, combineModel);
+            }
+        }
+
+        /// <summary>
+        /// Generate namespace closing brace
+        /// </summary>
+        private void GenerateNamespaceClosing(StringBuilder sb)
+        {
+            sb.AppendLine("}");
+            sb.AppendLine();
         }
 
         /// <summary>
