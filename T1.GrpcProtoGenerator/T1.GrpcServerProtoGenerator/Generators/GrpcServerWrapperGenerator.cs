@@ -509,20 +509,10 @@ namespace T1.GrpcProtoGenerator.Generators
         {
             foreach (var namespaceGroup in servicesByNamespace)
             {
-                GenerateSingleNamespaceBlock(sb, namespaceGroup, combineModel);
+                GenerateNamespaceDeclaration(sb, namespaceGroup.Key);
+                GenerateServicesInNamespace(sb, namespaceGroup, combineModel);
+                GenerateNamespaceClosing(sb);
             }
-        }
-
-        /// <summary>
-        /// Generate a single namespace block with its services
-        /// </summary>
-        private void GenerateSingleNamespaceBlock(StringBuilder sb, 
-            IGrouping<string, ProtoService> namespaceGroup, 
-            ProtoModel combineModel)
-        {
-            GenerateNamespaceDeclaration(sb, namespaceGroup.Key);
-            GenerateServicesInNamespace(sb, namespaceGroup, combineModel);
-            GenerateNamespaceClosing(sb);
         }
 
         /// <summary>
