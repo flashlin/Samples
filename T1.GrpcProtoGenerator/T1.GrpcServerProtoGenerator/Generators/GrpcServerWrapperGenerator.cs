@@ -339,6 +339,9 @@ namespace T1.GrpcProtoGenerator.Generators
             importNamespaces.Add("System.Threading");
             importNamespaces.Add("System.Threading.Tasks");
             importNamespaces.Add("Grpc.Core");
+            importNamespaces.Add("Microsoft.Extensions.DependencyInjection");
+            importNamespaces.Add("Microsoft.Extensions.Options");
+            importNamespaces.Add("Grpc.Net.Client");
         }
 
         /// <summary>
@@ -377,6 +380,8 @@ namespace T1.GrpcProtoGenerator.Generators
             {
                 GenerateClientInterface(sb, svc);
                 GenerateClientWrapper(sb, svc, combinedModel);
+                GenerateClientConfig(sb, svc);
+                GenerateClientExtension(sb, svc);
             }
         }
 
@@ -644,6 +649,63 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.Indent--;
             sb.WriteLine("};");
             sb.WriteLine("return dto;");
+        }
+
+        /// <summary>
+        /// Generate gRPC client configuration class
+        /// </summary>
+        private void GenerateClientConfig(IndentStringBuilder sb, ProtoService svc)
+        {
+            var configClassName = $"{svc.Name}GrpcConfig";
+            
+            sb.WriteLine($"public class {configClassName}");
+            sb.WriteLine("{");
+            sb.Indent++;
+            sb.WriteLine("public string ServerUrl { get; set; } = \"https://localhost:7001\";");
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
+        }
+
+        /// <summary>
+        /// Generate gRPC client extension class for dependency injection
+        /// </summary>
+        private void GenerateClientExtension(IndentStringBuilder sb, ProtoService svc)
+        {
+            var extensionClassName = $"{svc.Name}GrpcExtension";
+            var configClassName = $"{svc.Name}GrpcConfig";
+            var clientInterface = $"I{svc.Name}GrpcClient";
+            var wrapper = $"{svc.Name}GrpcClient";
+            var originalNamespace = svc.CsharpNamespace;
+            var grpcClient = $"{originalNamespace}.{svc.Name}.{svc.Name}Client";
+            
+            sb.WriteLine($"public static class {extensionClassName}");
+            sb.WriteLine("{");
+            sb.Indent++;
+            
+            // Generate AddXxxGrpcSdk extension method
+            sb.WriteLine($"public static void Add{svc.Name}GrpcSdk(this IServiceCollection services)");
+            sb.WriteLine("{");
+            sb.Indent++;
+            
+            // Register the original gRPC Client with dedicated channel
+            sb.WriteLine($"services.AddTransient<{grpcClient}>(provider =>");
+            sb.WriteLine("{");
+            sb.Indent++;
+            sb.WriteLine($"var config = provider.GetRequiredService<IOptions<{configClassName}>>();");
+            sb.WriteLine("var channel = GrpcChannel.ForAddress(config.Value.ServerUrl);");
+            sb.WriteLine($"return new {grpcClient}(channel);");
+            sb.Indent--;
+            sb.WriteLine("});");
+            
+            // Register the wrapper gRPC Client interface and implementation
+            sb.WriteLine($"services.AddTransient<{clientInterface}, {wrapper}>();");
+            
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         private string GenerateWrapperServerSource(ProtoModel model, ProtoModel combineModel)
