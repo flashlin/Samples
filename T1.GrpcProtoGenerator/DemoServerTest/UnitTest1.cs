@@ -14,7 +14,7 @@ public class Tests : IDisposable
     }
 
     [Test]
-    public async Task Test1()
+    public async Task TestSayHello()
     {
         // Arrange
         var request = new HelloRequestGrpcDto
