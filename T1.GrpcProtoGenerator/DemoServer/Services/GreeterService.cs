@@ -12,5 +12,13 @@ namespace DemoServer.Services
             };
             return Task.FromResult(response);
         }
+
+        public Task<GetTimeReplyGrpcDto> SayTime(GetTimeRequestGrpcDto request)
+        {
+            return Task.FromResult(new GetTimeReplyGrpcDto
+            {
+                ReplyTime = request.StartTime.AddSeconds(1),
+            });
+        }
     }
 }
