@@ -513,6 +513,9 @@ namespace T1.GrpcProtoGenerator.Generators
                 GenerateClientMethod(sb, rpc, combineModel);
             }
             
+            // Generate conversion methods for custom types
+            GenerateClientConversionMethods(sb, svc, combineModel);
+            
             sb.Indent--;
             sb.WriteLine("}");
             sb.WriteLine();
@@ -609,7 +612,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 foreach (var field in requestMessage.Fields.Where(f => f.IsRepeated))
                 {
                     var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    sb.WriteLine($"grpcReq.{propName}.AddRange(request.{propName});");
+                    GenerateRepeatedFieldMapping(sb, field, propName, "request", "grpcReq");
                 }
             }
         }
@@ -682,7 +685,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 foreach (var field in responseMessage.Fields.Where(f => f.IsRepeated))
                 {
                     var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    sb.WriteLine($"dto.{propName} = grpcResp.{propName}.ToList();");
+                    GenerateClientRepeatedFieldMapping(sb, field, propName, "grpcResp", "dto");
                 }
             }
             
@@ -1024,6 +1027,9 @@ namespace T1.GrpcProtoGenerator.Generators
                 GenerateServiceMethod(sb, rpc, combineModel);
             }
             
+            // Generate conversion methods for custom types
+            GenerateServerConversionMethods(sb, svc, combineModel);
+            
             sb.Indent--;
             sb.WriteLine("}");
             sb.WriteLine();
@@ -1100,6 +1106,16 @@ namespace T1.GrpcProtoGenerator.Generators
                 
                 sb.Indent--;
                 sb.WriteLine("};");
+                
+                // Handle repeated fields separately after object initialization (gRPC to DTO)
+                if (requestMessage != null && requestMessage.Fields.Any(f => f.IsRepeated))
+                {
+                    foreach (var field in requestMessage.Fields.Where(f => f.IsRepeated))
+                    {
+                        var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                        GenerateServerRequestRepeatedFieldMapping(sb, field, propName, "request", "dtoRequest");
+                    }
+                }
             }
         }
 
@@ -1181,7 +1197,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 foreach (var field in responseMessage.Fields.Where(f => f.IsRepeated))
                 {
                     var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
-                    sb.WriteLine($"grpcResponse.{propName}.AddRange(dtoResponse.{propName});");
+                    GenerateRepeatedFieldMapping(sb, field, propName, "dtoResponse", "grpcResponse");
                 }
             }
             
@@ -1202,7 +1218,9 @@ namespace T1.GrpcProtoGenerator.Generators
                 // Handle repeated fields with empty list initialization
                 if (field.IsRepeated)
                 {
-                    var elementType = GetCsharpElementType(field.Type);
+                    var elementType = IsPrimitiveType(field.Type) 
+                        ? GetCsharpElementType(field.Type) 
+                        : $"{field.Type}GrpcDto";
                     sb.WriteLine($"{propName} = new List<{elementType}>()" + comma);
                     continue;
                 }
@@ -1276,6 +1294,328 @@ namespace T1.GrpcProtoGenerator.Generators
                 "bytes" => "byte[]",
                 _ => protoType // For custom types, use as-is
             };
+        }
+
+        /// <summary>
+        /// Generate repeated field mapping with proper type conversion
+        /// </summary>
+        private void GenerateRepeatedFieldMapping(IndentStringBuilder sb, ProtoField field, string propName, 
+            string sourceVar, string targetVar)
+        {
+            var elementType = GetCsharpElementType(field.Type);
+            
+            // Check if this is a primitive type
+            if (IsPrimitiveType(field.Type))
+            {
+                // For primitive types, direct AddRange works
+                sb.WriteLine($"{targetVar}.{propName}.AddRange({sourceVar}.{propName});");
+            }
+            else
+            {
+                // For custom types, generate conversion logic
+                GenerateCustomTypeConversion(sb, field, propName, sourceVar, targetVar, ConversionDirection.DtoToGrpc);
+            }
+        }
+
+        /// <summary>
+        /// Generate repeated field mapping for client response (gRPC to DTO)
+        /// </summary>
+        private void GenerateClientRepeatedFieldMapping(IndentStringBuilder sb, ProtoField field, string propName, 
+            string sourceVar, string targetVar)
+        {
+            // Check if this is a primitive type
+            if (IsPrimitiveType(field.Type))
+            {
+                // For primitive types, direct ToList() works
+                sb.WriteLine($"{targetVar}.{propName} = {sourceVar}.{propName}.ToList();");
+            }
+            else
+            {
+                // For custom types, generate conversion logic
+                GenerateCustomTypeConversion(sb, field, propName, sourceVar, targetVar, ConversionDirection.GrpcToDto);
+            }
+        }
+
+        /// <summary>
+        /// Check if a type is a primitive protobuf type
+        /// </summary>
+        private bool IsPrimitiveType(string protoType)
+        {
+            return protoType switch
+            {
+                "int32" or "int64" or "uint32" or "uint64" or 
+                "float" or "double" or "bool" or "string" or "bytes" => true,
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Conversion direction enumeration
+        /// </summary>
+        private enum ConversionDirection
+        {
+            DtoToGrpc,  // Convert from DTO to gRPC type
+            GrpcToDto   // Convert from gRPC to DTO type
+        }
+
+        /// <summary>
+        /// Generate custom type conversion for repeated fields
+        /// </summary>
+        private void GenerateCustomTypeConversion(IndentStringBuilder sb, ProtoField field, string propName, 
+            string sourceVar, string targetVar, ConversionDirection direction)
+        {
+            var typeName = field.Type;
+            
+            switch (direction)
+            {
+                case ConversionDirection.DtoToGrpc:
+                    // Convert from DTO to gRPC (e.g., CustomerInfoGrpcDto -> CustomerInfo)
+                    sb.WriteLine($"{targetVar}.{propName}.AddRange({sourceVar}.{propName}.Select(dto => ConvertDtoTo{typeName}(dto)));");
+                    break;
+                    
+                case ConversionDirection.GrpcToDto:
+                    // Convert from gRPC to DTO (e.g., CustomerInfo -> CustomerInfoGrpcDto)
+                    sb.WriteLine($"{targetVar}.{propName} = {sourceVar}.{propName}.Select(grpc => Convert{typeName}ToDto(grpc)).ToList();");
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Generate conversion methods for server (gRPC to DTO and DTO to gRPC)
+        /// </summary>
+        private void GenerateServerConversionMethods(IndentStringBuilder sb, ProtoService svc, ProtoModel combineModel)
+        {
+            var customTypes = GetCustomTypesFromService(svc, combineModel);
+            
+            foreach (var customType in customTypes)
+            {
+                GenerateGrpcToDtoConversion(sb, customType, combineModel);
+                GenerateDtoToGrpcConversion(sb, customType, combineModel);
+            }
+        }
+
+        /// <summary>
+        /// Generate conversion methods for client (DTO to gRPC and gRPC to DTO)
+        /// </summary>
+        private void GenerateClientConversionMethods(IndentStringBuilder sb, ProtoService svc, ProtoModel combineModel)
+        {
+            var customTypes = GetCustomTypesFromService(svc, combineModel);
+            
+            foreach (var customType in customTypes)
+            {
+                GenerateDtoToGrpcClientConversion(sb, customType, combineModel);
+                GenerateGrpcToDtoClientConversion(sb, customType, combineModel);
+            }
+        }
+
+        /// <summary>
+        /// Get all custom types used in the service
+        /// </summary>
+        private HashSet<string> GetCustomTypesFromService(ProtoService svc, ProtoModel combineModel)
+        {
+            var customTypes = new HashSet<string>();
+            
+            foreach (var rpc in svc.Rpcs)
+            {
+                // Check request type
+                var requestMessage = combineModel.FindMessage(rpc.RequestType);
+                if (requestMessage != null)
+                {
+                    foreach (var field in requestMessage.Fields)
+                    {
+                        if (field.IsRepeated && !IsPrimitiveType(field.Type))
+                        {
+                            customTypes.Add(field.Type);
+                        }
+                    }
+                }
+                
+                // Check response type
+                var responseMessage = combineModel.FindMessage(rpc.ResponseType);
+                if (responseMessage != null)
+                {
+                    foreach (var field in responseMessage.Fields)
+                    {
+                        if (field.IsRepeated && !IsPrimitiveType(field.Type))
+                        {
+                            customTypes.Add(field.Type);
+                        }
+                    }
+                }
+            }
+            
+            return customTypes;
+        }
+
+        /// <summary>
+        /// Generate gRPC to DTO conversion method for server
+        /// </summary>
+        private void GenerateGrpcToDtoConversion(IndentStringBuilder sb, string typeName, ProtoModel combineModel)
+        {
+            var message = combineModel.FindMessage(typeName);
+            if (message == null) return;
+
+            sb.WriteLine($"private static {typeName}GrpcDto Convert{typeName}ToDto({typeName} grpc)");
+            sb.WriteLine("{");
+            sb.Indent++;
+            sb.WriteLine($"return new {typeName}GrpcDto");
+            sb.WriteLine("{");
+            sb.Indent++;
+            
+            for (int i = 0; i < message.Fields.Count; i++)
+            {
+                var field = message.Fields[i];
+                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var comma = i < message.Fields.Count - 1 ? "," : "";
+                
+                if (IsTimestampField(field))
+                {
+                    sb.WriteLine($"{propName} = grpc.{propName}.ToDateTime(){comma}");
+                }
+                else
+                {
+                    sb.WriteLine($"{propName} = grpc.{propName}{comma}");
+                }
+            }
+            
+            sb.Indent--;
+            sb.WriteLine("};");
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
+        }
+
+        /// <summary>
+        /// Generate DTO to gRPC conversion method for server
+        /// </summary>
+        private void GenerateDtoToGrpcConversion(IndentStringBuilder sb, string typeName, ProtoModel combineModel)
+        {
+            var message = combineModel.FindMessage(typeName);
+            if (message == null) return;
+
+            sb.WriteLine($"private static {typeName} ConvertDtoTo{typeName}({typeName}GrpcDto dto)");
+            sb.WriteLine("{");
+            sb.Indent++;
+            sb.WriteLine($"return new {typeName}");
+            sb.WriteLine("{");
+            sb.Indent++;
+            
+            for (int i = 0; i < message.Fields.Count; i++)
+            {
+                var field = message.Fields[i];
+                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var comma = i < message.Fields.Count - 1 ? "," : "";
+                
+                if (IsTimestampField(field))
+                {
+                    sb.WriteLine($"{propName} = dto.{propName}.ToGrpcTimestamp(){comma}");
+                }
+                else
+                {
+                    sb.WriteLine($"{propName} = dto.{propName}{comma}");
+                }
+            }
+            
+            sb.Indent--;
+            sb.WriteLine("};");
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
+        }
+
+        /// <summary>
+        /// Generate DTO to gRPC conversion method for client
+        /// </summary>
+        private void GenerateDtoToGrpcClientConversion(IndentStringBuilder sb, string typeName, ProtoModel combineModel)
+        {
+            var message = combineModel.FindMessage(typeName);
+            if (message == null) return;
+
+            sb.WriteLine($"private static {typeName} ConvertDtoTo{typeName}({typeName}GrpcDto dto)");
+            sb.WriteLine("{");
+            sb.Indent++;
+            sb.WriteLine($"return new {typeName}");
+            sb.WriteLine("{");
+            sb.Indent++;
+            
+            for (int i = 0; i < message.Fields.Count; i++)
+            {
+                var field = message.Fields[i];
+                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var comma = i < message.Fields.Count - 1 ? "," : "";
+                
+                if (IsTimestampField(field))
+                {
+                    sb.WriteLine($"{propName} = dto.{propName}.ToGrpcTimestamp(){comma}");
+                }
+                else
+                {
+                    sb.WriteLine($"{propName} = dto.{propName}{comma}");
+                }
+            }
+            
+            sb.Indent--;
+            sb.WriteLine("};");
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
+        }
+
+        /// <summary>
+        /// Generate repeated field mapping for server request (gRPC to DTO)
+        /// </summary>
+        private void GenerateServerRequestRepeatedFieldMapping(IndentStringBuilder sb, ProtoField field, string propName, 
+            string sourceVar, string targetVar)
+        {
+            // Check if this is a primitive type
+            if (IsPrimitiveType(field.Type))
+            {
+                // For primitive types, direct ToList() works
+                sb.WriteLine($"{targetVar}.{propName} = {sourceVar}.{propName}.ToList();");
+            }
+            else
+            {
+                // For custom types, generate conversion logic (gRPC to DTO)
+                GenerateCustomTypeConversion(sb, field, propName, sourceVar, targetVar, ConversionDirection.GrpcToDto);
+            }
+        }
+
+        /// <summary>
+        /// Generate gRPC to DTO conversion method for client
+        /// </summary>
+        private void GenerateGrpcToDtoClientConversion(IndentStringBuilder sb, string typeName, ProtoModel combineModel)
+        {
+            var message = combineModel.FindMessage(typeName);
+            if (message == null) return;
+
+            sb.WriteLine($"private static {typeName}GrpcDto Convert{typeName}ToDto({typeName} grpc)");
+            sb.WriteLine("{");
+            sb.Indent++;
+            sb.WriteLine($"return new {typeName}GrpcDto");
+            sb.WriteLine("{");
+            sb.Indent++;
+            
+            for (int i = 0; i < message.Fields.Count; i++)
+            {
+                var field = message.Fields[i];
+                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var comma = i < message.Fields.Count - 1 ? "," : "";
+                
+                if (IsTimestampField(field))
+                {
+                    sb.WriteLine($"{propName} = grpc.{propName}.ToDateTime(){comma}");
+                }
+                else
+                {
+                    sb.WriteLine($"{propName} = grpc.{propName}{comma}");
+                }
+            }
+            
+            sb.Indent--;
+            sb.WriteLine("};");
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         private static string MapProtoCTypeToCSharp(string protoType, ProtoModel combineModel)

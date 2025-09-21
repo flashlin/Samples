@@ -37,5 +37,19 @@ namespace DemoServer.Services
             }
             return Task.CompletedTask;
         }
+
+        public Task<GetObjListReplyGrpcDto> SayObjList(GetObjListRequestGrpcDto request)
+        {
+            return Task.FromResult(new GetObjListReplyGrpcDto
+            {
+                Customers = [
+                    new CustomerInfoGrpcDto
+                    {
+                        Id = 1,
+                        Birth = DateTime.Now
+                    }
+                ]
+            });
+        }
     }
 }
