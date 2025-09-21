@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 option csharp_namespace = "DemoServer.Services";
 
@@ -10,6 +11,7 @@ service Greeter {
   // Sends a greeting
   rpc SayHello(HelloRequest) returns(HelloReply);
   rpc SayTime(GetTimeRequest) returns(GetTimeReply);
+  rpc SayIntList(google.protobuf.Empty) returns(GetIntListReply);
 }
 
 // The request message containing the user's name.
@@ -29,4 +31,8 @@ message GetTimeRequest {
 
 message GetTimeReply {
   google.protobuf.Timestamp replyTime = 1;
+}
+
+message GetIntListReply {
+  repeated int64 ids = 1;
 }
