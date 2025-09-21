@@ -456,8 +456,9 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private string GenerateClientInterfaceMethodParameters(ProtoRpc rpc)
         {
-            // Skip parameter if request type is "Null"
-            if (rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase))
+            // Skip parameter if request type is "Null" or "google.protobuf.Empty"
+            if (rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
+                rpc.RequestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase))
             {
                 return "";
             }
@@ -548,7 +549,8 @@ namespace T1.GrpcProtoGenerator.Generators
         {
             return new ClientMethodInfo
             {
-                IsNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase),
+                IsNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
+                               rpc.RequestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase),
                 IsVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase)
             };
         }
@@ -575,7 +577,7 @@ namespace T1.GrpcProtoGenerator.Generators
             }
             else
             {
-                GenerateClientNullRequestMapping(sb, rpc);
+                GenerateClientNullRequestMapping(sb, rpc, combineModel);
             }
         }
 
@@ -585,22 +587,38 @@ namespace T1.GrpcProtoGenerator.Generators
         private void GenerateClientRequestObjectMapping(IndentStringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
         {
             var requestMessage = combineModel.FindMessage(rpc.RequestType);
-            sb.WriteLine($"var grpcReq = new {rpc.RequestType}");
+            var requestFullType = combineModel.FindRpcFullTypename(rpc.RequestType);
+            sb.WriteLine($"var grpcReq = new {requestFullType}");
             sb.WriteLine("{");
             sb.Indent++;
             
-            GenerateDtoFieldToRpcMappings(sb, requestMessage.Fields, "request");
+            // Only generate field mappings if the message exists and has fields
+            if (requestMessage != null && requestMessage.Fields.Any())
+            {
+                GenerateDtoFieldToRpcMappings(sb, requestMessage.Fields, "request");
+            }
             
             sb.Indent--;
             sb.WriteLine("};");
+            
+            // Handle repeated fields separately after object initialization
+            if (requestMessage != null && requestMessage.Fields.Any(f => f.IsRepeated))
+            {
+                foreach (var field in requestMessage.Fields.Where(f => f.IsRepeated))
+                {
+                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    sb.WriteLine($"grpcReq.{propName}.AddRange(request.{propName});");
+                }
+            }
         }
 
         /// <summary>
         /// Generate client request mapping for null requests
         /// </summary>
-        private void GenerateClientNullRequestMapping(IndentStringBuilder sb, ProtoRpc rpc)
+        private void GenerateClientNullRequestMapping(IndentStringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
         {
-            sb.WriteLine($"var grpcReq = new {rpc.RequestType}();");
+            var requestFullType = combineModel.FindRpcFullTypename(rpc.RequestType);
+            sb.WriteLine($"var grpcReq = new {requestFullType}();");
         }
 
         /// <summary>
@@ -647,10 +665,25 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.WriteLine("{");
             sb.Indent++;
             
-            GenerateRpcFieldToDtoMappings(sb, responseMessage.Fields, "grpcResp");
+            // Only generate field mappings if the message exists and has fields
+            if (responseMessage != null && responseMessage.Fields.Any())
+            {
+                GenerateRpcFieldToDtoMappings(sb, responseMessage.Fields, "grpcResp");
+            }
             
             sb.Indent--;
             sb.WriteLine("};");
+            
+            // Handle repeated fields separately after object initialization
+            if (responseMessage != null && responseMessage.Fields.Any(f => f.IsRepeated))
+            {
+                foreach (var field in responseMessage.Fields.Where(f => f.IsRepeated))
+                {
+                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    sb.WriteLine($"dto.{propName} = grpcResp.{propName}.ToList();");
+                }
+            }
+            
             sb.WriteLine("return dto;");
         }
 
@@ -925,8 +958,9 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private string GenerateInterfaceMethodParameters(ProtoRpc rpc, string rpcRequestType)
         {
-            // Skip parameter if request type is "Null"
-            if (rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase))
+            // Skip parameter if request type is "Null" or "google.protobuf.Empty"
+            if (rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
+                rpc.RequestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase))
             {
                 return "";
             }
@@ -1028,7 +1062,8 @@ namespace T1.GrpcProtoGenerator.Generators
                 ResponseFullType = combineModel.FindRpcFullTypename(rpc.ResponseType),
                 RequestType = combineModel.FindCsharpTypeName(rpc.RequestType),
                 ResponseType = combineModel.FindCsharpTypeName(rpc.ResponseType),
-                IsNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase),
+                IsNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
+                               rpc.RequestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase),
                 IsVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase)
             };
         }
@@ -1053,7 +1088,11 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.WriteLine("{");
                 sb.Indent++;
                 
-                GenerateRpcFieldToDtoMappings(sb, requestMessage.Fields, "request");
+                // Only generate field mappings if the message exists and has fields
+                if (requestMessage != null && requestMessage.Fields.Any())
+                {
+                    GenerateRpcFieldToDtoMappings(sb, requestMessage.Fields, "request");
+                }
                 
                 sb.Indent--;
                 sb.WriteLine("};");
@@ -1123,10 +1162,25 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.WriteLine("{");
             sb.Indent++;
             
-            GenerateDtoFieldToRpcMappings(sb, responseMessage.Fields, "dtoResponse");
+            // Only generate field mappings if the message exists and has fields
+            if (responseMessage != null && responseMessage.Fields.Any())
+            {
+                GenerateDtoFieldToRpcMappings(sb, responseMessage.Fields, "dtoResponse");
+            }
             
             sb.Indent--;
             sb.WriteLine("};");
+            
+            // Handle repeated fields separately after object initialization
+            if (responseMessage != null && responseMessage.Fields.Any(f => f.IsRepeated))
+            {
+                foreach (var field in responseMessage.Fields.Where(f => f.IsRepeated))
+                {
+                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    sb.WriteLine($"grpcResponse.{propName}.AddRange(dtoResponse.{propName});");
+                }
+            }
+            
             sb.WriteLine("return grpcResponse;");
         }
 
@@ -1140,6 +1194,14 @@ namespace T1.GrpcProtoGenerator.Generators
                 var field = fields[i];
                 var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
                 var comma = i < fields.Count - 1 ? "," : "";
+                
+                // Handle repeated fields with empty list initialization
+                if (field.IsRepeated)
+                {
+                    var elementType = GetCsharpElementType(field.Type);
+                    sb.WriteLine($"{propName} = new List<{elementType}>()" + comma);
+                    continue;
+                }
                 
                 // Check if field type is timestamp and needs conversion
                 if (IsTimestampField(field))
@@ -1165,6 +1227,12 @@ namespace T1.GrpcProtoGenerator.Generators
                 var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
                 var comma = i < fields.Count - 1 ? "," : "";
                 
+                // Skip repeated fields in object initializer - they will be handled separately
+                if (field.IsRepeated)
+                {
+                    continue;
+                }
+                
                 // Check if field type is timestamp and needs conversion
                 if (IsTimestampField(field))
                 {
@@ -1184,6 +1252,26 @@ namespace T1.GrpcProtoGenerator.Generators
         {
             return field.Type.Equals("Timestamp", StringComparison.OrdinalIgnoreCase) ||
                    field.Type.Equals("google.protobuf.Timestamp", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Get C# element type for repeated fields
+        /// </summary>
+        private string GetCsharpElementType(string protoType)
+        {
+            return protoType switch
+            {
+                "int32" => "int",
+                "int64" => "long",
+                "uint32" => "uint",
+                "uint64" => "ulong",
+                "float" => "float",
+                "double" => "double",
+                "bool" => "bool",
+                "string" => "string",
+                "bytes" => "byte[]",
+                _ => protoType // For custom types, use as-is
+            };
         }
 
         private static string MapProtoCTypeToCSharp(string protoType, ProtoModel combineModel)

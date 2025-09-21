@@ -33,6 +33,13 @@ namespace T1.GrpcProtoGenerator.Generators
             {
                 return protoEnum.GetFullName();
             }
+            
+            // Handle built-in protobuf types
+            if (IsBuiltInProtobufType(name))
+            {
+                return GetBuiltInTypeFullname(name);
+            }
+            
             return name;
         }
         
@@ -48,6 +55,12 @@ namespace T1.GrpcProtoGenerator.Generators
             if (protoEnum != null)
             {
                 return protoEnum.GetCsharpTypeName();
+            }
+
+            // Handle built-in protobuf types
+            if (IsBuiltInProtobufType(protoTypeName))
+            {
+                return GetBuiltInTypeCsharpName(protoTypeName);
             }
 
             return null;
@@ -68,6 +81,50 @@ namespace T1.GrpcProtoGenerator.Generators
             }
 
             return null;
+        }
+
+        private static bool IsBuiltInProtobufType(string typeName)
+        {
+            return typeName.StartsWith("google.protobuf.");
+        }
+
+        private static string GetBuiltInTypeFullname(string typeName)
+        {
+            // For google.protobuf types, return the fully qualified .NET type name
+            return typeName switch
+            {
+                "google.protobuf.Empty" => "Google.Protobuf.WellKnownTypes.Empty",
+                "google.protobuf.Timestamp" => "Google.Protobuf.WellKnownTypes.Timestamp",
+                "google.protobuf.Duration" => "Google.Protobuf.WellKnownTypes.Duration",
+                "google.protobuf.Any" => "Google.Protobuf.WellKnownTypes.Any",
+                "google.protobuf.Value" => "Google.Protobuf.WellKnownTypes.Value",
+                "google.protobuf.Struct" => "Google.Protobuf.WellKnownTypes.Struct",
+                "google.protobuf.ListValue" => "Google.Protobuf.WellKnownTypes.ListValue",
+                "google.protobuf.NullValue" => "Google.Protobuf.WellKnownTypes.NullValue",
+                "google.protobuf.StringValue" => "Google.Protobuf.WellKnownTypes.StringValue",
+                "google.protobuf.Int32Value" => "Google.Protobuf.WellKnownTypes.Int32Value",
+                "google.protobuf.Int64Value" => "Google.Protobuf.WellKnownTypes.Int64Value",
+                "google.protobuf.UInt32Value" => "Google.Protobuf.WellKnownTypes.UInt32Value",
+                "google.protobuf.UInt64Value" => "Google.Protobuf.WellKnownTypes.UInt64Value",
+                "google.protobuf.BoolValue" => "Google.Protobuf.WellKnownTypes.BoolValue",
+                "google.protobuf.BytesValue" => "Google.Protobuf.WellKnownTypes.BytesValue",
+                "google.protobuf.DoubleValue" => "Google.Protobuf.WellKnownTypes.DoubleValue",
+                "google.protobuf.FloatValue" => "Google.Protobuf.WellKnownTypes.FloatValue",
+                _ => typeName
+            };
+        }
+
+        private static string GetBuiltInTypeCsharpName(string typeName)
+        {
+            // For DTO types, we don't want to use the built-in types directly
+            // Instead, we'll create corresponding DTO types or use special handling
+            return typeName switch
+            {
+                "google.protobuf.Empty" => "EmptyGrpcDto", // Special case for Empty
+                "google.protobuf.Timestamp" => "DateTime", // Map to DateTime for DTOs
+                "google.protobuf.Duration" => "TimeSpan", // Map to TimeSpan for DTOs
+                _ => $"{typeName.Replace("google.protobuf.", "")}GrpcDto"
+            };
         }
     }
 

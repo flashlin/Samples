@@ -20,5 +20,13 @@ namespace DemoServer.Services
                 ReplyTime = request.StartTime.AddSeconds(1),
             });
         }
+
+        public Task<GetIntListReplyGrpcDto> SayIntList()
+        {
+            return Task.FromResult(new GetIntListReplyGrpcDto
+            {
+                Ids = [1, 2, 3]
+            });
+        }
     }
 }

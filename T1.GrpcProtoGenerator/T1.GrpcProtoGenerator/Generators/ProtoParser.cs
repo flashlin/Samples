@@ -12,7 +12,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private static readonly Regex MessageRegex = new Regex(@"message\s+(?<name>\w+)\s*\{(?<body>[\s\S]*?)\}", RegexOptions.Compiled);
         private static readonly Regex FieldRegex = new Regex(@"(?<optional>optional\s+)?(?<repeated>repeated\s+)?(?<type>\w+)\s+(?<name>\w+)\s*=\s*(?<tag>\d+);", RegexOptions.Compiled);
         private static readonly Regex ServiceRegex = new Regex(@"service\s+(?<name>\w+)\s*\{(?<body>[\s\S]*?)\}", RegexOptions.Compiled);
-        private static readonly Regex RpcRegex = new Regex(@"rpc\s+(?<name>\w+)\s*\(\s*(?<req>\w+)\s*\)\s*returns\s*\(\s*(?<resp>\w+)\s*\)\s*;", RegexOptions.Compiled);
+        private static readonly Regex RpcRegex = new Regex(@"rpc\s+(?<name>\w+)\s*\(\s*(?<req>[\w.]+)\s*\)\s*returns\s*\(\s*(?<resp>[\w.]+)\s*\)\s*;", RegexOptions.Compiled);
         private static readonly Regex EnumRegex = new Regex(@"enum\s+(?<name>\w+)\s*\{(?<body>[\s\S]*?)\}", RegexOptions.Compiled);
         private static readonly Regex EnumFieldRegex = new Regex(@"(?<name>\w+)\s*=\s*(?<value>\d+);", RegexOptions.Compiled);
 
