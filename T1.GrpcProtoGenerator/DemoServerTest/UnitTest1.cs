@@ -30,6 +30,25 @@ public class Tests : IDisposable
         Assert.That(response.Message, Is.EqualTo("Hello Test User!"));
     }
 
+    [Test]
+    public async Task TestSayTime()
+    {
+        // Arrange
+        var startTime = DateTime.UtcNow;
+        var request = new GetTimeRequestGrpcDto
+        {
+            Id = 123,
+            StartTime = startTime
+        };
+
+        // Act
+        var response = await _demoServerApp!.Client.SayTimeAsync(request);
+
+        // Assert
+        Assert.That(response, Is.Not.Null);
+        Assert.That(response.ReplyTime, Is.EqualTo(startTime.AddSeconds(1)));
+    }
+
     public void Dispose()
     {
         _demoServerApp?.Dispose();
