@@ -85,6 +85,8 @@ namespace T1.GrpcProtoGenerator.Generators
         {
             logger.LogDebug($"Generating service files for {allProtos.Length} proto files");
             
+            AddGeneratedSourceFile(spc, GenerateGrpcUtilsSource(), $"Generated_grpcUtils.cs");
+            
             foreach (var protoInfo in allProtos)
             {
                 var model = ProtoParser.ParseProtoText(protoInfo.Content, protoInfo.Path);
@@ -342,6 +344,7 @@ namespace T1.GrpcProtoGenerator.Generators
             importNamespaces.Add("Microsoft.Extensions.DependencyInjection");
             importNamespaces.Add("Microsoft.Extensions.Options");
             importNamespaces.Add("Grpc.Net.Client");
+            importNamespaces.Add("T1.GrpcProtoGenerator");
         }
 
         /// <summary>
@@ -586,7 +589,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.WriteLine("{");
             sb.Indent++;
             
-            GenerateFieldMappings(sb, requestMessage.Fields, "request");
+            GenerateDtoFieldToRpcMappings(sb, requestMessage.Fields, "request");
             
             sb.Indent--;
             sb.WriteLine("};");
@@ -644,7 +647,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.WriteLine("{");
             sb.Indent++;
             
-            GenerateFieldMappings(sb, responseMessage.Fields, "grpcResp");
+            GenerateRpcFieldToDtoMappings(sb, responseMessage.Fields, "grpcResp");
             
             sb.Indent--;
             sb.WriteLine("};");
@@ -708,6 +711,22 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.WriteLine();
         }
 
+        private string GenerateGrpcUtilsSource()
+        {
+            var sb = new IndentStringBuilder();
+            
+            sb.WriteLine("using System;");
+            sb.WriteLine("using Google.Protobuf.WellKnownTypes;");
+            
+            sb.WriteLine("namespace T1.GrpcProtoGenerator");
+            sb.WriteLine("{");
+            sb.Indent++;
+            GenerateGrpcHelperClass(sb);
+            sb.Indent--;
+            sb.WriteLine("}");
+            return sb.ToString();
+        }
+
         private string GenerateWrapperServerSource(ProtoModel model, ProtoModel combineModel)
         {
             if (!ValidateServerSourceGeneration(model))
@@ -754,6 +773,7 @@ namespace T1.GrpcProtoGenerator.Generators
             importNamespaces.Add("System.Threading.Tasks");
             importNamespaces.Add("Grpc.Core");
             importNamespaces.Add("Microsoft.Extensions.Logging");
+            importNamespaces.Add("T1.GrpcProtoGenerator");
         }
 
         /// <summary>
@@ -803,6 +823,35 @@ namespace T1.GrpcProtoGenerator.Generators
                 GenerateServiceInterface(sb, svc, combineModel);
                 GenerateServiceImplementation(sb, svc, combineModel);
             }
+        }
+
+        /// <summary>
+        /// Generate GrpcHelper static class with extension methods
+        /// </summary>
+        private void GenerateGrpcHelperClass(IndentStringBuilder sb)
+        {
+            sb.WriteLine("public static class GrpcHelper");
+            sb.WriteLine("{");
+            sb.Indent++;
+            
+            sb.WriteLine("public static Timestamp ToGrpcTimestamp(this DateTime dt)");
+            sb.WriteLine("{");
+            sb.Indent++;
+            
+            sb.WriteLine("var utcTime = dt;");
+            sb.WriteLine("if (dt.Kind == DateTimeKind.Local)");
+            sb.WriteLine("{");
+            sb.Indent++;
+            sb.WriteLine("utcTime = DateTime.SpecifyKind(dt, DateTimeKind.Utc);");
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine("return Timestamp.FromDateTime(utcTime);");
+            sb.Indent--;
+            sb.WriteLine("}");
+            
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
         }
 
         /// <summary>
@@ -1004,7 +1053,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 sb.WriteLine("{");
                 sb.Indent++;
                 
-                GenerateFieldMappings(sb, requestMessage.Fields, "request");
+                GenerateRpcFieldToDtoMappings(sb, requestMessage.Fields, "request");
                 
                 sb.Indent--;
                 sb.WriteLine("};");
@@ -1074,7 +1123,7 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.WriteLine("{");
             sb.Indent++;
             
-            GenerateFieldMappings(sb, responseMessage.Fields, "dtoResponse");
+            GenerateDtoFieldToRpcMappings(sb, responseMessage.Fields, "dtoResponse");
             
             sb.Indent--;
             sb.WriteLine("};");
@@ -1084,15 +1133,57 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Generate field mappings for object initializer
         /// </summary>
-        private void GenerateFieldMappings(IndentStringBuilder sb, List<ProtoField> fields, string sourceObject)
+        private void GenerateRpcFieldToDtoMappings(IndentStringBuilder sb, List<ProtoField> fields, string sourceObject)
         {
             for (int i = 0; i < fields.Count; i++)
             {
                 var field = fields[i];
                 var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
                 var comma = i < fields.Count - 1 ? "," : "";
-                sb.WriteLine($"{propName} = {sourceObject}.{propName}{comma}");
+                
+                // Check if field type is timestamp and needs conversion
+                if (IsTimestampField(field))
+                {
+                    sb.WriteLine($"{propName} = {sourceObject}.{propName}.ToDateTime(){comma}");
+                }
+                else
+                {
+                    sb.WriteLine($"{propName} = {sourceObject}.{propName}{comma}");
+                }
             }
+        }
+        
+        
+        /// <summary>
+        /// Generate field mappings for object initializer
+        /// </summary>
+        private void GenerateDtoFieldToRpcMappings(IndentStringBuilder sb, List<ProtoField> fields, string sourceObject)
+        {
+            for (int i = 0; i < fields.Count; i++)
+            {
+                var field = fields[i];
+                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var comma = i < fields.Count - 1 ? "," : "";
+                
+                // Check if field type is timestamp and needs conversion
+                if (IsTimestampField(field))
+                {
+                    sb.WriteLine($"{propName} = {sourceObject}.{propName}.ToGrpcTimestamp(){comma}");
+                }
+                else
+                {
+                    sb.WriteLine($"{propName} = {sourceObject}.{propName}{comma}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Check if a field is of timestamp type that needs conversion
+        /// </summary>
+        private bool IsTimestampField(ProtoField field)
+        {
+            return field.Type.Equals("Timestamp", StringComparison.OrdinalIgnoreCase) ||
+                   field.Type.Equals("google.protobuf.Timestamp", StringComparison.OrdinalIgnoreCase);
         }
 
         private static string MapProtoCTypeToCSharp(string protoType, ProtoModel combineModel)
