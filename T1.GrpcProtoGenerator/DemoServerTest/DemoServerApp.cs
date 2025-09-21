@@ -6,23 +6,26 @@ using DemoServer.Services;
 
 namespace DemoServerTest
 {
-    public class DemoServerApp : WebApplicationFactory<Program>
+    public class DemoServerApp : IDisposable
     {
+        private WebApplicationFactory<Program>? _webApplicationFactory;
         private GrpcChannel? _channel;
         private IGreeterGrpcClient? _grpcClient;
 
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            builder.ConfigureServices(services =>
-            {
-                // Additional test services can be configured here if needed
-            });
-        }
-
         public void Initialize()
         {
+            // Create the WebApplicationFactory using composition
+            _webApplicationFactory = new WebApplicationFactory<Program>()
+                .WithWebHostBuilder(builder =>
+                {
+                    builder.ConfigureServices(services =>
+                    {
+                        // Additional test services can be configured here if needed
+                    });
+                });
+
             // Create the test server and get the base address
-            var client = CreateClient();
+            var client = _webApplicationFactory.CreateClient();
             var baseAddress = client.BaseAddress!;
 
             // Create gRPC channel for the test server
@@ -46,13 +49,10 @@ namespace DemoServerTest
             }
         }
 
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (disposing)
-            {
-                _channel?.Dispose();
-            }
-            base.Dispose(disposing);
+            _channel?.Dispose();
+            _webApplicationFactory?.Dispose();
         }
     }
 }
