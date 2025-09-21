@@ -471,8 +471,9 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private string GenerateClientInterfaceMethodReturnType(ProtoRpc rpc)
         {
-            // Use Task instead of Task<T> if response type is "Void"
-            if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase))
+            // Use Task instead of Task<T> if response type is "Void" or "google.protobuf.Empty"
+            if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
+                rpc.ResponseType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase))
             {
                 return "Task";
             }
@@ -551,7 +552,8 @@ namespace T1.GrpcProtoGenerator.Generators
             {
                 IsNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
                                rpc.RequestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase),
-                IsVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase)
+                IsVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
+                                rpc.ResponseType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase)
             };
         }
 
@@ -973,8 +975,9 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private string GenerateInterfaceMethodReturnType(ProtoRpc rpc, string rpcResponseType)
         {
-            // Use Task instead of Task<T> if response type is "Void"
-            if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase))
+            // Use Task instead of Task<T> if response type is "Void" or "google.protobuf.Empty"
+            if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
+                rpc.ResponseType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase))
             {
                 return "Task";
             }
@@ -1064,7 +1067,8 @@ namespace T1.GrpcProtoGenerator.Generators
                 ResponseType = combineModel.FindCsharpTypeName(rpc.ResponseType),
                 IsNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
                                rpc.RequestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase),
-                IsVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase)
+                IsVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
+                                rpc.ResponseType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase)
             };
         }
 

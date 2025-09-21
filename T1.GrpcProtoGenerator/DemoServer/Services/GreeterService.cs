@@ -28,5 +28,14 @@ namespace DemoServer.Services
                 Ids = [1, 2, 3]
             });
         }
+
+        public Task SayIntList2(GetIntListRequestGrpcDto request)
+        {
+            if (request.Ids[0] != 1)
+            {
+                throw new Exception($"Something went wrong with {request.Ids[0]}");
+            }
+            return Task.CompletedTask;
+        }
     }
 }
