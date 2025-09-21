@@ -13,6 +13,7 @@ service Greeter {
   rpc SayTime(GetTimeRequest) returns(GetTimeReply);
   rpc SayIntList(google.protobuf.Empty) returns(GetIntListReply);
   rpc SayIntList2(GetIntListRequest) returns(google.protobuf.Empty);
+  rpc SayObjList(GetObjListRequest) returns(GetObjListReply);
 }
 
 // The request message containing the user's name.
@@ -40,4 +41,17 @@ message GetIntListRequest {
 
 message GetIntListReply {
   repeated int64 ids = 1;
+}
+
+message GetObjListRequest {
+  repeated CustomerInfo customers = 1;
+}
+
+message GetObjListReply {
+  repeated CustomerInfo customers = 1;
+}
+
+message CustomerInfo {
+  int64 id = 1;
+  google.protobuf.Timestamp birth = 2;
 }
