@@ -1226,7 +1226,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 }
                 
                 // Check if field type is timestamp and needs conversion
-                if (IsTimestampField(field))
+                if (field.IsTimestampField())
                 {
                     sb.WriteLine($"{propName} = {sourceObject}.{propName}.ToDateTime(){comma}");
                 }
@@ -1256,7 +1256,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 }
                 
                 // Check if field type is timestamp and needs conversion
-                if (IsTimestampField(field))
+                if (field.IsTimestampField())
                 {
                     sb.WriteLine($"{propName} = {sourceObject}.{propName}.ToGrpcTimestamp(){comma}");
                 }
@@ -1265,15 +1265,6 @@ namespace T1.GrpcProtoGenerator.Generators
                     sb.WriteLine($"{propName} = {sourceObject}.{propName}{comma}");
                 }
             }
-        }
-
-        /// <summary>
-        /// Check if a field is of timestamp type that needs conversion
-        /// </summary>
-        private bool IsTimestampField(ProtoField field)
-        {
-            return field.Type.Equals("Timestamp", StringComparison.OrdinalIgnoreCase) ||
-                   field.Type.Equals("google.protobuf.Timestamp", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -1468,7 +1459,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var propName = field.GetCamelName();
                 var comma = i < message.Fields.Count - 1 ? "," : "";
                 
-                if (IsTimestampField(field))
+                if (field.IsTimestampField())
                 {
                     sb.WriteLine($"{propName} = grpc.{propName}.ToDateTime(){comma}");
                 }
@@ -1506,7 +1497,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var propName = field.GetCamelName();
                 var comma = i < message.Fields.Count - 1 ? "," : "";
                 
-                if (IsTimestampField(field))
+                if (field.IsTimestampField())
                 {
                     sb.WriteLine($"{propName} = dto.{propName}.ToGrpcTimestamp(){comma}");
                 }
@@ -1544,7 +1535,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var propName = field.GetCamelName();
                 var comma = i < message.Fields.Count - 1 ? "," : "";
                 
-                if (IsTimestampField(field))
+                if (field.IsTimestampField())
                 {
                     sb.WriteLine($"{propName} = dto.{propName}.ToGrpcTimestamp(){comma}");
                 }
@@ -1601,7 +1592,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 var propName = field.GetCamelName();
                 var comma = i < message.Fields.Count - 1 ? "," : "";
                 
-                if (IsTimestampField(field))
+                if (field.IsTimestampField())
                 {
                     sb.WriteLine($"{propName} = grpc.{propName}.ToDateTime(){comma}");
                 }

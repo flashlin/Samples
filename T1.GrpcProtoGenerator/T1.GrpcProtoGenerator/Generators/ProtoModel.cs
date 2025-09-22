@@ -1,5 +1,6 @@
 // ProtoModel.cs
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -168,6 +169,15 @@ namespace T1.GrpcProtoGenerator.Generators
                 return string.Empty;
             
             return char.ToUpper(Name[0]) + Name.Substring(1);
+        }
+
+        /// <summary>
+        /// Check if a field is of timestamp type that needs conversion
+        /// </summary>
+        public bool IsTimestampField()
+        {
+            return Type.Equals("Timestamp", StringComparison.OrdinalIgnoreCase) ||
+                   Type.Equals("google.protobuf.Timestamp", StringComparison.OrdinalIgnoreCase);
         }
     }
 
