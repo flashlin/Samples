@@ -611,7 +611,7 @@ namespace T1.GrpcProtoGenerator.Generators
             {
                 foreach (var field in requestMessage.Fields.Where(f => f.IsRepeated))
                 {
-                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    var propName = field.GetCamelName();
                     GenerateRepeatedFieldMapping(sb, field, propName, "request", "grpcReq");
                 }
             }
@@ -684,7 +684,7 @@ namespace T1.GrpcProtoGenerator.Generators
             {
                 foreach (var field in responseMessage.Fields.Where(f => f.IsRepeated))
                 {
-                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    var propName = field.GetCamelName();
                     GenerateClientRepeatedFieldMapping(sb, field, propName, "grpcResp", "dto");
                 }
             }
@@ -1112,7 +1112,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 {
                     foreach (var field in requestMessage.Fields.Where(f => f.IsRepeated))
                     {
-                        var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                        var propName = field.GetCamelName();
                         GenerateServerRequestRepeatedFieldMapping(sb, field, propName, "request", "dtoRequest");
                     }
                 }
@@ -1196,7 +1196,7 @@ namespace T1.GrpcProtoGenerator.Generators
             {
                 foreach (var field in responseMessage.Fields.Where(f => f.IsRepeated))
                 {
-                    var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                    var propName = field.GetCamelName();
                     GenerateRepeatedFieldMapping(sb, field, propName, "dtoResponse", "grpcResponse");
                 }
             }
@@ -1212,7 +1212,7 @@ namespace T1.GrpcProtoGenerator.Generators
             for (int i = 0; i < fields.Count; i++)
             {
                 var field = fields[i];
-                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var propName = field.GetCamelName();
                 var comma = i < fields.Count - 1 ? "," : "";
                 
                 // Handle repeated fields with empty list initialization
@@ -1246,7 +1246,7 @@ namespace T1.GrpcProtoGenerator.Generators
             for (int i = 0; i < fields.Count; i++)
             {
                 var field = fields[i];
-                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var propName = field.GetCamelName();
                 var comma = i < fields.Count - 1 ? "," : "";
                 
                 // Skip repeated fields in object initializer - they will be handled separately
@@ -1465,7 +1465,7 @@ namespace T1.GrpcProtoGenerator.Generators
             for (int i = 0; i < message.Fields.Count; i++)
             {
                 var field = message.Fields[i];
-                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var propName = field.GetCamelName();
                 var comma = i < message.Fields.Count - 1 ? "," : "";
                 
                 if (IsTimestampField(field))
@@ -1503,7 +1503,7 @@ namespace T1.GrpcProtoGenerator.Generators
             for (int i = 0; i < message.Fields.Count; i++)
             {
                 var field = message.Fields[i];
-                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var propName = field.GetCamelName();
                 var comma = i < message.Fields.Count - 1 ? "," : "";
                 
                 if (IsTimestampField(field))
@@ -1541,7 +1541,7 @@ namespace T1.GrpcProtoGenerator.Generators
             for (int i = 0; i < message.Fields.Count; i++)
             {
                 var field = message.Fields[i];
-                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var propName = field.GetCamelName();
                 var comma = i < message.Fields.Count - 1 ? "," : "";
                 
                 if (IsTimestampField(field))
@@ -1598,7 +1598,7 @@ namespace T1.GrpcProtoGenerator.Generators
             for (int i = 0; i < message.Fields.Count; i++)
             {
                 var field = message.Fields[i];
-                var propName = char.ToUpper(field.Name[0]) + field.Name.Substring(1);
+                var propName = field.GetCamelName();
                 var comma = i < message.Fields.Count - 1 ? "," : "";
                 
                 if (IsTimestampField(field))

@@ -158,6 +158,17 @@ namespace T1.GrpcProtoGenerator.Generators
         public string Name { get; set; } = string.Empty;
         public bool IsRepeated { get; set; } = false;
         public bool IsOption { get; set; } = false;
+
+        /// <summary>
+        /// Converts the field name to CamelCase (first letter uppercase)
+        /// </summary>
+        public string GetCamelName()
+        {
+            if (string.IsNullOrEmpty(Name))
+                return string.Empty;
+            
+            return char.ToUpper(Name[0]) + Name.Substring(1);
+        }
     }
 
     public class ProtoService
