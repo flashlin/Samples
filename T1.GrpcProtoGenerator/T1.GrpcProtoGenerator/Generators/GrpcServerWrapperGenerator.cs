@@ -185,8 +185,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private bool ShouldGenerateMessageClass(ProtoMessage msg)
         {
             // Skip generating DTO for Google Void/Null types as they correspond to no C# class needed
-            return !msg.Name.Equals("Void", StringComparison.OrdinalIgnoreCase) && 
-                   !msg.Name.Equals("Null", StringComparison.OrdinalIgnoreCase);
+            return !IsVoidOrNullMessageName(msg.Name);
         }
 
         /// <summary>
@@ -457,8 +456,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private string GenerateClientInterfaceMethodParameters(ProtoRpc rpc)
         {
             // Skip parameter if request type is "Null" or "google.protobuf.Empty"
-            if (rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
-                rpc.RequestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase))
+            if (IsNullOrEmptyRequestType(rpc.RequestType))
             {
                 return "";
             }
@@ -472,8 +470,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private string GenerateClientInterfaceMethodReturnType(ProtoRpc rpc)
         {
             // Use Task instead of Task<T> if response type is "Void" or "google.protobuf.Empty"
-            if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
-                rpc.ResponseType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase))
+            if (IsVoidOrEmptyResponseType(rpc.ResponseType))
             {
                 return "Task";
             }
@@ -553,10 +550,8 @@ namespace T1.GrpcProtoGenerator.Generators
         {
             return new ClientMethodInfo
             {
-                IsNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
-                               rpc.RequestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase),
-                IsVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
-                                rpc.ResponseType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase)
+                IsNullRequest = IsNullOrEmptyRequestType(rpc.RequestType),
+                IsVoidResponse = IsVoidOrEmptyResponseType(rpc.ResponseType)
             };
         }
 
@@ -964,8 +959,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private string GenerateInterfaceMethodParameters(ProtoRpc rpc, string rpcRequestType)
         {
             // Skip parameter if request type is "Null" or "google.protobuf.Empty"
-            if (rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
-                rpc.RequestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase))
+            if (IsNullOrEmptyRequestType(rpc.RequestType))
             {
                 return "";
             }
@@ -979,8 +973,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private string GenerateInterfaceMethodReturnType(ProtoRpc rpc, string rpcResponseType)
         {
             // Use Task instead of Task<T> if response type is "Void" or "google.protobuf.Empty"
-            if (rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
-                rpc.ResponseType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase))
+            if (IsVoidOrEmptyResponseType(rpc.ResponseType))
             {
                 return "Task";
             }
@@ -1071,10 +1064,8 @@ namespace T1.GrpcProtoGenerator.Generators
                 ResponseFullType = combineModel.FindRpcFullTypename(rpc.ResponseType),
                 RequestType = combineModel.FindCsharpTypeName(rpc.RequestType),
                 ResponseType = combineModel.FindCsharpTypeName(rpc.ResponseType),
-                IsNullRequest = rpc.RequestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
-                               rpc.RequestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase),
-                IsVoidResponse = rpc.ResponseType.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
-                                rpc.ResponseType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase)
+                IsNullRequest = IsNullOrEmptyRequestType(rpc.RequestType),
+                IsVoidResponse = IsVoidOrEmptyResponseType(rpc.ResponseType)
             };
         }
 
@@ -1607,6 +1598,33 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.Indent--;
             sb.WriteLine("}");
             sb.WriteLine();
+        }
+
+        /// <summary>
+        /// Check if the request type is considered null/empty (Null or google.protobuf.Empty)
+        /// </summary>
+        private static bool IsNullOrEmptyRequestType(string requestType)
+        {
+            return requestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
+                   requestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Check if the response type is considered void/empty (Void or google.protobuf.Empty)
+        /// </summary>
+        private static bool IsVoidOrEmptyResponseType(string responseType)
+        {
+            return responseType.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
+                   responseType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Check if the message name should not generate a class (Void or Null)
+        /// </summary>
+        private static bool IsVoidOrNullMessageName(string messageName)
+        {
+            return messageName.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
+                   messageName.Equals("Null", StringComparison.OrdinalIgnoreCase);
         }
 
         private static string MapProtoCTypeToCSharp(string protoType, ProtoModel combineModel)
