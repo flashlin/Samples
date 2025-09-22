@@ -51,21 +51,52 @@ Install-Package T1.GrpcProtoGenerator
 
 2. **Build your project** - the source generator will automatically create wrapper classes for your gRPC services.
 
+```csharp
+public class GreeterService : IGreeterGrpcService
+{
+    public Task<HelloReplyGrpcDto> SayHello(HelloRequestGrpcDto request)
+    {
+        var response = new HelloReplyGrpcDto
+        {
+            Message = $"Hello {request.Name}!"
+        };
+        return Task.FromResult(response);
+    }
+}   
+```
+
 3. **Use the generated server wrappers**:
 
 ```csharp
-// Generated wrapper provides a clean, easy-to-use API
-var client = new GreeterServiceClient("https://localhost:5001");
-var response = await client.SayHelloAsync(new HelloRequest { Name = "World" });
-Console.WriteLine(response.Message);
+builder.Services.AddGrpc();
+builder.Services.AddScoped<IGreeterGrpcService, GreeterService>();
+
+var app = builder.Build();
+// Configure the HTTP request pipeline.
+app.MapGrpcService<GreeterNativeGrpcService>();
 ```
 
 3. **Use the generated client wrappers**:
 
 ```csharp
+var services = new ServiceCollection();
+// Configure gRPC server settings
+services.Configure<GreeterGrpcConfig>(config =>
+{
+    config.ServerUrl = "https://localhost:7001"; // Your gRPC server address
+});
+// Register gRPC SDK using auto-generated extension method
+services.AddGreeterGrpcSdk();
+```
+
+```csharp
 // Generated wrapper provides a clean, easy-to-use API
-var client = new GreeterServiceClient("https://localhost:5001");
-var response = await client.SayHelloAsync(new HelloRequest { Name = "World" });
+var client = sp.GetRequiredService<IGreeterGrpcClient>();
+var request = new HelloRequestGrpcDto 
+{ 
+    Name = "World from Consumer App" 
+};
+var response = await grpcClient.SayHelloAsync(request);
 Console.WriteLine(response.Message);
 ```
 
@@ -73,7 +104,8 @@ Console.WriteLine(response.Message);
 
 For each gRPC service in your .proto files, the generator creates:
 
-- **Client wrapper class**: `{ServiceName}Client`
+- **Server wrapper class**: `{ServiceName}GrpcService`
+- **Client wrapper class**: `{ServiceName}GrpcClient`
 - **Strongly-typed methods**: Async methods for each RPC call
 - **Channel management**: Automatic connection handling
 - **Error handling**: Proper exception propagation
@@ -101,7 +133,7 @@ message HelloReply {
 The generator creates:
 
 ```csharp
-public partial class GreeterServiceClient
+public class GreeterGrpcClient
 {
     private readonly GrpcChannel _channel;
     private readonly Greeter.GreeterClient _client;
