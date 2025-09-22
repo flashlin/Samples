@@ -27,7 +27,25 @@ Install-Package T1.GrpcProtoGenerator
 
 ## Usage
 
-1. **Add .proto files** to your project and ensure they are included as `<Protobuf>` items in your `.csproj`:
+1. **Given a .proto file**:
+
+```protobuf
+syntax = "proto3";
+
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply);
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloReply {
+  string message = 1;
+}
+```
+
+2. **Add .proto files** to your project and ensure they are included as `<Protobuf>` items in your `.csproj`:
 
 ```xml
 <ItemGroup>
@@ -76,7 +94,7 @@ var app = builder.Build();
 app.MapGrpcService<GreeterNativeGrpcService>();
 ```
 
-3. **Use the generated client wrappers**:
+4. **Use the generated client wrappers**:
 
 ```csharp
 var services = new ServiceCollection();
@@ -109,47 +127,6 @@ For each gRPC service in your .proto files, the generator creates:
 - **Strongly-typed methods**: Async methods for each RPC call
 - **Channel management**: Automatic connection handling
 - **Error handling**: Proper exception propagation
-
-## Example
-
-Given a .proto file:
-
-```protobuf
-syntax = "proto3";
-
-service Greeter {
-  rpc SayHello (HelloRequest) returns (HelloReply);
-}
-
-message HelloRequest {
-  string name = 1;
-}
-
-message HelloReply {
-  string message = 1;
-}
-```
-
-The generator creates:
-
-```csharp
-public class GreeterGrpcClient
-{
-    private readonly GrpcChannel _channel;
-    private readonly Greeter.GreeterClient _client;
-
-    public GreeterServiceClient(string address)
-    {
-        _channel = GrpcChannel.ForAddress(address);
-        _client = new Greeter.GreeterClient(_channel);
-    }
-
-    public async Task<HelloReply> SayHelloAsync(HelloRequest request)
-    {
-        return await _client.SayHelloAsync(request);
-    }
-}
-```
 
 ## Configuration
 
