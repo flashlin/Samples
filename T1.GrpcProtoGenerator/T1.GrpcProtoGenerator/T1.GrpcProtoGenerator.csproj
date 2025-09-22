@@ -29,6 +29,7 @@
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <IsRoslynComponent>true</IsRoslynComponent>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

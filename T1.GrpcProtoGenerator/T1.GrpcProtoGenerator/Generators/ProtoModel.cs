@@ -12,11 +12,11 @@ namespace T1.GrpcProtoGenerator.Generators
         public List<ProtoService> Services { get; } = new List<ProtoService>();
         public List<ProtoEnum> Enums { get; } = new List<ProtoEnum>();
 
-        public ProtoMessage FindMessage(string name)
+        public ProtoMessage? FindMessage(string name)
             => Messages.FirstOrDefault(m => m.Name == name) ?? 
                Messages.FirstOrDefault(m => m.GetFullName() == name);
 
-        public ProtoEnum FindEnum(string name)
+        public ProtoEnum? FindEnum(string name)
         {
             return Enums.FirstOrDefault(m=>m.Name == name);
         }
@@ -43,7 +43,7 @@ namespace T1.GrpcProtoGenerator.Generators
             return name;
         }
         
-        public string FindCsharpTypeName(string protoTypeName)
+        public string? FindCsharpTypeName(string protoTypeName)
         {
             var message = FindMessage(protoTypeName);
             if (message != null)
@@ -66,7 +66,7 @@ namespace T1.GrpcProtoGenerator.Generators
             return null;
         }
 
-        public string FindCsharpTypeFullName(string protoTypeName)
+        public string? FindCsharpTypeFullName(string protoTypeName)
         {
             var message = FindMessage(protoTypeName);
             if (message != null)
