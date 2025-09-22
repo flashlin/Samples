@@ -1605,8 +1605,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private static bool IsNullOrEmptyRequestType(string requestType)
         {
-            return requestType.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
-                   requestType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase);
+            return IsVoidOrNullMessageName(requestType);
         }
 
         /// <summary>
@@ -1614,8 +1613,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private static bool IsVoidOrEmptyResponseType(string responseType)
         {
-            return responseType.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
-                   responseType.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase);
+            return IsVoidOrNullMessageName(responseType);
         }
 
         /// <summary>
@@ -1624,7 +1622,8 @@ namespace T1.GrpcProtoGenerator.Generators
         private static bool IsVoidOrNullMessageName(string messageName)
         {
             return messageName.Equals("Void", StringComparison.OrdinalIgnoreCase) ||
-                   messageName.Equals("Null", StringComparison.OrdinalIgnoreCase);
+                   messageName.Equals("Null", StringComparison.OrdinalIgnoreCase) ||
+                   messageName.Equals("google.protobuf.Empty", StringComparison.OrdinalIgnoreCase);
         }
 
         private static string MapProtoCTypeToCSharp(string protoType, ProtoModel combineModel)
