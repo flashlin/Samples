@@ -8,7 +8,7 @@
     
     <!-- NuGet Package Configuration -->
     <PackageId>T1.GrpcProtoGenerator</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>T1 Development Team</Authors>
     <Company>T1</Company>
     <Product>T1 gRPC Proto Generator</Product>
@@ -19,7 +19,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>Initial release of T1 gRPC Proto Generator</PackageReleaseNotes>
+    <PackageReleaseNotes>update document</PackageReleaseNotes>
     <Copyright>Copyright (c) 2025 T1 Development Team</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
