@@ -41,27 +41,35 @@ namespace MakeSwaggerSDK
 
                 // Parse Swagger UI
                 var parser = new SwaggerUiParser();
-                var endpoints = await parser.Parse(options.SwaggerUrl);
+                var apiInfo = await parser.Parse(options.SwaggerUrl);
 
-                if (endpoints == null || endpoints.Count == 0)
+                if (apiInfo == null || apiInfo.Endpoints.Count == 0)
                 {
                     Console.WriteLine("❌ No endpoints found or failed to parse Swagger documentation.");
                     return 1;
                 }
 
-                Console.WriteLine($"✅ Successfully parsed {endpoints.Count} endpoints.");
+                Console.WriteLine($"✅ Successfully parsed {apiInfo.Endpoints.Count} endpoints and {apiInfo.ClassDefinitions.Count} model classes.");
 
                 // Generate SDK code
                 var generator = new SwaggerClientCodeGenerator();
-                var generatedCode = generator.Generate(options.SdkName, endpoints);
+                var generatedCode = generator.Generate(options.SdkName, apiInfo);
 
                 // Output the generated code
                 var outputFileName = options.OutputFileName ?? $"{options.SdkName}.cs";
                 await File.WriteAllTextAsync(outputFileName, generatedCode);
 
                 Console.WriteLine($"✅ Generated SDK code saved to: {outputFileName}");
+                
+                Console.WriteLine("\nGenerated model classes:");
+                foreach (var classDef in apiInfo.ClassDefinitions.Values)
+                {
+                    var classType = classDef.IsEnum ? "enum" : "class";
+                    Console.WriteLine($"  - {classType} {classDef.Name} ({classDef.Properties.Count} properties)");
+                }
+                
                 Console.WriteLine("\nGenerated endpoints:");
-                foreach (var endpoint in endpoints)
+                foreach (var endpoint in apiInfo.Endpoints)
                 {
                     Console.WriteLine($"  - {endpoint.HttpMethod.ToUpper()} {endpoint.Path} ({endpoint.OperationId})");
                 }

@@ -6,43 +6,142 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Http;
 using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace PetStoreSDK
 {
     /// <summary>
-    /// Response model for ApiResponse
+    /// 
     /// </summary>
     public class ApiResponse
     {
-        // TODO: Add properties based on actual API response structure
-        // You may need to manually define the properties for this class
+        [JsonProperty("code")]
+        public int? Code { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
     }
 
     /// <summary>
-    /// Response model for Pet
+    /// 
+    /// </summary>
+    public class Category
+    {
+        [JsonProperty("id")]
+        public long? Id { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+    }
+
+    /// <summary>
+    /// 
     /// </summary>
     public class Pet
     {
-        // TODO: Add properties based on actual API response structure
-        // You may need to manually define the properties for this class
+        [JsonProperty("id")]
+        public long? Id { get; set; }
+
+        [JsonProperty("category")]
+        public Category Category { get; set; }
+
+        [Required]
+        [JsonProperty("name")]
+        public string Name { get; set; } = default!;
+
+        [Required]
+        [JsonProperty("photoUrls")]
+        public List<string> PhotoUrls { get; set; } = default!;
+
+        [JsonProperty("tags")]
+        public List<Tag> Tags { get; set; }
+
+        /// <summary>
+        /// pet status in the store
+        /// </summary>
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
     }
 
     /// <summary>
-    /// Response model for Order
+    /// 
+    /// </summary>
+    public class Tag
+    {
+        [JsonProperty("id")]
+        public long? Id { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+    }
+
+    /// <summary>
+    /// 
     /// </summary>
     public class Order
     {
-        // TODO: Add properties based on actual API response structure
-        // You may need to manually define the properties for this class
+        [JsonProperty("id")]
+        public long? Id { get; set; }
+
+        [JsonProperty("petId")]
+        public long? PetId { get; set; }
+
+        [JsonProperty("quantity")]
+        public int? Quantity { get; set; }
+
+        [JsonProperty("shipDate")]
+        public DateTime? ShipDate { get; set; }
+
+        /// <summary>
+        /// Order Status
+        /// </summary>
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("complete")]
+        public bool? Complete { get; set; }
+
     }
 
     /// <summary>
-    /// Response model for User
+    /// 
     /// </summary>
     public class User
     {
-        // TODO: Add properties based on actual API response structure
-        // You may need to manually define the properties for this class
+        [JsonProperty("id")]
+        public long? Id { get; set; }
+
+        [JsonProperty("username")]
+        public string Username { get; set; }
+
+        [JsonProperty("firstName")]
+        public string FirstName { get; set; }
+
+        [JsonProperty("lastName")]
+        public string LastName { get; set; }
+
+        [JsonProperty("email")]
+        public string Email { get; set; }
+
+        [JsonProperty("password")]
+        public string Password { get; set; }
+
+        [JsonProperty("phone")]
+        public string Phone { get; set; }
+
+        /// <summary>
+        /// User Status
+        /// </summary>
+        [JsonProperty("userStatus")]
+        public int? UserStatus { get; set; }
+
     }
 
     /// <summary>

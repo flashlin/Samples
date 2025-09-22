@@ -20,7 +20,7 @@ namespace MakeSwaggerSDK.Services
             _httpClient = new HttpClient();
         }
 
-        public async Task<List<SwaggerEndpoint>> Parse(string swaggerUrl)
+        public async Task<SwaggerApiInfo> Parse(string swaggerUrl)
         {
             try
             {
@@ -139,19 +139,57 @@ namespace MakeSwaggerSDK.Services
             return string.Empty;
         }
 
-        private List<SwaggerEndpoint> ParseSwaggerJson(string jsonContent)
+        private SwaggerApiInfo ParseSwaggerJson(string jsonContent)
         {
-            var endpoints = new List<SwaggerEndpoint>();
+            var apiInfo = new SwaggerApiInfo();
             
             try
             {
                 var swaggerDoc = JObject.Parse(jsonContent);
-                var paths = swaggerDoc["paths"] as JObject;
                 
+                // Parse API info
+                var info = swaggerDoc["info"] as JObject;
+                if (info != null)
+                {
+                    apiInfo.Title = info["title"]?.ToString() ?? "";
+                    apiInfo.Version = info["version"]?.ToString() ?? "";
+                    apiInfo.Description = info["description"]?.ToString() ?? "";
+                }
+
+                // Parse base URL
+                var host = swaggerDoc["host"]?.ToString();
+                var basePath = swaggerDoc["basePath"]?.ToString();
+                var schemes = swaggerDoc["schemes"] as JArray;
+                var scheme = schemes?.FirstOrDefault()?.ToString() ?? "https";
+                
+                if (!string.IsNullOrEmpty(host))
+                {
+                    apiInfo.BaseUrl = $"{scheme}://{host}{basePath ?? ""}";
+                }
+
+                // Parse definitions
+                var definitions = swaggerDoc["definitions"] as JObject;
+                if (definitions != null)
+                {
+                    foreach (var definition in definitions.Properties())
+                    {
+                        var className = definition.Name;
+                        var classSchema = definition.Value as JObject;
+                        
+                        if (classSchema != null)
+                        {
+                            var classDef = ParseClassDefinition(className, classSchema, swaggerDoc);
+                            apiInfo.ClassDefinitions[className] = classDef;
+                        }
+                    }
+                }
+
+                // Parse paths (endpoints)
+                var paths = swaggerDoc["paths"] as JObject;
                 if (paths == null)
                 {
                     Console.WriteLine("No 'paths' section found in Swagger JSON");
-                    return endpoints;
+                    return apiInfo;
                 }
 
                 foreach (var pathProperty in paths.Properties())
@@ -175,7 +213,7 @@ namespace MakeSwaggerSDK.Services
                         var endpoint = ParseOperation(path, httpMethod, operation, swaggerDoc);
                         if (endpoint != null)
                         {
-                            endpoints.Add(endpoint);
+                            apiInfo.Endpoints.Add(endpoint);
                         }
                     }
                 }
@@ -186,7 +224,130 @@ namespace MakeSwaggerSDK.Services
                 throw;
             }
 
-            return endpoints;
+            return apiInfo;
+        }
+
+        private ClassDefinition ParseClassDefinition(string className, JObject classSchema, JObject swaggerDoc)
+        {
+            var classDef = new ClassDefinition
+            {
+                Name = className,
+                Description = classSchema["description"]?.ToString() ?? ""
+            };
+
+            var type = classSchema["type"]?.ToString();
+            classDef.Type = type ?? "object";
+
+            // Handle enums
+            var enumValues = classSchema["enum"] as JArray;
+            if (enumValues != null)
+            {
+                classDef.IsEnum = true;
+                foreach (var enumValue in enumValues)
+                {
+                    classDef.EnumValues.Add(enumValue.ToString());
+                }
+                return classDef;
+            }
+
+            // Parse required properties
+            var required = classSchema["required"] as JArray;
+            if (required != null)
+            {
+                foreach (var req in required)
+                {
+                    classDef.RequiredProperties.Add(req.ToString());
+                }
+            }
+
+            // Parse properties
+            var properties = classSchema["properties"] as JObject;
+            if (properties != null)
+            {
+                foreach (var property in properties.Properties())
+                {
+                    var propName = property.Name;
+                    var propSchema = property.Value as JObject;
+                    
+                    if (propSchema != null)
+                    {
+                        var classProp = ParseClassProperty(propName, propSchema, classDef.RequiredProperties, swaggerDoc);
+                        classDef.Properties.Add(classProp);
+                    }
+                }
+            }
+
+            return classDef;
+        }
+
+        private ClassProperty ParseClassProperty(string propName, JObject propSchema, List<string> requiredProperties, JObject swaggerDoc)
+        {
+            var classProp = new ClassProperty
+            {
+                Name = propName,
+                Description = propSchema["description"]?.ToString() ?? "",
+                IsRequired = requiredProperties.Contains(propName),
+                Format = propSchema["format"]?.ToString() ?? ""
+            };
+
+            var type = propSchema["type"]?.ToString();
+            var format = propSchema["format"]?.ToString();
+            var reference = propSchema["$ref"]?.ToString();
+
+            if (!string.IsNullOrEmpty(reference))
+            {
+                // Handle $ref to definitions
+                var refName = reference.Split('/').Last();
+                classProp.Type = refName;
+            }
+            else if (!string.IsNullOrEmpty(type))
+            {
+                if (type == "array")
+                {
+                    var items = propSchema["items"] as JObject;
+                    if (items != null)
+                    {
+                        var itemType = ParseSchemaType(items, swaggerDoc);
+                        classProp.Type = $"List<{itemType}>";
+                    }
+                    else
+                    {
+                        classProp.Type = "List<object>";
+                    }
+                }
+                else
+                {
+                    classProp.Type = ConvertSwaggerTypeToCSharp(type, format);
+                }
+            }
+            else
+            {
+                classProp.Type = "object";
+            }
+
+            // Handle nullable types
+            if (!classProp.IsRequired && !classProp.Type.EndsWith("?") && IsPrimitiveType(classProp.Type))
+            {
+                classProp.IsNullable = true;
+                classProp.Type += "?";
+            }
+
+            // Parse default value
+            if (propSchema["default"] != null)
+            {
+                classProp.DefaultValue = propSchema["default"];
+            }
+
+            return classProp;
+        }
+
+        private bool IsPrimitiveType(string type)
+        {
+            var primitiveTypes = new HashSet<string>
+            {
+                "int", "long", "float", "double", "decimal", "bool", "DateTime", "Guid"
+            };
+            return primitiveTypes.Contains(type);
         }
 
         private bool IsValidHttpMethod(string method)

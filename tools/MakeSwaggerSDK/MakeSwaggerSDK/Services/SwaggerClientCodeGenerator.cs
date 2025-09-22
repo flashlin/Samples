@@ -8,7 +8,7 @@ namespace MakeSwaggerSDK.Services
 {
     public class SwaggerClientCodeGenerator
     {
-        public string Generate(string sdkName, List<SwaggerEndpoint> endpoints)
+        public string Generate(string sdkName, SwaggerApiInfo apiInfo)
         {
             var sb = new StringBuilder();
             
@@ -21,28 +21,21 @@ namespace MakeSwaggerSDK.Services
             sb.AppendLine("using System.Threading.Tasks;");
             sb.AppendLine("using Microsoft.Extensions.Http;");
             sb.AppendLine("using Newtonsoft.Json;");
+            sb.AppendLine("using System.ComponentModel.DataAnnotations;");
             sb.AppendLine();
 
             // Add namespace
             sb.AppendLine($"namespace {sdkName}SDK");
             sb.AppendLine("{");
 
-            // Generate DTO classes for complex response types
-            var responseTypes = GetUniqueResponseTypes(endpoints);
-            foreach (var responseType in responseTypes)
+            // Generate model classes from definitions
+            foreach (var classDef in apiInfo.ClassDefinitions.Values)
             {
-                if (responseType != "void" && responseType != "string" && responseType != "int" && 
-                    responseType != "bool" && responseType != "DateTime" && responseType != "decimal" &&
-                    responseType != "long" && responseType != "float" && responseType != "double" &&
-                    responseType != "Guid" && responseType != "object" && 
-                    !responseType.StartsWith("List<") && !IsPrimitiveType(responseType))
-                {
-                    GenerateResponseClass(sb, responseType);
-                }
+                GenerateModelClass(sb, classDef);
             }
 
             // Generate the main client class
-            GenerateClientClass(sb, sdkName, endpoints);
+            GenerateClientClass(sb, sdkName, apiInfo.Endpoints);
 
             sb.AppendLine("}");
 
@@ -71,17 +64,151 @@ namespace MakeSwaggerSDK.Services
             return primitiveTypes.Contains(type) || type.StartsWith("List<");
         }
 
-        private void GenerateResponseClass(StringBuilder sb, string className)
+        private void GenerateModelClass(StringBuilder sb, ClassDefinition classDef)
         {
             sb.AppendLine($"    /// <summary>");
-            sb.AppendLine($"    /// Response model for {className}");
+            sb.AppendLine($"    /// {classDef.Description}");
             sb.AppendLine($"    /// </summary>");
-            sb.AppendLine($"    public class {className}");
+            
+            if (classDef.IsEnum)
+            {
+                GenerateEnumClass(sb, classDef);
+            }
+            else
+            {
+                GenerateObjectClass(sb, classDef);
+            }
+        }
+
+        private void GenerateEnumClass(StringBuilder sb, ClassDefinition classDef)
+        {
+            sb.AppendLine($"    public enum {classDef.Name}");
             sb.AppendLine("    {");
-            sb.AppendLine("        // TODO: Add properties based on actual API response structure");
-            sb.AppendLine("        // You may need to manually define the properties for this class");
+            
+            for (int i = 0; i < classDef.EnumValues.Count; i++)
+            {
+                var enumValue = classDef.EnumValues[i];
+                var sanitizedValue = SanitizeEnumValue(enumValue);
+                
+                if (i == classDef.EnumValues.Count - 1)
+                {
+                    sb.AppendLine($"        {sanitizedValue}");
+                }
+                else
+                {
+                    sb.AppendLine($"        {sanitizedValue},");
+                }
+            }
+            
             sb.AppendLine("    }");
             sb.AppendLine();
+        }
+
+        private void GenerateObjectClass(StringBuilder sb, ClassDefinition classDef)
+        {
+            sb.AppendLine($"    public class {classDef.Name}");
+            sb.AppendLine("    {");
+            
+            foreach (var property in classDef.Properties)
+            {
+                GenerateProperty(sb, property);
+            }
+            
+            sb.AppendLine("    }");
+            sb.AppendLine();
+        }
+
+        private void GenerateProperty(StringBuilder sb, ClassProperty property)
+        {
+            // Add XML documentation
+            if (!string.IsNullOrEmpty(property.Description))
+            {
+                sb.AppendLine($"        /// <summary>");
+                sb.AppendLine($"        /// {property.Description}");
+                sb.AppendLine($"        /// </summary>");
+            }
+
+            // Add validation attributes
+            if (property.IsRequired)
+            {
+                sb.AppendLine($"        [Required]");
+            }
+
+            // Add JSON property attribute
+            sb.AppendLine($"        [JsonProperty(\"{property.Name}\")]");
+
+            // Generate property declaration
+            var defaultValue = GetDefaultValueString(property);
+            if (!string.IsNullOrEmpty(defaultValue))
+            {
+                sb.AppendLine($"        public {property.Type} {PascalCase(property.Name)} {{ get; set; }} = {defaultValue};");
+            }
+            else
+            {
+                if (property.Type.EndsWith("?") || !property.IsRequired)
+                {
+                    sb.AppendLine($"        public {property.Type} {PascalCase(property.Name)} {{ get; set; }}");
+                }
+                else
+                {
+                    sb.AppendLine($"        public {property.Type} {PascalCase(property.Name)} {{ get; set; }} = default!;");
+                }
+            }
+            
+            sb.AppendLine();
+        }
+
+        private string GetDefaultValueString(ClassProperty property)
+        {
+            if (property.DefaultValue == null) 
+                return string.Empty;
+
+            return property.Type switch
+            {
+                "string" => $"\"{property.DefaultValue}\"",
+                "int" or "long" or "float" or "double" or "decimal" => property.DefaultValue.ToString(),
+                "bool" => property.DefaultValue.ToString()?.ToLower(),
+                _ when property.Type.StartsWith("List<") => $"new {property.Type}()",
+                _ => property.DefaultValue.ToString() ?? string.Empty
+            };
+        }
+
+        private string SanitizeEnumValue(string enumValue)
+        {
+            // Remove special characters and ensure it starts with a letter
+            var sanitized = new StringBuilder();
+            bool firstChar = true;
+
+            foreach (char c in enumValue)
+            {
+                if (char.IsLetterOrDigit(c))
+                {
+                    if (firstChar && char.IsDigit(c))
+                    {
+                        sanitized.Append('_');
+                    }
+                    sanitized.Append(char.ToUpper(c));
+                    firstChar = false;
+                }
+                else if (!firstChar)
+                {
+                    if (sanitized.Length > 0 && sanitized[sanitized.Length - 1] != '_')
+                    {
+                        sanitized.Append('_');
+                    }
+                }
+            }
+
+            var result = sanitized.ToString().TrimEnd('_');
+            return string.IsNullOrEmpty(result) ? "UNKNOWN" : result;
+        }
+
+        private string PascalCase(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            return char.ToUpper(input[0]) + input[1..];
         }
 
         private void GenerateClientClass(StringBuilder sb, string sdkName, List<SwaggerEndpoint> endpoints)
