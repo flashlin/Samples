@@ -600,6 +600,31 @@ namespace MakeSwaggerSDK.Services
             return ParseClassDefinition(className, schema, swaggerDoc);
         }
 
+        private JObject GetResponseSchema(JObject successResponse)
+        {
+            // Try OpenAPI 3.0 content format first
+            var content = successResponse["content"] as JObject;
+            if (content != null)
+            {
+                // Try to find JSON content type
+                foreach (var contentType in new[] { "application/json", "text/json", "application/*+json", "text/plain" })
+                {
+                    var mediaType = content[contentType] as JObject;
+                    if (mediaType != null)
+                    {
+                        var schema = mediaType["schema"] as JObject;
+                        if (schema != null)
+                        {
+                            return schema;
+                        }
+                    }
+                }
+            }
+            
+            // Fallback to Swagger 2.0 format
+            return successResponse["schema"] as JObject;
+        }
+
         private ResponseType ParseResponseType(JObject responses, JObject swaggerDoc, string operationId, SwaggerApiInfo apiInfo)
         {
             var responseType = new ResponseType();
@@ -616,7 +641,8 @@ namespace MakeSwaggerSDK.Services
 
             responseType.Description = successResponse["description"]?.ToString() ?? "";
             
-            var schema = successResponse["schema"] as JObject;
+            // Try to get schema from OpenAPI 3.0 content format first
+            var schema = GetResponseSchema(successResponse);
             if (schema != null)
             {
                 var reference = schema["$ref"]?.ToString();
