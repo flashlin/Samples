@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# MakeSwaggerSDK Runner Script
 # This script generates SDK from Swagger URL
 
-echo "🚀 MakeSwaggerSDK Tool"
+echo "🚀 CodeGen Tool"
 echo "================================================"
 
 # Ask for Swagger URL
@@ -34,7 +33,7 @@ echo "   Output: ../${sdk_name}Client.cs"
 echo ""
 
 # Navigate to the project directory
-cd MakeSwaggerSDK
+cd CodeGen
 
 # Build the project first
 echo "📦 Building project..."
