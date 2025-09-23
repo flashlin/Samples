@@ -452,10 +452,10 @@ namespace MakeSwaggerSDK.Services
         {
             if (string.IsNullOrEmpty(operationId))
             {
-                return "unknownOperation";
+                return "UnknownOperation";
             }
 
-            // Convert to camelCase: first word lowercase, subsequent words capitalized
+            // Convert to PascalCase: all words capitalized
             var words = new List<string>();
             var currentWord = new StringBuilder();
             
@@ -496,29 +496,21 @@ namespace MakeSwaggerSDK.Services
 
             if (words.Count == 0)
             {
-                return "unknownOperation";
+                return "UnknownOperation";
             }
 
-            // Build camelCase result
+            // Build PascalCase result
             var result = new StringBuilder();
             for (int i = 0; i < words.Count; i++)
             {
                 var word = words[i].ToLower();
-                if (i == 0)
+                // All words: capitalize first letter
+                if (word.Length > 0)
                 {
-                    // First word: all lowercase
-                    result.Append(word);
-                }
-                else
-                {
-                    // Subsequent words: capitalize first letter
-                    if (word.Length > 0)
+                    result.Append(char.ToUpper(word[0]));
+                    if (word.Length > 1)
                     {
-                        result.Append(char.ToUpper(word[0]));
-                        if (word.Length > 1)
-                        {
-                            result.Append(word.Substring(1));
-                        }
+                        result.Append(word.Substring(1));
                     }
                 }
             }
@@ -528,10 +520,10 @@ namespace MakeSwaggerSDK.Services
             // Ensure the result starts with a letter, not a digit
             if (char.IsDigit(finalResult[0]))
             {
-                finalResult = "operation" + char.ToUpper(finalResult[0]) + finalResult.Substring(1);
+                finalResult = "Operation" + finalResult;
             }
 
-            return string.IsNullOrEmpty(finalResult) ? "unknownOperation" : finalResult;
+            return string.IsNullOrEmpty(finalResult) ? "UnknownOperation" : finalResult;
         }
     }
 }
