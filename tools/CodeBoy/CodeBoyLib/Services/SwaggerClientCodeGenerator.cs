@@ -1,10 +1,10 @@
-using MakeSwaggerSDK.Models;
+using CodeBoyLib.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MakeSwaggerSDK.Services
+namespace CodeBoyLib.Services
 {
     public class SwaggerClientCodeGenerator
     {

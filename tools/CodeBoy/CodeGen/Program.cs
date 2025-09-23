@@ -1,6 +1,6 @@
 ﻿using CommandLine;
-using MakeSwaggerSDK.Models;
-using MakeSwaggerSDK.Services;
+using CodeBoyLib.Models;
+using CodeBoyLib.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

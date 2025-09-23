@@ -1,5 +1,5 @@
 using HtmlAgilityPack;
-using MakeSwaggerSDK.Models;
+using CodeBoyLib.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -9,7 +9,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace MakeSwaggerSDK.Services
+namespace CodeBoyLib.Services
 {
     public class SwaggerUiParser
     {
