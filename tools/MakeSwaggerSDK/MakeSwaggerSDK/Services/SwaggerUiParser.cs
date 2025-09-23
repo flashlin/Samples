@@ -210,7 +210,7 @@ namespace MakeSwaggerSDK.Services
                         var operation = methodProperty.Value as JObject;
                         if (operation == null) continue;
 
-                        var endpoint = ParseOperation(path, httpMethod, operation, swaggerDoc);
+                        var endpoint = ParseOperation(path, httpMethod, operation, swaggerDoc, apiInfo);
                         if (endpoint != null)
                         {
                             apiInfo.Endpoints.Add(endpoint);
@@ -356,7 +356,7 @@ namespace MakeSwaggerSDK.Services
             return validMethods.Contains(method.ToLower());
         }
 
-        private SwaggerEndpoint ParseOperation(string path, string httpMethod, JObject operation, JObject swaggerDoc)
+        private SwaggerEndpoint ParseOperation(string path, string httpMethod, JObject operation, JObject swaggerDoc, SwaggerApiInfo apiInfo)
         {
             var endpoint = new SwaggerEndpoint
             {
@@ -376,7 +376,7 @@ namespace MakeSwaggerSDK.Services
             {
                 foreach (var param in parameters)
                 {
-                    var parameter = ParseParameter(param as JObject, swaggerDoc);
+                    var parameter = ParseParameter(param as JObject, swaggerDoc, endpoint.OperationId, apiInfo);
                     if (parameter != null)
                     {
                         endpoint.Parameters.Add(parameter);
@@ -388,13 +388,13 @@ namespace MakeSwaggerSDK.Services
             var responses = operation["responses"] as JObject;
             if (responses != null)
             {
-                endpoint.ResponseType = ParseResponseType(responses, swaggerDoc);
+                endpoint.ResponseType = ParseResponseType(responses, swaggerDoc, endpoint.OperationId, apiInfo);
             }
 
             return endpoint;
         }
 
-        private EndpointParameter ParseParameter(JObject paramObj, JObject swaggerDoc)
+        private EndpointParameter ParseParameter(JObject paramObj, JObject swaggerDoc, string operationId, SwaggerApiInfo apiInfo)
         {
             if (paramObj == null) return null;
 
@@ -417,7 +417,27 @@ namespace MakeSwaggerSDK.Services
             else if (paramObj["schema"] != null)
             {
                 // Handle complex types with schema
-                parameter.Type = ParseSchemaType(paramObj["schema"] as JObject, swaggerDoc);
+                var schema = paramObj["schema"] as JObject;
+                parameter.Type = ParseSchemaType(schema, swaggerDoc);
+                
+                // For body parameters with complex inline schemas, generate DTO class
+                if (parameter.Location == "body" && schema != null)
+                {
+                    var reference = schema["$ref"]?.ToString();
+                    if (string.IsNullOrEmpty(reference))
+                    {
+                        // This is an inline schema, generate a DTO class for it
+                        var dtoClassName = $"{operationId}Request";
+                        parameter.Type = dtoClassName;
+                        
+                        // Generate the DTO class and add it to class definitions
+                        var classDef = ParseInlineSchemaToClassDefinition(dtoClassName, schema, swaggerDoc);
+                        if (classDef != null && !apiInfo.ClassDefinitions.ContainsKey(dtoClassName))
+                        {
+                            apiInfo.ClassDefinitions[dtoClassName] = classDef;
+                        }
+                    }
+                }
             }
             else
             {
@@ -427,7 +447,14 @@ namespace MakeSwaggerSDK.Services
             return parameter;
         }
 
-        private ResponseType ParseResponseType(JObject responses, JObject swaggerDoc)
+        private ClassDefinition ParseInlineSchemaToClassDefinition(string className, JObject schema, JObject swaggerDoc)
+        {
+            if (schema == null) return null;
+            
+            return ParseClassDefinition(className, schema, swaggerDoc);
+        }
+
+        private ResponseType ParseResponseType(JObject responses, JObject swaggerDoc, string operationId, SwaggerApiInfo apiInfo)
         {
             var responseType = new ResponseType();
             
@@ -446,7 +473,32 @@ namespace MakeSwaggerSDK.Services
             var schema = successResponse["schema"] as JObject;
             if (schema != null)
             {
-                responseType.Type = ParseSchemaType(schema, swaggerDoc);
+                var reference = schema["$ref"]?.ToString();
+                
+                if (string.IsNullOrEmpty(reference))
+                {
+                    // This is an inline schema, generate a DTO class for it if it's complex
+                    if (schema["type"]?.ToString() == "object" && schema["properties"] != null)
+                    {
+                        var dtoClassName = $"{operationId}Response";
+                        responseType.Type = dtoClassName;
+                        
+                        // Generate the DTO class and add it to class definitions
+                        var classDef = ParseInlineSchemaToClassDefinition(dtoClassName, schema, swaggerDoc);
+                        if (classDef != null && !apiInfo.ClassDefinitions.ContainsKey(dtoClassName))
+                        {
+                            apiInfo.ClassDefinitions[dtoClassName] = classDef;
+                        }
+                    }
+                    else
+                    {
+                        responseType.Type = ParseSchemaType(schema, swaggerDoc);
+                    }
+                }
+                else
+                {
+                    responseType.Type = ParseSchemaType(schema, swaggerDoc);
+                }
                 
                 // Check if it's an array
                 if (schema["type"]?.ToString() == "array")
@@ -455,7 +507,23 @@ namespace MakeSwaggerSDK.Services
                     var items = schema["items"] as JObject;
                     if (items != null)
                     {
-                        responseType.Type = ParseSchemaType(items, swaggerDoc);
+                        var itemReference = items["$ref"]?.ToString();
+                        if (string.IsNullOrEmpty(itemReference) && items["type"]?.ToString() == "object" && items["properties"] != null)
+                        {
+                            // Generate DTO for array item
+                            var itemDtoClassName = $"{operationId}ResponseItem";
+                            responseType.Type = itemDtoClassName;
+                            
+                            var itemClassDef = ParseInlineSchemaToClassDefinition(itemDtoClassName, items, swaggerDoc);
+                            if (itemClassDef != null && !apiInfo.ClassDefinitions.ContainsKey(itemDtoClassName))
+                            {
+                                apiInfo.ClassDefinitions[itemDtoClassName] = itemClassDef;
+                            }
+                        }
+                        else
+                        {
+                            responseType.Type = ParseSchemaType(items, swaggerDoc);
+                        }
                     }
                 }
             }
