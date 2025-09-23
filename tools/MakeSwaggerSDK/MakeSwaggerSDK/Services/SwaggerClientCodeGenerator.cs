@@ -393,12 +393,7 @@ namespace MakeSwaggerSDK.Services
 
             sb.AppendLine();
             sb.AppendLine("            var response = await _httpClient.SendAsync(request);");
-            sb.AppendLine();
-            sb.AppendLine("            if (!response.IsSuccessStatusCode)");
-            sb.AppendLine("            {");
-            sb.AppendLine("                var errorContent = await response.Content.ReadAsStringAsync();");
-            sb.AppendLine("                throw new HttpRequestException($\"HTTP {(int)response.StatusCode} {response.StatusCode}: {errorContent}\");");
-            sb.AppendLine("            }");
+            sb.AppendLine("            response.EnsureSuccessStatusCode();");
             sb.AppendLine();
 
             // Handle response
