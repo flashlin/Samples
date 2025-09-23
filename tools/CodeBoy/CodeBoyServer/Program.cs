@@ -50,7 +50,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Configure API endpoints
-CodeGenHandler.GenWebApiClient(app);
+CodeGenHandler.Map(app);
 
 // Add a health check endpoint
 app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Timestamp = DateTime.UtcNow }))

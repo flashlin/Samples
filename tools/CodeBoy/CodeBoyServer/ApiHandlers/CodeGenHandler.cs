@@ -13,7 +13,7 @@ namespace CodeBoyServer.ApiHandlers
         /// Configure code generation endpoints
         /// </summary>
         /// <param name="app">Web application builder</param>
-        public static void GenWebApiClient(WebApplication app)
+        public static void Map(WebApplication app)
         {
             app.MapPost("/codegen/genWebApiClient", GenerateWebApiClient)
                 .WithName("GenerateWebApiClient")
