@@ -480,16 +480,16 @@ namespace MakeSwaggerSDK.Services
                 return "UnknownEndpoint";
             }
             
-            // Clean the segment and capitalize first letter
+            // Clean the segment and capitalize first letter only
             var cleanSegment = CleanSegmentName(lastSegment);
             
-            // Ensure it starts with a letter and capitalize first letter
+            // Ensure it starts with a letter and capitalize first letter only
             if (string.IsNullOrEmpty(cleanSegment))
             {
                 return "UnknownEndpoint";
             }
             
-            return char.ToUpper(cleanSegment[0]) + cleanSegment.Substring(1).ToLower();
+            return char.ToUpper(cleanSegment[0]) + cleanSegment.Substring(1);
         }
         
         private string CleanSegmentName(string segment)
