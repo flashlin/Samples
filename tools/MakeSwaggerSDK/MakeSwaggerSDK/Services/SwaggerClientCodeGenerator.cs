@@ -31,7 +31,11 @@ namespace MakeSwaggerSDK.Services
             // Generate model classes from definitions
             foreach (var classDef in apiInfo.ClassDefinitions.Values)
             {
-                GenerateModelClass(sb, classDef);
+                // Skip numeric-only enums - they will be treated as int in DTOs
+                if (!classDef.IsNumericEnum)
+                {
+                    GenerateModelClass(sb, classDef);
+                }
             }
 
             // Generate the main client class

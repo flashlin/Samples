@@ -245,7 +245,95 @@ namespace MakeSwaggerSDK.Services
                 throw;
             }
 
+            // Post-process: Convert numeric enum references to int type
+            ConvertNumericEnumReferencesToInt(apiInfo);
+
             return apiInfo;
+        }
+
+        private void ConvertNumericEnumReferencesToInt(SwaggerApiInfo apiInfo)
+        {
+            // Get all numeric enum names
+            var numericEnumNames = apiInfo.ClassDefinitions
+                .Where(kvp => kvp.Value.IsNumericEnum)
+                .Select(kvp => kvp.Key)
+                .ToHashSet();
+
+            if (numericEnumNames.Count == 0) return;
+
+            // Update properties in all class definitions
+            foreach (var classDef in apiInfo.ClassDefinitions.Values)
+            {
+                if (classDef.IsNumericEnum) continue; // Skip the numeric enums themselves
+
+                foreach (var property in classDef.Properties)
+                {
+                    // Check direct type references
+                    if (numericEnumNames.Contains(property.Type))
+                    {
+                        property.Type = "int";
+                    }
+                    // Check List<EnumType> references
+                    else if (property.Type.StartsWith("List<") && property.Type.EndsWith(">"))
+                    {
+                        var innerType = property.Type.Substring(5, property.Type.Length - 6);
+                        if (numericEnumNames.Contains(innerType))
+                        {
+                            property.Type = "List<int>";
+                        }
+                    }
+                }
+            }
+
+            // Update parameter types in endpoints
+            foreach (var endpoint in apiInfo.Endpoints)
+            {
+                foreach (var parameter in endpoint.Parameters)
+                {
+                    if (numericEnumNames.Contains(parameter.Type))
+                    {
+                        parameter.Type = "int";
+                    }
+                    else if (parameter.Type.StartsWith("List<") && parameter.Type.EndsWith(">"))
+                    {
+                        var innerType = parameter.Type.Substring(5, parameter.Type.Length - 6);
+                        if (numericEnumNames.Contains(innerType))
+                        {
+                            parameter.Type = "List<int>";
+                        }
+                    }
+                }
+
+                // Update response types
+                if (numericEnumNames.Contains(endpoint.ResponseType.Type))
+                {
+                    endpoint.ResponseType.Type = "int";
+                }
+                else if (endpoint.ResponseType.Type.StartsWith("List<") && endpoint.ResponseType.Type.EndsWith(">"))
+                {
+                    var innerType = endpoint.ResponseType.Type.Substring(5, endpoint.ResponseType.Type.Length - 6);
+                    if (numericEnumNames.Contains(innerType))
+                    {
+                        endpoint.ResponseType.Type = "List<int>";
+                    }
+                }
+            }
+        }
+
+        private bool IsNumericOnlyEnum(JArray enumValues)
+        {
+            if (enumValues == null || enumValues.Count == 0)
+                return false;
+                
+            foreach (var value in enumValues)
+            {
+                // Check if value is numeric (integer or decimal)
+                if (value.Type != JTokenType.Integer && value.Type != JTokenType.Float)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private ClassDefinition ParseClassDefinition(string className, JObject classSchema, JObject swaggerDoc)
@@ -263,12 +351,27 @@ namespace MakeSwaggerSDK.Services
             var enumValues = classSchema["enum"] as JArray;
             if (enumValues != null)
             {
-                classDef.IsEnum = true;
-                foreach (var enumValue in enumValues)
+                // Check if enum contains only numeric values
+                bool isNumericOnlyEnum = IsNumericOnlyEnum(enumValues);
+                
+                if (!isNumericOnlyEnum)
                 {
-                    classDef.EnumValues.Add(enumValue.ToString());
+                    classDef.IsEnum = true;
+                    foreach (var enumValue in enumValues)
+                    {
+                        classDef.EnumValues.Add(enumValue.ToString());
+                    }
+                    return classDef;
                 }
-                return classDef;
+                else
+                {
+                    // For numeric-only enums, treat as integer type and don't generate enum
+                    // This class definition will be skipped by the code generator
+                    classDef.IsEnum = false;
+                    classDef.Type = "int"; // Mark as integer type
+                    classDef.IsNumericEnum = true; // Flag to skip this class
+                    return classDef;
+                }
             }
 
             // Parse required properties
