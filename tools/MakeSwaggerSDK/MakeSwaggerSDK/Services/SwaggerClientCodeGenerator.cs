@@ -384,13 +384,21 @@ namespace MakeSwaggerSDK.Services
             if (bodyParams.Any() && (endpoint.HttpMethod.ToUpper() == "POST" || endpoint.HttpMethod.ToUpper() == "PUT" || endpoint.HttpMethod.ToUpper() == "PATCH"))
             {
                 var bodyParam = bodyParams.First();
-                sb.AppendLine($"            var jsonContent = JsonConvert.SerializeObject({bodyParam.Name});");
-                sb.AppendLine("            request.Content = new StringContent(jsonContent, Encoding.UTF8, \"application/json\");");
+                sb.AppendLine($"            if ({bodyParam.Name} != null)");
+                sb.AppendLine("            {");
+                sb.AppendLine($"                var jsonContent = JsonConvert.SerializeObject({bodyParam.Name});");
+                sb.AppendLine("                request.Content = new StringContent(jsonContent, Encoding.UTF8, \"application/json\");");
+                sb.AppendLine("            }");
             }
 
             sb.AppendLine();
             sb.AppendLine("            var response = await _httpClient.SendAsync(request);");
-            sb.AppendLine("            response.EnsureSuccessStatusCode();");
+            sb.AppendLine();
+            sb.AppendLine("            if (!response.IsSuccessStatusCode)");
+            sb.AppendLine("            {");
+            sb.AppendLine("                var errorContent = await response.Content.ReadAsStringAsync();");
+            sb.AppendLine("                throw new HttpRequestException($\"HTTP {(int)response.StatusCode} {response.StatusCode}: {errorContent}\");");
+            sb.AppendLine("            }");
             sb.AppendLine();
 
             // Handle response
@@ -405,15 +413,44 @@ namespace MakeSwaggerSDK.Services
             else
             {
                 sb.AppendLine("            var responseContent = await response.Content.ReadAsStringAsync();");
+                sb.AppendLine();
+                sb.AppendLine("            if (string.IsNullOrEmpty(responseContent))");
+                
                 if (returnType.StartsWith("Task<List<"))
                 {
                     var innerType = returnType.Substring(5, returnType.Length - 6); // Remove "Task<" and ">"
-                    sb.AppendLine($"            return JsonConvert.DeserializeObject<{innerType}>(responseContent) ?? new {innerType}();");
+                    sb.AppendLine($"                return new {innerType}();");
+                    sb.AppendLine();
+                    sb.AppendLine($"            var result = JsonConvert.DeserializeObject<{innerType}>(responseContent);");
+                    sb.AppendLine($"            return result ?? new {innerType}();");
                 }
                 else if (returnType.StartsWith("Task<"))
                 {
                     var innerType = returnType.Substring(5, returnType.Length - 6); // Remove "Task<" and ">"
-                    sb.AppendLine($"            return JsonConvert.DeserializeObject<{innerType}>(responseContent);");
+                    
+                    // Check if it's a nullable reference type or value type
+                    var isNullableValueType = innerType.EndsWith("?") && IsPrimitiveType(innerType.TrimEnd('?'));
+                    var isReferenceType = !IsPrimitiveType(innerType) && !innerType.EndsWith("?");
+                    
+                    if (isNullableValueType)
+                    {
+                        sb.AppendLine("                return null;");
+                        sb.AppendLine();
+                        sb.AppendLine($"            return JsonConvert.DeserializeObject<{innerType}>(responseContent);");
+                    }
+                    else if (isReferenceType)
+                    {
+                        sb.AppendLine("                return null;");
+                        sb.AppendLine();
+                        sb.AppendLine($"            return JsonConvert.DeserializeObject<{innerType}>(responseContent);");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"                return default({innerType});");
+                        sb.AppendLine();
+                        sb.AppendLine($"            var result = JsonConvert.DeserializeObject<{innerType}>(responseContent);");
+                        sb.AppendLine($"            return result ?? default({innerType});");
+                    }
                 }
             }
 
