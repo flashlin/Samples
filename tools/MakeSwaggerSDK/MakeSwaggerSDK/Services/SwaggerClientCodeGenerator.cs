@@ -419,38 +419,18 @@ namespace MakeSwaggerSDK.Services
                 if (returnType.StartsWith("Task<List<"))
                 {
                     var innerType = returnType.Substring(5, returnType.Length - 6); // Remove "Task<" and ">"
-                    sb.AppendLine($"                return new {innerType}();");
+                    sb.AppendLine($"                return null;");
                     sb.AppendLine();
-                    sb.AppendLine($"            var result = JsonSerializer.Deserialize<{innerType}>(responseContent);");
-                    sb.AppendLine($"            return result ?? new {innerType}();");
+                    sb.AppendLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
                 }
                 else if (returnType.StartsWith("Task<"))
                 {
                     var innerType = returnType.Substring(5, returnType.Length - 6); // Remove "Task<" and ">"
                     
-                    // Check if it's a nullable reference type or value type
-                    var isNullableValueType = innerType.EndsWith("?") && IsPrimitiveType(innerType.TrimEnd('?'));
-                    var isReferenceType = !IsPrimitiveType(innerType) && !innerType.EndsWith("?");
-                    
-                    if (isNullableValueType)
-                    {
-                        sb.AppendLine("                return null;");
-                        sb.AppendLine();
-                        sb.AppendLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
-                    }
-                    else if (isReferenceType)
-                    {
-                        sb.AppendLine("                return null;");
-                        sb.AppendLine();
-                        sb.AppendLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
-                    }
-                    else
-                    {
-                        sb.AppendLine($"                return default({innerType});");
-                        sb.AppendLine();
-                        sb.AppendLine($"            var result = JsonSerializer.Deserialize<{innerType}>(responseContent);");
-                        sb.AppendLine($"            return result ?? default({innerType});");
-                    }
+                    // Since all return types are now nullable, we can directly return the deserialized result
+                    sb.AppendLine($"                return null;");
+                    sb.AppendLine();
+                    sb.AppendLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
                 }
             }
 
