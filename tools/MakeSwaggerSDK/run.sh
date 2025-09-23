@@ -1,10 +1,37 @@
 #!/bin/bash
 
 # MakeSwaggerSDK Runner Script
-# This script demonstrates how to use the MakeSwaggerSDK tool with Petstore API
+# This script generates SDK from Swagger URL
 
-echo "🚀 Running MakeSwaggerSDK with Petstore API..."
+echo "🚀 MakeSwaggerSDK Tool"
 echo "================================================"
+
+# Ask for Swagger URL
+echo -n "Input swagger url: "
+read swagger_url
+
+# Check if swagger_url is empty
+if [ -z "$swagger_url" ]; then
+    echo "❌ Swagger URL cannot be empty. Exiting..."
+    exit 1
+fi
+
+# Ask for SDK name
+echo -n "SDK name: "
+read sdk_name
+
+# Check if sdk_name is empty
+if [ -z "$sdk_name" ]; then
+    echo "❌ SDK name cannot be empty. Exiting..."
+    exit 1
+fi
+
+echo ""
+echo "📋 Configuration:"
+echo "   Swagger URL: $swagger_url"
+echo "   SDK Name: $sdk_name"
+echo "   Output: ../${sdk_name}Client.cs"
+echo ""
 
 # Navigate to the project directory
 cd MakeSwaggerSDK
@@ -21,23 +48,19 @@ fi
 echo "✅ Build successful!"
 echo ""
 
-# Run the MakeSwaggerSDK tool with Petstore API
-echo "🔍 Parsing Swagger from Petstore API..."
-echo "URL: https://petstore.swagger.io/v2/swagger.json"
-echo ""
-
-# Execute the tool with PetStore API
-dotnet run -- "https://petstore.swagger.io/v2/swagger.json" -n PetStore -o PetStoreClient.cs
+# Execute the tool with user inputs
+echo "🔍 Generating SDK from Swagger..."
+dotnet run -- "$swagger_url" -n "$sdk_name" -o "../${sdk_name}Client.cs"
 
 if [ $? -eq 0 ]; then
     echo ""
     echo "✅ SDK generation completed successfully!"
-    echo "📄 Generated file: PetStoreClient.cs"
+    echo "📄 Generated file: ${sdk_name}Client.cs"
     echo ""
     echo "📊 File size:"
-    ls -lh PetStoreClient.cs 2>/dev/null || echo "Output file not found"
+    ls -lh "../${sdk_name}Client.cs" 2>/dev/null || echo "Output file not found"
     echo ""
-    echo "🎉 You can now use the generated PetStoreClient.cs in your project!"
+    echo "🎉 You can now use the generated ${sdk_name}Client.cs in your project!"
 else
     echo ""
     echo "❌ SDK generation failed. Please check the errors above."
