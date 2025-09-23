@@ -27,73 +27,31 @@ namespace CodeBoyServer.ApiHandlers
         /// </summary>
         /// <param name="request">Generation request</param>
         /// <param name="codeGenService">Code generation service</param>
-        /// <param name="logger">Logger</param>
-        /// <returns>Generated code response</returns>
-        private static async Task<IResult> GenerateWebApiClient(
+        /// <returns>Generated code</returns>
+        private static async Task<string> GenerateWebApiClient(
             [FromBody] GenWebApiClientRequest request,
-            ICodeGenService codeGenService,
-            ILogger<GenWebApiClientService> logger)
+            ICodeGenService codeGenService)
         {
-            try
+            // Validate request
+            if (string.IsNullOrWhiteSpace(request.SwaggerUrl))
             {
-                // Validate request
-                if (string.IsNullOrWhiteSpace(request.SwaggerUrl))
-                {
-                    return Results.BadRequest(new GenWebApiClientResponse
-                    {
-                        Success = false,
-                        ErrorMessage = "SwaggerUrl is required"
-                    });
-                }
-
-                if (string.IsNullOrWhiteSpace(request.SdkName))
-                {
-                    return Results.BadRequest(new GenWebApiClientResponse
-                    {
-                        Success = false,
-                        ErrorMessage = "SdkName is required"
-                    });
-                }
-
-                logger.LogInformation("Received code generation request for URL: {SwaggerUrl}, SDK: {SdkName}", 
-                    request.SwaggerUrl, request.SdkName);
-
-                // Create generation arguments
-                var args = new GenWebApiClientArgs
-                {
-                    SwaggerUrl = request.SwaggerUrl,
-                    SdkName = request.SdkName
-                };
-
-                // Generate code
-                var generatedCode = await codeGenService.GenerateCode(args);
-
-                var response = new GenWebApiClientResponse
-                {
-                    Success = true,
-                    GeneratedCode = generatedCode
-                };
-
-                logger.LogInformation("Successfully generated code for SDK: {SdkName}", request.SdkName);
-
-                return Results.Ok(response);
+                throw new ArgumentException("SwaggerUrl is required");
             }
-            catch (Exception ex)
+
+            if (string.IsNullOrWhiteSpace(request.SdkName))
             {
-                logger.LogError(ex, "Error processing code generation request for URL: {SwaggerUrl}", 
-                    request.SwaggerUrl);
-
-                var errorResponse = new GenWebApiClientResponse
-                {
-                    Success = false,
-                    ErrorMessage = ex.Message
-                };
-
-                return Results.Problem(
-                    title: "Code Generation Error",
-                    detail: ex.Message,
-                    statusCode: 500);
+                throw new ArgumentException("SdkName is required");
             }
+
+            // Create generation arguments
+            var args = new GenWebApiClientArgs
+            {
+                SwaggerUrl = request.SwaggerUrl,
+                SdkName = request.SdkName
+            };
+
+            // Generate and return code
+            return await codeGenService.GenerateCode(args);
         }
     }
 }
