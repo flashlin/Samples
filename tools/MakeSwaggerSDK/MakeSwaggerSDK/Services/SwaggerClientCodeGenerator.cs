@@ -264,7 +264,7 @@ namespace MakeSwaggerSDK.Services
 
         private void GenerateEndpointMethod(StringBuilder sb, SwaggerEndpoint endpoint)
         {
-            var methodName = SanitizeMethodName(endpoint.OperationId);
+            var methodName = SanitizeMethodName(endpoint.Path);
             var returnType = GetReturnType(endpoint.ResponseType);
             
             sb.AppendLine($"        /// <summary>");
@@ -448,82 +448,74 @@ namespace MakeSwaggerSDK.Services
             return $"Task<{responseType.Type}>";
         }
 
-        private string SanitizeMethodName(string operationId)
+        private string SanitizeMethodName(string endpointPath)
         {
-            if (string.IsNullOrEmpty(operationId))
+            if (string.IsNullOrEmpty(endpointPath))
             {
-                return "UnknownOperation";
+                return "UnknownEndpoint";
             }
 
-            // Convert to PascalCase: all words capitalized
-            var words = new List<string>();
-            var currentWord = new StringBuilder();
+            // Extract the last segment from the path
+            // e.g., "/user/{id}/profile" -> "profile"
+            // e.g., "/pet" -> "pet"
+            // e.g., "/store/inventory" -> "inventory"
             
-            // Split into words based on special characters, underscores, and camelCase
-            for (int i = 0; i < operationId.Length; i++)
+            var pathSegments = endpointPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            
+            // Find the last segment that is not a parameter (not in {})
+            string? lastSegment = null;
+            for (int i = pathSegments.Length - 1; i >= 0; i--)
             {
-                char c = operationId[i];
+                var segment = pathSegments[i];
+                if (!segment.StartsWith("{") && !segment.EndsWith("}"))
+                {
+                    lastSegment = segment;
+                    break;
+                }
+            }
+            
+            // If no valid segment found, use a fallback
+            if (string.IsNullOrEmpty(lastSegment))
+            {
+                return "UnknownEndpoint";
+            }
+            
+            // Clean the segment and capitalize first letter
+            var cleanSegment = CleanSegmentName(lastSegment);
+            
+            // Ensure it starts with a letter and capitalize first letter
+            if (string.IsNullOrEmpty(cleanSegment))
+            {
+                return "UnknownEndpoint";
+            }
+            
+            return char.ToUpper(cleanSegment[0]) + cleanSegment.Substring(1).ToLower();
+        }
+        
+        private string CleanSegmentName(string segment)
+        {
+            if (string.IsNullOrEmpty(segment))
+                return string.Empty;
                 
+            var result = new StringBuilder();
+            
+            foreach (char c in segment)
+            {
                 if (char.IsLetterOrDigit(c))
                 {
-                    // Check if this is the start of a new word (uppercase after lowercase)
-                    if (i > 0 && char.IsUpper(c) && char.IsLower(operationId[i - 1]))
-                    {
-                        if (currentWord.Length > 0)
-                        {
-                            words.Add(currentWord.ToString());
-                            currentWord.Clear();
-                        }
-                    }
-                    currentWord.Append(c);
-                }
-                else
-                {
-                    // Non-alphanumeric character - end current word
-                    if (currentWord.Length > 0)
-                    {
-                        words.Add(currentWord.ToString());
-                        currentWord.Clear();
-                    }
+                    result.Append(c);
                 }
             }
             
-            // Add the last word if any
-            if (currentWord.Length > 0)
-            {
-                words.Add(currentWord.ToString());
-            }
-
-            if (words.Count == 0)
-            {
-                return "UnknownOperation";
-            }
-
-            // Build PascalCase result
-            var result = new StringBuilder();
-            for (int i = 0; i < words.Count; i++)
-            {
-                var word = words[i].ToLower();
-                // All words: capitalize first letter
-                if (word.Length > 0)
-                {
-                    result.Append(char.ToUpper(word[0]));
-                    if (word.Length > 1)
-                    {
-                        result.Append(word.Substring(1));
-                    }
-                }
-            }
-
-            var finalResult = result.ToString();
+            var cleanedResult = result.ToString();
             
-            // Ensure the result starts with a letter, not a digit
-            if (char.IsDigit(finalResult[0]))
+            // If it starts with a digit, prepend with "Endpoint"
+            if (!string.IsNullOrEmpty(cleanedResult) && char.IsDigit(cleanedResult[0]))
             {
-                finalResult = "Operation" + finalResult;
+                cleanedResult = "Endpoint" + cleanedResult;
             }
-
-            return string.IsNullOrEmpty(finalResult) ? "UnknownOperation" : finalResult;
+            
+            return string.IsNullOrEmpty(cleanedResult) ? "UnknownEndpoint" : cleanedResult;
         }
     }
 }
