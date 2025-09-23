@@ -20,7 +20,8 @@ namespace MakeSwaggerSDK.Services
             sb.AppendLine("using System.Text;");
             sb.AppendLine("using System.Threading.Tasks;");
             sb.AppendLine("using Microsoft.Extensions.Http;");
-            sb.AppendLine("using Newtonsoft.Json;");
+            sb.AppendLine("using System.Text.Json;");
+            sb.AppendLine("using System.Text.Json.Serialization;");
             sb.AppendLine("using System.ComponentModel.DataAnnotations;");
             sb.AppendLine();
 
@@ -139,7 +140,7 @@ namespace MakeSwaggerSDK.Services
             }
 
             // Add JSON property attribute
-            sb.AppendLine($"        [JsonProperty(\"{property.Name}\")]");
+            sb.AppendLine($"        [JsonPropertyName(\"{property.Name}\")]");
 
             // Generate property declaration
             var defaultValue = GetDefaultValueString(property);
@@ -390,7 +391,7 @@ namespace MakeSwaggerSDK.Services
                 var bodyParam = bodyParams.First();
                 sb.AppendLine($"            if ({bodyParam.Name} != null)");
                 sb.AppendLine("            {");
-                sb.AppendLine($"                var jsonContent = JsonConvert.SerializeObject({bodyParam.Name});");
+                sb.AppendLine($"                var jsonContent = JsonSerializer.Serialize({bodyParam.Name});");
                 sb.AppendLine("                request.Content = new StringContent(jsonContent, Encoding.UTF8, \"application/json\");");
                 sb.AppendLine("            }");
             }
@@ -420,7 +421,7 @@ namespace MakeSwaggerSDK.Services
                     var innerType = returnType.Substring(5, returnType.Length - 6); // Remove "Task<" and ">"
                     sb.AppendLine($"                return new {innerType}();");
                     sb.AppendLine();
-                    sb.AppendLine($"            var result = JsonConvert.DeserializeObject<{innerType}>(responseContent);");
+                    sb.AppendLine($"            var result = JsonSerializer.Deserialize<{innerType}>(responseContent);");
                     sb.AppendLine($"            return result ?? new {innerType}();");
                 }
                 else if (returnType.StartsWith("Task<"))
@@ -435,19 +436,19 @@ namespace MakeSwaggerSDK.Services
                     {
                         sb.AppendLine("                return null;");
                         sb.AppendLine();
-                        sb.AppendLine($"            return JsonConvert.DeserializeObject<{innerType}>(responseContent);");
+                        sb.AppendLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
                     }
                     else if (isReferenceType)
                     {
                         sb.AppendLine("                return null;");
                         sb.AppendLine();
-                        sb.AppendLine($"            return JsonConvert.DeserializeObject<{innerType}>(responseContent);");
+                        sb.AppendLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
                     }
                     else
                     {
                         sb.AppendLine($"                return default({innerType});");
                         sb.AppendLine();
-                        sb.AppendLine($"            var result = JsonConvert.DeserializeObject<{innerType}>(responseContent);");
+                        sb.AppendLine($"            var result = JsonSerializer.Deserialize<{innerType}>(responseContent);");
                         sb.AppendLine($"            return result ?? default({innerType});");
                     }
                 }
@@ -478,7 +479,15 @@ namespace MakeSwaggerSDK.Services
 
             if (responseType.IsArray)
             {
-                return $"Task<List<{responseType.Type}>>";
+                // Arrays (List<T>) can be null, so always add ?
+                return $"Task<List<{responseType.Type}>?>";
+            }
+
+            // For reference types, add ? since they can return null when response is empty
+            // For value types that already have ?, keep them as is  
+            if (!responseType.Type.EndsWith("?") && !IsPrimitiveType(responseType.Type))
+            {
+                return $"Task<{responseType.Type}?>";
             }
 
             return $"Task<{responseType.Type}>";
