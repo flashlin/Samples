@@ -167,7 +167,7 @@ namespace MakeSwaggerSDK.Services
                     apiInfo.BaseUrl = $"{scheme}://{host}{basePath ?? ""}";
                 }
 
-                // Parse definitions
+                // Parse definitions (Swagger 2.0)
                 var definitions = swaggerDoc["definitions"] as JObject;
                 if (definitions != null)
                 {
@@ -180,6 +180,27 @@ namespace MakeSwaggerSDK.Services
                         {
                             var classDef = ParseClassDefinition(className, classSchema, swaggerDoc);
                             apiInfo.ClassDefinitions[className] = classDef;
+                        }
+                    }
+                }
+
+                // Parse components/schemas (OpenAPI 3.0)
+                var components = swaggerDoc["components"] as JObject;
+                if (components != null)
+                {
+                    var schemas = components["schemas"] as JObject;
+                    if (schemas != null)
+                    {
+                        foreach (var schema in schemas.Properties())
+                        {
+                            var className = schema.Name;
+                            var classSchema = schema.Value as JObject;
+                            
+                            if (classSchema != null)
+                            {
+                                var classDef = ParseClassDefinition(className, classSchema, swaggerDoc);
+                                apiInfo.ClassDefinitions[className] = classDef;
+                            }
                         }
                     }
                 }
@@ -370,7 +391,7 @@ namespace MakeSwaggerSDK.Services
                 Produces = operation["produces"]?.ToObject<List<string>>() ?? new List<string>()
             };
 
-            // Parse parameters
+            // Parse parameters (Swagger 2.0 style)
             var parameters = operation["parameters"] as JArray;
             if (parameters != null)
             {
@@ -384,6 +405,17 @@ namespace MakeSwaggerSDK.Services
                 }
             }
 
+            // Parse requestBody (OpenAPI 3.0 style)
+            var requestBody = operation["requestBody"] as JObject;
+            if (requestBody != null)
+            {
+                var bodyParameter = ParseRequestBody(requestBody, swaggerDoc, endpoint.OperationId, apiInfo);
+                if (bodyParameter != null)
+                {
+                    endpoint.Parameters.Add(bodyParameter);
+                }
+            }
+
             // Parse responses
             var responses = operation["responses"] as JObject;
             if (responses != null)
@@ -392,6 +424,120 @@ namespace MakeSwaggerSDK.Services
             }
 
             return endpoint;
+        }
+
+        private EndpointParameter ParseRequestBody(JObject requestBody, JObject swaggerDoc, string operationId, SwaggerApiInfo apiInfo)
+        {
+            if (requestBody == null) return null;
+
+            var content = requestBody["content"] as JObject;
+            if (content == null) return null;
+
+            // Try to find JSON content type
+            JObject jsonContent = null;
+            foreach (var contentType in new[] { "application/json", "application/json-patch+json", "text/json", "application/*+json" })
+            {
+                if (content[contentType] != null)
+                {
+                    jsonContent = content[contentType] as JObject;
+                    break;
+                }
+            }
+
+            if (jsonContent == null) return null;
+
+            var schema = jsonContent["schema"] as JObject;
+            if (schema == null) return null;
+
+            var parameter = new EndpointParameter
+            {
+                Name = "body",
+                Location = "body",
+                IsRequired = true, // requestBody is typically required
+                Description = requestBody["description"]?.ToString() ?? "Request body"
+            };
+
+            // Handle schema reference or inline schema
+            var reference = schema["$ref"]?.ToString();
+            if (!string.IsNullOrEmpty(reference))
+            {
+                // Handle $ref to components/schemas
+                var refName = reference.Split('/').Last();
+                parameter.Type = refName;
+                
+                // Ensure the referenced schema is parsed as a class definition
+                if (!apiInfo.ClassDefinitions.ContainsKey(refName))
+                {
+                    var referencedSchema = GetReferencedSchema(reference, swaggerDoc);
+                    if (referencedSchema != null)
+                    {
+                        var classDef = ParseClassDefinition(refName, referencedSchema, swaggerDoc);
+                        apiInfo.ClassDefinitions[refName] = classDef;
+                    }
+                }
+            }
+            else if (schema["type"]?.ToString() == "array")
+            {
+                // Handle array type
+                var items = schema["items"] as JObject;
+                if (items != null)
+                {
+                    var itemReference = items["$ref"]?.ToString();
+                    if (!string.IsNullOrEmpty(itemReference))
+                    {
+                        var itemRefName = itemReference.Split('/').Last();
+                        parameter.Type = $"List<{itemRefName}>";
+                        
+                        // Ensure the referenced schema is parsed
+                        if (!apiInfo.ClassDefinitions.ContainsKey(itemRefName))
+                        {
+                            var referencedSchema = GetReferencedSchema(itemReference, swaggerDoc);
+                            if (referencedSchema != null)
+                            {
+                                var classDef = ParseClassDefinition(itemRefName, referencedSchema, swaggerDoc);
+                                apiInfo.ClassDefinitions[itemRefName] = classDef;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        parameter.Type = ParseSchemaType(items, swaggerDoc);
+                    }
+                }
+                else
+                {
+                    parameter.Type = "List<object>";
+                }
+            }
+            else
+            {
+                // Handle inline schema
+                var dtoClassName = $"{operationId}Request";
+                parameter.Type = dtoClassName;
+                
+                var classDef = ParseInlineSchemaToClassDefinition(dtoClassName, schema, swaggerDoc);
+                if (classDef != null && !apiInfo.ClassDefinitions.ContainsKey(dtoClassName))
+                {
+                    apiInfo.ClassDefinitions[dtoClassName] = classDef;
+                }
+            }
+
+            return parameter;
+        }
+
+        private JObject GetReferencedSchema(string reference, JObject swaggerDoc)
+        {
+            // Handle both Swagger 2.0 (#/definitions/) and OpenAPI 3.0 (#/components/schemas/) references
+            var pathParts = reference.TrimStart('#').TrimStart('/').Split('/');
+            
+            JObject current = swaggerDoc;
+            foreach (var part in pathParts)
+            {
+                current = current[part] as JObject;
+                if (current == null) return null;
+            }
+            
+            return current;
         }
 
         private EndpointParameter ParseParameter(JObject paramObj, JObject swaggerDoc, string operationId, SwaggerApiInfo apiInfo)
