@@ -3,7 +3,7 @@ version: '3.8'
 services:
   codeboy-server:
     build:
-      context: .
+      context: ./CodeBoyServer
       dockerfile: Dockerfile
     ports:
       - "8080:8080"

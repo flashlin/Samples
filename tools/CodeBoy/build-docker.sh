@@ -6,7 +6,8 @@ set -e
 
 echo "🐳 Building CodeBoy Server Docker Image..."
 
-# Build the Docker image
+# Change to CodeBoyServer directory and build the Docker image
+cd CodeBoyServer
 docker build -t codeboy-server:latest .
 
 echo "✅ Docker image built successfully!"
