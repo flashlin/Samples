@@ -50,17 +50,17 @@ echo ""
 
 # Execute the tool with user inputs
 echo "🔍 Generating SDK from Swagger..."
-dotnet run -- "$swagger_url" -n "$sdk_name" -o "../${sdk_name}Client.cs"
+dotnet run -- "$swagger_url" -n "$sdk_name" -o "../Generated/${sdk_name}Client.cs"
 
 if [ $? -eq 0 ]; then
     echo ""
     echo "✅ SDK generation completed successfully!"
-    echo "📄 Generated file: ${sdk_name}Client.cs"
+    echo "📄 Generated file: Generated/${sdk_name}Client.cs"
     echo ""
     echo "📊 File size:"
-    ls -lh "../${sdk_name}Client.cs" 2>/dev/null || echo "Output file not found"
+    ls -lh "../Generated/${sdk_name}Client.cs" 2>/dev/null || echo "Output file not found"
     echo ""
-    echo "🎉 You can now use the generated ${sdk_name}Client.cs in your project!"
+    echo "🎉 You can now use the generated Generated/${sdk_name}Client.cs in your project!"
 else
     echo ""
     echo "❌ SDK generation failed. Please check the errors above."

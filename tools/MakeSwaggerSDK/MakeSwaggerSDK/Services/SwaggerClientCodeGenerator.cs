@@ -166,8 +166,8 @@ namespace MakeSwaggerSDK.Services
             return property.Type switch
             {
                 "string" => $"\"{property.DefaultValue}\"",
-                "int" or "long" or "float" or "double" or "decimal" => property.DefaultValue.ToString(),
-                "bool" => property.DefaultValue.ToString()?.ToLower(),
+                "int" or "long" or "float" or "double" or "decimal" => property.DefaultValue.ToString() ?? string.Empty,
+                "bool" => property.DefaultValue.ToString()?.ToLower() ?? string.Empty,
                 _ when property.Type.StartsWith("List<") => $"new {property.Type}()",
                 _ => property.DefaultValue.ToString() ?? string.Empty
             };
@@ -452,36 +452,86 @@ namespace MakeSwaggerSDK.Services
         {
             if (string.IsNullOrEmpty(operationId))
             {
-                return "UnknownOperation";
+                return "unknownOperation";
             }
 
-            // Remove special characters and ensure it starts with a letter
-            var sanitized = new StringBuilder();
-            bool firstChar = true;
-
-            foreach (char c in operationId)
+            // Convert to camelCase: first word lowercase, subsequent words capitalized
+            var words = new List<string>();
+            var currentWord = new StringBuilder();
+            
+            // Split into words based on special characters, underscores, and camelCase
+            for (int i = 0; i < operationId.Length; i++)
             {
+                char c = operationId[i];
+                
                 if (char.IsLetterOrDigit(c))
                 {
-                    if (firstChar && char.IsDigit(c))
+                    // Check if this is the start of a new word (uppercase after lowercase)
+                    if (i > 0 && char.IsUpper(c) && char.IsLower(operationId[i - 1]))
                     {
-                        sanitized.Append('_');
+                        if (currentWord.Length > 0)
+                        {
+                            words.Add(currentWord.ToString());
+                            currentWord.Clear();
+                        }
                     }
-                    sanitized.Append(char.ToUpper(c));
-                    firstChar = false;
+                    currentWord.Append(c);
                 }
-                else if (!firstChar)
+                else
                 {
-                    // Replace special chars with underscore, but avoid consecutive underscores
-                    if (sanitized.Length > 0 && sanitized[sanitized.Length - 1] != '_')
+                    // Non-alphanumeric character - end current word
+                    if (currentWord.Length > 0)
                     {
-                        sanitized.Append('_');
+                        words.Add(currentWord.ToString());
+                        currentWord.Clear();
+                    }
+                }
+            }
+            
+            // Add the last word if any
+            if (currentWord.Length > 0)
+            {
+                words.Add(currentWord.ToString());
+            }
+
+            if (words.Count == 0)
+            {
+                return "unknownOperation";
+            }
+
+            // Build camelCase result
+            var result = new StringBuilder();
+            for (int i = 0; i < words.Count; i++)
+            {
+                var word = words[i].ToLower();
+                if (i == 0)
+                {
+                    // First word: all lowercase
+                    result.Append(word);
+                }
+                else
+                {
+                    // Subsequent words: capitalize first letter
+                    if (word.Length > 0)
+                    {
+                        result.Append(char.ToUpper(word[0]));
+                        if (word.Length > 1)
+                        {
+                            result.Append(word.Substring(1));
+                        }
                     }
                 }
             }
 
-            var result = sanitized.ToString().TrimEnd('_');
-            return string.IsNullOrEmpty(result) ? "UnknownOperation" : result;
+            var finalResult = result.ToString();
+            
+            // Ensure the result starts with a letter, not a digit
+            if (char.IsDigit(finalResult[0]))
+            {
+                finalResult = "operation" + char.ToUpper(finalResult[0]) + finalResult.Substring(1);
+            }
+
+            return string.IsNullOrEmpty(finalResult) ? "unknownOperation" : finalResult;
         }
     }
 }
