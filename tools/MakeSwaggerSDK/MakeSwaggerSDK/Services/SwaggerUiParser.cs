@@ -449,11 +449,23 @@ namespace MakeSwaggerSDK.Services
                 classProp.Type = "object";
             }
 
-            // Handle nullable types
-            if (!classProp.IsRequired && !classProp.Type.EndsWith("?") && IsPrimitiveType(classProp.Type))
+            // Handle nullable types - check explicit nullable flag first
+            var isExplicitlyNullable = propSchema["nullable"]?.ToObject<bool>() ?? false;
+            
+            if (isExplicitlyNullable)
             {
                 classProp.IsNullable = true;
-                classProp.Type += "?";
+                
+                // For value types (primitives), add "?" to make them nullable
+                if (IsPrimitiveType(classProp.Type) && !classProp.Type.EndsWith("?"))
+                {
+                    classProp.Type += "?";
+                }
+                // For reference types including List<T>, add "?" to make them nullable
+                else if (!classProp.Type.EndsWith("?"))
+                {
+                    classProp.Type += "?";
+                }
             }
 
             // Parse default value
