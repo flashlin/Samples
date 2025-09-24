@@ -685,18 +685,26 @@ namespace CodeBoyLib.Services
                 if (parameter.Location == "body" && schema != null)
                 {
                     var reference = schema["$ref"]?.ToString();
+                    var schemaType = schema["type"]?.ToString();
+                    
                     if (string.IsNullOrEmpty(reference))
                     {
-                        // This is an inline schema, generate a DTO class for it
-                        var dtoClassName = $"{operationId}Request";
-                        parameter.Type = dtoClassName;
-                        
-                        // Generate the DTO class and add it to class definitions
-                        var classDef = ParseInlineSchemaToClassDefinition(dtoClassName, schema, swaggerDoc);
-                        if (classDef != null && !apiInfo.ClassDefinitions.ContainsKey(dtoClassName))
+                        // Only generate DTO class for object types, not for arrays or primitive types
+                        if (schemaType == "object")
                         {
-                            apiInfo.ClassDefinitions[dtoClassName] = classDef;
+                            // This is an inline object schema, generate a DTO class for it
+                            var dtoClassName = $"{operationId}Request";
+                            parameter.Type = dtoClassName;
+                            
+                            // Generate the DTO class and add it to class definitions
+                            var classDef = ParseInlineSchemaToClassDefinition(dtoClassName, schema, swaggerDoc);
+                            if (classDef != null && !apiInfo.ClassDefinitions.ContainsKey(dtoClassName))
+                            {
+                                apiInfo.ClassDefinitions[dtoClassName] = classDef;
+                            }
                         }
+                        // For arrays and primitive types, use the type already parsed by ParseSchemaType
+                        // parameter.Type is already set correctly by ParseSchemaType call above
                     }
                 }
             }

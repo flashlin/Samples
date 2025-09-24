@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../CodeBoyServer/CodeBoyLib/CodeBoyLib.csproj" />
+    <ProjectReference Include="../CodeBoyBackend/CodeBoyLib/CodeBoyLib.csproj" />
   </ItemGroup>
 
 </Project>
