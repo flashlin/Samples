@@ -26,8 +26,13 @@ pnpm install
 ## 🛠️ 開發指令
 
 ```bash
-# 啟動開發伺服器
+# 啟動開發伺服器 (使用 Mock API)
 pnpm dev
+# 或
+pnpm dev:mock
+
+# 啟動開發伺服器 (使用真實 API - 需要後端伺服器運行在 http://127.0.0.1:8080)
+pnpm dev:real
 
 # 建置生產版本
 pnpm build
@@ -103,14 +108,34 @@ CodeBoyFront/
 
 ## 🌐 開發伺服器
 
-啟動後可在 http://localhost:5173 查看應用程式
+### Mock 模式 (預設)
+```bash
+pnpm dev
+```
+啟動後可在 http://localhost:5173 查看應用程式，使用 Mock API 進行開發
+
+### 真實 API 模式
+```bash
+pnpm dev:real
+```
+- 需要先啟動後端伺服器在 `http://127.0.0.1:8080`
+- 前端會將 `/api/*` 請求代理到後端伺服器
+- 適合整合測試和後端 API 開發
 
 ## 📝 環境變數
 
 ### 開發環境 (.env.development)
 ```
-VITE_APP_API_BASE_URL=http://localhost:3000/api
+VITE_APP_API_BASE_URL=/api
 VITE_APP_TITLE=CodeBoy Frontend (Dev)
+VITE_USE_REAL_API=false
+```
+
+### 真實 API 環境 (.env.development.real)
+```
+VITE_APP_API_BASE_URL=/api
+VITE_APP_TITLE=CodeBoy Frontend (Dev - Real API)
+VITE_USE_REAL_API=true
 ```
 
 ### 生產環境 (.env.production)
@@ -119,15 +144,18 @@ VITE_APP_API_BASE_URL=/api
 VITE_APP_TITLE=CodeBoy Frontend
 ```
 
-## 🧪 Mock API
+## 🧪 API 支援
 
-### 使用者 API
-- `POST /api/user/login` - 使用者登入
-- `GET /api/user/profile` - 取得使用者資料
+### 程式碼生成 API
+- `POST /api/codegen/genWebApiClient` - 從 Swagger URL 生成 Web API 客戶端程式碼
 
 ### 應用 API
 - `GET /api/app/health` - 健康檢查
 - `GET /api/app/info` - 應用資訊
+
+### API 模式切換
+- **Mock 模式**: 使用本地 Mock 資料，適合前端獨立開發
+- **Proxy 模式**: 透過 Vite proxy 將請求轉發到 `http://127.0.0.1:8080`，適合與後端整合測試
 
 ## 🎯 開發建議
 

@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mock": "vite",
+    "dev:real": "cp .env.development.real .env.development.local && vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .vue,.js,.ts,.jsx,.tsx --fix",

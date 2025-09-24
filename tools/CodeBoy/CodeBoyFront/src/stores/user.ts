@@ -1,6 +1,20 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { userApi, type LoginParams, type UserProfile } from '@/apis/user';
+
+// Define types locally since we no longer have user API
+interface LoginParams {
+  username: string;
+  password: string;
+}
+
+interface UserProfile {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  avatar?: string;
+  createdAt: string;
+}
 
 export const useUserStore = defineStore('user', () => {
   // State
@@ -15,11 +29,21 @@ export const useUserStore = defineStore('user', () => {
   const login = async (params: LoginParams) => {
     loading.value = true;
     try {
-      const result = await userApi.login(params);
-      token.value = result.token;
-      userInfo.value = { ...result.user, createdAt: new Date().toISOString() };
-      localStorage.setItem('token', result.token);
-      return result;
+      // Mock login for now - replace with actual API call when needed
+      const mockResult = {
+        token: 'mock-token-' + Date.now(),
+        user: {
+          id: 1,
+          username: params.username,
+          email: `${params.username}@example.com`,
+          role: 'user'
+        }
+      };
+      
+      token.value = mockResult.token;
+      userInfo.value = { ...mockResult.user, createdAt: new Date().toISOString() };
+      localStorage.setItem('token', mockResult.token);
+      return mockResult;
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -39,9 +63,18 @@ export const useUserStore = defineStore('user', () => {
     
     loading.value = true;
     try {
-      const profile = await userApi.getProfile();
-      userInfo.value = profile;
-      return profile;
+      // Mock profile fetch - replace with actual API call when needed
+      const mockProfile: UserProfile = {
+        id: 1,
+        username: 'admin',
+        email: 'admin@example.com',
+        role: 'admin',
+        avatar: 'https://via.placeholder.com/100',
+        createdAt: new Date().toISOString(),
+      };
+      
+      userInfo.value = mockProfile;
+      return mockProfile;
     } catch (error) {
       console.error('Failed to fetch profile:', error);
       throw error;
