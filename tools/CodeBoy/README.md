@@ -14,13 +14,33 @@
 
 ## 使用方式
 
-### 基本用法
+### Docker 方式 (推薦)
+
+#### 互動式管理
+```bash
+# 使用 fzf 選擇 start 或 stop
+./run-docker.sh
+```
+
+#### 直接建置和運行
+```bash
+# 建置 Docker 映像檔
+./build-docker.sh
+
+# 使用 Docker Compose
+docker-compose up -d
+```
+
+### 本地開發
+
+#### 基本用法
 
 ```bash
+cd CodeGen
 dotnet run -- http://your-swagger-url
 ```
 
-### 進階用法
+#### 進階用法
 
 ```bash
 # 指定 SDK 名稱

@@ -1,42 +1,82 @@
 #!/bin/bash
 
-# CodeBoy Server Docker Run Script
+# CodeBoy Server Docker Management Script
+# Interactive management of CodeBoy Server Docker container using fzf
 
 set -e
 
-echo "🚀 Starting CodeBoy Server with Docker..."
+echo "🐳 CodeBoy Server Docker Management"
+echo ""
 
-# Check if image exists
-if ! docker images codeboy-server:latest | grep -q codeboy-server; then
-    echo "❌ Docker image not found. Building it first..."
-    ./build-docker.sh
+# Check if fzf is installed
+if ! command -v fzf &> /dev/null; then
+    echo "❌ fzf is not installed. Please install fzf first."
+    echo "   brew install fzf   # on macOS"
+    echo "   apt install fzf    # on Ubuntu/Debian"
+    exit 1
 fi
 
-echo "🐳 Starting container..."
+# Use fzf to select action
+action=$(echo -e "start\nstop" | fzf --prompt="Select action: " --height=40% --border --header="Choose what to do with CodeBoy Server")
 
-# Stop and remove existing container if running
-docker stop codeboy-server 2>/dev/null || true
-docker rm codeboy-server 2>/dev/null || true
+# Check if user cancelled selection
+if [ -z "$action" ]; then
+    echo "❌ No action selected. Exiting..."
+    exit 0
+fi
 
-# Run the container
-docker run -d \
-    --name codeboy-server \
-    -p 8080:8080 \
-    --restart unless-stopped \
-    codeboy-server:latest
+case $action in
+    "start")
+        echo "🚀 Starting CodeBoy Server..."
+        
+        # Check if image exists
+        if ! docker images codeboy-server:latest | grep -q codeboy-server; then
+            echo "❌ Docker image not found. Building it first..."
+            ./build-docker.sh
+        fi
 
-echo "✅ CodeBoy Server is running!"
-echo ""
-echo "📖 API Documentation: http://localhost:8080"
-echo "🔍 Health Check: http://localhost:8080/health"
-echo "📊 Container Status:"
+        echo "🐳 Starting container..."
 
-# Show container status
-docker ps | grep codeboy-server
+        # Stop and remove existing container if running
+        docker stop codeboy-server 2>/dev/null || true
+        docker rm codeboy-server 2>/dev/null || true
 
-echo ""
-echo "📝 To view logs:"
-echo "  docker logs -f codeboy-server"
-echo ""
-echo "🛑 To stop:"
-echo "  docker stop codeboy-server"
+        # Run the container
+        docker run -d \
+            --name codeboy-server \
+            -p 8080:8080 \
+            --restart unless-stopped \
+            codeboy-server:latest
+
+        echo "✅ CodeBoy Server is running!"
+        echo ""
+        echo "📖 API Documentation: http://localhost:8080"
+        echo "🔍 Health Check: http://localhost:8080/health"
+        echo "📊 Container Status:"
+
+        # Show container status
+        docker ps | grep codeboy-server
+
+        echo ""
+        echo "📝 To view logs:"
+        echo "  docker logs -f codeboy-server"
+        ;;
+        
+    "stop")
+        echo "🛑 Stopping CodeBoy Server..."
+        
+        # Check if container is running
+        if docker ps | grep -q codeboy-server; then
+            docker stop codeboy-server
+            docker rm codeboy-server
+            echo "✅ CodeBoy Server stopped and removed successfully!"
+        else
+            echo "ℹ️  CodeBoy Server is not running."
+        fi
+        ;;
+        
+    *)
+        echo "❌ Invalid action: $action"
+        exit 1
+        ;;
+esac
