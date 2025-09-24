@@ -15,7 +15,7 @@ namespace CodeBoyServer.ApiHandlers
         /// <param name="app">Web application builder</param>
         public static void Map(WebApplication app)
         {
-            app.MapPost("/codegen/genWebApiClient", GenerateWebApiClient)
+            app.MapPost("/api/codegen/genWebApiClient", GenerateWebApiClient)
                 .WithName("GenerateWebApiClient")
                 .WithDescription("Generate Web API client code from Swagger URL")
                 .WithTags("CodeGeneration")
