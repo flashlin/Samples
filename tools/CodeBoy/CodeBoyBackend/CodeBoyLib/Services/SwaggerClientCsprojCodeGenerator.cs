@@ -20,7 +20,7 @@ namespace CodeBoyLib.Services
         /// <summary>
         /// Target .NET version (e.g., "net8.0", "net6.0")
         /// </summary>
-        public string DotnetVersion { get; set; } = string.Empty;
+        public string DotnetVersion { get; set; } = "net8.0";
 
         /// <summary>
         /// Output directory path
@@ -39,7 +39,7 @@ namespace CodeBoyLib.Services
     public class SwaggerClientCsprojCodeGenerator
     {
         /// <summary>
-        /// Generates a .csproj file for the SDK library using configuration object
+        /// Generates a .csproj file for the SDK library
         /// </summary>
         /// <param name="config">Configuration for .csproj generation</param>
         public void Generate(CsprojGenerationConfig config)
@@ -69,24 +69,6 @@ namespace CodeBoyLib.Services
             Console.WriteLine($"✅ Generated .csproj file: {csprojFilePath}");
         }
 
-        /// <summary>
-        /// Generates a .csproj file for the SDK library (legacy method for backward compatibility)
-        /// </summary>
-        /// <param name="sdkName">Name of the SDK (e.g., "Petstore")</param>
-        /// <param name="dotnetVersion">Target .NET version (e.g., "net8.0", "net6.0")</param>
-        /// <param name="outputPath">Output directory path</param>
-        public void Generate(string sdkName, string dotnetVersion, string outputPath)
-        {
-            var config = new CsprojGenerationConfig
-            {
-                SdkName = sdkName,
-                DotnetVersion = dotnetVersion,
-                OutputPath = outputPath,
-                SdkVersion = "1.0.0" // Default version for backward compatibility
-            };
-            
-            Generate(config);
-        }
 
         /// <summary>
         /// Generates the content of the .csproj file
