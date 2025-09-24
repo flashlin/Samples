@@ -28,15 +28,7 @@ request.interceptors.request.use(
 // Response interceptor
 request.interceptors.response.use(
   (response: AxiosResponse) => {
-    const { data } = response;
-    
-    // Handle common response structure
-    if (data.code === 200) {
-      return data.data;
-    } else {
-      console.error('API Error:', data.message);
-      return Promise.reject(new Error(data.message || 'Unknown error'));
-    }
+    return response.data;
   },
   (error) => {
     console.error('Request Error:', error.message);

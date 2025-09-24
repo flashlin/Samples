@@ -8,11 +8,7 @@ export default [
       
       // Validate required fields
       if (!swaggerUrl || !sdkName) {
-        return {
-          code: 400,
-          message: 'Missing required fields',
-          data: 'Error: SwaggerUrl and SdkName are required',
-        };
+        return 'Error: SwaggerUrl and SdkName are required';
       }
 
       // Simulate code generation
@@ -53,11 +49,7 @@ namespace ${sdkName}
     }
 }`;
 
-      return {
-        code: 200,
-        message: 'Code generated successfully',
-        data: generatedCode,
-      };
+      return generatedCode;
     },
   },
 ];
