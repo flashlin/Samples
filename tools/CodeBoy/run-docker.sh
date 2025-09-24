@@ -8,14 +8,6 @@ set -e
 echo "🐳 CodeBoy Server Docker Management"
 echo ""
 
-# Check if fzf is installed
-if ! command -v fzf &> /dev/null; then
-    echo "❌ fzf is not installed. Please install fzf first."
-    echo "   brew install fzf   # on macOS"
-    echo "   apt install fzf    # on Ubuntu/Debian"
-    exit 1
-fi
-
 # Use fzf to select action
 action=$(echo -e "start\nstop" | fzf --prompt="Select action: " --height=40% --border --header="Choose what to do with CodeBoy Server")
 
