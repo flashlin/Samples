@@ -51,30 +51,54 @@ namespace MakeSwaggerSDK
 
                 Console.WriteLine($"✅ Successfully parsed {apiInfo.Endpoints.Count} endpoints and {apiInfo.ClassDefinitions.Count} model classes.");
 
-                // Generate SDK code
-                var generator = new SwaggerClientCodeGenerator();
-                var generatedCode = generator.Generate(options.SdkName, apiInfo);
-
-                // Output the generated code
-                var outputFileName = options.OutputFileName ?? $"{options.SdkName}.cs";
-                await File.WriteAllTextAsync(outputFileName, generatedCode);
-
-                Console.WriteLine($"✅ Generated SDK code saved to: {outputFileName}");
+                // Determine the Generated directory path (relative to run.sh location)
+                var currentDirectory = Directory.GetCurrentDirectory();
+                var projectRoot = Path.GetDirectoryName(currentDirectory); // Go up from CodeGen to project root
+                var generatedDirectory = Path.Combine(projectRoot ?? currentDirectory, "Generated");
                 
-                Console.WriteLine("\nGenerated model classes:");
-                foreach (var classDef in apiInfo.ClassDefinitions.Values)
-                {
-                    var classType = classDef.IsEnum ? "enum" : "class";
-                    Console.WriteLine($"  - {classType} {classDef.Name} ({classDef.Properties.Count} properties)");
-                }
+                // Ensure Generated directory exists
+                Directory.CreateDirectory(generatedDirectory);
                 
-                Console.WriteLine("\nGenerated endpoints:");
-                foreach (var endpoint in apiInfo.Endpoints)
-                {
-                    Console.WriteLine($"  - {endpoint.HttpMethod.ToUpper()} {endpoint.Path} ({endpoint.OperationId})");
-                }
+                Console.WriteLine($"📁 Using Generated directory: {generatedDirectory}");
 
-                return 0;
+                // Configure the factory
+                var config = new GenSwaggerClientConfig
+                {
+                    DotnetVersion = "net8.0",
+                    SdkVersion = "1.0.0",
+                    BuildConfiguration = "Release",
+                    TempBaseDirectory = generatedDirectory,
+                    KeepTempDirectory = true, // Keep files for inspection
+                    BuildAssembly = true
+                };
+
+                // Generate and build complete SDK project
+                var factory = new GenSwaggerClientFactory();
+                var result = await factory.Build(options.SdkName, apiInfo, config);
+
+                // Print detailed summary
+                factory.PrintSummary(result);
+
+                if (result.Success)
+                {
+                    // Copy the generated client code to the requested output location if specified
+                    if (!string.IsNullOrEmpty(options.OutputFileName))
+                    {
+                        await File.CopyAsync(result.ClientCodePath, options.OutputFileName, true);
+                        Console.WriteLine($"📋 Also copied client code to: {options.OutputFileName}");
+                    }
+
+                    Console.WriteLine($"\n🎉 Complete SDK project generated successfully!");
+                    Console.WriteLine($"📦 Assembly: {result.AssemblyPath}");
+                    Console.WriteLine($"📁 Project files: {result.TempDirectory}");
+                    
+                    return 0;
+                }
+                else
+                {
+                    Console.WriteLine($"\n❌ SDK generation failed. Check errors above.");
+                    return 1;
+                }
             }
             catch (Exception ex)
             {
