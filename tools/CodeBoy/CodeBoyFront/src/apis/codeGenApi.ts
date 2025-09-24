@@ -1,15 +1,9 @@
 import request from './request';
 
-// Request/Response interfaces for code generation
+// Request interface for code generation
 export interface GenWebApiClientRequest {
   swaggerUrl: string;
   sdkName: string;
-}
-
-export interface GenWebApiClientResponse {
-  generatedCode: string;
-  success: boolean;
-  errorMessage?: string;
 }
 
 // Code generation API
@@ -17,9 +11,9 @@ export const codeGenApi = {
   /**
    * Generate Web API client code from Swagger URL
    * @param params Generation request parameters
-   * @returns Generated client code
+   * @returns Generated client code as string
    */
-  generateWebApiClient(params: GenWebApiClientRequest): Promise<GenWebApiClientResponse> {
+  generateWebApiClient(params: GenWebApiClientRequest): Promise<string> {
     return request.post('/codegen/genWebApiClient', params);
   },
 };

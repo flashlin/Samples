@@ -124,37 +124,43 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useCodeGenStore } from '@/stores/codeGenStore'
-
-// Store
-const codeGenStore = useCodeGenStore()
+import { ref } from 'vue'
+import { codeGenApi } from '@/apis/codeGenApi'
 
 // Form data
 const form = ref({
-  swaggerUrl: 'https://steropes-api.sbotry.com/swagger/index.html',
-  sdkName: 'Steropes'
+  swaggerUrl: '',
+  sdkName: ''
 })
 
-// Computed properties
-const loading = computed(() => codeGenStore.loading)
-const generatedCode = computed(() => codeGenStore.generatedCode)
-const error = computed(() => codeGenStore.error)
+// State
+const loading = ref(false)
+const generatedCode = ref('')
+const error = ref<string | null>(null)
 
 // Methods
 const handleGenerate = async () => {
+  loading.value = true
+  error.value = null
+  
   try {
-    await codeGenStore.generateWebApiClient({
+    const result = await codeGenApi.generateWebApiClient({
       swaggerUrl: form.value.swaggerUrl,
       sdkName: form.value.sdkName
     })
+    
+    generatedCode.value = result
   } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+    error.value = errorMessage
     console.error('Generation failed:', err)
+  } finally {
+    loading.value = false
   }
 }
 
 const clearError = () => {
-  codeGenStore.clearError()
+  error.value = null
 }
 
 const copyToClipboard = async () => {

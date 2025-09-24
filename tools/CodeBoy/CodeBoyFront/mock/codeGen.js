@@ -11,11 +11,7 @@ export default [
         return {
           code: 400,
           message: 'Missing required fields',
-          data: {
-            success: false,
-            generatedCode: '',
-            errorMessage: 'SwaggerUrl and SdkName are required',
-          },
+          data: 'Error: SwaggerUrl and SdkName are required',
         };
       }
 
@@ -60,11 +56,7 @@ namespace ${sdkName}
       return {
         code: 200,
         message: 'Code generated successfully',
-        data: {
-          success: true,
-          generatedCode: generatedCode,
-          errorMessage: null,
-        },
+        data: generatedCode,
       };
     },
   },
