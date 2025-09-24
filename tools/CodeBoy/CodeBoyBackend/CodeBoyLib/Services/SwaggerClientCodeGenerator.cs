@@ -47,19 +47,6 @@ namespace CodeBoyLib.Services
             return sb.ToString();
         }
 
-        private HashSet<string> GetUniqueResponseTypes(List<SwaggerEndpoint> endpoints)
-        {
-            var types = new HashSet<string>();
-            foreach (var endpoint in endpoints)
-            {
-                if (!string.IsNullOrEmpty(endpoint.ResponseType.Type))
-                {
-                    types.Add(endpoint.ResponseType.Type);
-                }
-            }
-            return types;
-        }
-
         private bool IsPrimitiveType(string type)
         {
             var primitiveTypes = new HashSet<string>
