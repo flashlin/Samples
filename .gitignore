@@ -84,3 +84,4 @@ T1.GrpcProtoGenerator/MyProtoContracts/Generated
 T1.GrpcProtoGenerator/T1.GrpcProtoGenerator/nupkg
 tools/MakeSwaggerSDK/Generated
 tools/MakeSwaggerSDK/MakeSwaggerSDK/Generated
+tools/CodeBoy/Generated
