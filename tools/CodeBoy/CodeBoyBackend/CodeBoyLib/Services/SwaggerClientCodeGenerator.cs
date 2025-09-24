@@ -20,6 +20,7 @@ namespace CodeBoyLib.Services
             sb.AppendLine("using System.Text;");
             sb.AppendLine("using System.Threading.Tasks;");
             sb.AppendLine("using Microsoft.Extensions.Http;");
+            sb.AppendLine("using Microsoft.Extensions.Options;");
             sb.AppendLine("using System.Text.Json;");
             sb.AppendLine("using System.Text.Json.Serialization;");
             sb.AppendLine("using System.ComponentModel.DataAnnotations;");
@@ -39,6 +40,9 @@ namespace CodeBoyLib.Services
                 }
             }
 
+            // Generate the configuration class
+            GenerateConfigClass(sb, sdkName);
+
             // Generate the main client class
             GenerateClientClass(sb, sdkName, apiInfo.Endpoints);
 
@@ -54,6 +58,33 @@ namespace CodeBoyLib.Services
                 "string", "int", "long", "float", "double", "decimal", "bool", "DateTime", "Guid", "object", "void"
             };
             return primitiveTypes.Contains(type) || type.StartsWith("List<");
+        }
+
+        private void GenerateConfigClass(StringBuilder sb, string sdkName)
+        {
+            var configClassName = $"{sdkName}ClientConfig";
+            
+            sb.AppendLine($"    /// <summary>");
+            sb.AppendLine($"    /// Configuration settings for {sdkName} API client");
+            sb.AppendLine($"    /// </summary>");
+            sb.AppendLine($"    public class {configClassName}");
+            sb.AppendLine("    {");
+            sb.AppendLine("        /// <summary>");
+            sb.AppendLine("        /// Base URL for the API");
+            sb.AppendLine("        /// </summary>");
+            sb.AppendLine("        public string BaseUrl { get; set; } = string.Empty;");
+            sb.AppendLine();
+            sb.AppendLine("        /// <summary>");
+            sb.AppendLine("        /// HTTP client name for dependency injection (optional)");
+            sb.AppendLine("        /// </summary>");
+            sb.AppendLine("        public string? HttpClientName { get; set; }");
+            sb.AppendLine();
+            sb.AppendLine("        /// <summary>");
+            sb.AppendLine("        /// Request timeout in seconds (optional)");
+            sb.AppendLine("        /// </summary>");
+            sb.AppendLine("        public int? TimeoutSeconds { get; set; }");
+            sb.AppendLine("    }");
+            sb.AppendLine();
         }
 
         private void GenerateModelClass(StringBuilder sb, ClassDefinition classDef)
@@ -213,32 +244,47 @@ namespace CodeBoyLib.Services
             sb.AppendLine($"    public class {className}");
             sb.AppendLine("    {");
             sb.AppendLine("        private readonly HttpClient _httpClient;");
-            sb.AppendLine("        private readonly string _baseUrl;");
+            sb.AppendLine($"        private readonly {sdkName}ClientConfig _config;");
             sb.AppendLine();
 
-            // Constructor with IHttpClientFactory
+            // Primary constructor with IOptions pattern
             sb.AppendLine($"        /// <summary>");
             sb.AppendLine($"        /// Initializes a new instance of {className}");
             sb.AppendLine($"        /// </summary>");
             sb.AppendLine($"        /// <param name=\"httpClientFactory\">HTTP client factory</param>");
-            sb.AppendLine($"        /// <param name=\"baseUrl\">Base URL for the API</param>");
-            sb.AppendLine($"        public {className}(IHttpClientFactory httpClientFactory, string baseUrl)");
+            sb.AppendLine($"        /// <param name=\"config\">Configuration options</param>");
+            sb.AppendLine($"        public {className}(IHttpClientFactory httpClientFactory, IOptions<{sdkName}ClientConfig> config)");
             sb.AppendLine("        {");
-            sb.AppendLine("            _httpClient = httpClientFactory.CreateClient();");
-            sb.AppendLine("            _baseUrl = baseUrl.TrimEnd('/');");
+            sb.AppendLine("            _config = config.Value ?? throw new ArgumentNullException(nameof(config));");
+            sb.AppendLine("            if (string.IsNullOrEmpty(_config.BaseUrl))");
+            sb.AppendLine("                throw new ArgumentException(\"BaseUrl must be configured\", nameof(config));");
+            sb.AppendLine();
+            sb.AppendLine("            if (!string.IsNullOrEmpty(_config.HttpClientName))");
+            sb.AppendLine("            {");
+            sb.AppendLine("                _httpClient = httpClientFactory.CreateClient(_config.HttpClientName);");
+            sb.AppendLine("            }");
+            sb.AppendLine("            else");
+            sb.AppendLine("            {");
+            sb.AppendLine("                _httpClient = httpClientFactory.CreateClient();");
+            sb.AppendLine("            }");
+            sb.AppendLine();
+            sb.AppendLine("            if (_config.TimeoutSeconds.HasValue)");
+            sb.AppendLine("            {");
+            sb.AppendLine("                _httpClient.Timeout = TimeSpan.FromSeconds(_config.TimeoutSeconds.Value);");
+            sb.AppendLine("            }");
             sb.AppendLine("        }");
             sb.AppendLine();
 
-            // Alternative constructor with HttpClient directly
+            // Alternative constructor with HttpClient directly (for backward compatibility)
             sb.AppendLine($"        /// <summary>");
-            sb.AppendLine($"        /// Initializes a new instance of {className}");
+            sb.AppendLine($"        /// Initializes a new instance of {className} (backward compatibility)");
             sb.AppendLine($"        /// </summary>");
             sb.AppendLine($"        /// <param name=\"httpClient\">HTTP client instance</param>");
             sb.AppendLine($"        /// <param name=\"baseUrl\">Base URL for the API</param>");
             sb.AppendLine($"        public {className}(HttpClient httpClient, string baseUrl)");
             sb.AppendLine("        {");
             sb.AppendLine("            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));");
-            sb.AppendLine("            _baseUrl = baseUrl.TrimEnd('/');");
+            sb.AppendLine($"            _config = new {sdkName}ClientConfig {{ BaseUrl = baseUrl.TrimEnd('/') }};");
             sb.AppendLine("        }");
             sb.AppendLine();
 
@@ -356,7 +402,7 @@ namespace CodeBoyLib.Services
                 "OPTIONS" => "HttpMethod.Options",
                 _ => $"new HttpMethod(\"{endpoint.HttpMethod.ToUpper()}\")"
             };
-            sb.AppendLine($"            var request = new HttpRequestMessage({httpMethod}, _baseUrl + url);");
+            sb.AppendLine($"            var request = new HttpRequestMessage({httpMethod}, _config.BaseUrl + url);");
 
             // Add headers
             foreach (var param in headerParams)
