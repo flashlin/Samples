@@ -33,7 +33,7 @@ echo ""
 echo "📋 Configuration:"
 echo "   Swagger URL: $swagger_url"
 echo "   SDK Name: $sdk_name"
-echo "   Output: ../${sdk_name}Client.cs"
+echo "   Output Path: ../Generated"
 echo ""
 
 # Navigate to the project directory
@@ -54,17 +54,18 @@ echo ""
 # Execute the tool with user inputs
 echo "🔍 Generating SDK from Swagger..."
 mkdir -p "../Generated"
-dotnet run -- "$swagger_url" -n "$sdk_name" -o "../Generated/${sdk_name}Client.cs"
+dotnet run -- "$swagger_url" -n "$sdk_name" -p "../Generated"
 
 if [ $? -eq 0 ]; then
     echo ""
     echo "✅ SDK generation completed successfully!"
-    echo "📄 Generated file: Generated/${sdk_name}Client.cs"
+    echo "📁 Generated project files in: Generated/"
     echo ""
-    echo "📊 File size:"
-    ls -lh "../Generated/${sdk_name}Client.cs" 2>/dev/null || echo "Output file not found"
+    echo "📊 Generated directory contents:"
+    ls -la "../Generated/" 2>/dev/null || echo "Generated directory not found"
     echo ""
-    echo "🎉 You can now use the generated Generated/${sdk_name}Client.cs in your project!"
+    echo "🎉 Multi-target SDK project generated successfully!"
+    echo "📦 Includes net8.0 and net9.0 builds with NuGet package!"
 else
     echo ""
     echo "❌ SDK generation failed. Please check the errors above."
