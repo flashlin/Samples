@@ -61,20 +61,9 @@ namespace MakeSwaggerSDK
                 
                 Console.WriteLine($"📁 Using Generated directory: {generatedDirectory}");
 
-                // Configure the factory
-                var config = new GenSwaggerClientConfig
-                {
-                    DotnetVersion = "net8.0",
-                    SdkVersion = "1.0.0",
-                    BuildConfiguration = "Release",
-                    TempBaseDirectory = generatedDirectory,
-                    KeepTempDirectory = true, // Keep files for inspection
-                    BuildAssembly = true
-                };
-
                 // Generate and build complete SDK project
                 var factory = new GenSwaggerClientWorkflow();
-                var result = await factory.Build(options.SdkName, apiInfo, config);
+                var result = await factory.Build(options.SdkName, apiInfo);
 
                 // Print detailed summary
                 factory.PrintSummary(result);
