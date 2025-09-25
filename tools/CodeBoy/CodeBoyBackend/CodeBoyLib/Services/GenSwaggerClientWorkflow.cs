@@ -285,7 +285,7 @@ namespace CodeBoyLib.Services
                 SdkVersion = "1.0.0",
                 BuildConfiguration = "Release",
                 KeepTempDirectory = true,
-                TempBaseDirectory = Path.Combine(outputPath, framework),
+                TempBaseDirectory = outputPath,
                 BuildAssembly = true
             };
         }
