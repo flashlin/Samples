@@ -333,6 +333,32 @@ namespace CodeBoyLib.Services
             var methodName = SanitizeMethodName(endpoint.Path);
             var returnType = GetReturnType(endpoint.ResponseType);
             
+            // Categorize parameters by location
+            var pathParams = endpoint.Parameters.Where(p => p.Location == "path").ToList();
+            var queryParams = endpoint.Parameters.Where(p => p.Location == "query").ToList();
+            var bodyParams = endpoint.Parameters.Where(p => p.Location == "body").ToList();
+            var headerParams = endpoint.Parameters.Where(p => p.Location == "header").ToList();
+            
+            // Generate method signature and documentation
+            GenerateMethodSignature(output, endpoint, methodName, returnType, pathParams, queryParams, bodyParams, headerParams);
+            
+            // Generate URL building logic
+            GenerateUrlBuilding(output, endpoint, pathParams, queryParams);
+            
+            // Generate HTTP request creation and execution
+            GenerateHttpRequest(output, endpoint, headerParams, bodyParams);
+            
+            // Generate response handling
+            GenerateResponseHandling(output, returnType);
+
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine();
+        }
+
+        private void GenerateMethodSignature(IndentStringBuilder output, SwaggerEndpoint endpoint, string methodName, string returnType,
+            List<EndpointParameter> pathParams, List<EndpointParameter> queryParams, List<EndpointParameter> bodyParams, List<EndpointParameter> headerParams)
+        {
             output.WriteLine($"/// <summary>");
             output.WriteLine($"/// {endpoint.Summary}");
             if (!string.IsNullOrEmpty(endpoint.Description))
@@ -341,12 +367,8 @@ namespace CodeBoyLib.Services
             }
             output.WriteLine($"/// </summary>");
 
-            // Generate method parameters
+            // Generate method parameters and documentation
             var methodParams = new List<string>();
-            var pathParams = endpoint.Parameters.Where(p => p.Location == "path").ToList();
-            var queryParams = endpoint.Parameters.Where(p => p.Location == "query").ToList();
-            var bodyParams = endpoint.Parameters.Where(p => p.Location == "body").ToList();
-            var headerParams = endpoint.Parameters.Where(p => p.Location == "header").ToList();
 
             // Add path parameters
             foreach (var param in pathParams)
@@ -385,7 +407,10 @@ namespace CodeBoyLib.Services
             output.WriteLine($"public async {returnType} {methodName}({string.Join(", ", methodParams)})");
             output.WriteLine("{");
             output.Indent++;
+        }
 
+        private void GenerateUrlBuilding(IndentStringBuilder output, SwaggerEndpoint endpoint, List<EndpointParameter> pathParams, List<EndpointParameter> queryParams)
+        {
             // Build URL
             var urlBuilder = new StringBuilder();
             urlBuilder.Append($"var url = $\"{endpoint.Path}\"");
@@ -422,7 +447,10 @@ namespace CodeBoyLib.Services
                 output.Indent--;
                 output.WriteLine();
             }
+        }
 
+        private void GenerateHttpRequest(IndentStringBuilder output, SwaggerEndpoint endpoint, List<EndpointParameter> headerParams, List<EndpointParameter> bodyParams)
+        {
             // Create HTTP request
             var httpMethod = endpoint.HttpMethod.ToUpper() switch
             {
@@ -470,7 +498,10 @@ namespace CodeBoyLib.Services
             output.WriteLine("var response = await _httpClient.SendAsync(request);");
             output.WriteLine("response.EnsureSuccessStatusCode();");
             output.WriteLine();
+        }
 
+        private void GenerateResponseHandling(IndentStringBuilder output, string returnType)
+        {
             // Handle response
             if (returnType == "Task")
             {
@@ -510,10 +541,6 @@ namespace CodeBoyLib.Services
                     output.Indent--;
                 }
             }
-
-            output.Indent--;
-            output.WriteLine("}");
-            output.WriteLine();
         }
 
         private void GenerateHelperMethods(IndentStringBuilder output)
