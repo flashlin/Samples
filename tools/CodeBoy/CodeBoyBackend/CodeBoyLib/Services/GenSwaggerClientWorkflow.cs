@@ -94,7 +94,7 @@ namespace CodeBoyLib.Services
         /// <summary>
         /// Base directory for temporary folders (defaults to system temp)
         /// </summary>
-        public string? TempBaseDirectory { get; set; }
+        public required string TempBaseDirectory { get; set; }
 
         /// <summary>
         /// Whether to perform the build step
@@ -234,8 +234,8 @@ namespace CodeBoyLib.Services
 
                 // Execute workflow steps for this framework
                 CreateTempDirectoryStep(frameworkResult, config);
-                await GenerateClientCodeStep(frameworkResult, sdkName, apiInfo, outputPath);
                 GenerateCsprojStep(frameworkResult, sdkName, config);
+                await GenerateClientCodeStep(frameworkResult, sdkName, apiInfo, frameworkResult.TempDirectory);
                 await BuildProjectStep(frameworkResult, config);
 
                 // Check if framework build was successful
