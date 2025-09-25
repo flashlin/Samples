@@ -234,7 +234,7 @@ namespace CodeBoyLib.Services
 
                 // Execute workflow steps for this framework
                 CreateTempDirectoryStep(frameworkResult, config);
-                await GenerateClientCodeStep(frameworkResult, sdkName, apiInfo);
+                await GenerateClientCodeStep(frameworkResult, sdkName, apiInfo, outputPath);
                 GenerateCsprojStep(frameworkResult, sdkName, config);
                 await BuildProjectStep(frameworkResult, config);
 
@@ -368,11 +368,12 @@ namespace CodeBoyLib.Services
         /// <param name="result">Result object to update</param>
         /// <param name="sdkName">Name of the SDK</param>
         /// <param name="apiInfo">Swagger API information</param>
-        private async Task GenerateClientCodeStep(GenSwaggerClientResult result, string sdkName, SwaggerApiInfo apiInfo)
+        /// <param name="outputPath">Base output path for file generation</param>
+        private async Task GenerateClientCodeStep(GenSwaggerClientResult result, string sdkName, SwaggerApiInfo apiInfo, string outputPath)
         {
             result.ProcessLog.Add("🔄 Step 2: Generating client code...");
             result.GeneratedCode = _codeGenerator.Generate(sdkName, apiInfo);
-            result.ClientCodePath = Path.Combine(result.TempDirectory, $"{sdkName}Client.cs");
+            result.ClientCodePath = Path.Combine(outputPath, $"{sdkName}Client.cs");
             
             await File.WriteAllTextAsync(result.ClientCodePath, result.GeneratedCode);
             result.ProcessLog.Add($"✅ Generated client code: {result.ClientCodePath}");
