@@ -89,7 +89,7 @@ namespace CodeBoyLib.Services
         /// <summary>
         /// Whether to keep the temporary directory after completion
         /// </summary>
-        public bool KeepTempDirectory { get; set; } = true;
+        public bool KeepTempDirectory { get; set; } = false;
 
         /// <summary>
         /// Base directory for temporary folders (defaults to system temp)
@@ -183,6 +183,8 @@ namespace CodeBoyLib.Services
                     {
                         result.AssemblyPath = result.BuildResult.AssemblyPath;
                         result.ProcessLog.Add($"✅ Build successful: {result.AssemblyPath}");
+                        
+                        
                     }
                     else
                     {
@@ -206,7 +208,7 @@ namespace CodeBoyLib.Services
 
                 result.TotalDuration = DateTime.Now - startTime;
                 result.ProcessLog.Add($"🏁 Process completed in {result.TotalDuration.TotalSeconds:F2} seconds");
-
+                
                 // Clean up if requested and successful
                 if (!config.KeepTempDirectory && result.Success)
                 {
