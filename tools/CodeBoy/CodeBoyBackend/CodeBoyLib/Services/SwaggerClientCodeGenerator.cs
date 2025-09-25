@@ -63,6 +63,26 @@ namespace CodeBoyLib.Services
             return primitiveTypes.Contains(type) || type.StartsWith("List<");
         }
 
+        /// <summary>
+        /// Get default value for primitive types when response is empty
+        /// </summary>
+        private string GetDefaultValueForPrimitiveType(string type)
+        {
+            return type switch
+            {
+                "bool" => "false",
+                "int" => "0",
+                "long" => "0L",
+                "float" => "0.0f",
+                "double" => "0.0",
+                "decimal" => "0.0m",
+                "DateTime" => "DateTime.MinValue",
+                "Guid" => "Guid.Empty",
+                "string" => "string.Empty",
+                _ => "default"
+            };
+        }
+
         private void GenerateConfigClass(IndentStringBuilder output, string sdkName)
         {
             var configClassName = $"{sdkName}ClientConfig";
@@ -515,12 +535,14 @@ namespace CodeBoyLib.Services
             {
                 output.WriteLine("var responseContent = await response.Content.ReadAsStringAsync();");
                 output.WriteLine();
-                output.WriteLine("if (string.IsNullOrEmpty(responseContent))");
-                output.Indent++;
                 
                 if (returnType.StartsWith("Task<List<"))
                 {
                     var innerType = returnType.Substring(5, returnType.Length - 6); // Remove "Task<" and ">"
+                    
+                    // Lists can be null when response is empty
+                    output.WriteLine("if (string.IsNullOrEmpty(responseContent))");
+                    output.Indent++;
                     output.WriteLine($"return null;");
                     output.Indent--;
                     output.WriteLine();
@@ -530,15 +552,47 @@ namespace CodeBoyLib.Services
                 {
                     var innerType = returnType.Substring(5, returnType.Length - 6); // Remove "Task<" and ">"
                     
-                    // Since all return types are now nullable, we can directly return the deserialized result
-                    output.WriteLine($"return null;");
-                    output.Indent--;
-                    output.WriteLine();
-                    output.WriteLine($"return JsonSerializer.Deserialize<{innerType}>(responseContent);");
+                    // Extract the base type without nullable suffix
+                    var baseType = innerType.EndsWith("?") ? innerType.Substring(0, innerType.Length - 1) : innerType;
+                    
+                    // Check if it's a primitive type
+                    if (IsPrimitiveType(baseType))
+                    {
+                        // For primitive types, provide default value when response is empty
+                        output.WriteLine("if (string.IsNullOrEmpty(responseContent))");
+                        output.Indent++;
+                        
+                        if (innerType.EndsWith("?"))
+                        {
+                            // Nullable primitive types can return null
+                            output.WriteLine($"return null;");
+                        }
+                        else
+                        {
+                            // Non-nullable primitive types should return default value
+                            var defaultValue = GetDefaultValueForPrimitiveType(baseType);
+                            output.WriteLine($"return {defaultValue};");
+                        }
+                        
+                        output.Indent--;
+                        output.WriteLine();
+                        output.WriteLine($"return JsonSerializer.Deserialize<{innerType}>(responseContent);");
+                    }
+                    else
+                    {
+                        // For reference types, they can be null when response is empty
+                        output.WriteLine("if (string.IsNullOrEmpty(responseContent))");
+                        output.Indent++;
+                        output.WriteLine($"return null;");
+                        output.Indent--;
+                        output.WriteLine();
+                        output.WriteLine($"return JsonSerializer.Deserialize<{innerType}>(responseContent);");
+                    }
                 }
                 else
                 {
-                    output.Indent--;
+                    // This case should not happen, but handle it gracefully
+                    output.WriteLine("// Unexpected return type format");
                 }
             }
         }
