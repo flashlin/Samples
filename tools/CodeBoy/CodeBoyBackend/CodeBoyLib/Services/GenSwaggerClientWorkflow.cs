@@ -110,6 +110,7 @@ namespace CodeBoyLib.Services
         private readonly SwaggerClientCodeGenerator _codeGenerator;
         private readonly SwaggerClientCsprojCodeGenerator _csprojGenerator;
         private readonly CsprojService _csprojService;
+        private readonly NupkgFileGenerator _nupkgGenerator;
 
         /// <summary>
         /// Initializes a new instance of GenSwaggerClientWorkflow
@@ -119,16 +120,16 @@ namespace CodeBoyLib.Services
             _codeGenerator = new SwaggerClientCodeGenerator();
             _csprojGenerator = new SwaggerClientCsprojCodeGenerator();
             _csprojService = new CsprojService();
+            _nupkgGenerator = new NupkgFileGenerator();
         }
 
         /// <summary>
-        /// Generates and builds a complete Swagger client project
+        /// Generates and builds a complete Swagger client project for multiple target frameworks
         /// </summary>
         /// <param name="sdkName">Name of the SDK to generate</param>
         /// <param name="apiInfo">Swagger API information</param>
-        /// <param name="config">Generation configuration</param>
         /// <returns>Generation and build result</returns>
-        public async Task<GenSwaggerClientResult> Build(string sdkName, SwaggerApiInfo apiInfo, GenSwaggerClientConfig? config = null)
+        public async Task<GenSwaggerClientResult> Build(string sdkName, SwaggerApiInfo apiInfo)
         {
             var result = new GenSwaggerClientResult
             {
@@ -136,16 +137,103 @@ namespace CodeBoyLib.Services
             };
 
             var startTime = DateTime.Now;
-            config ??= new GenSwaggerClientConfig();
+            var targetFrameworks = new[] { "net8.0", "net9.0" };
+            var outputPathList = new List<string>();
 
             try
             {
-                // Execute the workflow steps
-                CreateTempDirectoryStep(result, config);
-                await GenerateClientCodeStep(result, sdkName, apiInfo);
-                GenerateCsprojStep(result, sdkName, config);
-                await BuildProjectStep(result, config);
-                FinalizeResult(result, config, startTime);
+                result.ProcessLog.Add($"🚀 Starting multi-target build for frameworks: {string.Join(", ", targetFrameworks)}");
+
+                // Build for each target framework
+                foreach (var framework in targetFrameworks)
+                {
+                    result.ProcessLog.Add($"🔄 Building for {framework}...");
+
+                    // Create framework-specific config with different TempBaseDirectory
+                    var config = new GenSwaggerClientConfig
+                    {
+                        DotnetVersion = framework,
+                        SdkVersion = "1.0.0",
+                        BuildConfiguration = "Release",
+                        KeepTempDirectory = true,
+                        TempBaseDirectory = Path.Combine(Path.GetTempPath(), framework),
+                        BuildAssembly = true
+                    };
+
+                    // Create a temporary result object for this framework
+                    var frameworkResult = new GenSwaggerClientResult
+                    {
+                        SdkName = sdkName
+                    };
+
+                    try
+                    {
+                        // Execute workflow steps for this framework
+                        CreateTempDirectoryStep(frameworkResult, config);
+                        await GenerateClientCodeStep(frameworkResult, sdkName, apiInfo);
+                        GenerateCsprojStep(frameworkResult, sdkName, config);
+                        await BuildProjectStep(frameworkResult, config);
+
+                        // If successful, add to output path list and copy logs
+                        var frameworkSuccess = config.BuildAssembly ? 
+                            (frameworkResult.BuildResult?.Success ?? false) : 
+                            File.Exists(frameworkResult.ClientCodePath) && File.Exists(frameworkResult.CsprojPath);
+
+                        if (frameworkSuccess)
+                        {
+                            outputPathList.Add(frameworkResult.TempDirectory);
+                            result.ProcessLog.Add($"✅ {framework} build successful");
+                            
+                            // For the first successful framework, copy paths to main result
+                            if (string.IsNullOrEmpty(result.TempDirectory))
+                            {
+                                result.TempDirectory = frameworkResult.TempDirectory;
+                                result.ClientCodePath = frameworkResult.ClientCodePath;
+                                result.CsprojPath = frameworkResult.CsprojPath;
+                                result.AssemblyPath = frameworkResult.AssemblyPath;
+                                result.GeneratedCode = frameworkResult.GeneratedCode;
+                                result.BuildResult = frameworkResult.BuildResult;
+                            }
+                        }
+                        else
+                        {
+                            result.ProcessLog.Add($"❌ {framework} build failed");
+                            result.Errors.AddRange(frameworkResult.Errors);
+                        }
+
+                        // Add framework-specific logs to main result
+                        result.ProcessLog.AddRange(frameworkResult.ProcessLog);
+                    }
+                    catch (Exception ex)
+                    {
+                        result.ProcessLog.Add($"❌ {framework} build failed with exception: {ex.Message}");
+                        result.Errors.Add($"{framework} build exception: {ex.Message}");
+                    }
+                }
+
+                // Generate NuGet package if any frameworks were successful
+                if (outputPathList.Count > 0)
+                {
+                    result.ProcessLog.Add("🔄 Generating NuGet package...");
+                    var nupkgFile = Path.Combine(Path.GetTempPath(), $"{sdkName}.{DateTime.Now:yyyyMMdd_HHmmss}.nupkg");
+                    
+                    var nupkgSuccess = _nupkgGenerator.Generate(nupkgFile, outputPathList);
+                    if (nupkgSuccess)
+                    {
+                        result.ProcessLog.Add($"✅ NuGet package created: {nupkgFile}");
+                    }
+                    else
+                    {
+                        result.ProcessLog.Add("❌ Failed to create NuGet package");
+                        result.Errors.Add("NuGet package generation failed");
+                    }
+                }
+
+                // Determine overall success
+                result.Success = outputPathList.Count > 0;
+                result.TotalDuration = DateTime.Now - startTime;
+                result.ProcessLog.Add($"🏁 Multi-target build completed in {result.TotalDuration.TotalSeconds:F2} seconds");
+                result.ProcessLog.Add($"📊 Successful frameworks: {outputPathList.Count}/{targetFrameworks.Length}");
 
                 return result;
             }
@@ -160,18 +248,18 @@ namespace CodeBoyLib.Services
         }
 
         /// <summary>
-        /// Generates client code and project files without building
+        /// Generates client code and project files without building (legacy method)
         /// </summary>
         /// <param name="sdkName">Name of the SDK to generate</param>
         /// <param name="apiInfo">Swagger API information</param>
-        /// <param name="config">Generation configuration</param>
+        /// <param name="config">Generation configuration (ignored in multi-target build)</param>
         /// <returns>Generation result</returns>
         public async Task<GenSwaggerClientResult> GenerateOnly(string sdkName, SwaggerApiInfo apiInfo, GenSwaggerClientConfig? config = null)
         {
-            config ??= new GenSwaggerClientConfig();
-            config.BuildAssembly = false;
-            
-            return await Build(sdkName, apiInfo, config);
+            // Note: config parameter is ignored in the new multi-target implementation
+            // This method now performs a full multi-target build since individual framework generation
+            // is handled internally
+            return await Build(sdkName, apiInfo);
         }
 
         /// <summary>
