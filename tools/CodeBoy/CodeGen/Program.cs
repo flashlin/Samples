@@ -41,7 +41,7 @@ namespace MakeSwaggerSDK
 
                 // Parse Swagger UI
                 var parser = new SwaggerUiParser();
-                var apiInfo = await parser.Parse(options.SwaggerUrl);
+                var apiInfo = await parser.ParseFromJsonUrlAsync(options.SwaggerUrl);
 
                 if (apiInfo == null || apiInfo.Endpoints.Count == 0)
                 {
@@ -84,7 +84,7 @@ namespace MakeSwaggerSDK
                     // Copy the generated client code to the requested output location if specified
                     if (!string.IsNullOrEmpty(options.OutputFileName))
                     {
-                        await File.CopyAsync(result.ClientCodePath, options.OutputFileName, true);
+                        File.Copy(result.ClientCodePath, options.OutputFileName, true);
                         Console.WriteLine($"📋 Also copied client code to: {options.OutputFileName}");
                     }
 
