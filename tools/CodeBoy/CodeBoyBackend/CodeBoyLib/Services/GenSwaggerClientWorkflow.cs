@@ -105,7 +105,7 @@ namespace CodeBoyLib.Services
     /// <summary>
     /// Factory service for generating complete Swagger client projects
     /// </summary>
-    public class GenSwaggerClientFactory
+    public class GenSwaggerClientWorkflow
     {
         private readonly SwaggerClientCodeGenerator _codeGenerator;
         private readonly SwaggerClientCsprojCodeGenerator _csprojGenerator;
@@ -114,7 +114,7 @@ namespace CodeBoyLib.Services
         /// <summary>
         /// Initializes a new instance of GenSwaggerClientFactory
         /// </summary>
-        public GenSwaggerClientFactory()
+        public GenSwaggerClientWorkflow()
         {
             _codeGenerator = new SwaggerClientCodeGenerator();
             _csprojGenerator = new SwaggerClientCsprojCodeGenerator();
