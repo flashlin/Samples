@@ -54,13 +54,9 @@ namespace CodeBoyLib.Services
                 var v2Result = TryDeserializeSwaggerV2(jsonContent);
                 if (v2Result.IsSuccess) return v2Result;
 
-                // 如果 v2 失敗，嘗試 v3
-                var v3Result = TryDeserializeOpenApiV3(jsonContent);
-                if (v3Result.IsSuccess) return v3Result;
-
                 return new DeserializationResult
                 {
-                    ErrorMessage = $"Failed to parse as Swagger 2.0: {v2Result.ErrorMessage}. Also failed as OpenAPI 3.0: {v3Result.ErrorMessage}"
+                    ErrorMessage = $"Failed to parse as Swagger 2.0: {v2Result.ErrorMessage}."
                 };
             }
             else if (detectedVersion == SwaggerVersion.OpenApi3)
@@ -68,13 +64,9 @@ namespace CodeBoyLib.Services
                 var v3Result = TryDeserializeOpenApiV3(jsonContent);
                 if (v3Result.IsSuccess) return v3Result;
 
-                // 如果 v3 失敗，嘗試 v2
-                var v2Result = TryDeserializeSwaggerV2(jsonContent);
-                if (v2Result.IsSuccess) return v2Result;
-
                 return new DeserializationResult
                 {
-                    ErrorMessage = $"Failed to parse as OpenAPI 3.0: {v3Result.ErrorMessage}. Also failed as Swagger 2.0: {v2Result.ErrorMessage}"
+                    ErrorMessage = $"Failed to parse as OpenAPI 3.0: {v3Result.ErrorMessage}."
                 };
             }
             else
