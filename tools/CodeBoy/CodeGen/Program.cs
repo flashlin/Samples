@@ -3,6 +3,7 @@ using CodeBoyLib.Models;
 using CodeBoyLib.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace MakeSwaggerSDK
@@ -18,6 +19,9 @@ namespace MakeSwaggerSDK
 
         [Option('n', "name", Required = false, HelpText = "SDK class name")]
         public string SdkName { get; set; } = "ApiClient";
+
+        [Option('p', "output-path", Required = true, HelpText = "Base output path for all build operations")]
+        public string OutputPath { get; set; } = string.Empty;
     }
 
     class Program
@@ -38,6 +42,10 @@ namespace MakeSwaggerSDK
             {
                 Console.WriteLine($"Parsing Swagger from: {options.SwaggerUrl}");
                 Console.WriteLine($"SDK Name: {options.SdkName}");
+                if (!string.IsNullOrEmpty(options.OutputPath))
+                {
+                    Console.WriteLine($"Output Path: {options.OutputPath}");
+                }
 
                 // Parse Swagger UI
                 var parser = new SwaggerUiParser();
@@ -51,19 +59,16 @@ namespace MakeSwaggerSDK
 
                 Console.WriteLine($"✅ Successfully parsed {apiInfo.Endpoints.Count} endpoints and {apiInfo.ClassDefinitions.Count} model classes.");
 
-                // Determine the Generated directory path (relative to run.sh location)
-                var currentDirectory = Directory.GetCurrentDirectory();
-                var projectRoot = Path.GetDirectoryName(currentDirectory); // Go up from CodeGen to project root
-                var generatedDirectory = Path.Combine(projectRoot ?? currentDirectory, "Generated");
+                // Use the specified output path directly
+                var outputPath = options.OutputPath;
+                Console.WriteLine($"📁 Using output path: {outputPath}");
                 
-                // Ensure Generated directory exists
-                Directory.CreateDirectory(generatedDirectory);
-                
-                Console.WriteLine($"📁 Using Generated directory: {generatedDirectory}");
+                // Ensure output directory exists
+                Directory.CreateDirectory(outputPath);
 
                 // Generate and build complete SDK project
                 var factory = new GenSwaggerClientWorkflow();
-                var result = await factory.Build(options.SdkName, apiInfo);
+                var result = await factory.Build(options.SdkName, apiInfo, outputPath);
 
                 // Print detailed summary
                 factory.PrintSummary(result);
