@@ -89,7 +89,7 @@ namespace CodeBoyLib.Services
         /// <summary>
         /// Whether to keep the temporary directory after completion
         /// </summary>
-        public bool KeepTempDirectory { get; set; } = false;
+        public bool KeepTempDirectory { get; set; } = true;
 
         /// <summary>
         /// Base directory for temporary folders (defaults to system temp)
