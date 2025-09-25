@@ -128,8 +128,9 @@ namespace CodeBoyLib.Services
         /// </summary>
         /// <param name="sdkName">Name of the SDK to generate</param>
         /// <param name="apiInfo">Swagger API information</param>
+        /// <param name="outputPath">Base output path for all build operations</param>
         /// <returns>Generation and build result</returns>
-        public async Task<GenSwaggerClientResult> Build(string sdkName, SwaggerApiInfo apiInfo)
+        public async Task<GenSwaggerClientResult> Build(string sdkName, SwaggerApiInfo apiInfo, string outputPath)
         {
             var result = new GenSwaggerClientResult
             {
@@ -143,12 +144,16 @@ namespace CodeBoyLib.Services
             try
             {
                 result.ProcessLog.Add($"🚀 Starting multi-target build for frameworks: {string.Join(", ", targetFrameworks)}");
+                result.ProcessLog.Add($"📁 Using output path: {outputPath}");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(outputPath);
 
                 // Build for each target framework
-                await BuildAllFrameworks(sdkName, apiInfo, targetFrameworks, result, outputPathList);
+                await BuildAllFrameworks(sdkName, apiInfo, targetFrameworks, result, outputPathList, outputPath);
 
                 // Generate NuGet package if any frameworks were successful
-                await GenerateNuGetPackage(sdkName, outputPathList, result);
+                await GenerateNuGetPackage(sdkName, outputPathList, result, outputPath);
 
                 // Finalize the multi-target build result
                 FinalizeMultiTargetResult(result, outputPathList, targetFrameworks, startTime);
@@ -177,7 +182,8 @@ namespace CodeBoyLib.Services
             // Note: config parameter is ignored in the new multi-target implementation
             // This method now performs a full multi-target build since individual framework generation
             // is handled internally
-            return await Build(sdkName, apiInfo);
+            var defaultOutputPath = Path.Combine(Path.GetTempPath(), "CodeBoyGenerate");
+            return await Build(sdkName, apiInfo, defaultOutputPath);
         }
 
         /// <summary>
@@ -188,14 +194,15 @@ namespace CodeBoyLib.Services
         /// <param name="targetFrameworks">Array of target frameworks to build</param>
         /// <param name="result">Main result object to update</param>
         /// <param name="outputPathList">List to collect successful output paths</param>
+        /// <param name="outputPath">Base output path for all build operations</param>
         private async Task BuildAllFrameworks(string sdkName, SwaggerApiInfo apiInfo, string[] targetFrameworks, 
-            GenSwaggerClientResult result, List<string> outputPathList)
+            GenSwaggerClientResult result, List<string> outputPathList, string outputPath)
         {
             foreach (var framework in targetFrameworks)
             {
                 result.ProcessLog.Add($"🔄 Building for {framework}...");
                 
-                var frameworkSuccess = await BuildSingleFramework(sdkName, apiInfo, framework, result, outputPathList);
+                var frameworkSuccess = await BuildSingleFramework(sdkName, apiInfo, framework, result, outputPathList, outputPath);
                 
                 result.ProcessLog.Add($"{(frameworkSuccess ? "✅" : "❌")} {framework} build {(frameworkSuccess ? "successful" : "failed")}");
             }
@@ -209,14 +216,15 @@ namespace CodeBoyLib.Services
         /// <param name="framework">Target framework (e.g., "net8.0")</param>
         /// <param name="result">Main result object to update</param>
         /// <param name="outputPathList">List to collect successful output paths</param>
+        /// <param name="outputPath">Base output path for build operations</param>
         /// <returns>True if successful, false otherwise</returns>
         private async Task<bool> BuildSingleFramework(string sdkName, SwaggerApiInfo apiInfo, string framework, 
-            GenSwaggerClientResult result, List<string> outputPathList)
+            GenSwaggerClientResult result, List<string> outputPathList, string outputPath)
         {
             try
             {
-                // Create framework-specific config with different TempBaseDirectory
-                var config = CreateFrameworkConfig(framework);
+                // Create framework-specific config with outputPath-based TempBaseDirectory
+                var config = CreateFrameworkConfig(framework, outputPath);
 
                 // Create a temporary result object for this framework
                 var frameworkResult = new GenSwaggerClientResult
@@ -267,8 +275,9 @@ namespace CodeBoyLib.Services
         /// Creates a framework-specific configuration
         /// </summary>
         /// <param name="framework">Target framework</param>
+        /// <param name="outputPath">Base output path for build operations</param>
         /// <returns>Configuration for the framework</returns>
-        private GenSwaggerClientConfig CreateFrameworkConfig(string framework)
+        private GenSwaggerClientConfig CreateFrameworkConfig(string framework, string outputPath)
         {
             return new GenSwaggerClientConfig
             {
@@ -276,7 +285,7 @@ namespace CodeBoyLib.Services
                 SdkVersion = "1.0.0",
                 BuildConfiguration = "Release",
                 KeepTempDirectory = true,
-                TempBaseDirectory = Path.Combine(Path.GetTempPath(), framework),
+                TempBaseDirectory = Path.Combine(outputPath, framework),
                 BuildAssembly = true
             };
         }
@@ -302,12 +311,13 @@ namespace CodeBoyLib.Services
         /// <param name="sdkName">Name of the SDK</param>
         /// <param name="outputPathList">List of successful output paths</param>
         /// <param name="result">Result object to update</param>
-        private async Task GenerateNuGetPackage(string sdkName, List<string> outputPathList, GenSwaggerClientResult result)
+        /// <param name="outputPath">Base output path for package creation</param>
+        private async Task GenerateNuGetPackage(string sdkName, List<string> outputPathList, GenSwaggerClientResult result, string outputPath)
         {
             if (outputPathList.Count > 0)
             {
                 result.ProcessLog.Add("🔄 Generating NuGet package...");
-                var nupkgFile = Path.Combine(Path.GetTempPath(), $"{sdkName}.{DateTime.Now:yyyyMMdd_HHmmss}.nupkg");
+                var nupkgFile = Path.Combine(outputPath, $"{sdkName}.{DateTime.Now:yyyyMMdd_HHmmss}.nupkg");
                 
                 var nupkgSuccess = _nupkgGenerator.Generate(nupkgFile, outputPathList);
                 if (nupkgSuccess)
