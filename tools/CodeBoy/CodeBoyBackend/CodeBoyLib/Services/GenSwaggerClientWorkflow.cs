@@ -130,7 +130,7 @@ namespace CodeBoyLib.Services
         /// <param name="apiInfo">Swagger API information</param>
         /// <param name="outputPath">Base output path for all build operations</param>
         /// <returns>Generation and build result</returns>
-        public async Task<GenSwaggerClientResult> Build(string sdkName, SwaggerApiInfo apiInfo, string outputPath)
+        public async Task<GenSwaggerClientResult> Build(string sdkName, SwaggerApiInfo apiInfo, string outputPath, string packageName)
         {
             var result = new GenSwaggerClientResult
             {
@@ -154,7 +154,7 @@ namespace CodeBoyLib.Services
                 await BuildAllFrameworks(sdkName, apiInfo, targetFrameworks, result, outputPathList, outputPath, sdkVersion);
 
                 // Generate NuGet package if any frameworks were successful
-                await GenerateNuGetPackage(sdkName, outputPathList, result, outputPath, sdkVersion);
+                await GenerateNuGetPackage(packageName, outputPathList, result, outputPath, sdkVersion);
 
                 // Finalize the multi-target build result
                 FinalizeMultiTargetResult(result, outputPathList, targetFrameworks, startTime);
@@ -169,22 +169,6 @@ namespace CodeBoyLib.Services
                 result.TotalDuration = DateTime.Now - startTime;
                 return result;
             }
-        }
-
-        /// <summary>
-        /// Generates client code and project files without building (legacy method)
-        /// </summary>
-        /// <param name="sdkName">Name of the SDK to generate</param>
-        /// <param name="apiInfo">Swagger API information</param>
-        /// <param name="config">Generation configuration (ignored in multi-target build)</param>
-        /// <returns>Generation result</returns>
-        public async Task<GenSwaggerClientResult> GenerateOnly(string sdkName, SwaggerApiInfo apiInfo, GenSwaggerClientConfig? config = null)
-        {
-            // Note: config parameter is ignored in the new multi-target implementation
-            // This method now performs a full multi-target build since individual framework generation
-            // is handled internally
-            var defaultOutputPath = Path.Combine(Path.GetTempPath(), "CodeBoyGenerate");
-            return await Build(sdkName, apiInfo, defaultOutputPath);
         }
 
         /// <summary>
@@ -309,12 +293,12 @@ namespace CodeBoyLib.Services
             mainResult.BuildResult = frameworkResult.BuildResult;
         }
 
-        private async Task GenerateNuGetPackage(string sdkName, List<string> outputPathList, GenSwaggerClientResult result, string outputPath, string sdkVersion)
+        private async Task GenerateNuGetPackage(string packageName, List<string> outputPathList, GenSwaggerClientResult result, string outputPath, string sdkVersion)
         {
             if (outputPathList.Count > 0)
             {
                 result.ProcessLog.Add("🔄 Generating NuGet package...");
-                var nupkgFile = Path.Combine(outputPath, $"{sdkName}.{sdkVersion}.nupkg");
+                var nupkgFile = Path.Combine(outputPath, $"{packageName}.{sdkVersion}.nupkg");
                 
                 var nupkgSuccess = _nupkgGenerator.Generate(nupkgFile, outputPathList, sdkVersion);
                 if (nupkgSuccess)

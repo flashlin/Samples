@@ -53,6 +53,7 @@ echo ""
 
 # Execute the tool with user inputs
 echo "🔍 Generating SDK from Swagger..."
+rm -rf "../Generated"
 mkdir -p "../Generated"
 dotnet run -- "$swagger_url" -n "$sdk_name" -p "../Generated"
 
