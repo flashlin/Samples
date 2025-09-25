@@ -1,9 +1,10 @@
 using CodeBoyLib.Models;
 using CodeBoyLib.Models.SwaggerV2;
 using CodeBoyLib.Models.OpenApiV3;
-using Newtonsoft.Json;
 using System;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CodeBoyLib.Services
 {
@@ -140,14 +141,13 @@ namespace CodeBoyLib.Services
         {
             try
             {
-                var settings = new JsonSerializerSettings
+                var options = new JsonSerializerOptions
                 {
-                    MissingMemberHandling = MissingMemberHandling.Ignore,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    DateParseHandling = DateParseHandling.None
+                    PropertyNameCaseInsensitive = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 };
 
-                var document = JsonConvert.DeserializeObject<SwaggerDocument>(jsonContent, settings);
+                var document = JsonSerializer.Deserialize<SwaggerDocument>(jsonContent, options);
                 
                 if (document == null)
                 {
@@ -205,14 +205,13 @@ namespace CodeBoyLib.Services
         {
             try
             {
-                var settings = new JsonSerializerSettings
+                var options = new JsonSerializerOptions
                 {
-                    MissingMemberHandling = MissingMemberHandling.Ignore,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    DateParseHandling = DateParseHandling.None
+                    PropertyNameCaseInsensitive = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 };
 
-                var document = JsonConvert.DeserializeObject<OpenApiDocument>(jsonContent, settings);
+                var document = JsonSerializer.Deserialize<OpenApiDocument>(jsonContent, options);
                 
                 if (document == null)
                 {
