@@ -16,13 +16,15 @@ namespace CodeBoyLib.Services
     {
         private readonly HttpClient _httpClient;
         private readonly SwaggerDocumentDeserializer _deserializer;
-        private readonly SwaggerModelConverter _converter;
+        private readonly SwaggerV2ModelConverter _v2Converter;
+        private readonly SwaggerV3ModelConverter _v3Converter;
 
         public SwaggerUiParserNew(HttpClient? httpClient = null)
         {
             _httpClient = httpClient ?? new HttpClient();
             _deserializer = new SwaggerDocumentDeserializer();
-            _converter = new SwaggerModelConverter();
+            _v2Converter = new SwaggerV2ModelConverter();
+            _v3Converter = new SwaggerV3ModelConverter();
         }
 
         /// <summary>
@@ -83,14 +85,14 @@ namespace CodeBoyLib.Services
                 if (deserializationResult.Version == SwaggerDocumentDeserializer.SwaggerVersion.Swagger2 && 
                     deserializationResult.SwaggerV2Document != null)
                 {
-                    Console.WriteLine("🔄 Converting Swagger 2.0 document to ApiInfo...");
-                    apiInfo = _converter.ConvertSwaggerV2ToApiInfo(deserializationResult.SwaggerV2Document);
+                    Console.WriteLine("🔄 Converting Swagger 2.0 document to ApiInfo using V2 converter...");
+                    apiInfo = _v2Converter.Convert(deserializationResult.SwaggerV2Document);
                 }
                 else if (deserializationResult.Version == SwaggerDocumentDeserializer.SwaggerVersion.OpenApi3 && 
                          deserializationResult.OpenApiV3Document != null)
                 {
-                    Console.WriteLine("🔄 Converting OpenAPI 3.0 document to ApiInfo...");
-                    apiInfo = _converter.ConvertOpenApiV3ToApiInfo(deserializationResult.OpenApiV3Document);
+                    Console.WriteLine("🔄 Converting OpenAPI 3.0 document to ApiInfo using V3 converter...");
+                    apiInfo = _v3Converter.Convert(deserializationResult.OpenApiV3Document);
                 }
                 else
                 {
