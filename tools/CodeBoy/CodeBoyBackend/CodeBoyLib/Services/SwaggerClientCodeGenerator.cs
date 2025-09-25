@@ -358,7 +358,7 @@ namespace CodeBoyLib.Services
             foreach (var param in pathParams)
             {
                 methodParams.Add($"{param.Type} {param.Name}");
-                output.WriteLine($"        /// <param name=\"{param.Name}\">{param.Description}</param>");
+                output.WriteLine($"/// <param name=\"{param.Name}\">{param.Description}</param>");
             }
 
             // Add body parameter if exists
@@ -366,7 +366,7 @@ namespace CodeBoyLib.Services
             {
                 var bodyParam = bodyParams.First();
                 methodParams.Add($"{bodyParam.Type} {bodyParam.Name}");
-                output.WriteLine($"        /// <param name=\"{bodyParam.Name}\">{bodyParam.Description}</param>");
+                output.WriteLine($"/// <param name=\"{bodyParam.Name}\">{bodyParam.Description}</param>");
             }
 
             // Add query parameters as optional
@@ -375,7 +375,7 @@ namespace CodeBoyLib.Services
                 var paramType = param.IsRequired ? param.Type : $"{param.Type}?";
                 var defaultValue = param.IsRequired ? "" : " = null";
                 methodParams.Add($"{paramType} {param.Name}{defaultValue}");
-                output.WriteLine($"        /// <param name=\"{param.Name}\">{param.Description}</param>");
+                output.WriteLine($"/// <param name=\"{param.Name}\">{param.Description}</param>");
             }
 
             // Add header parameters as optional
@@ -384,16 +384,17 @@ namespace CodeBoyLib.Services
                 var paramType = param.IsRequired ? param.Type : $"{param.Type}?";
                 var defaultValue = param.IsRequired ? "" : " = null";
                 methodParams.Add($"{paramType} {param.Name}{defaultValue}");
-                output.WriteLine($"        /// <param name=\"{param.Name}\">{param.Description}</param>");
+                output.WriteLine($"/// <param name=\"{param.Name}\">{param.Description}</param>");
             }
 
-            output.WriteLine($"        /// <returns>{returnType}</returns>");
-            output.WriteLine($"        public async {returnType} {methodName}({string.Join(", ", methodParams)})");
-            output.WriteLine("        {");
+            output.WriteLine($"/// <returns>{returnType}</returns>");
+            output.WriteLine($"public async {returnType} {methodName}({string.Join(", ", methodParams)})");
+            output.WriteLine("{");
+            output.Indent++;
 
             // Build URL
             var urlBuilder = new StringBuilder();
-            urlBuilder.Append($"            var url = $\"{endpoint.Path}\"");
+            urlBuilder.Append($"var url = $\"{endpoint.Path}\"");
             
             // Replace path parameters
             foreach (var param in pathParams)
@@ -406,21 +407,25 @@ namespace CodeBoyLib.Services
             // Add query parameters
             if (queryParams.Any())
             {
-                output.WriteLine("            var queryParams = new List<string>();");
+                output.WriteLine("var queryParams = new List<string>();");
                 foreach (var param in queryParams)
                 {
                     if (param.IsRequired)
                     {
-                        output.WriteLine($"            queryParams.Add($\"{param.Name}={{Uri.EscapeDataString({param.Name}.ToString())}}\");");
+                        output.WriteLine($"queryParams.Add($\"{param.Name}={{Uri.EscapeDataString({param.Name}.ToString())}}\");");
                     }
                     else
                     {
-                        output.WriteLine($"            if ({param.Name} != null)");
-                        output.WriteLine($"                queryParams.Add($\"{param.Name}={{Uri.EscapeDataString({param.Name}.ToString())}}\");");
+                        output.WriteLine($"if ({param.Name} != null)");
+                        output.Indent++;
+                        output.WriteLine($"queryParams.Add($\"{param.Name}={{Uri.EscapeDataString({param.Name}.ToString())}}\");");
+                        output.Indent--;
                     }
                 }
-                output.WriteLine("            if (queryParams.Any())");
-                output.WriteLine("                url += \"?\" + string.Join(\"&\", queryParams);");
+                output.WriteLine("if (queryParams.Any())");
+                output.Indent++;
+                output.WriteLine("url += \"?\" + string.Join(\"&\", queryParams);");
+                output.Indent--;
                 output.WriteLine();
             }
 
@@ -436,19 +441,21 @@ namespace CodeBoyLib.Services
                 "OPTIONS" => "HttpMethod.Options",
                 _ => $"new HttpMethod(\"{endpoint.HttpMethod.ToUpper()}\")"
             };
-            output.WriteLine($"            var request = new HttpRequestMessage({httpMethod}, _config.BaseUrl + url);");
+            output.WriteLine($"var request = new HttpRequestMessage({httpMethod}, _config.BaseUrl + url);");
 
             // Add headers
             foreach (var param in headerParams)
             {
                 if (param.IsRequired)
                 {
-                    output.WriteLine($"            request.Headers.Add(\"{param.Name}\", {param.Name}.ToString());");
+                    output.WriteLine($"request.Headers.Add(\"{param.Name}\", {param.Name}.ToString());");
                 }
                 else
                 {
-                    output.WriteLine($"            if ({param.Name} != null)");
-                    output.WriteLine($"                request.Headers.Add(\"{param.Name}\", {param.Name}.ToString());");
+                    output.WriteLine($"if ({param.Name} != null)");
+                    output.Indent++;
+                    output.WriteLine($"request.Headers.Add(\"{param.Name}\", {param.Name}.ToString());");
+                    output.Indent--;
                 }
             }
 
@@ -456,52 +463,62 @@ namespace CodeBoyLib.Services
             if (bodyParams.Any() && (endpoint.HttpMethod.ToUpper() == "POST" || endpoint.HttpMethod.ToUpper() == "PUT" || endpoint.HttpMethod.ToUpper() == "PATCH"))
             {
                 var bodyParam = bodyParams.First();
-                output.WriteLine($"            if ({bodyParam.Name} != null)");
-                output.WriteLine("            {");
-                output.WriteLine($"                var jsonContent = JsonSerializer.Serialize({bodyParam.Name});");
-                output.WriteLine("                request.Content = new StringContent(jsonContent, Encoding.UTF8, \"application/json\");");
-                output.WriteLine("            }");
+                output.WriteLine($"if ({bodyParam.Name} != null)");
+                output.WriteLine("{");
+                output.Indent++;
+                output.WriteLine($"var jsonContent = JsonSerializer.Serialize({bodyParam.Name});");
+                output.WriteLine("request.Content = new StringContent(jsonContent, Encoding.UTF8, \"application/json\");");
+                output.Indent--;
+                output.WriteLine("}");
             }
 
             output.WriteLine();
-            output.WriteLine("            var response = await _httpClient.SendAsync(request);");
-            output.WriteLine("            response.EnsureSuccessStatusCode();");
+            output.WriteLine("var response = await _httpClient.SendAsync(request);");
+            output.WriteLine("response.EnsureSuccessStatusCode();");
             output.WriteLine();
 
             // Handle response
             if (returnType == "Task")
             {
-                output.WriteLine("            // No return value expected");
+                output.WriteLine("// No return value expected");
             }
             else if (returnType == "Task<string>")
             {
-                output.WriteLine("            return await response.Content.ReadAsStringAsync();");
+                output.WriteLine("return await response.Content.ReadAsStringAsync();");
             }
             else
             {
-                output.WriteLine("            var responseContent = await response.Content.ReadAsStringAsync();");
+                output.WriteLine("var responseContent = await response.Content.ReadAsStringAsync();");
                 output.WriteLine();
-                output.WriteLine("            if (string.IsNullOrEmpty(responseContent))");
+                output.WriteLine("if (string.IsNullOrEmpty(responseContent))");
+                output.Indent++;
                 
                 if (returnType.StartsWith("Task<List<"))
                 {
                     var innerType = returnType.Substring(5, returnType.Length - 6); // Remove "Task<" and ">"
-                    output.WriteLine($"                return null;");
+                    output.WriteLine($"return null;");
+                    output.Indent--;
                     output.WriteLine();
-                    output.WriteLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
+                    output.WriteLine($"return JsonSerializer.Deserialize<{innerType}>(responseContent);");
                 }
                 else if (returnType.StartsWith("Task<"))
                 {
                     var innerType = returnType.Substring(5, returnType.Length - 6); // Remove "Task<" and ">"
                     
                     // Since all return types are now nullable, we can directly return the deserialized result
-                    output.WriteLine($"                return null;");
+                    output.WriteLine($"return null;");
+                    output.Indent--;
                     output.WriteLine();
-                    output.WriteLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
+                    output.WriteLine($"return JsonSerializer.Deserialize<{innerType}>(responseContent);");
+                }
+                else
+                {
+                    output.Indent--;
                 }
             }
 
-            output.WriteLine("        }");
+            output.Indent--;
+            output.WriteLine("}");
             output.WriteLine();
         }
 
