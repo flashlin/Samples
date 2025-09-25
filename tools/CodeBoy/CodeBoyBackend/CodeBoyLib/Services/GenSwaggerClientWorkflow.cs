@@ -130,7 +130,7 @@ namespace CodeBoyLib.Services
         /// <param name="apiInfo">Swagger API information</param>
         /// <param name="outputPath">Base output path for all build operations</param>
         /// <returns>Generation and build result</returns>
-        public async Task<GenSwaggerClientResult> Build(string sdkName, SwaggerApiInfo apiInfo, string outputPath, string packageName)
+        public async Task<GenSwaggerClientResult> Build(string sdkName, SwaggerApiInfo apiInfo, string outputPath, string nupkgName)
         {
             var result = new GenSwaggerClientResult
             {
@@ -154,7 +154,7 @@ namespace CodeBoyLib.Services
                 await BuildAllFrameworks(sdkName, apiInfo, targetFrameworks, result, outputPathList, outputPath, sdkVersion);
 
                 // Generate NuGet package if any frameworks were successful
-                await GenerateNuGetPackage(packageName, outputPathList, result, outputPath, sdkVersion);
+                await GenerateNuGetPackage(nupkgName, outputPathList, result, outputPath, sdkVersion);
 
                 // Finalize the multi-target build result
                 FinalizeMultiTargetResult(result, outputPathList, targetFrameworks, startTime);
@@ -293,12 +293,12 @@ namespace CodeBoyLib.Services
             mainResult.BuildResult = frameworkResult.BuildResult;
         }
 
-        private async Task GenerateNuGetPackage(string packageName, List<string> outputPathList, GenSwaggerClientResult result, string outputPath, string sdkVersion)
+        private async Task GenerateNuGetPackage(string nupkgName, List<string> outputPathList, GenSwaggerClientResult result, string outputPath, string sdkVersion)
         {
             if (outputPathList.Count > 0)
             {
                 result.ProcessLog.Add("🔄 Generating NuGet package...");
-                var nupkgFile = Path.Combine(outputPath, $"{packageName}.{sdkVersion}.nupkg");
+                var nupkgFile = Path.Combine(outputPath, $"{nupkgName}.{sdkVersion}.nupkg");
                 
                 var nupkgSuccess = _nupkgGenerator.Generate(nupkgFile, outputPathList, sdkVersion);
                 if (nupkgSuccess)
