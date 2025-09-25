@@ -9,6 +9,32 @@ using System.Xml.Linq;
 namespace CodeBoyLib.Services
 {
     /// <summary>
+    /// Information about a project dependency
+    /// </summary>
+    public class ProjectDependency
+    {
+        /// <summary>
+        /// Package or assembly name
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Version of the dependency (for NuGet packages)
+        /// </summary>
+        public string? Version { get; set; }
+
+        /// <summary>
+        /// Type of dependency (PackageReference, Reference, etc.)
+        /// </summary>
+        public string Type { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Target framework for this dependency (if specific)
+        /// </summary>
+        public string? TargetFramework { get; set; }
+    }
+
+    /// <summary>
     /// Information about a project to be included in the NuGet package
     /// </summary>
     public class ProjectInfo
@@ -32,6 +58,11 @@ namespace CodeBoyLib.Services
         /// Project name
         /// </summary>
         public string ProjectName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Dependencies extracted from the .csproj file
+        /// </summary>
+        public List<ProjectDependency> Dependencies { get; set; } = new List<ProjectDependency>();
     }
 
     /// <summary>
@@ -152,12 +183,15 @@ namespace CodeBoyLib.Services
                     return null;
                 }
 
+                var dependencies = ExtractDependenciesFromCsproj(csprojPath);
+
                 return new ProjectInfo
                 {
                     CsprojPath = csprojPath,
                     TargetFramework = targetFramework,
                     OutputPath = outputPath,
-                    ProjectName = Path.GetFileNameWithoutExtension(csprojPath)
+                    ProjectName = Path.GetFileNameWithoutExtension(csprojPath),
+                    Dependencies = dependencies
                 };
             }
             catch (Exception ex)
@@ -198,6 +232,90 @@ namespace CodeBoyLib.Services
             {
                 Console.WriteLine($"❌ Error reading .csproj file {csprojPath}: {ex.Message}");
                 return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Extracts dependencies from a .csproj file
+        /// </summary>
+        /// <param name="csprojPath">Path to the .csproj file</param>
+        /// <returns>List of project dependencies</returns>
+        private List<ProjectDependency> ExtractDependenciesFromCsproj(string csprojPath)
+        {
+            var dependencies = new List<ProjectDependency>();
+
+            try
+            {
+                var doc = XDocument.Load(csprojPath);
+
+                // Extract PackageReference dependencies
+                var packageReferences = doc.Descendants("PackageReference");
+                foreach (var packageRef in packageReferences)
+                {
+                    var name = packageRef.Attribute("Include")?.Value;
+                    var version = packageRef.Attribute("Version")?.Value;
+                    
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        dependencies.Add(new ProjectDependency
+                        {
+                            Name = name,
+                            Version = version,
+                            Type = "PackageReference"
+                        });
+                    }
+                }
+
+                // Extract Reference dependencies (assembly references)
+                var references = doc.Descendants("Reference");
+                foreach (var reference in references)
+                {
+                    var name = reference.Attribute("Include")?.Value;
+                    
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        // Extract just the assembly name (before comma if version info is present)
+                        var assemblyName = name.Split(',')[0].Trim();
+                        
+                        dependencies.Add(new ProjectDependency
+                        {
+                            Name = assemblyName,
+                            Type = "Reference"
+                        });
+                    }
+                }
+
+                // Extract ProjectReference dependencies
+                var projectReferences = doc.Descendants("ProjectReference");
+                foreach (var projectRef in projectReferences)
+                {
+                    var includePath = projectRef.Attribute("Include")?.Value;
+                    
+                    if (!string.IsNullOrEmpty(includePath))
+                    {
+                        var projectName = Path.GetFileNameWithoutExtension(includePath);
+                        
+                        dependencies.Add(new ProjectDependency
+                        {
+                            Name = projectName,
+                            Type = "ProjectReference"
+                        });
+                    }
+                }
+
+                Console.WriteLine($"📦 Extracted {dependencies.Count} dependencies from {Path.GetFileName(csprojPath)}");
+                foreach (var dep in dependencies)
+                {
+                    var versionInfo = !string.IsNullOrEmpty(dep.Version) ? $" (v{dep.Version})" : "";
+                    Console.WriteLine($"   - {dep.Type}: {dep.Name}{versionInfo}");
+                }
+
+                return dependencies;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error extracting dependencies from {csprojPath}: {ex.Message}");
+                return dependencies;
             }
         }
 
@@ -301,6 +419,64 @@ namespace CodeBoyLib.Services
         }
 
         /// <summary>
+        /// Generates the dependencies section for the .nuspec file
+        /// </summary>
+        /// <param name="projects">List of projects to analyze for dependencies</param>
+        /// <returns>Generated dependencies XML section</returns>
+        private string GenerateDependenciesSection(List<ProjectInfo> projects)
+        {
+            var dependenciesSection = new StringBuilder();
+            
+            // Collect all PackageReference dependencies from all projects
+            var allDependencies = new Dictionary<string, (string? Version, string TargetFramework)>();
+            
+            foreach (var project in projects)
+            {
+                var packageDependencies = project.Dependencies
+                    .Where(d => d.Type == "PackageReference")
+                    .ToList();
+                
+                foreach (var dependency in packageDependencies)
+                {
+                    var key = $"{dependency.Name}_{project.TargetFramework}";
+                    if (!allDependencies.ContainsKey(key))
+                    {
+                        allDependencies[key] = (dependency.Version, project.TargetFramework);
+                    }
+                }
+            }
+            
+            if (allDependencies.Count > 0)
+            {
+                dependenciesSection.AppendLine("    <dependencies>");
+                
+                // Group by target framework
+                var frameworkGroups = allDependencies
+                    .GroupBy(kvp => kvp.Value.TargetFramework)
+                    .OrderBy(g => g.Key);
+                
+                foreach (var frameworkGroup in frameworkGroups)
+                {
+                    dependenciesSection.AppendLine($"      <group targetFramework=\"{frameworkGroup.Key}\">");
+                    
+                    foreach (var dependency in frameworkGroup.OrderBy(d => d.Key))
+                    {
+                        var packageName = dependency.Key.Substring(0, dependency.Key.LastIndexOf('_'));
+                        var version = dependency.Value.Version ?? "1.0.0";
+                        
+                        dependenciesSection.AppendLine($"        <dependency id=\"{packageName}\" version=\"{version}\" />");
+                    }
+                    
+                    dependenciesSection.AppendLine("      </group>");
+                }
+                
+                dependenciesSection.AppendLine("    </dependencies>");
+            }
+            
+            return dependenciesSection.ToString();
+        }
+
+        /// <summary>
         /// Creates the .nuspec manifest file
         /// </summary>
         /// <param name="nuspecPath">Path where to create the .nuspec file</param>
@@ -315,6 +491,7 @@ namespace CodeBoyLib.Services
             var projectNames = string.Join(", ", projects.Select(p => p.ProjectName).Distinct());
 
             var filesSection = GenerateFilesSection(projects);
+            var dependenciesSection = GenerateDependenciesSection(projects);
 
             var nuspecContent = $@"<?xml version=""1.0"" encoding=""utf-8""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
@@ -328,7 +505,7 @@ namespace CodeBoyLib.Services
     <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>api client codegen swagger openapi</tags>
-  </metadata>
+{dependenciesSection}  </metadata>
 {filesSection}</package>";
 
             File.WriteAllText(nuspecPath, nuspecContent);
