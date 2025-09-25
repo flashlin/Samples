@@ -140,81 +140,12 @@ namespace CodeBoyLib.Services
 
             try
             {
-                // Step 1: Create temporary directory
-                result.ProcessLog.Add("🔄 Step 1: Creating temporary directory...");
-                result.TempDirectory = CreateTempDirectory(config.TempBaseDirectory);
-                result.ProcessLog.Add($"📁 Created temp directory: {result.TempDirectory}");
-
-                // Step 2: Generate client code
-                result.ProcessLog.Add("🔄 Step 2: Generating client code...");
-                result.GeneratedCode = _codeGenerator.Generate(sdkName, apiInfo);
-                result.ClientCodePath = Path.Combine(result.TempDirectory, $"{sdkName}Client.cs");
-                
-                await File.WriteAllTextAsync(result.ClientCodePath, result.GeneratedCode);
-                result.ProcessLog.Add($"✅ Generated client code: {result.ClientCodePath}");
-
-                // Step 3: Generate .csproj file
-                result.ProcessLog.Add("🔄 Step 3: Generating .csproj file...");
-                var csprojConfig = new CsprojGenerationConfig
-                {
-                    SdkName = sdkName,
-                    DotnetVersion = config.DotnetVersion,
-                    OutputPath = result.TempDirectory,
-                    SdkVersion = config.SdkVersion
-                };
-
-                _csprojGenerator.Generate(csprojConfig);
-                result.CsprojPath = Path.Combine(result.TempDirectory, $"{sdkName}.csproj");
-                result.ProcessLog.Add($"✅ Generated .csproj: {result.CsprojPath}");
-
-                // Step 4: Build the project (if requested)
-                if (config.BuildAssembly)
-                {
-                    result.ProcessLog.Add("🔄 Step 4: Building project...");
-                    var buildConfig = new BuildConfig
-                    {
-                        Configuration = config.BuildConfiguration,
-                        Verbosity = "minimal"
-                    };
-
-                    result.BuildResult = await _csprojService.Build(result.CsprojPath, buildConfig);
-                    
-                    if (result.BuildResult.Success)
-                    {
-                        result.AssemblyPath = result.BuildResult.AssemblyPath;
-                        result.ProcessLog.Add($"✅ Build successful: {result.AssemblyPath}");
-                        
-                        
-                    }
-                    else
-                    {
-                        result.Errors.AddRange(result.BuildResult.Errors);
-                        result.ProcessLog.Add("❌ Build failed");
-                        foreach (var error in result.BuildResult.Errors)
-                        {
-                            result.ProcessLog.Add($"   {error}");
-                        }
-                    }
-                }
-                else
-                {
-                    result.ProcessLog.Add("⏭️  Step 4: Skipped build (BuildAssembly = false)");
-                }
-
-                // Determine overall success
-                result.Success = config.BuildAssembly ? 
-                    (result.BuildResult?.Success ?? false) : 
-                    File.Exists(result.ClientCodePath) && File.Exists(result.CsprojPath);
-
-                result.TotalDuration = DateTime.Now - startTime;
-                result.ProcessLog.Add($"🏁 Process completed in {result.TotalDuration.TotalSeconds:F2} seconds");
-                
-                // Clean up if requested and successful
-                if (!config.KeepTempDirectory && result.Success)
-                {
-                    result.ProcessLog.Add("🧹 Cleaning up temporary directory...");
-                    Directory.Delete(result.TempDirectory, true);
-                }
+                // Execute the workflow steps
+                CreateTempDirectoryStep(result, config);
+                await GenerateClientCodeStep(result, sdkName, apiInfo);
+                GenerateCsprojStep(result, sdkName, config);
+                await BuildProjectStep(result, config);
+                FinalizeResult(result, config, startTime);
 
                 return result;
             }
@@ -241,6 +172,119 @@ namespace CodeBoyLib.Services
             config.BuildAssembly = false;
             
             return await Build(sdkName, apiInfo, config);
+        }
+
+        /// <summary>
+        /// Step 1: Create temporary directory for the generation process
+        /// </summary>
+        /// <param name="result">Result object to update</param>
+        /// <param name="config">Generation configuration</param>
+        private void CreateTempDirectoryStep(GenSwaggerClientResult result, GenSwaggerClientConfig config)
+        {
+            result.ProcessLog.Add("🔄 Step 1: Creating temporary directory...");
+            result.TempDirectory = CreateTempDirectory(config.TempBaseDirectory);
+            result.ProcessLog.Add($"📁 Created temp directory: {result.TempDirectory}");
+        }
+
+        /// <summary>
+        /// Step 2: Generate client code and save to file
+        /// </summary>
+        /// <param name="result">Result object to update</param>
+        /// <param name="sdkName">Name of the SDK</param>
+        /// <param name="apiInfo">Swagger API information</param>
+        private async Task GenerateClientCodeStep(GenSwaggerClientResult result, string sdkName, SwaggerApiInfo apiInfo)
+        {
+            result.ProcessLog.Add("🔄 Step 2: Generating client code...");
+            result.GeneratedCode = _codeGenerator.Generate(sdkName, apiInfo);
+            result.ClientCodePath = Path.Combine(result.TempDirectory, $"{sdkName}Client.cs");
+            
+            await File.WriteAllTextAsync(result.ClientCodePath, result.GeneratedCode);
+            result.ProcessLog.Add($"✅ Generated client code: {result.ClientCodePath}");
+        }
+
+        /// <summary>
+        /// Step 3: Generate .csproj file
+        /// </summary>
+        /// <param name="result">Result object to update</param>
+        /// <param name="sdkName">Name of the SDK</param>
+        /// <param name="config">Generation configuration</param>
+        private void GenerateCsprojStep(GenSwaggerClientResult result, string sdkName, GenSwaggerClientConfig config)
+        {
+            result.ProcessLog.Add("🔄 Step 3: Generating .csproj file...");
+            var csprojConfig = new CsprojGenerationConfig
+            {
+                SdkName = sdkName,
+                DotnetVersion = config.DotnetVersion,
+                OutputPath = result.TempDirectory,
+                SdkVersion = config.SdkVersion
+            };
+
+            _csprojGenerator.Generate(csprojConfig);
+            result.CsprojPath = Path.Combine(result.TempDirectory, $"{sdkName}.csproj");
+            result.ProcessLog.Add($"✅ Generated .csproj: {result.CsprojPath}");
+        }
+
+        /// <summary>
+        /// Step 4: Build the project (if requested)
+        /// </summary>
+        /// <param name="result">Result object to update</param>
+        /// <param name="config">Generation configuration</param>
+        private async Task BuildProjectStep(GenSwaggerClientResult result, GenSwaggerClientConfig config)
+        {
+            if (config.BuildAssembly)
+            {
+                result.ProcessLog.Add("🔄 Step 4: Building project...");
+                var buildConfig = new BuildConfig
+                {
+                    Configuration = config.BuildConfiguration,
+                    Verbosity = "minimal"
+                };
+
+                result.BuildResult = await _csprojService.Build(result.CsprojPath, buildConfig);
+                
+                if (result.BuildResult.Success)
+                {
+                    result.AssemblyPath = result.BuildResult.AssemblyPath;
+                    result.ProcessLog.Add($"✅ Build successful: {result.AssemblyPath}");
+                }
+                else
+                {
+                    result.Errors.AddRange(result.BuildResult.Errors);
+                    result.ProcessLog.Add("❌ Build failed");
+                    foreach (var error in result.BuildResult.Errors)
+                    {
+                        result.ProcessLog.Add($"   {error}");
+                    }
+                }
+            }
+            else
+            {
+                result.ProcessLog.Add("⏭️  Step 4: Skipped build (BuildAssembly = false)");
+            }
+        }
+
+        /// <summary>
+        /// Finalize the result and perform cleanup
+        /// </summary>
+        /// <param name="result">Result object to finalize</param>
+        /// <param name="config">Generation configuration</param>
+        /// <param name="startTime">Start time of the process</param>
+        private void FinalizeResult(GenSwaggerClientResult result, GenSwaggerClientConfig config, DateTime startTime)
+        {
+            // Determine overall success
+            result.Success = config.BuildAssembly ? 
+                (result.BuildResult?.Success ?? false) : 
+                File.Exists(result.ClientCodePath) && File.Exists(result.CsprojPath);
+
+            result.TotalDuration = DateTime.Now - startTime;
+            result.ProcessLog.Add($"🏁 Process completed in {result.TotalDuration.TotalSeconds:F2} seconds");
+            
+            // Clean up if requested and successful
+            if (!config.KeepTempDirectory && result.Success)
+            {
+                result.ProcessLog.Add("🧹 Cleaning up temporary directory...");
+                Directory.Delete(result.TempDirectory, true);
+            }
         }
 
         /// <summary>
