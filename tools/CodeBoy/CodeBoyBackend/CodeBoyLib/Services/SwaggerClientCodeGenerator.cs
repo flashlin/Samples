@@ -251,6 +251,28 @@ namespace CodeBoyLib.Services
         {
             var className = $"{sdkName}Client";
             
+            // Generate class declaration and fields
+            GenerateClientClassDeclaration(output, sdkName, className);
+            
+            // Generate constructors
+            GeneratePrimaryConstructor(output, sdkName, className);
+            GenerateBackwardCompatibilityConstructor(output, sdkName, className);
+
+            // Generate methods for each endpoint
+            foreach (var endpoint in endpoints)
+            {
+                GenerateEndpointMethod(output, endpoint);
+            }
+
+            // Helper methods
+            GenerateHelperMethods(output);
+
+            output.Indent--;
+            output.WriteLine("}");
+        }
+
+        private void GenerateClientClassDeclaration(IndentStringBuilder output, string sdkName, string className)
+        {
             output.WriteLine($"/// <summary>");
             output.WriteLine($"/// HTTP client for {sdkName} API");
             output.WriteLine($"/// </summary>");
@@ -261,8 +283,10 @@ namespace CodeBoyLib.Services
             output.WriteLine("private readonly HttpClient _httpClient;");
             output.WriteLine($"private readonly {sdkName}ClientConfig _config;");
             output.WriteLine();
+        }
 
-            // Primary constructor with IOptions pattern
+        private void GeneratePrimaryConstructor(IndentStringBuilder output, string sdkName, string className)
+        {
             output.WriteLine($"/// <summary>");
             output.WriteLine($"/// Initializes a new instance of {className}");
             output.WriteLine($"/// </summary>");
@@ -303,8 +327,10 @@ namespace CodeBoyLib.Services
             output.Indent--;
             output.WriteLine("}");
             output.WriteLine();
+        }
 
-            // Alternative constructor with HttpClient directly (for backward compatibility)
+        private void GenerateBackwardCompatibilityConstructor(IndentStringBuilder output, string sdkName, string className)
+        {
             output.WriteLine($"/// <summary>");
             output.WriteLine($"/// Initializes a new instance of {className} (backward compatibility)");
             output.WriteLine($"/// </summary>");
@@ -320,18 +346,6 @@ namespace CodeBoyLib.Services
             output.Indent--;
             output.WriteLine("}");
             output.WriteLine();
-
-            // Generate methods for each endpoint
-            foreach (var endpoint in endpoints)
-            {
-                GenerateEndpointMethod(output, endpoint);
-            }
-
-            // Helper methods
-            GenerateHelperMethods(output);
-
-            output.Indent--;
-            output.WriteLine("}");
         }
 
         private void GenerateEndpointMethod(IndentStringBuilder output, SwaggerEndpoint endpoint)
