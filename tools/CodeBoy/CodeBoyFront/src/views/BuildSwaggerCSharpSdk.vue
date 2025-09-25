@@ -1,13 +1,13 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8 px-4">
+  <div class="min-h-screen bg-gray-900 py-8 px-4">
     <div class="max-w-2xl mx-auto">
-      <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="bg-gray-800 rounded-lg shadow-md p-6">
         <!-- Header -->
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">
+          <h1 class="text-3xl font-bold text-white mb-2">
             Build Swagger C# SDK
           </h1>
-          <p class="text-gray-600">
+          <p class="text-gray-400">
             Generate and build a .NET SDK NuGet package from Swagger/OpenAPI documentation
           </p>
         </div>
@@ -16,7 +16,7 @@
         <form @submit.prevent="buildNupkg" class="space-y-6">
           <!-- SDK Name -->
           <div>
-            <label for="sdkName" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="sdkName" class="block text-sm font-medium text-gray-300 mb-2">
               SDK Name
             </label>
             <input
@@ -24,17 +24,17 @@
               v-model="formData.sdkName"
               type="text"
               placeholder="e.g., MyApiClient"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white placeholder-gray-500"
               required
             />
-            <p class="mt-1 text-sm text-gray-500">
+            <p class="mt-1 text-sm text-gray-400">
               The name of the generated SDK client class
             </p>
           </div>
 
           <!-- Swagger URL -->
           <div>
-            <label for="swaggerUrl" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="swaggerUrl" class="block text-sm font-medium text-gray-300 mb-2">
               Swagger URL
             </label>
             <input
@@ -42,17 +42,17 @@
               v-model="formData.swaggerUrl"
               type="url"
               placeholder="https://api.example.com/swagger/v1/swagger.json"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white placeholder-gray-500"
               required
             />
-            <p class="mt-1 text-sm text-gray-500">
+            <p class="mt-1 text-sm text-gray-400">
               URL to the Swagger/OpenAPI JSON specification
             </p>
           </div>
 
           <!-- NuPkg Name -->
           <div>
-            <label for="nupkgName" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="nupkgName" class="block text-sm font-medium text-gray-300 mb-2">
               NuGet Package Name
             </label>
             <input
@@ -60,10 +60,10 @@
               v-model="formData.nupkgName"
               type="text"
               placeholder="e.g., MyCompany.MyApiClient"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white placeholder-gray-500"
               required
             />
-            <p class="mt-1 text-sm text-gray-500">
+            <p class="mt-1 text-sm text-gray-400">
               The name for the generated NuGet package
             </p>
           </div>
@@ -88,7 +88,7 @@
         </form>
 
         <!-- Error Message -->
-        <div v-if="errorMessage" class="mt-6 p-4 bg-red-50 border border-red-200 rounded-md">
+        <div v-if="errorMessage" class="mt-6 p-4 bg-red-900/20 border border-red-800 rounded-md">
           <div class="flex">
             <div class="flex-shrink-0">
               <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -96,14 +96,14 @@
               </svg>
             </div>
             <div class="ml-3">
-              <h3 class="text-sm font-medium text-red-800">Build Failed</h3>
-              <p class="mt-1 text-sm text-red-700">{{ errorMessage }}</p>
+              <h3 class="text-sm font-medium text-red-200">Build Failed</h3>
+              <p class="mt-1 text-sm text-red-300">{{ errorMessage }}</p>
             </div>
           </div>
         </div>
 
         <!-- Success Message -->
-        <div v-if="successMessage" class="mt-6 p-4 bg-green-50 border border-green-200 rounded-md">
+        <div v-if="successMessage" class="mt-6 p-4 bg-green-900/20 border border-green-800 rounded-md">
           <div class="flex">
             <div class="flex-shrink-0">
               <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -111,8 +111,8 @@
               </svg>
             </div>
             <div class="ml-3">
-              <h3 class="text-sm font-medium text-green-800">Success!</h3>
-              <p class="mt-1 text-sm text-green-700">{{ successMessage }}</p>
+              <h3 class="text-sm font-medium text-green-200">Success!</h3>
+              <p class="mt-1 text-sm text-green-300">{{ successMessage }}</p>
             </div>
           </div>
         </div>

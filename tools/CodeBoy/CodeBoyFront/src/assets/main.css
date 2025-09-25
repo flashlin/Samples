@@ -2,10 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
+/* Force dark mode styles */
+html, body {
   @apply bg-gray-900 text-gray-100;
 }
 
-html.dark {
-  @apply bg-gray-900 text-gray-100;
+/* Override any default light mode styles */
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure dark scrollbars in Webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
 }

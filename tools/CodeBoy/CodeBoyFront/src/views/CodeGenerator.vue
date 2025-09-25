@@ -1,12 +1,12 @@
 <template>
   <div class="max-w-4xl mx-auto py-8 px-4">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+    <div class="bg-gray-800 rounded-lg shadow-sm border border-gray-700">
       <!-- Header -->
-      <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+      <div class="border-b border-gray-700 px-6 py-4">
+        <h1 class="text-2xl font-bold text-white">
           Web API Client Generator
         </h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">
+        <p class="text-gray-400 mt-1">
           Generate C# client code from Swagger/OpenAPI specifications
         </p>
       </div>
@@ -16,7 +16,7 @@
         <form @submit.prevent="handleGenerate" class="space-y-6">
           <!-- Swagger URL Input -->
           <div>
-            <label for="swaggerUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label for="swaggerUrl" class="block text-sm font-medium text-gray-300 mb-2">
               Swagger URL
             </label>
             <input
@@ -25,15 +25,15 @@
               type="url"
               required
               placeholder="https://api.example.com/swagger/v1/swagger.json"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm
-                     focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
-                     placeholder-gray-400 dark:placeholder-gray-500"
+              class="w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm
+                     focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white
+                     placeholder-gray-500"
             />
           </div>
 
           <!-- SDK Name Input -->
           <div>
-            <label for="sdkName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label for="sdkName" class="block text-sm font-medium text-gray-300 mb-2">
               SDK Name
             </label>
             <input
@@ -42,9 +42,9 @@
               type="text"
               required
               placeholder="MyApiClient"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm
-                     focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white
-                     placeholder-gray-400 dark:placeholder-gray-500"
+              class="w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm
+                     focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white
+                     placeholder-gray-500"
             />
           </div>
 
@@ -66,7 +66,7 @@
         </form>
 
         <!-- Error Display -->
-        <div v-if="error" class="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+        <div v-if="error" class="mt-6 p-4 bg-red-900/20 border border-red-800 rounded-md">
           <div class="flex">
             <div class="flex-shrink-0">
               <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -74,10 +74,10 @@
               </svg>
             </div>
             <div class="ml-3">
-              <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+              <h3 class="text-sm font-medium text-red-200">
                 Generation Failed
               </h3>
-              <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+              <div class="mt-2 text-sm text-red-300">
                 {{ error }}
               </div>
             </div>
@@ -94,30 +94,28 @@
     </div>
 
     <!-- Generated Code Display -->
-    <div v-if="generatedCode" class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-      <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+    <div v-if="generatedCode" class="mt-8 bg-gray-800 rounded-lg shadow-sm border border-gray-700">
+      <div class="border-b border-gray-700 px-6 py-4 flex justify-between items-center">
+        <h2 class="text-lg font-semibold text-white">
           Generated Code
         </h2>
         <div class="flex space-x-2">
           <button
             @click="copyToClipboard"
-            class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600
-                   text-gray-700 dark:text-gray-300 px-3 py-1 rounded text-sm transition-colors"
+            class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded text-sm transition-colors"
           >
             Copy
           </button>
           <button
             @click="downloadCode"
-            class="bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50
-                   text-blue-700 dark:text-blue-300 px-3 py-1 rounded text-sm transition-colors"
+            class="bg-blue-900/30 hover:bg-blue-900/50 text-blue-300 px-3 py-1 rounded text-sm transition-colors"
           >
             Download
           </button>
         </div>
       </div>
       <div class="p-6">
-        <pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-md overflow-x-auto text-sm"><code class="language-csharp">{{ generatedCode }}</code></pre>
+        <pre class="bg-gray-900 p-4 rounded-md overflow-x-auto text-sm"><code class="language-csharp text-gray-100">{{ generatedCode }}</code></pre>
       </div>
     </div>
   </div>
