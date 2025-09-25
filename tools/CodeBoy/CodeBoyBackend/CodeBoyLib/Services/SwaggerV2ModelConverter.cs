@@ -110,8 +110,7 @@ namespace CodeBoyLib.Services
                 classDefinition.EnumValues = schema.Enum.Select(e => e?.ToString() ?? "").ToList();
 
                 // 檢查是否為純數字枚舉
-                classDefinition.IsNumericEnum = schema.Enum.All(e =>
-                    e != null && (e is int || e is long || e is decimal || e is double || e is float));
+                classDefinition.IsNumericEnum = IsNumericEnum(schema.Enum);
 
                 return classDefinition;
             }
@@ -156,7 +155,7 @@ namespace CodeBoyLib.Services
                 // Check if the referenced type is a numeric enum, if so use int instead
                 if (allDefinitions.TryGetValue(refTypeName, out var refSchema) && 
                     refSchema.Enum != null && refSchema.Enum.Count > 0 &&
-                    refSchema.Enum.All(e => e != null && (e is int || e is long || e is decimal || e is double || e is float)))
+                    IsNumericEnum(refSchema.Enum))
                 {
                     classProp.Type = "int";
                 }
@@ -387,7 +386,7 @@ namespace CodeBoyLib.Services
                 // Check if the referenced type is a numeric enum, if so use int instead
                 if (allDefinitions.TryGetValue(refTypeName, out var refSchema) && 
                     refSchema.Enum != null && refSchema.Enum.Count > 0 &&
-                    refSchema.Enum.All(e => e != null && (e is int || e is long || e is decimal || e is double || e is float)))
+                    IsNumericEnum(refSchema.Enum))
                 {
                     return "int";
                 }
@@ -423,6 +422,30 @@ namespace CodeBoyLib.Services
                 "boolean" => "bool",
                 _ => "object"
             };
+        }
+
+        /// <summary>
+        /// 檢查 enum 值是否都是數字
+        /// </summary>
+        private bool IsNumericEnum(List<object> enumValues)
+        {
+            if (enumValues == null || enumValues.Count == 0)
+                return false;
+
+            return enumValues.All(e =>
+            {
+                if (e == null) return false;
+
+                // Handle JsonElement (when deserializing from JSON)
+                if (e is System.Text.Json.JsonElement jsonElement)
+                {
+                    return jsonElement.ValueKind == System.Text.Json.JsonValueKind.Number;
+                }
+
+                // Handle direct numeric types
+                return e is int || e is long || e is decimal || e is double || e is float ||
+                       e is short || e is byte || e is sbyte || e is uint || e is ulong || e is ushort;
+            });
         }
 
         /// <summary>
