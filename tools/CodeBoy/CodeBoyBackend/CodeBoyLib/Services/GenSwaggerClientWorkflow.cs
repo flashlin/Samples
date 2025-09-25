@@ -130,7 +130,9 @@ namespace CodeBoyLib.Services
         /// <param name="apiInfo">Swagger API information</param>
         /// <param name="outputPath">Base output path for all build operations</param>
         /// <returns>Generation and build result</returns>
-        public async Task<GenSwaggerClientResult> Build(string sdkName, SwaggerApiInfo apiInfo, string outputPath, string nupkgName)
+        public async Task<GenSwaggerClientResult> Build(string sdkName, 
+            SwaggerApiInfo apiInfo, string outputPath, string nupkgName, 
+            string sdkVersion)
         {
             var result = new GenSwaggerClientResult
             {
@@ -139,7 +141,6 @@ namespace CodeBoyLib.Services
 
             var startTime = DateTime.Now;
             var targetFrameworks = new[] { "net8.0", "net9.0" };
-            var sdkVersion = "1.0.0";
             var outputPathList = new List<string>();
 
             try
