@@ -29,7 +29,7 @@ namespace CodeBoyServer.Services
 
                 // Parse Swagger UI
                 var parser = new SwaggerUiParser();
-                var apiInfo = await parser.ParseFromUrlAsync(args.SwaggerUrl);
+                var apiInfo = await parser.ParseFromJsonUrlAsync(args.SwaggerUrl);
 
                 if (apiInfo == null || apiInfo.Endpoints.Count == 0)
                 {

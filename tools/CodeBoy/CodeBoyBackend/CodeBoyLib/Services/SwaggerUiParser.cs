@@ -32,7 +32,7 @@ namespace CodeBoyLib.Services
         /// </summary>
         /// <param name="swaggerUrl">Swagger JSON URL</param>
         /// <returns>解析後的 API 資訊</returns>
-        public async Task<SwaggerApiInfo> ParseFromUrlAsync(string swaggerUrl)
+        public async Task<SwaggerApiInfo> ParseFromJsonUrlAsync(string swaggerUrl)
         {
             if (string.IsNullOrWhiteSpace(swaggerUrl))
                 throw new ArgumentException("Swagger URL cannot be null or empty", nameof(swaggerUrl));
@@ -139,7 +139,7 @@ namespace CodeBoyLib.Services
 
                 Console.WriteLine($"✅ Found Swagger JSON URL: {swaggerJsonUrl}");
                 
-                return await ParseFromUrlAsync(swaggerJsonUrl);
+                return await ParseFromJsonUrlAsync(swaggerJsonUrl);
             }
             catch (HttpRequestException ex)
             {
