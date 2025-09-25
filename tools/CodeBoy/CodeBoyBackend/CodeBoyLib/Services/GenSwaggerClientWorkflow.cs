@@ -309,14 +309,6 @@ namespace CodeBoyLib.Services
             mainResult.BuildResult = frameworkResult.BuildResult;
         }
 
-        /// <summary>
-        /// Generates the NuGet package from successful framework builds
-        /// </summary>
-        /// <param name="sdkName">Name of the SDK</param>
-        /// <param name="outputPathList">List of successful output paths</param>
-        /// <param name="result">Result object to update</param>
-        /// <param name="outputPath">Base output path for package creation</param>
-        /// <param name="config">Configuration containing version information</param>
         private async Task GenerateNuGetPackage(string sdkName, List<string> outputPathList, GenSwaggerClientResult result, string outputPath, string sdkVersion)
         {
             if (outputPathList.Count > 0)
@@ -324,7 +316,7 @@ namespace CodeBoyLib.Services
                 result.ProcessLog.Add("🔄 Generating NuGet package...");
                 var nupkgFile = Path.Combine(outputPath, $"{sdkName}.{sdkVersion}.nupkg");
                 
-                var nupkgSuccess = _nupkgGenerator.Generate(nupkgFile, outputPathList);
+                var nupkgSuccess = _nupkgGenerator.Generate(nupkgFile, outputPathList, sdkVersion);
                 if (nupkgSuccess)
                 {
                     result.ProcessLog.Add($"✅ NuGet package created: {nupkgFile}");

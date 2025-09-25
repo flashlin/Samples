@@ -44,8 +44,9 @@ namespace CodeBoyLib.Services
         /// </summary>
         /// <param name="nupkgFile">Path where the .nupkg file should be created</param>
         /// <param name="outputPathList">List of output directory paths containing .csproj files</param>
+        /// <param name="sdkVersion"></param>
         /// <returns>True if successful, false otherwise</returns>
-        public bool Generate(string nupkgFile, List<string> outputPathList)
+        public bool Generate(string nupkgFile, List<string> outputPathList, string sdkVersion)
         {
             try
             {
@@ -82,7 +83,7 @@ namespace CodeBoyLib.Services
                 }
 
                 // Create the package structure in tmp directory
-                var success = CreateNupkgStructure(tmpDir, projects, nupkgFile);
+                var success = CreateNupkgStructure(tmpDir, projects, nupkgFile, sdkVersion);
                 
                 if (success)
                 {
@@ -206,8 +207,9 @@ namespace CodeBoyLib.Services
         /// <param name="tmpDir">Temporary directory for package creation</param>
         /// <param name="projects">List of projects to include</param>
         /// <param name="nupkgFile">Output .nupkg file path</param>
+        /// <param name="sdkVersion"></param>
         /// <returns>True if successful</returns>
-        private bool CreateNupkgStructure(string tmpDir, List<ProjectInfo> projects, string nupkgFile)
+        private bool CreateNupkgStructure(string tmpDir, List<ProjectInfo> projects, string nupkgFile, string sdkVersion)
         {
             try
             {
@@ -258,7 +260,7 @@ namespace CodeBoyLib.Services
 
                 // Create .nuspec file
                 var nuspecPath = Path.Combine(tmpDir, "package.nuspec");
-                CreateNuspecFile(nuspecPath, projects);
+                CreateNuspecFile(nuspecPath, projects, sdkVersion);
 
                 // Create the .nupkg file
                 CreateNupkgFile(tmpDir, nupkgFile);
@@ -288,8 +290,9 @@ namespace CodeBoyLib.Services
                 var projectName = project.ProjectName;
                 
                 filesSection.AppendLine($"    <!-- {framework} -->");
-                filesSection.AppendLine($"    <file src=\"lib\\{framework}\\{projectName}.dll\" target=\"lib\\{framework}\" />");
-                filesSection.AppendLine($"    <file src=\"lib\\{framework}\\{projectName}.pdb\" target=\"lib\\{framework}\" />");
+                filesSection.AppendLine($"    <file src=\"lib/{framework}/{projectName}.dll\" target=\"lib/{framework}\" />");
+                filesSection.AppendLine($"    <file src=\"lib/{framework}/{projectName}.pdb\" target=\"lib/{framework}\" />");
+                filesSection.AppendLine($"    <file src=\"lib/{framework}/{projectName}.deps.json\" target=\"lib/{framework}\" />");
                 filesSection.AppendLine();
             }
 
@@ -302,7 +305,8 @@ namespace CodeBoyLib.Services
         /// </summary>
         /// <param name="nuspecPath">Path where to create the .nuspec file</param>
         /// <param name="projects">List of projects to include in the package</param>
-        private void CreateNuspecFile(string nuspecPath, List<ProjectInfo> projects)
+        /// <param name="sdkVersion"></param>
+        private void CreateNuspecFile(string nuspecPath, List<ProjectInfo> projects, string sdkVersion)
         {
             var primaryProject = projects.FirstOrDefault();
             if (primaryProject == null) return;
@@ -315,8 +319,8 @@ namespace CodeBoyLib.Services
             var nuspecContent = $@"<?xml version=""1.0"" encoding=""utf-8""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
   <metadata>
-    <id>{primaryProject.ProjectName}.Client</id>
-    <version>1.0.0</version>
+    <id>{primaryProject.ProjectName}</id>
+    <version>{sdkVersion}</version>
     <title>{primaryProject.ProjectName} Client</title>
     <authors>CodeBoy Generator</authors>
     <description>Auto-generated client library for {projectNames}. Supports {frameworks}.</description>
