@@ -73,7 +73,7 @@ namespace MakeSwaggerSDK
                 };
 
                 // Generate and build complete SDK project
-                var factory = new GenSwaggerClientFactory();
+                var factory = new GenSwaggerClientWorkflow();
                 var result = await factory.Build(options.SdkName, apiInfo, config);
 
                 // Print detailed summary

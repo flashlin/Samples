@@ -112,7 +112,7 @@ namespace CodeBoyLib.Services
         private readonly CsprojService _csprojService;
 
         /// <summary>
-        /// Initializes a new instance of GenSwaggerClientFactory
+        /// Initializes a new instance of GenSwaggerClientWorkflow
         /// </summary>
         public GenSwaggerClientWorkflow()
         {
