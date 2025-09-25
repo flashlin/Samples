@@ -368,12 +368,12 @@ namespace CodeBoyLib.Services
         /// <param name="result">Result object to update</param>
         /// <param name="sdkName">Name of the SDK</param>
         /// <param name="apiInfo">Swagger API information</param>
-        /// <param name="outputPath">Base output path for file generation</param>
-        private async Task GenerateClientCodeStep(GenSwaggerClientResult result, string sdkName, SwaggerApiInfo apiInfo, string outputPath)
+        /// <param name="frameworkTempDirectory">Framework-specific temp directory for file generation</param>
+        private async Task GenerateClientCodeStep(GenSwaggerClientResult result, string sdkName, SwaggerApiInfo apiInfo, string frameworkTempDirectory)
         {
             result.ProcessLog.Add("🔄 Step 2: Generating client code...");
             result.GeneratedCode = _codeGenerator.Generate(sdkName, apiInfo);
-            result.ClientCodePath = Path.Combine(outputPath, $"{sdkName}Client.cs");
+            result.ClientCodePath = Path.Combine(frameworkTempDirectory, $"{sdkName}Client.cs");
             
             await File.WriteAllTextAsync(result.ClientCodePath, result.GeneratedCode);
             result.ProcessLog.Add($"✅ Generated client code: {result.ClientCodePath}");
@@ -468,7 +468,7 @@ namespace CodeBoyLib.Services
         /// Creates a random temporary directory
         /// </summary>
         /// <param name="baseDirectory">Base directory for temp folders</param>
-        /// <returns>Path to the created temporary directory</returns>
+        /// <returns>Absolute path to the created temporary directory</returns>
         private string CreateTempDirectory(string? baseDirectory = null)
         {
             var basePath = baseDirectory ?? Path.GetTempPath();
@@ -476,7 +476,9 @@ namespace CodeBoyLib.Services
             var tempPath = Path.Combine(basePath, randomName);
             
             Directory.CreateDirectory(tempPath);
-            return tempPath;
+            
+            // Ensure we return an absolute path
+            return Path.GetFullPath(tempPath);
         }
 
         /// <summary>
