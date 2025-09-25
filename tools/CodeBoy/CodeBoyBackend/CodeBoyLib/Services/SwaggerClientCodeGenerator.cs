@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using T1.Standard.IO;
 
 namespace CodeBoyLib.Services
 {
@@ -10,25 +11,26 @@ namespace CodeBoyLib.Services
     {
         public string Generate(string sdkName, SwaggerApiInfo apiInfo)
         {
-            var sb = new StringBuilder();
+            var output = new IndentStringBuilder();
             
             // Add using statements
-            sb.AppendLine("using System;");
-            sb.AppendLine("using System.Collections.Generic;");
-            sb.AppendLine("using System.Linq;");
-            sb.AppendLine("using System.Net.Http;");
-            sb.AppendLine("using System.Text;");
-            sb.AppendLine("using System.Threading.Tasks;");
-            sb.AppendLine("using Microsoft.Extensions.Http;");
-            sb.AppendLine("using Microsoft.Extensions.Options;");
-            sb.AppendLine("using System.Text.Json;");
-            sb.AppendLine("using System.Text.Json.Serialization;");
-            sb.AppendLine("using System.ComponentModel.DataAnnotations;");
-            sb.AppendLine();
+            output.WriteLine("using System;");
+            output.WriteLine("using System.Collections.Generic;");
+            output.WriteLine("using System.Linq;");
+            output.WriteLine("using System.Net.Http;");
+            output.WriteLine("using System.Text;");
+            output.WriteLine("using System.Threading.Tasks;");
+            output.WriteLine("using Microsoft.Extensions.Http;");
+            output.WriteLine("using Microsoft.Extensions.Options;");
+            output.WriteLine("using System.Text.Json;");
+            output.WriteLine("using System.Text.Json.Serialization;");
+            output.WriteLine("using System.ComponentModel.DataAnnotations;");
+            output.WriteLine();
 
             // Add namespace
-            sb.AppendLine($"namespace {sdkName}SDK");
-            sb.AppendLine("{");
+            output.WriteLine($"namespace {sdkName}SDK");
+            output.WriteLine("{");
+            output.Indent++;
 
             // Generate model classes from definitions
             foreach (var classDef in apiInfo.ClassDefinitions.Values)
@@ -36,19 +38,20 @@ namespace CodeBoyLib.Services
                 // Skip numeric-only enums - they will be treated as int in DTOs
                 if (!classDef.IsNumericEnum)
                 {
-                    GenerateModelClass(sb, classDef);
+                    GenerateModelClass(output, classDef);
                 }
             }
 
             // Generate the configuration class
-            GenerateConfigClass(sb, sdkName);
+            GenerateConfigClass(output, sdkName);
 
             // Generate the main client class
-            GenerateClientClass(sb, sdkName, apiInfo.Endpoints);
+            GenerateClientClass(output, sdkName, apiInfo.Endpoints);
 
-            sb.AppendLine("}");
+            output.Indent--;
+            output.WriteLine("}");
 
-            return sb.ToString();
+            return output.ToString();
         }
 
         private bool IsPrimitiveType(string type)
@@ -60,53 +63,60 @@ namespace CodeBoyLib.Services
             return primitiveTypes.Contains(type) || type.StartsWith("List<");
         }
 
-        private void GenerateConfigClass(StringBuilder sb, string sdkName)
+        private void GenerateConfigClass(IndentStringBuilder output, string sdkName)
         {
             var configClassName = $"{sdkName}ClientConfig";
             
-            sb.AppendLine($"    /// <summary>");
-            sb.AppendLine($"    /// Configuration settings for {sdkName} API client");
-            sb.AppendLine($"    /// </summary>");
-            sb.AppendLine($"    public class {configClassName}");
-            sb.AppendLine("    {");
-            sb.AppendLine("        /// <summary>");
-            sb.AppendLine("        /// Base URL for the API");
-            sb.AppendLine("        /// </summary>");
-            sb.AppendLine("        public string BaseUrl { get; set; } = string.Empty;");
-            sb.AppendLine();
-            sb.AppendLine("        /// <summary>");
-            sb.AppendLine("        /// HTTP client name for dependency injection (optional)");
-            sb.AppendLine("        /// </summary>");
-            sb.AppendLine("        public string? HttpClientName { get; set; }");
-            sb.AppendLine();
-            sb.AppendLine("        /// <summary>");
-            sb.AppendLine("        /// Request timeout in seconds (optional)");
-            sb.AppendLine("        /// </summary>");
-            sb.AppendLine("        public int? TimeoutSeconds { get; set; }");
-            sb.AppendLine("    }");
-            sb.AppendLine();
+            output.WriteLine($"/// <summary>");
+            output.WriteLine($"/// Configuration settings for {sdkName} API client");
+            output.WriteLine($"/// </summary>");
+            output.WriteLine($"public class {configClassName}");
+            output.WriteLine("{");
+            output.Indent++;
+            
+            output.WriteLine("/// <summary>");
+            output.WriteLine("/// Base URL for the API");
+            output.WriteLine("/// </summary>");
+            output.WriteLine("public string BaseUrl { get; set; } = string.Empty;");
+            output.WriteLine();
+            
+            output.WriteLine("/// <summary>");
+            output.WriteLine("/// HTTP client name for dependency injection (optional)");
+            output.WriteLine("/// </summary>");
+            output.WriteLine("public string? HttpClientName { get; set; }");
+            output.WriteLine();
+            
+            output.WriteLine("/// <summary>");
+            output.WriteLine("/// Request timeout in seconds (optional)");
+            output.WriteLine("/// </summary>");
+            output.WriteLine("public int? TimeoutSeconds { get; set; }");
+            
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine();
         }
 
-        private void GenerateModelClass(StringBuilder sb, ClassDefinition classDef)
+        private void GenerateModelClass(IndentStringBuilder output, ClassDefinition classDef)
         {
-            sb.AppendLine($"    /// <summary>");
-            sb.AppendLine($"    /// {classDef.Description}");
-            sb.AppendLine($"    /// </summary>");
+            output.WriteLine($"/// <summary>");
+            output.WriteLine($"/// {classDef.Description}");
+            output.WriteLine($"/// </summary>");
             
             if (classDef.IsEnum)
             {
-                GenerateEnumClass(sb, classDef);
+                GenerateEnumClass(output, classDef);
             }
             else
             {
-                GenerateObjectClass(sb, classDef);
+                GenerateObjectClass(output, classDef);
             }
         }
 
-        private void GenerateEnumClass(StringBuilder sb, ClassDefinition classDef)
+        private void GenerateEnumClass(IndentStringBuilder output, ClassDefinition classDef)
         {
-            sb.AppendLine($"    public enum {classDef.Name}");
-            sb.AppendLine("    {");
+            output.WriteLine($"public enum {classDef.Name}");
+            output.WriteLine("{");
+            output.Indent++;
             
             for (int i = 0; i < classDef.EnumValues.Count; i++)
             {
@@ -115,70 +125,73 @@ namespace CodeBoyLib.Services
                 
                 if (i == classDef.EnumValues.Count - 1)
                 {
-                    sb.AppendLine($"        {sanitizedValue}");
+                    output.WriteLine($"{sanitizedValue}");
                 }
                 else
                 {
-                    sb.AppendLine($"        {sanitizedValue},");
+                    output.WriteLine($"{sanitizedValue},");
                 }
             }
             
-            sb.AppendLine("    }");
-            sb.AppendLine();
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine();
         }
 
-        private void GenerateObjectClass(StringBuilder sb, ClassDefinition classDef)
+        private void GenerateObjectClass(IndentStringBuilder output, ClassDefinition classDef)
         {
-            sb.AppendLine($"    public class {classDef.Name}");
-            sb.AppendLine("    {");
+            output.WriteLine($"public class {classDef.Name}");
+            output.WriteLine("{");
+            output.Indent++;
             
             foreach (var property in classDef.Properties)
             {
-                GenerateProperty(sb, property);
+                GenerateProperty(output, property);
             }
             
-            sb.AppendLine("    }");
-            sb.AppendLine();
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine();
         }
 
-        private void GenerateProperty(StringBuilder sb, ClassProperty property)
+        private void GenerateProperty(IndentStringBuilder output, ClassProperty property)
         {
             // Add XML documentation
             if (!string.IsNullOrEmpty(property.Description))
             {
-                sb.AppendLine($"        /// <summary>");
-                sb.AppendLine($"        /// {property.Description}");
-                sb.AppendLine($"        /// </summary>");
+                output.WriteLine($"/// <summary>");
+                output.WriteLine($"/// {property.Description}");
+                output.WriteLine($"/// </summary>");
             }
 
             // Add validation attributes
             if (property.IsRequired)
             {
-                sb.AppendLine($"        [Required]");
+                output.WriteLine($"[Required]");
             }
 
             // Add JSON property attribute
-            sb.AppendLine($"        [JsonPropertyName(\"{property.Name}\")]");
+            output.WriteLine($"[JsonPropertyName(\"{property.Name}\")]");
 
             // Generate property declaration
             var defaultValue = GetDefaultValueString(property);
             if (!string.IsNullOrEmpty(defaultValue))
             {
-                sb.AppendLine($"        public {property.Type} {PascalCase(property.Name)} {{ get; set; }} = {defaultValue};");
+                output.WriteLine($"public {property.Type} {PascalCase(property.Name)} {{ get; set; }} = {defaultValue};");
             }
             else
             {
                 if (property.Type.EndsWith("?") || !property.IsRequired)
                 {
-                    sb.AppendLine($"        public {property.Type} {PascalCase(property.Name)} {{ get; set; }}");
+                    output.WriteLine($"public {property.Type} {PascalCase(property.Name)} {{ get; set; }}");
                 }
                 else
                 {
-                    sb.AppendLine($"        public {property.Type} {PascalCase(property.Name)} {{ get; set; }} = default!;");
+                    output.WriteLine($"public {property.Type} {PascalCase(property.Name)} {{ get; set; }} = default!;");
                 }
             }
             
-            sb.AppendLine();
+            output.WriteLine();
         }
 
         private string GetDefaultValueString(ClassProperty property)
@@ -234,84 +247,105 @@ namespace CodeBoyLib.Services
             return char.ToUpper(input[0]) + input[1..];
         }
 
-        private void GenerateClientClass(StringBuilder sb, string sdkName, List<SwaggerEndpoint> endpoints)
+        private void GenerateClientClass(IndentStringBuilder output, string sdkName, List<SwaggerEndpoint> endpoints)
         {
             var className = $"{sdkName}Client";
             
-            sb.AppendLine($"    /// <summary>");
-            sb.AppendLine($"    /// HTTP client for {sdkName} API");
-            sb.AppendLine($"    /// </summary>");
-            sb.AppendLine($"    public class {className}");
-            sb.AppendLine("    {");
-            sb.AppendLine("        private readonly HttpClient _httpClient;");
-            sb.AppendLine($"        private readonly {sdkName}ClientConfig _config;");
-            sb.AppendLine();
+            output.WriteLine($"/// <summary>");
+            output.WriteLine($"/// HTTP client for {sdkName} API");
+            output.WriteLine($"/// </summary>");
+            output.WriteLine($"public class {className}");
+            output.WriteLine("{");
+            output.Indent++;
+            
+            output.WriteLine("private readonly HttpClient _httpClient;");
+            output.WriteLine($"private readonly {sdkName}ClientConfig _config;");
+            output.WriteLine();
 
             // Primary constructor with IOptions pattern
-            sb.AppendLine($"        /// <summary>");
-            sb.AppendLine($"        /// Initializes a new instance of {className}");
-            sb.AppendLine($"        /// </summary>");
-            sb.AppendLine($"        /// <param name=\"httpClientFactory\">HTTP client factory</param>");
-            sb.AppendLine($"        /// <param name=\"config\">Configuration options</param>");
-            sb.AppendLine($"        public {className}(IHttpClientFactory httpClientFactory, IOptions<{sdkName}ClientConfig> config)");
-            sb.AppendLine("        {");
-            sb.AppendLine("            _config = config.Value ?? throw new ArgumentNullException(nameof(config));");
-            sb.AppendLine("            if (string.IsNullOrEmpty(_config.BaseUrl))");
-            sb.AppendLine("                throw new ArgumentException(\"BaseUrl must be configured\", nameof(config));");
-            sb.AppendLine();
-            sb.AppendLine("            if (!string.IsNullOrEmpty(_config.HttpClientName))");
-            sb.AppendLine("            {");
-            sb.AppendLine("                _httpClient = httpClientFactory.CreateClient(_config.HttpClientName);");
-            sb.AppendLine("            }");
-            sb.AppendLine("            else");
-            sb.AppendLine("            {");
-            sb.AppendLine("                _httpClient = httpClientFactory.CreateClient();");
-            sb.AppendLine("            }");
-            sb.AppendLine();
-            sb.AppendLine("            if (_config.TimeoutSeconds.HasValue)");
-            sb.AppendLine("            {");
-            sb.AppendLine("                _httpClient.Timeout = TimeSpan.FromSeconds(_config.TimeoutSeconds.Value);");
-            sb.AppendLine("            }");
-            sb.AppendLine("        }");
-            sb.AppendLine();
+            output.WriteLine($"/// <summary>");
+            output.WriteLine($"/// Initializes a new instance of {className}");
+            output.WriteLine($"/// </summary>");
+            output.WriteLine($"/// <param name=\"httpClientFactory\">HTTP client factory</param>");
+            output.WriteLine($"/// <param name=\"config\">Configuration options</param>");
+            output.WriteLine($"public {className}(IHttpClientFactory httpClientFactory, IOptions<{sdkName}ClientConfig> config)");
+            output.WriteLine("{");
+            output.Indent++;
+            
+            output.WriteLine("_config = config.Value ?? throw new ArgumentNullException(nameof(config));");
+            output.WriteLine("if (string.IsNullOrEmpty(_config.BaseUrl))");
+            output.Indent++;
+            output.WriteLine("throw new ArgumentException(\"BaseUrl must be configured\", nameof(config));");
+            output.Indent--;
+            output.WriteLine();
+            
+            output.WriteLine("if (!string.IsNullOrEmpty(_config.HttpClientName))");
+            output.WriteLine("{");
+            output.Indent++;
+            output.WriteLine("_httpClient = httpClientFactory.CreateClient(_config.HttpClientName);");
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine("else");
+            output.WriteLine("{");
+            output.Indent++;
+            output.WriteLine("_httpClient = httpClientFactory.CreateClient();");
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine();
+            
+            output.WriteLine("if (_config.TimeoutSeconds.HasValue)");
+            output.WriteLine("{");
+            output.Indent++;
+            output.WriteLine("_httpClient.Timeout = TimeSpan.FromSeconds(_config.TimeoutSeconds.Value);");
+            output.Indent--;
+            output.WriteLine("}");
+            
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine();
 
             // Alternative constructor with HttpClient directly (for backward compatibility)
-            sb.AppendLine($"        /// <summary>");
-            sb.AppendLine($"        /// Initializes a new instance of {className} (backward compatibility)");
-            sb.AppendLine($"        /// </summary>");
-            sb.AppendLine($"        /// <param name=\"httpClient\">HTTP client instance</param>");
-            sb.AppendLine($"        /// <param name=\"baseUrl\">Base URL for the API</param>");
-            sb.AppendLine($"        public {className}(HttpClient httpClient, string baseUrl)");
-            sb.AppendLine("        {");
-            sb.AppendLine("            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));");
-            sb.AppendLine($"            _config = new {sdkName}ClientConfig {{ BaseUrl = baseUrl.TrimEnd('/') }};");
-            sb.AppendLine("        }");
-            sb.AppendLine();
+            output.WriteLine($"/// <summary>");
+            output.WriteLine($"/// Initializes a new instance of {className} (backward compatibility)");
+            output.WriteLine($"/// </summary>");
+            output.WriteLine($"/// <param name=\"httpClient\">HTTP client instance</param>");
+            output.WriteLine($"/// <param name=\"baseUrl\">Base URL for the API</param>");
+            output.WriteLine($"public {className}(HttpClient httpClient, string baseUrl)");
+            output.WriteLine("{");
+            output.Indent++;
+            
+            output.WriteLine("_httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));");
+            output.WriteLine($"_config = new {sdkName}ClientConfig {{ BaseUrl = baseUrl.TrimEnd('/') }};");
+            
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine();
 
             // Generate methods for each endpoint
             foreach (var endpoint in endpoints)
             {
-                GenerateEndpointMethod(sb, endpoint);
+                GenerateEndpointMethod(output, endpoint);
             }
 
             // Helper methods
-            GenerateHelperMethods(sb);
+            GenerateHelperMethods(output);
 
-            sb.AppendLine("    }");
+            output.Indent--;
+            output.WriteLine("}");
         }
 
-        private void GenerateEndpointMethod(StringBuilder sb, SwaggerEndpoint endpoint)
+        private void GenerateEndpointMethod(IndentStringBuilder output, SwaggerEndpoint endpoint)
         {
             var methodName = SanitizeMethodName(endpoint.Path);
             var returnType = GetReturnType(endpoint.ResponseType);
             
-            sb.AppendLine($"        /// <summary>");
-            sb.AppendLine($"        /// {endpoint.Summary}");
+            output.WriteLine($"/// <summary>");
+            output.WriteLine($"/// {endpoint.Summary}");
             if (!string.IsNullOrEmpty(endpoint.Description))
             {
-                sb.AppendLine($"        /// {endpoint.Description}");
+                output.WriteLine($"/// {endpoint.Description}");
             }
-            sb.AppendLine($"        /// </summary>");
+            output.WriteLine($"/// </summary>");
 
             // Generate method parameters
             var methodParams = new List<string>();
@@ -324,7 +358,7 @@ namespace CodeBoyLib.Services
             foreach (var param in pathParams)
             {
                 methodParams.Add($"{param.Type} {param.Name}");
-                sb.AppendLine($"        /// <param name=\"{param.Name}\">{param.Description}</param>");
+                output.WriteLine($"        /// <param name=\"{param.Name}\">{param.Description}</param>");
             }
 
             // Add body parameter if exists
@@ -332,7 +366,7 @@ namespace CodeBoyLib.Services
             {
                 var bodyParam = bodyParams.First();
                 methodParams.Add($"{bodyParam.Type} {bodyParam.Name}");
-                sb.AppendLine($"        /// <param name=\"{bodyParam.Name}\">{bodyParam.Description}</param>");
+                output.WriteLine($"        /// <param name=\"{bodyParam.Name}\">{bodyParam.Description}</param>");
             }
 
             // Add query parameters as optional
@@ -341,7 +375,7 @@ namespace CodeBoyLib.Services
                 var paramType = param.IsRequired ? param.Type : $"{param.Type}?";
                 var defaultValue = param.IsRequired ? "" : " = null";
                 methodParams.Add($"{paramType} {param.Name}{defaultValue}");
-                sb.AppendLine($"        /// <param name=\"{param.Name}\">{param.Description}</param>");
+                output.WriteLine($"        /// <param name=\"{param.Name}\">{param.Description}</param>");
             }
 
             // Add header parameters as optional
@@ -350,12 +384,12 @@ namespace CodeBoyLib.Services
                 var paramType = param.IsRequired ? param.Type : $"{param.Type}?";
                 var defaultValue = param.IsRequired ? "" : " = null";
                 methodParams.Add($"{paramType} {param.Name}{defaultValue}");
-                sb.AppendLine($"        /// <param name=\"{param.Name}\">{param.Description}</param>");
+                output.WriteLine($"        /// <param name=\"{param.Name}\">{param.Description}</param>");
             }
 
-            sb.AppendLine($"        /// <returns>{returnType}</returns>");
-            sb.AppendLine($"        public async {returnType} {methodName}({string.Join(", ", methodParams)})");
-            sb.AppendLine("        {");
+            output.WriteLine($"        /// <returns>{returnType}</returns>");
+            output.WriteLine($"        public async {returnType} {methodName}({string.Join(", ", methodParams)})");
+            output.WriteLine("        {");
 
             // Build URL
             var urlBuilder = new StringBuilder();
@@ -367,27 +401,27 @@ namespace CodeBoyLib.Services
                 urlBuilder.Replace($"{{{param.Name}}}", $"{{{param.Name}}}");
             }
             urlBuilder.Append(";");
-            sb.AppendLine(urlBuilder.ToString());
+            output.WriteLine(urlBuilder.ToString());
 
             // Add query parameters
             if (queryParams.Any())
             {
-                sb.AppendLine("            var queryParams = new List<string>();");
+                output.WriteLine("            var queryParams = new List<string>();");
                 foreach (var param in queryParams)
                 {
                     if (param.IsRequired)
                     {
-                        sb.AppendLine($"            queryParams.Add($\"{param.Name}={{Uri.EscapeDataString({param.Name}.ToString())}}\");");
+                        output.WriteLine($"            queryParams.Add($\"{param.Name}={{Uri.EscapeDataString({param.Name}.ToString())}}\");");
                     }
                     else
                     {
-                        sb.AppendLine($"            if ({param.Name} != null)");
-                        sb.AppendLine($"                queryParams.Add($\"{param.Name}={{Uri.EscapeDataString({param.Name}.ToString())}}\");");
+                        output.WriteLine($"            if ({param.Name} != null)");
+                        output.WriteLine($"                queryParams.Add($\"{param.Name}={{Uri.EscapeDataString({param.Name}.ToString())}}\");");
                     }
                 }
-                sb.AppendLine("            if (queryParams.Any())");
-                sb.AppendLine("                url += \"?\" + string.Join(\"&\", queryParams);");
-                sb.AppendLine();
+                output.WriteLine("            if (queryParams.Any())");
+                output.WriteLine("                url += \"?\" + string.Join(\"&\", queryParams);");
+                output.WriteLine();
             }
 
             // Create HTTP request
@@ -402,19 +436,19 @@ namespace CodeBoyLib.Services
                 "OPTIONS" => "HttpMethod.Options",
                 _ => $"new HttpMethod(\"{endpoint.HttpMethod.ToUpper()}\")"
             };
-            sb.AppendLine($"            var request = new HttpRequestMessage({httpMethod}, _config.BaseUrl + url);");
+            output.WriteLine($"            var request = new HttpRequestMessage({httpMethod}, _config.BaseUrl + url);");
 
             // Add headers
             foreach (var param in headerParams)
             {
                 if (param.IsRequired)
                 {
-                    sb.AppendLine($"            request.Headers.Add(\"{param.Name}\", {param.Name}.ToString());");
+                    output.WriteLine($"            request.Headers.Add(\"{param.Name}\", {param.Name}.ToString());");
                 }
                 else
                 {
-                    sb.AppendLine($"            if ({param.Name} != null)");
-                    sb.AppendLine($"                request.Headers.Add(\"{param.Name}\", {param.Name}.ToString());");
+                    output.WriteLine($"            if ({param.Name} != null)");
+                    output.WriteLine($"                request.Headers.Add(\"{param.Name}\", {param.Name}.ToString());");
                 }
             }
 
@@ -422,65 +456,69 @@ namespace CodeBoyLib.Services
             if (bodyParams.Any() && (endpoint.HttpMethod.ToUpper() == "POST" || endpoint.HttpMethod.ToUpper() == "PUT" || endpoint.HttpMethod.ToUpper() == "PATCH"))
             {
                 var bodyParam = bodyParams.First();
-                sb.AppendLine($"            if ({bodyParam.Name} != null)");
-                sb.AppendLine("            {");
-                sb.AppendLine($"                var jsonContent = JsonSerializer.Serialize({bodyParam.Name});");
-                sb.AppendLine("                request.Content = new StringContent(jsonContent, Encoding.UTF8, \"application/json\");");
-                sb.AppendLine("            }");
+                output.WriteLine($"            if ({bodyParam.Name} != null)");
+                output.WriteLine("            {");
+                output.WriteLine($"                var jsonContent = JsonSerializer.Serialize({bodyParam.Name});");
+                output.WriteLine("                request.Content = new StringContent(jsonContent, Encoding.UTF8, \"application/json\");");
+                output.WriteLine("            }");
             }
 
-            sb.AppendLine();
-            sb.AppendLine("            var response = await _httpClient.SendAsync(request);");
-            sb.AppendLine("            response.EnsureSuccessStatusCode();");
-            sb.AppendLine();
+            output.WriteLine();
+            output.WriteLine("            var response = await _httpClient.SendAsync(request);");
+            output.WriteLine("            response.EnsureSuccessStatusCode();");
+            output.WriteLine();
 
             // Handle response
             if (returnType == "Task")
             {
-                sb.AppendLine("            // No return value expected");
+                output.WriteLine("            // No return value expected");
             }
             else if (returnType == "Task<string>")
             {
-                sb.AppendLine("            return await response.Content.ReadAsStringAsync();");
+                output.WriteLine("            return await response.Content.ReadAsStringAsync();");
             }
             else
             {
-                sb.AppendLine("            var responseContent = await response.Content.ReadAsStringAsync();");
-                sb.AppendLine();
-                sb.AppendLine("            if (string.IsNullOrEmpty(responseContent))");
+                output.WriteLine("            var responseContent = await response.Content.ReadAsStringAsync();");
+                output.WriteLine();
+                output.WriteLine("            if (string.IsNullOrEmpty(responseContent))");
                 
                 if (returnType.StartsWith("Task<List<"))
                 {
                     var innerType = returnType.Substring(5, returnType.Length - 6); // Remove "Task<" and ">"
-                    sb.AppendLine($"                return null;");
-                    sb.AppendLine();
-                    sb.AppendLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
+                    output.WriteLine($"                return null;");
+                    output.WriteLine();
+                    output.WriteLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
                 }
                 else if (returnType.StartsWith("Task<"))
                 {
                     var innerType = returnType.Substring(5, returnType.Length - 6); // Remove "Task<" and ">"
                     
                     // Since all return types are now nullable, we can directly return the deserialized result
-                    sb.AppendLine($"                return null;");
-                    sb.AppendLine();
-                    sb.AppendLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
+                    output.WriteLine($"                return null;");
+                    output.WriteLine();
+                    output.WriteLine($"            return JsonSerializer.Deserialize<{innerType}>(responseContent);");
                 }
             }
 
-            sb.AppendLine("        }");
-            sb.AppendLine();
+            output.WriteLine("        }");
+            output.WriteLine();
         }
 
-        private void GenerateHelperMethods(StringBuilder sb)
+        private void GenerateHelperMethods(IndentStringBuilder output)
         {
-            sb.AppendLine("        /// <summary>");
-            sb.AppendLine("        /// Dispose resources");
-            sb.AppendLine("        /// </summary>");
-            sb.AppendLine("        public void Dispose()");
-            sb.AppendLine("        {");
-            sb.AppendLine("            _httpClient?.Dispose();");
-            sb.AppendLine("        }");
-            sb.AppendLine();
+            output.WriteLine("/// <summary>");
+            output.WriteLine("/// Dispose resources");
+            output.WriteLine("/// </summary>");
+            output.WriteLine("public void Dispose()");
+            output.WriteLine("{");
+            output.Indent++;
+            
+            output.WriteLine("_httpClient?.Dispose();");
+            
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine();
         }
 
         private string GetReturnType(ResponseType responseType)
