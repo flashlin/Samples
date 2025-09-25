@@ -273,6 +273,31 @@ namespace CodeBoyLib.Services
         }
 
         /// <summary>
+        /// Generates the files section for the .nuspec file
+        /// </summary>
+        /// <param name="projects">List of projects to include in the package</param>
+        /// <returns>Generated files XML section</returns>
+        private string GenerateFilesSection(List<ProjectInfo> projects)
+        {
+            var filesSection = new StringBuilder();
+            filesSection.AppendLine("  <files>");
+
+            foreach (var project in projects)
+            {
+                var framework = project.TargetFramework;
+                var projectName = project.ProjectName;
+                
+                filesSection.AppendLine($"    <!-- {framework} -->");
+                filesSection.AppendLine($"    <file src=\"lib\\{framework}\\{projectName}.dll\" target=\"lib\\{framework}\" />");
+                filesSection.AppendLine($"    <file src=\"lib\\{framework}\\{projectName}.pdb\" target=\"lib\\{framework}\" />");
+                filesSection.AppendLine();
+            }
+
+            filesSection.AppendLine("  </files>");
+            return filesSection.ToString();
+        }
+
+        /// <summary>
         /// Creates the .nuspec manifest file
         /// </summary>
         /// <param name="nuspecPath">Path where to create the .nuspec file</param>
@@ -284,6 +309,8 @@ namespace CodeBoyLib.Services
 
             var frameworks = string.Join(", ", projects.Select(p => p.TargetFramework).Distinct());
             var projectNames = string.Join(", ", projects.Select(p => p.ProjectName).Distinct());
+
+            var filesSection = GenerateFilesSection(projects);
 
             var nuspecContent = $@"<?xml version=""1.0"" encoding=""utf-8""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
@@ -298,7 +325,7 @@ namespace CodeBoyLib.Services
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>api client codegen swagger openapi</tags>
   </metadata>
-</package>";
+{filesSection}</package>";
 
             File.WriteAllText(nuspecPath, nuspecContent);
             Console.WriteLine($"📝 Created .nuspec file: {nuspecPath}");
