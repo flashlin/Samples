@@ -145,7 +145,18 @@ namespace CodeBoyLib.Services
             if (!string.IsNullOrEmpty(propSchema.Ref))
             {
                 var refTypeName = ExtractTypeNameFromRef(propSchema.Ref);
-                classProp.Type = refTypeName;
+                
+                // Check if the referenced type is a numeric enum, if so use int instead
+                if (allSchemas.TryGetValue(refTypeName, out var refSchema) && 
+                    refSchema.Enum != null && refSchema.Enum.Count > 0 &&
+                    refSchema.Enum.All(e => e != null && (e is int || e is long || e is decimal || e is double || e is float)))
+                {
+                    classProp.Type = "int";
+                }
+                else
+                {
+                    classProp.Type = refTypeName;
+                }
                 return classProp;
             }
 
@@ -395,7 +406,17 @@ namespace CodeBoyLib.Services
 
             if (!string.IsNullOrEmpty(schema.Ref))
             {
-                return ExtractTypeNameFromRef(schema.Ref);
+                var refTypeName = ExtractTypeNameFromRef(schema.Ref);
+                
+                // Check if the referenced type is a numeric enum, if so use int instead
+                if (allSchemas.TryGetValue(refTypeName, out var refSchema) && 
+                    refSchema.Enum != null && refSchema.Enum.Count > 0 &&
+                    refSchema.Enum.All(e => e != null && (e is int || e is long || e is decimal || e is double || e is float)))
+                {
+                    return "int";
+                }
+                
+                return refTypeName;
             }
 
             var schemaType = schema.Type?.ToLower();
