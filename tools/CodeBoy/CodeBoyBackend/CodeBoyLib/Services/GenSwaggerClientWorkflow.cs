@@ -89,7 +89,7 @@ namespace CodeBoyLib.Services
         /// <summary>
         /// Whether to keep the temporary directory after completion
         /// </summary>
-        public bool KeepTempDirectory { get; set; } = false;
+        public bool KeepTempDirectory { get; set; } = true;
 
         /// <summary>
         /// Base directory for temporary folders (defaults to system temp)
@@ -211,8 +211,7 @@ namespace CodeBoyLib.Services
                 if (!config.KeepTempDirectory && result.Success)
                 {
                     result.ProcessLog.Add("🧹 Cleaning up temporary directory...");
-                    // Note: We'll keep the directory for now since the assembly might be needed
-                    // Directory.Delete(result.TempDirectory, true);
+                    Directory.Delete(result.TempDirectory, true);
                 }
 
                 return result;
