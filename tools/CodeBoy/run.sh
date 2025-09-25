@@ -5,24 +5,28 @@
 echo "🚀 CodeGen Tool"
 echo "================================================"
 
-# Ask for Swagger URL
-echo -n "Input swagger url: "
+# Default values
+default_swagger_url="https://steropes-api.sbotry.com/swagger/v1/swagger.json"
+default_sdk_name="Steropes"
+
+# Ask for Swagger URL with default value
+echo -n "Input swagger url (default: $default_swagger_url): "
 read swagger_url
 
-# Check if swagger_url is empty
+# Use default if empty
 if [ -z "$swagger_url" ]; then
-    echo "❌ Swagger URL cannot be empty. Exiting..."
-    exit 1
+    swagger_url="$default_swagger_url"
+    echo "Using default: $swagger_url"
 fi
 
-# Ask for SDK name
-echo -n "SDK name: "
+# Ask for SDK name with default value
+echo -n "SDK name (default: $default_sdk_name): "
 read sdk_name
 
-# Check if sdk_name is empty
+# Use default if empty
 if [ -z "$sdk_name" ]; then
-    echo "❌ SDK name cannot be empty. Exiting..."
-    exit 1
+    sdk_name="$default_sdk_name"
+    echo "Using default: $sdk_name"
 fi
 
 echo ""
