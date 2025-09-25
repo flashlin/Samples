@@ -1,6 +1,8 @@
 using CodeBoyServer.Models;
 using CodeBoyServer.Services;
 using Microsoft.AspNetCore.Mvc;
+using CodeBoyLib.Services;
+using CodeBoyLib.Models;
 
 namespace CodeBoyServer.ApiHandlers
 {
@@ -18,6 +20,11 @@ namespace CodeBoyServer.ApiHandlers
             app.MapPost("/api/codegen/genWebApiClient", GenerateWebApiClient)
                 .WithName("GenerateWebApiClient")
                 .WithDescription("Generate Web API client code from Swagger URL")
+                .WithTags("CodeGeneration")
+                .WithOpenApi();
+            
+            app.MapPost("/api/codegen/buildWebApiClientNupkgs", BuildWebApiClientNupkg)
+                .WithDescription("Build Web API client nupkg from Swagger URL")
                 .WithTags("CodeGeneration")
                 .WithOpenApi();
         }
@@ -52,6 +59,78 @@ namespace CodeBoyServer.ApiHandlers
 
             // Generate and return code
             return await codeGenService.GenerateCode(args);
+        }
+
+        /// <summary>
+        /// Build Web API client nupkg endpoint handler
+        /// </summary>
+        /// <param name="request">Build request</param>
+        /// <returns>File download response for the generated .nupkg file</returns>
+        private static async Task<IResult> BuildWebApiClientNupkg(
+            [FromBody] BuildWebApiClientNupkgRequest request)
+        {
+            // Validate request
+            if (string.IsNullOrWhiteSpace(request.SdkName))
+            {
+                return Results.BadRequest("SdkName is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.SwaggerUrl))
+            {
+                return Results.BadRequest("SwaggerUrl is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.NupkgName))
+            {
+                return Results.BadRequest("NupkgName is required");
+            }
+
+            // Parse Swagger API information from URL
+            var swaggerParser = new SwaggerUiParser();
+            var apiInfo = await swaggerParser.ParseFromJsonUrlAsync(request.SwaggerUrl);
+
+            // Set up output directory 
+            var outputPath = Path.Combine(Path.GetTempPath(), $"CodeBoy_{Guid.NewGuid():N}");
+            Directory.CreateDirectory(outputPath);
+
+            // Build the Swagger client using GenSwaggerClientWorkflow
+            var workflow = new GenSwaggerClientWorkflow();
+            var sdkVersion = "1.0.0"; // Default version, could be configurable
+            var result = await workflow.Build(request.SdkName, apiInfo, outputPath, request.NupkgName, sdkVersion);
+
+            if (!result.Success)
+            {
+                var errorMessage = result.Errors.Any() 
+                    ? string.Join("; ", result.Errors)
+                    : "Unknown error occurred during build process";
+                return Results.Problem(
+                    detail: errorMessage,
+                    statusCode: 500,
+                    title: "Build Failed"
+                );
+            }
+
+            // Find the generated .nupkg file
+            var nupkgFile = Path.Combine(outputPath, $"{request.NupkgName}.{sdkVersion}.nupkg");
+            if (!File.Exists(nupkgFile))
+            {
+                return Results.Problem(
+                    detail: $"Generated .nupkg file not found at: {nupkgFile}",
+                    statusCode: 500,
+                    title: "File Not Found"
+                );
+            }
+
+            // Read the file for download
+            var fileBytes = await File.ReadAllBytesAsync(nupkgFile);
+            var fileName = Path.GetFileName(nupkgFile);
+
+            // Return file download response
+            return Results.File(
+                fileContents: fileBytes,
+                contentType: "application/octet-stream",
+                fileDownloadName: fileName
+            );
         }
     }
 }
