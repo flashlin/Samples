@@ -103,6 +103,37 @@ namespace CodeBoyLib.Services
     }
 
     /// <summary>
+    /// Parameters for building a Swagger client
+    /// </summary>
+    public class GenSwaggerClientBuildParams
+    {
+        /// <summary>
+        /// Name of the SDK to generate
+        /// </summary>
+        public required string SdkName { get; set; }
+
+        /// <summary>
+        /// Swagger API information
+        /// </summary>
+        public required SwaggerApiInfo ApiInfo { get; set; }
+
+        /// <summary>
+        /// Base output path for all build operations
+        /// </summary>
+        public required string OutputPath { get; set; }
+
+        /// <summary>
+        /// NuGet package name
+        /// </summary>
+        public required string NupkgName { get; set; }
+
+        /// <summary>
+        /// SDK version for the generated package
+        /// </summary>
+        public string SdkVersion { get; set; } = "1.0.0";
+    }
+
+    /// <summary>
     /// Factory service for generating complete Swagger client projects
     /// </summary>
     public class GenSwaggerClientWorkflow
@@ -126,17 +157,13 @@ namespace CodeBoyLib.Services
         /// <summary>
         /// Generates and builds a complete Swagger client project for multiple target frameworks
         /// </summary>
-        /// <param name="sdkName">Name of the SDK to generate</param>
-        /// <param name="apiInfo">Swagger API information</param>
-        /// <param name="outputPath">Base output path for all build operations</param>
+        /// <param name="buildParams">Build parameters</param>
         /// <returns>Generation and build result</returns>
-        public async Task<GenSwaggerClientResult> Build(string sdkName, 
-            SwaggerApiInfo apiInfo, string outputPath, string nupkgName, 
-            string sdkVersion)
+        public async Task<GenSwaggerClientResult> Build(GenSwaggerClientBuildParams buildParams)
         {
             var result = new GenSwaggerClientResult
             {
-                SdkName = sdkName
+                SdkName = buildParams.SdkName
             };
 
             var startTime = DateTime.Now;
@@ -146,16 +173,16 @@ namespace CodeBoyLib.Services
             try
             {
                 result.ProcessLog.Add($"🚀 Starting multi-target build for frameworks: {string.Join(", ", targetFrameworks)}");
-                result.ProcessLog.Add($"📁 Using output path: {outputPath}");
+                result.ProcessLog.Add($"📁 Using output path: {buildParams.OutputPath}");
 
                 // Ensure output directory exists
-                Directory.CreateDirectory(outputPath);
+                Directory.CreateDirectory(buildParams.OutputPath);
 
                 // Build for each target framework
-                await BuildAllFrameworks(sdkName, apiInfo, targetFrameworks, result, outputPathList, outputPath, sdkVersion);
+                await BuildAllFrameworks(buildParams.SdkName, buildParams.ApiInfo, targetFrameworks, result, outputPathList, buildParams.OutputPath, buildParams.SdkVersion);
 
                 // Generate NuGet package if any frameworks were successful
-                await GenerateNuGetPackage(nupkgName, outputPathList, result, outputPath, sdkVersion);
+                await GenerateNuGetPackage(buildParams.NupkgName, outputPathList, result, buildParams.OutputPath, buildParams.SdkVersion);
 
                 // Finalize the multi-target build result
                 FinalizeMultiTargetResult(result, outputPathList, targetFrameworks, startTime);

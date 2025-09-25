@@ -95,8 +95,15 @@ namespace CodeBoyServer.ApiHandlers
 
             // Build the Swagger client using GenSwaggerClientWorkflow
             var workflow = new GenSwaggerClientWorkflow();
-            var sdkVersion = "1.0.0"; // Default version, could be configurable
-            var result = await workflow.Build(request.SdkName, apiInfo, outputPath, request.NupkgName, sdkVersion);
+            var buildParams = new GenSwaggerClientBuildParams
+            {
+                SdkName = request.SdkName,
+                ApiInfo = apiInfo,
+                OutputPath = outputPath,
+                NupkgName = request.NupkgName,
+                SdkVersion = "1.0.0" // Default version, could be configurable
+            };
+            var result = await workflow.Build(buildParams);
 
             if (!result.Success)
             {
@@ -111,7 +118,7 @@ namespace CodeBoyServer.ApiHandlers
             }
 
             // Find the generated .nupkg file
-            var nupkgFile = Path.Combine(outputPath, $"{request.NupkgName}.{sdkVersion}.nupkg");
+            var nupkgFile = Path.Combine(outputPath, $"{buildParams.NupkgName}.{buildParams.SdkVersion}.nupkg");
             if (!File.Exists(nupkgFile))
             {
                 return Results.Problem(
