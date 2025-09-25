@@ -256,7 +256,6 @@ namespace CodeBoyLib.Services
             
             // Generate constructors
             GeneratePrimaryConstructor(output, sdkName, className);
-            GenerateBackwardCompatibilityConstructor(output, sdkName, className);
 
             // Generate methods for each endpoint
             foreach (var endpoint in endpoints)
@@ -323,25 +322,6 @@ namespace CodeBoyLib.Services
             output.WriteLine("_httpClient.Timeout = TimeSpan.FromSeconds(_config.TimeoutSeconds.Value);");
             output.Indent--;
             output.WriteLine("}");
-            
-            output.Indent--;
-            output.WriteLine("}");
-            output.WriteLine();
-        }
-
-        private void GenerateBackwardCompatibilityConstructor(IndentStringBuilder output, string sdkName, string className)
-        {
-            output.WriteLine($"/// <summary>");
-            output.WriteLine($"/// Initializes a new instance of {className} (backward compatibility)");
-            output.WriteLine($"/// </summary>");
-            output.WriteLine($"/// <param name=\"httpClient\">HTTP client instance</param>");
-            output.WriteLine($"/// <param name=\"baseUrl\">Base URL for the API</param>");
-            output.WriteLine($"public {className}(HttpClient httpClient, string baseUrl)");
-            output.WriteLine("{");
-            output.Indent++;
-            
-            output.WriteLine("_httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));");
-            output.WriteLine($"_config = new {sdkName}ClientConfig {{ BaseUrl = baseUrl.TrimEnd('/') }};");
             
             output.Indent--;
             output.WriteLine("}");
