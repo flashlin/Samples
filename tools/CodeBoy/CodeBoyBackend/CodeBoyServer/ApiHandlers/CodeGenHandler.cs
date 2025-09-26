@@ -118,11 +118,6 @@ namespace CodeBoyServer.ApiHandlers
             );
         }
 
-        /// <summary>
-        /// Build database model nupkg endpoint handler
-        /// </summary>
-        /// <param name="request">Build request</param>
-        /// <returns>File download response for the generated .nupkg file</returns>
         private static async Task<IResult> BuildDatabaseModelNupkg(
             [FromBody] BuildDatabaseModelNupkgRequest request,
             IGenDatabaseModelWorkflow workflow)
