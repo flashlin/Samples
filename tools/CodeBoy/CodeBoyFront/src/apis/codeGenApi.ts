@@ -11,6 +11,7 @@ export interface BuildWebApiClientNupkgRequest {
   sdkName: string;
   swaggerUrl: string;
   nupkgName: string;
+  sdkVersion: string;
 }
 
 // Code generation API

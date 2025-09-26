@@ -68,6 +68,24 @@
             </p>
           </div>
 
+          <!-- SDK Version -->
+          <div>
+            <label for="sdkVersion" class="block text-sm font-medium text-gray-300 mb-2">
+              SDK Version
+            </label>
+            <input
+              id="sdkVersion"
+              v-model="formData.sdkVersion"
+              type="text"
+              placeholder="e.g., 1.0.0"
+              class="w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white placeholder-gray-500"
+              required
+            />
+            <p class="mt-1 text-sm text-gray-400">
+              Version number for the generated SDK package
+            </p>
+          </div>
+
           <!-- Build Button -->
           <div class="pt-4">
             <button
@@ -129,7 +147,8 @@ import { codeGenApi, type BuildWebApiClientNupkgRequest } from '@/apis/codeGenAp
 const formData = reactive<BuildWebApiClientNupkgRequest>({
   sdkName: '',
   swaggerUrl: '',
-  nupkgName: ''
+  nupkgName: '',
+  sdkVersion: '1.0.0'
 })
 
 // State

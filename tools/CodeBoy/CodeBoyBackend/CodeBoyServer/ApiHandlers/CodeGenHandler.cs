@@ -101,7 +101,7 @@ namespace CodeBoyServer.ApiHandlers
                 ApiInfo = apiInfo,
                 OutputPath = outputPath,
                 NupkgName = request.NupkgName,
-                SdkVersion = "1.0.0" // Default version, could be configurable
+                SdkVersion = request.SdkVersion
             };
             var result = await workflow.Build(buildParams);
 
