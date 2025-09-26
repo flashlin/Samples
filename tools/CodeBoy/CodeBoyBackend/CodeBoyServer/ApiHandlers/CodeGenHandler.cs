@@ -137,7 +137,7 @@ namespace CodeBoyServer.ApiHandlers
         /// <returns>File download response for the generated .nupkg file</returns>
         private static async Task<IResult> BuildDatabaseModelNupkg(
             [FromBody] BuildDatabaseModelNupkgRequest request,
-            GenDatabaseModelWorkflow workflow)
+            IGenDatabaseModelWorkflow workflow)
         {
             // Set up output directory 
             var outputPath = Path.Combine(Path.GetTempPath(), $"CodeBoy_DB_{Guid.NewGuid():N}");

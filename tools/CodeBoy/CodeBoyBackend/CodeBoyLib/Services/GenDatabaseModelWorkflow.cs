@@ -119,7 +119,7 @@ namespace CodeBoyLib.Services
     /// </summary>
     public class GenDatabaseModelWorkflow : IGenDatabaseModelWorkflow
     {
-        private readonly DatabaseModelGenerator _databaseModelGenerator;
+        private readonly IDatabaseModelGenerator _databaseModelGenerator;
         private readonly NupkgFileGenerator _nupkgGenerator;
         private readonly ILogger<GenDatabaseModelWorkflow> _logger;
 
@@ -127,12 +127,16 @@ namespace CodeBoyLib.Services
         /// Initializes a new instance of GenDatabaseModelWorkflow
         /// </summary>
         /// <param name="logger">Logger instance</param>
-        /// <param name="databaseModelGeneratorLogger">Logger for DatabaseModelGenerator</param>
-        public GenDatabaseModelWorkflow(ILogger<GenDatabaseModelWorkflow> logger, ILogger<DatabaseModelGenerator> databaseModelGeneratorLogger)
+        /// <param name="databaseModelGenerator">Database model generator service</param>
+        /// <param name="nupkgGenerator">NuGet package generator service</param>
+        public GenDatabaseModelWorkflow(
+            ILogger<GenDatabaseModelWorkflow> logger, 
+            IDatabaseModelGenerator databaseModelGenerator,
+            NupkgFileGenerator nupkgGenerator)
         {
             _logger = logger;
-            _databaseModelGenerator = new DatabaseModelGenerator(databaseModelGeneratorLogger);
-            _nupkgGenerator = new NupkgFileGenerator();
+            _databaseModelGenerator = databaseModelGenerator;
+            _nupkgGenerator = nupkgGenerator;
         }
 
         /// <summary>

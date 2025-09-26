@@ -17,8 +17,8 @@ namespace CodeBoyLib
         public static IServiceCollection AddCodeBoyServices(this IServiceCollection services)
         {
             // Register database model generation services
-            services.AddScoped<DatabaseModelGenerator>();
-            services.AddScoped<GenDatabaseModelWorkflow>();
+            services.AddScoped<IDatabaseModelGenerator, DatabaseModelGenerator>();
+            services.AddScoped<IGenDatabaseModelWorkflow, GenDatabaseModelWorkflow>();
             
             // Register NuGet package generation service
             services.AddScoped<NupkgFileGenerator>();
