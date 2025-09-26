@@ -183,9 +183,8 @@ const buildNupkg = async () => {
     // Call API to build the NuPkg
     const blob = await codeGenApi.buildWebApiClientNupkg(formData)
     
-    // Generate filename for download
-    const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, '')
-    const filename = `${formData.nupkgName}_${timestamp}.nupkg`
+    // Generate filename for download (should match backend naming convention)
+    const filename = `${formData.nupkgName}.${formData.sdkVersion}.nupkg`
     
     // Download the file
     downloadFile(blob, filename)
