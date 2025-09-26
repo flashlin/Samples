@@ -30,7 +30,7 @@ export const codeGenApi = {
    * @returns File download blob
    */
   buildWebApiClientNupkg(params: BuildWebApiClientNupkgRequest): Promise<Blob> {
-    return request.post('/codegen/buildWebApiClientNupkgs', params, {
+    return request.post('/codegen/buildWebApiClientNupkg', params, {
       responseType: 'blob'
     });
   },

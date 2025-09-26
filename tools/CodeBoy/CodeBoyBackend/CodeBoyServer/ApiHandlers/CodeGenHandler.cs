@@ -23,7 +23,7 @@ namespace CodeBoyServer.ApiHandlers
                 .WithTags("CodeGeneration")
                 .WithOpenApi();
             
-            app.MapPost("/api/codegen/buildWebApiClientNupkgs", BuildWebApiClientNupkg)
+            app.MapPost("/api/codegen/buildWebApiClientNupkg", BuildWebApiClientNupkg)
                 .WithDescription("Build Web API client nupkg from Swagger URL")
                 .WithTags("CodeGeneration")
                 .WithOpenApi();
