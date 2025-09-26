@@ -27,6 +27,11 @@ namespace CodeBoyServer.ApiHandlers
                 .WithDescription("Build Web API client nupkg from Swagger URL")
                 .WithTags("CodeGeneration")
                 .WithOpenApi();
+            
+            app.MapPost("/api/codegen/buildDatabaseModelNupkg", BuildDatabaseModelNupkg)
+                .WithDescription("Build database model nupkg from database connection")
+                .WithTags("CodeGeneration")
+                .WithOpenApi();
         }
 
         /// <summary>
@@ -115,6 +120,69 @@ namespace CodeBoyServer.ApiHandlers
             // Read the file for download
             var fileBytes = await File.ReadAllBytesAsync(nupkgFile);
             var fileName = Path.GetFileName(nupkgFile);
+
+            // Return file download response
+            return Results.File(
+                fileContents: fileBytes,
+                contentType: "application/octet-stream",
+                fileDownloadName: fileName
+            );
+        }
+
+        /// <summary>
+        /// Build database model nupkg endpoint handler
+        /// </summary>
+        /// <param name="request">Build request</param>
+        /// <returns>File download response for the generated .nupkg file</returns>
+        private static async Task<IResult> BuildDatabaseModelNupkg(
+            [FromBody] BuildDatabaseModelNupkgRequest request)
+        {
+            // Set up output directory 
+            var outputPath = Path.Combine(Path.GetTempPath(), $"CodeBoy_DB_{Guid.NewGuid():N}");
+            Directory.CreateDirectory(outputPath);
+
+            // Build the database model using GenDatabaseModelWorkflow
+            var workflow = new GenDatabaseModelWorkflow();
+            var buildParams = new GenDatabaseModelBuildParams
+            {
+                DatabaseServer = request.DatabaseServer,
+                LoginId = request.LoginId,
+                LoginPassword = request.LoginPassword,
+                DatabaseName = request.DatabaseName,
+                NamespaceName = request.NamespaceName,
+                SdkName = request.SdkName,
+                SdkVersion = request.SdkVersion,
+                TargetFrameworks = request.TargetFrameworks,
+                OutputPath = outputPath
+            };
+
+            var result = await workflow.Build(buildParams);
+
+            if (!result.Success)
+            {
+                var errorMessage = result.Errors.Any() 
+                    ? string.Join("; ", result.Errors)
+                    : "Unknown error occurred during database model build process";
+                return Results.Problem(
+                    detail: errorMessage,
+                    statusCode: 500,
+                    title: "Database Model Build Failed"
+                );
+            }
+
+            // Check if NuGet package was generated
+            if (string.IsNullOrEmpty(result.NupkgFile) || !File.Exists(result.NupkgFile))
+            {
+                return Results.Problem(
+                    detail: $"Generated .nupkg file not found at: {result.NupkgFile}",
+                    statusCode: 500,
+                    title: "NuGet Package Not Found"
+                );
+            }
+
+            // Read the file for download
+            var fileBytes = await File.ReadAllBytesAsync(result.NupkgFile);
+            var fileName = Path.GetFileName(result.NupkgFile);
 
             // Return file download response
             return Results.File(
