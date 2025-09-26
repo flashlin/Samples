@@ -24,6 +24,22 @@ namespace CodeBoyLib.Services
     }
 
     /// <summary>
+    /// Output structure for EF generation result
+    /// </summary>
+    public class EfGenerationOutput
+    {
+        /// <summary>
+        /// Path to the generated .csproj file (filename with path)
+        /// </summary>
+        public string CsprojFilePath { get; set; } = string.Empty;
+
+        /// <summary>
+        /// List of generated code files
+        /// </summary>
+        public List<EfGeneratedFile> CodeFiles { get; set; } = new List<EfGeneratedFile>();
+    }
+
+    /// <summary>
     /// Parameters for EF Database First generation
     /// </summary>
     public class DatabaseGenerationParams
@@ -90,6 +106,11 @@ namespace CodeBoyLib.Services
         public List<EfGeneratedFile> GeneratedFiles { get; set; } = new List<EfGeneratedFile>();
 
         /// <summary>
+        /// Path to the generated .csproj file
+        /// </summary>
+        public string CsprojFilePath { get; set; } = string.Empty;
+
+        /// <summary>
         /// Any errors that occurred during generation
         /// </summary>
         public List<string> Errors { get; set; } = new List<string>();
@@ -119,11 +140,15 @@ namespace CodeBoyLib.Services
         /// Generates EF Code First models from database using scaffolding
         /// </summary>
         /// <param name="parameters">Database generation parameters</param>
-        /// <returns>List of generated files with their content</returns>
-        public async Task<List<EfGeneratedFile>> GenerateEfCode(DatabaseGenerationParams parameters)
+        /// <returns>EF generation output containing csproj path and code files</returns>
+        public async Task<EfGenerationOutput> GenerateEfCode(DatabaseGenerationParams parameters)
         {
             var result = await GenerateEfCodeWithResult(parameters);
-            return result.GeneratedFiles;
+            return new EfGenerationOutput
+            {
+                CsprojFilePath = result.CsprojFilePath,
+                CodeFiles = result.GeneratedFiles
+            };
         }
 
         /// <summary>
@@ -245,6 +270,9 @@ namespace CodeBoyLib.Services
             var csprojContent = GenerateScaffoldingCsproj(parameters);
             var csprojPath = Path.Combine(tempDirectory, $"{parameters.SdkName}.csproj");
             await File.WriteAllTextAsync(csprojPath, csprojContent);
+
+            // Store the csproj file path in the result
+            result.CsprojFilePath = csprojPath;
 
             result.ProcessLog.Add($"✅ Created project file: {csprojPath}");
         }
