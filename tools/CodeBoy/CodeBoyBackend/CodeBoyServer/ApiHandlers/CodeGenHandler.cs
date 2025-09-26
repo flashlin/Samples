@@ -69,22 +69,6 @@ namespace CodeBoyServer.ApiHandlers
         private static async Task<IResult> BuildWebApiClientNupkg(
             [FromBody] BuildWebApiClientNupkgRequest request)
         {
-            // Validate request
-            if (string.IsNullOrWhiteSpace(request.SdkName))
-            {
-                return Results.BadRequest("SdkName is required");
-            }
-
-            if (string.IsNullOrWhiteSpace(request.SwaggerUrl))
-            {
-                return Results.BadRequest("SwaggerUrl is required");
-            }
-
-            if (string.IsNullOrWhiteSpace(request.NupkgName))
-            {
-                return Results.BadRequest("NupkgName is required");
-            }
-
             // Parse Swagger API information from URL
             var swaggerParser = new SwaggerUiParser();
             var apiInfo = await swaggerParser.ParseFromJsonUrlAsync(request.SwaggerUrl);
