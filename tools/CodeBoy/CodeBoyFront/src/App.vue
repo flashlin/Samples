@@ -11,7 +11,7 @@ const route = useRoute()
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center space-x-8">
             <h1 class="text-xl font-semibold text-white">
-              CodeBoy Frontend
+              CodeBoy
             </h1>
             
             <!-- Navigation -->
@@ -39,7 +39,7 @@ const route = useRoute()
           
           <div class="flex items-center space-x-4">
             <span class="text-sm text-gray-400">
-              Vue3 + TypeScript + Tailwind
+              v1.0
             </span>
           </div>
         </div>
