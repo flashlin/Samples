@@ -135,7 +135,7 @@ namespace CodeBoyLib.Services
     /// <summary>
     /// Service for generating Entity Framework Code First models from existing databases
     /// </summary>
-    public class DatabaseModelGenerator
+    public class DatabaseModelGenerator : IDatabaseModelGenerator
     {
         private readonly ILogger<DatabaseModelGenerator> _logger;
 

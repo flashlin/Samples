@@ -117,7 +117,7 @@ namespace CodeBoyLib.Services
     /// <summary>
     /// Workflow service for generating complete database model projects with multiple target frameworks
     /// </summary>
-    public class GenDatabaseModelWorkflow
+    public class GenDatabaseModelWorkflow : IGenDatabaseModelWorkflow
     {
         private readonly DatabaseModelGenerator _databaseModelGenerator;
         private readonly NupkgFileGenerator _nupkgGenerator;
