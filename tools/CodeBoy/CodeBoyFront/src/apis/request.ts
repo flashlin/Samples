@@ -3,7 +3,7 @@ import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosR
 // Create axios instance
 const request: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_APP_API_BASE_URL || '/api',
-  timeout: 10000,
+  timeout: 1000 * 60 * 3,
   headers: {
     'Content-Type': 'application/json',
   },
