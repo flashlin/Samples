@@ -47,7 +47,7 @@ USER appuser
 EXPOSE 8080
 
 # Set environment variables
-ENV ASPNETCORE_URLS=http://+:8080
+ENV HTTP_PORTS=8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Configure .NET environment variables to use /tmp for all dotnet operations

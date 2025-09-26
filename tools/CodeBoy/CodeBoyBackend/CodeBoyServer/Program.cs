@@ -47,7 +47,11 @@ var app = builder.Build();
     app.UseCors("DevPolicy");
 }
 
-app.UseHttpsRedirection();
+// Only use HTTPS redirection in production when HTTPS is properly configured
+if (app.Environment.IsProduction() && app.Configuration["HTTPS_PORTS"] != null)
+{
+    app.UseHttpsRedirection();
+}
 
 // Configure API endpoints
 CodeGenHandler.Map(app);
