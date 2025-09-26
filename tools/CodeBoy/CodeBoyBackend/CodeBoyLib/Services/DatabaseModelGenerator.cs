@@ -96,6 +96,17 @@ namespace CodeBoyLib.Services
     /// </summary>
     public class EfGenerationResult
     {
+        private readonly ILogger? _logger;
+
+        /// <summary>
+        /// Initializes a new instance of EfGenerationResult
+        /// </summary>
+        /// <param name="logger">Optional logger instance</param>
+        public EfGenerationResult(ILogger? logger = null)
+        {
+            _logger = logger;
+        }
+
         /// <summary>
         /// Whether the generation was successful
         /// </summary>
@@ -130,6 +141,17 @@ namespace CodeBoyLib.Services
         /// Total duration of the process
         /// </summary>
         public TimeSpan Duration { get; set; }
+
+        /// <summary>
+        /// Adds a message to the process log and logs it using the logger
+        /// </summary>
+        /// <param name="message">The message to log</param>
+        /// <param name="logLevel">The log level to use (default: Information)</param>
+        public void AddProcessLog(string message, LogLevel logLevel = LogLevel.Information)
+        {
+            ProcessLog.Add(message);
+            _logger?.Log(logLevel, "{Message}", message);
+        }
     }
 
     /// <summary>
@@ -148,17 +170,6 @@ namespace CodeBoyLib.Services
             _logger = logger;
         }
 
-        /// <summary>
-        /// Adds a message to the process log and logs it using the logger
-        /// </summary>
-        /// <param name="result">The EfGenerationResult to add the log to</param>
-        /// <param name="message">The message to log</param>
-        /// <param name="logLevel">The log level to use (default: Information)</param>
-        private void AddProcessLog(EfGenerationResult result, string message, LogLevel logLevel = LogLevel.Information)
-        {
-            result.ProcessLog.Add(message);
-            _logger.Log(logLevel, "{Message}", message);
-        }
         /// <summary>
         /// Generates EF Code First models from database using scaffolding
         /// </summary>
@@ -181,12 +192,12 @@ namespace CodeBoyLib.Services
         /// <returns>Detailed generation result</returns>
         public async Task<EfGenerationResult> GenerateEfCodeWithResult(DatabaseGenerationParams parameters)
         {
-            var result = new EfGenerationResult();
+            var result = new EfGenerationResult(_logger);
             var startTime = DateTime.Now;
 
             try
             {
-                AddProcessLog(result, "🚀 Starting EF Code First generation from database...");
+                result.AddProcessLog("🚀 Starting EF Code First generation from database...");
                 
                 // Validate parameters
                 if (!ValidateParameters(parameters, result))
@@ -196,7 +207,7 @@ namespace CodeBoyLib.Services
 
                 // Create temporary directory for scaffolding
                 result.TempDirectory = CreateTempDirectory();
-                AddProcessLog(result, $"📁 Created temp directory: {result.TempDirectory}");
+                result.AddProcessLog($"📁 Created temp directory: {result.TempDirectory}");
 
                 // Create minimal project structure for scaffolding
                 await CreateScaffoldingProject(result.TempDirectory, parameters, result);
@@ -216,7 +227,7 @@ namespace CodeBoyLib.Services
                 }
 
                 result.Duration = DateTime.Now - startTime;
-                AddProcessLog(result, $"🏁 EF generation completed in {result.Duration.TotalSeconds:F2} seconds");
+                result.AddProcessLog($"🏁 EF generation completed in {result.Duration.TotalSeconds:F2} seconds");
 
                 return result;
             }
@@ -224,7 +235,7 @@ namespace CodeBoyLib.Services
             {
                 result.Success = false;
                 result.Errors.Add($"Generation exception: {ex.Message}");
-                AddProcessLog(result, $"💥 Fatal error: {ex.Message}", LogLevel.Error);
+                result.AddProcessLog($"💥 Fatal error: {ex.Message}", LogLevel.Error);
                 result.Duration = DateTime.Now - startTime;
                 return result;
             }
@@ -258,10 +269,10 @@ namespace CodeBoyLib.Services
             if (errors.Count > 0)
             {
                 result.Errors.AddRange(errors);
-                AddProcessLog(result, "❌ Parameter validation failed", LogLevel.Warning);
+                result.AddProcessLog("❌ Parameter validation failed", LogLevel.Warning);
                 foreach (var error in errors)
                 {
-                    AddProcessLog(result, $"   - {error}", LogLevel.Warning);
+                    result.AddProcessLog($"   - {error}", LogLevel.Warning);
                 }
                 return false;
             }
@@ -287,7 +298,7 @@ namespace CodeBoyLib.Services
         /// </summary>
         private async Task CreateScaffoldingProject(string tempDirectory, DatabaseGenerationParams parameters, EfGenerationResult result)
         {
-            AddProcessLog(result, "🔄 Creating scaffolding project...");
+            result.AddProcessLog("🔄 Creating scaffolding project...");
 
             // Create .csproj file with EF dependencies
             var csprojContent = GenerateScaffoldingCsproj(parameters);
@@ -297,7 +308,7 @@ namespace CodeBoyLib.Services
             // Store the csproj file path in the result
             result.CsprojFilePath = csprojPath;
 
-            AddProcessLog(result, $"✅ Created project file: {csprojPath}");
+            result.AddProcessLog($"✅ Created project file: {csprojPath}");
         }
 
         /// <summary>
@@ -340,14 +351,14 @@ namespace CodeBoyLib.Services
         {
             try
             {
-                AddProcessLog(result, "🔄 Executing EF scaffolding command...");
+                result.AddProcessLog("🔄 Executing EF scaffolding command...");
 
                 // Build connection string
                 var connectionString = BuildConnectionString(parameters);
-                AddProcessLog(result, "🔗 Built connection string (password hidden)");
+                result.AddProcessLog("🔗 Built connection string (password hidden)");
 
                 // Restore packages first
-                AddProcessLog(result, "📦 Restoring NuGet packages...");
+                result.AddProcessLog("📦 Restoring NuGet packages...");
                 var restoreSuccess = await ExecuteDotnetCommand("restore", tempDirectory, result);
                 if (!restoreSuccess)
                 {
@@ -363,12 +374,12 @@ namespace CodeBoyLib.Services
                                     $"--output-dir Models " +
                                     $"--context {parameters.DatabaseName}Context";
 
-                AddProcessLog(result, "⚡ Executing scaffolding command...");
+                result.AddProcessLog("⚡ Executing scaffolding command...");
                 var scaffoldSuccess = await ExecuteDotnetCommand(scaffoldCommand, tempDirectory, result);
 
                 if (scaffoldSuccess)
                 {
-                    AddProcessLog(result, "✅ EF scaffolding completed successfully");
+                    result.AddProcessLog("✅ EF scaffolding completed successfully");
                     return true;
                 }
                 else
@@ -380,7 +391,7 @@ namespace CodeBoyLib.Services
             catch (Exception ex)
             {
                 result.Errors.Add($"Scaffolding execution error: {ex.Message}");
-                AddProcessLog(result, $"❌ Scaffolding failed: {ex.Message}", LogLevel.Error);
+                result.AddProcessLog($"❌ Scaffolding failed: {ex.Message}", LogLevel.Error);
                 return false;
             }
         }
@@ -443,7 +454,7 @@ namespace CodeBoyLib.Services
                 // Log output
                 foreach (var line in outputLines)
                 {
-                    AddProcessLog(result, $"   {line}");
+                    result.AddProcessLog($"   {line}");
                 }
 
                 // Log errors if any
@@ -451,7 +462,7 @@ namespace CodeBoyLib.Services
                 {
                     foreach (var line in errorLines)
                     {
-                        AddProcessLog(result, $"   ERROR: {line}", LogLevel.Error);
+                        result.AddProcessLog($"   ERROR: {line}", LogLevel.Error);
                         result.Errors.Add(line);
                     }
                 }
@@ -461,7 +472,7 @@ namespace CodeBoyLib.Services
             catch (Exception ex)
             {
                 result.Errors.Add($"Command execution error: {ex.Message}");
-                AddProcessLog(result, $"❌ Command failed: {ex.Message}", LogLevel.Error);
+                result.AddProcessLog($"❌ Command failed: {ex.Message}", LogLevel.Error);
                 return false;
             }
         }
@@ -473,12 +484,12 @@ namespace CodeBoyLib.Services
         {
             try
             {
-                AddProcessLog(result, "📖 Reading generated files...");
+                result.AddProcessLog("📖 Reading generated files...");
 
                 var modelsDirectory = Path.Combine(tempDirectory, "Models");
                 if (!Directory.Exists(modelsDirectory))
                 {
-                    AddProcessLog(result, "❌ Models directory not found", LogLevel.Warning);
+                    result.AddProcessLog("❌ Models directory not found", LogLevel.Warning);
                     return;
                 }
 
@@ -499,7 +510,7 @@ namespace CodeBoyLib.Services
                         FileContent = fileContent
                     });
 
-                    AddProcessLog(result, $"✅ Read file: {fileName} ({fileContent.Length} characters)");
+                    result.AddProcessLog($"✅ Read file: {fileName} ({fileContent.Length} characters)");
                 }
 
                 // Also check for the context file in the root directory
@@ -516,15 +527,15 @@ namespace CodeBoyLib.Services
                         FileContent = fileContent
                     });
 
-                    AddProcessLog(result, $"✅ Read context file: {fileName} ({fileContent.Length} characters)");
+                    result.AddProcessLog($"✅ Read context file: {fileName} ({fileContent.Length} characters)");
                 }
 
-                AddProcessLog(result, $"📄 Total files read: {result.GeneratedFiles.Count}");
+                result.AddProcessLog($"📄 Total files read: {result.GeneratedFiles.Count}");
             }
             catch (Exception ex)
             {
                 result.Errors.Add($"File reading error: {ex.Message}");
-                AddProcessLog(result, $"❌ Failed to read files: {ex.Message}", LogLevel.Error);
+                result.AddProcessLog($"❌ Failed to read files: {ex.Message}", LogLevel.Error);
             }
         }
 
@@ -552,12 +563,12 @@ namespace CodeBoyLib.Services
                 if (!string.IsNullOrEmpty(result.TempDirectory) && Directory.Exists(result.TempDirectory))
                 {
                     Directory.Delete(result.TempDirectory, true);
-                    AddProcessLog(result, $"🧹 Cleaned up temporary directory: {result.TempDirectory}");
+                    result.AddProcessLog($"🧹 Cleaned up temporary directory: {result.TempDirectory}");
                 }
             }
             catch (Exception ex)
             {
-                AddProcessLog(result, $"⚠️  Warning: Could not clean up temp directory: {ex.Message}", LogLevel.Warning);
+                result.AddProcessLog($"⚠️  Warning: Could not clean up temp directory: {ex.Message}", LogLevel.Warning);
             }
         }
 
