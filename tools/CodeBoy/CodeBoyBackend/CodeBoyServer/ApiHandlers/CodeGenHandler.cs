@@ -75,10 +75,6 @@ namespace CodeBoyServer.ApiHandlers
         private static async Task<IResult> BuildWebApiClientNupkg(
             [FromBody] BuildWebApiClientNupkgRequest request)
         {
-            // Parse Swagger API information from URL
-            var swaggerParser = new SwaggerUiParser();
-            var apiInfo = await swaggerParser.ParseFromJsonUrlAsync(request.SwaggerUrl);
-
             // Set up output directory 
             var outputPath = Path.Combine(Path.GetTempPath(), $"CodeBoy_{Guid.NewGuid():N}");
             Directory.CreateDirectory(outputPath);
@@ -88,7 +84,7 @@ namespace CodeBoyServer.ApiHandlers
             var buildParams = new GenSwaggerClientBuildParams
             {
                 SdkName = request.SdkName,
-                ApiInfo = apiInfo,
+                SwaggerUrl = request.SwaggerUrl,
                 OutputPath = outputPath,
                 NupkgName = request.NupkgName,
                 SdkVersion = request.SdkVersion

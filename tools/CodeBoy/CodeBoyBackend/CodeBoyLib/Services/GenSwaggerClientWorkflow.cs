@@ -113,9 +113,9 @@ namespace CodeBoyLib.Services
         public required string SdkName { get; set; }
 
         /// <summary>
-        /// Swagger API information
+        /// Swagger URL to parse API information from
         /// </summary>
-        public required SwaggerApiInfo ApiInfo { get; set; }
+        public required string SwaggerUrl { get; set; }
 
         /// <summary>
         /// Base output path for all build operations
@@ -142,6 +142,7 @@ namespace CodeBoyLib.Services
         private readonly SwaggerClientCsprojCodeGenerator _csprojGenerator;
         private readonly CsprojService _csprojService;
         private readonly NupkgFileGenerator _nupkgGenerator;
+        private readonly SwaggerUiParser _swaggerParser;
 
         /// <summary>
         /// Initializes a new instance of GenSwaggerClientWorkflow
@@ -152,6 +153,7 @@ namespace CodeBoyLib.Services
             _csprojGenerator = new SwaggerClientCsprojCodeGenerator();
             _csprojService = new CsprojService();
             _nupkgGenerator = new NupkgFileGenerator();
+            _swaggerParser = new SwaggerUiParser();
         }
 
         /// <summary>
@@ -174,12 +176,17 @@ namespace CodeBoyLib.Services
             {
                 result.ProcessLog.Add($"🚀 Starting multi-target build for frameworks: {string.Join(", ", targetFrameworks)}");
                 result.ProcessLog.Add($"📁 Using output path: {buildParams.OutputPath}");
+                result.ProcessLog.Add($"🔗 Parsing Swagger from URL: {buildParams.SwaggerUrl}");
+
+                // Parse Swagger API information from URL
+                var apiInfo = await _swaggerParser.ParseFromJsonUrlAsync(buildParams.SwaggerUrl);
+                result.ProcessLog.Add($"✅ Successfully parsed Swagger API information");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(buildParams.OutputPath);
 
                 // Build for each target framework
-                await BuildAllFrameworks(buildParams.SdkName, buildParams.ApiInfo, targetFrameworks, result, outputPathList, buildParams.OutputPath, buildParams.SdkVersion);
+                await BuildAllFrameworks(buildParams.SdkName, apiInfo, targetFrameworks, result, outputPathList, buildParams.OutputPath, buildParams.SdkVersion);
 
                 // Generate NuGet package if any frameworks were successful
                 await GenerateNuGetPackage(buildParams.NupkgName, outputPathList, result, buildParams.OutputPath, buildParams.SdkVersion);
