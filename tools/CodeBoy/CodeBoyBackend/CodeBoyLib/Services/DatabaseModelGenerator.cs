@@ -62,6 +62,16 @@ namespace CodeBoyLib.Services
         /// SDK version for the generated package
         /// </summary>
         public string SdkVersion { get; set; } = "1.0.0";
+
+        /// <summary>
+        /// Target framework version for the generated project
+        /// </summary>
+        public string TargetFrameworkVersion { get; set; } = "net9.0";
+
+        /// <summary>
+        /// Entity Framework version to use
+        /// </summary>
+        public string EFVersion { get; set; } = "9.0.8";
     }
 
     /// <summary>
@@ -249,19 +259,19 @@ namespace CodeBoyLib.Services
             output.WriteLine("<Project Sdk=\"Microsoft.NET.Sdk\">");
             output.WriteLine();
             output.WriteLine("  <PropertyGroup>");
-            output.WriteLine("    <TargetFramework>net8.0</TargetFramework>");
+            output.WriteLine($"    <TargetFramework>{parameters.TargetFrameworkVersion}</TargetFramework>");
             output.WriteLine("    <ImplicitUsings>enable</ImplicitUsings>");
             output.WriteLine("    <Nullable>enable</Nullable>");
             output.WriteLine("  </PropertyGroup>");
             output.WriteLine();
             output.WriteLine("  <ItemGroup>");
-            output.WriteLine("    <PackageReference Include=\"Microsoft.EntityFrameworkCore\" Version=\"8.0.0\" />");
-            output.WriteLine("    <PackageReference Include=\"Microsoft.EntityFrameworkCore.SqlServer\" Version=\"8.0.0\" />");
-            output.WriteLine("    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Tools\" Version=\"8.0.0\">");
+            output.WriteLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore\" Version=\"{parameters.EFVersion}\" />");
+            output.WriteLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore.SqlServer\" Version=\"{parameters.EFVersion}\" />");
+            output.WriteLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Tools\" Version=\"{parameters.EFVersion}\">");
             output.WriteLine("      <PrivateAssets>all</PrivateAssets>");
             output.WriteLine("      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>");
             output.WriteLine("    </PackageReference>");
-            output.WriteLine("    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Design\" Version=\"8.0.0\">");
+            output.WriteLine($"    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Design\" Version=\"{parameters.EFVersion}\">");
             output.WriteLine("      <PrivateAssets>all</PrivateAssets>");
             output.WriteLine("      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>");
             output.WriteLine("    </PackageReference>");
