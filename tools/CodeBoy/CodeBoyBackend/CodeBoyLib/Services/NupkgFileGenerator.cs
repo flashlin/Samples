@@ -74,10 +74,10 @@ namespace CodeBoyLib.Services
         /// Generates a .nupkg file from multiple project output paths
         /// </summary>
         /// <param name="nupkgFile">Path where the .nupkg file should be created</param>
-        /// <param name="outputPathList">List of output directory paths containing .csproj files</param>
+        /// <param name="csProjectPathList">List of output directory paths containing .csproj files</param>
         /// <param name="sdkVersion"></param>
         /// <returns>True if successful, false otherwise</returns>
-        public bool Generate(string nupkgFile, List<string> outputPathList, string sdkVersion)
+        public bool Generate(string nupkgFile, List<string> csProjectPathList, string sdkVersion)
         {
             try
             {
@@ -97,7 +97,7 @@ namespace CodeBoyLib.Services
 
                 // Collect project information from all output paths
                 var projects = new List<ProjectInfo>();
-                foreach (var outputPath in outputPathList)
+                foreach (var outputPath in csProjectPathList)
                 {
                     var projectInfo = AnalyzeOutputPath(outputPath);
                     if (projectInfo != null)
