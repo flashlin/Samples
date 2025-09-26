@@ -33,6 +33,12 @@ namespace CodeBoyServer.ApiHandlers
                 .WithDescription("Build database model nupkg from database connection")
                 .WithTags("CodeGeneration")
                 .WithOpenApi();
+            
+            app.MapPost("/api/codegen/genTypescriptCodeFromSwagger", GenTypescriptCodeFromSwagger)
+                .WithName("GenTypescriptCodeFromSwagger")
+                .WithDescription("Generate TypeScript API client code from Swagger URL")
+                .WithTags("CodeGeneration")
+                .WithOpenApi();
         }
 
         /// <summary>
@@ -45,25 +51,11 @@ namespace CodeBoyServer.ApiHandlers
             [FromBody] GenWebApiClientRequest request,
             ICodeGenService codeGenService)
         {
-            // Validate request
-            if (string.IsNullOrWhiteSpace(request.SwaggerUrl))
-            {
-                throw new ArgumentException("SwaggerUrl is required");
-            }
-
-            if (string.IsNullOrWhiteSpace(request.SdkName))
-            {
-                throw new ArgumentException("SdkName is required");
-            }
-
-            // Create generation arguments
             var args = new GenWebApiClientArgs
             {
                 SwaggerUrl = request.SwaggerUrl,
                 SdkName = request.SdkName
             };
-
-            // Generate and return code
             return await codeGenService.GenerateCode(args);
         }
 
@@ -187,6 +179,21 @@ namespace CodeBoyServer.ApiHandlers
                 contentType: "application/octet-stream",
                 fileDownloadName: fileName
             );
+        }
+
+        /// <summary>
+        /// Generate TypeScript code from Swagger endpoint handler
+        /// </summary>
+        /// <param name="request">TypeScript generation request</param>
+        /// <returns>Generated TypeScript code</returns>
+        private static async Task<string> GenTypescriptCodeFromSwagger(
+            [FromBody] GenTypescriptCodeFromSwaggerRequest request)
+        {
+            var swaggerParser = new SwaggerUiParser();
+            var apiInfo = await swaggerParser.ParseFromJsonUrlAsync(request.SwaggerUrl);
+
+            var typescriptGenerator = new SwaggerClientTypescriptCodeGenerator();
+            return typescriptGenerator.Generate(request.ApiName, apiInfo);
         }
     }
 }
