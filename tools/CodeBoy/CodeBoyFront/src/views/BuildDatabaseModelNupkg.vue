@@ -317,7 +317,7 @@ const buildNupkg = async () => {
     const blob = await codeGenApi.buildDatabaseModelNupkg(formData)
 
     // Generate filename
-    const filename = `Titansoft.${formData.sdkName}.${formData.sdkVersion}.nupkg`
+    const filename = `${formData.sdkName}.${formData.sdkVersion}.nupkg`
 
     // Trigger download
     downloadBlob(blob, filename)
