@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import CodeGenerator from '@/views/CodeGenerator.vue'
 import BuildSwaggerCSharpSdk from '@/views/BuildSwaggerCSharpSdk.vue'
+import BuildDatabaseModelNupkg from '@/views/BuildDatabaseModelNupkg.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,6 +20,14 @@ const router = createRouter({
       component: BuildSwaggerCSharpSdk,
       meta: {
         title: 'Build Swagger C# SDK'
+      }
+    },
+    {
+      path: '/buildDatabaseModelNupkg',
+      name: 'buildDatabaseModelNupkg',
+      component: BuildDatabaseModelNupkg,
+      meta: {
+        title: 'Build Database Model NuGet Package'
       }
     }
   ]

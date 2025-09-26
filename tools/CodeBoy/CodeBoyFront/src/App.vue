@@ -34,6 +34,15 @@ const route = useRoute()
               >
                 Build C# SDK
               </RouterLink>
+              <RouterLink
+                to="/buildDatabaseModelNupkg"
+                class="px-3 py-2 text-sm font-medium rounded-md transition-colors"
+                :class="route.path === '/buildDatabaseModelNupkg' 
+                  ? 'bg-blue-900 text-blue-300' 
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'"
+              >
+                Build DB Models
+              </RouterLink>
             </nav>
           </div>
           

@@ -14,6 +14,18 @@ export interface BuildWebApiClientNupkgRequest {
   sdkVersion: string;
 }
 
+// Request interface for building database model nupkg
+export interface BuildDatabaseModelNupkgRequest {
+  databaseServer: string;
+  loginId: string;
+  loginPassword: string;
+  databaseName: string;
+  namespaceName: string;
+  sdkName: string;
+  sdkVersion: string;
+  targetFrameworks: string[];
+}
+
 // Code generation API
 export const codeGenApi = {
   /**
@@ -32,6 +44,17 @@ export const codeGenApi = {
    */
   buildWebApiClientNupkg(params: BuildWebApiClientNupkgRequest): Promise<Blob> {
     return request.post('/codegen/buildWebApiClientNupkg', params, {
+      responseType: 'blob'
+    });
+  },
+
+  /**
+   * Build database model nupkg from database connection
+   * @param params Build request parameters
+   * @returns File download blob
+   */
+  buildDatabaseModelNupkg(params: BuildDatabaseModelNupkgRequest): Promise<Blob> {
+    return request.post('/codegen/buildDatabaseModelNupkg', params, {
       responseType: 'blob'
     });
   },
