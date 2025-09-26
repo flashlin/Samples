@@ -361,7 +361,7 @@ namespace CodeBoyLib.Services
                                     $"--context-namespace \"{parameters.NamespaceName}\" " +
                                     $"--force " +
                                     $"--output-dir Models " +
-                                    $"--context {parameters.SdkName}Context";
+                                    $"--context {parameters.DatabaseName}Context";
 
                 AddProcessLog(result, "⚡ Executing scaffolding command...");
                 var scaffoldSuccess = await ExecuteDotnetCommand(scaffoldCommand, tempDirectory, result);
