@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace CodeBoyLib.Services
 {
@@ -120,13 +121,17 @@ namespace CodeBoyLib.Services
     {
         private readonly DatabaseModelGenerator _databaseModelGenerator;
         private readonly NupkgFileGenerator _nupkgGenerator;
+        private readonly ILogger<GenDatabaseModelWorkflow> _logger;
 
         /// <summary>
         /// Initializes a new instance of GenDatabaseModelWorkflow
         /// </summary>
-        public GenDatabaseModelWorkflow()
+        /// <param name="logger">Logger instance</param>
+        /// <param name="databaseModelGeneratorLogger">Logger for DatabaseModelGenerator</param>
+        public GenDatabaseModelWorkflow(ILogger<GenDatabaseModelWorkflow> logger, ILogger<DatabaseModelGenerator> databaseModelGeneratorLogger)
         {
-            _databaseModelGenerator = new DatabaseModelGenerator();
+            _logger = logger;
+            _databaseModelGenerator = new DatabaseModelGenerator(databaseModelGeneratorLogger);
             _nupkgGenerator = new NupkgFileGenerator();
         }
 
