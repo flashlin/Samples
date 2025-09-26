@@ -34,8 +34,10 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 # Copy the published application
 COPY --from=build /app/publish .
 
-# Ensure appuser has access to temp directories for dynamic compilation
-RUN mkdir -p /tmp && chmod 777 /tmp
+# Ensure appuser has access to temp directories for dynamic compilation and .NET operations
+RUN mkdir -p /tmp/.nuget /tmp/.dotnet && \
+    chmod 777 /tmp && \
+    chown -R appuser:appuser /tmp
 
 # Change ownership to appuser
 RUN chown -R appuser:appuser /app
@@ -47,6 +49,13 @@ EXPOSE 8080
 # Set environment variables
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
+
+# Configure .NET environment variables to use /tmp for all dotnet operations
+ENV DOTNET_CLI_HOME=/tmp
+ENV DOTNET_USER_PROFILE=/tmp
+ENV HOME=/tmp
+ENV NUGET_PACKAGES=/tmp/.nuget
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
