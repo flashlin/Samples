@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import CodeGenerator from '@/views/CodeGenerator.vue'
 import BuildSwaggerCSharpSdk from '@/views/BuildSwaggerCSharpSdk.vue'
 import BuildDatabaseModelNupkg from '@/views/BuildDatabaseModelNupkg.vue'
+import UseGrpcProtoGeneratorDoc from '@/views/UseGrpcProtoGeneratorDoc.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,6 +29,14 @@ const router = createRouter({
       component: BuildDatabaseModelNupkg,
       meta: {
         title: 'Build Database Model NuGet Package'
+      }
+    },
+    {
+      path: '/useGrpcProtoGeneratorDoc',
+      name: 'useGrpcProtoGeneratorDoc',
+      component: UseGrpcProtoGeneratorDoc,
+      meta: {
+        title: 'gRPC Proto Generator Documentation'
       }
     }
   ]

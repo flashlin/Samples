@@ -43,6 +43,15 @@ const route = useRoute()
               >
                 Build DB Models
               </RouterLink>
+              <RouterLink
+                to="/useGrpcProtoGeneratorDoc"
+                class="px-3 py-2 text-sm font-medium rounded-md transition-colors"
+                :class="route.path === '/useGrpcProtoGeneratorDoc' 
+                  ? 'bg-blue-900 text-blue-300' 
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'"
+              >
+                gRPC Proto Docs
+              </RouterLink>
             </nav>
           </div>
           
