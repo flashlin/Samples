@@ -137,15 +137,13 @@ namespace CodeBoyServer.ApiHandlers
         /// <returns>File download response for the generated .nupkg file</returns>
         private static async Task<IResult> BuildDatabaseModelNupkg(
             [FromBody] BuildDatabaseModelNupkgRequest request,
-            ILogger<GenDatabaseModelWorkflow> workflowLogger,
-            ILogger<DatabaseModelGenerator> generatorLogger)
+            GenDatabaseModelWorkflow workflow)
         {
             // Set up output directory 
             var outputPath = Path.Combine(Path.GetTempPath(), $"CodeBoy_DB_{Guid.NewGuid():N}");
             Directory.CreateDirectory(outputPath);
 
-            // Build the database model using GenDatabaseModelWorkflow
-            var workflow = new GenDatabaseModelWorkflow(workflowLogger, generatorLogger);
+            // Build the database model using GenDatabaseModelWorkflow (injected)
             var buildParams = new GenDatabaseModelBuildParams
             {
                 DatabaseServer = request.DatabaseServer,

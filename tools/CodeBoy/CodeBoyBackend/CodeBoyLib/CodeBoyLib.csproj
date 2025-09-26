@@ -8,7 +8,9 @@
 
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
     <PackageReference Include="T1.Standard" Version="1.0.86" />
   </ItemGroup>
 

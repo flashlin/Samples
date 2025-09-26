@@ -1,5 +1,6 @@
 using CodeBoyServer.ApiHandlers;
 using CodeBoyServer.Services;
+using CodeBoyLib;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,10 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Register code generation service
+// Register CodeBoy services
+builder.Services.AddCodeBoyServices();
+
+// Register server-specific services
 builder.Services.AddScoped<ICodeGenService, GenWebApiClientService>();
 
 // Add logging
