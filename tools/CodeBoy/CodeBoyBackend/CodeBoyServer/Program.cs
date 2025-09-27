@@ -1,6 +1,7 @@
 using CodeBoyServer.ApiHandlers;
 using CodeBoyServer.Services;
 using CodeBoyLib;
+using CodeBoyLib.MQ;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,7 @@ if (app.Environment.IsProduction() && app.Configuration["HTTPS_PORTS"] != null)
 
 // Configure API endpoints
 CodeGenHandler.Map(app);
+JobsHandler.Map(app);
 
 // Add a health check endpoint
 app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Timestamp = DateTime.UtcNow }))
