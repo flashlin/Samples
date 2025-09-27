@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
 namespace CodeBoyLib.MQ;
@@ -11,8 +10,7 @@ public class MassTransitProgressQueue : IProgressQueue
     public Channel<string> GetOrCreateChannel(string jobId)
         => _channels.GetOrAdd(jobId, _ => Channel.CreateUnbounded<string>());
 
-    public async IAsyncEnumerable<string> Consume(string jobId,
-        [EnumeratorCancellation] CancellationToken ct)
+    public async IAsyncEnumerable<string> Consume(string jobId, CancellationToken ct)
     {
         var channel = GetOrCreateChannel(jobId);
 
