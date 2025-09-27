@@ -122,8 +122,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { codeGenApi } from '@/apis/codeGenApi'
+import { LocalStorageService } from '@/services/LocalStorage'
 
 // Form data
 const form = ref({
@@ -181,4 +182,28 @@ const downloadCode = () => {
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
 }
+
+// Storage key for form data
+const STORAGE_KEY = 'codeGenerator_formData'
+
+// Load form data from storage on mount
+onMounted(async () => {
+  try {
+    const savedData = await LocalStorageService.loadFromStorage<typeof form.value>(STORAGE_KEY)
+    if (savedData) {
+      form.value = savedData
+    }
+  } catch (error) {
+    console.error('Failed to load form data from storage:', error)
+  }
+})
+
+// Save form data to storage on unmount
+onUnmounted(async () => {
+  try {
+    await LocalStorageService.saveToStorage(STORAGE_KEY, form.value)
+  } catch (error) {
+    console.error('Failed to save form data to storage:', error)
+  }
+})
 </script>
