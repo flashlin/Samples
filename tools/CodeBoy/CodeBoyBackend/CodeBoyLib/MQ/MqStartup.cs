@@ -5,7 +5,7 @@ namespace CodeBoyLib.MQ;
 
 public static class MqStartup
 {
-    public static void AddMqService(this IServiceCollection services, bool isDevelopment = false)
+    public static void AddMqService(this IServiceCollection services, bool isMemoryMode = true)
     {
         services.AddSingleton<MassTransitProgressQueue>();
         
@@ -14,7 +14,7 @@ public static class MqStartup
             x.AddConsumer<JobProgressConsumer>();
             x.AddConsumer<StartJobConsumer>();
 
-            if (isDevelopment)
+            if (isMemoryMode)
             {
                 // Use InMemory transport (single machine, no RabbitMQ Server required)
                 x.UsingInMemory((context, cfg) =>
@@ -41,7 +41,7 @@ public static class MqStartup
 
     public static void AddMqServiceInMemory(IServiceCollection services)
     {
-        AddMqService(services, isDevelopment: true);
+        AddMqService(services, isMemoryMode: true);
     }
 
     public static void AddMqServiceRabbitMq(IServiceCollection services, string host = "localhost", 
