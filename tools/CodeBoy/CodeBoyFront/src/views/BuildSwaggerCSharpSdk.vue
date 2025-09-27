@@ -140,8 +140,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { codeGenApi, type BuildWebApiClientNupkgRequest } from '@/apis/codeGenApi'
+import { LocalStorageService } from '@/services/LocalStorage'
 
 // Form data
 const formData = reactive<BuildWebApiClientNupkgRequest>({
@@ -197,6 +198,33 @@ const buildNupkg = async () => {
     isBuilding.value = false
   }
 }
+
+// Storage key for form data
+const STORAGE_KEY = 'buildSwaggerCSharpSdk_formData'
+
+// Load form data from storage on mount
+onMounted(async () => {
+  try {
+    const savedData = await LocalStorageService.loadFromStorage<BuildWebApiClientNupkgRequest>(STORAGE_KEY)
+    if (savedData) {
+      formData.sdkName = savedData.sdkName || ''
+      formData.swaggerUrl = savedData.swaggerUrl || ''
+      formData.nupkgName = savedData.nupkgName || ''
+      formData.sdkVersion = savedData.sdkVersion || '1.0.0'
+    }
+  } catch (error) {
+    console.error('Failed to load form data from storage:', error)
+  }
+})
+
+// Save form data to storage on unmount
+onUnmounted(async () => {
+  try {
+    await LocalStorageService.saveToStorage(STORAGE_KEY, formData)
+  } catch (error) {
+    console.error('Failed to save form data to storage:', error)
+  }
+})
 </script>
 
 <style scoped>
