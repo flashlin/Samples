@@ -262,8 +262,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { codeGenApi, type BuildDatabaseModelNupkgRequest } from '../apis/codeGenApi'
+import { LocalStorageService } from '@/services/LocalStorage'
 
 // Reactive form data
 const formData = reactive<BuildDatabaseModelNupkgRequest>({
@@ -347,4 +348,47 @@ const resetForm = () => {
   successMessage.value = ''
   errorMessage.value = ''
 }
+
+// Storage key for form data
+const STORAGE_KEY = 'buildDatabaseModel_formData'
+
+// Load form data from storage on mount
+onMounted(async () => {
+  try {
+    const savedData = await LocalStorageService.loadFromStorage<BuildDatabaseModelNupkgRequest>(STORAGE_KEY)
+    if (savedData) {
+      // Only restore non-sensitive data, skip password
+      formData.databaseServer = savedData.databaseServer || ''
+      formData.loginId = savedData.loginId || 'sa'
+      formData.databaseName = savedData.databaseName || ''
+      formData.namespaceName = savedData.namespaceName || ''
+      formData.sdkName = savedData.sdkName || ''
+      formData.sdkVersion = savedData.sdkVersion || '1.0.0'
+      formData.targetFrameworks = savedData.targetFrameworks || ['net8.0', 'net9.0']
+      // Note: loginPassword is intentionally not restored for security reasons
+    }
+  } catch (error) {
+    console.error('Failed to load form data from storage:', error)
+  }
+})
+
+// Save form data to storage on unmount
+onUnmounted(async () => {
+  try {
+    // Create a copy without the password for security
+    const dataToSave = {
+      databaseServer: formData.databaseServer,
+      loginId: formData.loginId,
+      loginPassword: '', // Don't save password
+      databaseName: formData.databaseName,
+      namespaceName: formData.namespaceName,
+      sdkName: formData.sdkName,
+      sdkVersion: formData.sdkVersion,
+      targetFrameworks: formData.targetFrameworks
+    }
+    await LocalStorageService.saveToStorage(STORAGE_KEY, dataToSave)
+  } catch (error) {
+    console.error('Failed to save form data to storage:', error)
+  }
+})
 </script>
