@@ -139,14 +139,6 @@ namespace CodeBoyLib.Services
             var propertyType = ConvertToTypeScriptType(property.Type, property.Format, false);
             var optional = property.IsRequired ? "" : "?";
 
-            // Add property documentation if description is available
-            if (!string.IsNullOrWhiteSpace(property.Description))
-            {
-                output.WriteLine("/**");
-                output.WriteLine($" * {property.Description}");
-                output.WriteLine(" */");
-            }
-
             output.WriteLine($"{propertyName}{optional}: {propertyType};");
         }
 
@@ -193,18 +185,6 @@ namespace CodeBoyLib.Services
             var parameters = GenerateMethodParameters(endpoint);
             var returnType = GetReturnType(endpoint);
             var httpMethod = endpoint.HttpMethod.ToLowerCase();
-
-            // Add method documentation
-            if (!string.IsNullOrWhiteSpace(endpoint.Summary))
-            {
-                output.WriteLine("/**");
-                output.WriteLine($" * {endpoint.Summary}");
-                if (!string.IsNullOrWhiteSpace(endpoint.Description))
-                {
-                    output.WriteLine($" * {endpoint.Description}");
-                }
-                output.WriteLine(" */");
-            }
 
             // Generate method signature
             output.Write($"{methodName}({parameters}): Promise<{returnType}> {{");
