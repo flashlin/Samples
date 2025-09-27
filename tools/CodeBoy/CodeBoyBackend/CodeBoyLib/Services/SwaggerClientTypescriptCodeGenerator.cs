@@ -81,7 +81,7 @@ namespace CodeBoyLib.Services
             {
                 foreach (var property in classDefinition.Properties)
                 {
-                    GenerateInterfaceProperty(output, property, classDefinition.RequiredProperties);
+                    GenerateInterfaceProperty(output, property);
                 }
             }
 
@@ -133,13 +133,11 @@ namespace CodeBoyLib.Services
         /// </summary>
         /// <param name="output">String builder for output</param>
         /// <param name="property">Property to generate</param>
-        /// <param name="requiredProperties">List of required property names</param>
-        private void GenerateInterfaceProperty(IndentStringBuilder output, ClassProperty property, List<string> requiredProperties)
+        private void GenerateInterfaceProperty(IndentStringBuilder output, ClassProperty property)
         {
             var propertyName = ToCamelCase(property.Name);
             var propertyType = ConvertToTypeScriptType(property.Type, property.Format, false);
-            var isRequired = property.IsRequired || requiredProperties.Contains(property.Name);
-            var optional = isRequired ? "" : "?";
+            var optional = property.IsRequired ? "" : "?";
 
             // Add property documentation if description is available
             if (!string.IsNullOrWhiteSpace(property.Description))
