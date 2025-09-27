@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeBoyLib", "CodeBoyLib\Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeBoyLibTests", "CodeBoyLibTests\CodeBoyLibTests.csproj", "{D3E4756C-826E-4257-89E7-A9E7DADE0F75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeBoyWebLib", "CodeBoyWebLib\CodeBoyWebLib.csproj", "{36AE2D91-36B6-42F7-9180-386FE7FE363D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +26,10 @@ Global
 		{D3E4756C-826E-4257-89E7-A9E7DADE0F75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3E4756C-826E-4257-89E7-A9E7DADE0F75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3E4756C-826E-4257-89E7-A9E7DADE0F75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36AE2D91-36B6-42F7-9180-386FE7FE363D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36AE2D91-36B6-42F7-9180-386FE7FE363D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36AE2D91-36B6-42F7-9180-386FE7FE363D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36AE2D91-36B6-42F7-9180-386FE7FE363D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
