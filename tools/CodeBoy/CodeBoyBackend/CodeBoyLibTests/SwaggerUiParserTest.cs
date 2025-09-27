@@ -35,6 +35,22 @@ namespace CodeBoyLibTests
                 new { Name = "type", Type = "string", IsRequired = false },
                 new { Name = "message", Type = "string", IsRequired = false }
             ], options => options.ExcludingMissingMembers());
+
+            // Verify Pet class definition exists
+            apiInfo.ClassDefinitions.Should().ContainKey("Pet");
+            var petClass = apiInfo.ClassDefinitions["Pet"];
+            petClass.Should().NotBeNull();
+            petClass.Name.Should().Be("Pet");
+
+            // Verify Pet has required properties with correct IsRequired values
+            petClass.Properties.Should().BeEquivalentTo([
+                new { Name = "id", Type = "long", IsRequired = false },
+                new { Name = "category", Type = "Category", IsRequired = false },
+                new { Name = "name", Type = "string", IsRequired = true },
+                new { Name = "photoUrls", Type = "List<string>", IsRequired = true },
+                new { Name = "tags", Type = "List<Tag>", IsRequired = false },
+                new { Name = "status", Type = "statusEnum", IsRequired = false }
+            ], options => options.ExcludingMissingMembers());
         }
 
         private string LoadEmbeddedResource(string resourceName)
