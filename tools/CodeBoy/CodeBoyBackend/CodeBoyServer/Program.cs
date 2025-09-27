@@ -19,6 +19,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // Register CodeBoy services
 builder.Services.AddCodeBoyServices();
+builder.Services.AddMqService(true);
 
 // Register server-specific services
 builder.Services.AddScoped<ICodeGenService, GenWebApiClientService>();

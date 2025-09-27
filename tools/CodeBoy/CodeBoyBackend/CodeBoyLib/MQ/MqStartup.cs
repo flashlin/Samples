@@ -5,7 +5,7 @@ namespace CodeBoyLib.MQ;
 
 public static class MqStartup
 {
-    public static void AddMqService(IServiceCollection services, bool isDevelopment = false)
+    public static void AddMqService(this IServiceCollection services, bool isDevelopment = false)
     {
         services.AddSingleton<MassTransitProgressQueue>();
         
