@@ -31,9 +31,9 @@ namespace CodeBoyLibTests
 
             // Verify ApiResponse has required properties
             apiResponseClass.Properties.Should().BeEquivalentTo([
-                new { Name = "code", Type = "int" },
-                new { Name = "type", Type = "string" },
-                new { Name = "message", Type = "string" }
+                new { Name = "code", Type = "int", IsRequired = true },
+                new { Name = "type", Type = "string", IsRequired = true },
+                new { Name = "message", Type = "string", IsRequired = true }
             ], options => options.ExcludingMissingMembers());
         }
 
