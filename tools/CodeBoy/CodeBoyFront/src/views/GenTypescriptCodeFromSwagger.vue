@@ -116,8 +116,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { codeGenApi, type GenTypescriptCodeFromSwaggerRequest } from '@/apis/codeGenApi'
+import { LocalStorageService } from '@/services/LocalStorage'
 
 // Form data
 const formData = reactive<GenTypescriptCodeFromSwaggerRequest>({
@@ -166,6 +167,31 @@ const generateCode = async () => {
     isGenerating.value = false
   }
 }
+
+// Storage key for form data
+const STORAGE_KEY = 'genTypescriptCodeFromSwagger_formData'
+
+// Load form data from storage on mount
+onMounted(async () => {
+  try {
+    const savedData = await LocalStorageService.loadFromStorage<GenTypescriptCodeFromSwaggerRequest>(STORAGE_KEY)
+    if (savedData) {
+      formData.apiName = savedData.apiName || ''
+      formData.swaggerUrl = savedData.swaggerUrl || ''
+    }
+  } catch (error) {
+    console.error('Failed to load form data from storage:', error)
+  }
+})
+
+// Save form data to storage on unmount
+onUnmounted(async () => {
+  try {
+    await LocalStorageService.saveToStorage(STORAGE_KEY, formData)
+  } catch (error) {
+    console.error('Failed to save form data to storage:', error)
+  }
+})
 </script>
 
 <style scoped>
