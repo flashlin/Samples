@@ -1,12 +1,11 @@
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace CodeBoyLib.MQ;
 
 public static class MqStartup
 {
-    public static void AddMqService(IServiceCollection services, IHostEnvironment environment)
+    public static void AddMqService(IServiceCollection services, bool isDevelopment = false)
     {
         services.AddSingleton<MassTransitProgressQueue>();
         
@@ -15,7 +14,7 @@ public static class MqStartup
             x.AddConsumer<JobProgressConsumer>();
             x.AddConsumer<StartJobConsumer>();
 
-            if (environment.IsDevelopment())
+            if (isDevelopment)
             {
                 // Use InMemory transport (single machine, no RabbitMQ Server required)
                 x.UsingInMemory((context, cfg) =>
@@ -33,9 +32,38 @@ public static class MqStartup
                         h.Username("guest");
                         h.Password("guest");
                     });
+
                     cfg.ConfigureEndpoints(context);
                 });
             }
+        });
+    }
+
+    public static void AddMqServiceInMemory(IServiceCollection services)
+    {
+        AddMqService(services, isDevelopment: true);
+    }
+
+    public static void AddMqServiceRabbitMq(IServiceCollection services, string host = "localhost", 
+        string username = "guest", string password = "guest", string virtualHost = "/")
+    {
+        services.AddSingleton<MassTransitProgressQueue>();
+        
+        services.AddMassTransit(x =>
+        {
+            x.AddConsumer<JobProgressConsumer>();
+            x.AddConsumer<StartJobConsumer>();
+
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.Host(host, virtualHost, h =>
+                {
+                    h.Username(username);
+                    h.Password(password);
+                });
+
+                cfg.ConfigureEndpoints(context);
+            });
         });
     }
 }
