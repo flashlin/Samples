@@ -35,7 +35,6 @@ namespace CodeBoyServer.ApiHandlers
                 .WithOpenApi();
             
             app.MapPost("/api/codegen/genTypescriptCodeFromSwagger", GenTypescriptCodeFromSwagger)
-                .WithName("GenTypescriptCodeFromSwagger")
                 .WithDescription("Generate TypeScript API client code from Swagger URL")
                 .WithTags("CodeGeneration")
                 .WithOpenApi();

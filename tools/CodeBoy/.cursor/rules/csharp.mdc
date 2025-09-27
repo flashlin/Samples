@@ -1,0 +1,10 @@
+---
+description:
+globs: csharp code
+alwaysApply: true
+---
+
+簡潔的程式碼：
+1. 移除冗餘的註解, 保持程式碼簡潔
+2. 方法內容不要太長, 依照功能區塊提取更小的方法
+3. 不要 try catch, 保持程式碼簡潔

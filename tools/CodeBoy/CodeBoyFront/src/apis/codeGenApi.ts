@@ -26,6 +26,12 @@ export interface BuildDatabaseModelNupkgRequest {
   targetFrameworks: string[];
 }
 
+// Request interface for generating TypeScript code from Swagger
+export interface GenTypescriptCodeFromSwaggerRequest {
+  apiName: string;
+  swaggerUrl: string;
+}
+
 // Code generation API
 export const codeGenApi = {
   /**
@@ -57,5 +63,14 @@ export const codeGenApi = {
     return request.post('/codegen/buildDatabaseModelNupkg', params, {
       responseType: 'blob'
     });
+  },
+
+  /**
+   * Generate TypeScript API client code from Swagger URL
+   * @param params TypeScript generation request parameters
+   * @returns Generated TypeScript code as string
+   */
+  genTypescriptCodeFromSwagger(params: GenTypescriptCodeFromSwaggerRequest): Promise<string> {
+    return request.post('/codegen/genTypescriptCodeFromSwagger', params);
   },
 };
