@@ -30,17 +30,11 @@ namespace CodeBoyLibTests
             apiResponseClass.Name.Should().Be("ApiResponse");
 
             // Verify ApiResponse has required properties
-            var codeProperty = apiResponseClass.Properties.FirstOrDefault(p => p.Name == "code");
-            codeProperty.Should().NotBeNull();
-            codeProperty!.Type.Should().Be("int"); // Swagger V2 converter maps integer to int
-
-            var typeProperty = apiResponseClass.Properties.FirstOrDefault(p => p.Name == "type");
-            typeProperty.Should().NotBeNull();
-            typeProperty!.Type.Should().Be("string");
-
-            var messageProperty = apiResponseClass.Properties.FirstOrDefault(p => p.Name == "message");
-            messageProperty.Should().NotBeNull();
-            messageProperty!.Type.Should().Be("string");
+            apiResponseClass.Properties.Should().BeEquivalentTo([
+                new { Name = "code", Type = "int" },
+                new { Name = "type", Type = "string" },
+                new { Name = "message", Type = "string" }
+            ], options => options.ExcludingMissingMembers());
         }
 
         private string LoadEmbeddedResource(string resourceName)
