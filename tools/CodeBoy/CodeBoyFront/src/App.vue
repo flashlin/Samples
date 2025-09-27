@@ -52,6 +52,15 @@ const route = useRoute()
               >
                 gRPC Proto Docs
               </RouterLink>
+              <RouterLink
+                to="/genTypescriptCodeFromSwagger"
+                class="px-3 py-2 text-sm font-medium rounded-md transition-colors"
+                :class="route.path === '/genTypescriptCodeFromSwagger' 
+                  ? 'bg-blue-900 text-blue-300' 
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'"
+              >
+                Gen TypeScript
+              </RouterLink>
             </nav>
           </div>
           

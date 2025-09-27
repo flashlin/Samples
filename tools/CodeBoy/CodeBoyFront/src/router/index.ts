@@ -3,6 +3,7 @@ import CodeGenerator from '@/views/CodeGenerator.vue'
 import BuildSwaggerCSharpSdk from '@/views/BuildSwaggerCSharpSdk.vue'
 import BuildDatabaseModelNupkg from '@/views/BuildDatabaseModelNupkg.vue'
 import UseGrpcProtoGeneratorDoc from '@/views/UseGrpcProtoGeneratorDoc.vue'
+import GenTypescriptCodeFromSwagger from '@/views/GenTypescriptCodeFromSwagger.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,6 +38,14 @@ const router = createRouter({
       component: UseGrpcProtoGeneratorDoc,
       meta: {
         title: 'gRPC Proto Generator Documentation'
+      }
+    },
+    {
+      path: '/genTypescriptCodeFromSwagger',
+      name: 'genTypescriptCodeFromSwagger',
+      component: GenTypescriptCodeFromSwagger,
+      meta: {
+        title: 'Generate TypeScript Code from Swagger'
       }
     }
   ]
