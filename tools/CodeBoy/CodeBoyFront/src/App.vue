@@ -61,6 +61,15 @@ const route = useRoute()
               >
                 Gen TypeScript
               </RouterLink>
+              <RouterLink
+                to="/genDatabaseDto"
+                class="px-3 py-2 text-sm font-medium rounded-md transition-colors"
+                :class="route.path === '/genDatabaseDto' 
+                  ? 'bg-blue-900 text-blue-300' 
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700'"
+              >
+                Gen Database DTO
+              </RouterLink>
             </nav>
           </div>
           

@@ -4,6 +4,7 @@ import BuildSwaggerCSharpSdk from '@/views/BuildSwaggerCSharpSdk.vue'
 import BuildDatabaseModelNupkg from '@/views/BuildDatabaseModelNupkg.vue'
 import UseGrpcProtoGeneratorDoc from '@/views/UseGrpcProtoGeneratorDoc.vue'
 import GenTypescriptCodeFromSwagger from '@/views/GenTypescriptCodeFromSwagger.vue'
+import GenDatabaseDto from '@/views/GenDatabaseDto.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +47,14 @@ const router = createRouter({
       component: GenTypescriptCodeFromSwagger,
       meta: {
         title: 'Generate TypeScript Code from Swagger'
+      }
+    },
+    {
+      path: '/genDatabaseDto',
+      name: 'genDatabaseDto',
+      component: GenDatabaseDto,
+      meta: {
+        title: 'Generate Database DTO'
       }
     }
   ]

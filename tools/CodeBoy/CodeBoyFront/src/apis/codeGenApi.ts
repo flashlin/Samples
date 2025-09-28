@@ -32,6 +32,11 @@ export interface GenTypescriptCodeFromSwaggerRequest {
   swaggerUrl: string;
 }
 
+// Request interface for generating database DTO code
+export interface GenDatabaseDtoRequest {
+  sql: string;
+}
+
 // Code generation API
 export const codeGenApi = {
   /**
@@ -72,5 +77,14 @@ export const codeGenApi = {
    */
   genTypescriptCodeFromSwagger(params: GenTypescriptCodeFromSwaggerRequest): Promise<string> {
     return request.post('/codegen/genTypescriptCodeFromSwagger', params);
+  },
+
+  /**
+   * Generate database DTO code from SQL CREATE TABLE statement
+   * @param params Database DTO generation request parameters
+   * @returns Generated DTO code as string
+   */
+  genDatabaseDto(params: GenDatabaseDtoRequest): Promise<string> {
+    return request.post('/codegen/genDatabaseDto', params);
   },
 };
