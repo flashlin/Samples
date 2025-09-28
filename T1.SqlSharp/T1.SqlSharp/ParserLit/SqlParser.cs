@@ -2616,6 +2616,19 @@ public class SqlParser
                 continue;
             }
 
+            if (TryKeyword("UNIQUE", out _))
+            {
+                // Handle column-level UNIQUE constraint
+                var uniqueConstraint = new SqlConstraintPrimaryKeyOrUnique
+                {
+                    ConstraintName = "",
+                    ConstraintType = "UNIQUE",
+                    Clustered = ""
+                };
+                sqlColumn.Constraints.Add(uniqueConstraint);
+                continue;
+            }
+
             if (Try(ParseIdentity, out var identityResult))
             {
                 if (identityResult.HasError)
