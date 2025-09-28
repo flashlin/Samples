@@ -66,7 +66,7 @@ public class ParseLinqJoinTest
             [
                 new LinqJoinExpr
                 {
-                    JoinType = "left join",
+                    JoinType = "join",
                     AliasName = "o",
                     Source = "orders",
                     On = new LinqConditionExpression
