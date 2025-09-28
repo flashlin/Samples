@@ -1,4 +1,5 @@
 using T1.SqlSharp.Expressions;
+using System.Linq;
 
 namespace T1.SqlSharp.ParserLit;
 
@@ -2621,7 +2622,7 @@ public class SqlParser
                 // Handle column-level UNIQUE constraint
                 var uniqueConstraint = new SqlConstraintPrimaryKeyOrUnique
                 {
-                    ConstraintName = "",
+                    ConstraintName = GenerateRandomConstraintName("CK_"),
                     ConstraintType = "UNIQUE",
                     Clustered = ""
                 };
@@ -3781,5 +3782,15 @@ public class SqlParser
         }
 
         return true;
+    }
+
+    private string GenerateRandomConstraintName(string prefix)
+    {
+        // Generate random constraint name with prefix + random letters
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var random = new Random();
+        var randomSuffix = new string(Enumerable.Repeat(chars, 8)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
+        return prefix + randomSuffix;
     }
 }
