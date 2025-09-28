@@ -38,6 +38,11 @@ namespace CodeBoyServer.ApiHandlers
                 .WithDescription("Generate TypeScript API client code from Swagger URL")
                 .WithTags("CodeGeneration")
                 .WithOpenApi();
+            
+            app.MapPost("/api/codegen/genDatabaseDto", GenDatabaseDto)
+                .WithDescription("Generate database DTO code from SQL CREATE TABLE statement")
+                .WithTags("CodeGeneration")
+                .WithOpenApi();
         }
 
         /// <summary>
@@ -188,6 +193,17 @@ namespace CodeBoyServer.ApiHandlers
 
             var typescriptGenerator = new SwaggerClientTypescriptCodeGenerator();
             return typescriptGenerator.Generate(request.ApiName, apiInfo);
+        }
+
+        /// <summary>
+        /// Generate database DTO code from SQL CREATE TABLE statement
+        /// </summary>
+        /// <param name="request">Database DTO generation request</param>
+        /// <returns>Generated DTO code</returns>
+        private static string GenDatabaseDto([FromBody] GenDatabaseDtoRequest request)
+        {
+            var generator = new DatabaseDtoGenerator();
+            return generator.GenerateEfDtoCode(request.Sql);
         }
     }
 }
