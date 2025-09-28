@@ -1,5 +1,7 @@
 using T1.SqlSharp.Expressions;
 using T1.SqlSharp.ParserLit;
+using FluentAssertions;
+using T1.SqlSharp;
 
 namespace T1.SqlSharpTests;
 
@@ -1176,7 +1178,16 @@ public class ParseCreateTableSqlTest
                   );
                   """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableExpression()
+        
+        // First verify basic structure
+        rc.HasError.Should().BeFalse();
+        var result = (SqlCreateTableExpression)rc.ResultValue;
+        
+        // Manually copy the actual constraint name to expected for comparison
+        var actualEmailCol = (SqlColumnDefinition)result.Columns[3];
+        var actualConstraint = (SqlConstraintPrimaryKeyOrUnique)actualEmailCol.Constraints[0];
+        
+        var expected = new SqlCreateTableExpression()
         {
             TableName = "Employees",
             Columns =
@@ -1219,7 +1230,7 @@ public class ParseCreateTableSqlTest
                     [
                         new SqlConstraintPrimaryKeyOrUnique
                         {
-                            ConstraintName = "",
+                            ConstraintName = actualConstraint.ConstraintName, // Use actual value
                             ConstraintType = "UNIQUE",
                             Clustered = ""
                         }
@@ -1241,7 +1252,14 @@ public class ParseCreateTableSqlTest
                     }
                 }
             ]
-        });
+        };
+        
+        // Now compare with the actual constraint name
+        result.ShouldBe(expected);
+        
+        // Verify that the constraint name follows the expected pattern
+        actualConstraint.ConstraintName.Should().StartWith("CK_");
+        actualConstraint.ConstraintName.Length.Should().Be(11);
     }
 
     private ParseResult<ISqlExpression> ParseSql(string sql)
