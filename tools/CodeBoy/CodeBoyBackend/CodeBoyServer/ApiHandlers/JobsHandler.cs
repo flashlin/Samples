@@ -1,5 +1,6 @@
 using MassTransit;
 using CodeBoyLib.MQ;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CodeBoyServer.ApiHandlers
 {
@@ -51,11 +52,14 @@ namespace CodeBoyServer.ApiHandlers
         /// <param name="ct">Cancellation token</param>
         private static async Task GetProgress(
             string jobId,
-            IProgressQueue progressQueue,
+            [FromServices] IProgressQueue progressQueue,
             HttpResponse response,
             CancellationToken ct)
         {
             response.ContentType = "text/event-stream";
+            response.Headers.Add("Cache-Control", "no-cache");
+            response.Headers.Add("Connection", "keep-alive");
+            
             await foreach (var message in progressQueue.Consume(jobId, ct))
             {
                 await response.WriteAsync($"data: {message}\n\n", ct);
