@@ -22,6 +22,8 @@ public class LinqParser
         if (sourceResult.HasError) return sourceResult.Error;
         // parse join(s)
         var joins = ParseJoins();
+        // parse additional from clauses (for DefaultIfEmpty)
+        var additionalFroms = ParseAdditionalFroms();
         // parse where
         LinqWhereExpr whereExpr = null;
         if (TryParseWhere(out var where))
@@ -36,8 +38,11 @@ public class LinqParser
         }
         var selectResult = Keywords("select")();
         if (selectResult.HasError) return selectResult.Error;
-        var selectAliasResult = ParseIdentifier();
-        if (selectAliasResult.HasError) return selectAliasResult.Error;
+        
+        // Parse select expression (could be 'new' or simple identifier)
+        var selectExpr = ParseSelectExpression();
+        if (selectExpr == null) return CreateParseError("Expected select expression");
+        
         return new LinqExpr
         {
             From = new LinqFromExpr
@@ -46,12 +51,10 @@ public class LinqParser
                 AliasName = aliasResult.ResultValue
             },
             Joins = joins,
+            AdditionalFroms = additionalFroms,
             Where = whereExpr,
             OrderBy = orderByExpr,
-            Select = new LinqSelectAllExpr
-            {
-                AliasName = selectAliasResult.ResultValue
-            }
+            Select = selectExpr
         };
     }
 
@@ -84,15 +87,244 @@ public class LinqParser
                 ComparisonOperator = ComparisonOperator.Equal,
                 Right = rightField
             };
+            
+                // Check for 'into' keyword
+                string intoGroup = null;
+                string joinType = "join";
+                _text.SkipWhitespace();
+                if (_text.TryKeywordIgnoreCase("into", out _))
+                {
+                    var intoResult = ParseIdentifier();
+                    if (!intoResult.HasError)
+                    {
+                        intoGroup = intoResult.ResultValue;
+                        // Keep joinType as "join" even with 'into' keyword
+                    }
+                }
+            
             joins.Add(new LinqJoinExpr
             {
-                JoinType = "join",
+                JoinType = joinType,
                 AliasName = aliasResult.ResultValue,
                 Source = sourceResult.ResultValue,
-                On = onExpr
+                On = onExpr,
+                Into = intoGroup
             });
         }
         return joins.Count > 0 ? joins : null;
+    }
+
+    private List<LinqFromExpr> ParseAdditionalFroms()
+    {
+        var additionalFroms = new List<LinqFromExpr>();
+        while (true)
+        {
+            _text.SkipWhitespace();
+            var pos = _text.Position;
+            if (!_text.TryKeywordIgnoreCase("from", out _))
+            {
+                _text.Position = pos;
+                break;
+            }
+            var aliasResult = ParseIdentifier();
+            if (aliasResult.HasError) break;
+            if (!_text.TryKeywordIgnoreCase("in", out _)) break;
+            
+            // Parse source (could be identifier.DefaultIfEmpty())
+            var source = ParseFromSource();
+            if (source.Source == null) break;
+            
+            additionalFroms.Add(new LinqFromExpr
+            {
+                Source = source.Source,
+                AliasName = aliasResult.ResultValue,
+                IsDefaultIfEmpty = source.IsDefaultIfEmpty
+            });
+        }
+        return additionalFroms.Count > 0 ? additionalFroms : null;
+    }
+
+    private (string Source, bool IsDefaultIfEmpty) ParseFromSource()
+    {
+        var identifierResult = ParseIdentifier();
+        if (identifierResult.HasError) return (null, false);
+        
+        var source = identifierResult.ResultValue;
+        bool isDefaultIfEmpty = false;
+        
+        _text.SkipWhitespace();
+        if (_text.PeekChar() == '.')
+        {
+            _text.NextChar();
+            if (_text.TryKeywordIgnoreCase("DefaultIfEmpty", out _))
+            {
+                if (_text.TryMatch("()", out _))
+                {
+                    source += ".DefaultIfEmpty()";
+                    isDefaultIfEmpty = true;
+                }
+            }
+        }
+        
+        return (source, isDefaultIfEmpty);
+    }
+
+    private ILinqExpression ParseSelectExpression()
+    {
+        _text.SkipWhitespace();
+        
+        // Check if it's 'select new'
+        if (_text.TryKeywordIgnoreCase("new", out _))
+        {
+            return ParseSelectNewExpression();
+        }
+        else
+        {
+            // Simple select (identifier)
+            var identifierResult = ParseIdentifier();
+            if (identifierResult.HasError) return null;
+            
+            return new LinqSelectAllExpr
+            {
+                AliasName = identifierResult.ResultValue
+            };
+        }
+    }
+
+    private LinqSelectNewExpr ParseSelectNewExpression()
+    {
+        _text.SkipWhitespace();
+        if (!_text.TryMatch("{", out _)) return null;
+        
+        var fields = new List<LinqSelectFieldExpr>();
+        
+        while (true)
+        {
+            _text.SkipWhitespace();
+            
+            // Parse field name
+            var fieldNameResult = ParseIdentifier();
+            if (fieldNameResult.HasError) break;
+            
+            _text.SkipWhitespace();
+            if (!_text.TryMatch("=", out _)) break;
+            
+            // Parse field value (simplified - just read until comma or closing brace)
+            _text.SkipWhitespace();
+            var value = ParseSelectFieldValue();
+            if (value == null) break;
+            
+            fields.Add(new LinqSelectFieldExpr
+            {
+                Name = fieldNameResult.ResultValue,
+                Value = value
+            });
+            
+            _text.SkipWhitespace();
+            if (_text.TryMatch(",", out _))
+            {
+                continue; // Parse next field
+            }
+            else if (_text.TryMatch("}", out _))
+            {
+                break; // End of object
+            }
+            else
+            {
+                break; // Error
+            }
+        }
+        
+        return fields.Count > 0 ? new LinqSelectNewExpr { Fields = fields } : null;
+    }
+
+    private ILinqExpression ParseSelectFieldValue()
+    {
+        // For now, we'll handle simple field expressions and complex expressions as string values
+        var startPos = _text.Position;
+        int braceLevel = 0;
+        bool inQuotes = false;
+        char quoteChar = '\0';
+        var chars = new List<char>();
+        
+        while (!_text.IsEnd())
+        {
+            var ch = _text.PeekNext(); // Use PeekNext instead of PeekChar to avoid skipping whitespace
+            
+            // Check break conditions first (before adding character)
+            if (!inQuotes)
+            {
+                if (ch == '}' && braceLevel == 0) 
+                {
+                    break; // End of object - don't include the closing brace
+                }
+                else if (ch == ',' && braceLevel == 0) 
+                {
+                    break; // End of field - don't include the comma
+                }
+            }
+            
+            // Add the character
+            chars.Add(ch);
+            _text.NextChar();
+            
+            // Update state after adding the character
+            if (!inQuotes)
+            {
+                if (ch == '"' || ch == '\'')
+                {
+                    inQuotes = true;
+                    quoteChar = ch;
+                }
+                else if (ch == '{') 
+                {
+                    braceLevel++;
+                }
+                else if (ch == '}') 
+                {
+                    braceLevel--;
+                }
+            }
+            else
+            {
+                if (ch == quoteChar)
+                {
+                    // Check if it's escaped
+                    if (chars.Count > 1 && chars[chars.Count - 2] == '\\')
+                    {
+                        // It's escaped, continue
+                    }
+                    else
+                    {
+                        inQuotes = false;
+                        quoteChar = '\0';
+                    }
+                }
+            }
+        }
+        
+        var valueText = new string(chars.ToArray()).Trim();
+        
+        // Try to parse as field expression first (simple case: table.field)
+        var originalPos = _text.Position;
+        _text.Position = startPos;
+        var fieldExpr = ParseLinqFieldExpr();
+        _text.Position = originalPos;
+        
+        if (fieldExpr != null)
+        {
+            // Check if the parsed field expression matches the text we read
+            var expectedText = fieldExpr.TableOrAlias != null 
+                ? $"{fieldExpr.TableOrAlias}.{fieldExpr.FieldName}"
+                : fieldExpr.FieldName;
+            if (expectedText == valueText)
+            {
+                return fieldExpr;
+            }
+        }
+        
+        // Otherwise, treat as a value (for complex expressions like og?.Product ?? "No Order")
+        return new LinqValue { Value = valueText };
     }
 
     private bool TryParseWhere(out ILinqExpression where)
