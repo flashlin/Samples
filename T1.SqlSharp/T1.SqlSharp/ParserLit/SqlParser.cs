@@ -521,7 +521,9 @@ public class SqlParser
                 break;
             }
 
-            var columnDefinition = Or<ISqlExpression>(ParseComputedColumnDefinition, ParseColumnDefinition)();
+            var columnDefinition = Or<ISqlExpression>(
+                ParseComputedColumnDefinition, 
+                ParseColumnDefinition)();
             if (columnDefinition.HasError)
             {
                 return columnDefinition.Error;
