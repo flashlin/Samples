@@ -43,19 +43,19 @@ public class LinqParser
         var selectExpr = ParseSelectExpression();
         if (selectExpr == null) return CreateParseError("Expected select expression");
         
-        return new LinqExpr
-        {
-            From = new LinqFromExpr
+            return new LinqExpr
             {
-                Source = sourceResult.ResultValue,
-                AliasName = aliasResult.ResultValue
-            },
-            Joins = joins,
-            AdditionalFroms = additionalFroms,
-            Where = whereExpr,
-            OrderBy = orderByExpr,
-            Select = selectExpr
-        };
+                From = new LinqFromExpr
+                {
+                    Source = new LinqSourceExpr { TableName = sourceResult.ResultValue },
+                    AliasName = aliasResult.ResultValue
+                },
+                Joins = joins,
+                AdditionalFroms = additionalFroms,
+                Where = whereExpr,
+                OrderBy = orderByExpr,
+                Select = selectExpr
+            };
     }
 
     private List<LinqJoinExpr> ParseJoins()
@@ -106,7 +106,7 @@ public class LinqParser
             {
                 JoinType = joinType,
                 AliasName = aliasResult.ResultValue,
-                Source = sourceResult.ResultValue,
+                Source = new LinqSourceExpr { TableName = sourceResult.ResultValue },
                 On = onExpr,
                 Into = intoGroup
             });
@@ -134,11 +134,14 @@ public class LinqParser
             var source = ParseFromSource();
             if (source.Source == null) break;
             
+            ILinqExpression sourceExpr = source.IsDefaultIfEmpty 
+                ? new LinqDefaultIfEmptyExpr { SourceName = source.Source.Replace(".DefaultIfEmpty()", "") }
+                : new LinqSourceExpr { TableName = source.Source };
+                
             additionalFroms.Add(new LinqFromExpr
             {
-                Source = source.Source,
-                AliasName = aliasResult.ResultValue,
-                IsDefaultIfEmpty = source.IsDefaultIfEmpty
+                Source = sourceExpr,
+                AliasName = aliasResult.ResultValue
             });
         }
         return additionalFroms.Count > 0 ? additionalFroms : null;

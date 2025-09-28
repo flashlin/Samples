@@ -19,7 +19,7 @@ public class ParseLinqWhereTest
         {
             From = new LinqFromExpr
             {
-                Source = "test",
+                Source = new LinqSourceExpr { TableName = "test" },
                 AliasName = "tb1"
             },
             Where = new LinqWhereExpr
@@ -51,7 +51,7 @@ public class ParseLinqWhereTest
         {
             From = new LinqFromExpr
             {
-                Source = "test",
+                Source = new LinqSourceExpr { TableName = "test" },
                 AliasName = "tb1"
             },
             Where = new LinqWhereExpr
@@ -93,7 +93,7 @@ public class ParseLinqWhereTest
         {
             From = new LinqFromExpr
             {
-                Source = "test",
+                Source = new LinqSourceExpr { TableName = "test" },
                 AliasName = "tb1"
             },
             OrderBy = new LinqOrderByExpr

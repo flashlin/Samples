@@ -12,15 +12,36 @@ public class LinqExpr
 
 public class LinqFromExpr
 {
-    public string Source { get; set; }
+    public ILinqExpression Source { get; set; }
     public string AliasName { get; set; }
-    public bool IsDefaultIfEmpty { get; set; }
     public override bool Equals(object? obj)
     {
         if (obj is not LinqFromExpr other) return false;
-        return Source == other.Source && AliasName == other.AliasName && IsDefaultIfEmpty == other.IsDefaultIfEmpty;
+        return Equals(Source, other.Source) && AliasName == other.AliasName;
     }
-    public override int GetHashCode() => (Source, AliasName, IsDefaultIfEmpty).GetHashCode();
+    public override int GetHashCode() => (Source, AliasName).GetHashCode();
+}
+
+public class LinqSourceExpr : ILinqExpression
+{
+    public string TableName { get; set; }
+    public override bool Equals(object? obj)
+    {
+        if (obj is not LinqSourceExpr other) return false;
+        return TableName == other.TableName;
+    }
+    public override int GetHashCode() => TableName.GetHashCode();
+}
+
+public class LinqDefaultIfEmptyExpr : ILinqExpression
+{
+    public string SourceName { get; set; }
+    public override bool Equals(object? obj)
+    {
+        if (obj is not LinqDefaultIfEmptyExpr other) return false;
+        return SourceName == other.SourceName;
+    }
+    public override int GetHashCode() => SourceName.GetHashCode();
 }
 
 public class LinqSelectAllExpr : ILinqExpression
@@ -119,7 +140,7 @@ public class LinqJoinExpr : ILinqExpression
 {
     public string JoinType { get; set; } = "join";
     public string AliasName { get; set; }
-    public string Source { get; set; }
+    public ILinqExpression Source { get; set; }
     public LinqConditionExpression On { get; set; }
     public string? Into { get; set; }
     public override bool Equals(object? obj)
@@ -127,7 +148,7 @@ public class LinqJoinExpr : ILinqExpression
         if (obj is not LinqJoinExpr other) return false;
         return JoinType == other.JoinType
             && AliasName == other.AliasName
-            && Source == other.Source
+            && Equals(Source, other.Source)
             && Equals(On, other.On)
             && Into == other.Into;
     }

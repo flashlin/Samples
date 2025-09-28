@@ -19,7 +19,7 @@ public class ParseLinqJoinTest
         {
             From = new LinqFromExpr
             {
-                Source = "tableA",
+                Source = new LinqSourceExpr { TableName = "tableA" },
                 AliasName = "a"
             },
             Joins =
@@ -27,7 +27,7 @@ public class ParseLinqJoinTest
                 new LinqJoinExpr
                 {
                     AliasName = "b",
-                    Source = "tableB",
+                    Source = new LinqSourceExpr { TableName = "tableB" },
                     On = new LinqConditionExpression
                     {
                         Left = new LinqFieldExpr { TableOrAlias = "a", FieldName = "Id" },
@@ -59,7 +59,7 @@ public class ParseLinqJoinTest
         {
             From = new LinqFromExpr
             {
-                Source = "customers",
+                Source = new LinqSourceExpr { TableName = "customers" },
                 AliasName = "c"
             },
             Joins =
@@ -68,7 +68,7 @@ public class ParseLinqJoinTest
                 {
                     JoinType = "join",
                     AliasName = "o",
-                    Source = "orders",
+                    Source = new LinqSourceExpr { TableName = "orders" },
                     On = new LinqConditionExpression
                     {
                         Left = new LinqFieldExpr { TableOrAlias = "c", FieldName = "Id" },
@@ -82,9 +82,8 @@ public class ParseLinqJoinTest
             [
                 new LinqFromExpr
                 {
-                    Source = "orderGroup.DefaultIfEmpty()",
-                    AliasName = "og",
-                    IsDefaultIfEmpty = true
+                    Source = new LinqDefaultIfEmptyExpr { SourceName = "orderGroup" },
+                    AliasName = "og"
                 }
             ],
             Select = new LinqSelectNewExpr

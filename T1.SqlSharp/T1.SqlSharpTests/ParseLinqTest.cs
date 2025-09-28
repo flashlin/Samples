@@ -19,7 +19,7 @@ public class ParseLinqTest
         {
             From = new LinqFromExpr
             {
-                Source = "test",
+                Source = new LinqSourceExpr { TableName = "test" },
                 AliasName = "tb1"
             },
             Select = new LinqSelectAllExpr
