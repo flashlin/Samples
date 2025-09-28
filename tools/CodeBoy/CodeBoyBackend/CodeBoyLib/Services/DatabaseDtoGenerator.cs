@@ -26,7 +26,7 @@ public class DatabaseDtoGenerator
                 if (column is SqlColumnDefinition columnDefinition)
                 {
                     var columnName = columnDefinition.ColumnName;
-                    var dataType = columnDefinition.DataType;
+                    var dataType = SqlTypeToCsharpType(columnDefinition.DataType, columnDefinition.DataSize);
                     output.WriteLine($"public {dataType} {columnName} {{ get; set; }}");
                     continue;
                 }
@@ -42,5 +42,31 @@ public class DatabaseDtoGenerator
             output.WriteLine("}");
         }
         return output.ToString();
+    }
+
+    private string SqlTypeToCsharpType(string sqlType, SqlDataSize? sqlDataSize)
+    {
+        var upperSqlType = sqlType.ToUpper();
+        
+        return upperSqlType switch
+        {
+            "INT" or "INTEGER" => "int",
+            "BIGINT" => "long",
+            "SMALLINT" => "short",
+            "TINYINT" => "byte",
+            "BIT" => "bool",
+            "DECIMAL" or "NUMERIC" or "MONEY" or "SMALLMONEY" => "decimal",
+            "FLOAT" or "REAL" => "double",
+            "DATE" => "DateTime",
+            "DATETIME" or "DATETIME2" or "SMALLDATETIME" => "DateTime",
+            "TIME" => "TimeSpan",
+            "DATETIMEOFFSET" => "DateTimeOffset",
+            "CHAR" or "VARCHAR" or "NCHAR" or "NVARCHAR" or "TEXT" or "NTEXT" => "string",
+            "BINARY" or "VARBINARY" or "IMAGE" => "byte[]",
+            "UNIQUEIDENTIFIER" => "Guid",
+            "XML" => "string",
+            "JSON" => "string",
+            _ => "object"
+        };
     }
 }

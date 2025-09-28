@@ -18,6 +18,7 @@ fi
 # Array of project names
 projectNames=(
     "T1.Standard"
+    "T1.SqlSharp"
     "T1.SlackSDK"
     "T1.GrpcProtoGenerator"
 )
