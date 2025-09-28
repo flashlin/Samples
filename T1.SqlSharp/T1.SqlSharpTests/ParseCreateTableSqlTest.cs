@@ -1162,6 +1162,88 @@ public class ParseCreateTableSqlTest
         });
     }
 
+    [Test]
+    public void EmployeesTableWithPrimaryKeyAndUniqueConstraint()
+    {
+        var sql = """
+                  CREATE TABLE Employees (
+                      EmployeeID INT PRIMARY KEY,
+                      FirstName VARCHAR(50) NOT NULL,
+                      LastName VARCHAR(50) NOT NULL,
+                      Email VARCHAR(100) UNIQUE,
+                      HireDate DATE,
+                      Salary DECIMAL(10, 2)
+                  );
+                  """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SqlCreateTableExpression()
+        {
+            TableName = "Employees",
+            Columns =
+            [
+                new SqlColumnDefinition
+                {
+                    ColumnName = "EmployeeID",
+                    DataType = "INT",
+                    IsPrimaryKey = true
+                },
+                new SqlColumnDefinition
+                {
+                    ColumnName = "FirstName",
+                    DataType = "VARCHAR",
+                    DataSize = new SqlDataSize
+                    {
+                        Size = "50"
+                    },
+                    IsNullable = false
+                },
+                new SqlColumnDefinition
+                {
+                    ColumnName = "LastName",
+                    DataType = "VARCHAR",
+                    DataSize = new SqlDataSize
+                    {
+                        Size = "50"
+                    },
+                    IsNullable = false
+                },
+                new SqlColumnDefinition
+                {
+                    ColumnName = "Email",
+                    DataType = "VARCHAR",
+                    DataSize = new SqlDataSize
+                    {
+                        Size = "100"
+                    },
+                    Constraints =
+                    [
+                        new SqlConstraintPrimaryKeyOrUnique
+                        {
+                            ConstraintName = "",
+                            ConstraintType = "UNIQUE",
+                            Clustered = ""
+                        }
+                    ]
+                },
+                new SqlColumnDefinition
+                {
+                    ColumnName = "HireDate",
+                    DataType = "DATE"
+                },
+                new SqlColumnDefinition
+                {
+                    ColumnName = "Salary",
+                    DataType = "DECIMAL",
+                    DataSize = new SqlDataSize
+                    {
+                        Size = "10",
+                        Scale = 2
+                    }
+                }
+            ]
+        });
+    }
+
     private ParseResult<ISqlExpression> ParseSql(string sql)
     {
         return SqlParser.Parse(sql);
