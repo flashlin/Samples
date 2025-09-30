@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   codeboy-server:
-    build:
-      context: ./CodeBoyBackend
-      dockerfile: Dockerfile
+    image: {{DOCKER_REGISTRY}}codeboy-server:latest
     ports:
       - "8082:8080"
     environment:
@@ -21,9 +19,7 @@ services:
       - codeboy-network
 
   codeboy-front:
-    build:
-      context: ./CodeBoyFront
-      dockerfile: Dockerfile
+    image: {{DOCKER_REGISTRY}}codeboy-front:latest
     ports:
       - "8081:80"
     restart: unless-stopped
