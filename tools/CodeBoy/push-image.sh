@@ -27,17 +27,17 @@ echo "📦 Registry: $DockerRegistryServer"
 echo ""
 
 echo "🔖 Tagging codeboy-server:latest..."
-docker tag codeboy-server:latest ${DockerRegistryServer}codeboy-server:latest
+docker tag codeboy-server:latest ${DockerRegistryServer}/codeboy-server:latest
 
 echo "📤 Pushing codeboy-server:latest..."
-docker push ${DockerRegistryServer}codeboy-server:latest
+docker push ${DockerRegistryServer}/codeboy-server:latest
 
 echo ""
 echo "🔖 Tagging codeboy-front:latest..."
-docker tag codeboy-front:latest ${DockerRegistryServer}codeboy-front:latest
+docker tag codeboy-front:latest ${DockerRegistryServer}/codeboy-front:latest
 
 echo "📤 Pushing codeboy-front:latest..."
-docker push ${DockerRegistryServer}codeboy-front:latest
+docker push ${DockerRegistryServer}/codeboy-front:latest
 
 echo ""
 echo "✅ All images tagged and pushed successfully!"
