@@ -21,7 +21,8 @@ case $action in
     "start")
         echo "🚀 Starting CodeBoy Server..."
 
-        
+        # Build images using docker compose
+        docker compose -f docker-compose-local.yml build
         # Run the container
         docker compose -f docker-compose-local.yml up -d
 
