@@ -20,19 +20,8 @@ fi
 case $action in
     "start")
         echo "🚀 Starting CodeBoy Server..."
+
         
-        # Check if image exists
-        if ! docker images codeboy-server:latest | grep -q codeboy-server; then
-            echo "❌ Docker image not found. Building it first..."
-            ./build-docker.sh
-        fi
-
-        echo "🐳 Starting container..."
-
-        # Stop and remove existing container if running
-        docker stop codeboy-server 2>/dev/null || true
-        docker rm codeboy-server 2>/dev/null || true
-
         # Run the container
         docker compose -f docker-compose-local.yml up -d
 
