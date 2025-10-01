@@ -321,42 +321,40 @@ namespace CodeBoyLib.Services
             return string.Join(" ", args);
         }
 
-        /// <summary>
-        /// Finds the generated assembly after successful build
-        /// </summary>
         private string? FindGeneratedAssembly(string csprojPath, BuildConfig config)
         {
-            try
+            var projectDir = Path.GetDirectoryName(csprojPath);
+            if (projectDir == null) return null;
+
+            var projectName = Path.GetFileNameWithoutExtension(csprojPath);
+            
+            if (!string.IsNullOrEmpty(config.OutputPath))
             {
-                var projectDir = Path.GetDirectoryName(csprojPath);
-                if (projectDir == null) return null;
-
-                var projectName = Path.GetFileNameWithoutExtension(csprojPath);
-                
-                // Try custom output path first
-                if (!string.IsNullOrEmpty(config.OutputPath))
-                {
-                    var customAssembly = Path.Combine(config.OutputPath, $"{projectName}.dll");
-                    if (File.Exists(customAssembly))
-                        return customAssembly;
-                }
-
-                // Try standard output paths
-                var possiblePaths = new[]
-                {
-                    Path.Combine(projectDir, "bin", config.Configuration, "net8.0", $"{projectName}.dll"),
-                    Path.Combine(projectDir, "bin", config.Configuration, "net7.0", $"{projectName}.dll"),
-                    Path.Combine(projectDir, "bin", config.Configuration, "net6.0", $"{projectName}.dll"),
-                    Path.Combine(projectDir, "bin", config.Configuration, "netstandard2.1", $"{projectName}.dll"),
-                    Path.Combine(projectDir, "bin", config.Configuration, "netstandard2.0", $"{projectName}.dll")
-                };
-
-                return possiblePaths.FirstOrDefault(File.Exists);
+                var customAssembly = Path.Combine(config.OutputPath, $"{projectName}.dll");
+                if (File.Exists(customAssembly))
+                    return customAssembly;
             }
-            catch
-            {
+
+            var binConfigDir = Path.Combine(projectDir, "bin", config.Configuration);
+            if (!Directory.Exists(binConfigDir))
                 return null;
+
+            var targetDirs = Directory.GetDirectories(binConfigDir)
+                .Where(dir =>
+                {
+                    var dirName = Path.GetFileName(dir);
+                    return System.Text.RegularExpressions.Regex.IsMatch(dirName, @"^net\d+\.\d+$|^netstandard\d+\.\d+$");
+                })
+                .OrderByDescending(dir => Path.GetFileName(dir));
+
+            foreach (var targetDir in targetDirs)
+            {
+                var assemblyPath = Path.Combine(targetDir, $"{projectName}.dll");
+                if (File.Exists(assemblyPath))
+                    return assemblyPath;
             }
+
+            return null;
         }
     }
 }
