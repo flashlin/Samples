@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using T1.GrpcProtoGenerator.Common;
+using T1.GrpcProtoGenerator.Generators.Models;
 
 namespace T1.GrpcProtoGenerator.Generators
 {
@@ -1792,77 +1793,6 @@ namespace T1.GrpcProtoGenerator.Generators
             
             sb.WriteLine();
         }
-    }
-
-    public class ProtoFileInfo
-    {
-        public string Path { get; set; }
-        public string Content { get; set; }
-
-        public string GetProtoFileName()
-        {
-            return System.IO.Path.GetFileNameWithoutExtension(Path);
-        }
-    }
-
-    /// <summary>
-    /// Service method information for code generation
-    /// </summary>
-    internal class ServiceMethodInfo
-    {
-        public string RequestFullType { get; set; } = string.Empty;
-        public string ResponseFullType { get; set; } = string.Empty;
-        public string RequestType { get; set; } = string.Empty;
-        public string ResponseType { get; set; } = string.Empty;
-        public bool IsNullRequest { get; set; }
-        public bool IsVoidResponse { get; set; }
-    }
-
-    /// <summary>
-    /// Interface method signature information
-    /// </summary>
-    internal class InterfaceMethodSignature
-    {
-        public string Parameters { get; set; } = string.Empty;
-        public string ReturnType { get; set; } = string.Empty;
-    }
-
-    /// <summary>
-    /// Client method information for code generation
-    /// </summary>
-    internal class ClientMethodInfo
-    {
-        public bool IsNullRequest { get; set; }
-        public bool IsVoidResponse { get; set; }
-    }
-
-    /// <summary>
-    /// Client interface method signature information
-    /// </summary>
-    internal class ClientInterfaceMethodSignature
-    {
-        public string Parameters { get; set; } = string.Empty;
-        public string ReturnType { get; set; } = string.Empty;
-    }
-
-    /// <summary>
-    /// Message property information for code generation
-    /// </summary>
-    internal class MessagePropertyInfo
-    {
-        public string Type { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public bool IsOptional { get; set; }
-    }
-
-    /// <summary>
-    /// Collection of proto elements from all proto files
-    /// </summary>
-    internal class ProtoElementCollection
-    {
-        public List<ProtoMessage> Messages { get; set; } = new List<ProtoMessage>();
-        public List<ProtoEnum> Enums { get; set; } = new List<ProtoEnum>();
-        public List<ProtoService> Services { get; set; } = new List<ProtoService>();
     }
 }
 

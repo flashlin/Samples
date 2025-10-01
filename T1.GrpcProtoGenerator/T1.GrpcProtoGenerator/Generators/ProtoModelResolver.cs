@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using T1.GrpcProtoGenerator.Generators.Models;
 
 namespace T1.GrpcProtoGenerator.Generators;
 
