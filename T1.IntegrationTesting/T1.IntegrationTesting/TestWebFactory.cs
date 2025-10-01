@@ -5,7 +5,7 @@ namespace T1.IntegrationTesting;
 
 public class TestWebFactory
 {
-    public IHost CreateGrpcServer<TGrpcServerStartup>(int port) 
+    public IHost CreateGrpcServer<TGrpcServerStartup>(int port, Action<IServiceCollection> mockServices) 
         where TGrpcServerStartup : class
     {
         var server = Host.CreateDefaultBuilder()
@@ -13,11 +13,7 @@ public class TestWebFactory
             {
                 webBuilder.UseStartup<TGrpcServerStartup>();
                 webBuilder.UseUrls($"http://localhost:{port}");
-                webBuilder.ConfigureServices(services =>
-                {
-                    // Auto-detect and replace
-                    // services.ReplaceWithMock<IWeatherService, FakeWeatherService>();
-                });
+                webBuilder.ConfigureServices(mockServices);
             })
             .Build();
         return server;

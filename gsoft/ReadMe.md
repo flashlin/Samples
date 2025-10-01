@@ -3,6 +3,10 @@ Cursor MCP setting
 ```json
 {
   "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["chrome-devtools-mcp@latest"]
+    },
     "browsermcp": {
       "command": "npx",
       "args": ["@browsermcp/mcp@latest"]
