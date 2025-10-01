@@ -775,6 +775,7 @@ namespace T1.GrpcProtoGenerator.Generators
             }
             
             var sb = new IndentStringBuilder();
+            sb.WriteLine("/// Auto-generated code. Do not modify manually. Generated at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             
             // Setup using statements
             SetupServerSourceUsingStatements(sb, combineModel, compilation);
