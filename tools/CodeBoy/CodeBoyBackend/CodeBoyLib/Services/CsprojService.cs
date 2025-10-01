@@ -328,25 +328,25 @@ namespace CodeBoyLib.Services
 
             var projectName = Path.GetFileNameWithoutExtension(csprojPath);
             
-            if (!string.IsNullOrEmpty(config.OutputPath))
-            {
-                var customAssembly = Path.Combine(config.OutputPath, $"{projectName}.dll");
-                if (File.Exists(customAssembly))
-                    return customAssembly;
-            }
+            return TryFindInCustomOutput(config.OutputPath, projectName) 
+                   ?? TryFindInStandardOutput(projectDir, config.Configuration, projectName);
+        }
 
-            var binConfigDir = Path.Combine(projectDir, "bin", config.Configuration);
-            if (!Directory.Exists(binConfigDir))
-                return null;
+        private string? TryFindInCustomOutput(string? outputPath, string projectName)
+        {
+            if (string.IsNullOrEmpty(outputPath)) return null;
+            
+            var assemblyPath = Path.Combine(outputPath, $"{projectName}.dll");
+            return File.Exists(assemblyPath) ? assemblyPath : null;
+        }
 
-            var targetDirs = Directory.GetDirectories(binConfigDir)
-                .Where(dir =>
-                {
-                    var dirName = Path.GetFileName(dir);
-                    return System.Text.RegularExpressions.Regex.IsMatch(dirName, @"^net\d+\.\d+$|^netstandard\d+\.\d+$");
-                })
-                .OrderByDescending(dir => Path.GetFileName(dir));
+        private string? TryFindInStandardOutput(string projectDir, string configuration, string projectName)
+        {
+            var binConfigDir = Path.Combine(projectDir, "bin", configuration);
+            if (!Directory.Exists(binConfigDir)) return null;
 
+            var targetDirs = GetTargetFrameworkDirectories(binConfigDir);
+            
             foreach (var targetDir in targetDirs)
             {
                 var assemblyPath = Path.Combine(targetDir, $"{projectName}.dll");
@@ -355,6 +355,19 @@ namespace CodeBoyLib.Services
             }
 
             return null;
+        }
+
+        private IEnumerable<string> GetTargetFrameworkDirectories(string binConfigDir)
+        {
+            return Directory.GetDirectories(binConfigDir)
+                .Where(IsTargetFrameworkDirectory)
+                .OrderByDescending(dir => Path.GetFileName(dir));
+        }
+
+        private bool IsTargetFrameworkDirectory(string dir)
+        {
+            var dirName = Path.GetFileName(dir);
+            return System.Text.RegularExpressions.Regex.IsMatch(dirName, @"^net\d+\.\d+$|^netstandard\d+\.\d+$");
         }
     }
 }
