@@ -193,46 +193,6 @@ namespace CodeBoyLib.Services
         }
 
         /// <summary>
-        /// Alternative: Build using MSBuild API (requires Microsoft.Build NuGet package)
-        /// Note: This method is commented out because it requires additional dependencies
-        /// </summary>
-        /*
-        public BuildResult BuildWithMSBuild(string csprojPath, BuildConfig config)
-        {
-            // This approach requires:
-            // <PackageReference Include="Microsoft.Build" Version="17.8.3" />
-            // <PackageReference Include="Microsoft.Build.Locator" Version="1.5.5" />
-            
-            var result = new BuildResult();
-            
-            try
-            {
-                // MSBuildLocator.RegisterDefaults();
-                
-                // var projectCollection = new ProjectCollection();
-                // var project = projectCollection.LoadProject(csprojPath);
-                
-                // var buildParameters = new BuildParameters(projectCollection)
-                // {
-                //     Loggers = new[] { new ConsoleLogger(LoggerVerbosity.Normal) }
-                // };
-                
-                // var buildRequest = new BuildRequestData(project.CreateProjectInstance(), new[] { "Build" });
-                // var buildResult = BuildManager.DefaultBuildManager.Build(buildParameters, buildRequest);
-                
-                // result.Success = buildResult.OverallResult == BuildResultCode.Success;
-            }
-            catch (Exception ex)
-            {
-                result.Success = false;
-                result.Errors.Add($"MSBuild error: {ex.Message}");
-            }
-            
-            return result;
-        }
-        */
-
-        /// <summary>
         /// Restores NuGet packages for the project
         /// </summary>
         /// <param name="csprojPath">Path to the .csproj file</param>
