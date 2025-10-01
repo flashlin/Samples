@@ -1,3 +1,0 @@
-from tb1 in customer select tb1
-from tb1 in customer select new { tb1.id, tb1.name }
-from tb1 in customer join tb2 in product on tb1.id equals tb2.id select new { tb1.id, tb1.name, tb2.productName }
