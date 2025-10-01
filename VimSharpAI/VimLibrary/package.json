@@ -18,9 +18,9 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "pnpm type-check && vite build",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc",
     "clean": "rm -rf dist",
     "rebuild": "pnpm clean && pnpm build",
     "prepublishOnly": "pnpm rebuild"
