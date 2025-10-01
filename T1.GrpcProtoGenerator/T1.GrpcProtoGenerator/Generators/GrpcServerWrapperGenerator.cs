@@ -123,6 +123,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private string GenerateWrapperGrpcMessageSource(ProtoMessage messageModel, ProtoModel combinedModel)
         {
             var sb = new IndentStringBuilder();
+            sb.WriteLine("/// Auto-generated code. Do not modify manually. Generated at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             
             // Generate using statements
             GenerateBasicUsingStatements(sb);
@@ -143,6 +144,7 @@ namespace T1.GrpcProtoGenerator.Generators
         private string GenerateWrapperGrpcEnumSource(ProtoEnum enumModel)
         {
             var sb = new IndentStringBuilder();
+            sb.WriteLine("/// Auto-generated code. Do not modify manually. Generated at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             
             // Generate using statements
             GenerateBasicUsingStatements(sb);
@@ -310,6 +312,7 @@ namespace T1.GrpcProtoGenerator.Generators
             }
             
             var sb = new IndentStringBuilder();
+            sb.WriteLine("/// Auto-generated code. Do not modify manually. Generated at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             
             // Setup using statements
             SetupClientSourceUsingStatements(sb, combinedModel);
