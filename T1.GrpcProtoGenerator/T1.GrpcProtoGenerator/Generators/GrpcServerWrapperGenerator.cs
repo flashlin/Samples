@@ -25,9 +25,16 @@ namespace T1.GrpcProtoGenerator.Generators
             
             // Collect all proto files and process them together to handle imports
             var allProtoFiles = protoFilesWithContent.Collect();
+            
+            // Get compilation provider to check for package references
+            var compilation = context.CompilationProvider;
+            
+            // Combine proto files with compilation information
+            var protoFilesWithCompilation = allProtoFiles.Combine(compilation);
 
-            context.RegisterSourceOutput(allProtoFiles, (spc, allProtos) =>
+            context.RegisterSourceOutput(protoFilesWithCompilation, (spc, data) =>
             {
+                var (allProtos, compilation) = data;
                 var logger = InitializeLogger(spc);
                 logger.LogWarning($"Starting source generation for {allProtos.Length} proto files");
                 
@@ -35,7 +42,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 
                 GenerateMessageFiles(spc, combinedModel, logger);
                 GenerateEnumFiles(spc, combinedModel, logger);
-                GenerateServiceFiles(spc, allProtos, combinedModel, logger);
+                GenerateServiceFiles(spc, allProtos, combinedModel, logger, compilation);
                 
                 logger.LogInfo("Source generation completed successfully");
             });
@@ -81,7 +88,7 @@ namespace T1.GrpcProtoGenerator.Generators
         /// Generate server and client files for all proto files
         /// </summary>
         private void GenerateServiceFiles(SourceProductionContext spc, ImmutableArray<ProtoFileInfo> allProtos, 
-            ProtoModel combinedModel, ISourceGeneratorLogger logger)
+            ProtoModel combinedModel, ISourceGeneratorLogger logger, Compilation compilation)
         {
             logger.LogDebug($"Generating service files for {allProtos.Length} proto files");
             
@@ -95,7 +102,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 logger.LogDebug($"Generating server and client files for {protoFileName}");
                 
                 // Generate server and client files per proto file
-                AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model, combinedModel), 
+                AddGeneratedSourceFile(spc, GenerateWrapperServerSource(model, combinedModel, compilation), 
                     $"Generated_{protoFileName}_server.cs");
                 AddGeneratedSourceFile(spc, GenerateWrapperClientSource(model, combinedModel), 
                     $"Generated_{protoFileName}_client.cs");
@@ -760,7 +767,7 @@ namespace T1.GrpcProtoGenerator.Generators
             return sb.ToString();
         }
 
-        private string GenerateWrapperServerSource(ProtoModel model, ProtoModel combineModel)
+        private string GenerateWrapperServerSource(ProtoModel model, ProtoModel combineModel, Compilation compilation)
         {
             if (!ValidateServerSourceGeneration(model))
             {
@@ -770,11 +777,11 @@ namespace T1.GrpcProtoGenerator.Generators
             var sb = new IndentStringBuilder();
             
             // Setup using statements
-            SetupServerSourceUsingStatements(sb, combineModel);
+            SetupServerSourceUsingStatements(sb, combineModel, compilation);
             
             // Group and generate services by namespace
             var servicesByNamespace = GroupServicesByNamespace(model);
-            GenerateNamespaceBlocks(sb, servicesByNamespace, combineModel);
+            GenerateNamespaceBlocks(sb, servicesByNamespace, combineModel, compilation);
 
             return sb.ToString();
         }
@@ -790,23 +797,29 @@ namespace T1.GrpcProtoGenerator.Generators
         /// <summary>
         /// Setup using statements for server source generation
         /// </summary>
-        private void SetupServerSourceUsingStatements(IndentStringBuilder sb, ProtoModel combineModel)
+        private void SetupServerSourceUsingStatements(IndentStringBuilder sb, ProtoModel combineModel, Compilation compilation)
         {
             var importNamespaces = CollectImportNamespacesForServer(combineModel);
-            AddServerSpecificNamespaces(importNamespaces);
+            AddServerSpecificNamespaces(importNamespaces, compilation);
             GenerateUsingStatements(sb, importNamespaces);
         }
 
         /// <summary>
         /// Add server-specific namespaces to the import list
         /// </summary>
-        private void AddServerSpecificNamespaces(HashSet<string> importNamespaces)
+        private void AddServerSpecificNamespaces(HashSet<string> importNamespaces, Compilation compilation)
         {
             importNamespaces.Add("System.Threading");
             importNamespaces.Add("System.Threading.Tasks");
             importNamespaces.Add("Grpc.Core");
             importNamespaces.Add("Microsoft.Extensions.Logging");
             importNamespaces.Add("T1.GrpcProtoGenerator");
+            
+            // Add NSubstitute namespace if the package is available
+            if (IsNSubstitutePackageAvailable(compilation))
+            {
+                importNamespaces.Add("NSubstitute");
+            }
         }
 
         /// <summary>
@@ -824,12 +837,12 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateNamespaceBlocks(IndentStringBuilder sb, 
             List<IGrouping<string, ProtoService>> servicesByNamespace, 
-            ProtoModel combineModel)
+            ProtoModel combineModel, Compilation compilation)
         {
             foreach (var namespaceGroup in servicesByNamespace)
             {
                 GenerateNamespaceDeclaration(sb, namespaceGroup.Key);
-                GenerateServicesInNamespace(sb, namespaceGroup, combineModel);
+                GenerateServicesInNamespace(sb, namespaceGroup, combineModel, compilation);
                 GenerateNamespaceClosing(sb);
             }
         }
@@ -849,12 +862,13 @@ namespace T1.GrpcProtoGenerator.Generators
         /// </summary>
         private void GenerateServicesInNamespace(IndentStringBuilder sb, 
             IGrouping<string, ProtoService> namespaceGroup, 
-            ProtoModel combineModel)
+            ProtoModel combineModel, Compilation compilation)
         {
             foreach (var svc in namespaceGroup)
             {
                 GenerateServiceInterface(sb, svc, combineModel);
                 GenerateServiceImplementation(sb, svc, combineModel);
+                GenerateMockServiceImplementation(sb, svc, combineModel, compilation);
             }
         }
 
@@ -1026,6 +1040,89 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.Indent--;
             sb.WriteLine("}");
             sb.WriteLine();
+        }
+
+        /// <summary>
+        /// Generate mock service implementation class for a given service (if NSubstitute is available)
+        /// </summary>
+        private void GenerateMockServiceImplementation(IndentStringBuilder sb, ProtoService svc, ProtoModel combineModel, Compilation compilation)
+        {
+            // Check if NSubstitute package is available
+            if (!IsNSubstitutePackageAvailable(compilation))
+            {
+                return;
+            }
+
+            var serviceInterface = $"I{svc.Name}GrpcService";
+            var mockClass = $"NSubstituteFor{svc.Name}";
+            
+            sb.WriteLine($"public class {mockClass} : {serviceInterface}");
+            sb.WriteLine("{");
+            sb.Indent++;
+            
+            // Generate private instance field
+            sb.WriteLine($"private readonly {serviceInterface} _instance;");
+            sb.WriteLine();
+            
+            // Generate constructor
+            sb.WriteLine($"public {mockClass}()");
+            sb.WriteLine("{");
+            sb.Indent++;
+            sb.WriteLine($"_instance = Substitute.For<{serviceInterface}>();");
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
+            
+            // Generate For property
+            sb.WriteLine($"public {serviceInterface} For {{ get {{ return _instance; }} }}");
+            sb.WriteLine();
+            
+            // Generate all interface methods that delegate to _instance
+            foreach (var rpc in svc.Rpcs)
+            {
+                GenerateMockServiceMethod(sb, rpc, combineModel);
+            }
+            
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
+        }
+
+        /// <summary>
+        /// Generate a single mock service method that delegates to the substitute instance
+        /// </summary>
+        private void GenerateMockServiceMethod(IndentStringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
+        {
+            var methodSignature = CreateInterfaceMethodSignature(rpc, combineModel);
+            
+            // Generate method signature
+            sb.WriteLine($"public {methodSignature.ReturnType} {rpc.Name}({methodSignature.Parameters})");
+            sb.WriteLine("{");
+            sb.Indent++;
+            
+            // Generate method call delegation
+            if (IsNullOrEmptyRequestType(rpc.RequestType))
+            {
+                sb.WriteLine($"return _instance.{rpc.Name}();");
+            }
+            else
+            {
+                sb.WriteLine($"return _instance.{rpc.Name}(request);");
+            }
+            
+            sb.Indent--;
+            sb.WriteLine("}");
+            sb.WriteLine();
+        }
+
+        /// <summary>
+        /// Check if NSubstitute package is available in the project
+        /// </summary>
+        private bool IsNSubstitutePackageAvailable(Compilation compilation)
+        {
+            // Check if NSubstitute assembly is referenced in the compilation
+            return compilation.ReferencedAssemblyNames
+                .Any(assemblyName => assemblyName.Name.Equals("NSubstitute", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
