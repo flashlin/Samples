@@ -819,12 +819,6 @@ namespace T1.GrpcProtoGenerator.Generators
             importNamespaces.Add("Grpc.Core");
             importNamespaces.Add("Microsoft.Extensions.Logging");
             importNamespaces.Add("T1.GrpcProtoGenerator");
-            
-            // Add NSubstitute namespace if the package is available
-            if (IsNSubstitutePackageAvailable(compilation))
-            {
-                importNamespaces.Add("NSubstitute");
-            }
         }
 
         /// <summary>
@@ -873,7 +867,6 @@ namespace T1.GrpcProtoGenerator.Generators
             {
                 GenerateServiceInterface(sb, svc, combineModel);
                 GenerateServiceImplementation(sb, svc, combineModel);
-                GenerateMockServiceImplementation(sb, svc, combineModel, compilation);
             }
         }
 
@@ -1047,88 +1040,6 @@ namespace T1.GrpcProtoGenerator.Generators
             sb.WriteLine();
         }
 
-        /// <summary>
-        /// Generate mock service implementation class for a given service (if NSubstitute is available)
-        /// </summary>
-        private void GenerateMockServiceImplementation(IndentStringBuilder sb, ProtoService svc, ProtoModel combineModel, Compilation compilation)
-        {
-            // Check if NSubstitute package is available
-            if (!IsNSubstitutePackageAvailable(compilation))
-            {
-                return;
-            }
-
-            var serviceInterface = $"I{svc.Name}GrpcService";
-            var mockClass = $"NSubstituteFor{svc.Name}";
-            
-            sb.WriteLine($"public class {mockClass} : {serviceInterface}");
-            sb.WriteLine("{");
-            sb.Indent++;
-            
-            // Generate private instance field
-            sb.WriteLine($"private readonly {serviceInterface} _instance;");
-            sb.WriteLine();
-            
-            // Generate constructor
-            sb.WriteLine($"public {mockClass}()");
-            sb.WriteLine("{");
-            sb.Indent++;
-            sb.WriteLine($"_instance = Substitute.For<{serviceInterface}>();");
-            sb.Indent--;
-            sb.WriteLine("}");
-            sb.WriteLine();
-            
-            // Generate For property
-            sb.WriteLine($"public {serviceInterface} For {{ get {{ return _instance; }} }}");
-            sb.WriteLine();
-            
-            // Generate all interface methods that delegate to _instance
-            foreach (var rpc in svc.Rpcs)
-            {
-                GenerateMockServiceMethod(sb, rpc, combineModel);
-            }
-            
-            sb.Indent--;
-            sb.WriteLine("}");
-            sb.WriteLine();
-        }
-
-        /// <summary>
-        /// Generate a single mock service method that delegates to the substitute instance
-        /// </summary>
-        private void GenerateMockServiceMethod(IndentStringBuilder sb, ProtoRpc rpc, ProtoModel combineModel)
-        {
-            var methodSignature = CreateInterfaceMethodSignature(rpc, combineModel);
-            
-            // Generate method signature
-            sb.WriteLine($"public {methodSignature.ReturnType} {rpc.Name}({methodSignature.Parameters})");
-            sb.WriteLine("{");
-            sb.Indent++;
-            
-            // Generate method call delegation
-            if (IsNullOrEmptyRequestType(rpc.RequestType))
-            {
-                sb.WriteLine($"return _instance.{rpc.Name}();");
-            }
-            else
-            {
-                sb.WriteLine($"return _instance.{rpc.Name}(request);");
-            }
-            
-            sb.Indent--;
-            sb.WriteLine("}");
-            sb.WriteLine();
-        }
-
-        /// <summary>
-        /// Check if NSubstitute package is available in the project
-        /// </summary>
-        private bool IsNSubstitutePackageAvailable(Compilation compilation)
-        {
-            // Check if NSubstitute assembly is referenced in the compilation
-            return compilation.ReferencedAssemblyNames
-                .Any(assemblyName => assemblyName.Name.Equals("NSubstitute", StringComparison.OrdinalIgnoreCase));
-        }
 
         /// <summary>
         /// Generate a single service method implementation
