@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using T1.Standard.IO;
 
 namespace CodeBoyLib.Services
 {
@@ -74,6 +75,136 @@ namespace CodeBoyLib.Services
             }
 
             return result;
+        }
+
+        public string GenProxyInterfaceCode(Type grpcClientType)
+        {
+            var grpcClientMembers = QueryWarpInterfaceFromGrpcClientType(grpcClientType);
+            var namespaceName = grpcClientType.Namespace + "Warp";
+            var typeName = grpcClientType.Name;
+            var output = new IndentStringBuilder();
+
+            WriteNamespaceStart(output, namespaceName);
+            WriteProxyInterface(output, typeName, grpcClientMembers);
+            WriteProxyClass(output, typeName, grpcClientMembers);
+            WriteNamespaceEnd(output);
+
+            return output.ToString();
+        }
+
+        private void WriteNamespaceStart(IndentStringBuilder output, string namespaceName)
+        {
+            output.WriteLine($"namespace {namespaceName}");
+            output.WriteLine("{");
+            output.Indent++;
+        }
+
+        private void WriteNamespaceEnd(IndentStringBuilder output)
+        {
+            output.Indent--;
+            output.WriteLine("}");
+        }
+
+        private void WriteProxyInterface(IndentStringBuilder output, string typeName, List<MethodInfo> members)
+        {
+            output.WriteLine($"public interface I{typeName}Proxy");
+            output.WriteLine("{");
+            output.Indent++;
+
+            foreach (var member in members)
+            {
+                WriteInterfaceMethod(output, member);
+            }
+
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine();
+        }
+
+        private void WriteInterfaceMethod(IndentStringBuilder output, MethodInfo member)
+        {
+            var returnTypeName = GetReturnTypeName(member);
+            var inputTypeName = GetInputTypeName(member);
+
+            if (!string.IsNullOrEmpty(inputTypeName))
+            {
+                output.WriteLine($"{returnTypeName} {member.MethodName}({inputTypeName} req);");
+            }
+            else
+            {
+                output.WriteLine($"{returnTypeName} {member.MethodName}();");
+            }
+        }
+
+        private void WriteProxyClass(IndentStringBuilder output, string typeName, List<MethodInfo> members)
+        {
+            output.WriteLine($"public class {typeName}Proxy : I{typeName}Proxy");
+            output.WriteLine("{");
+            output.Indent++;
+
+            foreach (var member in members)
+            {
+                WriteClassMethod(output, member);
+            }
+
+            output.Indent--;
+            output.WriteLine("}");
+        }
+
+        private void WriteClassMethod(IndentStringBuilder output, MethodInfo member)
+        {
+            var returnTypeName = GetReturnTypeName(member);
+            var inputTypeName = GetInputTypeName(member);
+
+            WriteMethodSignature(output, returnTypeName, member.MethodName, inputTypeName);
+            WriteMethodBody(output);
+        }
+
+        private void WriteMethodSignature(IndentStringBuilder output, string returnTypeName, string methodName, string inputTypeName)
+        {
+            if (!string.IsNullOrEmpty(inputTypeName))
+            {
+                output.WriteLine($"public {returnTypeName} {methodName}({inputTypeName} req)");
+            }
+            else
+            {
+                output.WriteLine($"public {returnTypeName} {methodName}()");
+            }
+        }
+
+        private void WriteMethodBody(IndentStringBuilder output)
+        {
+            output.WriteLine("{");
+            output.Indent++;
+            output.WriteLine("throw new NotImplementedException();");
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine();
+        }
+
+        private string GetReturnTypeName(MethodInfo member)
+        {
+            return member.ResponseType.Count > 0 
+                ? BuildTypeName(member.ResponseType) 
+                : "Task";
+        }
+
+        private string GetInputTypeName(MethodInfo member)
+        {
+            return member.InputType.Count > 0 
+                ? BuildTypeName(member.InputType) 
+                : string.Empty;
+        }
+
+        private string BuildTypeName(List<PropertyInfo> properties)
+        {
+            if (properties.Count == 0)
+                return string.Empty;
+
+            if (properties.Count == 1)
+                return properties[0].CsharpTypeName;
+
+            return "object";
         }
 
         private List<PropertyInfo> ExtractProperties(Type type)
