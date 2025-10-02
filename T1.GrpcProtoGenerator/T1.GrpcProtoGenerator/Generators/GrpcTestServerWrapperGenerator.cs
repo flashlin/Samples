@@ -28,11 +28,8 @@ namespace T1.GrpcProtoGenerator.Generators
             // Collect all proto files and process them together to handle imports
             var allProtoFiles = protoFilesWithContent.Collect();
 
-            // Get compilation provider to check for package references
-            var compilation = context.CompilationProvider;
-
             // Combine proto files with compilation information
-            var protoFilesWithCompilation = allProtoFiles.Combine(compilation);
+            var protoFilesWithCompilation = allProtoFiles.Combine(context.CompilationProvider);
 
             context.RegisterSourceOutput(protoFilesWithCompilation, (spc, data) =>
             {
