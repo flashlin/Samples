@@ -1,0 +1,34 @@
+# CodeBoy Project Rules
+
+## Code Generation
+
+### IndentStringBuilder Usage
+When generating code using `IndentStringBuilder` from `T1.Standard.IO`:
+- Use `WriteLine()` method to write lines (NOT `AppendLine()`)
+- Use `Indent` property with `++` to increase indentation
+- Use `Indent` property with `--` to decrease indentation
+- DO NOT use methods like `IncreaseIndent()` or `DecreaseIndent()`
+
+Example:
+```csharp
+var output = new IndentStringBuilder();
+output.WriteLine("namespace MyNamespace");
+output.WriteLine("{");
+output.Indent++;
+output.WriteLine("public class MyClass { }");
+output.Indent--;
+output.WriteLine("}");
+```
+
+## Coding Standards
+
+### Code Style
+1. Keep code concise - remove redundant comments
+2. Extract small methods based on functional blocks
+3. Avoid try-catch to keep code clean
+4. Method bodies should not be too long
+
+### Testing Framework
+1. Use NUnit3
+2. Use Fluent Assertions for assertions
+
