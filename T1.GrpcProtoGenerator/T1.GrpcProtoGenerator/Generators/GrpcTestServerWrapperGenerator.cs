@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -13,39 +14,46 @@ namespace T1.GrpcProtoGenerator.Generators
     [Generator]
     public class GrpcTestServerWrapperGenerator : IIncrementalGenerator
     {
-        public void Initialize(IncrementalGeneratorInitializationContext context)
+    public void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+        var protoFiles = context.AdditionalTextsProvider
+            .Where(f => f.Path.EndsWith(".proto"));
+
+        var protoFilesWithContent = protoFiles.Select((text, _) => new ProtoFileInfo
         {
-            var protoFiles = context.AdditionalTextsProvider
-                .Where(f => f.Path.EndsWith(".proto"));
+            Path = text.Path,
+            Content = text.GetText()!.ToString()
+        });
+        
+        // Collect all proto files and process them together to handle imports
+        var allProtoFiles = protoFilesWithContent.Collect();
+        
+        // Get compilation provider to check for package references
+        var compilation = context.CompilationProvider;
+        
+        // Combine proto files with compilation information
+        var protoFilesWithCompilation = allProtoFiles.Combine(compilation);
 
-            var protoFilesWithContent = protoFiles.Select((text, _) => new ProtoFileInfo
+        context.RegisterSourceOutput(protoFilesWithCompilation, (spc, data) =>
+        {
+            var (allProtos, compilation) = data;
+            
+            // Only generate test code if NSubstitute package is available
+            if (!IsNSubstitutePackageAvailable(compilation))
             {
-                Path = text.Path,
-                Content = text.GetText()!.ToString()
-            });
+                return;
+            }
             
-            // Collect all proto files and process them together to handle imports
-            var allProtoFiles = protoFilesWithContent.Collect();
+            var logger = InitializeLogger(spc);
+            logger.LogWarning($"Starting test source generation for {allProtos.Length} proto files");
             
-            // Get compilation provider to check for package references
-            var compilation = context.CompilationProvider;
+            var combinedModel = new ProtoModelResolver().CreateCombinedModel(allProtos);
             
-            // Combine proto files with compilation information
-            var protoFilesWithCompilation = allProtoFiles.Combine(compilation);
+            GenerateTestServiceFiles(spc, allProtos, combinedModel, logger, compilation);
 
-            context.RegisterSourceOutput(protoFilesWithCompilation, (spc, data) =>
-            {
-                var (allProtos, compilation) = data;
-                var logger = InitializeLogger(spc);
-                logger.LogWarning($"Starting test source generation for {allProtos.Length} proto files");
-                
-                var combinedModel = new ProtoModelResolver().CreateCombinedModel(allProtos);
-                
-                GenerateTestServiceFiles(spc, allProtos, combinedModel, logger, compilation);
-
-                logger.LogInfo("Test source generation completed successfully");
-            });
-        }
+            logger.LogInfo("Test source generation completed successfully");
+        });
+    }
 
         /// <summary>
         /// Initialize logger for source generation

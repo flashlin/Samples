@@ -36,6 +36,13 @@ namespace T1.GrpcProtoGenerator.Generators
             context.RegisterSourceOutput(protoFilesWithCompilation, (spc, data) =>
             {
                 var (allProtos, compilation) = data;
+                
+                // Only generate server code if NSubstitute package is NOT available (non-test project)
+                if (IsNSubstitutePackageAvailable(compilation))
+                {
+                    return;
+                }
+                
                 var logger = InitializeLogger(spc);
                 logger.LogWarning($"Starting source generation for {allProtos.Length} proto files");
                 
@@ -55,6 +62,15 @@ namespace T1.GrpcProtoGenerator.Generators
         private ISourceGeneratorLogger InitializeLogger(SourceProductionContext spc)
         {
             return new SourceGeneratorLogger(spc.ReportDiagnostic, nameof(GrpcServerWrapperGenerator));
+        }
+
+        /// <summary>
+        /// Check if NSubstitute package is available in the compilation
+        /// </summary>
+        private bool IsNSubstitutePackageAvailable(Compilation compilation)
+        {
+            return compilation.ReferencedAssemblyNames
+                .Any(assemblyName => assemblyName.Name.Equals("NSubstitute", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
