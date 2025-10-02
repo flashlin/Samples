@@ -78,7 +78,7 @@ namespace T1.GrpcProtoGenerator.Generators
                 
                 logger.LogDebug($"Generating test server files for {protoFileName}");
                 
-                // Generate test server files per proto file
+                // Generate test server files per proto file (only for services in this proto file)
                 AddGeneratedSourceFile(spc, GenerateTestServerSource(model, combinedModel, compilation), 
                     $"Generated_{protoFileName}_test_server.cs");
             }

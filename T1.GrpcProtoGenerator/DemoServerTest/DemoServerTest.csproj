@@ -44,5 +44,10 @@
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
     </ItemGroup>
 
+    <!-- Exclude Generated folder from compilation to avoid duplicate definitions -->
+    <ItemGroup>
+        <Compile Remove="Generated/**/*.cs" />
+    </ItemGroup>
+
 
 </Project>
