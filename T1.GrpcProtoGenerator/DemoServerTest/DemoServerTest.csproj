@@ -32,6 +32,11 @@
         <ProjectReference Include="..\MyProtoContracts\MyProtoContracts.csproj"/>
     </ItemGroup>
 
+    <!-- Link to proto files from referenced projects for test code generation -->
+    <ItemGroup>
+        <AdditionalFiles Include="..\MyProtoContracts\Protos\**\*.proto" />
+    </ItemGroup>
+
     <ItemGroup>
         <ProjectReference Include="..\T1.GrpcProtoGenerator\T1.GrpcProtoGenerator.csproj"
                           OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
