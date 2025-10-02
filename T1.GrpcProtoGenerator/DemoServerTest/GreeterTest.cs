@@ -11,6 +11,8 @@ public class Tests : IDisposable
     {
         _demoServerApp = new DemoServerApp();
         _demoServerApp.Initialize();
+
+        //var t = new NSubstituteForDemoServer();
     }
 
     [Test]
