@@ -196,6 +196,135 @@ namespace CodeBoyLib.Services
                 : string.Empty;
         }
 
+        public string GenProtoCode(Type grpcClientType)
+        {
+            var grpcClientMembers = QueryWarpInterfaceFromGrpcClientType(grpcClientType);
+            var serviceName = grpcClientType.Name.Replace("Client", "");
+            var output = new IndentStringBuilder();
+
+            WriteProtoHeader(output);
+            WriteProtoMessages(output, grpcClientMembers);
+            WriteProtoService(output, serviceName, grpcClientMembers);
+
+            return output.ToString();
+        }
+
+        private void WriteProtoHeader(IndentStringBuilder output)
+        {
+            output.WriteLine("syntax = \"proto3\";");
+            output.WriteLine();
+        }
+
+        private void WriteProtoMessages(IndentStringBuilder output, List<MethodInfo> members)
+        {
+            var processedMessages = new HashSet<string>();
+
+            foreach (var member in members)
+            {
+                var requestMessageName = $"{member.MethodName}Request";
+                if (member.InputType.Count > 0 && !processedMessages.Contains(requestMessageName))
+                {
+                    WriteProtoMessage(output, requestMessageName, member.InputType);
+                    processedMessages.Add(requestMessageName);
+                }
+
+                var responseMessageName = $"{member.MethodName}Response";
+                if (member.ResponseType.Count > 0 && !processedMessages.Contains(responseMessageName))
+                {
+                    WriteProtoMessage(output, responseMessageName, member.ResponseType);
+                    processedMessages.Add(responseMessageName);
+                }
+            }
+        }
+
+        private void WriteProtoMessage(IndentStringBuilder output, string messageName, List<PropertyInfo> properties)
+        {
+            output.WriteLine($"message {messageName} {{");
+            output.Indent++;
+
+            for (int i = 0; i < properties.Count; i++)
+            {
+                var property = properties[i];
+                var protoType = ConvertCsharpTypeToProtoType(property.CsharpTypeName);
+                var fieldName = ConvertPropertyNameToSnakeCase(property.PropertyName);
+                output.WriteLine($"{protoType} {fieldName} = {i + 1};");
+            }
+
+            output.Indent--;
+            output.WriteLine("}");
+            output.WriteLine();
+        }
+
+        private void WriteProtoService(IndentStringBuilder output, string serviceName, List<MethodInfo> members)
+        {
+            output.WriteLine($"service {serviceName} {{");
+            output.Indent++;
+
+            foreach (var member in members)
+            {
+                WriteProtoRpcMethod(output, member);
+            }
+
+            output.Indent--;
+            output.WriteLine("}");
+        }
+
+        private void WriteProtoRpcMethod(IndentStringBuilder output, MethodInfo member)
+        {
+            var requestType = member.InputType.Count > 0 ? $"{member.MethodName}Request" : "google.protobuf.Empty";
+            var responseType = member.ResponseType.Count > 0 ? $"{member.MethodName}Response" : "google.protobuf.Empty";
+            
+            output.WriteLine($"rpc {member.MethodName} ({requestType}) returns ({responseType});");
+        }
+
+        private string ConvertCsharpTypeToProtoType(string csharpType)
+        {
+            return csharpType switch
+            {
+                "int" => "int32",
+                "long" => "int64",
+                "short" => "int32",
+                "byte" => "uint32",
+                "bool" => "bool",
+                "float" => "float",
+                "double" => "double",
+                "decimal" => "double",
+                "string" => "string",
+                _ when csharpType.StartsWith("List<") => ConvertListTypeToProtoType(csharpType),
+                _ => csharpType
+            };
+        }
+
+        private string ConvertListTypeToProtoType(string listType)
+        {
+            var innerType = listType.Substring(5, listType.Length - 6);
+            return $"repeated {ConvertCsharpTypeToProtoType(innerType)}";
+        }
+
+        private string ConvertPropertyNameToSnakeCase(string propertyName)
+        {
+            if (string.IsNullOrEmpty(propertyName))
+                return propertyName;
+
+            var result = new System.Text.StringBuilder();
+            result.Append(char.ToLower(propertyName[0]));
+
+            for (int i = 1; i < propertyName.Length; i++)
+            {
+                if (char.IsUpper(propertyName[i]))
+                {
+                    result.Append('_');
+                    result.Append(char.ToLower(propertyName[i]));
+                }
+                else
+                {
+                    result.Append(propertyName[i]);
+                }
+            }
+
+            return result.ToString();
+        }
+
         private string BuildTypeName(List<PropertyInfo> properties)
         {
             if (properties.Count == 0)
