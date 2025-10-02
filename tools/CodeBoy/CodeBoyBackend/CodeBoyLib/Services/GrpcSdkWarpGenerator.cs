@@ -77,7 +77,7 @@ namespace CodeBoyLib.Services
             return result;
         }
 
-        public string GenProxyInterfaceCode(Type grpcClientType)
+        public string GenProxyCode(Type grpcClientType)
         {
             var grpcClientMembers = QueryWarpInterfaceFromGrpcClientType(grpcClientType);
             var namespaceName = grpcClientType.Namespace + "Warp";
