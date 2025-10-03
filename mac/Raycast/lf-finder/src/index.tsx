@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, showToast, Toast, closeMainWindow } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import path from "path";
@@ -115,10 +115,19 @@ export default function Command() {
                 }}
               />
               <Action
-                title="打開檔案"
+                title="複製檔案名稱"
                 icon={Icon.Document}
+                onAction={async () => {
+                  await Clipboard.copy(path.basename(file));
+                  showToast({ style: Toast.Style.Success, title: "已複製檔案名稱" });
+                }}
+              />
+              <Action
+                title="開啟檔案"
+                icon={Icon.Finder}
                 onAction={() => {
                   exec(`open "${file}"`);
+                  showToast({ style: Toast.Style.Success, title: "正在開啟檔案" });
                 }}
               />
               <Action
