@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lf-finder",
+  "title": "LF Finder",
+  "description": "使用 Regex 搜尋檔案",
+  "icon": "command-icon.png",
+  "author": "flash",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Files by Regex",
+      "description": "使用正規表達式搜尋檔案",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.0"
+  },
+  "devDependencies": {
+    "@types/node": "~22.12.0",
+    "@types/react": "^18.0.27",
+    "@typescript-eslint/eslint-plugin": "^5.48.1",
+    "@typescript-eslint/parser": "^5.48.1",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "prettier": "^2.8.2",
+    "react": "^18.2.0",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
+
