@@ -220,7 +220,8 @@ namespace CodeBoyServer.ApiHandlers
         /// <returns>Generated proto code</returns>
         private static async Task<string> GenProtoCodeFromGrpcClientAssembly(
             [FromForm] string namespaceName,
-            [FromForm] IFormFile assemblyFile)
+            [FromForm] IFormFile assemblyFile,
+            ILogger<Program> logger)
         {
             if (assemblyFile == null || assemblyFile.Length == 0)
             {
@@ -242,7 +243,7 @@ namespace CodeBoyServer.ApiHandlers
                 Directory.CreateDirectory(dependenciesDirectory);
             }
 
-            var generator = new GrpcSdkWarpGenerator();
+            var generator = new GrpcSdkWarpGenerator(logger);
             var types = generator.QueryGrpcClientTypesFromAssemblyBytes(assemblyBytes, dependenciesDirectory);
             
             var output = new T1.Standard.IO.IndentStringBuilder();

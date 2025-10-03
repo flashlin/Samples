@@ -89,27 +89,14 @@ namespace CodeBoyLib.Services
         {
             if (File.Exists(outputPath))
             {
-                _logger?.LogInformation("NuGet package {PackageName} {Version} already exists, skipping download", packageName, version);
                 return true;
             }
 
             _logger?.LogInformation("Downloading NuGet package {PackageName} version {Version}", packageName, version);
-
             var packageUrl = $"https://api.nuget.org/v3-flatcontainer/{packageName.ToLower()}/{version}/{packageName.ToLower()}.{version}.nupkg";
-
             var downloadTask = DownloadNugetPackageAsync(packageUrl, outputPath);
             downloadTask.Wait();
-            
             var result = downloadTask.Result;
-            if (result)
-            {
-                _logger?.LogInformation("Successfully downloaded NuGet package {PackageName} {Version}", packageName, version);
-            }
-            else
-            {
-                _logger?.LogError("Failed to download NuGet package {PackageName} {Version} from {Url}", packageName, version, packageUrl);
-            }
-            
             return result;
         }
 
