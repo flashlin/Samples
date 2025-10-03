@@ -1,47 +1,28 @@
 import { Action, ActionPanel, Clipboard, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import React from "react";
-import fs from "fs";
-import path from "path";
 import { exec } from "child_process";
+import path from "path";
 
 export default function Command() {
   const [regex, setRegex] = useState("");
   const [files, setFiles] = useState<string[]>([]);
+  const searchDir = "/Users/yourname/Documents"; // 設定根目錄
 
   useEffect(() => {
     if (!regex) return;
 
-    try {
-      const pattern = new RegExp(regex, "i");
-      const searchDir = "/Users/yourname"; // 你要搜尋的根目錄
-
-      const matched: string[] = [];
-      function walk(dir: string) {
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
-        for (const entry of entries) {
-          const fullPath = path.join(dir, entry.name);
-          if (entry.isDirectory()) {
-            if (!entry.name.startsWith(".")) walk(fullPath); // 避免 .git node_modules
-          } else if (pattern.test(entry.name)) {
-            matched.push(fullPath);
-          }
-        }
+    exec(`fd --regex "${regex}" ${searchDir}`, (err, stdout) => {
+      if (err) {
+        setFiles([]);
+        return;
       }
-
-      walk(searchDir);
-      setFiles(matched);
-    } catch (err) {
-      setFiles([]);
-    }
+      const results = stdout.split("\n").filter(Boolean);
+      setFiles(results);
+    });
   }, [regex]);
 
   return (
-    <List
-      searchBarPlaceholder="輸入 regex 搜尋檔案"
-      onSearchTextChange={setRegex}
-      throttle
-    >
+    <List searchBarPlaceholder="輸入 regex 搜尋檔案" onSearchTextChange={setRegex} throttle>
       {files.map((file) => (
         <List.Item
           key={file}
@@ -71,4 +52,3 @@ export default function Command() {
     </List>
   );
 }
-
