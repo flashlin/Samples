@@ -80,6 +80,12 @@ export default function Command() {
                 icon={Icon.MagnifyingGlass}
                 onAction={handleSearch}
               />
+              <Action
+                title="關閉視窗"
+                icon={Icon.XMarkCircle}
+                shortcut={{ modifiers: [], key: "escape" }}
+                onAction={closeMainWindow}
+              />
             </ActionPanel>
           }
         />
@@ -94,6 +100,12 @@ export default function Command() {
                 title="開始搜尋"
                 icon={Icon.MagnifyingGlass}
                 onAction={handleSearch}
+              />
+              <Action
+                title="關閉視窗"
+                icon={Icon.XMarkCircle}
+                shortcut={{ modifiers: [], key: "escape" }}
+                onAction={closeMainWindow}
               />
             </ActionPanel>
           }
@@ -134,6 +146,12 @@ export default function Command() {
                 title="重新搜尋"
                 icon={Icon.MagnifyingGlass}
                 onAction={handleSearch}
+              />
+              <Action
+                title="關閉視窗"
+                icon={Icon.XMarkCircle}
+                shortcut={{ modifiers: [], key: "escape" }}
+                onAction={closeMainWindow}
               />
             </ActionPanel>
           }
