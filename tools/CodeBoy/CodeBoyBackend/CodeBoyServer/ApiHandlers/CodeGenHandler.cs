@@ -47,6 +47,7 @@ namespace CodeBoyServer.ApiHandlers
             app.MapPost("/api/codegen/genProtoCodeFromGrpcClientAssembly", GenProtoCodeFromGrpcClientAssembly)
                 .WithDescription("Generate proto code from gRPC client assembly")
                 .WithTags("CodeGeneration")
+                .DisableAntiforgery()
                 .WithOpenApi();
         }
 
@@ -214,12 +215,27 @@ namespace CodeBoyServer.ApiHandlers
         /// <summary>
         /// Generate proto code from gRPC client assembly
         /// </summary>
-        /// <param name="request">Proto code generation request</param>
+        /// <param name="namespaceName">Namespace name for the generated code</param>
+        /// <param name="assemblyFile">gRPC client assembly DLL file</param>
         /// <returns>Generated proto code</returns>
-        private static string GenProtoCodeFromGrpcClientAssembly([FromBody] GenProtoCodeFromGrpcClientAssemblyRequest request)
+        private static async Task<string> GenProtoCodeFromGrpcClientAssembly(
+            [FromForm] string namespaceName,
+            [FromForm] IFormFile assemblyFile)
         {
+            if (assemblyFile == null || assemblyFile.Length == 0)
+            {
+                throw new ArgumentException("Assembly file is required");
+            }
+
+            byte[] assemblyBytes;
+            using (var memoryStream = new MemoryStream())
+            {
+                await assemblyFile.CopyToAsync(memoryStream);
+                assemblyBytes = memoryStream.ToArray();
+            }
+
             var generator = new GrpcSdkWarpGenerator();
-            var types = generator.QueryGrpcClientTypesFromAssemblyBytes(request.Assembly);
+            var types = generator.QueryGrpcClientTypesFromAssemblyBytes(assemblyBytes);
             
             var output = new T1.Standard.IO.IndentStringBuilder();
             foreach (var type in types)

@@ -100,6 +100,14 @@ export const codeGenApi = {
    * @returns Generated proto code as string
    */
   genProtoCodeFromGrpcClientAssembly(params: GenProtoCodeFromGrpcClientAssemblyRequest): Promise<string> {
-    return request.post('/codegen/genProtoCodeFromGrpcClientAssembly', params);
+    const formData = new FormData();
+    formData.append('namespaceName', params.namespaceName);
+    formData.append('assemblyFile', new Blob([params.assembly]), 'assembly.dll');
+    
+    return request.post('/codegen/genProtoCodeFromGrpcClientAssembly', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
   },
 };
