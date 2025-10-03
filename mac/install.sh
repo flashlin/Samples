@@ -13,6 +13,8 @@ if [ ! -d ~/miniconda3 ]; then
 fi
 
 brew install zsh-autosuggestions
+brew install ripgrep
+brew install fd
 uv run ./install.py
 
 echo "Install done"

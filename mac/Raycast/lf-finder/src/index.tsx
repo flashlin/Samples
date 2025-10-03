@@ -6,23 +6,58 @@ import path from "path";
 export default function Command() {
   const [regex, setRegex] = useState("");
   const [files, setFiles] = useState<string[]>([]);
-  const searchDir = "/Users/yourname/Documents"; // 設定根目錄
+  const [isLoading, setIsLoading] = useState(false);
+  const searchDir = "/Users/flash"; // 設定根目錄
 
   useEffect(() => {
-    if (!regex) return;
+    if (!regex) {
+      setFiles([]);
+      return;
+    }
 
-    exec(`fd --regex "${regex}" ${searchDir}`, (err, stdout) => {
+    setIsLoading(true);
+    
+    // Escape single quotes in regex for shell safety
+    const escapedRegex = regex.replace(/'/g, "'\\''");
+    
+    // Use -e to match file extension, or --glob for simpler patterns
+    // For regex patterns, use full path matching
+    const command = `fd --type f --no-ignore-vcs '${escapedRegex}' '${searchDir}'`;
+    
+    exec(command, { maxBuffer: 1024 * 1024 * 10 }, (err, stdout, stderr) => {
+      setIsLoading(false);
+      
       if (err) {
+        console.error("fd error:", err, stderr);
+        showToast({ 
+          style: Toast.Style.Failure, 
+          title: "搜尋失敗", 
+          message: stderr || err.message 
+        });
         setFiles([]);
         return;
       }
-      const results = stdout.split("\n").filter(Boolean);
+      
+      const results = stdout.trim().split("\n").filter(Boolean);
       setFiles(results);
+      
+      if (results.length === 0) {
+        showToast({ 
+          style: Toast.Style.Success, 
+          title: "無結果", 
+          message: `找不到符合 "${regex}" 的檔案` 
+        });
+      }
     });
   }, [regex]);
 
   return (
-    <List searchBarPlaceholder="輸入 regex 搜尋檔案" onSearchTextChange={setRegex} throttle>
+    <List 
+      searchBarPlaceholder="輸入檔案名稱或 pattern（例如：\.sql$ 或 test）" 
+      onSearchTextChange={setRegex} 
+      isLoading={isLoading}
+      throttle
+    >
       {files.map((file) => (
         <List.Item
           key={file}
