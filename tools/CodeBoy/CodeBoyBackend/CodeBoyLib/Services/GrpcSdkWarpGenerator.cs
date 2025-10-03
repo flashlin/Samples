@@ -140,7 +140,7 @@ namespace CodeBoyLib.Services
 
                 var targetFrameworks = new[] { 
                     "netstandard2.1", "netstandard2.0", "netstandard1.6", "netstandard1.0", 
-                    "net6.0", "net5.0", 
+                    "net9.0", "net8.0", "net7.0", "net6.0", "net5.0", 
                     "netcoreapp3.1", "netcoreapp2.1", 
                     "net45", "net40" };
                 foreach (var framework in targetFrameworks)
