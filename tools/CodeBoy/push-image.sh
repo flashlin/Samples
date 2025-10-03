@@ -20,11 +20,11 @@ echo ""
 
 echo "🔨 Building fresh images..."
 cd CodeBoyBackend
-docker build -t codeboy-server:latest .
+docker build --platform linux/amd64 -t codeboy-server:latest .
 cd ..
 
 cd CodeBoyFront
-docker build -t codeboy-front:latest .
+docker build --platform linux/amd64 -t codeboy-front:latest .
 cd ..
 
 echo ""
