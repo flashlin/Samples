@@ -177,8 +177,11 @@ const clearMessages = () => {
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
-    selectedFile.value = target.files[0]
-    clearMessages()
+    const file = target.files[0]
+    if (file) {
+      selectedFile.value = file
+      clearMessages()
+    }
   }
 }
 
