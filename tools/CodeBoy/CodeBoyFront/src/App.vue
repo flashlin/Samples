@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
   { path: '/useGrpcProtoGeneratorDoc', name: 'gRPC Proto Docs', description: 'gRPC Proto generator documentation' },
   { path: '/genTypescriptCodeFromSwagger', name: 'Gen TypeScript', description: 'Generate TypeScript API client' },
   { path: '/genDatabaseDto', name: 'Gen Database DTO', description: 'Generate database DTO from SQL' },
-  { path: '/genProtoCodeFromGrpcClientAssembly', name: 'Gen Proto from gRPC', description: 'Generate proto code from gRPC assembly' }
+  { path: '/genProtoCodeFromGrpcClientAssembly', name: 'Gen Proto from gRPC Client SDK', description: 'Generate proto code from gRPC assembly' }
 ]
 
 const filteredNavItems = computed(() => {
