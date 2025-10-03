@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using T1.Standard.IO;
 
 namespace CodeBoyLib.Services
@@ -27,10 +29,13 @@ namespace CodeBoyLib.Services
     {
         private readonly string _assemblyDirectory;
         private readonly Dictionary<string, string> _grpcNugetPackages;
+        private readonly ILogger _logger;
+        private static readonly HttpClient _httpClient = new HttpClient();
 
-        public GrpcAssemblyLoadContext(string assemblyDirectory) : base(isCollectible: true)
+        public GrpcAssemblyLoadContext(string assemblyDirectory, ILogger logger = null) : base(isCollectible: true)
         {
             _assemblyDirectory = assemblyDirectory;
+            _logger = logger;
             _grpcNugetPackages = new Dictionary<string, string>
             {
                 { "Google.Protobuf", "3.19.2" },
@@ -84,24 +89,41 @@ namespace CodeBoyLib.Services
         {
             if (File.Exists(outputPath))
             {
+                _logger?.LogInformation("NuGet package {PackageName} {Version} already exists, skipping download", packageName, version);
                 return true;
             }
 
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = "nuget",
-                Arguments = $"install {packageName} -Version {version} -OutputDirectory \"{Path.GetDirectoryName(outputPath)}\" -NonInteractive",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
+            _logger?.LogInformation("Downloading NuGet package {PackageName} version {Version}", packageName, version);
 
-            using (var process = Process.Start(startInfo))
+            var packageUrl = $"https://api.nuget.org/v3-flatcontainer/{packageName.ToLower()}/{version}/{packageName.ToLower()}.{version}.nupkg";
+
+            var downloadTask = DownloadNugetPackageAsync(packageUrl, outputPath);
+            downloadTask.Wait();
+            
+            var result = downloadTask.Result;
+            if (result)
             {
-                process.WaitForExit();
-                return process.ExitCode == 0;
+                _logger?.LogInformation("Successfully downloaded NuGet package {PackageName} {Version}", packageName, version);
             }
+            else
+            {
+                _logger?.LogError("Failed to download NuGet package {PackageName} {Version} from {Url}", packageName, version, packageUrl);
+            }
+            
+            return result;
+        }
+
+        private async Task<bool> DownloadNugetPackageAsync(string packageUrl, string outputPath)
+        {
+            var response = await _httpClient.GetAsync(packageUrl);
+            if (!response.IsSuccessStatusCode)
+            {
+                return false;
+            }
+
+            var content = await response.Content.ReadAsByteArrayAsync();
+            await File.WriteAllBytesAsync(outputPath, content);
+            return true;
         }
 
         private void ExtractNugetPackage(string nupkgPath, string extractPath)
@@ -169,6 +191,13 @@ namespace CodeBoyLib.Services
 
     public class GrpcSdkWarpGenerator
     {
+        private readonly ILogger _logger;
+
+        public GrpcSdkWarpGenerator(ILogger logger = null)
+        {
+            _logger = logger;
+        }
+
         public List<Type> QueryGrpcClientTypesFromAssemblyFile(string assemblyFile)
         {
             var assembly = Assembly.LoadFrom(assemblyFile);
@@ -183,7 +212,7 @@ namespace CodeBoyLib.Services
                 return QueryGrpcClientTypesFromAssembly(assembly);
             }
 
-            var loadContext = new GrpcAssemblyLoadContext(dependenciesDirectory);
+            var loadContext = new GrpcAssemblyLoadContext(dependenciesDirectory, _logger);
             using (var ms = new MemoryStream(assemblyBytes))
             {
                 var assembly = loadContext.LoadFromStream(ms);

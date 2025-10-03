@@ -234,8 +234,16 @@ namespace CodeBoyServer.ApiHandlers
                 assemblyBytes = memoryStream.ToArray();
             }
 
+            var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var dependenciesDirectory = Path.Combine(appDirectory, "codeData");
+            
+            if (!Directory.Exists(dependenciesDirectory))
+            {
+                Directory.CreateDirectory(dependenciesDirectory);
+            }
+
             var generator = new GrpcSdkWarpGenerator();
-            var types = generator.QueryGrpcClientTypesFromAssemblyBytes(assemblyBytes);
+            var types = generator.QueryGrpcClientTypesFromAssemblyBytes(assemblyBytes, dependenciesDirectory);
             
             var output = new T1.Standard.IO.IndentStringBuilder();
             foreach (var type in types)
