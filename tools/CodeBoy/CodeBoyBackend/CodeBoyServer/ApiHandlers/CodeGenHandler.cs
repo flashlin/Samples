@@ -212,7 +212,7 @@ namespace CodeBoyServer.ApiHandlers
             return generator.GenerateEfDtoCode(request.Sql);
         }
 
-        private static async Task<string> GenProtoCodeFromGrpcClientAssembly(
+        private static async Task<List<ProtoFileInfo>> GenProtoCodeFromGrpcClientAssembly(
             [FromForm] string namespaceName,
             [FromForm] IFormFile assemblyFile,
             ILogger<Program> logger)
@@ -240,13 +240,23 @@ namespace CodeBoyServer.ApiHandlers
             var generator = new GrpcSdkWarpGenerator(logger);
             var types = generator.QueryGrpcClientTypesFromAssemblyBytes(assemblyBytes, dependenciesDirectory);
             
-            var output = new T1.Standard.IO.IndentStringBuilder();
+            var protoFiles = new List<ProtoFileInfo>();
             foreach (var type in types)
             {
-                output.WriteLine(generator.GenProtoCode(type));
+                var genProtoCode = generator.GenProtoCode(type);
+                protoFiles.Add(new ProtoFileInfo()
+                {
+                    ServiceName = type.Name,
+                    ProtoCode = genProtoCode,
+                });
             }
-            
-            return output.ToString();
+            return protoFiles;
         }
+    }
+
+    public class ProtoFileInfo
+    {
+        public string ServiceName { get; set; } = string.Empty;
+        public string ProtoCode { get; set; } =string.Empty;
     }
 }
