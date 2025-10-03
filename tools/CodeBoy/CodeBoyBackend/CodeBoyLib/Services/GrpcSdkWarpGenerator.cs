@@ -52,33 +52,23 @@ namespace CodeBoyLib.Services
         protected override Assembly Load(AssemblyName assemblyName)
         {
             var assemblyPath = Path.Combine(_assemblyDirectory, $"{assemblyName.Name}.dll");
-            
-            _logger?.LogInformation("Attempting to load assembly {AssemblyName} from {AssemblyPath}", assemblyName.Name, assemblyPath);
-            
             if (File.Exists(assemblyPath))
             {
-                _logger?.LogInformation("Assembly {AssemblyName} found at {AssemblyPath}", assemblyName.Name, assemblyPath);
                 return LoadFromAssemblyPath(assemblyPath);
             }
-
-            _logger?.LogInformation("Assembly {AssemblyName} not found, checking if it's a known gRPC package", assemblyName.Name);
 
             if (_grpcNugetPackages.ContainsKey(assemblyName.Name))
             {
                 var version = _grpcNugetPackages[assemblyName.Name];
-                _logger?.LogInformation("Assembly {AssemblyName} is a known package, attempting to download and extract", assemblyName.Name);
-                
                 if (DownloadAndExtractNugetPackage(assemblyName.Name, version))
                 {
                     if (File.Exists(assemblyPath))
                     {
-                        _logger?.LogInformation("Assembly {AssemblyName} successfully extracted and found at {AssemblyPath}", assemblyName.Name, assemblyPath);
                         return LoadFromAssemblyPath(assemblyPath);
                     }
                     else
                     {
                         _logger?.LogError("Assembly {AssemblyName} was extracted but not found at expected path {AssemblyPath}", assemblyName.Name, assemblyPath);
-                        
                         var files = Directory.GetFiles(_assemblyDirectory, "*.dll");
                         _logger?.LogInformation("Available DLLs in directory: {DllFiles}", string.Join(", ", files.Select(Path.GetFileName)));
                     }
@@ -127,7 +117,6 @@ namespace CodeBoyLib.Services
             {
                 return false;
             }
-
             var content = await response.Content.ReadAsByteArrayAsync();
             await File.WriteAllBytesAsync(outputPath, content);
             return true;
@@ -149,8 +138,11 @@ namespace CodeBoyLib.Services
                     _logger?.LogInformation("Found DLL: {FullName}", entry.FullName);
                 }
 
-                var targetFrameworks = new[] { "netstandard2.1", "netstandard2.0", "netstandard1.6", "netstandard1.0", "net6.0", "net5.0", "netcoreapp3.1", "netcoreapp2.1", "net45", "net40" };
-                
+                var targetFrameworks = new[] { 
+                    "netstandard2.1", "netstandard2.0", "netstandard1.6", "netstandard1.0", 
+                    "net6.0", "net5.0", 
+                    "netcoreapp3.1", "netcoreapp2.1", 
+                    "net45", "net40" };
                 foreach (var framework in targetFrameworks)
                 {
                     var foundDlls = false;
