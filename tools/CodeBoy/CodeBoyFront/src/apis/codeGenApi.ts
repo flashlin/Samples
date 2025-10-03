@@ -43,6 +43,12 @@ export interface GenProtoCodeFromGrpcClientAssemblyRequest {
   assembly: Uint8Array;
 }
 
+// Response interface for proto code generation
+export interface ProtoFileInfo {
+  serviceName: string;
+  protoCode: string;
+}
+
 // Code generation API
 export const codeGenApi = {
   /**
@@ -97,12 +103,13 @@ export const codeGenApi = {
   /**
    * Generate proto code from gRPC client assembly
    * @param params Proto code generation request parameters
-   * @returns Generated proto code as string
+   * @returns Array of proto file information
    */
-  genProtoCodeFromGrpcClientAssembly(params: GenProtoCodeFromGrpcClientAssemblyRequest): Promise<string> {
+  genProtoCodeFromGrpcClientAssembly(params: GenProtoCodeFromGrpcClientAssemblyRequest): Promise<ProtoFileInfo[]> {
     const formData = new FormData();
     formData.append('namespaceName', params.namespaceName);
-    formData.append('assemblyFile', new Blob([params.assembly]), 'assembly.dll');
+    const blob = new Blob([params.assembly as BlobPart], { type: 'application/octet-stream' });
+    formData.append('assemblyFile', blob, 'assembly.dll');
     
     return request.post('/codegen/genProtoCodeFromGrpcClientAssembly', formData, {
       headers: {

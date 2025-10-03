@@ -116,30 +116,34 @@
           </div>
         </div>
 
-        <!-- Generated Code Display -->
-        <div v-if="generatedCode" class="mt-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-medium text-white">Generated Proto Code</h3>
-            <button
-              @click="copyToClipboard"
-              class="px-3 py-2 bg-gray-700 text-gray-300 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-            >
-              <span v-if="copied" class="flex items-center">
-                <svg class="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                Copied!
-              </span>
-              <span v-else class="flex items-center">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                </svg>
-                Copy Code
-              </span>
-            </button>
-          </div>
-          <div class="bg-gray-900 rounded-lg border border-gray-600 overflow-hidden">
-            <pre class="p-4 text-sm text-green-400 overflow-x-auto"><code>{{ generatedCode }}</code></pre>
+        <!-- Generated Proto Files Display -->
+        <div v-if="protoFiles.length > 0" class="mt-6 space-y-4">
+          <h3 class="text-lg font-medium text-white">Generated Proto Files</h3>
+          
+          <div v-for="(protoFile, index) in protoFiles" :key="index" class="bg-gray-800 rounded-lg border border-gray-600 overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 bg-gray-750 border-b border-gray-600">
+              <h4 class="text-md font-medium text-white">{{ protoFile.serviceName }}.proto</h4>
+              <button
+                @click="copyToClipboard(index)"
+                class="px-3 py-1 bg-gray-700 text-gray-300 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm"
+              >
+                <span v-if="copiedIndex === index" class="flex items-center">
+                  <svg class="w-4 h-4 mr-1 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Copied!
+                </span>
+                <span v-else class="flex items-center">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                  </svg>
+                  Copy
+                </span>
+              </button>
+            </div>
+            <div class="bg-gray-900">
+              <pre class="p-4 text-sm text-green-400 overflow-x-auto"><code>{{ protoFile.protoCode }}</code></pre>
+            </div>
           </div>
         </div>
       </div>
@@ -149,7 +153,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
-import { codeGenApi, type GenProtoCodeFromGrpcClientAssemblyRequest } from '@/apis/codeGenApi'
+import { codeGenApi, type GenProtoCodeFromGrpcClientAssemblyRequest, type ProtoFileInfo } from '@/apis/codeGenApi'
 import { LocalStorageService } from '@/services/LocalStorage'
 
 // Form data (excluding file)
@@ -164,13 +168,13 @@ const fileInput = ref<HTMLInputElement | null>(null)
 // State
 const isGenerating = ref(false)
 const errorMessage = ref('')
-const generatedCode = ref('')
-const copied = ref(false)
+const protoFiles = ref<ProtoFileInfo[]>([])
+const copiedIndex = ref<number | null>(null)
 
 // Clear messages
 const clearMessages = () => {
   errorMessage.value = ''
-  generatedCode.value = ''
+  protoFiles.value = []
 }
 
 // Handle file selection
@@ -195,13 +199,16 @@ const formatFileSize = (bytes: number): string => {
 }
 
 // Copy to clipboard
-const copyToClipboard = async () => {
+const copyToClipboard = async (index: number) => {
   try {
-    await navigator.clipboard.writeText(generatedCode.value)
-    copied.value = true
-    setTimeout(() => {
-      copied.value = false
-    }, 2000)
+    const protoFile = protoFiles.value[index]
+    if (protoFile) {
+      await navigator.clipboard.writeText(protoFile.protoCode)
+      copiedIndex.value = index
+      setTimeout(() => {
+        copiedIndex.value = null
+      }, 2000)
+    }
   } catch (error) {
     console.error('Failed to copy to clipboard:', error)
   }
@@ -229,8 +236,8 @@ const generateCode = async () => {
     }
 
     // Call API to generate proto code
-    const code = await codeGenApi.genProtoCodeFromGrpcClientAssembly(request)
-    generatedCode.value = code
+    const result = await codeGenApi.genProtoCodeFromGrpcClientAssembly(request)
+    protoFiles.value = result
   } catch (error: any) {
     console.error('Generation failed:', error)
     errorMessage.value = error.response?.data?.detail || error.message || 'Failed to generate proto code. Please check your inputs and try again.'
