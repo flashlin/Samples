@@ -1,15 +1,6 @@
 #!/bin/bash
 set -e
 
-cd CodeBoyBackend
-docker build -t codeboy-server:latest .
-cd ..
-
-cd CodeBoyFront
-docker build -t codeboy-front:latest .
-cd ..
-
-
 if [ ! -f .env ]; then
     echo "❌ .env file not found!"
     exit 1
@@ -22,6 +13,21 @@ if [ -z "$DockerRegistryServer" ]; then
     exit 1
 fi
 
+echo "🧹 Cleaning up old images..."
+docker rmi codeboy-server:latest ${DockerRegistryServer}/codeboy-server:latest 2>/dev/null || true
+docker rmi codeboy-front:latest ${DockerRegistryServer}/codeboy-front:latest 2>/dev/null || true
+echo ""
+
+echo "🔨 Building fresh images..."
+cd CodeBoyBackend
+docker build -t codeboy-server:latest .
+cd ..
+
+cd CodeBoyFront
+docker build -t codeboy-front:latest .
+cd ..
+
+echo ""
 echo "🏷️  Tagging and pushing Docker images..."
 echo "📦 Registry: $DockerRegistryServer"
 echo ""
