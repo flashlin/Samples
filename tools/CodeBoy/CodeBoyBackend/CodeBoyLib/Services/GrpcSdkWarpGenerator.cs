@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using T1.Standard.IO;
 
 namespace CodeBoyLib.Services
@@ -19,6 +23,150 @@ namespace CodeBoyLib.Services
         public List<PropertyInfo> ResponseType { get; set; } = new List<PropertyInfo>();
     }
 
+    public class GrpcAssemblyLoadContext : AssemblyLoadContext
+    {
+        private readonly string _assemblyDirectory;
+        private readonly Dictionary<string, string> _grpcNugetPackages;
+
+        public GrpcAssemblyLoadContext(string assemblyDirectory) : base(isCollectible: true)
+        {
+            _assemblyDirectory = assemblyDirectory;
+            _grpcNugetPackages = new Dictionary<string, string>
+            {
+                { "Google.Protobuf", "3.19.2" },
+                { "Grpc.Core", "2.46.6" },
+                { "Grpc.Core.Api", "2.46.6" },
+                { "Grpc.Net.Client", "2.52.0" },
+                { "Grpc.Net.Common", "2.52.0" },
+                { "Grpc.Tools", "2.52.0" },
+                { "System.Runtime.CompilerServices.Unsafe", "6.0.0" },
+                { "System.Memory", "4.5.5" }
+            };
+        }
+
+        protected override Assembly Load(AssemblyName assemblyName)
+        {
+            var assemblyPath = Path.Combine(_assemblyDirectory, $"{assemblyName.Name}.dll");
+            if (File.Exists(assemblyPath))
+            {
+                return LoadFromAssemblyPath(assemblyPath);
+            }
+
+            if (_grpcNugetPackages.ContainsKey(assemblyName.Name))
+            {
+                var version = _grpcNugetPackages[assemblyName.Name];
+                if (DownloadAndExtractNugetPackage(assemblyName.Name, version))
+                {
+                    if (File.Exists(assemblyPath))
+                    {
+                        return LoadFromAssemblyPath(assemblyPath);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private bool DownloadAndExtractNugetPackage(string packageName, string version)
+        {
+            var nupkgPath = Path.Combine(_assemblyDirectory, $"{packageName}.{version}.nupkg");
+
+            if (!DownloadNugetPackage(packageName, version, nupkgPath))
+            {
+                return false;
+            }
+
+            ExtractNugetPackage(nupkgPath, _assemblyDirectory);
+            return true;
+        }
+
+        private bool DownloadNugetPackage(string packageName, string version, string outputPath)
+        {
+            if (File.Exists(outputPath))
+            {
+                return true;
+            }
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "nuget",
+                Arguments = $"install {packageName} -Version {version} -OutputDirectory \"{Path.GetDirectoryName(outputPath)}\" -NonInteractive",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using (var process = Process.Start(startInfo))
+            {
+                process.WaitForExit();
+                return process.ExitCode == 0;
+            }
+        }
+
+        private void ExtractNugetPackage(string nupkgPath, string extractPath)
+        {
+            var packageFolder = Path.Combine(extractPath, Path.GetFileNameWithoutExtension(nupkgPath));
+            
+            if (Directory.Exists(packageFolder))
+            {
+                var libPath = FindLibPath(packageFolder);
+                if (!string.IsNullOrEmpty(libPath))
+                {
+                    CopyDllsToDirectory(libPath, extractPath);
+                }
+                return;
+            }
+
+            using (var archive = ZipFile.OpenRead(nupkgPath))
+            {
+                foreach (var entry in archive.Entries)
+                {
+                    if (entry.FullName.Contains("/lib/") && entry.Name.EndsWith(".dll"))
+                    {
+                        var destinationPath = Path.Combine(extractPath, entry.Name);
+                        entry.ExtractToFile(destinationPath, true);
+                    }
+                }
+            }
+        }
+
+        private string FindLibPath(string packageFolder)
+        {
+            var libFolder = Path.Combine(packageFolder, "lib");
+            if (!Directory.Exists(libFolder))
+            {
+                return null;
+            }
+
+            var targetFrameworks = new[] { "netstandard2.1", "netstandard2.0", "netstandard1.6", "net6.0", "net5.0", "netcoreapp3.1" };
+            foreach (var framework in targetFrameworks)
+            {
+                var frameworkPath = Path.Combine(libFolder, framework);
+                if (Directory.Exists(frameworkPath))
+                {
+                    return frameworkPath;
+                }
+            }
+
+            var firstSubDir = Directory.GetDirectories(libFolder).FirstOrDefault();
+            return firstSubDir;
+        }
+
+        private void CopyDllsToDirectory(string sourcePath, string targetPath)
+        {
+            foreach (var dllFile in Directory.GetFiles(sourcePath, "*.dll"))
+            {
+                var fileName = Path.GetFileName(dllFile);
+                var targetFile = Path.Combine(targetPath, fileName);
+                if (!File.Exists(targetFile))
+                {
+                    File.Copy(dllFile, targetFile, true);
+                }
+            }
+        }
+    }
+
     public class GrpcSdkWarpGenerator
     {
         public List<Type> QueryGrpcClientTypesFromAssemblyFile(string assemblyFile)
@@ -27,10 +175,20 @@ namespace CodeBoyLib.Services
             return QueryGrpcClientTypesFromAssembly(assembly);
         }
 
-        public List<Type> QueryGrpcClientTypesFromAssemblyBytes(byte[] assemblyBytes)
+        public List<Type> QueryGrpcClientTypesFromAssemblyBytes(byte[] assemblyBytes, string dependenciesDirectory = null)
         {
-            var assembly = Assembly.Load(assemblyBytes);
-            return QueryGrpcClientTypesFromAssembly(assembly);
+            if (string.IsNullOrEmpty(dependenciesDirectory))
+            {
+                var assembly = Assembly.Load(assemblyBytes);
+                return QueryGrpcClientTypesFromAssembly(assembly);
+            }
+
+            var loadContext = new GrpcAssemblyLoadContext(dependenciesDirectory);
+            using (var ms = new MemoryStream(assemblyBytes))
+            {
+                var assembly = loadContext.LoadFromStream(ms);
+                return QueryGrpcClientTypesFromAssembly(assembly);
+            }
         }
 
         private List<Type> QueryGrpcClientTypesFromAssembly(Assembly assembly)
