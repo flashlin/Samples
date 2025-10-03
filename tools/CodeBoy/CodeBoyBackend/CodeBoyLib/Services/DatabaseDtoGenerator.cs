@@ -6,6 +6,24 @@ namespace CodeBoyLib.Services;
 
 public class DatabaseDtoGenerator
 {
+    private string NormalName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return name;
+
+        var result = name;
+
+        if (result.Contains("."))
+        {
+            var parts = result.Split('.');
+            result = parts[^1];
+        }
+
+        result = result.Replace("[", "").Replace("]", "");
+
+        return result;
+    }
+
     public string GenerateEfDtoCode(string createTableSql)
     {
         var sqlParser = new SqlParser(createTableSql);
@@ -18,14 +36,14 @@ public class DatabaseDtoGenerator
             {
                 continue;
             }
-            var tableName = createTableExpr.TableName;
+            var tableName = NormalName(createTableExpr.TableName);
             output.WriteLine($"public class {tableName}Dto {{");
             output.Indent++;
             foreach (var column in createTableExpr.Columns)
             {
                 if (column is SqlColumnDefinition columnDefinition)
                 {
-                    var columnName = columnDefinition.ColumnName;
+                    var columnName = NormalName(columnDefinition.ColumnName);
                     var dataType = SqlTypeToCsharpType(columnDefinition.DataType, columnDefinition.DataSize);
                     output.WriteLine($"public {dataType} {columnName} {{ get; set; }}");
                     continue;
