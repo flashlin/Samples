@@ -6,6 +6,7 @@ const route = useRoute()
 const router = useRouter()
 
 const searchQuery = ref('')
+const isSearchFocused = ref(false)
 
 interface NavItem {
   path: string
@@ -34,9 +35,24 @@ const filteredNavItems = computed(() => {
   )
 })
 
+const showNavList = computed(() => {
+  return isSearchFocused.value
+})
+
+const handleSearchFocus = () => {
+  isSearchFocused.value = true
+}
+
+const handleSearchBlur = () => {
+  setTimeout(() => {
+    isSearchFocused.value = false
+  }, 200)
+}
+
 const navigateTo = (path: string) => {
   router.push(path)
   searchQuery.value = ''
+  isSearchFocused.value = false
 }
 </script>
 
@@ -63,12 +79,14 @@ const navigateTo = (path: string) => {
                   type="text"
                   placeholder="搜尋功能..."
                   class="w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  @focus="handleSearchFocus"
+                  @blur="handleSearchBlur"
                 />
               </div>
 
               <!-- Navigation List -->
               <div
-                v-if="searchQuery.trim()"
+                v-if="showNavList"
                 class="absolute z-50 mt-2 w-full bg-gray-800 border border-gray-600 rounded-md shadow-lg max-h-96 overflow-y-auto"
               >
                 <div v-if="filteredNavItems.length === 0" class="px-4 py-3 text-sm text-gray-400">
