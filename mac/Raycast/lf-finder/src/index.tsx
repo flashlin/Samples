@@ -4,13 +4,14 @@ import { exec } from "child_process";
 import path from "path";
 
 export default function Command() {
-  const [regex, setRegex] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [files, setFiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const searchDir = "/Users/flash"; // 設定根目錄
 
-  useEffect(() => {
-    if (!regex) {
+  const performSearch = (query: string) => {
+    if (!query) {
       setFiles([]);
       return;
     }
@@ -18,7 +19,7 @@ export default function Command() {
     setIsLoading(true);
     
     // Escape single quotes in regex for shell safety
-    const escapedRegex = regex.replace(/'/g, "'\\''");
+    const escapedRegex = query.replace(/'/g, "'\\''");
     
     // Use full path to fd (Homebrew installation)
     const fdPath = "/opt/homebrew/bin/fd";
@@ -45,19 +46,35 @@ export default function Command() {
         showToast({ 
           style: Toast.Style.Success, 
           title: "無結果", 
-          message: `找不到符合 "${regex}" 的檔案` 
+          message: `找不到符合 "${query}" 的檔案` 
         });
       }
     });
-  }, [regex]);
+  };
+
+  useEffect(() => {
+    performSearch(searchQuery);
+  }, [searchQuery]);
 
   return (
     <List 
-      searchBarPlaceholder="輸入檔案名稱或 pattern（例如：\.sql$ 或 test）" 
-      onSearchTextChange={setRegex} 
+      searchBarPlaceholder="輸入檔案名稱或 pattern，按 Enter 搜尋（例如：\.sql$ 或 test）" 
+      onSearchTextChange={setSearchText}
+      searchText={searchText}
       isLoading={isLoading}
-      throttle
     >
+      {files.length === 0 && !isLoading && searchQuery && (
+        <List.EmptyView 
+          title="無搜尋結果" 
+          description={`找不到符合 "${searchQuery}" 的檔案`}
+        />
+      )}
+      {files.length === 0 && !searchQuery && (
+        <List.EmptyView 
+          title="輸入搜尋條件" 
+          description="輸入檔案名稱或 pattern，按 Enter 開始搜尋"
+        />
+      )}
       {files.map((file) => (
         <List.Item
           key={file}
@@ -65,6 +82,13 @@ export default function Command() {
           subtitle={file}
           actions={
             <ActionPanel>
+              <Action
+                title="開始搜尋"
+                icon={Icon.MagnifyingGlass}
+                onAction={() => {
+                  setSearchQuery(searchText);
+                }}
+              />
               <Action
                 title="複製檔案路徑"
                 icon={Icon.Clipboard}
