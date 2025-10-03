@@ -212,12 +212,6 @@ namespace CodeBoyServer.ApiHandlers
             return generator.GenerateEfDtoCode(request.Sql);
         }
 
-        /// <summary>
-        /// Generate proto code from gRPC client assembly
-        /// </summary>
-        /// <param name="namespaceName">Namespace name for the generated code</param>
-        /// <param name="assemblyFile">gRPC client assembly DLL file</param>
-        /// <returns>Generated proto code</returns>
         private static async Task<string> GenProtoCodeFromGrpcClientAssembly(
             [FromForm] string namespaceName,
             [FromForm] IFormFile assemblyFile,
