@@ -37,6 +37,12 @@ export interface GenDatabaseDtoRequest {
   sql: string;
 }
 
+// Request interface for generating proto code from gRPC client assembly
+export interface GenProtoCodeFromGrpcClientAssemblyRequest {
+  namespaceName: string;
+  assembly: Uint8Array;
+}
+
 // Code generation API
 export const codeGenApi = {
   /**
@@ -86,5 +92,14 @@ export const codeGenApi = {
    */
   genDatabaseDto(params: GenDatabaseDtoRequest): Promise<string> {
     return request.post('/codegen/genDatabaseDto', params);
+  },
+
+  /**
+   * Generate proto code from gRPC client assembly
+   * @param params Proto code generation request parameters
+   * @returns Generated proto code as string
+   */
+  genProtoCodeFromGrpcClientAssembly(params: GenProtoCodeFromGrpcClientAssemblyRequest): Promise<string> {
+    return request.post('/codegen/genProtoCodeFromGrpcClientAssembly', params);
   },
 };

@@ -5,6 +5,7 @@ import BuildDatabaseModelNupkg from '@/views/BuildDatabaseModelNupkg.vue'
 import UseGrpcProtoGeneratorDoc from '@/views/UseGrpcProtoGeneratorDoc.vue'
 import GenTypescriptCodeFromSwagger from '@/views/GenTypescriptCodeFromSwagger.vue'
 import GenDatabaseDto from '@/views/GenDatabaseDto.vue'
+import GenProtoCodeFromGrpcClientAssembly from '@/views/GenProtoCodeFromGrpcClientAssembly.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -55,6 +56,14 @@ const router = createRouter({
       component: GenDatabaseDto,
       meta: {
         title: 'Generate Database DTO'
+      }
+    },
+    {
+      path: '/genProtoCodeFromGrpcClientAssembly',
+      name: 'genProtoCodeFromGrpcClientAssembly',
+      component: GenProtoCodeFromGrpcClientAssembly,
+      meta: {
+        title: 'Generate Proto Code from gRPC Client Assembly'
       }
     }
   ]
