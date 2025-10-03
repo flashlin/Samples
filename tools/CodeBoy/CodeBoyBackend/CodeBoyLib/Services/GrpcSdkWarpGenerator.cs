@@ -21,11 +21,15 @@ namespace CodeBoyLib.Services
 
     public class GrpcSdkWarpGenerator
     {
-        public List<Type> QueryGrpcClientTypes(string assemblyFile)
+        public List<Type> QueryGrpcClientTypesFromAssemblyFile(string assemblyFile)
         {
             var assembly = Assembly.LoadFrom(assemblyFile);
-            var clientTypes = new List<Type>();
+            return QueryGrpcClientTypesFromAssembly(assembly);
+        }
 
+        private List<Type> QueryGrpcClientTypesFromAssembly(Assembly assembly)
+        {
+            var clientTypes = new List<Type>();
             foreach (var type in assembly.GetTypes())
             {
                 if (IsGrpcClientType(type))
@@ -33,7 +37,6 @@ namespace CodeBoyLib.Services
                     clientTypes.Add(type);
                 }
             }
-
             return clientTypes;
         }
 
