@@ -27,6 +27,12 @@ namespace CodeBoyLib.Services
             return QueryGrpcClientTypesFromAssembly(assembly);
         }
 
+        public List<Type> QueryGrpcClientTypesFromAssemblyBytes(byte[] assemblyBytes)
+        {
+            var assembly = Assembly.Load(assemblyBytes);
+            return QueryGrpcClientTypesFromAssembly(assembly);
+        }
+
         private List<Type> QueryGrpcClientTypesFromAssembly(Assembly assembly)
         {
             var clientTypes = new List<Type>();
