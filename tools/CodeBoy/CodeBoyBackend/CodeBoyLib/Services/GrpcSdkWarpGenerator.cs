@@ -12,17 +12,17 @@ using T1.Standard.IO;
 
 namespace CodeBoyLib.Services
 {
-    public class PropertyInfo
+    public class GrpcRpcPropertyInfo
     {
         public string CsharpTypeName { get; set; } = string.Empty;
         public string PropertyName { get; set; } = string.Empty;
     }
 
-    public class MethodInfo
+    public class GrpcRpcMethodInfo
     {
         public string MethodName { get; set; } = string.Empty;
-        public List<PropertyInfo> InputType { get; set; } = new List<PropertyInfo>();
-        public List<PropertyInfo> ResponseType { get; set; } = new List<PropertyInfo>();
+        public List<GrpcRpcPropertyInfo> InputType { get; set; } = new List<GrpcRpcPropertyInfo>();
+        public List<GrpcRpcPropertyInfo> ResponseType { get; set; } = new List<GrpcRpcPropertyInfo>();
     }
 
     public class GrpcAssemblyLoadContext : AssemblyLoadContext
@@ -229,15 +229,15 @@ namespace CodeBoyLib.Services
             return clientTypes;
         }
 
-        public List<MethodInfo> QueryWarpInterfaceFromGrpcClientType(Type grpcClientType)
+        public List<GrpcRpcMethodInfo> QueryWarpInterfaceFromGrpcClientType(Type grpcClientType)
         {
-            var result = new List<MethodInfo>();
+            var result = new List<GrpcRpcMethodInfo>();
             var methods = grpcClientType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
                 .Where(m => m.IsVirtual && !m.IsFinal);
 
             foreach (var method in methods)
             {
-                var methodInfo = new MethodInfo
+                var methodInfo = new GrpcRpcMethodInfo
                 {
                     MethodName = method.Name
                 };
@@ -297,7 +297,7 @@ namespace CodeBoyLib.Services
             output.WriteLine("}");
         }
 
-        private void WriteProxyInterface(IndentStringBuilder output, string typeName, List<MethodInfo> members)
+        private void WriteProxyInterface(IndentStringBuilder output, string typeName, List<GrpcRpcMethodInfo> members)
         {
             output.WriteLine($"public interface I{typeName}Proxy");
             output.WriteLine("{");
@@ -313,7 +313,7 @@ namespace CodeBoyLib.Services
             output.WriteLine();
         }
 
-        private void WriteInterfaceMethod(IndentStringBuilder output, MethodInfo member)
+        private void WriteInterfaceMethod(IndentStringBuilder output, GrpcRpcMethodInfo member)
         {
             var returnTypeName = GetReturnTypeName(member);
             var inputTypeName = GetInputTypeName(member);
@@ -328,7 +328,7 @@ namespace CodeBoyLib.Services
             }
         }
 
-        private void WriteProxyClass(IndentStringBuilder output, string typeName, List<MethodInfo> members)
+        private void WriteProxyClass(IndentStringBuilder output, string typeName, List<GrpcRpcMethodInfo> members)
         {
             output.WriteLine($"public class {typeName}Proxy : I{typeName}Proxy");
             output.WriteLine("{");
@@ -343,7 +343,7 @@ namespace CodeBoyLib.Services
             output.WriteLine("}");
         }
 
-        private void WriteClassMethod(IndentStringBuilder output, MethodInfo member)
+        private void WriteClassMethod(IndentStringBuilder output, GrpcRpcMethodInfo member)
         {
             var returnTypeName = GetReturnTypeName(member);
             var inputTypeName = GetInputTypeName(member);
@@ -374,14 +374,14 @@ namespace CodeBoyLib.Services
             output.WriteLine();
         }
 
-        private string GetReturnTypeName(MethodInfo member)
+        private string GetReturnTypeName(GrpcRpcMethodInfo member)
         {
             return member.ResponseType.Count > 0 
                 ? BuildTypeName(member.ResponseType) 
                 : "Task";
         }
 
-        private string GetInputTypeName(MethodInfo member)
+        private string GetInputTypeName(GrpcRpcMethodInfo member)
         {
             return member.InputType.Count > 0 
                 ? BuildTypeName(member.InputType) 
@@ -407,7 +407,7 @@ namespace CodeBoyLib.Services
             output.WriteLine();
         }
 
-        private void WriteProtoMessages(IndentStringBuilder output, List<MethodInfo> members)
+        private void WriteProtoMessages(IndentStringBuilder output, List<GrpcRpcMethodInfo> members)
         {
             var processedMessages = new HashSet<string>();
 
@@ -429,7 +429,7 @@ namespace CodeBoyLib.Services
             }
         }
 
-        private void WriteProtoMessage(IndentStringBuilder output, string messageName, List<PropertyInfo> properties)
+        private void WriteProtoMessage(IndentStringBuilder output, string messageName, List<GrpcRpcPropertyInfo> properties)
         {
             output.WriteLine($"message {messageName} {{");
             output.Indent++;
@@ -447,7 +447,7 @@ namespace CodeBoyLib.Services
             output.WriteLine();
         }
 
-        private void WriteProtoService(IndentStringBuilder output, string serviceName, List<MethodInfo> members)
+        private void WriteProtoService(IndentStringBuilder output, string serviceName, List<GrpcRpcMethodInfo> members)
         {
             output.WriteLine($"service {serviceName} {{");
             output.Indent++;
@@ -461,7 +461,7 @@ namespace CodeBoyLib.Services
             output.WriteLine("}");
         }
 
-        private void WriteProtoRpcMethod(IndentStringBuilder output, MethodInfo member)
+        private void WriteProtoRpcMethod(IndentStringBuilder output, GrpcRpcMethodInfo member)
         {
             var requestType = member.InputType.Count > 0 ? $"{member.MethodName}Request" : "google.protobuf.Empty";
             var responseType = member.ResponseType.Count > 0 ? $"{member.MethodName}Response" : "google.protobuf.Empty";
@@ -517,7 +517,7 @@ namespace CodeBoyLib.Services
             return result.ToString();
         }
 
-        private string BuildTypeName(List<PropertyInfo> properties)
+        private string BuildTypeName(List<GrpcRpcPropertyInfo> properties)
         {
             if (properties.Count == 0)
                 return string.Empty;
@@ -528,14 +528,14 @@ namespace CodeBoyLib.Services
             return "object";
         }
 
-        private List<PropertyInfo> ExtractProperties(Type type)
+        private List<GrpcRpcPropertyInfo> ExtractProperties(Type type)
         {
-            var properties = new List<PropertyInfo>();
+            var properties = new List<GrpcRpcPropertyInfo>();
             var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             foreach (var prop in props)
             {
-                properties.Add(new PropertyInfo
+                properties.Add(new GrpcRpcPropertyInfo
                 {
                     CsharpTypeName = GetCsharpTypeName(prop.PropertyType),
                     PropertyName = prop.Name
