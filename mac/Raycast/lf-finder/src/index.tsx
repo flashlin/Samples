@@ -56,6 +56,12 @@ export default function Command() {
     performSearch(searchQuery);
   }, [searchQuery]);
 
+  const handleSearch = () => {
+    if (searchText) {
+      setSearchQuery(searchText);
+    }
+  };
+
   return (
     <List 
       searchBarPlaceholder="輸入檔案名稱或 pattern，按 Enter 搜尋（例如：\.sql$ 或 test）" 
@@ -67,12 +73,30 @@ export default function Command() {
         <List.EmptyView 
           title="無搜尋結果" 
           description={`找不到符合 "${searchQuery}" 的檔案`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="重新搜尋"
+                icon={Icon.MagnifyingGlass}
+                onAction={handleSearch}
+              />
+            </ActionPanel>
+          }
         />
       )}
       {files.length === 0 && !searchQuery && (
         <List.EmptyView 
           title="輸入搜尋條件" 
           description="輸入檔案名稱或 pattern，按 Enter 開始搜尋"
+          actions={
+            <ActionPanel>
+              <Action
+                title="開始搜尋"
+                icon={Icon.MagnifyingGlass}
+                onAction={handleSearch}
+              />
+            </ActionPanel>
+          }
         />
       )}
       {files.map((file) => (
@@ -82,13 +106,6 @@ export default function Command() {
           subtitle={file}
           actions={
             <ActionPanel>
-              <Action
-                title="開始搜尋"
-                icon={Icon.MagnifyingGlass}
-                onAction={() => {
-                  setSearchQuery(searchText);
-                }}
-              />
               <Action
                 title="複製檔案路徑"
                 icon={Icon.Clipboard}
@@ -103,6 +120,11 @@ export default function Command() {
                 onAction={() => {
                   exec(`open "${file}"`);
                 }}
+              />
+              <Action
+                title="重新搜尋"
+                icon={Icon.MagnifyingGlass}
+                onAction={handleSearch}
               />
             </ActionPanel>
           }
