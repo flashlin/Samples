@@ -52,21 +52,41 @@ namespace CodeBoyLib.Services
         protected override Assembly Load(AssemblyName assemblyName)
         {
             var assemblyPath = Path.Combine(_assemblyDirectory, $"{assemblyName.Name}.dll");
+            
+            _logger?.LogInformation("Attempting to load assembly {AssemblyName} from {AssemblyPath}", assemblyName.Name, assemblyPath);
+            
             if (File.Exists(assemblyPath))
             {
+                _logger?.LogInformation("Assembly {AssemblyName} found at {AssemblyPath}", assemblyName.Name, assemblyPath);
                 return LoadFromAssemblyPath(assemblyPath);
             }
+
+            _logger?.LogInformation("Assembly {AssemblyName} not found, checking if it's a known gRPC package", assemblyName.Name);
 
             if (_grpcNugetPackages.ContainsKey(assemblyName.Name))
             {
                 var version = _grpcNugetPackages[assemblyName.Name];
+                _logger?.LogInformation("Assembly {AssemblyName} is a known package, attempting to download and extract", assemblyName.Name);
+                
                 if (DownloadAndExtractNugetPackage(assemblyName.Name, version))
                 {
                     if (File.Exists(assemblyPath))
                     {
+                        _logger?.LogInformation("Assembly {AssemblyName} successfully extracted and found at {AssemblyPath}", assemblyName.Name, assemblyPath);
                         return LoadFromAssemblyPath(assemblyPath);
                     }
+                    else
+                    {
+                        _logger?.LogError("Assembly {AssemblyName} was extracted but not found at expected path {AssemblyPath}", assemblyName.Name, assemblyPath);
+                        
+                        var files = Directory.GetFiles(_assemblyDirectory, "*.dll");
+                        _logger?.LogInformation("Available DLLs in directory: {DllFiles}", string.Join(", ", files.Select(Path.GetFileName)));
+                    }
                 }
+            }
+            else
+            {
+                _logger?.LogWarning("Assembly {AssemblyName} is not in the known gRPC packages list", assemblyName.Name);
             }
 
             return null;
@@ -115,65 +135,62 @@ namespace CodeBoyLib.Services
 
         private void ExtractNugetPackage(string nupkgPath, string extractPath)
         {
-            var packageFolder = Path.Combine(extractPath, Path.GetFileNameWithoutExtension(nupkgPath));
-            
-            if (Directory.Exists(packageFolder))
-            {
-                var libPath = FindLibPath(packageFolder);
-                if (!string.IsNullOrEmpty(libPath))
-                {
-                    CopyDllsToDirectory(libPath, extractPath);
-                }
-                return;
-            }
+            _logger?.LogInformation("Extracting NuGet package from {NupkgPath} to {ExtractPath}", nupkgPath, extractPath);
 
             using (var archive = ZipFile.OpenRead(nupkgPath))
             {
-                foreach (var entry in archive.Entries)
+                _logger?.LogInformation("Total entries in package: {Count}", archive.Entries.Count);
+                
+                var dllEntries = archive.Entries.Where(e => e.Name.EndsWith(".dll")).ToList();
+                _logger?.LogInformation("DLL entries found: {DllCount}", dllEntries.Count);
+                
+                foreach (var entry in dllEntries)
                 {
-                    if (entry.FullName.Contains("/lib/") && entry.Name.EndsWith(".dll"))
+                    _logger?.LogInformation("Found DLL: {FullName}", entry.FullName);
+                }
+
+                var targetFrameworks = new[] { "netstandard2.1", "netstandard2.0", "netstandard1.6", "netstandard1.0", "net6.0", "net5.0", "netcoreapp3.1", "netcoreapp2.1", "net45", "net40" };
+                
+                foreach (var framework in targetFrameworks)
+                {
+                    var foundDlls = false;
+                    foreach (var entry in archive.Entries)
                     {
-                        var destinationPath = Path.Combine(extractPath, entry.Name);
-                        entry.ExtractToFile(destinationPath, true);
+                        var normalizedPath = entry.FullName.Replace('\\', '/');
+                        if (normalizedPath.Contains($"lib/{framework}/") && entry.Name.EndsWith(".dll"))
+                        {
+                            var destinationPath = Path.Combine(extractPath, entry.Name);
+                            _logger?.LogInformation("Extracting {DllName} from framework {Framework}", entry.Name, framework);
+                            entry.ExtractToFile(destinationPath, true);
+                            foundDlls = true;
+                        }
+                    }
+                    
+                    if (foundDlls)
+                    {
+                        _logger?.LogInformation("Successfully extracted DLLs from framework {Framework}", framework);
+                        return;
                     }
                 }
-            }
-        }
 
-        private string FindLibPath(string packageFolder)
-        {
-            var libFolder = Path.Combine(packageFolder, "lib");
-            if (!Directory.Exists(libFolder))
-            {
-                return null;
-            }
-
-            var targetFrameworks = new[] { "netstandard2.1", "netstandard2.0", "netstandard1.6", "net6.0", "net5.0", "netcoreapp3.1" };
-            foreach (var framework in targetFrameworks)
-            {
-                var frameworkPath = Path.Combine(libFolder, framework);
-                if (Directory.Exists(frameworkPath))
+                _logger?.LogWarning("No matching framework found, extracting all DLLs from lib folder");
+                var extractedCount = 0;
+                foreach (var entry in archive.Entries)
                 {
-                    return frameworkPath;
+                    var normalizedPath = entry.FullName.Replace('\\', '/');
+                    if (normalizedPath.Contains("lib/") && entry.Name.EndsWith(".dll") && !string.IsNullOrEmpty(entry.Name))
+                    {
+                        var destinationPath = Path.Combine(extractPath, entry.Name);
+                        _logger?.LogInformation("Extracting {DllName} from {EntryPath}", entry.Name, entry.FullName);
+                        entry.ExtractToFile(destinationPath, true);
+                        extractedCount++;
+                    }
                 }
-            }
-
-            var firstSubDir = Directory.GetDirectories(libFolder).FirstOrDefault();
-            return firstSubDir;
-        }
-
-        private void CopyDllsToDirectory(string sourcePath, string targetPath)
-        {
-            foreach (var dllFile in Directory.GetFiles(sourcePath, "*.dll"))
-            {
-                var fileName = Path.GetFileName(dllFile);
-                var targetFile = Path.Combine(targetPath, fileName);
-                if (!File.Exists(targetFile))
-                {
-                    File.Copy(dllFile, targetFile, true);
-                }
+                
+                _logger?.LogInformation("Extracted {Count} DLL files", extractedCount);
             }
         }
+
     }
 
     public class GrpcSdkWarpGenerator
