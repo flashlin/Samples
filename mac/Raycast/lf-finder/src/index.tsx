@@ -20,9 +20,9 @@ export default function Command() {
     // Escape single quotes in regex for shell safety
     const escapedRegex = regex.replace(/'/g, "'\\''");
     
-    // Use -e to match file extension, or --glob for simpler patterns
-    // For regex patterns, use full path matching
-    const command = `fd --type f --no-ignore-vcs '${escapedRegex}' '${searchDir}'`;
+    // Use full path to fd (Homebrew installation)
+    const fdPath = "/opt/homebrew/bin/fd";
+    const command = `${fdPath} --type f --no-ignore-vcs '${escapedRegex}' '${searchDir}'`;
     
     exec(command, { maxBuffer: 1024 * 1024 * 10 }, (err, stdout, stderr) => {
       setIsLoading(false);
