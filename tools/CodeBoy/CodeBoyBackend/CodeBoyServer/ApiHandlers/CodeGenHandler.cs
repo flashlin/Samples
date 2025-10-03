@@ -43,6 +43,11 @@ namespace CodeBoyServer.ApiHandlers
                 .WithDescription("Generate database DTO code from SQL CREATE TABLE statement")
                 .WithTags("CodeGeneration")
                 .WithOpenApi();
+            
+            app.MapPost("/api/codegen/genProtoCodeFromGrpcClientAssembly", GenProtoCodeFromGrpcClientAssembly)
+                .WithDescription("Generate proto code from gRPC client assembly")
+                .WithTags("CodeGeneration")
+                .WithOpenApi();
         }
 
         /// <summary>
@@ -204,6 +209,25 @@ namespace CodeBoyServer.ApiHandlers
         {
             var generator = new DatabaseDtoGenerator();
             return generator.GenerateEfDtoCode(request.Sql);
+        }
+
+        /// <summary>
+        /// Generate proto code from gRPC client assembly
+        /// </summary>
+        /// <param name="request">Proto code generation request</param>
+        /// <returns>Generated proto code</returns>
+        private static string GenProtoCodeFromGrpcClientAssembly([FromBody] GenProtoCodeFromGrpcClientAssemblyRequest request)
+        {
+            var generator = new GrpcSdkWarpGenerator();
+            var types = generator.QueryGrpcClientTypesFromAssemblyBytes(request.Assembly);
+            
+            var output = new T1.Standard.IO.IndentStringBuilder();
+            foreach (var type in types)
+            {
+                output.WriteLine(generator.GenProtoCode(type));
+            }
+            
+            return output.ToString();
         }
     }
 }
