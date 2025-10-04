@@ -151,15 +151,16 @@ export class VimEditor extends LitElement {
     this.hiddenInput.setAttribute('type', 'text');
     this.hiddenInput.style.cssText = `
       position: absolute;
-      width: 200px;
+      width: 1px;
       height: 20px;
-      border: 1px solid red;
+      border: none;
       outline: none;
-      background: rgba(255, 0, 0, 0.1);
-      color: white;
+      background: transparent;
+      color: transparent;
+      caret-color: transparent;
       font-size: 16px;
       font-family: monospace;
-      padding: 2px;
+      padding: 0;
       margin: 0;
       z-index: 1000;
     `;
