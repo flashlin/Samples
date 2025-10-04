@@ -49,6 +49,9 @@ export class VimEditor extends LitElement {
   private bufferWidth = 0;
   private bufferHeight = 0;
   private isComposing = false;
+  
+  private visualStartX = 0;
+  private visualStartY = 0;
 
   private getRectY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight;
@@ -132,13 +135,42 @@ export class VimEditor extends LitElement {
         const isCursor = y === this.cursorY && x === this.cursorX && this.cursorVisible;
         const isNormalMode = this.mode === 'normal';
         
+        const isVisualSelection = this.mode === 'visual' && this.isInVisualSelection(y, x);
+        
         this.buffer[y][x] = {
           char,
-          foreground: (isCursor && isNormalMode) ? [0, 0, 0] : [255, 255, 255],
-          background: (isCursor && isNormalMode) ? [255, 255, 255] : [0, 0, 0],
+          foreground: (isCursor && isNormalMode) ? [0, 0, 0] : isVisualSelection ? [0, 0, 0] : [255, 255, 255],
+          background: (isCursor && isNormalMode) ? [255, 255, 255] : isVisualSelection ? [100, 149, 237] : [0, 0, 0],
         };
       }
     }
+  }
+
+  private isInVisualSelection(y: number, x: number): boolean {
+    const startY = Math.min(this.visualStartY, this.cursorY);
+    const endY = Math.max(this.visualStartY, this.cursorY);
+    
+    if (y < startY || y > endY) {
+      return false;
+    }
+    
+    if (startY === endY) {
+      const startX = Math.min(this.visualStartX, this.cursorX);
+      const endX = Math.max(this.visualStartX, this.cursorX);
+      return x >= startX && x <= endX;
+    }
+    
+    if (y === startY) {
+      const startX = this.visualStartY === startY ? this.visualStartX : this.cursorX;
+      return x >= startX;
+    }
+    
+    if (y === endY) {
+      const endX = this.visualStartY === endY ? this.visualStartX : this.cursorX;
+      return x <= endX;
+    }
+    
+    return true;
   }
 
   firstUpdated() {
@@ -322,6 +354,8 @@ export class VimEditor extends LitElement {
       this.handleNormalMode(key);
     } else if (this.mode === 'insert') {
       this.handleInsertMode(key);
+    } else if (this.mode === 'visual') {
+      this.handleVisualMode(key);
     }
     
     if (this.p5Instance) {
@@ -363,6 +397,11 @@ export class VimEditor extends LitElement {
         this.insertLineBelow();
         this.hiddenInput?.focus();
         break;
+      case 'v':
+        this.mode = 'visual';
+        this.visualStartX = this.cursorX;
+        this.visualStartY = this.cursorY;
+        break;
     }
   }
 
@@ -389,6 +428,39 @@ export class VimEditor extends LitElement {
       this.moveCursorUp();
     } else if (key === 'ArrowDown') {
       this.moveCursorDown();
+    }
+  }
+
+  private handleVisualMode(key: string) {
+    switch (key) {
+      case 'Escape':
+        this.mode = 'normal';
+        break;
+      case 'j':
+      case 'ArrowDown':
+        this.moveCursorDown();
+        break;
+      case 'k':
+      case 'ArrowUp':
+        this.moveCursorUp();
+        break;
+      case 'h':
+      case 'ArrowLeft':
+        this.moveCursorLeft();
+        break;
+      case 'l':
+      case 'ArrowRight':
+        this.moveCursorRight();
+        break;
+      case 'y':
+        this.yankVisualSelection();
+        this.mode = 'normal';
+        break;
+      case 'c':
+      case 'd':
+        this.cutVisualSelection();
+        this.mode = 'normal';
+        break;
     }
   }
 
@@ -444,6 +516,68 @@ export class VimEditor extends LitElement {
     this.cursorX = 0;
     this.mode = 'insert';
     this.updateInputPosition();
+  }
+
+  private getVisualSelection(): string {
+    const startY = Math.min(this.visualStartY, this.cursorY);
+    const endY = Math.max(this.visualStartY, this.cursorY);
+    const startX = this.visualStartY === startY ? 
+      Math.min(this.visualStartX, this.cursorX) : 
+      Math.min(this.cursorX, this.visualStartX);
+    const endX = this.visualStartY === endY ? 
+      Math.max(this.visualStartX, this.cursorX) : 
+      Math.max(this.cursorX, this.visualStartX);
+    
+    if (startY === endY) {
+      return this.content[startY].slice(startX, endX + 1);
+    }
+    
+    let result = '';
+    for (let y = startY; y <= endY; y++) {
+      if (y === startY) {
+        result += this.content[y].slice(startX) + '\n';
+      } else if (y === endY) {
+        result += this.content[y].slice(0, endX + 1);
+      } else {
+        result += this.content[y] + '\n';
+      }
+    }
+    return result;
+  }
+
+  private yankVisualSelection() {
+    const selection = this.getVisualSelection();
+    navigator.clipboard.writeText(selection);
+  }
+
+  private cutVisualSelection() {
+    const selection = this.getVisualSelection();
+    navigator.clipboard.writeText(selection);
+    
+    const startY = Math.min(this.visualStartY, this.cursorY);
+    const endY = Math.max(this.visualStartY, this.cursorY);
+    const startX = this.visualStartY === startY ? 
+      Math.min(this.visualStartX, this.cursorX) : 
+      Math.min(this.cursorX, this.visualStartX);
+    const endX = this.visualStartY === endY ? 
+      Math.max(this.visualStartX, this.cursorX) : 
+      Math.max(this.cursorX, this.visualStartX);
+    
+    if (startY === endY) {
+      const line = this.content[startY];
+      this.content[startY] = line.slice(0, startX) + line.slice(endX + 1);
+      this.cursorX = startX;
+      this.cursorY = startY;
+    } else {
+      const firstPart = this.content[startY].slice(0, startX);
+      const lastPart = this.content[endY].slice(endX + 1);
+      this.content[startY] = firstPart + lastPart;
+      this.content.splice(startY + 1, endY - startY);
+      this.cursorX = startX;
+      this.cursorY = startY;
+    }
+    
+    this.adjustCursorX();
   }
 
   private handleBackspace() {
