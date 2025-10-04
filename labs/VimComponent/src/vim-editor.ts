@@ -128,11 +128,12 @@ export class VimEditor extends LitElement {
         const char = line[x] || ' ';
         
         const isCursor = y === this.cursorY && x === this.cursorX && this.cursorVisible;
+        const isNormalMode = this.mode === 'normal';
         
         this.buffer[y][x] = {
           char,
-          foreground: isCursor ? [0, 0, 0] : [255, 255, 255],
-          background: isCursor ? [255, 255, 255] : [0, 0, 0],
+          foreground: (isCursor && isNormalMode) ? [0, 0, 0] : [255, 255, 255],
+          background: (isCursor && isNormalMode) ? [255, 255, 255] : [0, 0, 0],
         };
       }
     }
@@ -415,6 +416,23 @@ export class VimEditor extends LitElement {
         p.text(cell.char, screenX, this.getTextY(y));
       }
     }
+    
+    this.drawInsertCursor(p);
+  }
+
+  private drawInsertCursor(p: p5) {
+    if (this.mode !== 'insert' || !this.cursorVisible) {
+      return;
+    }
+    
+    const line = this.content[this.cursorY] || '';
+    const screenX = this.getTextXPosition(line, this.cursorX);
+    const screenY = this.getRectY(this.cursorY);
+    
+    p.stroke(255);
+    p.strokeWeight(2);
+    p.line(screenX, screenY, screenX, screenY + this.lineHeight);
+    p.noStroke();
   }
 
   private drawStatusBar(p: p5) {
