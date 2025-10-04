@@ -240,15 +240,19 @@ export class VimEditor extends LitElement {
   private handleNormalMode(key: string) {
     switch (key) {
       case 'j':
+      case 'ArrowDown':
         this.moveCursorDown();
         break;
       case 'k':
+      case 'ArrowUp':
         this.moveCursorUp();
         break;
       case 'h':
+      case 'ArrowLeft':
         this.moveCursorLeft();
         break;
       case 'l':
+      case 'ArrowRight':
         this.moveCursorRight();
         break;
       case '$':
@@ -274,6 +278,14 @@ export class VimEditor extends LitElement {
       this.handleBackspace();
     } else if (key === 'Enter') {
       this.handleEnter();
+    } else if (key === 'ArrowLeft') {
+      this.moveCursorLeft();
+    } else if (key === 'ArrowRight') {
+      this.moveCursorRight();
+    } else if (key === 'ArrowUp') {
+      this.moveCursorUp();
+    } else if (key === 'ArrowDown') {
+      this.moveCursorDown();
     } else if (key.length === 1) {
       this.insertCharacter(key);
     }
