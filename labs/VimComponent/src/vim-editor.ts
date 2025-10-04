@@ -389,8 +389,12 @@ export class VimEditor extends LitElement {
         this.hiddenInput?.focus();
         break;
       case 'a':
-        this.moveCursorRight();
+        const currentLine = this.content[this.cursorY] || '';
+        if (this.cursorX < currentLine.length) {
+          this.cursorX += 1;
+        }
         this.mode = 'insert';
+        this.updateInputPosition();
         this.hiddenInput?.focus();
         break;
       case 'o':
