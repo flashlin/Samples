@@ -1,8 +1,6 @@
-using CodeBoyLib.Services;
 using CodeBoyLib.Models;
 using FluentAssertions;
 using System.Linq;
-using System.Reflection;
 using NUnit.Framework;
 
 namespace CodeBoyLibTests
@@ -13,10 +11,7 @@ namespace CodeBoyLibTests
         [Test]
         public void ParseFromJson_WithSwaggerV2Json_ShouldParseApiResponseClassDefinition()
         {
-            var swaggerV2JsonContent = LoadEmbeddedResource("CodeBoyLibTests.DataFiles.SwaggerV2.json");
-            var parser = new SwaggerUiParser();
-
-            var apiInfo = parser.ParseFromJson(swaggerV2JsonContent);
+            var apiInfo = TestHelper.ParseSwaggerV2Json();
 
             VerifyBasicStructure(apiInfo);
             VerifyApiResponseClass(apiInfo);
@@ -60,20 +55,6 @@ namespace CodeBoyLibTests
                 new { Name = "tags", Type = "List<Tag>", IsRequired = false },
                 new { Name = "status", Type = "statusEnum", IsRequired = false }
             ], options => options.ExcludingMissingMembers());
-        }
-
-        private string LoadEmbeddedResource(string resourceName)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            using var stream = assembly.GetManifestResourceStream(resourceName);
-            
-            if (stream == null)
-            {
-                throw new InvalidOperationException($"Could not find embedded resource: {resourceName}");
-            }
-
-            using var reader = new StreamReader(stream);
-            return reader.ReadToEnd();
         }
     }
 }
