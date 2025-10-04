@@ -343,6 +343,12 @@ export class VimEditor extends LitElement {
       return;
     }
     
+    if ((event.metaKey || event.ctrlKey) && key === 'v' && this.mode === 'insert') {
+      event.preventDefault();
+      this.handlePaste();
+      return;
+    }
+    
     this.lastKeyPressed = key;
     
     const isNormalChar = key.length === 1 && this.mode === 'insert';
@@ -630,6 +636,47 @@ export class VimEditor extends LitElement {
       currentLine.substring(this.cursorX);
     this.cursorX += 1;
     this.updateInputPosition();
+  }
+
+  private async handlePaste() {
+    try {
+      const text = await navigator.clipboard.readText();
+      this.insertText(text);
+      if (this.p5Instance) {
+        this.p5Instance.redraw();
+      }
+    } catch (err) {
+      console.error('Failed to read clipboard:', err);
+    }
+  }
+
+  private insertText(text: string) {
+    const lines = text.split('\n');
+    
+    if (lines.length === 1) {
+      for (const char of text) {
+        this.insertCharacter(char);
+      }
+    } else {
+      const currentLine = this.content[this.cursorY];
+      const beforeCursor = currentLine.substring(0, this.cursorX);
+      const afterCursor = currentLine.substring(this.cursorX);
+      
+      this.content[this.cursorY] = beforeCursor + lines[0];
+      
+      for (let i = 1; i < lines.length - 1; i++) {
+        this.cursorY += 1;
+        this.content.splice(this.cursorY, 0, lines[i]);
+      }
+      
+      if (lines.length > 1) {
+        this.cursorY += 1;
+        this.content.splice(this.cursorY, 0, lines[lines.length - 1] + afterCursor);
+        this.cursorX = lines[lines.length - 1].length;
+      }
+      
+      this.updateInputPosition();
+    }
   }
 
 
