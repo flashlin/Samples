@@ -20,7 +20,7 @@ export class VimEditor extends LitElement {
   private p5Instance: p5 | null = null;
   private canvas: HTMLCanvasElement | null = null;
   private cursorBlinkInterval: number | null = null;
-  private charWidth = 9;
+  private baseCharWidth = 9;
   private lineHeight = 20;
   private textPadding = 2;
   private textOffsetY = 5;
@@ -56,6 +56,27 @@ export class VimEditor extends LitElement {
     return this.getRectY(lineIndex) + this.textOffsetY;
   }
 
+  private isFullWidthChar(char: string): boolean {
+    if (!char) return false;
+    const code = char.charCodeAt(0);
+    return code >= 0x4E00 && code <= 0x9FFF || 
+           code >= 0x3040 && code <= 0x30FF ||
+           code >= 0xAC00 && code <= 0xD7AF ||
+           code >= 0xFF00 && code <= 0xFFEF;
+  }
+
+  private getCharWidth(char: string): number {
+    return this.isFullWidthChar(char) ? this.baseCharWidth * 2 : this.baseCharWidth;
+  }
+
+  private getTextXPosition(line: string, charIndex: number): number {
+    let x = 60;
+    for (let i = 0; i < charIndex && i < line.length; i++) {
+      x += this.getCharWidth(line[i]);
+    }
+    return x;
+  }
+
   getStatus(): EditorStatus {
     return {
       mode: this.mode,
@@ -81,7 +102,7 @@ export class VimEditor extends LitElement {
   }
 
   private initializeBuffer() {
-    const editableWidth = Math.floor((800 - 60) / this.charWidth);
+    const editableWidth = Math.floor((800 - 60) / this.baseCharWidth);
     const editableHeight = Math.floor((600 - this.statusBarHeight) / this.lineHeight);
     
     this.bufferWidth = editableWidth;
@@ -161,7 +182,7 @@ export class VimEditor extends LitElement {
         p.textAlign(p.LEFT, p.TOP);
         p.textFont('monospace');
         
-        this.charWidth = p.textWidth('M');
+        this.baseCharWidth = p.textWidth('M');
         
         this.initializeBuffer();
         
@@ -368,13 +389,16 @@ export class VimEditor extends LitElement {
 
   private renderBuffer(p: p5) {
     for (let y = 0; y < this.bufferHeight && y < this.buffer.length; y++) {
+      const line = this.content[y] || '';
       for (let x = 0; x < this.bufferWidth && x < this.buffer[y].length; x++) {
         const cell = this.buffer[y][x];
-        const screenX = 60 + x * this.charWidth;
+        const char = line[x] || ' ';
+        const charWidth = this.getCharWidth(char);
+        const screenX = this.getTextXPosition(line, x);
         
         if (cell.background[0] !== 0 || cell.background[1] !== 0 || cell.background[2] !== 0) {
           p.fill(cell.background[0], cell.background[1], cell.background[2]);
-          p.rect(screenX, this.getRectY(y), this.charWidth, this.lineHeight);
+          p.rect(screenX, this.getRectY(y), charWidth, this.lineHeight);
         }
         
         p.fill(cell.foreground[0], cell.foreground[1], cell.foreground[2]);
