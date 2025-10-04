@@ -23,6 +23,7 @@ export class VimEditor extends LitElement {
   private charWidth = 9;
   private lineHeight = 20;
   private textPadding = 2;
+  private textOffsetY = 3;
   private statusBarHeight = 24;
   
   @state()
@@ -47,8 +48,12 @@ export class VimEditor extends LitElement {
   private bufferWidth = 0;
   private bufferHeight = 0;
 
-  private getTextY(lineIndex: number): number {
+  private getRectY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight;
+  }
+
+  private getTextY(lineIndex: number): number {
+    return this.getRectY(lineIndex) + this.textOffsetY;
   }
 
   getStatus(): EditorStatus {
@@ -366,15 +371,14 @@ export class VimEditor extends LitElement {
       for (let x = 0; x < this.bufferWidth && x < this.buffer[y].length; x++) {
         const cell = this.buffer[y][x];
         const screenX = 60 + x * this.charWidth;
-        const screenY = this.getTextY(y);
         
         if (cell.background[0] !== 0 || cell.background[1] !== 0 || cell.background[2] !== 0) {
           p.fill(cell.background[0], cell.background[1], cell.background[2]);
-          p.rect(screenX, screenY, this.charWidth, this.lineHeight);
+          p.rect(screenX, this.getRectY(y), this.charWidth, this.lineHeight);
         }
         
         p.fill(cell.foreground[0], cell.foreground[1], cell.foreground[2]);
-        p.text(cell.char, screenX, screenY);
+        p.text(cell.char, screenX, this.getTextY(y));
       }
     }
   }
