@@ -25,6 +25,7 @@ export class VimEditor extends LitElement {
   private textPadding = 2;
   private textOffsetY = 5;
   private statusBarHeight = 24;
+  private hiddenInput: HTMLInputElement | null = null;
   
   @state()
   private cursorVisible = true;
@@ -47,6 +48,7 @@ export class VimEditor extends LitElement {
   private buffer: BufferCell[][] = [];
   private bufferWidth = 0;
   private bufferHeight = 0;
+  private isComposing = false;
 
   private getRectY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight;
@@ -140,9 +142,55 @@ export class VimEditor extends LitElement {
   }
 
   firstUpdated() {
-    console.log('firstUpdated called');
-    
+    this.createHiddenInput();
     this.waitForP5AndInitialize();
+  }
+
+  private createHiddenInput() {
+    this.hiddenInput = document.createElement('input');
+    this.hiddenInput.style.cssText = `
+      position: absolute;
+      left: -9999px;
+      opacity: 0;
+      pointer-events: none;
+    `;
+    this.shadowRoot?.appendChild(this.hiddenInput);
+    
+    this.hiddenInput.addEventListener('compositionstart', (e) => {
+      console.log('Composition start:', e.data);
+      this.isComposing = true;
+    });
+    
+    this.hiddenInput.addEventListener('compositionend', (e) => {
+      console.log('Composition end:', e.data);
+      this.isComposing = false;
+      if (this.mode === 'insert' && e.data) {
+        for (const char of e.data) {
+          this.insertCharacter(char);
+        }
+        if (this.p5Instance) {
+          this.p5Instance.redraw();
+        }
+      }
+      this.hiddenInput!.value = '';
+    });
+    
+    this.hiddenInput.addEventListener('input', (e) => {
+      if (!this.isComposing && this.hiddenInput) {
+        const value = this.hiddenInput.value;
+        if (value && this.mode === 'insert') {
+          for (const char of value) {
+            this.insertCharacter(char);
+          }
+          if (this.p5Instance) {
+            this.p5Instance.redraw();
+          }
+        }
+        this.hiddenInput.value = '';
+      }
+    });
+    
+    this.hiddenInput.focus();
   }
 
   private waitForP5AndInitialize() {
@@ -191,8 +239,6 @@ export class VimEditor extends LitElement {
       };
 
       p.draw = () => {
-        console.log('Drawing frame...');
-        
         this.updateBuffer();
         
         p.background(0);
@@ -202,8 +248,6 @@ export class VimEditor extends LitElement {
         this.drawLineNumbers(p);
         this.renderBuffer(p);
         this.drawStatusBar(p);
-        
-        console.log('Frame complete');
       };
     };
 
@@ -222,9 +266,25 @@ export class VimEditor extends LitElement {
 
   private handleKeyDown(event: KeyboardEvent) {
     const key = event.key;
+    
+    if (key === 'CapsLock' || key === 'Shift' || key === 'Control' || key === 'Alt' || key === 'Meta') {
+      return;
+    }
+    
+    if (this.isComposing || event.isComposing) {
+      return;
+    }
+    
+    if (key === 'Process' || key === 'Unidentified') {
+      return;
+    }
+    
     this.lastKeyPressed = key;
     
-    event.preventDefault();
+    const isNormalChar = key.length === 1 && this.mode === 'insert';
+    if (!isNormalChar) {
+      event.preventDefault();
+    }
     
     if (this.mode === 'normal') {
       this.handleNormalMode(key);
@@ -260,13 +320,16 @@ export class VimEditor extends LitElement {
         break;
       case 'i':
         this.mode = 'insert';
+        this.hiddenInput?.focus();
         break;
       case 'a':
         this.moveCursorRight();
         this.mode = 'insert';
+        this.hiddenInput?.focus();
         break;
       case 'o':
         this.insertLineBelow();
+        this.hiddenInput?.focus();
         break;
     }
   }
@@ -274,7 +337,15 @@ export class VimEditor extends LitElement {
   private handleInsertMode(key: string) {
     if (key === 'Escape') {
       this.mode = 'normal';
-    } else if (key === 'Backspace') {
+      this.hiddenInput?.blur();
+      return;
+    }
+    
+    if (key.length === 1) {
+      return;
+    }
+    
+    if (key === 'Backspace') {
       this.handleBackspace();
     } else if (key === 'Enter') {
       this.handleEnter();
@@ -286,8 +357,6 @@ export class VimEditor extends LitElement {
       this.moveCursorUp();
     } else if (key === 'ArrowDown') {
       this.moveCursorDown();
-    } else if (key.length === 1) {
-      this.insertCharacter(key);
     }
   }
 
@@ -384,7 +453,9 @@ export class VimEditor extends LitElement {
     if (this.p5Instance) {
       this.p5Instance.remove();
     }
-    // 移除鍵盤事件監聽器
+    if (this.hiddenInput) {
+      this.hiddenInput.remove();
+    }
     window.removeEventListener('keydown', this.handleKeyDown.bind(this));
     super.disconnectedCallback();
   }
