@@ -1,0 +1,24 @@
+# Project Context
+This is a Web Component library project built with TypeScript.
+
+## Pre-requisites Before Handling User Requests
+Before processing any user request, you must:
+1. Scan the current project structure
+2. Understand the project content and architecture
+3. Then proceed with the user's request
+
+## Code Style Guidelines
+
+### Method Length
+- Keep method content short and focused
+- Extract code blocks into smaller methods based on functionality
+- Each method should have a single, clear responsibility
+
+### Comments
+- Do not write comments in the code
+- Code should be self-documenting through clear naming and structure
+
+## TypeScript Standards
+- Use camelCase for interface properties
+- Follow TypeScript best practices for Web Component development
+

@@ -2,16 +2,29 @@ import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import p5 from 'p5';
 
+export interface EditorStatus {
+  mode: 'normal' | 'insert' | 'visual';
+  cursorX: number;
+  cursorY: number;
+  cursorVisible: boolean;
+}
+
+export interface BufferCell {
+  char: string;
+  foreground: number[];
+  background: number[];
+}
+
 @customElement('vim-editor')
 export class VimEditor extends LitElement {
   private p5Instance: p5 | null = null;
   private canvas: HTMLCanvasElement | null = null;
   private cursorBlinkInterval: number | null = null;
-  private charWidth = 9; // 假設等寬字體的字符寬度為 9 像素
-  private lineHeight = 20; // 行高
-  private baseLine = 14; // 文字基準線
-  private textPadding = 2; // 文字上下間距
-  private statusBarHeight = 24; // 狀態列高度
+  private charWidth = 9;
+  private lineHeight = 20;
+  private baseLine = 14;
+  private textPadding = 2;
+  private statusBarHeight = 24;
   
   @state()
   private cursorVisible = true;
@@ -31,6 +44,10 @@ export class VimEditor extends LitElement {
   @state()
   private lastKeyPressed = '';
 
+  private buffer: BufferCell[][] = [];
+  private bufferWidth = 0;
+  private bufferHeight = 0;
+
   // 計算文字的 Y 座標
   private getTextY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight + this.baseLine;
@@ -39,6 +56,64 @@ export class VimEditor extends LitElement {
   // 計算游標的 Y 座標
   private getCursorY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight + this.baseLine;
+  }
+
+  getStatus(): EditorStatus {
+    return {
+      mode: this.mode,
+      cursorX: this.cursorX,
+      cursorY: this.cursorY,
+      cursorVisible: this.cursorVisible,
+    };
+  }
+
+  getBuffer(): BufferCell[][] {
+    return this.buffer;
+  }
+
+  setContent(content: string[]) {
+    this.content = [...content];
+    this.updateBuffer();
+    if (this.p5Instance) {
+      this.p5Instance.redraw();
+    }
+  }
+
+  private initializeBuffer() {
+    const editableWidth = Math.floor((800 - 60) / this.charWidth);
+    const editableHeight = Math.floor((600 - this.statusBarHeight) / this.lineHeight);
+    
+    this.bufferWidth = editableWidth;
+    this.bufferHeight = editableHeight;
+    
+    this.buffer = Array(editableHeight).fill(null).map(() =>
+      Array(editableWidth).fill(null).map(() => ({
+        char: ' ',
+        foreground: [255, 255, 255],
+        background: [0, 0, 0],
+      }))
+    );
+  }
+
+  private updateBuffer() {
+    if (this.buffer.length === 0) {
+      this.initializeBuffer();
+    }
+    
+    for (let y = 0; y < this.bufferHeight; y++) {
+      for (let x = 0; x < this.bufferWidth; x++) {
+        const line = this.content[y] || '';
+        const char = line[x] || ' ';
+        
+        const isCursor = y === this.cursorY && x === this.cursorX && this.cursorVisible;
+        
+        this.buffer[y][x] = {
+          char,
+          foreground: isCursor ? [0, 0, 0] : [255, 255, 255],
+          background: isCursor ? [255, 255, 255] : [0, 0, 0],
+        };
+      }
+    }
   }
 
   firstUpdated() {
@@ -72,38 +147,24 @@ export class VimEditor extends LitElement {
         p.textAlign(p.LEFT, p.TOP);
         p.textFont('monospace');
         
-        // 計算字符寬度
         this.charWidth = p.textWidth('M');
         
-        // 關閉自動循環
+        this.initializeBuffer();
+        
         p.noLoop();
       };
 
       p.draw = () => {
         console.log('Drawing frame...');
-        // 清除背景
+        
+        this.updateBuffer();
+        
         p.background(0);
         
-        // 繪製邊框
-        p.stroke(100);
-        p.noFill();
-        p.rect(0, 0, p.width-1, p.height-1);
-        p.noStroke();
-        
-        // 繪製編輯區域背景
-        p.fill(0);
-        p.rect(0, 0, p.width, p.height - this.statusBarHeight);
-        
-        console.log('Drawing line numbers...');
+        this.drawBorder(p);
+        this.drawEditorBackground(p);
         this.drawLineNumbers(p);
-        
-        console.log('Drawing content...');
-        this.drawContent(p);
-        
-        console.log('Drawing cursor...');
-        this.drawCursor(p);
-        
-        console.log('Drawing status bar...');
+        this.renderBuffer(p);
         this.drawStatusBar(p);
         
         console.log('Frame complete');
@@ -131,108 +192,136 @@ export class VimEditor extends LitElement {
     const key = event.key;
     this.lastKeyPressed = key;
     
-    // 避免瀏覽器默認行為（例如頁面滾動）
     event.preventDefault();
     
-    // 處理 Vim 移動按鍵
     if (this.mode === 'normal') {
-      switch (key) {
-        case 'j': // 向下移動
-          if (this.cursorY < this.content.length - 1) {
-            this.cursorY += 1;
-          }
-          break;
-        case 'k': // 向上移動
-          if (this.cursorY > 0) {
-            this.cursorY -= 1;
-          }
-          break;
-        case 'h': // 向左移動
-          if (this.cursorX > 0) {
-            this.cursorX -= 1;
-          }
-          break;
-        case 'l': // 向右移動
-          if (this.content[this.cursorY] && this.cursorX < this.content[this.cursorY].length - 1) {
-            this.cursorX += 1;
-          }
-          break;
-        case 'i': // 進入插入模式
-          this.mode = 'insert';
-          break;
-        case 'a': // 往右移動後進入插入模式
-          // 如果游標不在行尾，則向右移動一格
-          if (this.content[this.cursorY] && this.cursorX < this.content[this.cursorY].length - 1) {
-            this.cursorX += 1;
-          }
-          this.mode = 'insert';
-          break;
-      }
+      this.handleNormalMode(key);
     } else if (this.mode === 'insert') {
-      // 在插入模式中，ESC 鍵返回正常模式
-      if (key === 'Escape') {
-        this.mode = 'normal';
-      } else if (key === 'Backspace') {
-        // 刪除游標前的字符
-        if (this.cursorX > 0) {
-          // 如果游標不在行首，刪除前一個字符
-          const currentLine = this.content[this.cursorY];
-          this.content[this.cursorY] = currentLine.substring(0, this.cursorX - 1) + currentLine.substring(this.cursorX);
-          this.cursorX -= 1;
-        } else if (this.cursorY > 0) {
-          // 如果游標在行首但不是第一行，將該行合併到上一行
-          const previousLine = this.content[this.cursorY - 1];
-          const currentLine = this.content[this.cursorY];
-          
-          // 設置新的游標位置
-          this.cursorX = previousLine.length;
-          
-          // 合併兩行
-          this.content[this.cursorY - 1] = previousLine + currentLine;
-          
-          // 刪除當前行
-          this.content.splice(this.cursorY, 1);
-          
-          // 移動游標到上一行
-          this.cursorY -= 1;
-        }
-      } else if (key === 'Enter') {
-        // 處理回車鍵，插入新行
-        const currentLine = this.content[this.cursorY];
-        
-        // 將當前行分割成兩部分
-        const lineBeforeCursor = currentLine.substring(0, this.cursorX);
-        const lineAfterCursor = currentLine.substring(this.cursorX);
-        
-        // 更新當前行
-        this.content[this.cursorY] = lineBeforeCursor;
-        
-        // 在當前行之後插入新行
-        this.content.splice(this.cursorY + 1, 0, lineAfterCursor);
-        
-        // 移動游標到下一行的開頭
-        this.cursorY += 1;
-        this.cursorX = 0;
-      } else if (key.length === 1) {
-        // 處理普通字符輸入
-        const currentLine = this.content[this.cursorY];
-        
-        // 在游標位置插入字符
-        this.content[this.cursorY] = 
-          currentLine.substring(0, this.cursorX) + 
-          key + 
-          currentLine.substring(this.cursorX);
-        
-        // 移動游標位置
-        this.cursorX += 1;
-      }
+      this.handleInsertMode(key);
     }
     
-    // 重新繪製以更新游標位置和顯示按下的按鍵
     if (this.p5Instance) {
       this.p5Instance.redraw();
     }
   }
+
+  private handleNormalMode(key: string) {
+    switch (key) {
+      case 'j':
+        this.moveCursorDown();
+        break;
+      case 'k':
+        this.moveCursorUp();
+        break;
+      case 'h':
+        this.moveCursorLeft();
+        break;
+      case 'l':
+        this.moveCursorRight();
+        break;
+      case '$':
+        this.moveCursorToLineEnd();
+        break;
+      case 'i':
+        this.mode = 'insert';
+        break;
+      case 'a':
+        this.moveCursorRight();
+        this.mode = 'insert';
+        break;
+    }
+  }
+
+  private handleInsertMode(key: string) {
+    if (key === 'Escape') {
+      this.mode = 'normal';
+    } else if (key === 'Backspace') {
+      this.handleBackspace();
+    } else if (key === 'Enter') {
+      this.handleEnter();
+    } else if (key.length === 1) {
+      this.insertCharacter(key);
+    }
+  }
+
+  private moveCursorDown() {
+    if (this.cursorY < this.content.length - 1) {
+      this.cursorY += 1;
+      this.adjustCursorX();
+    }
+  }
+
+  private moveCursorUp() {
+    if (this.cursorY > 0) {
+      this.cursorY -= 1;
+      this.adjustCursorX();
+    }
+  }
+
+  private moveCursorLeft() {
+    if (this.cursorX > 0) {
+      this.cursorX -= 1;
+    }
+  }
+
+  private moveCursorRight() {
+    const currentLine = this.content[this.cursorY] || '';
+    if (this.cursorX < currentLine.length - 1) {
+      this.cursorX += 1;
+    }
+  }
+
+  private moveCursorToLineEnd() {
+    const currentLine = this.content[this.cursorY] || '';
+    if (currentLine.length > 0) {
+      this.cursorX = currentLine.length - 1;
+    }
+  }
+
+  private adjustCursorX() {
+    const currentLine = this.content[this.cursorY] || '';
+    if (currentLine.length > 0 && this.cursorX >= currentLine.length) {
+      this.cursorX = currentLine.length - 1;
+    }
+  }
+
+  private handleBackspace() {
+    if (this.cursorX > 0) {
+      const currentLine = this.content[this.cursorY];
+      this.content[this.cursorY] = currentLine.substring(0, this.cursorX - 1) + currentLine.substring(this.cursorX);
+      this.cursorX -= 1;
+    } else if (this.cursorY > 0) {
+      const previousLine = this.content[this.cursorY - 1];
+      const currentLine = this.content[this.cursorY];
+      
+      this.cursorX = previousLine.length;
+      this.content[this.cursorY - 1] = previousLine + currentLine;
+      this.content.splice(this.cursorY, 1);
+      this.cursorY -= 1;
+    }
+  }
+
+  private handleEnter() {
+    const currentLine = this.content[this.cursorY];
+    const lineBeforeCursor = currentLine.substring(0, this.cursorX);
+    const lineAfterCursor = currentLine.substring(this.cursorX);
+    
+    this.content[this.cursorY] = lineBeforeCursor;
+    this.content.splice(this.cursorY + 1, 0, lineAfterCursor);
+    
+    this.cursorY += 1;
+    this.cursorX = 0;
+  }
+
+  private insertCharacter(char: string) {
+    const currentLine = this.content[this.cursorY];
+    this.content[this.cursorY] = 
+      currentLine.substring(0, this.cursorX) + 
+      char + 
+      currentLine.substring(this.cursorX);
+    this.cursorX += 1;
+  }
+
 
   disconnectedCallback() {
     if (this.cursorBlinkInterval) {
@@ -246,6 +335,18 @@ export class VimEditor extends LitElement {
     super.disconnectedCallback();
   }
 
+  private drawBorder(p: p5) {
+    p.stroke(100);
+    p.noFill();
+    p.rect(0, 0, p.width - 1, p.height - 1);
+    p.noStroke();
+  }
+
+  private drawEditorBackground(p: p5) {
+    p.fill(0);
+    p.rect(0, 0, p.width, p.height - this.statusBarHeight);
+  }
+
   private drawLineNumbers(p: p5) {
     p.fill(0, 0, 100);
     p.rect(0, 0, 50, p.height - this.statusBarHeight);
@@ -255,33 +356,21 @@ export class VimEditor extends LitElement {
     });
   }
 
-  private drawContent(p: p5) {
-    p.fill(255);
-    this.content.forEach((line, i) => {
-      p.text(line, 60, this.getTextY(i));
-    });
-  }
-
-  private drawCursor(p: p5) {
-    if (this.cursorVisible) {
-      // 使用反色效果
-      p.push();
-      p.fill(255);
-      // 根據當前游標位置計算 X 座標
-      const cursorX = 60 + this.cursorX * this.charWidth;
-      
-      // 使用 getCursorY 方法來計算游標位置
-      const cursorY = this.getCursorY(this.cursorY);
-      
-      // 繪製一個完整字符大小的方塊
-      p.rect(cursorX, cursorY, this.charWidth, this.lineHeight);
-      
-      // 在方塊上用黑色繪製字符
-      p.fill(0);
-      if (this.content[this.cursorY] && this.content[this.cursorY][this.cursorX]) {
-        p.text(this.content[this.cursorY][this.cursorX], cursorX, this.getTextY(this.cursorY));
+  private renderBuffer(p: p5) {
+    for (let y = 0; y < this.bufferHeight && y < this.buffer.length; y++) {
+      for (let x = 0; x < this.bufferWidth && x < this.buffer[y].length; x++) {
+        const cell = this.buffer[y][x];
+        const screenX = 60 + x * this.charWidth;
+        const screenY = this.textPadding + y * this.lineHeight;
+        
+        if (cell.background[0] !== 0 || cell.background[1] !== 0 || cell.background[2] !== 0) {
+          p.fill(cell.background[0], cell.background[1], cell.background[2]);
+          p.rect(screenX, screenY, this.charWidth, this.lineHeight);
+        }
+        
+        p.fill(cell.foreground[0], cell.foreground[1], cell.foreground[2]);
+        p.text(cell.char, screenX, this.getTextY(y));
       }
-      p.pop();
     }
   }
 
