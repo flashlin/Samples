@@ -390,6 +390,12 @@ export class VimEditor extends LitElement {
       case '$':
         this.moveCursorToLineEnd();
         break;
+      case 'w':
+        this.moveToNextWord();
+        break;
+      case 'b':
+        this.moveToPreviousWord();
+        break;
       case 'i':
         this.mode = 'insert';
         this.hiddenInput?.focus();
@@ -513,6 +519,94 @@ export class VimEditor extends LitElement {
       this.cursorX = currentLine.length - 1;
       this.updateInputPosition();
     }
+  }
+
+  private isWordChar(char: string): boolean {
+    return /\w/.test(char);
+  }
+
+  private moveToNextWord() {
+    const currentLine = this.content[this.cursorY] || '';
+    
+    if (this.cursorX >= currentLine.length - 1) {
+      if (this.cursorY < this.content.length - 1) {
+        this.cursorY += 1;
+        this.cursorX = 0;
+        const nextLine = this.content[this.cursorY] || '';
+        for (let i = 0; i < nextLine.length; i++) {
+          if (this.isWordChar(nextLine[i])) {
+            this.cursorX = i;
+            break;
+          }
+        }
+      }
+      this.updateInputPosition();
+      return;
+    }
+    
+    let foundNonWord = false;
+    for (let i = this.cursorX + 1; i < currentLine.length; i++) {
+      const char = currentLine[i];
+      
+      if (!this.isWordChar(char)) {
+        foundNonWord = true;
+      } else if (foundNonWord) {
+        this.cursorX = i;
+        this.updateInputPosition();
+        return;
+      }
+    }
+    
+    this.cursorX = currentLine.length - 1;
+    this.updateInputPosition();
+  }
+
+  private moveToPreviousWord() {
+    if (this.cursorX === 0) {
+      if (this.cursorY > 0) {
+        this.cursorY -= 1;
+        const prevLine = this.content[this.cursorY] || '';
+        this.cursorX = Math.max(0, prevLine.length - 1);
+        
+        for (let i = this.cursorX; i >= 0; i--) {
+          if (this.isWordChar(prevLine[i])) {
+            for (let j = i; j >= 0; j--) {
+              if (!this.isWordChar(prevLine[j])) {
+                this.cursorX = j + 1;
+                this.updateInputPosition();
+                return;
+              }
+            }
+            this.cursorX = 0;
+            this.updateInputPosition();
+            return;
+          }
+        }
+      }
+      this.updateInputPosition();
+      return;
+    }
+    
+    const currentLine = this.content[this.cursorY] || '';
+    let foundWord = false;
+    
+    for (let i = this.cursorX - 1; i >= 0; i--) {
+      const char = currentLine[i];
+      
+      if (this.isWordChar(char)) {
+        foundWord = true;
+      } else if (foundWord) {
+        this.cursorX = i + 1;
+        this.updateInputPosition();
+        return;
+      }
+    }
+    
+    if (foundWord) {
+      this.cursorX = 0;
+    }
+    
+    this.updateInputPosition();
   }
 
   private adjustCursorX() {
