@@ -1,5 +1,15 @@
 # CodeBoy Project Rules
 
+## AI Assistant Workflow
+
+### Before Processing Requests
+Before starting to process any user request, the AI assistant MUST:
+1. Scan the current project structure to understand the codebase layout
+2. Review relevant files and understand the context
+3. Only then proceed with processing the user's requirements
+
+This ensures the AI has proper context and understanding of the codebase before making any changes or suggestions.
+
 ## Code Generation
 
 ### IndentStringBuilder Usage
