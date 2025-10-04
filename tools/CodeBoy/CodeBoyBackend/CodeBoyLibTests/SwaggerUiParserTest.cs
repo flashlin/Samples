@@ -13,36 +13,45 @@ namespace CodeBoyLibTests
         [Test]
         public void ParseFromJson_WithSwaggerV2Json_ShouldParseApiResponseClassDefinition()
         {
-            // Arrange
             var swaggerV2JsonContent = LoadEmbeddedResource("CodeBoyLibTests.DataFiles.SwaggerV2.json");
             var parser = new SwaggerUiParser();
 
-            // Act
             var apiInfo = parser.ParseFromJson(swaggerV2JsonContent);
 
-            // Assert
+            VerifyBasicStructure(apiInfo);
+            VerifyApiResponseClass(apiInfo);
+            VerifyPetClass(apiInfo);
+        }
+
+        private void VerifyBasicStructure(OpenApiInfo apiInfo)
+        {
             apiInfo.Should().NotBeNull();
             apiInfo.ClassDefinitions.Should().NotBeNull();
+        }
+
+        private void VerifyApiResponseClass(OpenApiInfo apiInfo)
+        {
             apiInfo.ClassDefinitions.Should().ContainKey("ApiResponse");
 
             var apiResponseClass = apiInfo.ClassDefinitions["ApiResponse"];
             apiResponseClass.Should().NotBeNull();
             apiResponseClass.Name.Should().Be("ApiResponse");
 
-            // Verify ApiResponse has required properties
             apiResponseClass.Properties.Should().BeEquivalentTo([
                 new { Name = "code", Type = "int", IsRequired = false },
                 new { Name = "type", Type = "string", IsRequired = false },
                 new { Name = "message", Type = "string", IsRequired = false }
             ], options => options.ExcludingMissingMembers());
+        }
 
-            // Verify Pet class definition exists
+        private void VerifyPetClass(OpenApiInfo apiInfo)
+        {
             apiInfo.ClassDefinitions.Should().ContainKey("Pet");
+
             var petClass = apiInfo.ClassDefinitions["Pet"];
             petClass.Should().NotBeNull();
             petClass.Name.Should().Be("Pet");
 
-            // Verify Pet has required properties with correct IsRequired values
             petClass.Properties.Should().BeEquivalentTo([
                 new { Name = "id", Type = "long", IsRequired = false },
                 new { Name = "category", Type = "Category", IsRequired = false },
