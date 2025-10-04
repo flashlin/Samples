@@ -151,18 +151,20 @@ export class VimEditor extends LitElement {
     this.hiddenInput.setAttribute('type', 'text');
     this.hiddenInput.style.cssText = `
       position: absolute;
-      width: 1px;
+      width: 200px;
       height: 20px;
-      border: none;
+      border: 1px solid rgba(100, 100, 100, 0.3);
       outline: none;
-      background: transparent;
-      color: transparent;
-      caret-color: transparent;
+      background: rgba(0, 0, 0, 0.2);
+      color: rgb(255, 255, 255);
+      caret-color: rgb(255, 255, 255);
       font-size: 16px;
       font-family: monospace;
-      padding: 0;
+      padding: 2px;
       margin: 0;
       z-index: 1000;
+      pointer-events: none;
+      border-radius: 2px;
     `;
     this.shadowRoot?.appendChild(this.hiddenInput);
     
