@@ -320,7 +320,6 @@ export class VimEditor extends LitElement {
     this.cursorBlinkInterval = window.setInterval(() => {
       this.cursorVisible = !this.cursorVisible;
       if (this.p5Instance) {
-        console.log('Triggering redraw...');
         this.p5Instance.redraw();
       }
     }, 500);
