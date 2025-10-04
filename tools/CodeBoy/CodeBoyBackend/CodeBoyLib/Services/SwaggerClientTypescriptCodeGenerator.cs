@@ -316,6 +316,16 @@ namespace CodeBoyLib.Services
         /// <returns>TypeScript type string</returns>
         private string ConvertToTypeScriptType(string swaggerType, string? format, bool isArray)
         {
+            if (string.IsNullOrEmpty(swaggerType))
+                return "any";
+
+            if (swaggerType.StartsWith("List<") && swaggerType.EndsWith(">"))
+            {
+                var innerType = swaggerType.Substring(5, swaggerType.Length - 6);
+                var convertedInnerType = ConvertToTypeScriptType(innerType, format, false);
+                return $"{convertedInnerType}[]";
+            }
+
             var baseType = swaggerType?.ToLower() switch
             {
                 "string" => format?.ToLower() switch
@@ -326,12 +336,18 @@ namespace CodeBoyLib.Services
                     _ => "string"
                 },
                 "integer" => "number",
+                "int" => "number",
+                "long" => "number",
                 "number" => "number",
+                "float" => "number",
+                "double" => "number",
+                "decimal" => "number",
                 "boolean" => "boolean",
+                "bool" => "boolean",
                 "object" => "any",
                 "array" => "any[]",
                 null or "" => "any",
-                _ => swaggerType // Assume it's a custom type/interface name
+                _ => swaggerType
             };
 
             return isArray ? $"{baseType}[]" : baseType;
