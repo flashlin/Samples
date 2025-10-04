@@ -148,11 +148,20 @@ export class VimEditor extends LitElement {
 
   private createHiddenInput() {
     this.hiddenInput = document.createElement('input');
+    this.hiddenInput.setAttribute('type', 'text');
     this.hiddenInput.style.cssText = `
       position: absolute;
-      left: -9999px;
-      opacity: 0;
-      pointer-events: none;
+      width: 200px;
+      height: 20px;
+      border: 1px solid red;
+      outline: none;
+      background: rgba(255, 0, 0, 0.1);
+      color: white;
+      font-size: 16px;
+      font-family: monospace;
+      padding: 2px;
+      margin: 0;
+      z-index: 1000;
     `;
     this.shadowRoot?.appendChild(this.hiddenInput);
     
@@ -191,6 +200,18 @@ export class VimEditor extends LitElement {
     });
     
     this.hiddenInput.focus();
+    this.updateInputPosition();
+  }
+
+  private updateInputPosition() {
+    if (!this.hiddenInput) return;
+    
+    const line = this.content[this.cursorY] || '';
+    const x = this.getTextXPosition(line, this.cursorX);
+    const y = this.getRectY(this.cursorY);
+    
+    this.hiddenInput.style.left = `${x}px`;
+    this.hiddenInput.style.top = `${y}px`;
   }
 
   private waitForP5AndInitialize() {
@@ -364,6 +385,7 @@ export class VimEditor extends LitElement {
     if (this.cursorY < this.content.length - 1) {
       this.cursorY += 1;
       this.adjustCursorX();
+      this.updateInputPosition();
     }
   }
 
@@ -371,12 +393,14 @@ export class VimEditor extends LitElement {
     if (this.cursorY > 0) {
       this.cursorY -= 1;
       this.adjustCursorX();
+      this.updateInputPosition();
     }
   }
 
   private moveCursorLeft() {
     if (this.cursorX > 0) {
       this.cursorX -= 1;
+      this.updateInputPosition();
     }
   }
 
@@ -384,6 +408,7 @@ export class VimEditor extends LitElement {
     const currentLine = this.content[this.cursorY] || '';
     if (this.cursorX < currentLine.length - 1) {
       this.cursorX += 1;
+      this.updateInputPosition();
     }
   }
 
@@ -391,6 +416,7 @@ export class VimEditor extends LitElement {
     const currentLine = this.content[this.cursorY] || '';
     if (currentLine.length > 0) {
       this.cursorX = currentLine.length - 1;
+      this.updateInputPosition();
     }
   }
 
@@ -406,6 +432,7 @@ export class VimEditor extends LitElement {
     this.cursorY += 1;
     this.cursorX = 0;
     this.mode = 'insert';
+    this.updateInputPosition();
   }
 
   private handleBackspace() {
@@ -422,6 +449,7 @@ export class VimEditor extends LitElement {
       this.content.splice(this.cursorY, 1);
       this.cursorY -= 1;
     }
+    this.updateInputPosition();
   }
 
   private handleEnter() {
@@ -434,6 +462,7 @@ export class VimEditor extends LitElement {
     
     this.cursorY += 1;
     this.cursorX = 0;
+    this.updateInputPosition();
   }
 
   private insertCharacter(char: string) {
@@ -443,6 +472,7 @@ export class VimEditor extends LitElement {
       char + 
       currentLine.substring(this.cursorX);
     this.cursorX += 1;
+    this.updateInputPosition();
   }
 
 
