@@ -22,7 +22,6 @@ export class VimEditor extends LitElement {
   private cursorBlinkInterval: number | null = null;
   private charWidth = 9;
   private lineHeight = 20;
-  private baseLine = 14;
   private textPadding = 2;
   private statusBarHeight = 24;
   
@@ -48,14 +47,8 @@ export class VimEditor extends LitElement {
   private bufferWidth = 0;
   private bufferHeight = 0;
 
-  // 計算文字的 Y 座標
   private getTextY(lineIndex: number): number {
-    return this.textPadding + lineIndex * this.lineHeight + this.baseLine;
-  }
-
-  // 計算游標的 Y 座標
-  private getCursorY(lineIndex: number): number {
-    return this.textPadding + lineIndex * this.lineHeight + this.baseLine;
+    return this.textPadding + lineIndex * this.lineHeight;
   }
 
   getStatus(): EditorStatus {
@@ -373,7 +366,7 @@ export class VimEditor extends LitElement {
       for (let x = 0; x < this.bufferWidth && x < this.buffer[y].length; x++) {
         const cell = this.buffer[y][x];
         const screenX = 60 + x * this.charWidth;
-        const screenY = this.textPadding + y * this.lineHeight;
+        const screenY = this.getTextY(y);
         
         if (cell.background[0] !== 0 || cell.background[1] !== 0 || cell.background[2] !== 0) {
           p.fill(cell.background[0], cell.background[1], cell.background[2]);
@@ -381,7 +374,7 @@ export class VimEditor extends LitElement {
         }
         
         p.fill(cell.foreground[0], cell.foreground[1], cell.foreground[2]);
-        p.text(cell.char, screenX, this.getTextY(y));
+        p.text(cell.char, screenX, screenY);
       }
     }
   }
