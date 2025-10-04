@@ -109,6 +109,84 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('w key in normal mode', () => {
+    it('should move cursor to next English word', () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(6);
+      expect(status.cursorY).toBe(0);
+    });
+
+    it('should move cursor to next Chinese word group', () => {
+      editor.setContent(['你好世界']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(3);
+      expect(status.cursorY).toBe(0);
+    });
+
+    it('should move cursor between English and Chinese', () => {
+      editor.setContent(['Hello 你好 World']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      let event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      let status = editor.getStatus();
+      expect(status.cursorX).toBe(6);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      status = editor.getStatus();
+      expect(status.cursorX).toBe(9);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      status = editor.getStatus();
+      expect(status.cursorX).toBe(13);
+    });
+
+    it('should jump from punctuation to next word', () => {
+      editor.setContent(['Hello World中文!']);
+      editor.cursorX = 14;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(14);
+      expect(status.cursorY).toBe(0);
+    });
+
+    it('should move to next line when at end of line', () => {
+      editor.setContent(['hello', 'world']);
+      editor.cursorX = 4;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(0);
+      expect(status.cursorY).toBe(1);
+    });
+  });
+
   describe('buffer system', () => {
     it('should maintain buffer state', () => {
       editor.setContent(['test']);
