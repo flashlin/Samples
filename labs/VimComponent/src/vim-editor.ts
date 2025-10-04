@@ -73,6 +73,9 @@ export class VimEditor extends LitElement {
 
   setContent(content: string[]) {
     this.content = [...content];
+    if (this.buffer.length === 0) {
+      this.initializeBuffer();
+    }
     this.updateBuffer();
     if (this.p5Instance) {
       this.p5Instance.redraw();
@@ -95,7 +98,7 @@ export class VimEditor extends LitElement {
     );
   }
 
-  private updateBuffer() {
+  updateBuffer() {
     if (this.buffer.length === 0) {
       this.initializeBuffer();
     }
