@@ -525,6 +525,20 @@ export class VimEditor extends LitElement {
     return /\w/.test(char);
   }
 
+  private isChinese(char: string): boolean {
+    return /[\u4e00-\u9fa5]/.test(char);
+  }
+
+  private getCharType(char: string): 'word' | 'chinese' | 'space' {
+    if (this.isChinese(char)) {
+      return 'chinese';
+    } else if (this.isWordChar(char)) {
+      return 'word';
+    } else {
+      return 'space';
+    }
+  }
+
   private moveToNextWord() {
     const currentLine = this.content[this.cursorY] || '';
     
@@ -534,7 +548,7 @@ export class VimEditor extends LitElement {
         this.cursorX = 0;
         const nextLine = this.content[this.cursorY] || '';
         for (let i = 0; i < nextLine.length; i++) {
-          if (this.isWordChar(nextLine[i])) {
+          if (this.getCharType(nextLine[i]) !== 'space') {
             this.cursorX = i;
             break;
           }
@@ -544,17 +558,24 @@ export class VimEditor extends LitElement {
       return;
     }
     
-    let foundNonWord = false;
+    const currentType = this.getCharType(currentLine[this.cursorX]);
+    let skipCurrent = true;
+    
     for (let i = this.cursorX + 1; i < currentLine.length; i++) {
-      const char = currentLine[i];
+      const charType = this.getCharType(currentLine[i]);
       
-      if (!this.isWordChar(char)) {
-        foundNonWord = true;
-      } else if (foundNonWord) {
-        this.cursorX = i;
-        this.updateInputPosition();
-        return;
+      if (charType === 'space') {
+        skipCurrent = false;
+        continue;
       }
+      
+      if (skipCurrent && charType === currentType) {
+        continue;
+      }
+      
+      this.cursorX = i;
+      this.updateInputPosition();
+      return;
     }
     
     this.cursorX = currentLine.length - 1;
@@ -569,9 +590,10 @@ export class VimEditor extends LitElement {
         this.cursorX = Math.max(0, prevLine.length - 1);
         
         for (let i = this.cursorX; i >= 0; i--) {
-          if (this.isWordChar(prevLine[i])) {
+          const charType = this.getCharType(prevLine[i]);
+          if (charType !== 'space') {
             for (let j = i; j >= 0; j--) {
-              if (!this.isWordChar(prevLine[j])) {
+              if (this.getCharType(prevLine[j]) !== charType) {
                 this.cursorX = j + 1;
                 this.updateInputPosition();
                 return;
@@ -588,24 +610,34 @@ export class VimEditor extends LitElement {
     }
     
     const currentLine = this.content[this.cursorY] || '';
-    let foundWord = false;
+    const currentType = this.getCharType(currentLine[this.cursorX]);
+    let skipCurrent = currentType !== 'space';
     
     for (let i = this.cursorX - 1; i >= 0; i--) {
-      const char = currentLine[i];
+      const charType = this.getCharType(currentLine[i]);
       
-      if (this.isWordChar(char)) {
-        foundWord = true;
-      } else if (foundWord) {
-        this.cursorX = i + 1;
-        this.updateInputPosition();
-        return;
+      if (charType === 'space') {
+        skipCurrent = false;
+        continue;
       }
-    }
-    
-    if (foundWord) {
+      
+      if (skipCurrent && charType === currentType) {
+        continue;
+      }
+      
+      for (let j = i; j >= 0; j--) {
+        if (this.getCharType(currentLine[j]) !== charType) {
+          this.cursorX = j + 1;
+          this.updateInputPosition();
+          return;
+        }
+      }
       this.cursorX = 0;
+      this.updateInputPosition();
+      return;
     }
     
+    this.cursorX = 0;
     this.updateInputPosition();
   }
 
