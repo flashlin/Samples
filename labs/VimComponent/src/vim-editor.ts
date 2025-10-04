@@ -413,6 +413,7 @@ export class VimEditor extends LitElement {
     if (key === 'Escape') {
       this.mode = 'normal';
       this.hiddenInput?.blur();
+      this.adjustCursorForNormalMode();
       return;
     }
     
@@ -508,6 +509,13 @@ export class VimEditor extends LitElement {
   }
 
   private adjustCursorX() {
+    const currentLine = this.content[this.cursorY] || '';
+    if (currentLine.length > 0 && this.cursorX >= currentLine.length) {
+      this.cursorX = currentLine.length - 1;
+    }
+  }
+
+  private adjustCursorForNormalMode() {
     const currentLine = this.content[this.cursorY] || '';
     if (currentLine.length > 0 && this.cursorX >= currentLine.length) {
       this.cursorX = currentLine.length - 1;
