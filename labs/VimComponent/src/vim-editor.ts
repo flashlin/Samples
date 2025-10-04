@@ -260,6 +260,9 @@ export class VimEditor extends LitElement {
         this.moveCursorRight();
         this.mode = 'insert';
         break;
+      case 'o':
+        this.insertLineBelow();
+        break;
     }
   }
 
@@ -314,6 +317,13 @@ export class VimEditor extends LitElement {
     if (currentLine.length > 0 && this.cursorX >= currentLine.length) {
       this.cursorX = currentLine.length - 1;
     }
+  }
+
+  private insertLineBelow() {
+    this.content.splice(this.cursorY + 1, 0, '');
+    this.cursorY += 1;
+    this.cursorX = 0;
+    this.mode = 'insert';
   }
 
   private handleBackspace() {
