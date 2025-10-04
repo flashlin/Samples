@@ -122,7 +122,21 @@ export class VimEditor extends LitElement {
   firstUpdated() {
     console.log('firstUpdated called');
     
-    // 使用固定大小而不是容器大小
+    this.waitForP5AndInitialize();
+  }
+
+  private waitForP5AndInitialize() {
+    if (typeof (window as any).p5 === 'undefined') {
+      console.log('Waiting for p5.js to load...');
+      setTimeout(() => this.waitForP5AndInitialize(), 50);
+      return;
+    }
+    
+    console.log('p5.js loaded, initializing...');
+    this.initializeP5();
+  }
+
+  private initializeP5() {
     const width = 800;
     const height = 600;
     
@@ -134,7 +148,6 @@ export class VimEditor extends LitElement {
         const canvas = p.createCanvas(width, height);
         this.canvas = canvas.elt as HTMLCanvasElement;
         
-        // 設置 canvas 樣式
         canvas.elt.style.cssText = `
           display: block !important;
           width: 800px !important;
@@ -174,20 +187,16 @@ export class VimEditor extends LitElement {
       };
     };
 
-    // 使用 window.p5 而不是直接導入的 p5
     this.p5Instance = new (window as any).p5(sketch, this.shadowRoot as unknown as HTMLElement);
 
-    // 設置游標閃爍
     this.cursorBlinkInterval = window.setInterval(() => {
       this.cursorVisible = !this.cursorVisible;
-      // 直接調用 p5 的 redraw
       if (this.p5Instance) {
         console.log('Triggering redraw...');
         this.p5Instance.redraw();
       }
     }, 500);
 
-    // 添加鍵盤事件監聽器
     window.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
