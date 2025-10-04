@@ -516,10 +516,24 @@ export class VimEditor extends LitElement {
   private drawLineNumbers(p: p5) {
     p.fill(0, 0, 100);
     p.rect(0, 0, 50, p.height - this.statusBarHeight);
-    p.fill(255);
+    
+    p.textAlign(p.RIGHT, p.TOP);
+    
     this.content.forEach((_, i) => {
-      p.text((i + 1).toString(), 5, this.getTextY(i));
+      const isCursorLine = i === this.cursorY;
+      
+      if (isCursorLine) {
+        p.fill(255, 255, 0);
+        const lineNum = (i + 1).toString();
+        p.text(lineNum, 45, this.getTextY(i));
+      } else {
+        p.fill(100, 100, 100);
+        const relativeNum = Math.abs(i - this.cursorY).toString();
+        p.text(relativeNum, 45, this.getTextY(i));
+      }
     });
+    
+    p.textAlign(p.LEFT, p.TOP);
   }
 
   private renderBuffer(p: p5) {
