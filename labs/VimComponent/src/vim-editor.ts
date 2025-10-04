@@ -23,7 +23,7 @@ export class VimEditor extends LitElement {
   private charWidth = 9;
   private lineHeight = 20;
   private textPadding = 2;
-  private textOffsetY = 3;
+  private textOffsetY = 5;
   private statusBarHeight = 24;
   
   @state()
