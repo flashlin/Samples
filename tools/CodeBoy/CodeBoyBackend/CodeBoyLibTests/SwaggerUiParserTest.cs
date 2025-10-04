@@ -23,13 +23,13 @@ namespace CodeBoyLibTests
             VerifyPetClass(apiInfo);
         }
 
-        private void VerifyBasicStructure(OpenApiInfo apiInfo)
+        private void VerifyBasicStructure(SwaggerApiInfo apiInfo)
         {
             apiInfo.Should().NotBeNull();
             apiInfo.ClassDefinitions.Should().NotBeNull();
         }
 
-        private void VerifyApiResponseClass(OpenApiInfo apiInfo)
+        private void VerifyApiResponseClass(SwaggerApiInfo apiInfo)
         {
             apiInfo.ClassDefinitions.Should().ContainKey("ApiResponse");
 
@@ -44,7 +44,7 @@ namespace CodeBoyLibTests
             ], options => options.ExcludingMissingMembers());
         }
 
-        private void VerifyPetClass(OpenApiInfo apiInfo)
+        private void VerifyPetClass(SwaggerApiInfo apiInfo)
         {
             apiInfo.ClassDefinitions.Should().ContainKey("Pet");
 
