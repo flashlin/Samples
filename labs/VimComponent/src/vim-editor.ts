@@ -500,7 +500,8 @@ export class VimEditor extends LitElement {
 
   private moveCursorRight() {
     const currentLine = this.content[this.cursorY] || '';
-    if (this.cursorX < currentLine.length - 1) {
+    const maxPosition = this.mode === 'insert' ? currentLine.length : currentLine.length - 1;
+    if (this.cursorX < maxPosition) {
       this.cursorX += 1;
       this.updateInputPosition();
     }
