@@ -165,17 +165,25 @@ export class VimEditor extends LitElement {
       z-index: 1000;
       pointer-events: none;
       border-radius: 2px;
+      opacity: 0;
+      transition: opacity 0.1s ease;
     `;
     this.shadowRoot?.appendChild(this.hiddenInput);
     
     this.hiddenInput.addEventListener('compositionstart', (e) => {
       console.log('Composition start:', e.data);
       this.isComposing = true;
+      if (this.hiddenInput) {
+        this.hiddenInput.style.opacity = '1';
+      }
     });
     
     this.hiddenInput.addEventListener('compositionend', (e) => {
       console.log('Composition end:', e.data);
       this.isComposing = false;
+      if (this.hiddenInput) {
+        this.hiddenInput.style.opacity = '0';
+      }
       if (this.mode === 'insert' && e.data) {
         for (const char of e.data) {
           this.insertCharacter(char);
