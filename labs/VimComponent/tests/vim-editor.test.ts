@@ -187,6 +187,84 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('W key in normal mode', () => {
+    it('should move cursor to next space-separated WORD', () => {
+      editor.setContent(['hello,world test']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'W' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(12);
+      expect(status.cursorY).toBe(0);
+    });
+
+    it('should treat punctuation as part of WORD', () => {
+      editor.setContent(['hello,world! test']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'W' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(13);
+    });
+
+    it('should move across Chinese and English together', () => {
+      editor.setContent(['hello中文world test']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'W' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(13);
+    });
+  });
+
+  describe('B key in normal mode', () => {
+    it('should move cursor to previous space-separated WORD', () => {
+      editor.setContent(['hello,world test']);
+      editor.cursorX = 12;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'B' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(0);
+      expect(status.cursorY).toBe(0);
+    });
+
+    it('should treat punctuation as part of WORD', () => {
+      editor.setContent(['hello,world! test']);
+      editor.cursorX = 13;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'B' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(0);
+    });
+
+    it('should move across Chinese and English together', () => {
+      editor.setContent(['hello中文world test']);
+      editor.cursorX = 13;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'B' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(0);
+    });
+  });
+
   describe('^ key in normal mode', () => {
     it('should move cursor to first non-space character', () => {
       editor.setContent(['  hello world']);

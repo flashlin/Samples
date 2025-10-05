@@ -406,8 +406,14 @@ export class VimEditor extends LitElement {
       case 'w':
         this.moveToNextWord();
         break;
+      case 'W':
+        this.moveToNextWORD();
+        break;
       case 'b':
         this.moveToPreviousWord();
+        break;
+      case 'B':
+        this.moveToPreviousWORD();
         break;
       case 'i':
         this.mode = 'insert';
@@ -655,6 +661,105 @@ export class VimEditor extends LitElement {
       
       for (let j = i; j >= 0; j--) {
         if (this.getCharType(currentLine[j]) !== charType) {
+          this.cursorX = j + 1;
+          this.updateInputPosition();
+          return;
+        }
+      }
+      this.cursorX = 0;
+      this.updateInputPosition();
+      return;
+    }
+    
+    this.cursorX = 0;
+    this.updateInputPosition();
+  }
+
+  private moveToNextWORD() {
+    const currentLine = this.content[this.cursorY] || '';
+    
+    if (this.cursorX >= currentLine.length - 1) {
+      if (this.cursorY < this.content.length - 1) {
+        this.cursorY += 1;
+        this.cursorX = 0;
+        const nextLine = this.content[this.cursorY] || '';
+        for (let i = 0; i < nextLine.length; i++) {
+          if (nextLine[i] !== ' ' && nextLine[i] !== '\t') {
+            this.cursorX = i;
+            break;
+          }
+        }
+      }
+      this.updateInputPosition();
+      return;
+    }
+    
+    const isCurrentSpace = currentLine[this.cursorX] === ' ' || currentLine[this.cursorX] === '\t';
+    let foundNonSpace = false;
+    
+    for (let i = this.cursorX + 1; i < currentLine.length; i++) {
+      const isSpace = currentLine[i] === ' ' || currentLine[i] === '\t';
+      
+      if (isSpace) {
+        foundNonSpace = true;
+      } else if (foundNonSpace || isCurrentSpace) {
+        this.cursorX = i;
+        this.updateInputPosition();
+        return;
+      }
+    }
+    
+    this.cursorX = currentLine.length - 1;
+    this.updateInputPosition();
+  }
+
+  private moveToPreviousWORD() {
+    if (this.cursorX === 0) {
+      if (this.cursorY > 0) {
+        this.cursorY -= 1;
+        const prevLine = this.content[this.cursorY] || '';
+        this.cursorX = Math.max(0, prevLine.length - 1);
+        
+        for (let i = this.cursorX; i >= 0; i--) {
+          const isSpace = prevLine[i] === ' ' || prevLine[i] === '\t';
+          if (!isSpace) {
+            for (let j = i; j >= 0; j--) {
+              const isSpaceJ = prevLine[j] === ' ' || prevLine[j] === '\t';
+              if (isSpaceJ) {
+                this.cursorX = j + 1;
+                this.updateInputPosition();
+                return;
+              }
+            }
+            this.cursorX = 0;
+            this.updateInputPosition();
+            return;
+          }
+        }
+      }
+      this.updateInputPosition();
+      return;
+    }
+    
+    const currentLine = this.content[this.cursorY] || '';
+    const isCurrentSpace = currentLine[this.cursorX] === ' ' || currentLine[this.cursorX] === '\t';
+    let skipCurrent = !isCurrentSpace;
+    
+    for (let i = this.cursorX - 1; i >= 0; i--) {
+      const isSpace = currentLine[i] === ' ' || currentLine[i] === '\t';
+      
+      if (isSpace) {
+        skipCurrent = false;
+        continue;
+      }
+      
+      if (skipCurrent) {
+        continue;
+      }
+      
+      for (let j = i; j >= 0; j--) {
+        const isSpaceJ = currentLine[j] === ' ' || currentLine[j] === '\t';
+        if (isSpaceJ) {
           this.cursorX = j + 1;
           this.updateInputPosition();
           return;
