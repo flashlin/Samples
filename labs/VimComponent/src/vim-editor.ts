@@ -649,7 +649,7 @@ export class VimEditor extends LitElement {
     }
     
     const currentLine = this.content[this.cursorY] || '';
-    const availablePixelWidth = (800 - 60);
+    const availablePixelWidth = (800 - 60) - (this.baseCharWidth * 2);
     
     let scrollEndX = this.scrollOffsetX;
     let accumulatedWidth = 0;
