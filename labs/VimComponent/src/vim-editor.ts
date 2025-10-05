@@ -67,6 +67,10 @@ export class VimEditor extends LitElement {
   private pendingCommand = '';
   private commandTimeout: number | null = null;
 
+  private history: Array<{ content: string[]; cursorX: number; cursorY: number }> = [];
+  private historyIndex = -1;
+  private maxHistorySize = 100;
+
   private getRectY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight;
   }
@@ -263,6 +267,7 @@ export class VimEditor extends LitElement {
   firstUpdated() {
     this.createHiddenInput();
     this.waitForP5AndInitialize();
+    this.saveHistory();
   }
 
   private createHiddenInput() {
@@ -539,12 +544,14 @@ export class VimEditor extends LitElement {
       }
       
       if (this.pendingCommand === 'diw') {
+        this.saveHistory();
         this.deleteInnerWord();
         this.pendingCommand = '';
         return;
       }
       
       if (this.pendingCommand === 'dw') {
+        this.saveHistory();
         this.deleteWord();
         this.pendingCommand = '';
         return;
@@ -576,11 +583,13 @@ export class VimEditor extends LitElement {
         break;
       case 'i':
         if (this.pendingCommand === '') {
+          this.saveHistory();
           this.mode = 'insert';
           this.hiddenInput?.focus();
         }
         break;
       case 'a':
+        this.saveHistory();
         const currentLine = this.content[this.cursorY] || '';
         if (this.cursorX < currentLine.length) {
           this.cursorX += 1;
@@ -590,6 +599,7 @@ export class VimEditor extends LitElement {
         this.hiddenInput?.focus();
         break;
       case 'o':
+        this.saveHistory();
         this.insertLineBelow();
         this.hiddenInput?.focus();
         break;
@@ -612,6 +622,9 @@ export class VimEditor extends LitElement {
         break;
       case 'p':
         this.pasteAfterCursor();
+        break;
+      case 'u':
+        this.undo();
         break;
     }
   }
@@ -927,6 +940,8 @@ export class VimEditor extends LitElement {
       return;
     }
     
+    this.saveHistory();
+    
     const currentLine = this.content[range.y];
     const beforeWord = currentLine.substring(0, range.startX);
     const afterWord = currentLine.substring(range.endX + 1);
@@ -947,6 +962,8 @@ export class VimEditor extends LitElement {
     if (currentLine.length === 0 || this.cursorX >= currentLine.length) {
       return;
     }
+    
+    this.saveHistory();
     
     const startX = this.cursorX;
     let endX = this.cursorX;
@@ -1238,6 +1255,8 @@ export class VimEditor extends LitElement {
   }
 
   private cutVisualSelection() {
+    this.saveHistory();
+    
     const selection = this.getVisualSelection();
     navigator.clipboard.writeText(selection);
     
@@ -1361,6 +1380,8 @@ export class VimEditor extends LitElement {
   }
 
   private pasteTextAfterCursor(text: string) {
+    this.saveHistory();
+    
     const currentLine = this.content[this.cursorY] || '';
     const lines = text.split('\n');
     
@@ -1409,6 +1430,44 @@ export class VimEditor extends LitElement {
     }
     
     this.updateInputPosition();
+  }
+
+  private saveHistory() {
+    if (this.historyIndex < this.history.length - 1) {
+      this.history = this.history.slice(0, this.historyIndex + 1);
+    }
+    
+    this.history.push({
+      content: JSON.parse(JSON.stringify(this.content)),
+      cursorX: this.cursorX,
+      cursorY: this.cursorY
+    });
+    
+    if (this.history.length > this.maxHistorySize) {
+      this.history.shift();
+    } else {
+      this.historyIndex++;
+    }
+  }
+
+  private undo() {
+    if (this.historyIndex > 0) {
+      this.historyIndex--;
+      const state = this.history[this.historyIndex];
+      this.content = JSON.parse(JSON.stringify(state.content));
+      this.cursorX = state.cursorX;
+      this.cursorY = state.cursorY;
+      this.updateInputPosition();
+      if (this.p5Instance) {
+        this.p5Instance.redraw();
+      }
+    }
+  }
+
+  resetHistory() {
+    this.history = [];
+    this.historyIndex = -1;
+    this.saveHistory();
   }
 
 

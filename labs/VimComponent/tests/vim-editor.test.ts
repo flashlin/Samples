@@ -1441,5 +1441,166 @@ describe('VimEditor', () => {
       expect(editor.cursorY).toBe(2);
     });
   });
+
+  describe('u command (undo)', () => {
+    it('should have history initialized', async () => {
+      editor.content = ['hello'];
+      await editor.updateComplete;
+      editor.resetHistory();
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+
+      const event = new KeyboardEvent('keydown', { key: 'u' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('hello');
+    });
+
+    it('should undo diw command', async () => {
+      editor.content = ['hello world test'];
+      await editor.updateComplete;
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+
+      event = new KeyboardEvent('keydown', { key: 'i' });
+      window.dispatchEvent(event);
+
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('hello  test');
+
+      event = new KeyboardEvent('keydown', { key: 'u' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('hello world test');
+      expect(editor.cursorX).toBe(6);
+    });
+
+    it('should undo dw command', async () => {
+      editor.content = ['hello world'];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('world');
+
+      event = new KeyboardEvent('keydown', { key: 'u' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('hello world');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should undo paste operation', async () => {
+      const mockReadText = vi.fn();
+      const mockWriteText = vi.fn();
+      
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          readText: mockReadText,
+          writeText: mockWriteText,
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      editor.content = ['hello'];
+      await editor.updateComplete;
+      editor.cursorX = 4;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+
+      mockReadText.mockResolvedValue(' world');
+
+      let event = new KeyboardEvent('keydown', { key: 'p' });
+      window.dispatchEvent(event);
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('hello world');
+
+      event = new KeyboardEvent('keydown', { key: 'u' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('hello');
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should undo visual mode cut', async () => {
+      editor.content = ['hello world'];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+
+      let event = new KeyboardEvent('keydown', { key: 'v' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      editor.cursorX = 4;
+
+      event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe(' world');
+
+      event = new KeyboardEvent('keydown', { key: 'u' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('hello world');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should handle multiple undo operations', async () => {
+      editor.content = ['hello world'];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: 'i' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe(' world');
+
+      event = new KeyboardEvent('keydown', { key: 'u' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('hello world');
+    });
+  });
 });
 
