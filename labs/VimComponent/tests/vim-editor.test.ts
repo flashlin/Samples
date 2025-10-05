@@ -316,6 +316,76 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('number prefix in normal mode', () => {
+    it('should move down 5 lines with 5j', () => {
+      editor.setContent(['line1', 'line2', 'line3', 'line4', 'line5', 'line6', 'line7']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: '5' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorY).toBe(5);
+    });
+
+    it('should move up 3 lines with 3k', () => {
+      editor.setContent(['line1', 'line2', 'line3', 'line4', 'line5', 'line6', 'line7']);
+      editor.cursorX = 0;
+      editor.cursorY = 6;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: '3' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'k' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorY).toBe(3);
+    });
+
+    it('should support multi-digit numbers like 10j', () => {
+      const lines = Array.from({ length: 20 }, (_, i) => `line${i + 1}`);
+      editor.setContent(lines);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: '1' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: '0' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorY).toBe(10);
+    });
+
+    it('should work with other movement keys like 5w', () => {
+      editor.setContent(['one two three four five six seven']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: '5' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(24);
+    });
+  });
+
   describe('visual mode navigation', () => {
     it('should move cursor to line end with $ key', () => {
       editor.setContent(['hello world']);

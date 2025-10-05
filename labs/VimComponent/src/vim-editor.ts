@@ -53,6 +53,8 @@ export class VimEditor extends LitElement {
   
   private visualStartX = 0;
   private visualStartY = 0;
+  
+  private numberPrefix = '';
 
   private getRectY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight;
@@ -381,22 +383,38 @@ export class VimEditor extends LitElement {
   }
 
   private handleNormalMode(key: string) {
+    if (/^[0-9]$/.test(key)) {
+      this.numberPrefix += key;
+      return;
+    }
+    
+    const count = this.numberPrefix ? parseInt(this.numberPrefix, 10) : 1;
+    this.numberPrefix = '';
+    
     switch (key) {
       case 'j':
       case 'ArrowDown':
-        this.moveCursorDown();
+        for (let i = 0; i < count; i++) {
+          this.moveCursorDown();
+        }
         break;
       case 'k':
       case 'ArrowUp':
-        this.moveCursorUp();
+        for (let i = 0; i < count; i++) {
+          this.moveCursorUp();
+        }
         break;
       case 'h':
       case 'ArrowLeft':
-        this.moveCursorLeft();
+        for (let i = 0; i < count; i++) {
+          this.moveCursorLeft();
+        }
         break;
       case 'l':
       case 'ArrowRight':
-        this.moveCursorRight();
+        for (let i = 0; i < count; i++) {
+          this.moveCursorRight();
+        }
         break;
       case '$':
         this.moveCursorToLineEnd();
@@ -405,16 +423,24 @@ export class VimEditor extends LitElement {
         this.moveCursorToLineStart();
         break;
       case 'w':
-        this.moveToNextWord();
+        for (let i = 0; i < count; i++) {
+          this.moveToNextWord();
+        }
         break;
       case 'W':
-        this.moveToNextWORD();
+        for (let i = 0; i < count; i++) {
+          this.moveToNextWORD();
+        }
         break;
       case 'b':
-        this.moveToPreviousWord();
+        for (let i = 0; i < count; i++) {
+          this.moveToPreviousWord();
+        }
         break;
       case 'B':
-        this.moveToPreviousWORD();
+        for (let i = 0; i < count; i++) {
+          this.moveToPreviousWORD();
+        }
         break;
       case 'i':
         this.mode = 'insert';
