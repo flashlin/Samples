@@ -490,6 +490,60 @@ describe('VimEditor', () => {
       expect(status.cursorY).toBe(3);
       expect(status.mode).toBe('visual');
     });
+
+    it('should delete selected text with x key in visual mode', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      let event = new KeyboardEvent('keydown', { key: 'v' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+      
+      editor.cursorX = 4;
+      await editor.updateComplete;
+      
+      event = new KeyboardEvent('keydown', { key: 'x' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe(' world');
+      const status = editor.getStatus();
+      expect(status.mode).toBe('normal');
+    });
+
+    it('should delete multiline selection with x key in visual mode', async () => {
+      editor.setContent(['line1', 'line2', 'line3', 'line4']);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      let event = new KeyboardEvent('keydown', { key: 'v' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+      
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+      
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+      
+      event = new KeyboardEvent('keydown', { key: 'x' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual(['line1', 'lie4']);
+      const status = editor.getStatus();
+      expect(status.mode).toBe('normal');
+      expect(status.cursorY).toBe(1);
+    });
   });
 
   describe('visual line mode', () => {
@@ -570,6 +624,54 @@ describe('VimEditor', () => {
       const status = editor.getStatus();
       expect(status.cursorY).toBe(3);
       expect(status.mode).toBe('visual-line');
+    });
+
+    it('should delete entire lines with x key in visual-line mode', async () => {
+      editor.setContent(['line1', 'line2', 'line3', 'line4', 'line5']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      let event = new KeyboardEvent('keydown', { key: 'V' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+      
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+      
+      event = new KeyboardEvent('keydown', { key: 'x' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual(['line1', 'line4', 'line5']);
+      const status = editor.getStatus();
+      expect(status.mode).toBe('normal');
+      expect(status.cursorY).toBe(1);
+    });
+
+    it('should delete single line with x key in visual-line mode', async () => {
+      editor.setContent(['line1', 'line2', 'line3']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      let event = new KeyboardEvent('keydown', { key: 'V' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+      
+      event = new KeyboardEvent('keydown', { key: 'x' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual(['line1', 'line3']);
+      const status = editor.getStatus();
+      expect(status.mode).toBe('normal');
+      expect(status.cursorY).toBe(1);
     });
   });
 

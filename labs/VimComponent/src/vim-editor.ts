@@ -661,6 +661,7 @@ export class VimEditor extends LitElement {
         break;
       case 'c':
       case 'd':
+      case 'x':
         this.cutVisualSelection();
         this.mode = 'normal';
         break;
@@ -688,6 +689,7 @@ export class VimEditor extends LitElement {
         break;
       case 'c':
       case 'd':
+      case 'x':
         this.cutVisualSelection();
         this.mode = 'normal';
         break;
@@ -1278,6 +1280,21 @@ export class VimEditor extends LitElement {
     
     const startY = Math.min(this.visualStartY, this.cursorY);
     const endY = Math.max(this.visualStartY, this.cursorY);
+    
+    if (this.mode === 'visual-line') {
+      const linesToDelete = endY - startY + 1;
+      this.content.splice(startY, linesToDelete);
+      
+      if (this.content.length === 0) {
+        this.content = [''];
+      }
+      
+      this.cursorY = Math.min(startY, this.content.length - 1);
+      this.cursorX = 0;
+      this.adjustCursorX();
+      return;
+    }
+    
     const startX = this.visualStartY === startY ? 
       Math.min(this.visualStartX, this.cursorX) : 
       Math.min(this.cursorX, this.visualStartX);
