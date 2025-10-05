@@ -64,8 +64,12 @@ export class VimEditor extends LitElement {
   private fastJumpInput = '';
   private previousMode: 'normal' | 'visual' | 'visual-line' = 'normal';
   
-  private pendingCommand = '';
-  private commandTimeout: number | null = null;
+  private keyBuffer = '';
+  
+  private commandPatterns = [
+    { pattern: 'diw', action: () => { this.saveHistory(); this.deleteInnerWord(); } },
+    { pattern: 'dw', action: () => { this.saveHistory(); this.deleteWord(); } },
+  ];
 
   private history: Array<{ content: string[]; cursorX: number; cursorY: number }> = [];
   private historyIndex = -1;
@@ -90,6 +94,29 @@ export class VimEditor extends LitElement {
     } while (current >= 0);
     
     return label;
+  }
+
+  private processKeyBuffer(): boolean {
+    const sortedPatterns = [...this.commandPatterns].sort((a, b) => b.pattern.length - a.pattern.length);
+    
+    for (const { pattern, action } of sortedPatterns) {
+      if (this.keyBuffer === pattern) {
+        this.keyBuffer = '';
+        action();
+        return true;
+      }
+    }
+    
+    const hasPartialMatch = sortedPatterns.some(({ pattern }) => 
+      pattern.startsWith(this.keyBuffer)
+    );
+    
+    if (!hasPartialMatch) {
+      this.keyBuffer = '';
+      return false;
+    }
+    
+    return false;
   }
 
   private findMatchesInVisibleRange(targetChar: string): Array<{ x: number; y: number; label: string }> {
@@ -535,97 +562,59 @@ export class VimEditor extends LitElement {
   }
 
   private handleNormalMode(key: string) {
-    if (this.pendingCommand) {
-      this.pendingCommand += key;
-      
-      if (this.commandTimeout) {
-        clearTimeout(this.commandTimeout);
-        this.commandTimeout = null;
-      }
-      
-      if (this.pendingCommand === 'diw') {
-        this.saveHistory();
-        this.deleteInnerWord();
-        this.pendingCommand = '';
-        return;
-      }
-      
-      if (this.pendingCommand === 'dw') {
-        this.saveHistory();
-        this.deleteWord();
-        this.pendingCommand = '';
-        return;
-      }
-      
-      if (this.pendingCommand.length >= 3 || !['di', 'd'].includes(this.pendingCommand)) {
-        this.pendingCommand = '';
-        return;
-      }
-      
-      this.commandTimeout = window.setTimeout(() => {
-        this.pendingCommand = '';
-        this.commandTimeout = null;
-      }, 1000);
+    if (this.keyBuffer === '' && this.handleMovement(key)) {
       return;
     }
     
-    if (this.handleMovement(key)) {
-      return;
-    }
+    this.keyBuffer += key;
+    const commandExecuted = this.processKeyBuffer();
     
-    switch (key) {
-      case 'd':
-        this.pendingCommand = 'd';
-        this.commandTimeout = window.setTimeout(() => {
-          this.pendingCommand = '';
-          this.commandTimeout = null;
-        }, 1000);
-        break;
-      case 'i':
-        if (this.pendingCommand === '') {
+    if (!commandExecuted && this.keyBuffer === '') {
+      switch (key) {
+        case 'i':
           this.saveHistory();
           this.mode = 'insert';
           this.hiddenInput?.focus();
-        }
-        break;
-      case 'a':
-        this.saveHistory();
-        const currentLine = this.content[this.cursorY] || '';
-        if (this.cursorX < currentLine.length) {
-          this.cursorX += 1;
-        }
-        this.mode = 'insert';
-        this.updateInputPosition();
-        this.hiddenInput?.focus();
-        break;
-      case 'o':
-        this.saveHistory();
-        this.insertLineBelow();
-        this.hiddenInput?.focus();
-        break;
-      case 'v':
-        this.mode = 'visual';
-        this.visualStartX = this.cursorX;
-        this.visualStartY = this.cursorY;
-        break;
-      case 'V':
-        this.mode = 'visual-line';
-        this.visualStartX = this.cursorX;
-        this.visualStartY = this.cursorY;
-        break;
-      case 'f':
-        this.previousMode = 'normal';
-        this.mode = 'fast-jump';
-        this.fastJumpChar = '';
-        this.fastJumpMatches = [];
-        this.fastJumpInput = '';
-        break;
-      case 'p':
-        this.pasteAfterCursor();
-        break;
-      case 'u':
-        this.undo();
-        break;
+          break;
+        case 'a':
+          this.saveHistory();
+          const currentLine = this.content[this.cursorY] || '';
+          if (this.cursorX < currentLine.length) {
+            this.cursorX += 1;
+          }
+          this.mode = 'insert';
+          this.updateInputPosition();
+          this.hiddenInput?.focus();
+          break;
+        case 'o':
+          this.saveHistory();
+          this.insertLineBelow();
+          this.hiddenInput?.focus();
+          break;
+        case 'v':
+          this.mode = 'visual';
+          this.visualStartX = this.cursorX;
+          this.visualStartY = this.cursorY;
+          break;
+        case 'V':
+          this.mode = 'visual-line';
+          this.visualStartX = this.cursorX;
+          this.visualStartY = this.cursorY;
+          break;
+        case 'f':
+          this.previousMode = 'normal';
+          this.mode = 'fast-jump';
+          this.fastJumpChar = '';
+          this.fastJumpMatches = [];
+          this.fastJumpInput = '';
+          break;
+        case 'p':
+          this.pasteAfterCursor();
+          break;
+        case 'u':
+          this.undo();
+          break;
+      }
     }
   }
 
@@ -940,8 +929,6 @@ export class VimEditor extends LitElement {
       return;
     }
     
-    this.saveHistory();
-    
     const currentLine = this.content[range.y];
     const beforeWord = currentLine.substring(0, range.startX);
     const afterWord = currentLine.substring(range.endX + 1);
@@ -962,8 +949,6 @@ export class VimEditor extends LitElement {
     if (currentLine.length === 0 || this.cursorX >= currentLine.length) {
       return;
     }
-    
-    this.saveHistory();
     
     const startX = this.cursorX;
     let endX = this.cursorX;
