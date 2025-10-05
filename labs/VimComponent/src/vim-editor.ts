@@ -612,10 +612,8 @@ export class VimEditor extends LitElement {
 
   private moveCursorToLineEnd() {
     const currentLine = this.content[this.cursorY] || '';
-    console.log(`[LineEnd] Line ${this.cursorY}, length=${currentLine.length}`);
     if (currentLine.length > 0) {
       this.cursorX = currentLine.length - 1;
-      console.log(`[LineEnd] Moved cursor to X=${this.cursorX}`);
       this.updateInputPosition();
     }
   }
