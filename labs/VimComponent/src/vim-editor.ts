@@ -4,7 +4,7 @@ import p5 from 'p5';
 import exampleText from './example.txt?raw';
 
 export interface EditorStatus {
-  mode: 'normal' | 'insert' | 'visual' | 'visual-line';
+  mode: 'normal' | 'insert' | 'visual' | 'visual-line' | 'fast-jump' | 'match';
   cursorX: number;
   cursorY: number;
   cursorVisible: boolean;
@@ -32,7 +32,7 @@ export class VimEditor extends LitElement {
   private cursorVisible = true;
   
   @property({ type: String })
-  mode: 'normal' | 'insert' | 'visual' | 'visual-line' = 'normal';
+  mode: 'normal' | 'insert' | 'visual' | 'visual-line' | 'fast-jump' | 'match' = 'normal';
 
   @property({ type: Number })
   cursorX = 0;
@@ -59,12 +59,56 @@ export class VimEditor extends LitElement {
   private scrollOffsetX = 0;
   private scrollOffsetY = 0;
 
+  private fastJumpChar = '';
+  private fastJumpMatches: Array<{ x: number; y: number; label: string }> = [];
+  private fastJumpInput = '';
+
   private getRectY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight;
   }
 
   private getTextY(lineIndex: number): number {
     return this.getRectY(lineIndex) + this.textOffsetY;
+  }
+
+  private generateLabel(index: number): string {
+    const letters = 'abcdefghijklmnopqrstuvwxyz';
+    let label = '';
+    let current = index;
+    
+    do {
+      label = letters[current % 26] + label;
+      current = Math.floor(current / 26) - 1;
+    } while (current >= 0);
+    
+    return label;
+  }
+
+  private findMatchesInVisibleRange(targetChar: string): Array<{ x: number; y: number; label: string }> {
+    const matches: Array<{ x: number; y: number; label: string }> = [];
+    let matchIndex = 0;
+    
+    for (let bufferY = 0; bufferY < this.bufferHeight; bufferY++) {
+      const contentY = bufferY + this.scrollOffsetY;
+      if (contentY >= this.content.length) {
+        break;
+      }
+      
+      const line = this.content[contentY] || '';
+      
+      for (let contentX = 0; contentX < line.length; contentX++) {
+        if (line[contentX] === targetChar) {
+          matches.push({
+            x: contentX,
+            y: contentY,
+            label: this.generateLabel(matchIndex)
+          });
+          matchIndex++;
+        }
+      }
+    }
+    
+    return matches;
   }
 
   private isFullWidthChar(char: string): boolean {
@@ -165,7 +209,10 @@ export class VimEditor extends LitElement {
         const isVisualSelection = this.mode === 'visual' && this.isInVisualSelection(contentY, contentX);
         const isVisualLineSelection = this.mode === 'visual-line' && this.isInVisualLineSelection(contentY);
         
-        const isHighlighted = isVisualSelection || isVisualLineSelection;
+        const isFastJumpMatch = this.mode === 'match' && 
+          this.fastJumpMatches.some(match => match.x === contentX && match.y === contentY);
+        
+        const isHighlighted = isVisualSelection || isVisualLineSelection || isFastJumpMatch;
         
         this.buffer[bufferY][bufferX] = {
           char,
@@ -347,6 +394,7 @@ export class VimEditor extends LitElement {
         this.drawEditorBackground(p);
         this.drawLineNumbers(p);
         this.renderBuffer(p);
+        this.drawFastJumpLabels(p);
         this.drawStatusBar(p);
       };
     };
@@ -399,6 +447,10 @@ export class VimEditor extends LitElement {
       this.handleVisualMode(key);
     } else if (this.mode === 'visual-line') {
       this.handleVisualLineMode(key);
+    } else if (this.mode === 'fast-jump') {
+      this.handleFastJumpMode(key);
+    } else if (this.mode === 'match') {
+      this.handleMatchMode(key);
     }
     
     this.adjustScrollToCursor();
@@ -506,6 +558,12 @@ export class VimEditor extends LitElement {
         this.visualStartX = this.cursorX;
         this.visualStartY = this.cursorY;
         break;
+      case 'f':
+        this.mode = 'fast-jump';
+        this.fastJumpChar = '';
+        this.fastJumpMatches = [];
+        this.fastJumpInput = '';
+        break;
     }
   }
 
@@ -575,6 +633,72 @@ export class VimEditor extends LitElement {
         this.cutVisualSelection();
         this.mode = 'normal';
         break;
+    }
+  }
+
+  private handleFastJumpMode(key: string) {
+    if (key === 'Escape') {
+      this.mode = 'normal';
+      this.fastJumpChar = '';
+      this.fastJumpMatches = [];
+      this.fastJumpInput = '';
+      return;
+    }
+    
+    if (key.length === 1) {
+      this.fastJumpChar = key;
+      const matches = this.findMatchesInVisibleRange(key);
+      
+      if (matches.length === 0) {
+        this.mode = 'normal';
+        this.fastJumpChar = '';
+        this.fastJumpMatches = [];
+        this.fastJumpInput = '';
+      } else if (matches.length === 1) {
+        this.cursorX = matches[0].x;
+        this.cursorY = matches[0].y;
+        this.mode = 'normal';
+        this.fastJumpChar = '';
+        this.fastJumpMatches = [];
+        this.fastJumpInput = '';
+      } else {
+        this.fastJumpMatches = matches;
+        this.mode = 'match';
+      }
+    }
+  }
+
+  private handleMatchMode(key: string) {
+    if (key === 'Escape') {
+      this.mode = 'normal';
+      this.fastJumpChar = '';
+      this.fastJumpMatches = [];
+      this.fastJumpInput = '';
+      return;
+    }
+    
+    if (key.length === 1 && /[a-z]/.test(key)) {
+      this.fastJumpInput += key;
+      
+      const matchingLabels = this.fastJumpMatches.filter(match => 
+        match.label.startsWith(this.fastJumpInput)
+      );
+      
+      if (matchingLabels.length === 0) {
+        this.mode = 'normal';
+        this.fastJumpChar = '';
+        this.fastJumpMatches = [];
+        this.fastJumpInput = '';
+      } else if (matchingLabels.length === 1 && matchingLabels[0].label === this.fastJumpInput) {
+        this.cursorX = matchingLabels[0].x;
+        this.cursorY = matchingLabels[0].y;
+        this.mode = 'normal';
+        this.fastJumpChar = '';
+        this.fastJumpMatches = [];
+        this.fastJumpInput = '';
+      } else {
+        this.fastJumpMatches = matchingLabels;
+      }
     }
   }
 
@@ -1172,6 +1296,35 @@ export class VimEditor extends LitElement {
     p.strokeWeight(2);
     p.line(screenX, screenY, screenX, screenY + this.lineHeight);
     p.noStroke();
+  }
+
+  private drawFastJumpLabels(p: p5) {
+    if (this.mode !== 'match' || this.fastJumpMatches.length === 0) {
+      return;
+    }
+    
+    for (const match of this.fastJumpMatches) {
+      const bufferY = match.y - this.scrollOffsetY;
+      const bufferX = match.x - this.scrollOffsetX;
+      
+      if (bufferY < 0 || bufferY >= this.bufferHeight || bufferX < 0 || bufferX >= this.bufferWidth) {
+        continue;
+      }
+      
+      const line = this.content[match.y] || '';
+      const visibleLine = line.substring(this.scrollOffsetX);
+      const screenX = this.getTextXPosition(visibleLine, bufferX);
+      const screenY = this.getRectY(bufferY);
+      
+      const labelWidth = match.label.length * this.baseCharWidth + 4;
+      const labelHeight = this.lineHeight;
+      
+      p.fill(255, 200, 0);
+      p.rect(screenX, screenY, labelWidth, labelHeight);
+      
+      p.fill(0, 0, 0);
+      p.text(match.label, screenX + 2, this.getTextY(bufferY));
+    }
   }
 
   private drawStatusBar(p: p5) {

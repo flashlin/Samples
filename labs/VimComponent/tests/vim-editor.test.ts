@@ -774,5 +774,140 @@ describe('VimEditor', () => {
       expect(col).toBe(4);
     });
   });
+
+  describe('fast-jump mode', () => {
+    it('should enter fast-jump mode when pressing f', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      
+      const event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('fast-jump');
+    });
+
+    it('should return to normal mode if no matches found', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      
+      let event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'x' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('normal');
+    });
+
+    it('should jump directly if only one match found', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      let event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('normal');
+      expect(status.cursorX).toBe(6);
+      expect(status.cursorY).toBe(0);
+    });
+
+    it('should enter match mode if multiple matches found', async () => {
+      editor.setContent(['hello hello hello']);
+      await editor.updateComplete;
+      
+      let event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'h' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('match');
+    });
+
+    it('should jump to correct position after selecting label', async () => {
+      editor.setContent(['hello hello hello']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      let event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'h' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'b' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('normal');
+      expect(status.cursorX).toBe(6);
+      expect(status.cursorY).toBe(0);
+    });
+
+    it('should filter matches as user types label', async () => {
+      editor.setContent(['aaa bbb ccc ddd eee fff ggg hhh iii jjj kkk lll mmm nnn ooo ppp qqq rrr sss ttt uuu vvv www xxx yyy zzz']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      let event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'a' });
+      window.dispatchEvent(event);
+      
+      let status = editor.getStatus();
+      expect(status.mode).toBe('match');
+      
+      event = new KeyboardEvent('keydown', { key: 'b' });
+      window.dispatchEvent(event);
+      
+      status = editor.getStatus();
+      expect(status.mode).toBe('normal');
+      expect(status.cursorX).toBe(1);
+      expect(status.cursorY).toBe(0);
+    });
+
+    it('should exit on Escape in fast-jump mode', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      
+      let event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'Escape' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('normal');
+    });
+
+    it('should exit on Escape in match mode', async () => {
+      editor.setContent(['hello hello hello']);
+      await editor.updateComplete;
+      
+      let event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'h' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'Escape' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('normal');
+    });
+  });
 });
 
