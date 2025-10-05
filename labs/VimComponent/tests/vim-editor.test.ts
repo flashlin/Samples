@@ -654,6 +654,23 @@ describe('VimEditor', () => {
       const scroll = editor.getScrollOffset();
       expect(scroll.x).toBe(0);
     });
+
+    it('should scroll right when pressing $ to jump to line end', () => {
+      const longLine = 'a'.repeat(100);
+      editor.setContent([longLine]);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      const event = new KeyboardEvent('keydown', { key: '$' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(99);
+      
+      const scroll = editor.getScrollOffset();
+      expect(scroll.x).toBeGreaterThan(0);
+    });
   });
 
   describe('buffer system', () => {

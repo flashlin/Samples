@@ -612,8 +612,10 @@ export class VimEditor extends LitElement {
 
   private moveCursorToLineEnd() {
     const currentLine = this.content[this.cursorY] || '';
+    console.log(`[LineEnd] Line ${this.cursorY}, length=${currentLine.length}`);
     if (currentLine.length > 0) {
       this.cursorX = currentLine.length - 1;
+      console.log(`[LineEnd] Moved cursor to X=${this.cursorX}`);
       this.updateInputPosition();
     }
   }
@@ -646,8 +648,33 @@ export class VimEditor extends LitElement {
       this.scrollOffsetX = this.cursorX;
     }
     
-    if (this.cursorX >= this.scrollOffsetX + this.bufferWidth) {
-      this.scrollOffsetX = this.cursorX - this.bufferWidth + 1;
+    const currentLine = this.content[this.cursorY] || '';
+    const availablePixelWidth = (800 - 60);
+    
+    let scrollEndX = this.scrollOffsetX;
+    let accumulatedWidth = 0;
+    
+    while (scrollEndX < currentLine.length && accumulatedWidth < availablePixelWidth) {
+      accumulatedWidth += this.isFullWidthChar(currentLine[scrollEndX]) ? this.baseCharWidth * 2 : this.baseCharWidth;
+      scrollEndX++;
+    }
+    
+    if (this.cursorX >= scrollEndX) {
+      console.log(`[Scroll] Horizontal scroll triggered: cursorX=${this.cursorX}, scrollEndX=${scrollEndX}, scrollOffsetX=${this.scrollOffsetX}`);
+      
+      while (this.cursorX >= scrollEndX && this.scrollOffsetX < this.cursorX) {
+        this.scrollOffsetX++;
+        
+        scrollEndX = this.scrollOffsetX;
+        accumulatedWidth = 0;
+        
+        while (scrollEndX < currentLine.length && accumulatedWidth < availablePixelWidth) {
+          accumulatedWidth += this.isFullWidthChar(currentLine[scrollEndX]) ? this.baseCharWidth * 2 : this.baseCharWidth;
+          scrollEndX++;
+        }
+      }
+      
+      console.log(`[Scroll] New scrollOffsetX=${this.scrollOffsetX}, new scrollEndX=${scrollEndX}`);
     }
   }
 
