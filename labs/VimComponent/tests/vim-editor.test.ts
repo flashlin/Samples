@@ -573,6 +573,89 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('viewport scrolling', () => {
+    it('should scroll down when cursor moves beyond bottom', () => {
+      const lines = Array.from({ length: 50 }, (_, i) => `line${i + 1}`);
+      editor.setContent(lines);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      for (let i = 0; i < 30; i++) {
+        const event = new KeyboardEvent('keydown', { key: 'j' });
+        window.dispatchEvent(event);
+      }
+      
+      const status = editor.getStatus();
+      expect(status.cursorY).toBe(30);
+      
+      const scroll = editor.getScrollOffset();
+      expect(scroll.y).toBeGreaterThan(0);
+    });
+
+    it('should scroll up when cursor moves beyond top', () => {
+      const lines = Array.from({ length: 50 }, (_, i) => `line${i + 1}`);
+      editor.setContent(lines);
+      editor.cursorX = 0;
+      editor.cursorY = 30;
+      editor.mode = 'normal';
+      
+      for (let i = 0; i < 30; i++) {
+        const event = new KeyboardEvent('keydown', { key: 'j' });
+        window.dispatchEvent(event);
+      }
+      
+      for (let i = 0; i < 60; i++) {
+        const event = new KeyboardEvent('keydown', { key: 'k' });
+        window.dispatchEvent(event);
+      }
+      
+      const status = editor.getStatus();
+      expect(status.cursorY).toBe(0);
+      
+      const scroll = editor.getScrollOffset();
+      expect(scroll.y).toBe(0);
+    });
+
+    it('should scroll right when cursor moves beyond right edge', () => {
+      const longLine = 'a'.repeat(100);
+      editor.setContent([longLine]);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      for (let i = 0; i < 90; i++) {
+        const event = new KeyboardEvent('keydown', { key: 'l' });
+        window.dispatchEvent(event);
+      }
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(90);
+      
+      const scroll = editor.getScrollOffset();
+      expect(scroll.x).toBeGreaterThan(0);
+    });
+
+    it('should scroll left when cursor moves beyond left edge', () => {
+      const longLine = 'a'.repeat(100);
+      editor.setContent([longLine]);
+      editor.cursorX = 90;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      for (let i = 0; i < 90; i++) {
+        const event = new KeyboardEvent('keydown', { key: 'h' });
+        window.dispatchEvent(event);
+      }
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(0);
+      
+      const scroll = editor.getScrollOffset();
+      expect(scroll.x).toBe(0);
+    });
+  });
+
   describe('buffer system', () => {
     it('should maintain buffer state', () => {
       editor.setContent(['test']);

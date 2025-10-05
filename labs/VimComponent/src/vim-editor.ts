@@ -55,6 +55,9 @@ export class VimEditor extends LitElement {
   private visualStartY = 0;
   
   private numberPrefix = '';
+  
+  private scrollOffsetX = 0;
+  private scrollOffsetY = 0;
 
   private getRectY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight;
@@ -96,6 +99,13 @@ export class VimEditor extends LitElement {
 
   getBuffer(): BufferCell[][] {
     return this.buffer;
+  }
+
+  getScrollOffset(): { x: number; y: number } {
+    return {
+      x: this.scrollOffsetX,
+      y: this.scrollOffsetY,
+    };
   }
 
   setContent(content: string[]) {
@@ -141,20 +151,23 @@ export class VimEditor extends LitElement {
       this.initializeBuffer();
     }
     
-    for (let y = 0; y < this.bufferHeight; y++) {
-      for (let x = 0; x < this.bufferWidth; x++) {
-        const line = this.content[y] || '';
-        const char = line[x] || ' ';
+    for (let bufferY = 0; bufferY < this.bufferHeight; bufferY++) {
+      for (let bufferX = 0; bufferX < this.bufferWidth; bufferX++) {
+        const contentY = bufferY + this.scrollOffsetY;
+        const contentX = bufferX + this.scrollOffsetX;
         
-        const isCursor = y === this.cursorY && x === this.cursorX && this.cursorVisible;
+        const line = this.content[contentY] || '';
+        const char = line[contentX] || ' ';
+        
+        const isCursor = contentY === this.cursorY && contentX === this.cursorX && this.cursorVisible;
         const isNormalMode = this.mode === 'normal';
         
-        const isVisualSelection = this.mode === 'visual' && this.isInVisualSelection(y, x);
-        const isVisualLineSelection = this.mode === 'visual-line' && this.isInVisualLineSelection(y);
+        const isVisualSelection = this.mode === 'visual' && this.isInVisualSelection(contentY, contentX);
+        const isVisualLineSelection = this.mode === 'visual-line' && this.isInVisualLineSelection(contentY);
         
         const isHighlighted = isVisualSelection || isVisualLineSelection;
         
-        this.buffer[y][x] = {
+        this.buffer[bufferY][bufferX] = {
           char,
           foreground: (isCursor && isNormalMode) ? [0, 0, 0] : isHighlighted ? [0, 0, 0] : [255, 255, 255],
           background: (isCursor && isNormalMode) ? [255, 255, 255] : isHighlighted ? [100, 149, 237] : [0, 0, 0],
@@ -388,6 +401,8 @@ export class VimEditor extends LitElement {
       this.handleVisualLineMode(key);
     }
     
+    this.adjustScrollToCursor();
+    
     if (this.p5Instance) {
       this.p5Instance.redraw();
     }
@@ -616,6 +631,24 @@ export class VimEditor extends LitElement {
     
     this.cursorX = firstNonSpace;
     this.updateInputPosition();
+  }
+
+  private adjustScrollToCursor() {
+    if (this.cursorY < this.scrollOffsetY) {
+      this.scrollOffsetY = this.cursorY;
+    }
+    
+    if (this.cursorY >= this.scrollOffsetY + this.bufferHeight) {
+      this.scrollOffsetY = this.cursorY - this.bufferHeight + 1;
+    }
+    
+    if (this.cursorX < this.scrollOffsetX) {
+      this.scrollOffsetX = this.cursorX;
+    }
+    
+    if (this.cursorX >= this.scrollOffsetX + this.bufferWidth) {
+      this.scrollOffsetX = this.cursorX - this.bufferWidth + 1;
+    }
   }
 
   private isWordChar(char: string): boolean {
@@ -1035,39 +1068,48 @@ export class VimEditor extends LitElement {
     
     p.textAlign(p.RIGHT, p.TOP);
     
-    this.content.forEach((_, i) => {
-      const isCursorLine = i === this.cursorY;
+    for (let bufferY = 0; bufferY < this.bufferHeight; bufferY++) {
+      const contentY = bufferY + this.scrollOffsetY;
+      
+      if (contentY >= this.content.length) {
+        break;
+      }
+      
+      const isCursorLine = contentY === this.cursorY;
       
       if (isCursorLine) {
         p.fill(255, 255, 0);
-        const lineNum = (i + 1).toString();
-        p.text(lineNum, 45, this.getTextY(i));
+        const lineNum = (contentY + 1).toString();
+        p.text(lineNum, 45, this.getTextY(bufferY));
       } else {
         p.fill(100, 100, 100);
-        const relativeNum = Math.abs(i - this.cursorY).toString();
-        p.text(relativeNum, 45, this.getTextY(i));
+        const relativeNum = Math.abs(contentY - this.cursorY).toString();
+        p.text(relativeNum, 45, this.getTextY(bufferY));
       }
-    });
+    }
     
     p.textAlign(p.LEFT, p.TOP);
   }
 
   private renderBuffer(p: p5) {
-    for (let y = 0; y < this.bufferHeight && y < this.buffer.length; y++) {
-      const line = this.content[y] || '';
-      for (let x = 0; x < this.bufferWidth && x < this.buffer[y].length; x++) {
-        const cell = this.buffer[y][x];
-        const char = line[x] || ' ';
+    for (let bufferY = 0; bufferY < this.bufferHeight && bufferY < this.buffer.length; bufferY++) {
+      const contentY = bufferY + this.scrollOffsetY;
+      const line = this.content[contentY] || '';
+      
+      for (let bufferX = 0; bufferX < this.bufferWidth && bufferX < this.buffer[bufferY].length; bufferX++) {
+        const contentX = bufferX + this.scrollOffsetX;
+        const cell = this.buffer[bufferY][bufferX];
+        const char = line[contentX] || ' ';
         const charWidth = this.getCharWidth(char);
-        const screenX = this.getTextXPosition(line, x);
+        const screenX = this.getTextXPosition(line.substring(this.scrollOffsetX), bufferX);
         
         if (cell.background[0] !== 0 || cell.background[1] !== 0 || cell.background[2] !== 0) {
           p.fill(cell.background[0], cell.background[1], cell.background[2]);
-          p.rect(screenX, this.getRectY(y), charWidth, this.lineHeight);
+          p.rect(screenX, this.getRectY(bufferY), charWidth, this.lineHeight);
         }
         
         p.fill(cell.foreground[0], cell.foreground[1], cell.foreground[2]);
-        p.text(cell.char, screenX, this.getTextY(y));
+        p.text(cell.char, screenX, this.getTextY(bufferY));
       }
     }
     
@@ -1079,9 +1121,17 @@ export class VimEditor extends LitElement {
       return;
     }
     
+    const bufferY = this.cursorY - this.scrollOffsetY;
+    const bufferX = this.cursorX - this.scrollOffsetX;
+    
+    if (bufferY < 0 || bufferY >= this.bufferHeight || bufferX < 0 || bufferX >= this.bufferWidth) {
+      return;
+    }
+    
     const line = this.content[this.cursorY] || '';
-    const screenX = this.getTextXPosition(line, this.cursorX);
-    const screenY = this.getRectY(this.cursorY);
+    const visibleLine = line.substring(this.scrollOffsetX);
+    const screenX = this.getTextXPosition(visibleLine, bufferX);
+    const screenY = this.getRectY(bufferY);
     
     p.stroke(255);
     p.strokeWeight(2);
