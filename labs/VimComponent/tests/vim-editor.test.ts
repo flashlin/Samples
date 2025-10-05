@@ -492,6 +492,87 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('visual line mode', () => {
+    it('should enter visual-line mode with V key', () => {
+      editor.setContent(['line1', 'line2', 'line3']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      const event = new KeyboardEvent('keydown', { key: 'V' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('visual-line');
+    });
+
+    it('should highlight entire line in visual-line mode', () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      const event = new KeyboardEvent('keydown', { key: 'V' });
+      window.dispatchEvent(event);
+      
+      editor.updateBuffer();
+      const buffer = editor.getBuffer();
+      
+      for (let x = 0; x < 11; x++) {
+        expect(buffer[0][x].background).toEqual([100, 149, 237]);
+      }
+    });
+
+    it('should highlight multiple lines when moving down', () => {
+      editor.setContent(['line1', 'line2', 'line3', 'line4']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'V' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorY).toBe(2);
+      expect(status.mode).toBe('visual-line');
+      
+      editor.updateBuffer();
+      const buffer = editor.getBuffer();
+      
+      for (let y = 0; y <= 2; y++) {
+        for (let x = 0; x < 5; x++) {
+          expect(buffer[y][x].background).toEqual([100, 149, 237]);
+        }
+      }
+    });
+
+    it('should support number prefix like 3j in visual-line mode', () => {
+      editor.setContent(['line1', 'line2', 'line3', 'line4', 'line5']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'V' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: '3' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorY).toBe(3);
+      expect(status.mode).toBe('visual-line');
+    });
+  });
+
   describe('buffer system', () => {
     it('should maintain buffer state', () => {
       editor.setContent(['test']);

@@ -4,7 +4,7 @@ import p5 from 'p5';
 import exampleText from './example.txt?raw';
 
 export interface EditorStatus {
-  mode: 'normal' | 'insert' | 'visual';
+  mode: 'normal' | 'insert' | 'visual' | 'visual-line';
   cursorX: number;
   cursorY: number;
   cursorVisible: boolean;
@@ -32,7 +32,7 @@ export class VimEditor extends LitElement {
   private cursorVisible = true;
   
   @property({ type: String })
-  mode: 'normal' | 'insert' | 'visual' = 'normal';
+  mode: 'normal' | 'insert' | 'visual' | 'visual-line' = 'normal';
 
   @property({ type: Number })
   cursorX = 0;
@@ -150,11 +150,14 @@ export class VimEditor extends LitElement {
         const isNormalMode = this.mode === 'normal';
         
         const isVisualSelection = this.mode === 'visual' && this.isInVisualSelection(y, x);
+        const isVisualLineSelection = this.mode === 'visual-line' && this.isInVisualLineSelection(y);
+        
+        const isHighlighted = isVisualSelection || isVisualLineSelection;
         
         this.buffer[y][x] = {
           char,
-          foreground: (isCursor && isNormalMode) ? [0, 0, 0] : isVisualSelection ? [0, 0, 0] : [255, 255, 255],
-          background: (isCursor && isNormalMode) ? [255, 255, 255] : isVisualSelection ? [100, 149, 237] : [0, 0, 0],
+          foreground: (isCursor && isNormalMode) ? [0, 0, 0] : isHighlighted ? [0, 0, 0] : [255, 255, 255],
+          background: (isCursor && isNormalMode) ? [255, 255, 255] : isHighlighted ? [100, 149, 237] : [0, 0, 0],
         };
       }
     }
@@ -185,6 +188,12 @@ export class VimEditor extends LitElement {
     }
     
     return true;
+  }
+
+  private isInVisualLineSelection(y: number): boolean {
+    const startY = Math.min(this.visualStartY, this.cursorY);
+    const endY = Math.max(this.visualStartY, this.cursorY);
+    return y >= startY && y <= endY;
   }
 
   firstUpdated() {
@@ -375,6 +384,8 @@ export class VimEditor extends LitElement {
       this.handleInsertMode(key);
     } else if (this.mode === 'visual') {
       this.handleVisualMode(key);
+    } else if (this.mode === 'visual-line') {
+      this.handleVisualLineMode(key);
     }
     
     if (this.p5Instance) {
@@ -475,6 +486,11 @@ export class VimEditor extends LitElement {
         this.visualStartX = this.cursorX;
         this.visualStartY = this.cursorY;
         break;
+      case 'V':
+        this.mode = 'visual-line';
+        this.visualStartX = this.cursorX;
+        this.visualStartY = this.cursorY;
+        break;
     }
   }
 
@@ -506,6 +522,27 @@ export class VimEditor extends LitElement {
   }
 
   private handleVisualMode(key: string) {
+    if (this.handleMovement(key)) {
+      return;
+    }
+    
+    switch (key) {
+      case 'Escape':
+        this.mode = 'normal';
+        break;
+      case 'y':
+        this.yankVisualSelection();
+        this.mode = 'normal';
+        break;
+      case 'c':
+      case 'd':
+        this.cutVisualSelection();
+        this.mode = 'normal';
+        break;
+    }
+  }
+
+  private handleVisualLineMode(key: string) {
     if (this.handleMovement(key)) {
       return;
     }
