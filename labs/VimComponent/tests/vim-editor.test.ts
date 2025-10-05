@@ -908,6 +908,100 @@ describe('VimEditor', () => {
       const status = editor.getStatus();
       expect(status.mode).toBe('normal');
     });
+
+    it('should work in visual mode', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      let event = new KeyboardEvent('keydown', { key: 'v' });
+      window.dispatchEvent(event);
+      
+      expect(editor.getStatus().mode).toBe('visual');
+      
+      event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      expect(editor.getStatus().mode).toBe('fast-jump');
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('visual');
+      expect(status.cursorX).toBe(6);
+      expect(status.cursorY).toBe(0);
+    });
+
+    it('should work in visual-line mode', async () => {
+      editor.setContent(['hello world', 'foo bar baz']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      let event = new KeyboardEvent('keydown', { key: 'V' });
+      window.dispatchEvent(event);
+      
+      expect(editor.getStatus().mode).toBe('visual-line');
+      
+      event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      expect(editor.getStatus().mode).toBe('fast-jump');
+      
+      event = new KeyboardEvent('keydown', { key: 'b' });
+      window.dispatchEvent(event);
+      
+      expect(editor.getStatus().mode).toBe('match');
+      
+      event = new KeyboardEvent('keydown', { key: 'b' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('visual-line');
+      expect(status.cursorX).toBe(8);
+      expect(status.cursorY).toBe(1);
+    });
+
+    it('should return to visual mode when pressing Escape in fast-jump', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      
+      let event = new KeyboardEvent('keydown', { key: 'v' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'Escape' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('visual');
+    });
+
+    it('should return to visual mode when pressing Escape in match mode', async () => {
+      editor.setContent(['hello hello hello']);
+      await editor.updateComplete;
+      
+      let event = new KeyboardEvent('keydown', { key: 'v' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'f' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'h' });
+      window.dispatchEvent(event);
+      
+      expect(editor.getStatus().mode).toBe('match');
+      
+      event = new KeyboardEvent('keydown', { key: 'Escape' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('visual');
+    });
   });
 });
 

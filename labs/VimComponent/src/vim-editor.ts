@@ -62,6 +62,7 @@ export class VimEditor extends LitElement {
   private fastJumpChar = '';
   private fastJumpMatches: Array<{ x: number; y: number; label: string }> = [];
   private fastJumpInput = '';
+  private previousMode: 'normal' | 'visual' | 'visual-line' = 'normal';
 
   private getRectY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight;
@@ -559,6 +560,7 @@ export class VimEditor extends LitElement {
         this.visualStartY = this.cursorY;
         break;
       case 'f':
+        this.previousMode = 'normal';
         this.mode = 'fast-jump';
         this.fastJumpChar = '';
         this.fastJumpMatches = [];
@@ -612,6 +614,13 @@ export class VimEditor extends LitElement {
         this.cutVisualSelection();
         this.mode = 'normal';
         break;
+      case 'f':
+        this.previousMode = 'visual';
+        this.mode = 'fast-jump';
+        this.fastJumpChar = '';
+        this.fastJumpMatches = [];
+        this.fastJumpInput = '';
+        break;
     }
   }
 
@@ -633,12 +642,19 @@ export class VimEditor extends LitElement {
         this.cutVisualSelection();
         this.mode = 'normal';
         break;
+      case 'f':
+        this.previousMode = 'visual-line';
+        this.mode = 'fast-jump';
+        this.fastJumpChar = '';
+        this.fastJumpMatches = [];
+        this.fastJumpInput = '';
+        break;
     }
   }
 
   private handleFastJumpMode(key: string) {
     if (key === 'Escape') {
-      this.mode = 'normal';
+      this.mode = this.previousMode;
       this.fastJumpChar = '';
       this.fastJumpMatches = [];
       this.fastJumpInput = '';
@@ -650,14 +666,14 @@ export class VimEditor extends LitElement {
       const matches = this.findMatchesInVisibleRange(key);
       
       if (matches.length === 0) {
-        this.mode = 'normal';
+        this.mode = this.previousMode;
         this.fastJumpChar = '';
         this.fastJumpMatches = [];
         this.fastJumpInput = '';
       } else if (matches.length === 1) {
         this.cursorX = matches[0].x;
         this.cursorY = matches[0].y;
-        this.mode = 'normal';
+        this.mode = this.previousMode;
         this.fastJumpChar = '';
         this.fastJumpMatches = [];
         this.fastJumpInput = '';
@@ -670,7 +686,7 @@ export class VimEditor extends LitElement {
 
   private handleMatchMode(key: string) {
     if (key === 'Escape') {
-      this.mode = 'normal';
+      this.mode = this.previousMode;
       this.fastJumpChar = '';
       this.fastJumpMatches = [];
       this.fastJumpInput = '';
@@ -685,14 +701,14 @@ export class VimEditor extends LitElement {
       );
       
       if (matchingLabels.length === 0) {
-        this.mode = 'normal';
+        this.mode = this.previousMode;
         this.fastJumpChar = '';
         this.fastJumpMatches = [];
         this.fastJumpInput = '';
       } else if (matchingLabels.length === 1 && matchingLabels[0].label === this.fastJumpInput) {
         this.cursorX = matchingLabels[0].x;
         this.cursorY = matchingLabels[0].y;
-        this.mode = 'normal';
+        this.mode = this.previousMode;
         this.fastJumpChar = '';
         this.fastJumpMatches = [];
         this.fastJumpInput = '';
