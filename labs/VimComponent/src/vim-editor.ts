@@ -67,10 +67,11 @@ export class VimEditor extends LitElement {
   private keyBuffer = '';
   
   private commandPatterns = [
-    { pattern: 'diw', action: () => { this.deleteInnerWord(); }, saveHistory: true },
-    { pattern: 'dw', action: () => { this.deleteWord(); }, saveHistory: true },
-    { pattern: 'i', action: () => { this.mode = 'insert'; this.hiddenInput?.focus(); }, saveHistory: true },
+    { pattern: 'diw', action: () => { this.saveHistory(); this.deleteInnerWord(); } },
+    { pattern: 'dw', action: () => { this.saveHistory(); this.deleteWord(); } },
+    { pattern: 'i', action: () => { this.saveHistory(); this.mode = 'insert'; this.hiddenInput?.focus(); } },
     { pattern: 'a', action: () => { 
+      this.saveHistory();
       const currentLine = this.content[this.cursorY] || '';
       if (this.cursorX < currentLine.length) {
         this.cursorX += 1;
@@ -78,27 +79,27 @@ export class VimEditor extends LitElement {
       this.mode = 'insert';
       this.updateInputPosition();
       this.hiddenInput?.focus();
-    }, saveHistory: true },
-    { pattern: 'o', action: () => { this.insertLineBelow(); this.hiddenInput?.focus(); }, saveHistory: true },
-    { pattern: 'p', action: () => { this.pasteAfterCursor(); }, saveHistory: true },
+    } },
+    { pattern: 'o', action: () => { this.saveHistory(); this.insertLineBelow(); this.hiddenInput?.focus(); } },
+    { pattern: 'p', action: () => { this.saveHistory(); this.pasteAfterCursor(); } },
     { pattern: 'v', action: () => { 
       this.mode = 'visual';
       this.visualStartX = this.cursorX;
       this.visualStartY = this.cursorY;
-    }, saveHistory: false },
+    } },
     { pattern: 'V', action: () => { 
       this.mode = 'visual-line';
       this.visualStartX = this.cursorX;
       this.visualStartY = this.cursorY;
-    }, saveHistory: false },
+    } },
     { pattern: 'f', action: () => { 
       this.previousMode = 'normal';
       this.mode = 'fast-jump';
       this.fastJumpChar = '';
       this.fastJumpMatches = [];
       this.fastJumpInput = '';
-    }, saveHistory: false },
-    { pattern: 'u', action: () => { this.undo(); }, saveHistory: false },
+    } },
+    { pattern: 'u', action: () => { this.undo(); } },
   ];
 
   private history: Array<{ content: string[]; cursorX: number; cursorY: number }> = [];
@@ -129,12 +130,9 @@ export class VimEditor extends LitElement {
   private processKeyBuffer(): boolean {
     const sortedPatterns = [...this.commandPatterns].sort((a, b) => b.pattern.length - a.pattern.length);
     
-    for (const { pattern, action, saveHistory } of sortedPatterns) {
+    for (const { pattern, action } of sortedPatterns) {
       if (this.keyBuffer === pattern) {
         this.keyBuffer = '';
-        if (saveHistory) {
-          this.saveHistory();
-        }
         action();
         return true;
       }
@@ -1350,8 +1348,6 @@ export class VimEditor extends LitElement {
   }
 
   private pasteTextAfterCursor(text: string) {
-    this.saveHistory();
-    
     const currentLine = this.content[this.cursorY] || '';
     const lines = text.split('\n');
     
