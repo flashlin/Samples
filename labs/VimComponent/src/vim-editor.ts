@@ -136,11 +136,31 @@ export class VimEditor extends LitElement {
       }
     }
     
+    const dNumberJMatch = /^d(\d+)j$/.exec(this.keyBuffer);
+    if (dNumberJMatch) {
+      const count = parseInt(dNumberJMatch[1], 10);
+      this.keyBuffer = '';
+      this.saveHistory();
+      this.deleteLinesDown(count);
+      return true;
+    }
+    
+    const dNumberKMatch = /^d(\d+)k$/.exec(this.keyBuffer);
+    if (dNumberKMatch) {
+      const count = parseInt(dNumberKMatch[1], 10);
+      this.keyBuffer = '';
+      this.saveHistory();
+      this.deleteLinesUp(count);
+      return true;
+    }
+    
     const hasPartialMatch = sortedPatterns.some(({ pattern }) => 
       pattern.startsWith(this.keyBuffer)
     );
     
-    if (!hasPartialMatch) {
+    const hasNumberPattern = /^d\d*[jk]?$/.test(this.keyBuffer);
+    
+    if (!hasPartialMatch && !hasNumberPattern) {
       this.keyBuffer = '';
       return false;
     }
@@ -946,7 +966,7 @@ export class VimEditor extends LitElement {
     const afterWord = currentLine.substring(endX);
     
     this.content[this.cursorY] = beforeWord + afterWord;
-    
+
     this.cursorX = startX;
     if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
       this.cursorX = this.content[this.cursorY].length - 1;
@@ -954,6 +974,45 @@ export class VimEditor extends LitElement {
     if (this.cursorX < 0) {
       this.cursorX = 0;
     }
+  }
+
+  private deleteLinesDown(count: number) {
+    const startY = this.cursorY;
+    const endY = Math.min(startY + count, this.content.length - 1);
+    const linesToDelete = endY - startY + 1;
+    
+    this.content.splice(startY, linesToDelete);
+    
+    if (this.content.length === 0) {
+      this.content = [''];
+    }
+    
+    if (this.cursorY >= this.content.length) {
+      this.cursorY = this.content.length - 1;
+    }
+    
+    this.cursorX = 0;
+    this.adjustCursorX();
+  }
+
+  private deleteLinesUp(count: number) {
+    const endY = this.cursorY;
+    const startY = Math.max(endY - count, 0);
+    const linesToDelete = endY - startY + 1;
+    
+    this.content.splice(startY, linesToDelete);
+    
+    if (this.content.length === 0) {
+      this.content = [''];
+    }
+    
+    this.cursorY = startY;
+    if (this.cursorY >= this.content.length) {
+      this.cursorY = this.content.length - 1;
+    }
+    
+    this.cursorX = 0;
+    this.adjustCursorX();
   }
 
   private moveToNextWord() {

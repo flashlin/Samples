@@ -1602,5 +1602,135 @@ describe('VimEditor', () => {
       expect(editor.content[0]).toBe('hello world');
     });
   });
+
+  describe('d{number}j and d{number}k commands', () => {
+    it('should delete multiple lines down with d2j', async () => {
+      editor.content = ['line1', 'line2', 'line3', 'line4', 'line5'];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      editor.resetHistory();
+
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: '2' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content).toEqual(['line1', 'line5']);
+      expect(editor.cursorY).toBe(1);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete multiple lines up with d2k', async () => {
+      editor.content = ['line1', 'line2', 'line3', 'line4', 'line5'];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 3;
+      editor.mode = 'normal';
+      editor.resetHistory();
+
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: '2' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: 'k' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content).toEqual(['line1', 'line5']);
+      expect(editor.cursorY).toBe(1);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete single line with d1j', async () => {
+      editor.content = ['line1', 'line2', 'line3'];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: '1' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content).toEqual(['line3']);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should handle d5j when there are fewer lines', async () => {
+      editor.content = ['line1', 'line2', 'line3'];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: '5' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content).toEqual(['']);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should handle d5k from top lines', async () => {
+      editor.content = ['line1', 'line2', 'line3'];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      editor.resetHistory();
+
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: '5' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: 'k' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content).toEqual(['line3']);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should undo d3j command', async () => {
+      editor.content = ['line1', 'line2', 'line3', 'line4', 'line5', 'line6'];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      editor.resetHistory();
+
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: '3' });
+      window.dispatchEvent(event);
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content).toEqual(['line1', 'line6']);
+
+      event = new KeyboardEvent('keydown', { key: 'u' });
+      window.dispatchEvent(event);
+      await editor.updateComplete;
+
+      expect(editor.content).toEqual(['line1', 'line2', 'line3', 'line4', 'line5', 'line6']);
+      expect(editor.cursorY).toBe(1);
+    });
+  });
 });
 
