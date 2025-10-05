@@ -495,25 +495,41 @@ export class VimEditor extends LitElement {
   }
 
   private handleVisualMode(key: string) {
+    if (/^[0-9]$/.test(key)) {
+      this.numberPrefix += key;
+      return;
+    }
+    
+    const count = this.numberPrefix ? parseInt(this.numberPrefix, 10) : 1;
+    this.numberPrefix = '';
+    
     switch (key) {
       case 'Escape':
         this.mode = 'normal';
         break;
       case 'j':
       case 'ArrowDown':
-        this.moveCursorDown();
+        for (let i = 0; i < count; i++) {
+          this.moveCursorDown();
+        }
         break;
       case 'k':
       case 'ArrowUp':
-        this.moveCursorUp();
+        for (let i = 0; i < count; i++) {
+          this.moveCursorUp();
+        }
         break;
       case 'h':
       case 'ArrowLeft':
-        this.moveCursorLeft();
+        for (let i = 0; i < count; i++) {
+          this.moveCursorLeft();
+        }
         break;
       case 'l':
       case 'ArrowRight':
-        this.moveCursorRight();
+        for (let i = 0; i < count; i++) {
+          this.moveCursorRight();
+        }
         break;
       case '$':
         this.moveCursorToLineEnd();

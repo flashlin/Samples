@@ -443,6 +443,53 @@ describe('VimEditor', () => {
         expect(buffer[0][i].background).toEqual([100, 149, 237]);
       }
     });
+
+    it('should support number prefix like 5j in visual mode', () => {
+      editor.setContent(['line1', 'line2', 'line3', 'line4', 'line5', 'line6', 'line7']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'v' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: '5' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'j' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorY).toBe(5);
+      expect(status.mode).toBe('visual');
+      
+      editor.updateBuffer();
+      const buffer = editor.getBuffer();
+      
+      for (let y = 0; y <= 5; y++) {
+        expect(buffer[y][0].background).toEqual([100, 149, 237]);
+      }
+    });
+
+    it('should support number prefix like 3k in visual mode', () => {
+      editor.setContent(['line1', 'line2', 'line3', 'line4', 'line5', 'line6', 'line7']);
+      editor.cursorX = 0;
+      editor.cursorY = 6;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'v' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: '3' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'k' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorY).toBe(3);
+      expect(status.mode).toBe('visual');
+    });
   });
 
   describe('buffer system', () => {
