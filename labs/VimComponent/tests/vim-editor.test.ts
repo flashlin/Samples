@@ -1282,5 +1282,164 @@ describe('VimEditor', () => {
       expect(editor.cursorX).toBe(0);
     });
   });
+
+  describe('p command (paste)', () => {
+    let mockReadText: any;
+    let mockWriteText: any;
+
+    beforeEach(() => {
+      mockReadText = vi.fn();
+      mockWriteText = vi.fn();
+      
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          readText: mockReadText,
+          writeText: mockWriteText,
+        },
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it('should paste single line text after cursor', async () => {
+      editor.content = ['hello world'];
+      await editor.updateComplete;
+      editor.cursorX = 4;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+
+      mockReadText.mockResolvedValue('TEST');
+
+      const event = new KeyboardEvent('keydown', { key: 'p' });
+      window.dispatchEvent(event);
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('helloTEST world');
+      expect(editor.cursorX).toBe(8);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should paste at beginning of line', async () => {
+      editor.content = ['hello'];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+
+      mockReadText.mockResolvedValue('X');
+
+      const event = new KeyboardEvent('keydown', { key: 'p' });
+      window.dispatchEvent(event);
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('hXello');
+      expect(editor.cursorX).toBe(1);
+    });
+
+    it('should paste at end of line', async () => {
+      editor.content = ['hello'];
+      await editor.updateComplete;
+      editor.cursorX = 4;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+
+      mockReadText.mockResolvedValue('!');
+
+      const event = new KeyboardEvent('keydown', { key: 'p' });
+      window.dispatchEvent(event);
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('hello!');
+      expect(editor.cursorX).toBe(5);
+    });
+
+    it('should paste multi-line text after cursor', async () => {
+      editor.content = ['hello world'];
+      await editor.updateComplete;
+      editor.cursorX = 4;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+
+      mockReadText.mockResolvedValue('AAA\nBBB\nCCC');
+
+      const event = new KeyboardEvent('keydown', { key: 'p' });
+      window.dispatchEvent(event);
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('helloAAA');
+      expect(editor.content[1]).toBe('BBB');
+      expect(editor.content[2]).toBe('CCC world');
+      expect(editor.cursorX).toBe(2);
+      expect(editor.cursorY).toBe(2);
+    });
+
+    it('should paste Chinese text after cursor', async () => {
+      editor.content = ['你好世界'];
+      await editor.updateComplete;
+      editor.cursorX = 1;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+
+      mockReadText.mockResolvedValue('測試');
+
+      const event = new KeyboardEvent('keydown', { key: 'p' });
+      window.dispatchEvent(event);
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('你好測試世界');
+      expect(editor.cursorX).toBe(3);
+    });
+
+    it('should paste on empty line', async () => {
+      editor.content = [''];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+
+      mockReadText.mockResolvedValue('test');
+
+      const event = new KeyboardEvent('keydown', { key: 'p' });
+      window.dispatchEvent(event);
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('test');
+      expect(editor.cursorX).toBe(3);
+    });
+
+    it('should paste multiple lines on empty line', async () => {
+      editor.content = [''];
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+
+      mockReadText.mockResolvedValue('line1\nline2\nline3');
+
+      const event = new KeyboardEvent('keydown', { key: 'p' });
+      window.dispatchEvent(event);
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await editor.updateComplete;
+
+      expect(editor.content[0]).toBe('line1');
+      expect(editor.content[1]).toBe('line2');
+      expect(editor.content[2]).toBe('line3');
+      expect(editor.cursorX).toBe(4);
+      expect(editor.cursorY).toBe(2);
+    });
+  });
 });
 

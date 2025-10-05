@@ -610,6 +610,9 @@ export class VimEditor extends LitElement {
         this.fastJumpMatches = [];
         this.fastJumpInput = '';
         break;
+      case 'p':
+        this.pasteAfterCursor();
+        break;
     }
   }
 
@@ -1316,6 +1319,18 @@ export class VimEditor extends LitElement {
     }
   }
 
+  private async pasteAfterCursor() {
+    try {
+      const text = await navigator.clipboard.readText();
+      this.pasteTextAfterCursor(text);
+      if (this.p5Instance) {
+        this.p5Instance.redraw();
+      }
+    } catch (err) {
+      console.error('Failed to read clipboard:', err);
+    }
+  }
+
   private insertText(text: string) {
     const lines = text.split('\n');
     
@@ -1343,6 +1358,57 @@ export class VimEditor extends LitElement {
       
       this.updateInputPosition();
     }
+  }
+
+  private pasteTextAfterCursor(text: string) {
+    const currentLine = this.content[this.cursorY] || '';
+    const lines = text.split('\n');
+    
+    if (lines.length === 1) {
+      let insertPosition: number;
+      if (currentLine.length === 0) {
+        insertPosition = 0;
+      } else {
+        insertPosition = Math.min(this.cursorX + 1, currentLine.length);
+      }
+      
+      const beforeInsert = currentLine.substring(0, insertPosition);
+      const afterInsert = currentLine.substring(insertPosition);
+      
+      this.content[this.cursorY] = beforeInsert + text + afterInsert;
+      
+      if (currentLine.length === 0) {
+        this.cursorX = text.length - 1;
+      } else {
+        this.cursorX = insertPosition + text.length - 1;
+      }
+    } else {
+      let insertPosition: number;
+      if (currentLine.length === 0) {
+        insertPosition = 0;
+      } else {
+        insertPosition = Math.min(this.cursorX + 1, currentLine.length);
+      }
+      
+      const beforeInsert = currentLine.substring(0, insertPosition);
+      const afterInsert = currentLine.substring(insertPosition);
+      
+      this.content[this.cursorY] = beforeInsert + lines[0];
+      
+      for (let i = 1; i < lines.length - 1; i++) {
+        this.cursorY += 1;
+        this.content.splice(this.cursorY, 0, lines[i]);
+      }
+      
+      if (lines.length > 1) {
+        this.cursorY += 1;
+        const lastLine = lines[lines.length - 1];
+        this.content.splice(this.cursorY, 0, lastLine + afterInsert);
+        this.cursorX = lastLine.length > 0 ? lastLine.length - 1 : 0;
+      }
+    }
+    
+    this.updateInputPosition();
   }
 
 
