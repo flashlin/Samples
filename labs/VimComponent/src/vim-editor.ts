@@ -544,6 +544,12 @@ export class VimEditor extends LitElement {
         return;
       }
       
+      if (this.pendingCommand === 'dw') {
+        this.deleteWord();
+        this.pendingCommand = '';
+        return;
+      }
+      
       if (this.pendingCommand.length >= 3 || !['di', 'd'].includes(this.pendingCommand)) {
         this.pendingCommand = '';
         return;
@@ -927,6 +933,46 @@ export class VimEditor extends LitElement {
     this.cursorX = range.startX;
     if (this.cursorX >= this.content[range.y].length && this.content[range.y].length > 0) {
       this.cursorX = this.content[range.y].length - 1;
+    }
+    if (this.cursorX < 0) {
+      this.cursorX = 0;
+    }
+  }
+
+  private deleteWord() {
+    const currentLine = this.content[this.cursorY] || '';
+    if (currentLine.length === 0 || this.cursorX >= currentLine.length) {
+      return;
+    }
+    
+    const startX = this.cursorX;
+    let endX = this.cursorX;
+    
+    const currentChar = currentLine[this.cursorX];
+    const charType = this.getCharType(currentChar);
+    
+    if (charType === 'space') {
+      while (endX < currentLine.length && this.getCharType(currentLine[endX]) === 'space') {
+        endX++;
+      }
+    } else {
+      while (endX < currentLine.length && this.getCharType(currentLine[endX]) === charType) {
+        endX++;
+      }
+      
+      while (endX < currentLine.length && this.getCharType(currentLine[endX]) === 'space') {
+        endX++;
+      }
+    }
+    
+    const beforeWord = currentLine.substring(0, startX);
+    const afterWord = currentLine.substring(endX);
+    
+    this.content[this.cursorY] = beforeWord + afterWord;
+    
+    this.cursorX = startX;
+    if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
+      this.cursorX = this.content[this.cursorY].length - 1;
     }
     if (this.cursorX < 0) {
       this.cursorX = 0;

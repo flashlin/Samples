@@ -1144,5 +1144,143 @@ describe('VimEditor', () => {
       expect(editor.cursorX).toBe(5);
     });
   });
+
+  describe('dw command', () => {
+    it('should delete word from cursor position', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      expect(editor.content[0]).toBe('world test');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete from middle of word', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      expect(editor.content[0]).toBe('heworld test');
+      expect(editor.cursorX).toBe(2);
+    });
+
+    it('should delete Chinese word from cursor', async () => {
+      editor.setContent(['你好世界測試']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      expect(editor.content[0]).toBe('');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete word including trailing spaces', async () => {
+      editor.setContent(['hello  world']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      expect(editor.content[0]).toBe('world');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete spaces when cursor on space', async () => {
+      editor.setContent(['hello  world']);
+      await editor.updateComplete;
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      expect(editor.content[0]).toBe('helloworld');
+      expect(editor.cursorX).toBe(5);
+    });
+
+    it('should handle word with numbers', async () => {
+      editor.setContent(['hello123 world']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      expect(editor.content[0]).toBe('world');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should handle delete at end of line', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      expect(editor.content[0]).toBe('hello ');
+      expect(editor.cursorX).toBe(5);
+    });
+
+    it('should handle mixed English and Chinese with dw', async () => {
+      editor.setContent(['hello你好world']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'd' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'w' });
+      window.dispatchEvent(event);
+      
+      expect(editor.content[0]).toBe('你好world');
+      expect(editor.cursorX).toBe(0);
+    });
+  });
 });
 
