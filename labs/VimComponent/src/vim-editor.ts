@@ -1,6 +1,7 @@
 import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import p5 from 'p5';
+import exampleText from './example.txt?raw';
 
 export interface EditorStatus {
   mode: 'normal' | 'insert' | 'visual';
@@ -40,7 +41,7 @@ export class VimEditor extends LitElement {
   cursorY = 0;
 
   @property({ type: Array })
-  content: string[] = ['Hello World中文!'];
+  content: string[] = exampleText.split('\n');
   
   @state()
   private lastKeyPressed = '';

@@ -1,0 +1,66 @@
+好的！我來為 Visual Mode 添加 `$` 和 `^` 按鍵支援。讓我檢查 `handleVisualMode` 方法：
+
+[2 tools called]
+現在添加測試案例：
+
+[1 tool called]
+讓我找個合適的位置添加 Visual Mode 的測試：
+
+[2 tools called]
+現在檢查是否需要暴露 `visualStartX` 和 `visualStartY` 給測試使用。讓我檢查這些屬性的定義：
+
+[1 tool called]
+這些屬性是 private，測試無法直接訪問。讓我修改測試，不直接設置這些屬性，而是通過進入 Visual Mode 的方式：
+
+[2 tools called]
+完美！所有測試都通過了。讓我總結一下實作的內容：
+
+## 實作總結
+### 新增功能：Visual Mode 的 `$` 和 `^` 按鍵
+
+在 Visual Mode 下：
+- **`$`**：移動游標到當前行的最後一個字元
+- **`^`**：移動游標到當前行第一個非空白字元
+
+### 修改內容
+
+在 `handleVisualMode()` 方法中添加了兩個 case：
+```typescript
+case '$':
+  this.moveCursorToLineEnd();
+  break;
+case '^':
+  this.moveCursorToLineStart();
+  break;
+```
+
+這樣就重用了 Normal Mode 已經實作好的方法。
+
+### 測試案例
+
+添加了 3 個測試案例：
+
+1. **`$` 按鍵跳到行尾**：
+   - 在 `'hello world'` 從位置 0 進入 Visual Mode
+   - 按 `$` 跳到位置 10（`d`）
+   - 保持在 Visual Mode
+
+2. **`^` 按鍵跳到行首非空白字元**：
+   - 在 `'  hello world'` 從位置 8 進入 Visual Mode
+   - 按 `^` 跳到位置 2（`h`）
+   - 保持在 Visual Mode
+
+3. **`$` 選取從開頭到結尾**：
+   - 在 `'abc'` 從位置 0 進入 Visual Mode
+   - 按 `$` 選取整行
+   - 驗證 buffer 中所有字元都被反白（背景色為藍色 `[100, 149, 237]`）
+
+### 功能說明
+
+這些按鍵在 Visual Mode 中的行為與 Normal Mode 相同，但會：
+1. 保持在 Visual Mode
+2. 移動游標時會自動更新選取範圍
+3. 選取範圍會從 `visualStartX/Y` 到當前游標位置
+
+所有 30 個測試全部通過！現在可以在 Visual Mode 使用 `$` 和 `^` 來快速選取到行尾或行首了。
+
