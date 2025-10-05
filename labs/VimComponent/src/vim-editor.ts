@@ -382,10 +382,10 @@ export class VimEditor extends LitElement {
     }
   }
 
-  private handleNormalMode(key: string) {
+  private handleMovement(key: string): boolean {
     if (/^[0-9]$/.test(key)) {
       this.numberPrefix += key;
-      return;
+      return true;
     }
     
     const count = this.numberPrefix ? parseInt(this.numberPrefix, 10) : 1;
@@ -397,51 +397,62 @@ export class VimEditor extends LitElement {
         for (let i = 0; i < count; i++) {
           this.moveCursorDown();
         }
-        break;
+        return true;
       case 'k':
       case 'ArrowUp':
         for (let i = 0; i < count; i++) {
           this.moveCursorUp();
         }
-        break;
+        return true;
       case 'h':
       case 'ArrowLeft':
         for (let i = 0; i < count; i++) {
           this.moveCursorLeft();
         }
-        break;
+        return true;
       case 'l':
       case 'ArrowRight':
         for (let i = 0; i < count; i++) {
           this.moveCursorRight();
         }
-        break;
+        return true;
       case '$':
         this.moveCursorToLineEnd();
-        break;
+        return true;
       case '^':
         this.moveCursorToLineStart();
-        break;
+        return true;
       case 'w':
         for (let i = 0; i < count; i++) {
           this.moveToNextWord();
         }
-        break;
+        return true;
       case 'W':
         for (let i = 0; i < count; i++) {
           this.moveToNextWORD();
         }
-        break;
+        return true;
       case 'b':
         for (let i = 0; i < count; i++) {
           this.moveToPreviousWord();
         }
-        break;
+        return true;
       case 'B':
         for (let i = 0; i < count; i++) {
           this.moveToPreviousWORD();
         }
-        break;
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleNormalMode(key: string) {
+    if (this.handleMovement(key)) {
+      return;
+    }
+    
+    switch (key) {
       case 'i':
         this.mode = 'insert';
         this.hiddenInput?.focus();
@@ -495,47 +506,13 @@ export class VimEditor extends LitElement {
   }
 
   private handleVisualMode(key: string) {
-    if (/^[0-9]$/.test(key)) {
-      this.numberPrefix += key;
+    if (this.handleMovement(key)) {
       return;
     }
-    
-    const count = this.numberPrefix ? parseInt(this.numberPrefix, 10) : 1;
-    this.numberPrefix = '';
     
     switch (key) {
       case 'Escape':
         this.mode = 'normal';
-        break;
-      case 'j':
-      case 'ArrowDown':
-        for (let i = 0; i < count; i++) {
-          this.moveCursorDown();
-        }
-        break;
-      case 'k':
-      case 'ArrowUp':
-        for (let i = 0; i < count; i++) {
-          this.moveCursorUp();
-        }
-        break;
-      case 'h':
-      case 'ArrowLeft':
-        for (let i = 0; i < count; i++) {
-          this.moveCursorLeft();
-        }
-        break;
-      case 'l':
-      case 'ArrowRight':
-        for (let i = 0; i < count; i++) {
-          this.moveCursorRight();
-        }
-        break;
-      case '$':
-        this.moveCursorToLineEnd();
-        break;
-      case '^':
-        this.moveCursorToLineStart();
         break;
       case 'y':
         this.yankVisualSelection();
