@@ -63,6 +63,9 @@ export class VimEditor extends LitElement {
   private fastJumpMatches: Array<{ x: number; y: number; label: string }> = [];
   private fastJumpInput = '';
   private previousMode: 'normal' | 'visual' | 'visual-line' = 'normal';
+  
+  private pendingCommand = '';
+  private commandTimeout: number | null = null;
 
   private getRectY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight;
@@ -527,14 +530,49 @@ export class VimEditor extends LitElement {
   }
 
   private handleNormalMode(key: string) {
+    if (this.pendingCommand) {
+      this.pendingCommand += key;
+      
+      if (this.commandTimeout) {
+        clearTimeout(this.commandTimeout);
+        this.commandTimeout = null;
+      }
+      
+      if (this.pendingCommand === 'diw') {
+        this.deleteInnerWord();
+        this.pendingCommand = '';
+        return;
+      }
+      
+      if (this.pendingCommand.length >= 3 || !['di', 'd'].includes(this.pendingCommand)) {
+        this.pendingCommand = '';
+        return;
+      }
+      
+      this.commandTimeout = window.setTimeout(() => {
+        this.pendingCommand = '';
+        this.commandTimeout = null;
+      }, 1000);
+      return;
+    }
+    
     if (this.handleMovement(key)) {
       return;
     }
     
     switch (key) {
+      case 'd':
+        this.pendingCommand = 'd';
+        this.commandTimeout = window.setTimeout(() => {
+          this.pendingCommand = '';
+          this.commandTimeout = null;
+        }, 1000);
+        break;
       case 'i':
-        this.mode = 'insert';
-        this.hiddenInput?.focus();
+        if (this.pendingCommand === '') {
+          this.mode = 'insert';
+          this.hiddenInput?.focus();
+        }
         break;
       case 'a':
         const currentLine = this.content[this.cursorY] || '';
@@ -841,6 +879,57 @@ export class VimEditor extends LitElement {
       return 'word';
     } else {
       return 'space';
+    }
+  }
+
+  private getInnerWordRange(): { startX: number; endX: number; y: number } | null {
+    const currentLine = this.content[this.cursorY] || '';
+    if (currentLine.length === 0) {
+      return null;
+    }
+    
+    const cursorChar = currentLine[this.cursorX];
+    if (!cursorChar) {
+      return null;
+    }
+    
+    const charType = this.getCharType(cursorChar);
+    if (charType === 'space') {
+      return null;
+    }
+    
+    let startX = this.cursorX;
+    let endX = this.cursorX;
+    
+    while (startX > 0 && this.getCharType(currentLine[startX - 1]) === charType) {
+      startX--;
+    }
+    
+    while (endX < currentLine.length - 1 && this.getCharType(currentLine[endX + 1]) === charType) {
+      endX++;
+    }
+    
+    return { startX, endX, y: this.cursorY };
+  }
+
+  private deleteInnerWord() {
+    const range = this.getInnerWordRange();
+    if (!range) {
+      return;
+    }
+    
+    const currentLine = this.content[range.y];
+    const beforeWord = currentLine.substring(0, range.startX);
+    const afterWord = currentLine.substring(range.endX + 1);
+    
+    this.content[range.y] = beforeWord + afterWord;
+    
+    this.cursorX = range.startX;
+    if (this.cursorX >= this.content[range.y].length && this.content[range.y].length > 0) {
+      this.cursorX = this.content[range.y].length - 1;
+    }
+    if (this.cursorX < 0) {
+      this.cursorX = 0;
     }
   }
 
