@@ -400,6 +400,9 @@ export class VimEditor extends LitElement {
       case '$':
         this.moveCursorToLineEnd();
         break;
+      case '^':
+        this.moveCursorToLineStart();
+        break;
       case 'w':
         this.moveToNextWord();
         break;
@@ -529,6 +532,21 @@ export class VimEditor extends LitElement {
       this.cursorX = currentLine.length - 1;
       this.updateInputPosition();
     }
+  }
+
+  private moveCursorToLineStart() {
+    const currentLine = this.content[this.cursorY] || '';
+    let firstNonSpace = 0;
+    
+    for (let i = 0; i < currentLine.length; i++) {
+      if (currentLine[i] !== ' ' && currentLine[i] !== '\t') {
+        firstNonSpace = i;
+        break;
+      }
+    }
+    
+    this.cursorX = firstNonSpace;
+    this.updateInputPosition();
   }
 
   private isWordChar(char: string): boolean {

@@ -187,6 +187,57 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('^ key in normal mode', () => {
+    it('should move cursor to first non-space character', () => {
+      editor.setContent(['  hello world']);
+      editor.cursorX = 8;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: '^' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(2);
+      expect(status.cursorY).toBe(0);
+    });
+
+    it('should move to position 0 if no leading spaces', () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 8;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: '^' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(0);
+    });
+
+    it('should handle line with only spaces', () => {
+      editor.setContent(['     ']);
+      editor.cursorX = 3;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: '^' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(0);
+    });
+
+    it('should handle tabs and spaces', () => {
+      editor.setContent(['\t  hello']);
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: '^' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(3);
+    });
+  });
+
   describe('buffer system', () => {
     it('should maintain buffer state', () => {
       editor.setContent(['test']);
