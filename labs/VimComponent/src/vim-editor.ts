@@ -67,8 +67,8 @@ export class VimEditor extends LitElement {
   private keyBuffer = '';
   
   private commandPatterns = [
-    { pattern: 'diw', action: () => { this.saveHistory(); this.deleteInnerWord(); } },
-    { pattern: 'dw', action: () => { this.saveHistory(); this.deleteWord(); } },
+    { pattern: 'diw', action: () => { this.deleteInnerWord(); } },
+    { pattern: 'dw', action: () => { this.deleteWord(); } },
   ];
 
   private history: Array<{ content: string[]; cursorX: number; cursorY: number }> = [];
@@ -102,6 +102,7 @@ export class VimEditor extends LitElement {
     for (const { pattern, action } of sortedPatterns) {
       if (this.keyBuffer === pattern) {
         this.keyBuffer = '';
+        this.saveHistory();
         action();
         return true;
       }
