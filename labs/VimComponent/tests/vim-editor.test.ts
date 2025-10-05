@@ -316,6 +316,65 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('visual mode navigation', () => {
+    it('should move cursor to line end with $ key', () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'v' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: '$' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(10);
+      expect(status.mode).toBe('visual');
+    });
+
+    it('should move cursor to line start with ^ key', () => {
+      editor.setContent(['  hello world']);
+      editor.cursorX = 8;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'v' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: '^' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(2);
+      expect(status.mode).toBe('visual');
+    });
+
+    it('should select from start to end with $ key', () => {
+      editor.setContent(['abc']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      let event = new KeyboardEvent('keydown', { key: 'v' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: '$' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(2);
+      
+      editor.updateBuffer();
+      const buffer = editor.getBuffer();
+      
+      for (let i = 0; i <= 2; i++) {
+        expect(buffer[0][i].background).toEqual([100, 149, 237]);
+      }
+    });
+  });
+
   describe('buffer system', () => {
     it('should maintain buffer state', () => {
       editor.setContent(['test']);

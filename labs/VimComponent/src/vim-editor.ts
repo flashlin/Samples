@@ -488,6 +488,12 @@ export class VimEditor extends LitElement {
       case 'ArrowRight':
         this.moveCursorRight();
         break;
+      case '$':
+        this.moveCursorToLineEnd();
+        break;
+      case '^':
+        this.moveCursorToLineStart();
+        break;
       case 'y':
         this.yankVisualSelection();
         this.mode = 'normal';
