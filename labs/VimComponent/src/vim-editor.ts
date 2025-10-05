@@ -106,6 +106,17 @@ export class VimEditor extends LitElement {
     }
   }
 
+  getDisplayColumn(): number {
+    const currentLine = this.content[this.cursorY] || '';
+    let displayCol = 0;
+    
+    for (let i = 0; i < this.cursorX && i < currentLine.length; i++) {
+      displayCol += this.isFullWidthChar(currentLine[i]) ? 2 : 1;
+    }
+    
+    return displayCol;
+  }
+
   private initializeBuffer() {
     const editableWidth = Math.floor((800 - 60) / this.baseCharWidth);
     const editableHeight = Math.floor((600 - this.statusBarHeight) / this.lineHeight);
@@ -904,7 +915,7 @@ export class VimEditor extends LitElement {
     
     // 繪製狀態列文字，包含最後按下的按鍵
     p.fill(255);
-    let statusText = `Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.cursorX + 1}`;
+    let statusText = `Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.getDisplayColumn() + 1}`;
     if (this.lastKeyPressed) {
       statusText += ` | Key: "${this.lastKeyPressed}"`;
     }

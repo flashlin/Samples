@@ -247,5 +247,46 @@ describe('VimEditor', () => {
       expect(editor.getStatus().mode).toBe('insert');
     });
   });
+
+  describe('display column calculation', () => {
+    it('should calculate display column for English text', () => {
+      editor.setContent(['Hello World']);
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      
+      const col = editor.getDisplayColumn();
+      expect(col).toBe(6);
+    });
+
+    it('should calculate display column with Chinese characters', () => {
+      editor.setContent(['Hello World 中文!']);
+      editor.cursorX = 13;
+      editor.cursorY = 0;
+      
+      const col = editor.getDisplayColumn();
+      expect(col).toBe(14);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(13);
+    });
+
+    it('should calculate display column at start of Chinese character', () => {
+      editor.setContent(['Hello World 中文!']);
+      editor.cursorX = 12;
+      editor.cursorY = 0;
+      
+      const col = editor.getDisplayColumn();
+      expect(col).toBe(12);
+    });
+
+    it('should calculate display column for all Chinese text', () => {
+      editor.setContent(['你好世界']);
+      editor.cursorX = 2;
+      editor.cursorY = 0;
+      
+      const col = editor.getDisplayColumn();
+      expect(col).toBe(4);
+    });
+  });
 });
 
