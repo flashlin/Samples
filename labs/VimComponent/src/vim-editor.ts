@@ -651,6 +651,16 @@ export class VimEditor extends LitElement {
     const currentLine = this.content[this.cursorY] || '';
     const availablePixelWidth = (800 - 60) - (this.baseCharWidth * 2);
     
+    let linePixelWidth = 0;
+    for (let i = 0; i < currentLine.length; i++) {
+      linePixelWidth += this.isFullWidthChar(currentLine[i]) ? this.baseCharWidth * 2 : this.baseCharWidth;
+    }
+    
+    if (linePixelWidth <= availablePixelWidth) {
+      this.scrollOffsetX = 0;
+      return;
+    }
+    
     let scrollEndX = this.scrollOffsetX;
     let accumulatedWidth = 0;
     
