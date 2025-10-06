@@ -1525,6 +1525,175 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('vi` command (visual select backtick)', () => {
+    it('should select content between backticks', async () => {
+      editor.setContent(['const str = `hello world`;']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '`');
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.visualStartY).toBe(0);
+      expect(editor.cursorX).toBe(23);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should select and delete with vi`x', async () => {
+      editor.setContent(['const str = `hello world`;']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '`', 'x');
+      
+      expect(editor.content[0]).toBe('const str = ``;');
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should handle cursor on opening backtick', async () => {
+      editor.setContent(['`test content`']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '`');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(1);
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should do nothing if no matching backticks', async () => {
+      editor.setContent(['no backticks here']);
+      await editor.updateComplete;
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      const originalX = editor.cursorX;
+      pressKeys('v', 'i', '`');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.cursorX).toBe(originalX);
+    });
+  });
+
+  describe("vi' command (visual select single quote)", () => {
+    it('should select content between single quotes', async () => {
+      editor.setContent(["const str = 'hello world';"]);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', "'");
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorX).toBe(23);
+    });
+
+    it('should handle escaped single quote', async () => {
+      editor.setContent(["const str = 'don\\'t worry';"]);
+      await editor.updateComplete;
+      editor.cursorX = 18;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', "'");
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorX).toBe(24);
+    });
+
+    it('should select and yank with vi\'y', async () => {
+      editor.setContent(["const str = 'hello world';"]);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      const mockWriteText = vi.fn();
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: mockWriteText },
+        writable: true,
+        configurable: true
+      });
+      
+      pressKeys('v', 'i', "'", 'y');
+      
+      expect(mockWriteText).toHaveBeenCalledWith('hello world');
+      expect(editor.mode).toBe('normal');
+    });
+  });
+
+  describe('vi" command (visual select double quote)', () => {
+    it('should select content between double quotes', async () => {
+      editor.setContent(['const str = "hello world";']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '"');
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorX).toBe(23);
+    });
+
+    it('should handle escaped double quote', async () => {
+      editor.setContent(['const str = "say \\"hello\\"";']);
+      await editor.updateComplete;
+      editor.cursorX = 20;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '"');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorX).toBe(25);
+    });
+
+    it('should select and delete with vi"d', async () => {
+      editor.setContent(['const str = "hello world";']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '"', 'd');
+      
+      expect(editor.content[0]).toBe('const str = "";');
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should handle cursor on closing quote', async () => {
+      editor.setContent(['"test content"']);
+      await editor.updateComplete;
+      editor.cursorX = 13;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '"');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(1);
+      expect(editor.cursorX).toBe(12);
+    });
+  });
+
   describe('dw command', () => {
     it('should delete word from cursor position', async () => {
       editor.setContent(['hello world test']);

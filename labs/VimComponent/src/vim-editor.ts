@@ -64,6 +64,7 @@ export class VimEditor extends LitElement {
   private previousMode: 'normal' | 'visual' | 'visual-line' = 'normal';
   
   private keyBuffer = '';
+  private visualKeyBuffer = '';
   
   private commandPatterns = [
     { pattern: 'diw', action: () => { this.saveHistory(); this.deleteInnerWord(); } },
@@ -654,14 +655,30 @@ export class VimEditor extends LitElement {
   }
 
   private handleVisualMode(key: string) {
-    if (this.handleMovement(key)) {
+    if (this.visualKeyBuffer === '' && this.handleMovement(key)) {
       return;
     }
     
+    if (key === 'Escape') {
+      this.mode = 'normal';
+      this.visualKeyBuffer = '';
+      return;
+    }
+    
+    if (key === 'i' && this.visualKeyBuffer === '') {
+      this.visualKeyBuffer = 'i';
+      return;
+    }
+    
+    if (this.visualKeyBuffer === 'i' && (key === '`' || key === "'" || key === '"')) {
+      this.selectInnerQuote(key);
+      this.visualKeyBuffer = '';
+      return;
+    }
+    
+    this.visualKeyBuffer = '';
+    
     switch (key) {
-      case 'Escape':
-        this.mode = 'normal';
-        break;
       case 'y':
         this.yankVisualSelection();
         this.mode = 'normal';
@@ -965,6 +982,25 @@ export class VimEditor extends LitElement {
     if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
       this.cursorX = this.content[this.cursorY].length - 1;
     }
+  }
+
+  private selectInnerQuote(quoteChar: string) {
+    const currentLine = this.content[this.cursorY] || '';
+    if (currentLine.length === 0) {
+      return;
+    }
+    
+    const range = this.findQuoteRange(currentLine, this.cursorX, quoteChar);
+    if (!range || range.startX === range.endX) {
+      return;
+    }
+    
+    this.visualStartY = this.cursorY;
+    this.visualStartX = range.startX + 1;
+    this.cursorY = this.cursorY;
+    this.cursorX = range.endX - 1;
+    
+    this.updateInputPosition();
   }
 
   private findQuoteRange(line: string, cursorPos: number, quoteChar: string): { startX: number; endX: number } | null {
