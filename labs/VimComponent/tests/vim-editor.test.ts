@@ -1337,6 +1337,194 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('di` command (backtick)', () => {
+    it('should delete content between backticks', async () => {
+      editor.setContent(['const str = `hello world`;']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '`');
+      
+      expect(editor.content[0]).toBe('const str = ``;');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should handle cursor on opening backtick', async () => {
+      editor.setContent(['`test content`']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '`');
+      
+      expect(editor.content[0]).toBe('``');
+      expect(editor.cursorX).toBe(1);
+    });
+
+    it('should handle cursor on closing backtick', async () => {
+      editor.setContent(['`test content`']);
+      await editor.updateComplete;
+      editor.cursorX = 13;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '`');
+      
+      expect(editor.content[0]).toBe('``');
+      expect(editor.cursorX).toBe(1);
+    });
+
+    it('should do nothing if no matching backticks', async () => {
+      editor.setContent(['no backticks here']);
+      await editor.updateComplete;
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '`');
+      
+      expect(editor.content[0]).toBe('no backticks here');
+      expect(editor.cursorX).toBe(5);
+    });
+
+    it('should handle empty content between backticks', async () => {
+      editor.setContent(['test `` string']);
+      await editor.updateComplete;
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '`');
+      
+      expect(editor.content[0]).toBe('test `` string');
+      expect(editor.cursorX).toBe(6);
+    });
+  });
+
+  describe("di' command (single quote)", () => {
+    it('should delete content between single quotes', async () => {
+      editor.setContent(["const str = 'hello world';"]);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', "'");
+      
+      expect(editor.content[0]).toBe("const str = '';");
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should handle escaped single quote', async () => {
+      editor.setContent(["const str = 'don\\'t worry';"]);
+      await editor.updateComplete;
+      editor.cursorX = 18;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', "'");
+      
+      expect(editor.content[0]).toBe("const str = '';");
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should handle multiple escaped backslashes', async () => {
+      editor.setContent(["const str = 'test\\\\\\' string';"]);
+      await editor.updateComplete;
+      editor.cursorX = 20;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', "'");
+      
+      expect(editor.content[0]).toBe("const str = '';");
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should do nothing if no matching quotes', async () => {
+      editor.setContent(['no quotes here']);
+      await editor.updateComplete;
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', "'");
+      
+      expect(editor.content[0]).toBe('no quotes here');
+      expect(editor.cursorX).toBe(5);
+    });
+  });
+
+  describe('di" command (double quote)', () => {
+    it('should delete content between double quotes', async () => {
+      editor.setContent(['const str = "hello world";']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '"');
+      
+      expect(editor.content[0]).toBe('const str = "";');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should handle escaped double quote', async () => {
+      editor.setContent(['const str = "say \\"hello\\"";']);
+      await editor.updateComplete;
+      editor.cursorX = 20;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '"');
+      
+      expect(editor.content[0]).toBe('const str = "";');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should handle multiple escaped backslashes before quote', async () => {
+      editor.setContent(['const str = "test\\\\\\" string";']);
+      await editor.updateComplete;
+      editor.cursorX = 22;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '"');
+      
+      expect(editor.content[0]).toBe('const str = "";');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should handle cursor on opening quote', async () => {
+      editor.setContent(['"test content"']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '"');
+      
+      expect(editor.content[0]).toBe('""');
+      expect(editor.cursorX).toBe(1);
+    });
+
+    it('should do nothing if no matching quotes', async () => {
+      editor.setContent(['no quotes here']);
+      await editor.updateComplete;
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '"');
+      
+      expect(editor.content[0]).toBe('no quotes here');
+      expect(editor.cursorX).toBe(5);
+    });
+  });
+
   describe('dw command', () => {
     it('should delete word from cursor position', async () => {
       editor.setContent(['hello world test']);

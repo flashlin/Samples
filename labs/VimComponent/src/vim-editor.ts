@@ -67,6 +67,9 @@ export class VimEditor extends LitElement {
   
   private commandPatterns = [
     { pattern: 'diw', action: () => { this.saveHistory(); this.deleteInnerWord(); } },
+    { pattern: 'di`', action: () => { this.saveHistory(); this.deleteInnerQuote('`'); } },
+    { pattern: "di'", action: () => { this.saveHistory(); this.deleteInnerQuote("'"); } },
+    { pattern: 'di"', action: () => { this.saveHistory(); this.deleteInnerQuote('"'); } },
     { pattern: 'dw', action: () => { this.saveHistory(); this.deleteWord(); } },
     { pattern: 'de', action: () => { this.saveHistory(); this.deleteToWordEnd(); } },
     { pattern: 'i', action: () => { this.mode = 'insert'; this.hiddenInput?.focus(); } },
@@ -940,6 +943,64 @@ export class VimEditor extends LitElement {
     if (this.cursorX < 0) {
       this.cursorX = 0;
     }
+  }
+
+  private deleteInnerQuote(quoteChar: string) {
+    const currentLine = this.content[this.cursorY] || '';
+    if (currentLine.length === 0) {
+      return;
+    }
+    
+    const range = this.findQuoteRange(currentLine, this.cursorX, quoteChar);
+    if (!range || range.startX === range.endX) {
+      return;
+    }
+    
+    const beforeQuote = currentLine.substring(0, range.startX + 1);
+    const afterQuote = currentLine.substring(range.endX);
+    
+    this.content[this.cursorY] = beforeQuote + afterQuote;
+    
+    this.cursorX = range.startX + 1;
+    if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
+      this.cursorX = this.content[this.cursorY].length - 1;
+    }
+  }
+
+  private findQuoteRange(line: string, cursorPos: number, quoteChar: string): { startX: number; endX: number } | null {
+    const quotes: number[] = [];
+    
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === quoteChar) {
+        let isEscaped = false;
+        if (i > 0 && line[i - 1] === '\\') {
+          let backslashCount = 0;
+          for (let j = i - 1; j >= 0 && line[j] === '\\'; j--) {
+            backslashCount++;
+          }
+          isEscaped = backslashCount % 2 === 1;
+        }
+        
+        if (!isEscaped) {
+          quotes.push(i);
+        }
+      }
+    }
+    
+    if (quotes.length < 2) {
+      return null;
+    }
+    
+    for (let i = 0; i < quotes.length - 1; i += 2) {
+      const startX = quotes[i];
+      const endX = quotes[i + 1];
+      
+      if (cursorPos >= startX && cursorPos <= endX) {
+        return { startX, endX };
+      }
+    }
+    
+    return null;
   }
 
   private deleteWord() {
