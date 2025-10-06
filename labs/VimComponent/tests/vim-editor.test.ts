@@ -2592,5 +2592,291 @@ describe('VimEditor', () => {
       expect(editor.cursorY).toBe(1);
     });
   });
+
+  describe('search mode (*)', () => {
+    it('should enter search mode with * from visual selection', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('search');
+      expect(status.searchKeyword).toBe('hello');
+      expect(status.searchMatchCount).toBe(3);
+    });
+
+    it('should highlight all search matches', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should jump to next match with n', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      
+      pressKey('n');
+      expect(editor.cursorY).toBe(1);
+      expect(editor.cursorX).toBe(5);
+      
+      pressKey('n');
+      expect(editor.cursorY).toBe(2);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should jump to previous match with N', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      pressKeys('n', 'n');
+      
+      pressKey('N');
+      expect(editor.cursorY).toBe(1);
+      expect(editor.cursorX).toBe(5);
+    });
+
+    it('should wrap around when jumping to next/previous', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      pressKeys('n', 'n', 'n');
+      
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should clear current search mark with b', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      
+      expect(editor.getStatus().searchMatchCount).toBe(3);
+      
+      pressKey('b');
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('search');
+      expect(status.searchKeyword).toBe('hello');
+      expect(status.searchMatchCount).toBe(2);
+    });
+
+    it('should restore search marks with u', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      expect(editor.getStatus().searchMatchCount).toBe(3);
+      
+      pressKey('b');
+      expect(editor.getStatus().searchMatchCount).toBe(2);
+      
+      pressKey('u');
+      
+      const status = editor.getStatus();
+      expect(status.mode).toBe('search');
+      expect(status.searchKeyword).toBe('hello');
+      expect(status.searchMatchCount).toBe(3);
+    });
+
+    it('should clear multiple marks one by one with b', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      expect(editor.getStatus().searchMatchCount).toBe(3);
+      
+      pressKey('b');
+      expect(editor.getStatus().searchMatchCount).toBe(2);
+      expect(editor.getStatus().mode).toBe('search');
+      
+      pressKey('b');
+      expect(editor.getStatus().searchMatchCount).toBe(1);
+      expect(editor.getStatus().mode).toBe('search');
+      
+      pressKey('b');
+      expect(editor.getStatus().searchMatchCount).toBe(undefined);
+      expect(editor.getStatus().mode).toBe('normal');
+    });
+
+    it('should remove current mark and jump to next', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(0);
+      
+      pressKey('b');
+      
+      expect(editor.cursorY).toBe(1);
+      expect(editor.cursorX).toBe(5);
+    });
+
+    it('should restore marks in correct order', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      pressKeys('b', 'b');
+      expect(editor.getStatus().searchMatchCount).toBe(1);
+      
+      pressKey('u');
+      expect(editor.getStatus().searchMatchCount).toBe(2);
+      
+      pressKey('u');
+      expect(editor.getStatus().searchMatchCount).toBe(3);
+    });
+
+    it('should enter multi-insert mode with i', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      pressKey('i');
+      
+      expect(editor.getStatus().mode).toBe('multi-insert');
+    });
+
+    it('should exit search mode with Escape', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      pressKey('Escape');
+      
+      expect(editor.getStatus().mode).toBe('normal');
+    });
+  });
+
+  describe('multi-insert mode', () => {
+    it('should insert character at all search matches', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', 'i', 'X');
+      
+      expect(editor.content).toEqual([
+        'helloX world',
+        'test helloX test',
+        'helloX again'
+      ]);
+    });
+
+    it('should delete character from all search matches with Backspace', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', 'i', 'X', 'Backspace');
+      
+      expect(editor.content).toEqual([
+        'hello world',
+        'test hello test',
+        'hello again'
+      ]);
+    });
+
+    it('should insert newline at all search matches', async () => {
+      editor.setContent(['hello world', 'test hello test']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', 'i', 'Enter');
+      
+      expect(editor.content).toEqual([
+        'hello',
+        ' world',
+        'test hello',
+        ' test'
+      ]);
+    });
+
+    it('should exit multi-insert mode with Escape to search mode', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', 'i');
+      expect(editor.getStatus().mode).toBe('multi-insert');
+      
+      pressKey('Escape');
+      expect(editor.getStatus().mode).toBe('search');
+      
+      pressKey('Escape');
+      expect(editor.getStatus().mode).toBe('normal');
+    });
+
+    it('should handle multiple character insertions', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', 'i', 'X', 'Y', 'Z');
+      
+      expect(editor.content).toEqual([
+        'helloXYZ world',
+        'test helloXYZ test',
+        'helloXYZ again'
+      ]);
+    });
+  });
 });
 

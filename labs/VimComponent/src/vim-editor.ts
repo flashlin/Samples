@@ -4,10 +4,12 @@ import p5 from 'p5';
 import exampleText from './example.txt?raw';
 
 export interface EditorStatus {
-  mode: 'normal' | 'insert' | 'visual' | 'visual-line' | 'fast-jump' | 'match';
+  mode: 'normal' | 'insert' | 'visual' | 'visual-line' | 'fast-jump' | 'match' | 'search' | 'multi-insert';
   cursorX: number;
   cursorY: number;
   cursorVisible: boolean;
+  searchKeyword?: string;
+  searchMatchCount?: number;
 }
 
 export interface BufferCell {
@@ -32,7 +34,7 @@ export class VimEditor extends LitElement {
   private cursorVisible = true;
   
   @property({ type: String })
-  mode: 'normal' | 'insert' | 'visual' | 'visual-line' | 'fast-jump' | 'match' = 'normal';
+  mode: 'normal' | 'insert' | 'visual' | 'visual-line' | 'fast-jump' | 'match' | 'search' | 'multi-insert' = 'normal';
 
   @property({ type: Number })
   cursorX = 0;
@@ -65,6 +67,11 @@ export class VimEditor extends LitElement {
   
   private keyBuffer = '';
   private visualKeyBuffer = '';
+  
+  private searchKeyword = '';
+  private searchMatches: Array<{ y: number; x: number }> = [];
+  private currentMatchIndex = -1;
+  private searchHistory: Array<{ keyword: string; matches: Array<{ y: number; x: number }> }> = [];
   
   private commandPatterns = [
     { pattern: 'diw', action: () => { this.saveHistory(); this.deleteInnerWord(); } },
@@ -226,6 +233,8 @@ export class VimEditor extends LitElement {
       cursorX: this.cursorX,
       cursorY: this.cursorY,
       cursorVisible: this.cursorVisible,
+      searchKeyword: this.searchKeyword.length > 0 ? this.searchKeyword : undefined,
+      searchMatchCount: this.searchMatches.length > 0 ? this.searchMatches.length : undefined,
     };
   }
 
@@ -300,12 +309,19 @@ export class VimEditor extends LitElement {
         const isFastJumpMatch = this.mode === 'match' && 
           this.fastJumpMatches.some(match => match.x === contentX && match.y === contentY);
         
-        const isHighlighted = isVisualSelection || isVisualLineSelection || isFastJumpMatch;
+        const isSearchMatch = (this.mode === 'search' || this.mode === 'multi-insert') && 
+          this.isInSearchMatch(contentY, contentX);
+        
+        const isCurrentSearchMatch = (this.mode === 'search' || this.mode === 'multi-insert') && 
+          this.currentMatchIndex >= 0 && 
+          this.isInSearchMatch(contentY, contentX, this.currentMatchIndex);
+        
+        const isHighlighted = isVisualSelection || isVisualLineSelection || isFastJumpMatch || isSearchMatch;
         
         this.buffer[bufferY][bufferX] = {
           char,
-          foreground: (isCursor && isNormalMode) ? [0, 0, 0] : isHighlighted ? [0, 0, 0] : [255, 255, 255],
-          background: (isCursor && isNormalMode) ? [255, 255, 255] : isHighlighted ? [100, 149, 237] : [0, 0, 0],
+          foreground: (isCursor && isNormalMode) ? [0, 0, 0] : isCurrentSearchMatch ? [0, 0, 0] : isHighlighted ? [0, 0, 0] : [255, 255, 255],
+          background: (isCursor && isNormalMode) ? [255, 255, 255] : isCurrentSearchMatch ? [255, 165, 0] : isHighlighted ? [100, 149, 237] : [0, 0, 0],
         };
       }
     }
@@ -342,6 +358,26 @@ export class VimEditor extends LitElement {
     const startY = Math.min(this.visualStartY, this.cursorY);
     const endY = Math.max(this.visualStartY, this.cursorY);
     return y >= startY && y <= endY;
+  }
+
+  private isInSearchMatch(y: number, x: number, matchIndex?: number): boolean {
+    if (this.searchKeyword.length === 0 || this.searchMatches.length === 0) {
+      return false;
+    }
+    
+    if (matchIndex !== undefined) {
+      const match = this.searchMatches[matchIndex];
+      if (!match) return false;
+      return y === match.y && x >= match.x && x < match.x + this.searchKeyword.length;
+    }
+    
+    for (const match of this.searchMatches) {
+      if (y === match.y && x >= match.x && x < match.x + this.searchKeyword.length) {
+        return true;
+      }
+    }
+    
+    return false;
   }
 
   firstUpdated() {
@@ -539,6 +575,10 @@ export class VimEditor extends LitElement {
       this.handleFastJumpMode(key);
     } else if (this.mode === 'match') {
       this.handleMatchMode(key);
+    } else if (this.mode === 'search') {
+      this.handleSearchMode(key);
+    } else if (this.mode === 'multi-insert') {
+      this.handleMultiInsertMode(key);
     }
     
     this.adjustScrollToCursor();
@@ -694,6 +734,9 @@ export class VimEditor extends LitElement {
         this.mode = 'fast-jump';
         this.fastJumpMatches = [];
         this.fastJumpInput = '';
+        break;
+      case '*':
+        this.startSearchFromVisualSelection();
         break;
     }
   }
@@ -1890,6 +1933,251 @@ export class VimEditor extends LitElement {
       10,
       statusY + 3 // 計算垂直居中位置
     );
+  }
+
+  private startSearchFromVisualSelection() {
+    const selection = this.getVisualSelection();
+    if (!selection || selection.trim().length === 0) {
+      this.mode = 'normal';
+      return;
+    }
+    
+    this.searchKeyword = selection;
+    this.findAllMatches();
+    
+    if (this.searchMatches.length === 0) {
+      this.mode = 'normal';
+      return;
+    }
+    
+    this.currentMatchIndex = 0;
+    this.mode = 'search';
+    this.cursorY = this.searchMatches[0].y;
+    this.cursorX = this.searchMatches[0].x;
+    this.searchHistory.push({
+      keyword: this.searchKeyword,
+      matches: [...this.searchMatches]
+    });
+  }
+
+  private findAllMatches() {
+    this.searchMatches = [];
+    const keyword = this.searchKeyword;
+    
+    for (let y = 0; y < this.content.length; y++) {
+      const line = this.content[y];
+      let startIndex = 0;
+      
+      while (true) {
+        const index = line.indexOf(keyword, startIndex);
+        if (index === -1) break;
+        
+        this.searchMatches.push({ y, x: index });
+        startIndex = index + 1;
+      }
+    }
+  }
+
+  private handleSearchMode(key: string) {
+    switch (key) {
+      case 'Escape':
+        this.mode = 'normal';
+        this.searchKeyword = '';
+        this.searchMatches = [];
+        this.currentMatchIndex = -1;
+        break;
+      case 'n':
+        this.jumpToNextMatch();
+        break;
+      case 'N':
+        this.jumpToPreviousMatch();
+        break;
+      case 'b':
+        this.clearSearchMarks();
+        break;
+      case 'u':
+        this.restoreSearchMarks();
+        break;
+      case 'i':
+        this.enterMultiInsertMode();
+        break;
+    }
+  }
+
+  private jumpToNextMatch() {
+    if (this.searchMatches.length === 0) return;
+    
+    this.currentMatchIndex = (this.currentMatchIndex + 1) % this.searchMatches.length;
+    const match = this.searchMatches[this.currentMatchIndex];
+    this.cursorY = match.y;
+    this.cursorX = match.x;
+  }
+
+  private jumpToPreviousMatch() {
+    if (this.searchMatches.length === 0) return;
+    
+    this.currentMatchIndex = (this.currentMatchIndex - 1 + this.searchMatches.length) % this.searchMatches.length;
+    const match = this.searchMatches[this.currentMatchIndex];
+    this.cursorY = match.y;
+    this.cursorX = match.x;
+  }
+
+  private clearSearchMarks() {
+    if (this.currentMatchIndex < 0 || this.searchMatches.length === 0) {
+      return;
+    }
+    
+    const removedMatch = this.searchMatches[this.currentMatchIndex];
+    this.searchHistory.push({
+      keyword: this.searchKeyword,
+      matches: [removedMatch]
+    });
+    
+    this.searchMatches.splice(this.currentMatchIndex, 1);
+    
+    if (this.searchMatches.length === 0) {
+      this.searchKeyword = '';
+      this.currentMatchIndex = -1;
+      this.mode = 'normal';
+    } else {
+      if (this.currentMatchIndex >= this.searchMatches.length) {
+        this.currentMatchIndex = 0;
+      }
+      const nextMatch = this.searchMatches[this.currentMatchIndex];
+      this.cursorY = nextMatch.y;
+      this.cursorX = nextMatch.x;
+    }
+  }
+
+  private restoreSearchMarks() {
+    if (this.searchHistory.length === 0) return;
+    
+    const lastSearch = this.searchHistory.pop()!;
+    
+    for (const match of lastSearch.matches) {
+      this.searchMatches.push(match);
+    }
+    
+    this.searchMatches.sort((a, b) => {
+      if (a.y !== b.y) return a.y - b.y;
+      return a.x - b.x;
+    });
+    
+    if (this.searchKeyword.length === 0 && lastSearch.keyword) {
+      this.searchKeyword = lastSearch.keyword;
+    }
+    
+    this.currentMatchIndex = 0;
+    this.mode = 'search';
+    
+    if (this.searchMatches.length > 0) {
+      this.cursorY = this.searchMatches[0].y;
+      this.cursorX = this.searchMatches[0].x;
+    }
+  }
+
+  private enterMultiInsertMode() {
+    this.saveHistory();
+    this.mode = 'multi-insert';
+    this.hiddenInput?.focus();
+  }
+
+  private handleMultiInsertMode(key: string) {
+    if (key === 'Escape') {
+      this.mode = 'search';
+      this.hiddenInput?.blur();
+      return;
+    }
+    
+    if (key === 'Backspace') {
+      this.multiInsertBackspace();
+      return;
+    }
+    
+    if (key === 'Enter') {
+      this.multiInsertNewline();
+      return;
+    }
+    
+    if (key.length === 1) {
+      this.multiInsertCharacter(key);
+    }
+  }
+
+  private multiInsertCharacter(char: string) {
+    const keywordLength = this.searchKeyword.length;
+    
+    for (let i = this.searchMatches.length - 1; i >= 0; i--) {
+      const match = this.searchMatches[i];
+      const line = this.content[match.y];
+      
+      this.content[match.y] = 
+        line.substring(0, match.x + keywordLength) +
+        char +
+        line.substring(match.x + keywordLength);
+    }
+    
+    this.searchKeyword += char;
+    
+    for (let i = 0; i < this.searchMatches.length; i++) {
+      if (this.searchMatches[i].y === this.cursorY && 
+          this.searchMatches[i].x <= this.cursorX) {
+        this.cursorX++;
+      }
+    }
+  }
+
+  private multiInsertBackspace() {
+    if (this.searchKeyword.length === 0) return;
+    
+    const keywordLength = this.searchKeyword.length;
+    
+    for (let i = this.searchMatches.length - 1; i >= 0; i--) {
+      const match = this.searchMatches[i];
+      const line = this.content[match.y];
+      
+      this.content[match.y] = 
+        line.substring(0, match.x + keywordLength - 1) +
+        line.substring(match.x + keywordLength);
+    }
+    
+    this.searchKeyword = this.searchKeyword.slice(0, -1);
+    
+    for (let i = 0; i < this.searchMatches.length; i++) {
+      if (this.searchMatches[i].y === this.cursorY && 
+          this.searchMatches[i].x <= this.cursorX && 
+          this.cursorX > 0) {
+        this.cursorX--;
+      }
+    }
+  }
+
+  private multiInsertNewline() {
+    const keywordLength = this.searchKeyword.length;
+    
+    for (let i = this.searchMatches.length - 1; i >= 0; i--) {
+      const match = this.searchMatches[i];
+      const line = this.content[match.y];
+      
+      const before = line.substring(0, match.x + keywordLength);
+      const after = line.substring(match.x + keywordLength);
+      
+      this.content[match.y] = before;
+      this.content.splice(match.y + 1, 0, after);
+      
+      for (let j = i + 1; j < this.searchMatches.length; j++) {
+        if (this.searchMatches[j].y > match.y) {
+          this.searchMatches[j].y++;
+        }
+      }
+    }
+    
+    this.searchKeyword += '\n';
+    
+    if (this.cursorY < this.content.length - 1) {
+      this.cursorY++;
+      this.cursorX = 0;
+    }
   }
 
   render() {
