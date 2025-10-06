@@ -43,6 +43,15 @@ const mockP5Constructor = vi.fn((sketch: any, element: any) => {
 
 (window as any).p5 = mockP5Constructor;
 
+function pressKey(key: string) {
+  const event = new KeyboardEvent('keydown', { key });
+  window.dispatchEvent(event);
+}
+
+function pressKeys(...keys: string[]) {
+  keys.forEach(key => pressKey(key));
+}
+
 describe('VimEditor', () => {
   let editor: any;
 
@@ -68,8 +77,7 @@ describe('VimEditor', () => {
       expect(status.cursorX).toBe(0);
       expect(status.cursorY).toBe(0);
       
-      const event = new KeyboardEvent('keydown', { key: '$' });
-      window.dispatchEvent(event);
+      pressKey('$');
       
       const newStatus = editor.getStatus();
       expect(newStatus.cursorX).toBe(2);
@@ -91,8 +99,7 @@ describe('VimEditor', () => {
     it('should handle empty line', () => {
       editor.setContent(['']);
       
-      const event = new KeyboardEvent('keydown', { key: '$' });
-      window.dispatchEvent(event);
+      pressKey('$');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(0);
@@ -1052,17 +1059,12 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      let event = new KeyboardEvent('keydown', { key: 'f' });
-      window.dispatchEvent(event);
-      
-      event = new KeyboardEvent('keydown', { key: 'a' });
-      window.dispatchEvent(event);
+      pressKeys('f', 'a');
       
       let status = editor.getStatus();
       expect(status.mode).toBe('match');
       
-      event = new KeyboardEvent('keydown', { key: 'b' });
-      window.dispatchEvent(event);
+      pressKey('b');
       
       status = editor.getStatus();
       expect(status.mode).toBe('normal');
