@@ -605,6 +605,11 @@ export class VimEditor extends LitElement {
           this.moveToPreviousWORD();
         }
         return true;
+      case 'e':
+        for (let i = 0; i < count; i++) {
+          this.moveToWordEnd();
+        }
+        return true;
       default:
         return false;
     }
@@ -1054,6 +1059,51 @@ export class VimEditor extends LitElement {
       this.cursorX = i;
       this.updateInputPosition();
       return;
+    }
+    
+    this.cursorX = currentLine.length - 1;
+    this.updateInputPosition();
+  }
+
+  private moveToWordEnd() {
+    const currentLine = this.content[this.cursorY] || '';
+    
+    if (this.cursorX >= currentLine.length) {
+      return;
+    }
+    
+    const currentChar = currentLine[this.cursorX];
+    const currentType = this.getCharType(currentChar);
+    
+    if (currentType === 'space') {
+      return;
+    }
+    
+    let startPos = this.cursorX;
+    const nextChar = currentLine[this.cursorX + 1];
+    
+    if (nextChar && this.getCharType(nextChar) !== currentType) {
+      startPos = this.cursorX + 1;
+      
+      while (startPos < currentLine.length && this.getCharType(currentLine[startPos]) === 'space') {
+        startPos++;
+      }
+      
+      if (startPos >= currentLine.length) {
+        return;
+      }
+    }
+    
+    const newType = this.getCharType(currentLine[startPos]);
+    
+    for (let i = startPos + 1; i < currentLine.length; i++) {
+      const charType = this.getCharType(currentLine[i]);
+      
+      if (charType !== newType) {
+        this.cursorX = i - 1;
+        this.updateInputPosition();
+        return;
+      }
     }
     
     this.cursorX = currentLine.length - 1;

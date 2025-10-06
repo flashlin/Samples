@@ -265,6 +265,96 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('e key in normal mode', () => {
+    it('should move to end of current English word', () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'e' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(4);
+      expect(status.cursorY).toBe(0);
+    });
+
+    it('should move to end of current Chinese word', () => {
+      editor.setContent(['你好世界']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'e' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(3);
+    });
+
+    it('should stay at same position when cursor is on space', () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'e' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(5);
+    });
+
+    it('should handle cursor in middle of word', () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 2;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'e' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(4);
+    });
+
+    it('should handle cursor at end of word', () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 4;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'e' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(10);
+    });
+
+    it('should handle mixed English and Chinese', () => {
+      editor.setContent(['hello中文world']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      const event = new KeyboardEvent('keydown', { key: 'e' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(4);
+    });
+
+    it('should handle number prefix like 2e', () => {
+      editor.setContent(['one two three four']);
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      
+      let event = new KeyboardEvent('keydown', { key: '2' });
+      window.dispatchEvent(event);
+      
+      event = new KeyboardEvent('keydown', { key: 'e' });
+      window.dispatchEvent(event);
+      
+      const status = editor.getStatus();
+      expect(status.cursorX).toBe(6);
+    });
+  });
+
   describe('^ key in normal mode', () => {
     it('should move cursor to first non-space character', () => {
       editor.setContent(['  hello world']);
