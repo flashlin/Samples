@@ -1321,7 +1321,6 @@ export class VimEditor extends LitElement {
   }
 
   private cutVisualSelection() {
-    this.saveHistory({ cursorX: this.visualStartX, cursorY: this.visualStartY });
     const selection = this.getVisualSelection();
     navigator.clipboard.writeText(selection);
     
@@ -1333,6 +1332,8 @@ export class VimEditor extends LitElement {
     const endX = this.visualStartY === endY ? 
       Math.max(this.visualStartX, this.cursorX) : 
       Math.max(this.cursorX, this.visualStartX);
+
+    this.saveHistory({ cursorX: endX, cursorY: endY });
     
     this.deleteMultiLineSelection(startY, endY, startX, endX);
     this.adjustCursorX();
