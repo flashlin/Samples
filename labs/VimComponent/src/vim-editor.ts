@@ -716,6 +716,12 @@ export class VimEditor extends LitElement {
       return;
     }
     
+    if (this.visualKeyBuffer === 'i' && key === 'w') {
+      this.selectInnerWord();
+      this.visualKeyBuffer = '';
+      return;
+    }
+    
     this.visualKeyBuffer = '';
     
     switch (key) {
@@ -982,6 +988,22 @@ export class VimEditor extends LitElement {
     }
     
     return { startX, endX, y: this.cursorY };
+  }
+
+  private selectInnerWord() {
+    const range = this.getInnerWordRange();
+    if (!range) {
+      this.mode = 'normal';
+      return;
+    }
+    
+    this.mode = 'visual';
+    this.visualStartY = range.y;
+    this.visualStartX = range.startX;
+    this.cursorY = range.y;
+    this.cursorX = range.endX;
+    
+    this.updateInputPosition();
   }
 
   private deleteInnerWord() {

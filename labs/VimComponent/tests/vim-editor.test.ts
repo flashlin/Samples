@@ -1694,6 +1694,105 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('viw command', () => {
+    it('should select inner word from normal mode', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', 'w');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(0);
+      expect(editor.visualStartY).toBe(0);
+      expect(editor.cursorX).toBe(4);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should select word in the middle', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorX = 7;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', 'w');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(6);
+      expect(editor.cursorX).toBe(10);
+    });
+
+    it('should select Chinese word', async () => {
+      editor.setContent(['你好 世界 測試']);
+      await editor.updateComplete;
+      editor.cursorX = 3;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', 'w');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(3);
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should not select when cursor is on space', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', 'w');
+      
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should select word with cursor at end of word', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorX = 4;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', 'w');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(0);
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should select and delete word with viwx', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorX = 7;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', 'w', 'x');
+      
+      expect(editor.content).toEqual(['hello  test']);
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should select word with numbers', async () => {
+      editor.setContent(['test123 world']);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', 'w');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(0);
+      expect(editor.cursorX).toBe(6);
+    });
+  });
+
   describe('multiline quote support', () => {
     it('should delete multiline content with di` (backtick)', async () => {
       editor.setContent([
