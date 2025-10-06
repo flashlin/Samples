@@ -68,9 +68,8 @@ export class VimEditor extends LitElement {
   private commandPatterns = [
     { pattern: 'diw', action: () => { this.saveHistory(); this.deleteInnerWord(); } },
     { pattern: 'dw', action: () => { this.saveHistory(); this.deleteWord(); } },
-    { pattern: 'i', action: () => { this.saveHistory(); this.mode = 'insert'; this.hiddenInput?.focus(); } },
+    { pattern: 'i', action: () => { this.mode = 'insert'; this.hiddenInput?.focus(); } },
     { pattern: 'a', action: () => { 
-      this.saveHistory();
       const currentLine = this.content[this.cursorY] || '';
       if (this.cursorX < currentLine.length) {
         this.cursorX += 1;
@@ -79,7 +78,7 @@ export class VimEditor extends LitElement {
       this.updateInputPosition();
       this.hiddenInput?.focus();
     } },
-    { pattern: 'o', action: () => { this.saveHistory(); this.insertLineBelow(); this.hiddenInput?.focus(); } },
+    { pattern: 'o', action: () => { this.insertLineBelow(); this.hiddenInput?.focus(); } },
     { pattern: 'p', action: () => { this.saveHistory(); this.pasteAfterCursor(); } },
     { pattern: 'v', action: () => { 
       this.mode = 'visual';
@@ -343,7 +342,6 @@ export class VimEditor extends LitElement {
   firstUpdated() {
     this.createHiddenInput();
     this.waitForP5AndInitialize();
-    this.saveHistory();
   }
 
   private createHiddenInput() {
@@ -1324,7 +1322,6 @@ export class VimEditor extends LitElement {
 
   private cutVisualSelection() {
     this.saveHistory();
-    
     const selection = this.getVisualSelection();
     navigator.clipboard.writeText(selection);
     
@@ -1516,10 +1513,6 @@ export class VimEditor extends LitElement {
   }
 
   private saveHistory() {
-    if (this.historyIndex < this.history.length - 1) {
-      this.history = this.history.slice(0, this.historyIndex + 1);
-    }
-    
     this.history.push({
       content: JSON.parse(JSON.stringify(this.content)),
       cursorX: this.cursorX,
@@ -1534,9 +1527,9 @@ export class VimEditor extends LitElement {
   }
 
   private undo() {
-    if (this.historyIndex > 0) {
-      this.historyIndex--;
+    if (this.historyIndex >= 0) {
       const state = this.history[this.historyIndex];
+      this.historyIndex--;
       this.content = JSON.parse(JSON.stringify(state.content));
       this.cursorX = state.cursorX;
       this.cursorY = state.cursorY;
@@ -1550,7 +1543,6 @@ export class VimEditor extends LitElement {
   resetHistory() {
     this.history = [];
     this.historyIndex = -1;
-    this.saveHistory();
   }
 
 
