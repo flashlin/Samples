@@ -90,10 +90,8 @@ describe('VimEditor', () => {
       expect(buffer[0][1].char).toBe('b');
       expect(buffer[0][2].char).toBe('c');
       
-      if (newStatus.cursorVisible) {
-        expect(buffer[0][2].background).toEqual([255, 255, 255]);
-        expect(buffer[0][2].foreground).toEqual([0, 0, 0]);
-      }
+      expect(buffer[0][2].background).toEqual([255, 255, 255]);
+      expect(buffer[0][2].foreground).toEqual([0, 0, 0]);
     });
 
     it('should handle empty line', () => {
