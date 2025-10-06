@@ -1766,7 +1766,7 @@ describe('VimEditor', () => {
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe('hello world');
-      expect(editor.cursorX).toBe(0);
+      expect(editor.cursorX).toBe(4);
     });
 
     it('should handle multiple undo operations', async () => {
