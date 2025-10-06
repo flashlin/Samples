@@ -968,15 +968,33 @@ export class VimEditor extends LitElement {
       return;
     }
     
-    const currentLine = this.content[this.cursorY];
-    const beforeQuote = currentLine.substring(0, range.startX + 1);
-    const afterQuote = currentLine.substring(range.endX);
-    
-    this.content[this.cursorY] = beforeQuote + afterQuote;
-    
-    this.cursorX = range.startX + 1;
-    if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
-      this.cursorX = this.content[this.cursorY].length - 1;
+    if (range.startY === range.endY) {
+      const currentLine = this.content[range.startY];
+      const beforeQuote = currentLine.substring(0, range.startX + 1);
+      const afterQuote = currentLine.substring(range.endX);
+      
+      this.content[range.startY] = beforeQuote + afterQuote;
+      
+      this.cursorY = range.startY;
+      this.cursorX = range.startX + 1;
+      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
+        this.cursorX = this.content[this.cursorY].length - 1;
+      }
+    } else {
+      const firstLine = this.content[range.startY];
+      const lastLine = this.content[range.endY];
+      
+      const beforeQuote = firstLine.substring(0, range.startX + 1);
+      const afterQuote = lastLine.substring(range.endX);
+      
+      this.content[range.startY] = beforeQuote + afterQuote;
+      this.content.splice(range.startY + 1, range.endY - range.startY);
+      
+      this.cursorY = range.startY;
+      this.cursorX = range.startX + 1;
+      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
+        this.cursorX = this.content[this.cursorY].length - 1;
+      }
     }
   }
 
@@ -986,62 +1004,85 @@ export class VimEditor extends LitElement {
       return;
     }
     
-    this.visualStartY = this.cursorY;
+    this.visualStartY = range.startY;
     this.visualStartX = range.startX + 1;
-    this.cursorY = this.cursorY;
+    this.cursorY = range.endY;
     this.cursorX = range.endX - 1;
     
     this.updateInputPosition();
   }
 
-  private getInnerQuoteRange(quoteChar: string): { startX: number; endX: number } | null {
-    const currentLine = this.content[this.cursorY] || '';
-    if (currentLine.length === 0) {
+  private getInnerQuoteRange(quoteChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
+    const range = this.findMultiLineQuoteRange(quoteChar);
+    if (!range) {
       return null;
     }
     
-    const range = this.findQuoteRange(currentLine, this.cursorX, quoteChar);
-    if (!range || range.startX === range.endX) {
+    if (range.startY === range.endY && range.startX === range.endX) {
       return null;
     }
     
     return range;
   }
 
-  private findQuoteRange(line: string, cursorPos: number, quoteChar: string): { startX: number; endX: number } | null {
-    const quotes: number[] = [];
+  private findMultiLineQuoteRange(quoteChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
+    let startY = -1;
+    let startX = -1;
+    let endY = -1;
+    let endX = -1;
+    let inQuote = false;
     
-    for (let i = 0; i < line.length; i++) {
-      if (line[i] === quoteChar) {
-        let isEscaped = false;
-        if (i > 0 && line[i - 1] === '\\') {
-          let backslashCount = 0;
-          for (let j = i - 1; j >= 0 && line[j] === '\\'; j--) {
-            backslashCount++;
-          }
-          isEscaped = backslashCount % 2 === 1;
-        }
-        
-        if (!isEscaped) {
-          quotes.push(i);
-        }
-      }
-    }
-    
-    if (quotes.length < 2) {
-      return null;
-    }
-    
-    for (let i = 0; i < quotes.length - 1; i += 2) {
-      const startX = quotes[i];
-      const endX = quotes[i + 1];
+    for (let y = 0; y < this.content.length; y++) {
+      const line = this.content[y];
       
-      if (cursorPos >= startX && cursorPos <= endX) {
-        return { startX, endX };
+      for (let x = 0; x < line.length; x++) {
+        if (line[x] === quoteChar) {
+          let isEscaped = false;
+          if (x > 0 && line[x - 1] === '\\') {
+            let backslashCount = 0;
+            for (let j = x - 1; j >= 0 && line[j] === '\\'; j--) {
+              backslashCount++;
+            }
+            isEscaped = backslashCount % 2 === 1;
+          }
+          
+          if (!isEscaped) {
+            if (!inQuote) {
+              startY = y;
+              startX = x;
+              inQuote = true;
+            } else {
+              endY = y;
+              endX = x;
+              
+              if (this.isCursorInRange(startY, startX, endY, endX)) {
+                return { startY, startX, endY, endX };
+              }
+              
+              inQuote = false;
+            }
+          }
+        }
       }
     }
     
     return null;
+  }
+
+  private isCursorInRange(startY: number, startX: number, endY: number, endX: number): boolean {
+    if (this.cursorY < startY || this.cursorY > endY) {
+      return false;
+    }
+    
+    if (this.cursorY === startY && this.cursorX < startX) {
+      return false;
+    }
+    
+    if (this.cursorY === endY && this.cursorX > endX) {
+      return false;
+    }
+    
+    return true;
   }
 
   private deleteWord() {
@@ -1463,12 +1504,20 @@ export class VimEditor extends LitElement {
     
     const startY = Math.min(this.visualStartY, this.cursorY);
     const endY = Math.max(this.visualStartY, this.cursorY);
-    const startX = this.visualStartY === startY ? 
-      Math.min(this.visualStartX, this.cursorX) : 
-      Math.min(this.cursorX, this.visualStartX);
-    const endX = this.visualStartY === endY ? 
-      Math.max(this.visualStartX, this.cursorX) : 
-      Math.max(this.cursorX, this.visualStartX);
+    
+    let startX, endX;
+    if (startY === endY) {
+      startX = Math.min(this.visualStartX, this.cursorX);
+      endX = Math.max(this.visualStartX, this.cursorX);
+    } else {
+      if (this.visualStartY === startY) {
+        startX = this.visualStartX;
+        endX = this.cursorX;
+      } else {
+        startX = this.cursorX;
+        endX = this.visualStartX;
+      }
+    }
 
     this.saveHistory({ cursorX: endX, cursorY: endY });
     

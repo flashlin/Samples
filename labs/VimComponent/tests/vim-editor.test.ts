@@ -1694,6 +1694,185 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('multiline quote support', () => {
+    it('should delete multiline content with di` (backtick)', async () => {
+      editor.setContent([
+        'const str = `line1',
+        'line2',
+        'line3`;'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '`');
+      
+      expect(editor.content).toEqual(['const str = ``;']);
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it("should delete multiline content with di' (single quote)", async () => {
+      editor.setContent([
+        "const str = 'line1",
+        "line2",
+        "line3';"
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', "'");
+      
+      expect(editor.content).toEqual(["const str = '';"]);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should delete multiline content with di" (double quote)', async () => {
+      editor.setContent([
+        'const str = "line1',
+        'line2',
+        'line3";'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '"');
+      
+      expect(editor.content).toEqual(['const str = "";']);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should select multiline content with vi` (backtick)', async () => {
+      editor.setContent([
+        'const str = `line1',
+        'line2',
+        'line3`;'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '`');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartY).toBe(0);
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorY).toBe(2);
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it("should select multiline content with vi' (single quote)", async () => {
+      editor.setContent([
+        "const str = 'line1",
+        "line2",
+        "line3';"
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', "'");
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartY).toBe(0);
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorY).toBe(2);
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should select multiline content with vi" (double quote)', async () => {
+      editor.setContent([
+        'const str = "line1',
+        'line2',
+        'line3";'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '"');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartY).toBe(0);
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorY).toBe(2);
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should handle cursor on first line of multiline quote', async () => {
+      editor.setContent([
+        'const str = `hello',
+        'world`;'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '`');
+      
+      expect(editor.content).toEqual(['const str = ``;']);
+    });
+
+    it('should handle cursor on last line of multiline quote', async () => {
+      editor.setContent([
+        'const str = `hello',
+        'world`;'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 3;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 'i', '`');
+      
+      expect(editor.content).toEqual(['const str = ``;']);
+    });
+
+    it('should select multiline with vi` before deleting', async () => {
+      editor.setContent([
+        'const str = `hello',
+        'world`;'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '`');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartY).toBe(0);
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorY).toBe(1);
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should select and delete multiline with vi`x', async () => {
+      editor.setContent([
+        'const str = `hello',
+        'world`;'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '`', 'x');
+      
+      expect(editor.content).toEqual(['const str = ``;']);
+      expect(editor.mode).toBe('normal');
+    });
+  });
+
   describe('dw command', () => {
     it('should delete word from cursor position', async () => {
       editor.setContent(['hello world test']);
