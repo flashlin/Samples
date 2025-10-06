@@ -2894,6 +2894,112 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('search mode cursor movement', () => {
+    it('should move cursor left with h in search mode', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      
+      expect(editor.cursorX).toBe(0);
+      
+      pressKeys('$', 'h');
+      
+      expect(editor.cursorX).toBe(3);
+    });
+
+    it('should move cursor right with l in search mode', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      
+      expect(editor.cursorX).toBe(0);
+      
+      pressKey('l');
+      
+      expect(editor.cursorX).toBe(1);
+    });
+
+    it('should move to start of match with 0', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', 'l', 'l', '0');
+      
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should move to end of match with $', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', '$');
+      
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should not move beyond match boundaries', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      
+      pressKeys('l', 'l', 'l', 'l', 'l', 'l');
+      
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should delete character at cursor with x', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', 'l', 'x');
+      
+      expect(editor.content).toEqual([
+        'hllo world',
+        'test hllo test',
+        'hllo again'
+      ]);
+      expect(editor.getStatus().searchKeyword).toBe('hllo');
+    });
+
+    it('should delete all matches with d', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', 'd');
+      
+      expect(editor.content).toEqual([
+        ' world',
+        'test  test',
+        ' again'
+      ]);
+      expect(editor.mode).toBe('normal');
+    });
+  });
+
   describe('multi-insert mode', () => {
     it('should insert character at all search matches', async () => {
       editor.setContent(['hello world', 'test hello test', 'hello again']);

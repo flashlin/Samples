@@ -302,6 +302,7 @@ export class VimEditor extends LitElement {
         
         const isCursor = contentY === this.cursorY && contentX === this.cursorX && this.cursorVisible;
         const isNormalMode = this.mode === 'normal';
+        const isSearchMode = this.mode === 'search';
         
         const isVisualSelection = this.mode === 'visual' && this.isInVisualSelection(contentY, contentX);
         const isVisualLineSelection = this.mode === 'visual-line' && this.isInVisualLineSelection(contentY);
@@ -320,8 +321,8 @@ export class VimEditor extends LitElement {
         
         this.buffer[bufferY][bufferX] = {
           char,
-          foreground: (isCursor && isNormalMode) ? [0, 0, 0] : isCurrentSearchMatch ? [0, 0, 0] : isHighlighted ? [0, 0, 0] : [255, 255, 255],
-          background: (isCursor && isNormalMode) ? [255, 255, 255] : isCurrentSearchMatch ? [255, 165, 0] : isHighlighted ? [100, 149, 237] : [0, 0, 0],
+          foreground: (isCursor && (isNormalMode || isSearchMode)) ? [0, 0, 0] : isCurrentSearchMatch ? [0, 0, 0] : isHighlighted ? [0, 0, 0] : [255, 255, 255],
+          background: (isCursor && (isNormalMode || isSearchMode)) ? [255, 255, 255] : isCurrentSearchMatch ? [255, 165, 0] : isHighlighted ? [100, 149, 237] : [0, 0, 0],
         };
       }
     }
@@ -1882,7 +1883,7 @@ export class VimEditor extends LitElement {
   }
 
   private drawInsertCursor(p: p5) {
-    if (this.mode !== 'insert' || !this.cursorVisible) {
+    if ((this.mode !== 'insert' && this.mode !== 'multi-insert') || !this.cursorVisible) {
       return;
     }
     
@@ -2001,6 +2002,45 @@ export class VimEditor extends LitElement {
   }
 
   private handleSearchMode(key: string) {
+    if (this.currentMatchIndex >= 0 && this.searchMatches.length > 0) {
+      const match = this.searchMatches[this.currentMatchIndex];
+      const matchEndX = match.x + this.searchKeyword.length;
+      
+      if (key === 'h' || key === 'ArrowLeft') {
+        if (this.cursorX > match.x) {
+          this.cursorX--;
+        }
+        return;
+      }
+      
+      if (key === 'l' || key === 'ArrowRight') {
+        if (this.cursorX < matchEndX - 1) {
+          this.cursorX++;
+        }
+        return;
+      }
+      
+      if (key === '0' || key === 'Home') {
+        this.cursorX = match.x;
+        return;
+      }
+      
+      if (key === '$' || key === 'End') {
+        this.cursorX = matchEndX - 1;
+        return;
+      }
+      
+      if (key === 'x') {
+        this.searchModeDelete();
+        return;
+      }
+      
+      if (key === 'd') {
+        this.searchModeDeleteAll();
+        return;
+      }
+    }
+    
     switch (key) {
       case 'Escape':
         this.mode = 'normal';
@@ -2098,7 +2138,66 @@ export class VimEditor extends LitElement {
     }
   }
 
+  private searchModeDelete() {
+    if (this.currentMatchIndex < 0 || this.searchMatches.length === 0) {
+      return;
+    }
+    
+    this.saveHistory();
+    
+    const match = this.searchMatches[this.currentMatchIndex];
+    const matchEndX = match.x + this.searchKeyword.length;
+    const offsetInMatch = this.cursorX - match.x;
+    
+    for (let i = this.searchMatches.length - 1; i >= 0; i--) {
+      const m = this.searchMatches[i];
+      const line = this.content[m.y];
+      const deletePos = m.x + offsetInMatch;
+      
+      if (deletePos < m.x + this.searchKeyword.length) {
+        this.content[m.y] = line.substring(0, deletePos) + line.substring(deletePos + 1);
+      }
+    }
+    
+    this.searchKeyword = this.searchKeyword.substring(0, offsetInMatch) + 
+                         this.searchKeyword.substring(offsetInMatch + 1);
+    
+    if (this.searchKeyword.length === 0) {
+      this.searchMatches = [];
+      this.currentMatchIndex = -1;
+      this.mode = 'normal';
+    } else if (this.cursorX >= match.x + this.searchKeyword.length) {
+      this.cursorX = match.x + this.searchKeyword.length - 1;
+    }
+  }
+
+  private searchModeDeleteAll() {
+    if (this.currentMatchIndex < 0 || this.searchMatches.length === 0) {
+      return;
+    }
+    
+    this.saveHistory();
+    
+    for (let i = this.searchMatches.length - 1; i >= 0; i--) {
+      const match = this.searchMatches[i];
+      const line = this.content[match.y];
+      
+      this.content[match.y] = line.substring(0, match.x) + 
+                              line.substring(match.x + this.searchKeyword.length);
+    }
+    
+    this.searchKeyword = '';
+    this.searchMatches = [];
+    this.currentMatchIndex = -1;
+    this.mode = 'normal';
+  }
+
   private enterMultiInsertMode() {
+    if (this.currentMatchIndex >= 0 && this.searchMatches.length > 0) {
+      const match = this.searchMatches[this.currentMatchIndex];
+      this.cursorX = match.x + this.searchKeyword.length;
+    }
+    
     this.saveHistory();
     this.mode = 'multi-insert';
     this.hiddenInput?.focus();
