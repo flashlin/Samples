@@ -963,16 +963,12 @@ export class VimEditor extends LitElement {
   }
 
   private deleteInnerQuote(quoteChar: string) {
-    const currentLine = this.content[this.cursorY] || '';
-    if (currentLine.length === 0) {
+    const range = this.getInnerQuoteRange(quoteChar);
+    if (!range) {
       return;
     }
     
-    const range = this.findQuoteRange(currentLine, this.cursorX, quoteChar);
-    if (!range || range.startX === range.endX) {
-      return;
-    }
-    
+    const currentLine = this.content[this.cursorY];
     const beforeQuote = currentLine.substring(0, range.startX + 1);
     const afterQuote = currentLine.substring(range.endX);
     
@@ -985,13 +981,8 @@ export class VimEditor extends LitElement {
   }
 
   private selectInnerQuote(quoteChar: string) {
-    const currentLine = this.content[this.cursorY] || '';
-    if (currentLine.length === 0) {
-      return;
-    }
-    
-    const range = this.findQuoteRange(currentLine, this.cursorX, quoteChar);
-    if (!range || range.startX === range.endX) {
+    const range = this.getInnerQuoteRange(quoteChar);
+    if (!range) {
       return;
     }
     
@@ -1001,6 +992,20 @@ export class VimEditor extends LitElement {
     this.cursorX = range.endX - 1;
     
     this.updateInputPosition();
+  }
+
+  private getInnerQuoteRange(quoteChar: string): { startX: number; endX: number } | null {
+    const currentLine = this.content[this.cursorY] || '';
+    if (currentLine.length === 0) {
+      return null;
+    }
+    
+    const range = this.findQuoteRange(currentLine, this.cursorX, quoteChar);
+    if (!range || range.startX === range.endX) {
+      return null;
+    }
+    
+    return range;
   }
 
   private findQuoteRange(line: string, cursorPos: number, quoteChar: string): { startX: number; endX: number } | null {
