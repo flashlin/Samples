@@ -2061,7 +2061,10 @@ export class VimEditor extends LitElement {
         this.restoreSearchMarks();
         break;
       case 'i':
-        this.enterMultiInsertMode();
+        this.enterMultiInsertMode(false);
+        break;
+      case 'a':
+        this.enterMultiInsertMode(true);
         break;
     }
   }
@@ -2192,10 +2195,13 @@ export class VimEditor extends LitElement {
     this.mode = 'normal';
   }
 
-  private enterMultiInsertMode() {
-    if (this.currentMatchIndex >= 0 && this.searchMatches.length > 0) {
+  private enterMultiInsertMode(moveNext: boolean = false) {
+    if (moveNext && this.currentMatchIndex >= 0 && this.searchMatches.length > 0) {
       const match = this.searchMatches[this.currentMatchIndex];
-      this.cursorX = match.x + this.searchKeyword.length;
+      const matchEndX = match.x + this.searchKeyword.length;
+      if (this.cursorX < matchEndX) {
+        this.cursorX++;
+      }
     }
     
     this.saveHistory();
@@ -2226,62 +2232,76 @@ export class VimEditor extends LitElement {
   }
 
   private multiInsertCharacter(char: string) {
-    const keywordLength = this.searchKeyword.length;
+    if (this.currentMatchIndex < 0 || this.searchMatches.length === 0) {
+      return;
+    }
+    
+    const currentMatch = this.searchMatches[this.currentMatchIndex];
+    const offsetInMatch = this.cursorX - currentMatch.x;
     
     for (let i = this.searchMatches.length - 1; i >= 0; i--) {
       const match = this.searchMatches[i];
       const line = this.content[match.y];
+      const insertPos = match.x + offsetInMatch;
       
       this.content[match.y] = 
-        line.substring(0, match.x + keywordLength) +
+        line.substring(0, insertPos) +
         char +
-        line.substring(match.x + keywordLength);
+        line.substring(insertPos);
     }
     
-    this.searchKeyword += char;
+    this.searchKeyword = 
+      this.searchKeyword.substring(0, offsetInMatch) + 
+      char + 
+      this.searchKeyword.substring(offsetInMatch);
     
-    for (let i = 0; i < this.searchMatches.length; i++) {
-      if (this.searchMatches[i].y === this.cursorY && 
-          this.searchMatches[i].x <= this.cursorX) {
-        this.cursorX++;
-      }
-    }
+    this.cursorX++;
   }
 
   private multiInsertBackspace() {
-    if (this.searchKeyword.length === 0) return;
+    if (this.currentMatchIndex < 0 || this.searchMatches.length === 0 || this.searchKeyword.length === 0) {
+      return;
+    }
     
-    const keywordLength = this.searchKeyword.length;
+    const currentMatch = this.searchMatches[this.currentMatchIndex];
+    const offsetInMatch = this.cursorX - currentMatch.x;
+    
+    if (offsetInMatch <= 0) {
+      return;
+    }
     
     for (let i = this.searchMatches.length - 1; i >= 0; i--) {
       const match = this.searchMatches[i];
       const line = this.content[match.y];
+      const deletePos = match.x + offsetInMatch - 1;
       
       this.content[match.y] = 
-        line.substring(0, match.x + keywordLength - 1) +
-        line.substring(match.x + keywordLength);
+        line.substring(0, deletePos) +
+        line.substring(deletePos + 1);
     }
     
-    this.searchKeyword = this.searchKeyword.slice(0, -1);
+    this.searchKeyword = 
+      this.searchKeyword.substring(0, offsetInMatch - 1) + 
+      this.searchKeyword.substring(offsetInMatch);
     
-    for (let i = 0; i < this.searchMatches.length; i++) {
-      if (this.searchMatches[i].y === this.cursorY && 
-          this.searchMatches[i].x <= this.cursorX && 
-          this.cursorX > 0) {
-        this.cursorX--;
-      }
-    }
+    this.cursorX--;
   }
 
   private multiInsertNewline() {
-    const keywordLength = this.searchKeyword.length;
+    if (this.currentMatchIndex < 0 || this.searchMatches.length === 0) {
+      return;
+    }
+    
+    const currentMatch = this.searchMatches[this.currentMatchIndex];
+    const offsetInMatch = this.cursorX - currentMatch.x;
     
     for (let i = this.searchMatches.length - 1; i >= 0; i--) {
       const match = this.searchMatches[i];
       const line = this.content[match.y];
+      const splitPos = match.x + offsetInMatch;
       
-      const before = line.substring(0, match.x + keywordLength);
-      const after = line.substring(match.x + keywordLength);
+      const before = line.substring(0, splitPos);
+      const after = line.substring(splitPos);
       
       this.content[match.y] = before;
       this.content.splice(match.y + 1, 0, after);
@@ -2293,12 +2313,13 @@ export class VimEditor extends LitElement {
       }
     }
     
-    this.searchKeyword += '\n';
+    this.searchKeyword = 
+      this.searchKeyword.substring(0, offsetInMatch) + 
+      '\n' + 
+      this.searchKeyword.substring(offsetInMatch);
     
-    if (this.cursorY < this.content.length - 1) {
-      this.cursorY++;
-      this.cursorX = 0;
-    }
+    this.cursorY++;
+    this.cursorX = currentMatch.x;
   }
 
   render() {

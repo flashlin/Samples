@@ -3001,6 +3001,72 @@ describe('VimEditor', () => {
   });
 
   describe('multi-insert mode', () => {
+    it('should enter multi-insert at current cursor position with i', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      expect(editor.cursorX).toBe(0);
+      
+      pressKeys('l', 'l', 'i');
+      
+      expect(editor.mode).toBe('multi-insert');
+      expect(editor.cursorX).toBe(2);
+    });
+
+    it('should enter multi-insert at next position with a', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      expect(editor.cursorX).toBe(0);
+      
+      pressKeys('l', 'l', 'a');
+      
+      expect(editor.mode).toBe('multi-insert');
+      expect(editor.cursorX).toBe(3);
+    });
+
+    it('should insert at cursor position not at end', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      pressKeys('l', 'i', 'X');
+      
+      expect(editor.content).toEqual([
+        'hXello world',
+        'test hXello test',
+        'hXello again'
+      ]);
+    });
+
+    it('should insert after cursor with a key', async () => {
+      editor.setContent(['hello world', 'test hello test', 'hello again']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'l', 'l', 'l', 'l', '*');
+      pressKeys('l', 'a', 'X');
+      
+      expect(editor.content).toEqual([
+        'heXllo world',
+        'test heXllo test',
+        'heXllo again'
+      ]);
+    });
+
     it('should insert character at all search matches', async () => {
       editor.setContent(['hello world', 'test hello test', 'hello again']);
       await editor.updateComplete;
@@ -3008,7 +3074,7 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      pressKeys('v', 'l', 'l', 'l', 'l', '*', 'i', 'X');
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', '$', 'a', 'X');
       
       expect(editor.content).toEqual([
         'helloX world',
@@ -3040,7 +3106,7 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      pressKeys('v', 'l', 'l', 'l', 'l', '*', 'i', 'Enter');
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', '$', 'a', 'Enter');
       
       expect(editor.content).toEqual([
         'hello',
@@ -3074,7 +3140,7 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      pressKeys('v', 'l', 'l', 'l', 'l', '*', 'i', 'X', 'Y', 'Z');
+      pressKeys('v', 'l', 'l', 'l', 'l', '*', '$', 'a', 'X', 'Y', 'Z');
       
       expect(editor.content).toEqual([
         'helloXYZ world',
