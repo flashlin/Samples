@@ -1321,7 +1321,7 @@ export class VimEditor extends LitElement {
   }
 
   private cutVisualSelection() {
-    this.saveHistory();
+    this.saveHistory({ cursorX: this.visualStartX, cursorY: this.visualStartY });
     const selection = this.getVisualSelection();
     navigator.clipboard.writeText(selection);
     
@@ -1512,11 +1512,14 @@ export class VimEditor extends LitElement {
     this.updateInputPosition();
   }
 
-  private saveHistory() {
+  private saveHistory(cursorPos: { cursorX: number; cursorY: number } | null = null) {
+    const saveCursorX = cursorPos !== null ? cursorPos.cursorX : this.cursorX;
+    const saveCursorY = cursorPos !== null ? cursorPos.cursorY : this.cursorY;
+    
     this.history.push({
       content: JSON.parse(JSON.stringify(this.content)),
-      cursorX: this.cursorX,
-      cursorY: this.cursorY
+      cursorX: saveCursorX,
+      cursorY: saveCursorY
     });
     
     if (this.history.length > this.maxHistorySize) {
