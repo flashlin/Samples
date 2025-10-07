@@ -74,6 +74,7 @@ export class VimEditor extends LitElement {
   private searchHistory: Array<{ keyword: string; matches: Array<{ y: number; x: number }> }> = [];
   
   private commandPatterns = [
+    { pattern: 'gg', action: () => { this.moveToFirstLine(); } },
     { pattern: 'diw', action: () => { this.saveHistory(); this.deleteInnerWord(); } },
     { pattern: 'di`', action: () => { this.saveHistory(); this.deleteInnerQuote('`'); } },
     { pattern: "di'", action: () => { this.saveHistory(); this.deleteInnerQuote("'"); } },
@@ -654,6 +655,9 @@ export class VimEditor extends LitElement {
           this.moveToWordEnd();
         }
         return true;
+      case 'G':
+        this.moveToLastLine();
+        return true;
       default:
         return false;
     }
@@ -887,6 +891,17 @@ export class VimEditor extends LitElement {
     }
     
     this.cursorX = firstNonSpace;
+    this.updateInputPosition();
+  }
+
+  private moveToFirstLine() {
+    this.cursorY = 0;
+    this.moveCursorToLineStart();
+  }
+
+  private moveToLastLine() {
+    this.cursorY = Math.max(0, this.content.length - 1);
+    this.adjustCursorX();
     this.updateInputPosition();
   }
 
