@@ -110,6 +110,7 @@ export class VimEditor extends LitElement {
       this.fastJumpInput = '';
     } },
     { pattern: 'u', action: () => { this.undo(); } },
+    { pattern: '%', action: () => { this.jumpToMatchingBracket(); } },
   ];
 
   private history: Array<{ content: string[]; cursorX: number; cursorY: number }> = [];
@@ -903,6 +904,144 @@ export class VimEditor extends LitElement {
     this.cursorY = Math.max(0, this.content.length - 1);
     this.adjustCursorX();
     this.updateInputPosition();
+  }
+
+  private jumpToMatchingBracket() {
+    const currentLine = this.content[this.cursorY] || '';
+    const currentChar = currentLine[this.cursorX];
+    
+    if (!currentChar) {
+      return;
+    }
+    
+    const openBrackets: { [key: string]: string } = {
+      '[': ']',
+      '{': '}',
+      '(': ')',
+      '"': '"',
+      "'": "'",
+      '`': '`',
+      '<': '>',
+    };
+    
+    const closeBrackets: { [key: string]: string } = {
+      ']': '[',
+      '}': '{',
+      ')': '(',
+      '"': '"',
+      "'": "'",
+      '`': '`',
+      '>': '<',
+    };
+    
+    let matchPos: { y: number; x: number } | null = null;
+    
+    if (openBrackets[currentChar]) {
+      matchPos = this.findMatchingBracketForward(currentChar, openBrackets[currentChar]);
+    } else if (closeBrackets[currentChar]) {
+      matchPos = this.findMatchingBracketBackward(closeBrackets[currentChar], currentChar);
+    }
+    
+    if (matchPos) {
+      this.cursorY = matchPos.y;
+      this.cursorX = matchPos.x;
+      this.updateInputPosition();
+    }
+  }
+
+  private findMatchingBracketForward(openChar: string, closeChar: string): { y: number; x: number } | null {
+    let depth = 0;
+    const isQuote = openChar === closeChar;
+    
+    for (let y = this.cursorY; y < this.content.length; y++) {
+      const line = this.content[y];
+      const startX = y === this.cursorY ? this.cursorX : 0;
+      
+      for (let x = startX; x < line.length; x++) {
+        if (this.isEscaped(line, x)) {
+          continue;
+        }
+        
+        const char = line[x];
+        
+        if (isQuote) {
+          if (char === openChar) {
+            if (y === this.cursorY && x === this.cursorX) {
+              depth++;
+            } else if (depth === 1) {
+              return { y, x };
+            } else {
+              depth++;
+            }
+          }
+        } else {
+          if (char === openChar) {
+            depth++;
+          } else if (char === closeChar) {
+            depth--;
+            if (depth === 0) {
+              return { y, x };
+            }
+          }
+        }
+      }
+    }
+    
+    return null;
+  }
+
+  private findMatchingBracketBackward(openChar: string, closeChar: string): { y: number; x: number } | null {
+    let depth = 0;
+    const isQuote = openChar === closeChar;
+    
+    for (let y = this.cursorY; y >= 0; y--) {
+      const line = this.content[y];
+      const startX = y === this.cursorY ? this.cursorX : line.length - 1;
+      
+      for (let x = startX; x >= 0; x--) {
+        if (this.isEscaped(line, x)) {
+          continue;
+        }
+        
+        const char = line[x];
+        
+        if (isQuote) {
+          if (char === closeChar) {
+            if (y === this.cursorY && x === this.cursorX) {
+              depth++;
+            } else if (depth === 1) {
+              return { y, x };
+            } else {
+              depth++;
+            }
+          }
+        } else {
+          if (char === closeChar) {
+            depth++;
+          } else if (char === openChar) {
+            depth--;
+            if (depth === 0) {
+              return { y, x };
+            }
+          }
+        }
+      }
+    }
+    
+    return null;
+  }
+
+  private isEscaped(line: string, position: number): boolean {
+    if (position === 0) {
+      return false;
+    }
+    
+    let backslashCount = 0;
+    for (let i = position - 1; i >= 0 && line[i] === '\\'; i--) {
+      backslashCount++;
+    }
+    
+    return backslashCount % 2 === 1;
   }
 
   private adjustScrollToCursor() {
