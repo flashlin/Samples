@@ -48,3 +48,77 @@ if (this.keyBuffer === 'special' && needsComplexLogic) {
 }
 ```
 
+## Testing Guidelines
+
+### CRITICAL: Test-Driven Development Workflow
+When adding or modifying any functionality, you MUST follow this workflow:
+
+1. **After Implementation**: Run tests immediately
+   ```bash
+   npm test -- --run
+   ```
+   - Ensure all existing tests still pass
+   - Verify that new/modified functionality doesn't break existing features
+   - If any tests fail, fix the implementation before proceeding
+
+2. **Add Test Cases**: Write comprehensive test cases for the new functionality
+   - Cover normal use cases
+   - Cover edge cases and error conditions
+   - Cover interaction with existing features
+   - Test both forward and backward operations (if applicable)
+   - Test with various input types (English, Chinese, special characters, etc.)
+
+3. **Final Verification**: Run all tests again
+   ```bash
+   npm test -- --run
+   ```
+   - Ensure all tests pass (both old and new)
+   - Verify test coverage is adequate
+   - Only consider the task complete when all tests are green
+
+### Test Case Requirements
+- Place test cases in the `tests/` directory
+- Follow existing test patterns and naming conventions
+- Use descriptive test names that explain what is being tested
+- Group related tests using `describe` blocks
+- Each test should be independent and isolated
+
+### Example Test Workflow
+```typescript
+// 1. Implement feature
+{ pattern: '%', action: () => { this.jumpToMatchingBracket(); } }
+
+// 2. Run existing tests
+// npm test -- --run
+
+// 3. Add test cases
+describe('% command (jump to matching bracket)', () => {
+  it('should jump from opening bracket to closing bracket', async () => {
+    // test implementation
+  });
+  
+  it('should handle nested brackets', async () => {
+    // test implementation
+  });
+  
+  it('should handle escaped characters', async () => {
+    // test implementation
+  });
+});
+
+// 4. Run all tests again
+// npm test -- --run
+```
+
+### Why This Matters
+- Prevents regression bugs
+- Ensures code quality and reliability
+- Documents expected behavior
+- Makes future refactoring safer
+- Provides confidence in changes
+
+**⚠️ WARNING**: Do NOT consider any feature implementation complete until:
+1. All existing tests pass
+2. New test cases are written
+3. All tests (old + new) pass successfully
+
