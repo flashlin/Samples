@@ -22,3 +22,29 @@ Before processing any user request, you must:
 - Use camelCase for interface properties
 - Follow TypeScript best practices for Web Component development
 
+## Key Mapping Implementation Guidelines
+
+### Priority: Use commandPatterns
+When adding any key mapping functionality:
+1. **First Priority**: Use the `commandPatterns` array with pattern-based approach
+   - Add new patterns to the `commandPatterns` array
+   - Define the key sequence as a pattern string
+   - Implement the action as a callback function
+   - This approach is preferred for its simplicity and maintainability
+
+2. **Alternative Approach**: Only implement custom logic when:
+   - The pattern-based approach cannot handle the requirement
+   - Complex state management is needed beyond simple pattern matching
+   - Special handling is required that doesn't fit the pattern model
+
+### Example
+```typescript
+// Good: Using commandPatterns
+{ pattern: 'gg', action: () => { this.moveToFirstLine(); } }
+
+// Only when necessary: Custom implementation
+if (this.keyBuffer === 'special' && needsComplexLogic) {
+  // custom handling
+}
+```
+
