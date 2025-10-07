@@ -76,6 +76,7 @@ export class VimEditor extends LitElement {
   private commandPatterns = [
     { pattern: 'gg', action: () => { this.moveToFirstLine(); } },
     { pattern: 'diw', action: () => { this.saveHistory(); this.deleteInnerWord(); } },
+    { pattern: 'di%', action: () => { this.saveHistory(); this.deleteInnerBracket(); } },
     { pattern: 'di`', action: () => { this.saveHistory(); this.deleteInnerQuote('`'); } },
     { pattern: "di'", action: () => { this.saveHistory(); this.deleteInnerQuote("'"); } },
     { pattern: 'di"', action: () => { this.saveHistory(); this.deleteInnerQuote('"'); } },
@@ -1218,6 +1219,42 @@ export class VimEditor extends LitElement {
     }
   }
 
+  private deleteInnerBracket() {
+    const range = this.getInnerBracketRange();
+    if (!range) {
+      return;
+    }
+    
+    if (range.startY === range.endY) {
+      const currentLine = this.content[range.startY];
+      const beforeBracket = currentLine.substring(0, range.startX + 1);
+      const afterBracket = currentLine.substring(range.endX);
+      
+      this.content[range.startY] = beforeBracket + afterBracket;
+      
+      this.cursorY = range.startY;
+      this.cursorX = range.startX + 1;
+      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
+        this.cursorX = this.content[this.cursorY].length - 1;
+      }
+    } else {
+      const firstLine = this.content[range.startY];
+      const lastLine = this.content[range.endY];
+      
+      const beforeBracket = firstLine.substring(0, range.startX + 1);
+      const afterBracket = lastLine.substring(range.endX);
+      
+      this.content[range.startY] = beforeBracket + afterBracket;
+      this.content.splice(range.startY + 1, range.endY - range.startY);
+      
+      this.cursorY = range.startY;
+      this.cursorX = range.startX + 1;
+      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
+        this.cursorX = this.content[this.cursorY].length - 1;
+      }
+    }
+  }
+
   private selectInnerQuote(quoteChar: string) {
     const range = this.getInnerQuoteRange(quoteChar);
     if (!range) {
@@ -1243,6 +1280,132 @@ export class VimEditor extends LitElement {
     }
     
     return range;
+  }
+
+  private getInnerBracketRange(): { startY: number; startX: number; endY: number; endX: number } | null {
+    const bracketPairs: Array<[string, string]> = [
+      ['[', ']'],
+      ['{', '}'],
+      ['(', ')'],
+      ['"', '"'],
+      ["'", "'"],
+      ['`', '`'],
+      ['<', '>'],
+    ];
+    
+    let closestRange: { startY: number; startX: number; endY: number; endX: number; distance: number } | null = null;
+    
+    for (const [openChar, closeChar] of bracketPairs) {
+      const range = this.findInnerBracketRange(openChar, closeChar);
+      if (range) {
+        const distance = this.calculateDistanceFromCursor(range.startY, range.startX, range.endY, range.endX);
+        if (!closestRange || distance < closestRange.distance) {
+          closestRange = { ...range, distance };
+        }
+      }
+    }
+    
+    if (!closestRange) {
+      return null;
+    }
+    
+    return {
+      startY: closestRange.startY,
+      startX: closestRange.startX,
+      endY: closestRange.endY,
+      endX: closestRange.endX,
+    };
+  }
+
+  private findInnerBracketRange(openChar: string, closeChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
+    const isQuote = openChar === closeChar;
+    
+    if (isQuote) {
+      return this.findMultiLineQuoteRange(openChar);
+    }
+    
+    let openPos = this.findOpeningBracketBeforeCursor(openChar, closeChar);
+    if (!openPos) {
+      return null;
+    }
+    
+    let closePos = this.findClosingBracketFromPosition(openChar, closeChar, openPos.y, openPos.x);
+    if (!closePos) {
+      return null;
+    }
+    
+    if (this.isCursorInRange(openPos.y, openPos.x, closePos.y, closePos.x)) {
+      return {
+        startY: openPos.y,
+        startX: openPos.x,
+        endY: closePos.y,
+        endX: closePos.x,
+      };
+    }
+    
+    return null;
+  }
+
+  private findOpeningBracketBeforeCursor(openChar: string, closeChar: string): { y: number; x: number } | null {
+    let depth = 0;
+    
+    for (let y = this.cursorY; y >= 0; y--) {
+      const line = this.content[y];
+      const endX = y === this.cursorY ? this.cursorX : line.length - 1;
+      
+      for (let x = endX; x >= 0; x--) {
+        if (this.isEscaped(line, x)) {
+          continue;
+        }
+        
+        const char = line[x];
+        
+        if (char === closeChar) {
+          depth++;
+        } else if (char === openChar) {
+          if (depth === 0) {
+            return { y, x };
+          }
+          depth--;
+        }
+      }
+    }
+    
+    return null;
+  }
+
+  private findClosingBracketFromPosition(openChar: string, closeChar: string, startY: number, startX: number): { y: number; x: number } | null {
+    let depth = 0;
+    
+    for (let y = startY; y < this.content.length; y++) {
+      const line = this.content[y];
+      const beginX = y === startY ? startX : 0;
+      
+      for (let x = beginX; x < line.length; x++) {
+        if (this.isEscaped(line, x)) {
+          continue;
+        }
+        
+        const char = line[x];
+        
+        if (char === openChar) {
+          depth++;
+        } else if (char === closeChar) {
+          depth--;
+          if (depth === 0) {
+            return { y, x };
+          }
+        }
+      }
+    }
+    
+    return null;
+  }
+
+  private calculateDistanceFromCursor(startY: number, startX: number, endY: number, endX: number): number {
+    const distToStart = Math.abs(this.cursorY - startY) * 1000 + Math.abs(this.cursorX - startX);
+    const distToEnd = Math.abs(this.cursorY - endY) * 1000 + Math.abs(this.cursorX - endX);
+    return Math.min(distToStart, distToEnd);
   }
 
   private findMultiLineQuoteRange(quoteChar: string): { startY: number; startX: number; endY: number; endX: number } | null {

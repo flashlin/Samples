@@ -3421,5 +3421,264 @@ describe('VimEditor', () => {
       expect(editor.cursorX).toBe(28);
     });
   });
+
+  describe('di% command (delete inner bracket)', () => {
+    it('should delete content between brackets when cursor is inside', async () => {
+      editor.setContent(['const arr = [1, 2, 3];']);
+      await editor.updateComplete;
+      editor.cursorX = 14;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const arr = [];');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should delete content between parentheses when cursor is inside', async () => {
+      editor.setContent(['function test(a, b, c) {']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('function test() {');
+      expect(editor.cursorX).toBe(14);
+    });
+
+    it('should delete content between curly braces when cursor is inside', async () => {
+      editor.setContent(['if (true) { console.log("test"); }']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('if (true) {}');
+      expect(editor.cursorX).toBe(11);
+    });
+
+    it('should delete content between double quotes when cursor is inside', async () => {
+      editor.setContent(['const str = "hello world";']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const str = "";');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should delete content between single quotes when cursor is inside', async () => {
+      editor.setContent(["const str = 'hello world';"]);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe("const str = '';");
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should delete content between backticks when cursor is inside', async () => {
+      editor.setContent(['const str = `hello ${name}`;']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const str = ``;');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should delete content between angle brackets when cursor is inside', async () => {
+      editor.setContent(['const tag = <div>content</div>;']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const tag = <>content</div>;');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should handle nested brackets correctly', async () => {
+      editor.setContent(['const arr = [[1, 2], [3, 4]];']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const arr = [[], [3, 4]];');
+      expect(editor.cursorX).toBe(14);
+    });
+
+    it('should handle deeply nested structures', async () => {
+      editor.setContent(['const obj = { a: { b: { c: 1 } } };']);
+      await editor.updateComplete;
+      editor.cursorX = 20;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const obj = { a: {} };');
+      expect(editor.cursorX).toBe(18);
+    });
+
+    it('should handle multiline brackets', async () => {
+      editor.setContent([
+        'function test() {',
+        '  const x = 1;',
+        '  return x;',
+        '}'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 5;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content).toEqual(['function test() {}']);
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(17);
+    });
+
+    it('should handle multiline quotes', async () => {
+      editor.setContent([
+        'const str = `',
+        '  hello',
+        '  world',
+        '`;'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content).toEqual(['const str = ``;']);
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should do nothing if cursor is not inside any brackets', async () => {
+      editor.setContent(['const x = 1;']);
+      await editor.updateComplete;
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      const originalContent = editor.content[0];
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe(originalContent);
+      expect(editor.cursorX).toBe(6);
+    });
+
+    it('should handle escaped quotes correctly', async () => {
+      editor.setContent(['const str = "hello \\" world";']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const str = "";');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should find closest bracket pair when multiple options exist', async () => {
+      editor.setContent(['const x = (a + (b * c)) + d;']);
+      await editor.updateComplete;
+      editor.cursorX = 18;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const x = (a + ()) + d;');
+      expect(editor.cursorX).toBe(16);
+    });
+
+    it('should support undo for di%', async () => {
+      editor.setContent(['const arr = [1, 2, 3];']);
+      await editor.updateComplete;
+      editor.cursorX = 14;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      const originalContent = editor.content[0];
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const arr = [];');
+      
+      pressKey('u');
+      
+      expect(editor.content[0]).toBe(originalContent);
+    });
+
+    it('should handle cursor at bracket position', async () => {
+      editor.setContent(['const arr = [1, 2, 3];']);
+      await editor.updateComplete;
+      editor.cursorX = 12;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('i');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const arr = [];');
+      expect(editor.cursorX).toBe(13);
+    });
+  });
 });
 
