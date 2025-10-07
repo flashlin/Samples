@@ -263,6 +263,16 @@ export class VimEditor extends LitElement {
     }
   }
 
+  load(text: string): void {
+    const lines = text.split('\n');
+    this.setContent(lines);
+    this.cursorX = 0;
+    this.cursorY = 0;
+    this.scrollOffsetX = 0;
+    this.scrollOffsetY = 0;
+    this.mode = 'normal';
+  }
+
   getDisplayColumn(): number {
     const currentLine = this.content[this.cursorY] || '';
     let displayCol = 0;

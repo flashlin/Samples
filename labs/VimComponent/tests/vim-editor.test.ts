@@ -3680,5 +3680,131 @@ describe('VimEditor', () => {
       expect(editor.cursorX).toBe(13);
     });
   });
+
+  describe('load method (public API)', () => {
+    it('should load single line text', async () => {
+      const text = 'Hello World';
+      editor.load(text);
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual(['Hello World']);
+      expect(editor.cursorX).toBe(0);
+      expect(editor.cursorY).toBe(0);
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should load multiline text', async () => {
+      const text = 'Line 1\nLine 2\nLine 3';
+      editor.load(text);
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual(['Line 1', 'Line 2', 'Line 3']);
+      expect(editor.cursorX).toBe(0);
+      expect(editor.cursorY).toBe(0);
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should load Chinese text', async () => {
+      const text = '你好世界\n測試文字';
+      editor.load(text);
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual(['你好世界', '測試文字']);
+      expect(editor.cursorX).toBe(0);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should load empty text', async () => {
+      const text = '';
+      editor.load(text);
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual(['']);
+      expect(editor.cursorX).toBe(0);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should load text with only newlines', async () => {
+      const text = '\n\n\n';
+      editor.load(text);
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual(['', '', '', '']);
+      expect(editor.cursorX).toBe(0);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should reset cursor position when loading new text', async () => {
+      editor.setContent(['Line 1', 'Line 2', 'Line 3']);
+      await editor.updateComplete;
+      editor.cursorX = 5;
+      editor.cursorY = 2;
+      
+      const text = 'New content';
+      editor.load(text);
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual(['New content']);
+      expect(editor.cursorX).toBe(0);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should reset scroll position when loading new text', async () => {
+      editor.setContent(['Line 1', 'Line 2', 'Line 3', 'Line 4', 'Line 5']);
+      await editor.updateComplete;
+      
+      const text = 'New content';
+      editor.load(text);
+      await editor.updateComplete;
+      
+      const scrollOffset = editor.getScrollOffset();
+      expect(scrollOffset.x).toBe(0);
+      expect(scrollOffset.y).toBe(0);
+    });
+
+    it('should set mode to normal when loading new text', async () => {
+      editor.mode = 'insert';
+      
+      const text = 'Some text';
+      editor.load(text);
+      await editor.updateComplete;
+      
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should handle text with mixed line endings', async () => {
+      const text = 'Line 1\nLine 2\nLine 3';
+      editor.load(text);
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual(['Line 1', 'Line 2', 'Line 3']);
+    });
+
+    it('should load code with special characters', async () => {
+      const text = 'function test() {\n  return "Hello!";\n}';
+      editor.load(text);
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual([
+        'function test() {',
+        '  return "Hello!";',
+        '}'
+      ]);
+      expect(editor.cursorX).toBe(0);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should allow editing after loading text', async () => {
+      const text = 'Initial text';
+      editor.load(text);
+      await editor.updateComplete;
+      
+      editor.mode = 'insert';
+      editor.cursorX = 7;
+      
+      expect(editor.content[0]).toBe('Initial text');
+      expect(editor.cursorX).toBe(7);
+    });
+  });
 });
 

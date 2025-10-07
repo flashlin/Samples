@@ -26,11 +26,87 @@
         canvas {
             display: block;
         }
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007acc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #005a9e;
+        }
     </style>
 </head>
 <body>
     <h1>Vim Editor Component Demo</h1>
+    <div class="controls">
+        <button onclick="loadSampleCode()">Load Sample Code</button>
+        <button onclick="loadMarkdown()">Load Markdown</button>
+        <button onclick="loadJSON()">Load JSON</button>
+    </div>
     <vim-editor></vim-editor>
     <script type="module" src="/src/vim-editor.ts"></script>
+    <script type="module">
+        const editor = document.querySelector('vim-editor');
+
+        window.loadSampleCode = function() {
+            const code = `function fibonacci(n) {
+  if (n <= 1) {
+    return n;
+  }
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+console.log(fibonacci(10));`;
+            editor.load(code);
+        };
+
+        window.loadMarkdown = function() {
+            const markdown = `# VimEditor Component
+
+A powerful Vim-like editor built as a Web Component.
+
+## Features
+
+- Normal mode navigation
+- Visual mode selection
+- Insert mode editing
+- Command patterns support
+- Bracket matching with %
+- And much more!
+
+## Usage
+
+\`\`\`javascript
+const editor = document.querySelector('vim-editor');
+editor.load('Your text here');
+\`\`\``;
+            editor.load(markdown);
+        };
+
+        window.loadJSON = function() {
+            const json = `{
+  "name": "vim-editor",
+  "version": "1.0.0",
+  "description": "A Vim-like editor component",
+  "features": [
+    "Normal mode",
+    "Visual mode",
+    "Insert mode",
+    "Bracket matching"
+  ],
+  "author": "Your Name"
+}`;
+            editor.load(json);
+        };
+    </script>
 </body>
 </html>
