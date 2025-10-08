@@ -61,11 +61,11 @@ export class NormalModeHandler extends BaseModeHandler {
   }
   
   handleKey(key: string, editor: IVimEditor): void {
-    if (editor['keyBuffer'] === '' && editor['handleMovement'](key)) {
+    if (editor.keyBuffer === '' && editor['handleMovement'](key)) {
       return;
     }
     
-    editor['keyBuffer'] += key;
+    editor.keyBuffer += key;
     this.processKeyBuffer(editor);
   }
   
@@ -74,51 +74,51 @@ export class NormalModeHandler extends BaseModeHandler {
     const sortedPatterns = [...commandPatterns].sort((a, b) => b.pattern.length - a.pattern.length);
     
     for (const { pattern, action } of sortedPatterns) {
-      if (editor['keyBuffer'] === pattern) {
-        editor['keyBuffer'] = '';
+      if (editor.keyBuffer === pattern) {
+        editor.keyBuffer = '';
         action();
         return true;
       }
     }
     
-    const dNumberJMatch = /^d(\d+)j$/.exec(editor['keyBuffer']);
+    const dNumberJMatch = /^d(\d+)j$/.exec(editor.keyBuffer);
     if (dNumberJMatch) {
       const count = parseInt(dNumberJMatch[1], 10);
-      editor['keyBuffer'] = '';
+      editor.keyBuffer = '';
       editor['saveHistory']();
       editor['deleteLinesDown'](count);
       return true;
     }
     
-    const dNumberKMatch = /^d(\d+)k$/.exec(editor['keyBuffer']);
+    const dNumberKMatch = /^d(\d+)k$/.exec(editor.keyBuffer);
     if (dNumberKMatch) {
       const count = parseInt(dNumberKMatch[1], 10);
-      editor['keyBuffer'] = '';
+      editor.keyBuffer = '';
       editor['saveHistory']();
       editor['deleteLinesUp'](count);
       return true;
     }
     
-    const numberGMatch = /^(\d+)G$/.exec(editor['keyBuffer']);
+    const numberGMatch = /^(\d+)G$/.exec(editor.keyBuffer);
     if (numberGMatch) {
       const lineNumber = parseInt(numberGMatch[1], 10) - 1;
-      editor['keyBuffer'] = '';
+      editor.keyBuffer = '';
       editor['moveToLine'](lineNumber);
       return true;
     }
     
-    const ddMatch = /^d{2,}$/.exec(editor['keyBuffer']);
+    const ddMatch = /^d{2,}$/.exec(editor.keyBuffer);
     if (ddMatch) {
-      if (editor['keyBuffer'] === 'dd') {
-        editor['keyBuffer'] = '';
+      if (editor.keyBuffer === 'dd') {
+        editor.keyBuffer = '';
         editor['saveHistory']();
         editor['deleteLine']();
         return true;
       }
     }
     
-    if (editor['keyBuffer'].length > 10) {
-      editor['keyBuffer'] = '';
+    if (editor.keyBuffer.length > 10) {
+      editor.keyBuffer = '';
       return false;
     }
     

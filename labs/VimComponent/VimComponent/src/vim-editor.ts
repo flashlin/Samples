@@ -75,8 +75,8 @@ export class VimEditor extends LitElement {
   fastJumpInput = '';
   private previousMode: EditorMode.Normal | EditorMode.Visual | EditorMode.VisualLine = EditorMode.Normal;
   
-  private keyBuffer = '';
-  private visualKeyBuffer = '';
+  keyBuffer = '';
+  visualKeyBuffer = '';
   
   private searchKeyword = '';
   private searchMatches: Array<{ y: number; x: number }> = [];

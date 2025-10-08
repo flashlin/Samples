@@ -4,34 +4,34 @@ export class VisualModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.Visual;
   
   handleKey(key: string, editor: IVimEditor): void {
-    if (editor['visualKeyBuffer'] === '' && editor['handleMovement'](key)) {
+    if (editor.visualKeyBuffer === '' && editor['handleMovement'](key)) {
       return;
     }
     
     if (key === 'Escape') {
       editor.mode = EditorMode.Normal;
-      editor['visualKeyBuffer'] = '';
+      editor.visualKeyBuffer = '';
       return;
     }
     
-    if (key === 'i' && editor['visualKeyBuffer'] === '') {
-      editor['visualKeyBuffer'] = 'i';
+    if (key === 'i' && editor.visualKeyBuffer === '') {
+      editor.visualKeyBuffer = 'i';
       return;
     }
     
-    if (editor['visualKeyBuffer'] === 'i' && (key === '`' || key === "'" || key === '"')) {
+    if (editor.visualKeyBuffer === 'i' && (key === '`' || key === "'" || key === '"')) {
       this.selectInnerQuote(editor, key);
-      editor['visualKeyBuffer'] = '';
+      editor.visualKeyBuffer = '';
       return;
     }
     
-    if (editor['visualKeyBuffer'] === 'i' && key === 'w') {
+    if (editor.visualKeyBuffer === 'i' && key === 'w') {
       this.selectInnerWord(editor);
-      editor['visualKeyBuffer'] = '';
+      editor.visualKeyBuffer = '';
       return;
     }
     
-    editor['visualKeyBuffer'] = '';
+    editor.visualKeyBuffer = '';
     
     switch (key) {
       case 'y':

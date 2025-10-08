@@ -32,6 +32,8 @@ export interface IVimEditor {
   cursorY: number;
   fastJumpMatches: Array<{ x: number; y: number; label: string }>;
   fastJumpInput: string;
+  keyBuffer: string;
+  visualKeyBuffer: string;
   
   // Public methods for getting ranges
   getInnerWordRange(): { startX: number; endX: number; y: number } | null;
