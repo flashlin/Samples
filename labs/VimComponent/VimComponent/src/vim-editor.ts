@@ -111,8 +111,14 @@ export class VimEditor extends LitElement {
     { pattern: 'dw', action: () => { this.saveHistory(); this.deleteWord(); } },
     { pattern: 'de', action: () => { this.saveHistory(); this.deleteToWordEnd(); } },
     { pattern: 'i', action: () => { this.enterInsertMode(); } },
-    { pattern: 't', action: () => { this.addTMark(); } },
-    { pattern: 'T', action: () => { this.clearTMarks(); } },
+    { pattern: 't', action: () => { 
+      const normalHandler = this.modeHandlerRegistry.getHandler(EditorMode.Normal) as any;
+      normalHandler.addTMark(this);
+    } },
+    { pattern: 'T', action: () => { 
+      const normalHandler = this.modeHandlerRegistry.getHandler(EditorMode.Normal) as any;
+      normalHandler.clearTMarks(this);
+    } },
     { pattern: 'a', action: () => { 
       const currentLine = this.content[this.cursorY] || '';
       if (this.cursorX < currentLine.length) {
@@ -2238,23 +2244,6 @@ export class VimEditor extends LitElement {
     this.hiddenInput?.focus();
   }
 
-  private addTMark() {
-    const existingIndex = this.tMarks.findIndex(
-      mark => mark.y === this.cursorY && mark.x === this.cursorX
-    );
-    
-    if (existingIndex === -1) {
-      this.tMarks.push({ y: this.cursorY, x: this.cursorX });
-      this.tMarks.sort((a, b) => {
-        if (a.y !== b.y) return a.y - b.y;
-        return a.x - b.x;
-      });
-    }
-  }
-
-  private clearTMarks() {
-    this.tMarks = [];
-  }
 
 
 
