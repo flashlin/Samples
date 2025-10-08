@@ -20,11 +20,21 @@ namespace CodeBoyLibTests
             return reader.ReadToEnd();
         }
 
+        public static SwaggerApiInfo ParseSwaggerFromEmbeddedResource(string fileName)
+        {
+            var jsonContent = LoadEmbeddedResource($"CodeBoyLibTests.DataFiles.{fileName}");
+            var parser = new SwaggerUiParser();
+            return parser.ParseFromJson(jsonContent);
+        }
+
         public static SwaggerApiInfo ParseSwaggerV2Json()
         {
-            var swaggerV2JsonContent = LoadEmbeddedResource("CodeBoyLibTests.DataFiles.SwaggerV2.json");
-            var parser = new SwaggerUiParser();
-            return parser.ParseFromJson(swaggerV2JsonContent);
+            return ParseSwaggerFromEmbeddedResource("SwaggerV2.json");
+        }
+
+        public static SwaggerApiInfo ParseOpenApiV3Json()
+        {
+            return ParseSwaggerFromEmbeddedResource("OpenApiV3.json");
         }
     }
 }

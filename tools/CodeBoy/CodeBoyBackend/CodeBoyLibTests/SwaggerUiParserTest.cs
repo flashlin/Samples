@@ -18,10 +18,58 @@ namespace CodeBoyLibTests
             VerifyPetClass(apiInfo);
         }
 
+        [Test]
+        public void ParseFromJson_WithOpenApiV3Json_ShouldParseCorrectly()
+        {
+            var apiInfo = TestHelper.ParseOpenApiV3Json();
+
+            VerifyBasicStructure(apiInfo);
+            VerifyOpenApiV3BasicInfo(apiInfo);
+            VerifyAbTestRequestClass(apiInfo);
+            VerifyRegistrationFormClass(apiInfo);
+        }
+
         private void VerifyBasicStructure(SwaggerApiInfo apiInfo)
         {
             apiInfo.Should().NotBeNull();
             apiInfo.ClassDefinitions.Should().NotBeNull();
+        }
+
+        private void VerifyOpenApiV3BasicInfo(SwaggerApiInfo apiInfo)
+        {
+            apiInfo.Title.Should().Be("Akis");
+            apiInfo.Version.Should().Be("1.0");
+            apiInfo.Endpoints.Should().NotBeEmpty();
+            apiInfo.ClassDefinitions.Should().NotBeEmpty();
+        }
+
+        private void VerifyAbTestRequestClass(SwaggerApiInfo apiInfo)
+        {
+            apiInfo.ClassDefinitions.Should().ContainKey("AbTestRequest");
+
+            var abTestRequest = apiInfo.ClassDefinitions["AbTestRequest"];
+            abTestRequest.Should().NotBeNull();
+            abTestRequest.Name.Should().Be("AbTestRequest");
+
+            abTestRequest.Properties.Should().Contain(p => p.Name == "Name" && p.Type == "string");
+            abTestRequest.Properties.Should().Contain(p => p.Name == "From" && p.Type == "string");
+            abTestRequest.Properties.Should().Contain(p => p.Name == "Group" && p.Type == "string");
+            abTestRequest.Properties.Should().Contain(p => p.Name == "Platform" && p.Type == "string");
+        }
+
+        private void VerifyRegistrationFormClass(SwaggerApiInfo apiInfo)
+        {
+            apiInfo.ClassDefinitions.Should().ContainKey("RegistrationForm");
+
+            var registrationForm = apiInfo.ClassDefinitions["RegistrationForm"];
+            registrationForm.Should().NotBeNull();
+            registrationForm.Name.Should().Be("RegistrationForm");
+
+            registrationForm.Properties.Should().Contain(p => p.Name == "AccountInfo" && p.Type == "AccountInfo");
+            registrationForm.Properties.Should().Contain(p => p.Name == "PersonalInfo" && p.Type == "PersonalInfo");
+            registrationForm.Properties.Should().Contain(p => p.Name == "Platform" && p.Type == "string");
+            registrationForm.Properties.Should().Contain(p => p.Name == "Language");
+            registrationForm.Properties.Should().Contain(p => p.Name == "SecurityQuestionId" && p.Type == "int");
         }
 
         private void VerifyApiResponseClass(SwaggerApiInfo apiInfo)
