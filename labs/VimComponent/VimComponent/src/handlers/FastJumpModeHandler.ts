@@ -3,6 +3,10 @@ import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 export class FastJumpModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.FastJump;
   
+  shouldPreventDefault(key: string): boolean {
+    return true;
+  }
+  
   handleKey(key: string, editor: IVimEditor): void {
     if (key === 'Escape') {
       editor.mode = editor.previousMode;

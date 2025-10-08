@@ -3,6 +3,10 @@ import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 export class NormalModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.Normal;
   
+  shouldPreventDefault(key: string): boolean {
+    return true;
+  }
+  
   private getCommandPatterns(editor: IVimEditor) {
     return [
       { pattern: 'gg', action: () => { editor.moveToFirstLine(); } },

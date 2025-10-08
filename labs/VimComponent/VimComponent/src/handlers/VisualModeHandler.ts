@@ -3,6 +3,10 @@ import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 export class VisualModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.Visual;
   
+  shouldPreventDefault(key: string): boolean {
+    return true;
+  }
+  
   handleKey(key: string, editor: IVimEditor): void {
     if (editor.visualKeyBuffer === '' && editor.handleMovement(key)) {
       return;

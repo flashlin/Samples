@@ -3,6 +3,10 @@ import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 export class FastSearchModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.FastSearch;
   
+  shouldPreventDefault(key: string): boolean {
+    return true;
+  }
+  
   handleKey(key: string, editor: IVimEditor): void {
     if (editor.currentMatchIndex >= 0 && editor.searchMatches.length > 0) {
       const match = editor.searchMatches[editor.currentMatchIndex];
