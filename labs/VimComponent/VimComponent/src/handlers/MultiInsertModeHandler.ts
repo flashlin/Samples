@@ -26,18 +26,109 @@ export class MultiInsertModeHandler extends BaseModeHandler {
     }
     
     if (key === 'Backspace') {
-      editor['multiInsertBackspace']();
+      this.multiInsertBackspace(editor);
       return;
     }
     
     if (key === 'Enter') {
-      editor['multiInsertNewline']();
+      this.multiInsertNewline(editor);
       return;
     }
     
     if (key.length === 1) {
-      editor['multiInsertCharacter'](key);
+      this.multiInsertCharacter(editor, key);
     }
+  }
+  
+  private multiInsertCharacter(editor: any, char: string): void {
+    if (editor['currentMatchIndex'] < 0 || editor['searchMatches'].length === 0) {
+      return;
+    }
+    
+    const currentMatch = editor['searchMatches'][editor['currentMatchIndex']];
+    const offsetInMatch = editor.cursorX - currentMatch.x;
+    
+    for (let i = editor['searchMatches'].length - 1; i >= 0; i--) {
+      const match = editor['searchMatches'][i];
+      const line = editor.content[match.y];
+      const insertPos = match.x + offsetInMatch;
+      
+      editor.content[match.y] = 
+        line.substring(0, insertPos) +
+        char +
+        line.substring(insertPos);
+    }
+    
+    editor['searchKeyword'] = 
+      editor['searchKeyword'].substring(0, offsetInMatch) + 
+      char + 
+      editor['searchKeyword'].substring(offsetInMatch);
+    
+    editor.cursorX++;
+  }
+  
+  private multiInsertBackspace(editor: any): void {
+    if (editor['currentMatchIndex'] < 0 || editor['searchMatches'].length === 0 || editor['searchKeyword'].length === 0) {
+      return;
+    }
+    
+    const currentMatch = editor['searchMatches'][editor['currentMatchIndex']];
+    const offsetInMatch = editor.cursorX - currentMatch.x;
+    
+    if (offsetInMatch <= 0) {
+      return;
+    }
+    
+    for (let i = editor['searchMatches'].length - 1; i >= 0; i--) {
+      const match = editor['searchMatches'][i];
+      const line = editor.content[match.y];
+      const deletePos = match.x + offsetInMatch - 1;
+      
+      editor.content[match.y] = 
+        line.substring(0, deletePos) +
+        line.substring(deletePos + 1);
+    }
+    
+    editor['searchKeyword'] = 
+      editor['searchKeyword'].substring(0, offsetInMatch - 1) + 
+      editor['searchKeyword'].substring(offsetInMatch);
+    
+    editor.cursorX--;
+  }
+  
+  private multiInsertNewline(editor: any): void {
+    if (editor['currentMatchIndex'] < 0 || editor['searchMatches'].length === 0) {
+      return;
+    }
+    
+    const currentMatch = editor['searchMatches'][editor['currentMatchIndex']];
+    const offsetInMatch = editor.cursorX - currentMatch.x;
+    
+    for (let i = editor['searchMatches'].length - 1; i >= 0; i--) {
+      const match = editor['searchMatches'][i];
+      const line = editor.content[match.y];
+      const splitPos = match.x + offsetInMatch;
+      
+      const before = line.substring(0, splitPos);
+      const after = line.substring(splitPos);
+      
+      editor.content[match.y] = before;
+      editor.content.splice(match.y + 1, 0, after);
+      
+      for (let j = i + 1; j < editor['searchMatches'].length; j++) {
+        if (editor['searchMatches'][j].y > match.y) {
+          editor['searchMatches'][j].y++;
+        }
+      }
+    }
+    
+    editor['searchKeyword'] = 
+      editor['searchKeyword'].substring(0, offsetInMatch) + 
+      '\n' + 
+      editor['searchKeyword'].substring(offsetInMatch);
+    
+    editor.cursorY++;
+    editor.cursorX = currentMatch.x;
   }
 }
 

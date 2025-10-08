@@ -479,15 +479,21 @@ export class VimEditor extends LitElement {
           this.p5Instance.redraw();
         }
       } else if (this.mode === EditorMode.TInsert && e.data) {
+        const handler = this.currentModeHandler as any;
         for (const char of e.data) {
-          this.tInsertCharacter(char);
+          if (handler.tInsertCharacter) {
+            handler.tInsertCharacter(this, char);
+          }
         }
         if (this.p5Instance) {
           this.p5Instance.redraw();
         }
       } else if (this.mode === EditorMode.MultiInsert && e.data) {
+        const handler = this.currentModeHandler as any;
         for (const char of e.data) {
-          this.multiInsertCharacter(char);
+          if (handler.multiInsertCharacter) {
+            handler.multiInsertCharacter(this, char);
+          }
         }
         if (this.p5Instance) {
           this.p5Instance.redraw();
@@ -507,15 +513,21 @@ export class VimEditor extends LitElement {
             this.p5Instance.redraw();
           }
         } else if (value && this.mode === EditorMode.TInsert) {
+          const handler = this.currentModeHandler as any;
           for (const char of value) {
-            this.tInsertCharacter(char);
+            if (handler.tInsertCharacter) {
+              handler.tInsertCharacter(this, char);
+            }
           }
           if (this.p5Instance) {
             this.p5Instance.redraw();
           }
         } else if (value && this.mode === EditorMode.MultiInsert) {
+          const handler = this.currentModeHandler as any;
           for (const char of value) {
-            this.multiInsertCharacter(char);
+            if (handler.multiInsertCharacter) {
+              handler.multiInsertCharacter(this, char);
+            }
           }
           if (this.p5Instance) {
             this.p5Instance.redraw();
@@ -717,181 +729,8 @@ export class VimEditor extends LitElement {
     }
   }
 
-  private handleNormalMode(key: string) {
-    if (this.keyBuffer === '' && this.handleMovement(key)) {
-      return;
-    }
-    
-    this.keyBuffer += key;
-    this.processKeyBuffer();
-  }
 
-  private handleInsertMode(key: string) {
-    if (key === 'Escape') {
-      this.mode = EditorMode.Normal;
-      this.hiddenInput?.blur();
-      this.adjustCursorForNormalMode();
-      return;
-    }
-    
-    if (key.length === 1) {
-      return;
-    }
-    
-    if (key === 'Backspace') {
-      this.handleBackspace();
-    } else if (key === 'Enter') {
-      this.handleEnter();
-    } else if (key === 'ArrowLeft') {
-      this.moveCursorLeft();
-    } else if (key === 'ArrowRight') {
-      this.moveCursorRight();
-    } else if (key === 'ArrowUp') {
-      this.moveCursorUp();
-    } else if (key === 'ArrowDown') {
-      this.moveCursorDown();
-    }
-  }
 
-  private handleVisualMode(key: string) {
-    if (this.visualKeyBuffer === '' && this.handleMovement(key)) {
-      return;
-    }
-    
-    if (key === 'Escape') {
-      this.mode = EditorMode.Normal;
-      this.visualKeyBuffer = '';
-      return;
-    }
-    
-    if (key === 'i' && this.visualKeyBuffer === '') {
-      this.visualKeyBuffer = 'i';
-      return;
-    }
-    
-    if (this.visualKeyBuffer === 'i' && (key === '`' || key === "'" || key === '"')) {
-      this.selectInnerQuote(key);
-      this.visualKeyBuffer = '';
-      return;
-    }
-    
-    if (this.visualKeyBuffer === 'i' && key === 'w') {
-      this.selectInnerWord();
-      this.visualKeyBuffer = '';
-      return;
-    }
-    
-    this.visualKeyBuffer = '';
-    
-    switch (key) {
-      case 'y':
-        this.yankVisualSelection();
-        this.mode = EditorMode.Normal;
-        break;
-      case 'c':
-      case 'd':
-      case 'x':
-        this.cutVisualSelection();
-        this.mode = EditorMode.Normal;
-        break;
-      case 'f':
-        this.previousMode = EditorMode.Visual;
-        this.mode = EditorMode.FastJump;
-        this.fastJumpMatches = [];
-        this.fastJumpInput = '';
-        break;
-      case '*':
-        this.startSearchFromVisualSelection();
-        break;
-    }
-  }
-
-  private handleVisualLineMode(key: string) {
-    if (this.handleMovement(key)) {
-      return;
-    }
-    
-    switch (key) {
-      case 'Escape':
-        this.mode = EditorMode.Normal;
-        break;
-      case 'y':
-        this.yankVisualSelection();
-        this.mode = EditorMode.Normal;
-        break;
-      case 'c':
-      case 'd':
-      case 'x':
-        this.cutVisualLineSelection();
-        this.mode = EditorMode.Normal;
-        break;
-      case 'f':
-        this.previousMode = EditorMode.VisualLine;
-        this.mode = EditorMode.FastJump;
-        this.fastJumpMatches = [];
-        this.fastJumpInput = '';
-        break;
-    }
-  }
-
-  private handleFastJumpMode(key: string) {
-    if (key === 'Escape') {
-      this.mode = this.previousMode;
-      this.fastJumpMatches = [];
-      this.fastJumpInput = '';
-      return;
-    }
-    
-    if (key.length === 1) {
-      const matches = this.findMatchesInVisibleRange(key);
-      
-      if (matches.length === 0) {
-        this.mode = this.previousMode;
-        this.fastJumpMatches = [];
-        this.fastJumpInput = '';
-      } else if (matches.length === 1) {
-        this.cursorX = matches[0].x;
-        this.cursorY = matches[0].y;
-        this.mode = this.previousMode;
-        this.fastJumpMatches = [];
-        this.fastJumpInput = '';
-      } else {
-        this.fastJumpMatches = matches;
-        this.mode = EditorMode.FastMatch;
-      }
-    }
-  }
-
-  private handleMatchMode(key: string) {
-    if (key === 'Escape') {
-      this.mode = this.previousMode;
-      this.fastJumpMatches = [];
-      this.fastJumpInput = '';
-      return;
-    }
-    
-    if (key.length === 1 && /[a-z]/.test(key)) {
-      this.fastJumpInput += key;
-      
-      const matchingLabels = this.fastJumpMatches.filter(match => 
-        match.label.startsWith(this.fastJumpInput)
-      );
-      
-      if (matchingLabels.length === 0) {
-        this.mode = this.previousMode;
-        this.fastJumpMatches = [];
-        this.fastJumpInput = '';
-      } else if (matchingLabels.length === 1 && matchingLabels[0].label === this.fastJumpInput) {
-        this.cursorX = matchingLabels[0].x;
-        this.cursorY = matchingLabels[0].y;
-        this.mode = this.previousMode;
-        this.fastJumpMatches = [];
-        this.fastJumpInput = '';
-      } else {
-        this.fastJumpMatches = matchingLabels;
-      }
-    }
-  }
 
   private moveCursorDown() {
     if (this.cursorY < this.content.length - 1) {
@@ -2520,73 +2359,6 @@ export class VimEditor extends LitElement {
     }
   }
 
-  private handleSearchMode(key: string) {
-    if (this.currentMatchIndex >= 0 && this.searchMatches.length > 0) {
-      const match = this.searchMatches[this.currentMatchIndex];
-      const matchEndX = match.x + this.searchKeyword.length;
-      
-      if (key === 'h' || key === 'ArrowLeft') {
-        if (this.cursorX > match.x) {
-          this.cursorX--;
-        }
-        return;
-      }
-      
-      if (key === 'l' || key === 'ArrowRight') {
-        if (this.cursorX < matchEndX - 1) {
-          this.cursorX++;
-        }
-        return;
-      }
-      
-      if (key === '0' || key === 'Home') {
-        this.cursorX = match.x;
-        return;
-      }
-      
-      if (key === '$' || key === 'End') {
-        this.cursorX = matchEndX - 1;
-        return;
-      }
-      
-      if (key === 'x') {
-        this.searchModeDelete();
-        return;
-      }
-      
-      if (key === 'd') {
-        this.searchModeDeleteAll();
-        return;
-      }
-    }
-    
-    switch (key) {
-      case 'Escape':
-        this.mode = EditorMode.Normal;
-        this.searchKeyword = '';
-        this.searchMatches = [];
-        this.currentMatchIndex = -1;
-        break;
-      case 'n':
-        this.jumpToNextMatch();
-        break;
-      case 'N':
-        this.jumpToPreviousMatch();
-        break;
-      case 'b':
-        this.clearSearchMarks();
-        break;
-      case 'u':
-        this.restoreSearchMarks();
-        break;
-      case 'i':
-        this.enterMultiInsertMode(false);
-        break;
-      case 'a':
-        this.enterMultiInsertMode(true);
-        break;
-    }
-  }
 
   private jumpToNextMatch() {
     if (this.searchMatches.length === 0) return;
@@ -2728,118 +2500,6 @@ export class VimEditor extends LitElement {
     this.hiddenInput?.focus();
   }
 
-  private handleMultiInsertMode(key: string) {
-    if (key === 'Escape') {
-      this.mode = EditorMode.FastSearch;
-      this.hiddenInput?.blur();
-      return;
-    }
-    
-    if (key === 'Backspace') {
-      this.multiInsertBackspace();
-      return;
-    }
-    
-    if (key === 'Enter') {
-      this.multiInsertNewline();
-      return;
-    }
-    
-    if (key.length === 1) {
-      this.multiInsertCharacter(key);
-    }
-  }
-
-  private multiInsertCharacter(char: string) {
-    if (this.currentMatchIndex < 0 || this.searchMatches.length === 0) {
-      return;
-    }
-    
-    const currentMatch = this.searchMatches[this.currentMatchIndex];
-    const offsetInMatch = this.cursorX - currentMatch.x;
-    
-    for (let i = this.searchMatches.length - 1; i >= 0; i--) {
-      const match = this.searchMatches[i];
-      const line = this.content[match.y];
-      const insertPos = match.x + offsetInMatch;
-      
-      this.content[match.y] = 
-        line.substring(0, insertPos) +
-        char +
-        line.substring(insertPos);
-    }
-    
-    this.searchKeyword = 
-      this.searchKeyword.substring(0, offsetInMatch) + 
-      char + 
-      this.searchKeyword.substring(offsetInMatch);
-    
-    this.cursorX++;
-  }
-
-  private multiInsertBackspace() {
-    if (this.currentMatchIndex < 0 || this.searchMatches.length === 0 || this.searchKeyword.length === 0) {
-      return;
-    }
-    
-    const currentMatch = this.searchMatches[this.currentMatchIndex];
-    const offsetInMatch = this.cursorX - currentMatch.x;
-    
-    if (offsetInMatch <= 0) {
-      return;
-    }
-    
-    for (let i = this.searchMatches.length - 1; i >= 0; i--) {
-      const match = this.searchMatches[i];
-      const line = this.content[match.y];
-      const deletePos = match.x + offsetInMatch - 1;
-      
-      this.content[match.y] = 
-        line.substring(0, deletePos) +
-        line.substring(deletePos + 1);
-    }
-    
-    this.searchKeyword = 
-      this.searchKeyword.substring(0, offsetInMatch - 1) + 
-      this.searchKeyword.substring(offsetInMatch);
-    
-    this.cursorX--;
-  }
-
-  private multiInsertNewline() {
-    if (this.currentMatchIndex < 0 || this.searchMatches.length === 0) {
-      return;
-    }
-    
-    const currentMatch = this.searchMatches[this.currentMatchIndex];
-    const offsetInMatch = this.cursorX - currentMatch.x;
-    
-    for (let i = this.searchMatches.length - 1; i >= 0; i--) {
-      const match = this.searchMatches[i];
-      const line = this.content[match.y];
-      const splitPos = match.x + offsetInMatch;
-      
-      const before = line.substring(0, splitPos);
-      const after = line.substring(splitPos);
-      
-      this.content[match.y] = before;
-      this.content.splice(match.y + 1, 0, after);
-      
-      for (let j = i + 1; j < this.searchMatches.length; j++) {
-        if (this.searchMatches[j].y > match.y) {
-          this.searchMatches[j].y++;
-        }
-      }
-    }
-    
-    this.searchKeyword = 
-      this.searchKeyword.substring(0, offsetInMatch) + 
-      '\n' + 
-      this.searchKeyword.substring(offsetInMatch);
-    
-    this.cursorY++;
-    this.cursorX = currentMatch.x;
-  }
 
   private enterInsertMode() {
     if (this.tMarks.length > 0) {
@@ -2872,154 +2532,7 @@ export class VimEditor extends LitElement {
     this.tMarks = [];
   }
 
-  private handleTInsertMode(key: string) {
-    if (key === 'Escape') {
-      this.mode = EditorMode.Normal;
-      this.hiddenInput?.blur();
-      this.adjustCursorForNormalMode();
-      return;
-    }
-    
-    if (key === 'Backspace') {
-      this.tInsertBackspace();
-    } else if (key === 'Enter') {
-      this.tInsertNewline();
-    } else if (key === 'ArrowLeft') {
-      this.moveCursorLeft();
-    } else if (key === 'ArrowRight') {
-      this.moveCursorRight();
-    } else if (key === 'ArrowUp') {
-      this.moveCursorUp();
-    } else if (key === 'ArrowDown') {
-      this.moveCursorDown();
-    }
-  }
 
-  private tInsertBackspace() {
-    if (this.tMarks.length === 0) return;
-    
-    this.saveHistory();
-    
-    const currentMarkIndex = this.findCurrentTMarkIndex();
-    if (currentMarkIndex === -1) return;
-    
-    const currentMark = this.tMarks[currentMarkIndex];
-    const offsetInMark = this.cursorX - currentMark.x;
-    
-    if (offsetInMark <= 0) {
-      return;
-    }
-    
-    for (let i = this.tMarks.length - 1; i >= 0; i--) {
-      const mark = this.tMarks[i];
-      const line = this.content[mark.y];
-      const deletePos = mark.x + offsetInMark - 1;
-      
-      if (deletePos >= 0 && deletePos < line.length) {
-        this.content[mark.y] = line.substring(0, deletePos) + line.substring(deletePos + 1);
-        
-        for (let j = i + 1; j < this.tMarks.length; j++) {
-          if (this.tMarks[j].y === mark.y) {
-            this.tMarks[j].x--;
-          }
-        }
-      }
-    }
-    
-    this.cursorX--;
-  }
-
-  private tInsertNewline() {
-    if (this.tMarks.length === 0) return;
-    
-    this.saveHistory();
-    
-    const currentMarkIndex = this.findCurrentTMarkIndex();
-    if (currentMarkIndex === -1) return;
-    
-    const currentMark = this.tMarks[currentMarkIndex];
-    const offsetInMark = this.cursorX - currentMark.x;
-    
-    for (let i = this.tMarks.length - 1; i >= 0; i--) {
-      const mark = this.tMarks[i];
-      const line = this.content[mark.y];
-      const splitPos = mark.x + offsetInMark;
-      
-      const before = line.substring(0, splitPos);
-      const after = line.substring(splitPos);
-      
-      this.content[mark.y] = before;
-      this.content.splice(mark.y + 1, 0, after);
-      
-      for (let j = i + 1; j < this.tMarks.length; j++) {
-        if (this.tMarks[j].y > mark.y) {
-          this.tMarks[j].y++;
-        }
-      }
-    }
-    
-    this.cursorY++;
-    this.cursorX = currentMark.x;
-  }
-
-  private tInsertCharacter(char: string) {
-    if (this.tMarks.length === 0) return;
-    
-    const currentMarkIndex = this.findCurrentTMarkIndex();
-    if (currentMarkIndex === -1) return;
-    
-    const currentMark = this.tMarks[currentMarkIndex];
-    const offsetInMark = this.cursorX - currentMark.x;
-    
-    for (let i = this.tMarks.length - 1; i >= 0; i--) {
-      const mark = this.tMarks[i];
-      const line = this.content[mark.y];
-      const insertPos = mark.x + offsetInMark;
-      
-      this.content[mark.y] = 
-        line.substring(0, insertPos) +
-        char +
-        line.substring(insertPos);
-      
-      for (let j = i + 1; j < this.tMarks.length; j++) {
-        if (this.tMarks[j].y === mark.y) {
-          this.tMarks[j].x++;
-        }
-      }
-    }
-    
-    this.cursorX++;
-  }
-
-  private findCurrentTMarkIndex(): number {
-    if (this.tMarks.length === 0) return -1;
-    
-    for (let i = 0; i < this.tMarks.length; i++) {
-      const mark = this.tMarks[i];
-      if (mark.y === this.cursorY && mark.x === this.cursorX) {
-        return i;
-      }
-    }
-    
-    for (let i = 0; i < this.tMarks.length; i++) {
-      const mark = this.tMarks[i];
-      if (mark.y === this.cursorY && this.cursorX >= mark.x) {
-        const nextMark = this.tMarks[i + 1];
-        if (!nextMark || nextMark.y !== this.cursorY || this.cursorX < nextMark.x) {
-          return i;
-        }
-      }
-    }
-    
-    for (let i = this.tMarks.length - 1; i >= 0; i--) {
-      const mark = this.tMarks[i];
-      if (mark.y < this.cursorY || (mark.y === this.cursorY && mark.x <= this.cursorX)) {
-        return i;
-      }
-    }
-    
-    return 0;
-  }
 
   render() {
     return html`
