@@ -12,6 +12,7 @@ export enum EditorMode {
   FastMatch = 'fast-match',
   FastSearch = 'fast-search',
   MultiInsert = 'multi-insert',
+  TInsert = 't-insert',
 }
 
 export interface EditorStatus {
@@ -84,6 +85,8 @@ export class VimEditor extends LitElement {
   private currentMatchIndex = -1;
   private searchHistory: Array<{ keyword: string; matches: Array<{ y: number; x: number }> }> = [];
   
+  private tMarks: Array<{ y: number; x: number }> = [];
+  
   private commandPatterns = [
     { pattern: 'gg', action: () => { this.moveToFirstLine(); } },
     { pattern: 'diw', action: () => { this.saveHistory(); this.deleteInnerWord(); } },
@@ -105,7 +108,9 @@ export class VimEditor extends LitElement {
     { pattern: 'da%', action: () => { this.saveHistory(); this.deleteAroundAnyBracket(); } },
     { pattern: 'dw', action: () => { this.saveHistory(); this.deleteWord(); } },
     { pattern: 'de', action: () => { this.saveHistory(); this.deleteToWordEnd(); } },
-    { pattern: 'i', action: () => { this.mode = EditorMode.Insert; this.hiddenInput?.focus(); } },
+    { pattern: 'i', action: () => { this.enterInsertMode(); } },
+    { pattern: 't', action: () => { this.addTMark(); } },
+    { pattern: 'T', action: () => { this.clearTMarks(); } },
     { pattern: 'a', action: () => { 
       const currentLine = this.content[this.cursorY] || '';
       if (this.cursorX < currentLine.length) {
@@ -467,6 +472,13 @@ export class VimEditor extends LitElement {
         if (this.p5Instance) {
           this.p5Instance.redraw();
         }
+      } else if (this.mode === EditorMode.TInsert && e.data) {
+        for (const char of e.data) {
+          this.tInsertCharacter(char);
+        }
+        if (this.p5Instance) {
+          this.p5Instance.redraw();
+        }
       }
       this.hiddenInput!.value = '';
     });
@@ -477,6 +489,13 @@ export class VimEditor extends LitElement {
         if (value && this.mode === EditorMode.Insert) {
           for (const char of value) {
             this.insertCharacter(char);
+          }
+          if (this.p5Instance) {
+            this.p5Instance.redraw();
+          }
+        } else if (value && this.mode === EditorMode.TInsert) {
+          for (const char of value) {
+            this.tInsertCharacter(char);
           }
           if (this.p5Instance) {
             this.p5Instance.redraw();
@@ -550,6 +569,7 @@ export class VimEditor extends LitElement {
         this.drawEditorBackground(p);
         this.drawLineNumbers(p);
         this.renderBuffer(p);
+        this.drawTMarks(p);
         this.drawFastJumpLabels(p);
         this.drawStatusBar(p);
       };
@@ -591,7 +611,7 @@ export class VimEditor extends LitElement {
     
     this.lastKeyPressed = key;
     
-    const isNormalChar = key.length === 1 && this.mode === EditorMode.Insert;
+    const isNormalChar = key.length === 1 && (this.mode === EditorMode.Insert || this.mode === EditorMode.TInsert);
     if (!isNormalChar) {
       event.preventDefault();
     }
@@ -612,6 +632,8 @@ export class VimEditor extends LitElement {
       this.handleSearchMode(key);
     } else if (this.mode === EditorMode.MultiInsert) {
       this.handleMultiInsertMode(key);
+    } else if (this.mode === EditorMode.TInsert) {
+      this.handleTInsertMode(key);
     }
     
     this.adjustScrollToCursor();
@@ -2398,6 +2420,38 @@ export class VimEditor extends LitElement {
     }
   }
 
+  private drawTMarks(p: p5) {
+    if (this.tMarks.length === 0) {
+      return;
+    }
+    
+    for (const mark of this.tMarks) {
+      const bufferY = mark.y - this.scrollOffsetY;
+      const bufferX = mark.x - this.scrollOffsetX;
+      
+      if (bufferY < 0 || bufferY >= this.bufferHeight || bufferX < 0 || bufferX >= this.bufferWidth) {
+        continue;
+      }
+      
+      const line = this.content[mark.y] || '';
+      const visibleLine = line.substring(this.scrollOffsetX);
+      const screenX = this.getTextXPosition(visibleLine, bufferX);
+      const screenY = this.getRectY(bufferY);
+      
+      const markWidth = this.baseCharWidth * 0.5;
+      const markHeight = this.lineHeight;
+      const markX = screenX - markWidth - 2;
+      
+      p.fill(255, 100, 100);
+      p.rect(markX, screenY, markWidth, markHeight);
+      
+      p.fill(255, 255, 255);
+      p.textSize(12);
+      p.text('t', markX, screenY + 2);
+      p.textSize(16);
+    }
+  }
+
   private drawStatusBar(p: p5) {
     // 計算編輯區域的高度
     const editorHeight = p.height - this.statusBarHeight;
@@ -2784,6 +2838,174 @@ export class VimEditor extends LitElement {
     
     this.cursorY++;
     this.cursorX = currentMatch.x;
+  }
+
+  private enterInsertMode() {
+    if (this.tMarks.length > 0) {
+      this.mode = EditorMode.TInsert;
+      const lastMark = this.tMarks[this.tMarks.length - 1];
+      this.cursorY = lastMark.y;
+      this.cursorX = lastMark.x;
+      this.updateInputPosition();
+    } else {
+      this.mode = EditorMode.Insert;
+    }
+    this.hiddenInput?.focus();
+  }
+
+  private addTMark() {
+    const existingIndex = this.tMarks.findIndex(
+      mark => mark.y === this.cursorY && mark.x === this.cursorX
+    );
+    
+    if (existingIndex === -1) {
+      this.tMarks.push({ y: this.cursorY, x: this.cursorX });
+      this.tMarks.sort((a, b) => {
+        if (a.y !== b.y) return a.y - b.y;
+        return a.x - b.x;
+      });
+    }
+  }
+
+  private clearTMarks() {
+    this.tMarks = [];
+  }
+
+  private handleTInsertMode(key: string) {
+    if (key === 'Escape') {
+      this.mode = EditorMode.Normal;
+      this.hiddenInput?.blur();
+      this.adjustCursorForNormalMode();
+      return;
+    }
+    
+    if (key === 'Backspace') {
+      this.tInsertBackspace();
+    } else if (key === 'Enter') {
+      this.tInsertNewline();
+    } else if (key === 'ArrowLeft') {
+      this.moveCursorLeft();
+    } else if (key === 'ArrowRight') {
+      this.moveCursorRight();
+    } else if (key === 'ArrowUp') {
+      this.moveCursorUp();
+    } else if (key === 'ArrowDown') {
+      this.moveCursorDown();
+    }
+  }
+
+  private tInsertBackspace() {
+    if (this.tMarks.length === 0) return;
+    
+    this.saveHistory();
+    
+    const currentMarkIndex = this.findCurrentTMarkIndex();
+    if (currentMarkIndex === -1) return;
+    
+    const currentMark = this.tMarks[currentMarkIndex];
+    const offsetInMark = this.cursorX - currentMark.x;
+    
+    if (offsetInMark <= 0) {
+      return;
+    }
+    
+    for (let i = this.tMarks.length - 1; i >= 0; i--) {
+      const mark = this.tMarks[i];
+      const line = this.content[mark.y];
+      const deletePos = mark.x + offsetInMark - 1;
+      
+      if (deletePos >= 0 && deletePos < line.length) {
+        this.content[mark.y] = line.substring(0, deletePos) + line.substring(deletePos + 1);
+      }
+    }
+    
+    this.cursorX--;
+  }
+
+  private tInsertNewline() {
+    if (this.tMarks.length === 0) return;
+    
+    this.saveHistory();
+    
+    const currentMarkIndex = this.findCurrentTMarkIndex();
+    if (currentMarkIndex === -1) return;
+    
+    const currentMark = this.tMarks[currentMarkIndex];
+    const offsetInMark = this.cursorX - currentMark.x;
+    
+    for (let i = this.tMarks.length - 1; i >= 0; i--) {
+      const mark = this.tMarks[i];
+      const line = this.content[mark.y];
+      const splitPos = mark.x + offsetInMark;
+      
+      const before = line.substring(0, splitPos);
+      const after = line.substring(splitPos);
+      
+      this.content[mark.y] = before;
+      this.content.splice(mark.y + 1, 0, after);
+      
+      for (let j = i + 1; j < this.tMarks.length; j++) {
+        if (this.tMarks[j].y > mark.y) {
+          this.tMarks[j].y++;
+        }
+      }
+    }
+    
+    this.cursorY++;
+    this.cursorX = currentMark.x;
+  }
+
+  private tInsertCharacter(char: string) {
+    if (this.tMarks.length === 0) return;
+    
+    const currentMarkIndex = this.findCurrentTMarkIndex();
+    if (currentMarkIndex === -1) return;
+    
+    const currentMark = this.tMarks[currentMarkIndex];
+    const offsetInMark = this.cursorX - currentMark.x;
+    
+    for (let i = this.tMarks.length - 1; i >= 0; i--) {
+      const mark = this.tMarks[i];
+      const line = this.content[mark.y];
+      const insertPos = mark.x + offsetInMark;
+      
+      this.content[mark.y] = 
+        line.substring(0, insertPos) +
+        char +
+        line.substring(insertPos);
+    }
+    
+    this.cursorX++;
+  }
+
+  private findCurrentTMarkIndex(): number {
+    if (this.tMarks.length === 0) return -1;
+    
+    for (let i = 0; i < this.tMarks.length; i++) {
+      const mark = this.tMarks[i];
+      if (mark.y === this.cursorY && mark.x === this.cursorX) {
+        return i;
+      }
+    }
+    
+    for (let i = 0; i < this.tMarks.length; i++) {
+      const mark = this.tMarks[i];
+      if (mark.y === this.cursorY && this.cursorX >= mark.x) {
+        const nextMark = this.tMarks[i + 1];
+        if (!nextMark || nextMark.y !== this.cursorY || this.cursorX < nextMark.x) {
+          return i;
+        }
+      }
+    }
+    
+    for (let i = this.tMarks.length - 1; i >= 0; i--) {
+      const mark = this.tMarks[i];
+      if (mark.y < this.cursorY || (mark.y === this.cursorY && mark.x <= this.cursorX)) {
+        return i;
+      }
+    }
+    
+    return 0;
   }
 
   render() {
