@@ -51,10 +51,16 @@ namespace CodeBoyLibTests
             abTestRequest.Should().NotBeNull();
             abTestRequest.Name.Should().Be("AbTestRequest");
 
-            abTestRequest.Properties.Should().Contain(p => p.Name == "Name" && p.Type == "string");
-            abTestRequest.Properties.Should().Contain(p => p.Name == "From" && p.Type == "string");
-            abTestRequest.Properties.Should().Contain(p => p.Name == "Group" && p.Type == "string");
-            abTestRequest.Properties.Should().Contain(p => p.Name == "Platform" && p.Type == "string");
+            abTestRequest.Properties.Should().BeEquivalentTo([
+                new { Name = "Name", Type = "string", IsRequired = false },
+                new { Name = "From", Type = "string", IsRequired = false },
+                new { Name = "Group", Type = "string", IsRequired = false },
+                new { Name = "Platform", Type = "string", IsRequired = false },
+                new { Name = "Language", Type = "string", IsRequired = false },
+                new { Name = "Event", Type = "string", IsRequired = false },
+                new { Name = "Category", Type = "string", IsRequired = false },
+                new { Name = "LoginName", Type = "string", IsRequired = false }
+            ], options => options.ExcludingMissingMembers());
         }
 
         private void VerifyRegistrationFormClass(SwaggerApiInfo apiInfo)
@@ -65,11 +71,21 @@ namespace CodeBoyLibTests
             registrationForm.Should().NotBeNull();
             registrationForm.Name.Should().Be("RegistrationForm");
 
-            registrationForm.Properties.Should().Contain(p => p.Name == "AccountInfo" && p.Type == "AccountInfo");
-            registrationForm.Properties.Should().Contain(p => p.Name == "PersonalInfo" && p.Type == "PersonalInfo");
-            registrationForm.Properties.Should().Contain(p => p.Name == "Platform" && p.Type == "string");
-            registrationForm.Properties.Should().Contain(p => p.Name == "Language");
-            registrationForm.Properties.Should().Contain(p => p.Name == "SecurityQuestionId" && p.Type == "int");
+            registrationForm.Properties.Should().BeEquivalentTo([
+                new { Name = "AccountInfo", Type = "AccountInfo", IsRequired = false },
+                new { Name = "PersonalInfo", Type = "PersonalInfo", IsRequired = false },
+                new { Name = "Platform", Type = "string", IsRequired = false },
+                new { Name = "Language", Type = "int", IsRequired = false },
+                new { Name = "SecurityAnswer", Type = "string", IsRequired = false },
+                new { Name = "SecurityQuestion", Type = "string", IsRequired = false },
+                new { Name = "Referral", Type = "string", IsRequired = false },
+                new { Name = "SecurityQuestionId", Type = "int", IsRequired = false },
+                new { Name = "ValidationCodeLoginName", Type = "string", IsRequired = false },
+                new { Name = "ValidationCode", Type = "string", IsRequired = false },
+                new { Name = "TCReadTime", Type = "string", IsRequired = false },
+                new { Name = "BrandRedirection", Type = "RegisterBrandRedirection", IsRequired = false },
+                new { Name = "IsRemoveNameAndDob", Type = "bool", IsRequired = false }
+            ], options => options.ExcludingMissingMembers());
         }
 
         private void VerifyApiResponseClass(SwaggerApiInfo apiInfo)
