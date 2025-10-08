@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="DataFiles\SwaggerV2.json" />
+    <EmbeddedResource Include="DataFiles\OpenApiV3.json" />
   </ItemGroup>
 
 </Project>
