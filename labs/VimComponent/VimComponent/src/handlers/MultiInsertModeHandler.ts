@@ -1,13 +1,13 @@
-import { EditorMode, BaseModeHandler } from '../vimEditorTypes';
+import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 
 export class MultiInsertModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.MultiInsert;
   
-  onEnter(editor: any): void {
+  onEnter(editor: IVimEditor): void {
     editor['hiddenInput']?.focus();
   }
   
-  onExit(editor: any): void {
+  onExit(editor: IVimEditor): void {
     editor['hiddenInput']?.blur();
     editor['searchKeyword'] = '';
     editor['searchMatches'] = [];
@@ -19,7 +19,7 @@ export class MultiInsertModeHandler extends BaseModeHandler {
     return key.length !== 1;
   }
   
-  handleKey(key: string, editor: any): void {
+  handleKey(key: string, editor: IVimEditor): void {
     if (key === 'Escape') {
       editor.mode = EditorMode.FastSearch;
       return;
@@ -40,7 +40,7 @@ export class MultiInsertModeHandler extends BaseModeHandler {
     }
   }
   
-  private multiInsertCharacter(editor: any, char: string): void {
+  private multiInsertCharacter(editor: IVimEditor, char: string): void {
     if (editor['currentMatchIndex'] < 0 || editor['searchMatches'].length === 0) {
       return;
     }
@@ -67,7 +67,7 @@ export class MultiInsertModeHandler extends BaseModeHandler {
     editor.cursorX++;
   }
   
-  private multiInsertBackspace(editor: any): void {
+  private multiInsertBackspace(editor: IVimEditor): void {
     if (editor['currentMatchIndex'] < 0 || editor['searchMatches'].length === 0 || editor['searchKeyword'].length === 0) {
       return;
     }
@@ -96,7 +96,7 @@ export class MultiInsertModeHandler extends BaseModeHandler {
     editor.cursorX--;
   }
   
-  private multiInsertNewline(editor: any): void {
+  private multiInsertNewline(editor: IVimEditor): void {
     if (editor['currentMatchIndex'] < 0 || editor['searchMatches'].length === 0) {
       return;
     }
@@ -131,7 +131,7 @@ export class MultiInsertModeHandler extends BaseModeHandler {
     editor.cursorX = currentMatch.x;
   }
   
-  handleInput(editor: any, value: string): void {
+  handleInput(editor: IVimEditor, value: string): void {
     for (const char of value) {
       this.multiInsertCharacter(editor, char);
     }
@@ -140,7 +140,7 @@ export class MultiInsertModeHandler extends BaseModeHandler {
     }
   }
   
-  handleCompositionEnd(editor: any, data: string): void {
+  handleCompositionEnd(editor: IVimEditor, data: string): void {
     if (data) {
       for (const char of data) {
         this.multiInsertCharacter(editor, char);

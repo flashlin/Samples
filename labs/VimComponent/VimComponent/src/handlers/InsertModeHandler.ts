@@ -1,13 +1,13 @@
-import { EditorMode, BaseModeHandler } from '../vimEditorTypes';
+import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 
 export class InsertModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.Insert;
   
-  onEnter(editor: any): void {
+  onEnter(editor: IVimEditor): void {
     editor['hiddenInput']?.focus();
   }
   
-  onExit(editor: any): void {
+  onExit(editor: IVimEditor): void {
     editor['hiddenInput']?.blur();
     editor['adjustCursorForNormalMode']();
   }
@@ -16,7 +16,7 @@ export class InsertModeHandler extends BaseModeHandler {
     return key.length !== 1;
   }
   
-  handleKey(key: string, editor: any): void {
+  handleKey(key: string, editor: IVimEditor): void {
     if (key === 'Escape') {
       editor.mode = EditorMode.Normal;
       return;
@@ -41,7 +41,7 @@ export class InsertModeHandler extends BaseModeHandler {
     }
   }
   
-  handleInput(editor: any, value: string): void {
+  handleInput(editor: IVimEditor, value: string): void {
     for (const char of value) {
       editor['insertCharacter'](char);
     }
@@ -50,7 +50,7 @@ export class InsertModeHandler extends BaseModeHandler {
     }
   }
   
-  handleCompositionEnd(editor: any, data: string): void {
+  handleCompositionEnd(editor: IVimEditor, data: string): void {
     if (data) {
       for (const char of data) {
         editor['insertCharacter'](char);

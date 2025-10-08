@@ -1,13 +1,13 @@
-import { EditorMode, BaseModeHandler } from '../vimEditorTypes';
+import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 
 export class TInsertModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.TInsert;
   
-  onEnter(editor: any): void {
+  onEnter(editor: IVimEditor): void {
     editor['hiddenInput']?.focus();
   }
   
-  onExit(editor: any): void {
+  onExit(editor: IVimEditor): void {
     editor['hiddenInput']?.blur();
     editor['adjustCursorForNormalMode']();
   }
@@ -16,7 +16,7 @@ export class TInsertModeHandler extends BaseModeHandler {
     return key.length !== 1;
   }
   
-  handleKey(key: string, editor: any): void {
+  handleKey(key: string, editor: IVimEditor): void {
     if (key === 'Escape') {
       editor.mode = EditorMode.Normal;
       return;
@@ -37,7 +37,7 @@ export class TInsertModeHandler extends BaseModeHandler {
     }
   }
   
-  tInsertBackspace(editor: any): void {
+  tInsertBackspace(editor: IVimEditor): void {
     if (editor['tMarks'].length === 0) return;
     
     editor['saveHistory']();
@@ -71,7 +71,7 @@ export class TInsertModeHandler extends BaseModeHandler {
     editor.cursorX--;
   }
   
-  tInsertNewline(editor: any): void {
+  tInsertNewline(editor: IVimEditor): void {
     if (editor['tMarks'].length === 0) return;
     
     editor['saveHistory']();
@@ -104,7 +104,7 @@ export class TInsertModeHandler extends BaseModeHandler {
     editor.cursorX = currentMark.x;
   }
   
-  tInsertCharacter(editor: any, char: string): void {
+  tInsertCharacter(editor: IVimEditor, char: string): void {
     if (editor['tMarks'].length === 0) return;
     
     const currentMarkIndex = this.findCurrentTMarkIndex(editor);
@@ -133,7 +133,7 @@ export class TInsertModeHandler extends BaseModeHandler {
     editor.cursorX++;
   }
   
-  private findCurrentTMarkIndex(editor: any): number {
+  private findCurrentTMarkIndex(editor: IVimEditor): number {
     if (editor['tMarks'].length === 0) return -1;
     
     for (let i = 0; i < editor['tMarks'].length; i++) {
@@ -163,7 +163,7 @@ export class TInsertModeHandler extends BaseModeHandler {
     return 0;
   }
   
-  handleInput(editor: any, value: string): void {
+  handleInput(editor: IVimEditor, value: string): void {
     for (const char of value) {
       this.tInsertCharacter(editor, char);
     }
@@ -172,7 +172,7 @@ export class TInsertModeHandler extends BaseModeHandler {
     }
   }
   
-  handleCompositionEnd(editor: any, data: string): void {
+  handleCompositionEnd(editor: IVimEditor, data: string): void {
     if (data) {
       for (const char of data) {
         this.tInsertCharacter(editor, char);

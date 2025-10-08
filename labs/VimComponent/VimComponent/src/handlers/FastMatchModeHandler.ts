@@ -1,9 +1,9 @@
-import { EditorMode, BaseModeHandler } from '../vimEditorTypes';
+import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 
 export class FastMatchModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.FastMatch;
   
-  handleKey(key: string, editor: any): void {
+  handleKey(key: string, editor: IVimEditor): void {
     if (key === 'Escape') {
       editor.mode = editor['previousMode'];
       editor['fastJumpMatches'] = [];

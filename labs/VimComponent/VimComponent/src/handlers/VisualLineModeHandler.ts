@@ -1,9 +1,9 @@
-import { EditorMode, BaseModeHandler } from '../vimEditorTypes';
+import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 
 export class VisualLineModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.VisualLine;
   
-  handleKey(key: string, editor: any): void {
+  handleKey(key: string, editor: IVimEditor): void {
     if (editor['handleMovement'](key)) {
       return;
     }
@@ -31,7 +31,7 @@ export class VisualLineModeHandler extends BaseModeHandler {
     }
   }
   
-  private getVisualSelection(editor: any): string {
+  private getVisualSelection(editor: IVimEditor): string {
     const startY = Math.min(editor['visualStartY'], editor.cursorY);
     const endY = Math.max(editor['visualStartY'], editor.cursorY);
     const startX = editor['visualStartY'] === startY ? 
@@ -58,12 +58,12 @@ export class VisualLineModeHandler extends BaseModeHandler {
     return result;
   }
   
-  private yankVisualSelection(editor: any): void {
+  private yankVisualSelection(editor: IVimEditor): void {
     const selection = this.getVisualSelection(editor);
     navigator.clipboard.writeText(selection);
   }
   
-  private cutVisualLineSelection(editor: any): void {
+  private cutVisualLineSelection(editor: IVimEditor): void {
     editor['saveHistory']();
     
     const selection = this.getVisualSelection(editor);

@@ -1,9 +1,9 @@
-import { EditorMode, BaseModeHandler } from '../vimEditorTypes';
+import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 
 export class FastSearchModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.FastSearch;
   
-  handleKey(key: string, editor: any): void {
+  handleKey(key: string, editor: IVimEditor): void {
     if (editor['currentMatchIndex'] >= 0 && editor['searchMatches'].length > 0) {
       const match = editor['searchMatches'][editor['currentMatchIndex']];
       const matchEndX = match.x + editor['searchKeyword'].length;
@@ -80,7 +80,7 @@ export class FastSearchModeHandler extends BaseModeHandler {
     }
   }
   
-  findAllMatches(editor: any): void {
+  findAllMatches(editor: IVimEditor): void {
     editor['searchMatches'] = [];
     const keyword = editor['searchKeyword'];
     
@@ -98,7 +98,7 @@ export class FastSearchModeHandler extends BaseModeHandler {
     }
   }
   
-  private jumpToNextMatch(editor: any): void {
+  private jumpToNextMatch(editor: IVimEditor): void {
     if (editor['searchMatches'].length === 0) return;
     
     editor['currentMatchIndex'] = (editor['currentMatchIndex'] + 1) % editor['searchMatches'].length;
@@ -107,7 +107,7 @@ export class FastSearchModeHandler extends BaseModeHandler {
     editor.cursorX = match.x;
   }
   
-  private jumpToPreviousMatch(editor: any): void {
+  private jumpToPreviousMatch(editor: IVimEditor): void {
     if (editor['searchMatches'].length === 0) return;
     
     editor['currentMatchIndex'] = (editor['currentMatchIndex'] - 1 + editor['searchMatches'].length) % editor['searchMatches'].length;
@@ -116,7 +116,7 @@ export class FastSearchModeHandler extends BaseModeHandler {
     editor.cursorX = match.x;
   }
   
-  private clearSearchMarks(editor: any): void {
+  private clearSearchMarks(editor: IVimEditor): void {
     if (editor['currentMatchIndex'] < 0 || editor['searchMatches'].length === 0) {
       return;
     }
@@ -143,7 +143,7 @@ export class FastSearchModeHandler extends BaseModeHandler {
     }
   }
   
-  private restoreSearchMarks(editor: any): void {
+  private restoreSearchMarks(editor: IVimEditor): void {
     if (editor['searchHistory'].length === 0) return;
     
     const lastSearch = editor['searchHistory'].pop()!;
@@ -170,7 +170,7 @@ export class FastSearchModeHandler extends BaseModeHandler {
     }
   }
   
-  private searchModeDelete(editor: any): void {
+  private searchModeDelete(editor: IVimEditor): void {
     if (editor['currentMatchIndex'] < 0 || editor['searchMatches'].length === 0) {
       return;
     }
@@ -203,7 +203,7 @@ export class FastSearchModeHandler extends BaseModeHandler {
     }
   }
   
-  private searchModeDeleteAll(editor: any): void {
+  private searchModeDeleteAll(editor: IVimEditor): void {
     if (editor['currentMatchIndex'] < 0 || editor['searchMatches'].length === 0) {
       return;
     }

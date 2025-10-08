@@ -1,9 +1,9 @@
-import { EditorMode, BaseModeHandler } from '../vimEditorTypes';
+import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 
 export class NormalModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.Normal;
   
-  private getCommandPatterns(editor: any) {
+  private getCommandPatterns(editor: IVimEditor) {
     return [
       { pattern: 'gg', action: () => { editor['moveToFirstLine'](); } },
       { pattern: 'diw', action: () => { editor['saveHistory'](); this.deleteInnerWord(editor); } },
@@ -60,7 +60,7 @@ export class NormalModeHandler extends BaseModeHandler {
     ];
   }
   
-  handleKey(key: string, editor: any): void {
+  handleKey(key: string, editor: IVimEditor): void {
     if (editor['keyBuffer'] === '' && editor['handleMovement'](key)) {
       return;
     }
@@ -69,7 +69,7 @@ export class NormalModeHandler extends BaseModeHandler {
     this.processKeyBuffer(editor);
   }
   
-  private processKeyBuffer(editor: any): boolean {
+  private processKeyBuffer(editor: IVimEditor): boolean {
     const commandPatterns = this.getCommandPatterns(editor);
     const sortedPatterns = [...commandPatterns].sort((a, b) => b.pattern.length - a.pattern.length);
     
@@ -125,7 +125,7 @@ export class NormalModeHandler extends BaseModeHandler {
     return false;
   }
   
-  addTMark(editor: any): void {
+  addTMark(editor: IVimEditor): void {
     const existingIndex = editor['tMarks'].findIndex(
       (mark: any) => mark.y === editor.cursorY && mark.x === editor.cursorX
     );
@@ -139,11 +139,11 @@ export class NormalModeHandler extends BaseModeHandler {
     }
   }
   
-  clearTMarks(editor: any): void {
+  clearTMarks(editor: IVimEditor): void {
     editor['tMarks'] = [];
   }
   
-  private deleteInnerWord(editor: any): void {
+  private deleteInnerWord(editor: IVimEditor): void {
     const range = editor.getInnerWordRange();
     if (!range) {
       return;
@@ -164,7 +164,7 @@ export class NormalModeHandler extends BaseModeHandler {
     }
   }
   
-  private deleteInnerQuote(editor: any, quoteChar: string): void {
+  private deleteInnerQuote(editor: IVimEditor, quoteChar: string): void {
     const range = editor.getInnerQuoteRange(quoteChar);
     if (!range) {
       return;
@@ -200,7 +200,7 @@ export class NormalModeHandler extends BaseModeHandler {
     }
   }
   
-  private deleteInnerBracket(editor: any): void {
+  private deleteInnerBracket(editor: IVimEditor): void {
     const range = editor.getInnerBracketRange();
     if (!range) {
       return;
@@ -236,7 +236,7 @@ export class NormalModeHandler extends BaseModeHandler {
     }
   }
   
-  private deleteAroundBracket(editor: any, openChar: string, closeChar: string): void {
+  private deleteAroundBracket(editor: IVimEditor, openChar: string, closeChar: string): void {
     const range = editor['findInnerBracketRange'](openChar, closeChar);
     if (!range) {
       return;
@@ -272,7 +272,7 @@ export class NormalModeHandler extends BaseModeHandler {
     }
   }
   
-  private deleteAroundQuote(editor: any, quoteChar: string): void {
+  private deleteAroundQuote(editor: IVimEditor, quoteChar: string): void {
     const range = editor.getInnerQuoteRange(quoteChar);
     if (!range) {
       return;
@@ -308,7 +308,7 @@ export class NormalModeHandler extends BaseModeHandler {
     }
   }
   
-  private deleteAroundAnyBracket(editor: any): void {
+  private deleteAroundAnyBracket(editor: IVimEditor): void {
     const range = editor.getInnerBracketRange();
     if (!range) {
       return;

@@ -1,9 +1,9 @@
-import { EditorMode, BaseModeHandler } from '../vimEditorTypes';
+import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 
 export class VisualModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.Visual;
   
-  handleKey(key: string, editor: any): void {
+  handleKey(key: string, editor: IVimEditor): void {
     if (editor['visualKeyBuffer'] === '' && editor['handleMovement'](key)) {
       return;
     }
@@ -56,7 +56,7 @@ export class VisualModeHandler extends BaseModeHandler {
     }
   }
   
-  private selectInnerWord(editor: any): void {
+  private selectInnerWord(editor: IVimEditor): void {
     const range = editor.getInnerWordRange();
     if (!range) {
       editor.mode = EditorMode.Normal;
@@ -72,7 +72,7 @@ export class VisualModeHandler extends BaseModeHandler {
     editor['updateInputPosition']();
   }
   
-  private selectInnerQuote(editor: any, quoteChar: string): void {
+  private selectInnerQuote(editor: IVimEditor, quoteChar: string): void {
     const range = editor.getInnerQuoteRange(quoteChar);
     if (!range) {
       return;
@@ -86,7 +86,7 @@ export class VisualModeHandler extends BaseModeHandler {
     editor['updateInputPosition']();
   }
   
-  private getVisualSelection(editor: any): string {
+  private getVisualSelection(editor: IVimEditor): string {
     const startY = Math.min(editor['visualStartY'], editor.cursorY);
     const endY = Math.max(editor['visualStartY'], editor.cursorY);
     const startX = editor['visualStartY'] === startY ? 
@@ -113,12 +113,12 @@ export class VisualModeHandler extends BaseModeHandler {
     return result;
   }
   
-  private yankVisualSelection(editor: any): void {
+  private yankVisualSelection(editor: IVimEditor): void {
     const selection = this.getVisualSelection(editor);
     navigator.clipboard.writeText(selection);
   }
   
-  private cutVisualSelection(editor: any): void {
+  private cutVisualSelection(editor: IVimEditor): void {
     const selection = this.getVisualSelection(editor);
     navigator.clipboard.writeText(selection);
     
@@ -145,7 +145,7 @@ export class VisualModeHandler extends BaseModeHandler {
     editor['adjustCursorX']();
   }
   
-  private startSearchFromVisualSelection(editor: any): void {
+  private startSearchFromVisualSelection(editor: IVimEditor): void {
     const selection = this.getVisualSelection(editor);
     if (!selection || selection.trim().length === 0) {
       editor.mode = EditorMode.Normal;
