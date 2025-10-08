@@ -64,7 +64,8 @@ public class DatabaseDtoGenerator
 
     private string SqlTypeToCsharpType(string sqlType, SqlDataSize? sqlDataSize)
     {
-        var upperSqlType = sqlType.ToUpper();
+        var normalizedType = sqlType.Replace("[", "").Replace("]", "");
+        var upperSqlType = normalizedType.ToUpper();
         
         return upperSqlType switch
         {
