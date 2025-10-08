@@ -7,7 +7,7 @@ import { ModeHandlerRegistry } from './handlers';
 
 @customElement('vim-editor')
 export class VimEditor extends LitElement {
-  private p5Instance: p5 | null = null;
+  p5Instance: p5 | null = null;
   private canvas: HTMLCanvasElement | null = null;
   private cursorBlinkInterval: number | null = null;
   private baseCharWidth = 9;
@@ -15,7 +15,7 @@ export class VimEditor extends LitElement {
   private textPadding = 2;
   private textOffsetY = 5;
   private statusBarHeight = 24;
-  private hiddenInput: HTMLInputElement | null = null;
+  hiddenInput: HTMLInputElement | null = null;
   
   @state()
   private cursorVisible = true;
@@ -63,8 +63,8 @@ export class VimEditor extends LitElement {
   private bufferHeight = 0;
   private isComposing = false;
   
-  private visualStartX = 0;
-  private visualStartY = 0;
+  visualStartX = 0;
+  visualStartY = 0;
   
   private numberPrefix = '';
   
@@ -73,19 +73,19 @@ export class VimEditor extends LitElement {
 
   fastJumpMatches: Array<{ x: number; y: number; label: string }> = [];
   fastJumpInput = '';
-  private previousMode: EditorMode.Normal | EditorMode.Visual | EditorMode.VisualLine = EditorMode.Normal;
+  previousMode: EditorMode.Normal | EditorMode.Visual | EditorMode.VisualLine = EditorMode.Normal;
   
   keyBuffer = '';
   visualKeyBuffer = '';
   
-  private searchKeyword = '';
-  private searchMatches: Array<{ y: number; x: number }> = [];
-  private currentMatchIndex = -1;
-  private searchHistory: Array<{ keyword: string; matches: Array<{ y: number; x: number }> }> = [];
+  searchKeyword = '';
+  searchMatches: Array<{ y: number; x: number }> = [];
+  currentMatchIndex = -1;
+  searchHistory: Array<{ keyword: string; matches: Array<{ y: number; x: number }> }> = [];
   
-  private tMarks: Array<{ y: number; x: number }> = [];
+  tMarks: Array<{ y: number; x: number }> = [];
   
-  private modeHandlerRegistry!: ModeHandlerRegistry;
+  modeHandlerRegistry!: ModeHandlerRegistry;
   private currentModeHandler!: EditorModeHandler;
   private previousModeHandler!: EditorModeHandler;
   
@@ -116,7 +116,7 @@ export class VimEditor extends LitElement {
   }
 
 
-  private findMatchesInVisibleRange(targetChar: string): Array<{ x: number; y: number; label: string }> {
+  findMatchesInVisibleRange(targetChar: string): Array<{ x: number; y: number; label: string }> {
     const matches: Array<{ x: number; y: number; label: string }> = [];
     let matchIndex = 0;
     
@@ -395,7 +395,7 @@ export class VimEditor extends LitElement {
     this.updateInputPosition();
   }
 
-  private updateInputPosition() {
+  updateInputPosition() {
     if (!this.hiddenInput) return;
     
     const line = this.content[this.cursorY] || '';
@@ -510,7 +510,7 @@ export class VimEditor extends LitElement {
     }
   }
 
-  private handleMovement(key: string): boolean {
+  handleMovement(key: string): boolean {
     if (/^[0-9]$/.test(key)) {
       this.numberPrefix += key;
       return true;
@@ -586,7 +586,7 @@ export class VimEditor extends LitElement {
 
 
 
-  private moveCursorDown() {
+  moveCursorDown() {
     if (this.cursorY < this.content.length - 1) {
       this.cursorY += 1;
       this.adjustCursorX();
@@ -594,7 +594,7 @@ export class VimEditor extends LitElement {
     }
   }
 
-  private moveCursorUp() {
+  moveCursorUp() {
     if (this.cursorY > 0) {
       this.cursorY -= 1;
       this.adjustCursorX();
@@ -602,14 +602,14 @@ export class VimEditor extends LitElement {
     }
   }
 
-  private moveCursorLeft() {
+  moveCursorLeft() {
     if (this.cursorX > 0) {
       this.cursorX -= 1;
       this.updateInputPosition();
     }
   }
 
-  private moveCursorRight() {
+  moveCursorRight() {
     const currentLine = this.content[this.cursorY] || '';
     const maxPosition = this.mode === EditorMode.Insert ? currentLine.length : currentLine.length - 1;
     if (this.cursorX < maxPosition) {
@@ -641,7 +641,7 @@ export class VimEditor extends LitElement {
     this.updateInputPosition();
   }
 
-  private moveToFirstLine() {
+  moveToFirstLine() {
     this.cursorY = 0;
     this.moveCursorToLineStart();
   }
@@ -652,7 +652,7 @@ export class VimEditor extends LitElement {
     this.updateInputPosition();
   }
 
-  private jumpToMatchingBracket() {
+  jumpToMatchingBracket() {
     const currentLine = this.content[this.cursorY] || '';
     const currentChar = currentLine[this.cursorX];
     
@@ -939,7 +939,7 @@ export class VimEditor extends LitElement {
     };
   }
   
-  private findInnerBracketRange(openChar: string, closeChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
+  findInnerBracketRange(openChar: string, closeChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
     const isQuote = openChar === closeChar;
     
     if (isQuote) {
@@ -1100,7 +1100,7 @@ export class VimEditor extends LitElement {
     return true;
   }
 
-  private deleteWord() {
+  deleteWord() {
     const currentLine = this.content[this.cursorY] || '';
     if (currentLine.length === 0 || this.cursorX >= currentLine.length) {
       return;
@@ -1140,7 +1140,7 @@ export class VimEditor extends LitElement {
     }
   }
 
-  private deleteToWordEnd() {
+  deleteToWordEnd() {
     const currentLine = this.content[this.cursorY] || '';
     if (currentLine.length === 0 || this.cursorX >= currentLine.length) {
       return;
@@ -1174,7 +1174,7 @@ export class VimEditor extends LitElement {
     }
   }
 
-  private deleteLinesDown(count: number) {
+  deleteLinesDown(count: number) {
     const startY = this.cursorY;
     const endY = Math.min(startY + count, this.content.length - 1);
     const linesToDelete = endY - startY + 1;
@@ -1193,7 +1193,7 @@ export class VimEditor extends LitElement {
     this.adjustCursorX();
   }
 
-  private deleteLinesUp(count: number) {
+  deleteLinesUp(count: number) {
     const endY = this.cursorY;
     const startY = Math.max(endY - count, 0);
     const linesToDelete = endY - startY + 1;
@@ -1459,21 +1459,21 @@ export class VimEditor extends LitElement {
     this.updateInputPosition();
   }
 
-  private adjustCursorX() {
+  adjustCursorX() {
     const currentLine = this.content[this.cursorY] || '';
     if (currentLine.length > 0 && this.cursorX >= currentLine.length) {
       this.cursorX = currentLine.length - 1;
     }
   }
 
-  private adjustCursorForNormalMode() {
+  adjustCursorForNormalMode() {
     const currentLine = this.content[this.cursorY] || '';
     if (currentLine.length > 0 && this.cursorX >= currentLine.length) {
       this.cursorX = currentLine.length - 1;
     }
   }
 
-  private insertLineBelow() {
+  insertLineBelow() {
     this.content.splice(this.cursorY + 1, 0, '');
     this.cursorY += 1;
     this.cursorX = 0;
@@ -1482,7 +1482,7 @@ export class VimEditor extends LitElement {
   }
 
 
-  private deleteMultiLineSelection(startY: number, endY: number, startX: number, endX: number) {
+  deleteMultiLineSelection(startY: number, endY: number, startX: number, endX: number) {
     const firstPart = this.content[startY].slice(0, startX);
     const lastPart = this.content[endY].slice(endX + 1);
     this.content[startY] = firstPart + lastPart;
@@ -1491,7 +1491,7 @@ export class VimEditor extends LitElement {
     this.cursorY = startY;
   }
 
-  private handleBackspace() {
+  handleBackspace() {
     if (this.cursorX > 0) {
       const currentLine = this.content[this.cursorY];
       this.content[this.cursorY] = currentLine.substring(0, this.cursorX - 1) + currentLine.substring(this.cursorX);
@@ -1508,7 +1508,7 @@ export class VimEditor extends LitElement {
     this.updateInputPosition();
   }
 
-  private handleEnter() {
+  handleEnter() {
     const currentLine = this.content[this.cursorY];
     const lineBeforeCursor = currentLine.substring(0, this.cursorX);
     const lineAfterCursor = currentLine.substring(this.cursorX);
@@ -1521,7 +1521,7 @@ export class VimEditor extends LitElement {
     this.updateInputPosition();
   }
 
-  private insertCharacter(char: string) {
+  insertCharacter(char: string) {
     const currentLine = this.content[this.cursorY];
     this.content[this.cursorY] = 
       currentLine.substring(0, this.cursorX) + 
@@ -1543,7 +1543,7 @@ export class VimEditor extends LitElement {
     }
   }
 
-  private async pasteAfterCursor() {
+  async pasteAfterCursor() {
     try {
       const text = await navigator.clipboard.readText();
       this.pasteTextAfterCursor(text);
@@ -1635,7 +1635,7 @@ export class VimEditor extends LitElement {
     this.updateInputPosition();
   }
 
-  private saveHistory(cursorPos: { cursorX: number; cursorY: number } | null = null) {
+  saveHistory(cursorPos: { cursorX: number; cursorY: number } | null = null) {
     const saveCursorX = cursorPos !== null ? cursorPos.cursorX : this.cursorX;
     const saveCursorY = cursorPos !== null ? cursorPos.cursorY : this.cursorY;
     
@@ -1652,7 +1652,7 @@ export class VimEditor extends LitElement {
     }
   }
 
-  private undo() {
+  undo() {
     if (this.historyIndex >= 0) {
       const state = this.history[this.historyIndex];
       this.historyIndex--;
@@ -1876,7 +1876,7 @@ export class VimEditor extends LitElement {
   }
 
 
-  private enterInsertMode() {
+  enterInsertMode() {
     if (this.tMarks.length > 0) {
       this.mode = EditorMode.TInsert;
       const lastMark = this.tMarks[this.tMarks.length - 1];

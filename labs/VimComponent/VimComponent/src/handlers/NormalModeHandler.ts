@@ -5,27 +5,27 @@ export class NormalModeHandler extends BaseModeHandler {
   
   private getCommandPatterns(editor: IVimEditor) {
     return [
-      { pattern: 'gg', action: () => { editor['moveToFirstLine'](); } },
-      { pattern: 'diw', action: () => { editor['saveHistory'](); this.deleteInnerWord(editor); } },
-      { pattern: 'di%', action: () => { editor['saveHistory'](); this.deleteInnerBracket(editor); } },
-      { pattern: 'di`', action: () => { editor['saveHistory'](); this.deleteInnerQuote(editor, '`'); } },
-      { pattern: "di'", action: () => { editor['saveHistory'](); this.deleteInnerQuote(editor, "'"); } },
-      { pattern: 'di"', action: () => { editor['saveHistory'](); this.deleteInnerQuote(editor, '"'); } },
-      { pattern: 'da(', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '(', ')'); } },
-      { pattern: 'da)', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '(', ')'); } },
-      { pattern: 'da[', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '[', ']'); } },
-      { pattern: 'da]', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '[', ']'); } },
-      { pattern: 'da{', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '{', '}'); } },
-      { pattern: 'da}', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '{', '}'); } },
-      { pattern: 'da<', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '<', '>'); } },
-      { pattern: 'da>', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '<', '>'); } },
-      { pattern: 'da`', action: () => { editor['saveHistory'](); this.deleteAroundQuote(editor, '`'); } },
-      { pattern: "da'", action: () => { editor['saveHistory'](); this.deleteAroundQuote(editor, "'"); } },
-      { pattern: 'da"', action: () => { editor['saveHistory'](); this.deleteAroundQuote(editor, '"'); } },
-      { pattern: 'da%', action: () => { editor['saveHistory'](); this.deleteAroundAnyBracket(editor); } },
-      { pattern: 'dw', action: () => { editor['saveHistory'](); editor['deleteWord'](); } },
-      { pattern: 'de', action: () => { editor['saveHistory'](); editor['deleteToWordEnd'](); } },
-      { pattern: 'i', action: () => { editor['enterInsertMode'](); } },
+      { pattern: 'gg', action: () => { editor.moveToFirstLine(); } },
+      { pattern: 'diw', action: () => { editor.saveHistory(); this.deleteInnerWord(editor); } },
+      { pattern: 'di%', action: () => { editor.saveHistory(); this.deleteInnerBracket(editor); } },
+      { pattern: 'di`', action: () => { editor.saveHistory(); this.deleteInnerQuote(editor, '`'); } },
+      { pattern: "di'", action: () => { editor.saveHistory(); this.deleteInnerQuote(editor, "'"); } },
+      { pattern: 'di"', action: () => { editor.saveHistory(); this.deleteInnerQuote(editor, '"'); } },
+      { pattern: 'da(', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '(', ')'); } },
+      { pattern: 'da)', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '(', ')'); } },
+      { pattern: 'da[', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '[', ']'); } },
+      { pattern: 'da]', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '[', ']'); } },
+      { pattern: 'da{', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '{', '}'); } },
+      { pattern: 'da}', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '{', '}'); } },
+      { pattern: 'da<', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '<', '>'); } },
+      { pattern: 'da>', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '<', '>'); } },
+      { pattern: 'da`', action: () => { editor.saveHistory(); this.deleteAroundQuote(editor, '`'); } },
+      { pattern: "da'", action: () => { editor.saveHistory(); this.deleteAroundQuote(editor, "'"); } },
+      { pattern: 'da"', action: () => { editor.saveHistory(); this.deleteAroundQuote(editor, '"'); } },
+      { pattern: 'da%', action: () => { editor.saveHistory(); this.deleteAroundAnyBracket(editor); } },
+      { pattern: 'dw', action: () => { editor.saveHistory(); editor.deleteWord(); } },
+      { pattern: 'de', action: () => { editor.saveHistory(); editor.deleteToWordEnd(); } },
+      { pattern: 'i', action: () => { editor.enterInsertMode(); } },
       { pattern: 't', action: () => { this.addTMark(editor); } },
       { pattern: 'T', action: () => { this.clearTMarks(editor); } },
       { pattern: 'a', action: () => { 
@@ -34,34 +34,34 @@ export class NormalModeHandler extends BaseModeHandler {
           editor.cursorX += 1;
         }
         editor.mode = EditorMode.Insert;
-        editor['updateInputPosition']();
-        editor['hiddenInput']?.focus();
+        editor.updateInputPosition();
+        editor.hiddenInput?.focus();
       } },
-      { pattern: 'o', action: () => { editor['insertLineBelow'](); editor['hiddenInput']?.focus(); } },
-      { pattern: 'p', action: () => { editor['saveHistory'](); editor['pasteAfterCursor'](); } },
+      { pattern: 'o', action: () => { editor.insertLineBelow(); editor.hiddenInput?.focus(); } },
+      { pattern: 'p', action: () => { editor.saveHistory(); editor.pasteAfterCursor(); } },
       { pattern: 'v', action: () => { 
         editor.mode = EditorMode.Visual;
-        editor['visualStartX'] = editor.cursorX;
-        editor['visualStartY'] = editor.cursorY;
+        editor.visualStartX = editor.cursorX;
+        editor.visualStartY = editor.cursorY;
       } },
       { pattern: 'V', action: () => { 
         editor.mode = EditorMode.VisualLine;
-        editor['visualStartX'] = editor.cursorX;
-        editor['visualStartY'] = editor.cursorY;
+        editor.visualStartX = editor.cursorX;
+        editor.visualStartY = editor.cursorY;
       } },
       { pattern: 'f', action: () => { 
-        editor['previousMode'] = EditorMode.Normal;
+        editor.previousMode = EditorMode.Normal;
         editor.mode = EditorMode.FastJump;
         editor.fastJumpMatches = [];
         editor.fastJumpInput = '';
       } },
-      { pattern: 'u', action: () => { editor['undo'](); } },
-      { pattern: '%', action: () => { editor['jumpToMatchingBracket'](); } },
+      { pattern: 'u', action: () => { editor.undo(); } },
+      { pattern: '%', action: () => { editor.jumpToMatchingBracket(); } },
     ];
   }
   
   handleKey(key: string, editor: IVimEditor): void {
-    if (editor.keyBuffer === '' && editor['handleMovement'](key)) {
+    if (editor.keyBuffer === '' && editor.handleMovement(key)) {
       return;
     }
     
@@ -85,8 +85,8 @@ export class NormalModeHandler extends BaseModeHandler {
     if (dNumberJMatch) {
       const count = parseInt(dNumberJMatch[1], 10);
       editor.keyBuffer = '';
-      editor['saveHistory']();
-      editor['deleteLinesDown'](count);
+      editor.saveHistory();
+      editor.deleteLinesDown(count);
       return true;
     }
     
@@ -94,8 +94,8 @@ export class NormalModeHandler extends BaseModeHandler {
     if (dNumberKMatch) {
       const count = parseInt(dNumberKMatch[1], 10);
       editor.keyBuffer = '';
-      editor['saveHistory']();
-      editor['deleteLinesUp'](count);
+      editor.saveHistory();
+      editor.deleteLinesUp(count);
       return true;
     }
     
@@ -111,7 +111,7 @@ export class NormalModeHandler extends BaseModeHandler {
     if (ddMatch) {
       if (editor.keyBuffer === 'dd') {
         editor.keyBuffer = '';
-        editor['saveHistory']();
+        editor.saveHistory();
         editor['deleteLine']();
         return true;
       }
@@ -126,13 +126,13 @@ export class NormalModeHandler extends BaseModeHandler {
   }
   
   addTMark(editor: IVimEditor): void {
-    const existingIndex = editor['tMarks'].findIndex(
+    const existingIndex = editor.tMarks.findIndex(
       (mark: any) => mark.y === editor.cursorY && mark.x === editor.cursorX
     );
     
     if (existingIndex === -1) {
-      editor['tMarks'].push({ y: editor.cursorY, x: editor.cursorX });
-      editor['tMarks'].sort((a: any, b: any) => {
+      editor.tMarks.push({ y: editor.cursorY, x: editor.cursorX });
+      editor.tMarks.sort((a: any, b: any) => {
         if (a.y !== b.y) return a.y - b.y;
         return a.x - b.x;
       });
@@ -140,7 +140,7 @@ export class NormalModeHandler extends BaseModeHandler {
   }
   
   clearTMarks(editor: IVimEditor): void {
-    editor['tMarks'] = [];
+    editor.tMarks = [];
   }
   
   private deleteInnerWord(editor: IVimEditor): void {
@@ -237,7 +237,7 @@ export class NormalModeHandler extends BaseModeHandler {
   }
   
   private deleteAroundBracket(editor: IVimEditor, openChar: string, closeChar: string): void {
-    const range = editor['findInnerBracketRange'](openChar, closeChar);
+    const range = editor.findInnerBracketRange(openChar, closeChar);
     if (!range) {
       return;
     }

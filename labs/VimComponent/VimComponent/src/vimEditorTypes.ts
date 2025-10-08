@@ -26,6 +26,7 @@ export interface BufferCell {
 }
 
 export interface IVimEditor {
+  // State properties
   mode: EditorMode;
   content: string[];
   cursorX: number;
@@ -34,11 +35,57 @@ export interface IVimEditor {
   fastJumpInput: string;
   keyBuffer: string;
   visualKeyBuffer: string;
+  previousMode: EditorMode.Normal | EditorMode.Visual | EditorMode.VisualLine;
+  visualStartX: number;
+  visualStartY: number;
+  searchKeyword: string;
+  searchMatches: Array<{ y: number; x: number }>;
+  currentMatchIndex: number;
+  searchHistory: Array<{ keyword: string; matches: Array<{ y: number; x: number }> }>;
+  tMarks: Array<{ y: number; x: number }>;
+  hiddenInput: HTMLInputElement | null;
+  p5Instance: any;
+  modeHandlerRegistry: any;
   
-  // Public methods for getting ranges
+  // Range methods
   getInnerWordRange(): { startX: number; endX: number; y: number } | null;
   getInnerQuoteRange(quoteChar: string): { startY: number; startX: number; endY: number; endX: number } | null;
   getInnerBracketRange(): { startY: number; startX: number; endY: number; endX: number } | null;
+  findInnerBracketRange(openChar: string, closeChar: string): { startY: number; startX: number; endY: number; endX: number } | null;
+  
+  // Movement methods
+  handleMovement(key: string): boolean;
+  moveCursorUp(): void;
+  moveCursorDown(): void;
+  moveCursorLeft(): void;
+  moveCursorRight(): void;
+  moveToFirstLine(): void;
+  jumpToMatchingBracket(): void;
+  
+  // Edit methods
+  insertCharacter(char: string): void;
+  handleEnter(): void;
+  handleBackspace(): void;
+  deleteWord(): void;
+  deleteToWordEnd(): void;
+  deleteLinesDown(count: number): void;
+  deleteLinesUp(count: number): void;
+  deleteMultiLineSelection(startY: number, endY: number, startX: number, endX: number): void;
+  pasteAfterCursor(): void;
+  insertLineBelow(): void;
+  
+  // Mode methods
+  enterInsertMode(): void;
+  
+  // History methods
+  saveHistory(cursorPos?: { cursorX: number; cursorY: number }): void;
+  undo(): void;
+  
+  // Helper methods
+  adjustCursorX(): void;
+  adjustCursorForNormalMode(): void;
+  updateInputPosition(): void;
+  findMatchesInVisibleRange(char: string): Array<{ x: number; y: number; label: string }>;
   
   requestUpdate(property?: string, oldValue?: any): void;
   

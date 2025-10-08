@@ -4,7 +4,7 @@ export class VisualLineModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.VisualLine;
   
   handleKey(key: string, editor: IVimEditor): void {
-    if (editor['handleMovement'](key)) {
+    if (editor.handleMovement(key)) {
       return;
     }
     
@@ -23,7 +23,7 @@ export class VisualLineModeHandler extends BaseModeHandler {
         editor.mode = EditorMode.Normal;
         break;
       case 'f':
-        editor['previousMode'] = EditorMode.VisualLine;
+        editor.previousMode = EditorMode.VisualLine;
         editor.mode = EditorMode.FastJump;
         editor.fastJumpMatches = [];
         editor.fastJumpInput = '';
@@ -32,14 +32,14 @@ export class VisualLineModeHandler extends BaseModeHandler {
   }
   
   private getVisualSelection(editor: IVimEditor): string {
-    const startY = Math.min(editor['visualStartY'], editor.cursorY);
-    const endY = Math.max(editor['visualStartY'], editor.cursorY);
-    const startX = editor['visualStartY'] === startY ? 
-      Math.min(editor['visualStartX'], editor.cursorX) : 
-      Math.min(editor.cursorX, editor['visualStartX']);
-    const endX = editor['visualStartY'] === endY ? 
-      Math.max(editor['visualStartX'], editor.cursorX) : 
-      Math.max(editor.cursorX, editor['visualStartX']);
+    const startY = Math.min(editor.visualStartY, editor.cursorY);
+    const endY = Math.max(editor.visualStartY, editor.cursorY);
+    const startX = editor.visualStartY === startY ? 
+      Math.min(editor.visualStartX, editor.cursorX) : 
+      Math.min(editor.cursorX, editor.visualStartX);
+    const endX = editor.visualStartY === endY ? 
+      Math.max(editor.visualStartX, editor.cursorX) : 
+      Math.max(editor.cursorX, editor.visualStartX);
     
     if (startY === endY) {
       return editor.content[startY].slice(startX, endX + 1);
@@ -64,13 +64,13 @@ export class VisualLineModeHandler extends BaseModeHandler {
   }
   
   private cutVisualLineSelection(editor: IVimEditor): void {
-    editor['saveHistory']();
+    editor.saveHistory();
     
     const selection = this.getVisualSelection(editor);
     navigator.clipboard.writeText(selection);
     
-    const startY = Math.min(editor['visualStartY'], editor.cursorY);
-    const endY = Math.max(editor['visualStartY'], editor.cursorY);
+    const startY = Math.min(editor.visualStartY, editor.cursorY);
+    const endY = Math.max(editor.visualStartY, editor.cursorY);
     const linesToDelete = endY - startY + 1;
     
     editor.content.splice(startY, linesToDelete);
@@ -81,7 +81,7 @@ export class VisualLineModeHandler extends BaseModeHandler {
     
     editor.cursorY = Math.min(startY, editor.content.length - 1);
     editor.cursorX = 0;
-    editor['adjustCursorX']();
+    editor.adjustCursorX();
   }
 }
 

@@ -4,12 +4,12 @@ export class InsertModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.Insert;
   
   onEnter(editor: IVimEditor): void {
-    editor['hiddenInput']?.focus();
+    editor.hiddenInput?.focus();
   }
   
   onExit(editor: IVimEditor): void {
-    editor['hiddenInput']?.blur();
-    editor['adjustCursorForNormalMode']();
+    editor.hiddenInput?.blur();
+    editor.adjustCursorForNormalMode();
   }
   
   shouldPreventDefault(key: string): boolean {
@@ -27,36 +27,36 @@ export class InsertModeHandler extends BaseModeHandler {
     }
     
     if (key === 'Backspace') {
-      editor['handleBackspace']();
+      editor.handleBackspace();
     } else if (key === 'Enter') {
-      editor['handleEnter']();
+      editor.handleEnter();
     } else if (key === 'ArrowLeft') {
-      editor['moveCursorLeft']();
+      editor.moveCursorLeft();
     } else if (key === 'ArrowRight') {
-      editor['moveCursorRight']();
+      editor.moveCursorRight();
     } else if (key === 'ArrowUp') {
-      editor['moveCursorUp']();
+      editor.moveCursorUp();
     } else if (key === 'ArrowDown') {
-      editor['moveCursorDown']();
+      editor.moveCursorDown();
     }
   }
   
   handleInput(editor: IVimEditor, value: string): void {
     for (const char of value) {
-      editor['insertCharacter'](char);
+      editor.insertCharacter(char);
     }
-    if (editor['p5Instance']) {
-      editor['p5Instance'].redraw();
+    if (editor.p5Instance) {
+      editor.p5Instance.redraw();
     }
   }
   
   handleCompositionEnd(editor: IVimEditor, data: string): void {
     if (data) {
       for (const char of data) {
-        editor['insertCharacter'](char);
+        editor.insertCharacter(char);
       }
-      if (editor['p5Instance']) {
-        editor['p5Instance'].redraw();
+      if (editor.p5Instance) {
+        editor.p5Instance.redraw();
       }
     }
   }

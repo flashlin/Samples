@@ -5,23 +5,23 @@ export class FastJumpModeHandler extends BaseModeHandler {
   
   handleKey(key: string, editor: IVimEditor): void {
     if (key === 'Escape') {
-      editor.mode = editor['previousMode'];
+      editor.mode = editor.previousMode;
       editor.fastJumpMatches = [];
       editor.fastJumpInput = '';
       return;
     }
     
     if (key.length === 1) {
-      const matches = editor['findMatchesInVisibleRange'](key);
+      const matches = editor.findMatchesInVisibleRange(key);
       
       if (matches.length === 0) {
-        editor.mode = editor['previousMode'];
+        editor.mode = editor.previousMode;
         editor.fastJumpMatches = [];
         editor.fastJumpInput = '';
       } else if (matches.length === 1) {
         editor.cursorX = matches[0].x;
         editor.cursorY = matches[0].y;
-        editor.mode = editor['previousMode'];
+        editor.mode = editor.previousMode;
         editor.fastJumpMatches = [];
         editor.fastJumpInput = '';
       } else {

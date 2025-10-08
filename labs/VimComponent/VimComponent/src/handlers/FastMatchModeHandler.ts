@@ -5,7 +5,7 @@ export class FastMatchModeHandler extends BaseModeHandler {
   
   handleKey(key: string, editor: IVimEditor): void {
     if (key === 'Escape') {
-      editor.mode = editor['previousMode'];
+      editor.mode = editor.previousMode;
       editor.fastJumpMatches = [];
       editor.fastJumpInput = '';
       return;
@@ -19,13 +19,13 @@ export class FastMatchModeHandler extends BaseModeHandler {
       );
       
       if (matchingLabels.length === 0) {
-        editor.mode = editor['previousMode'];
+        editor.mode = editor.previousMode;
         editor.fastJumpMatches = [];
         editor.fastJumpInput = '';
       } else if (matchingLabels.length === 1 && matchingLabels[0].label === editor.fastJumpInput) {
         editor.cursorX = matchingLabels[0].x;
         editor.cursorY = matchingLabels[0].y;
-        editor.mode = editor['previousMode'];
+        editor.mode = editor.previousMode;
         editor.fastJumpMatches = [];
         editor.fastJumpInput = '';
       } else {

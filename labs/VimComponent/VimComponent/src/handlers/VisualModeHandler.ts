@@ -4,7 +4,7 @@ export class VisualModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.Visual;
   
   handleKey(key: string, editor: IVimEditor): void {
-    if (editor.visualKeyBuffer === '' && editor['handleMovement'](key)) {
+    if (editor.visualKeyBuffer === '' && editor.handleMovement(key)) {
       return;
     }
     
@@ -45,7 +45,7 @@ export class VisualModeHandler extends BaseModeHandler {
         editor.mode = EditorMode.Normal;
         break;
       case 'f':
-        editor['previousMode'] = EditorMode.Visual;
+        editor.previousMode = EditorMode.Visual;
         editor.mode = EditorMode.FastJump;
         editor.fastJumpMatches = [];
         editor.fastJumpInput = '';
@@ -64,12 +64,12 @@ export class VisualModeHandler extends BaseModeHandler {
     }
     
     editor.mode = EditorMode.Visual;
-    editor['visualStartY'] = range.y;
-    editor['visualStartX'] = range.startX;
+    editor.visualStartY = range.y;
+    editor.visualStartX = range.startX;
     editor.cursorY = range.y;
     editor.cursorX = range.endX;
     
-    editor['updateInputPosition']();
+    editor.updateInputPosition();
   }
   
   private selectInnerQuote(editor: IVimEditor, quoteChar: string): void {
@@ -78,23 +78,23 @@ export class VisualModeHandler extends BaseModeHandler {
       return;
     }
     
-    editor['visualStartY'] = range.startY;
-    editor['visualStartX'] = range.startX + 1;
+    editor.visualStartY = range.startY;
+    editor.visualStartX = range.startX + 1;
     editor.cursorY = range.endY;
     editor.cursorX = range.endX - 1;
     
-    editor['updateInputPosition']();
+    editor.updateInputPosition();
   }
   
   private getVisualSelection(editor: IVimEditor): string {
-    const startY = Math.min(editor['visualStartY'], editor.cursorY);
-    const endY = Math.max(editor['visualStartY'], editor.cursorY);
-    const startX = editor['visualStartY'] === startY ? 
-      Math.min(editor['visualStartX'], editor.cursorX) : 
-      Math.min(editor.cursorX, editor['visualStartX']);
-    const endX = editor['visualStartY'] === endY ? 
-      Math.max(editor['visualStartX'], editor.cursorX) : 
-      Math.max(editor.cursorX, editor['visualStartX']);
+    const startY = Math.min(editor.visualStartY, editor.cursorY);
+    const endY = Math.max(editor.visualStartY, editor.cursorY);
+    const startX = editor.visualStartY === startY ? 
+      Math.min(editor.visualStartX, editor.cursorX) : 
+      Math.min(editor.cursorX, editor.visualStartX);
+    const endX = editor.visualStartY === endY ? 
+      Math.max(editor.visualStartX, editor.cursorX) : 
+      Math.max(editor.cursorX, editor.visualStartX);
     
     if (startY === endY) {
       return editor.content[startY].slice(startX, endX + 1);
@@ -122,27 +122,27 @@ export class VisualModeHandler extends BaseModeHandler {
     const selection = this.getVisualSelection(editor);
     navigator.clipboard.writeText(selection);
     
-    const startY = Math.min(editor['visualStartY'], editor.cursorY);
-    const endY = Math.max(editor['visualStartY'], editor.cursorY);
+    const startY = Math.min(editor.visualStartY, editor.cursorY);
+    const endY = Math.max(editor.visualStartY, editor.cursorY);
     
     let startX, endX;
     if (startY === endY) {
-      startX = Math.min(editor['visualStartX'], editor.cursorX);
-      endX = Math.max(editor['visualStartX'], editor.cursorX);
+      startX = Math.min(editor.visualStartX, editor.cursorX);
+      endX = Math.max(editor.visualStartX, editor.cursorX);
     } else {
-      if (editor['visualStartY'] === startY) {
-        startX = editor['visualStartX'];
+      if (editor.visualStartY === startY) {
+        startX = editor.visualStartX;
         endX = editor.cursorX;
       } else {
         startX = editor.cursorX;
-        endX = editor['visualStartX'];
+        endX = editor.visualStartX;
       }
     }
 
-    editor['saveHistory']({ cursorX: endX, cursorY: endY });
+    editor.saveHistory({ cursorX: endX, cursorY: endY });
     
-    editor['deleteMultiLineSelection'](startY, endY, startX, endX);
-    editor['adjustCursorX']();
+    editor.deleteMultiLineSelection(startY, endY, startX, endX);
+    editor.adjustCursorX();
   }
   
   private startSearchFromVisualSelection(editor: IVimEditor): void {
@@ -152,22 +152,22 @@ export class VisualModeHandler extends BaseModeHandler {
       return;
     }
     
-    editor['searchKeyword'] = selection;
-    const fastSearchHandler = editor['modeHandlerRegistry'].getHandler(EditorMode.FastSearch);
+    editor.searchKeyword = selection;
+    const fastSearchHandler = editor.modeHandlerRegistry.getHandler(EditorMode.FastSearch);
     fastSearchHandler.findAllMatches(editor);
     
-    if (editor['searchMatches'].length === 0) {
+    if (editor.searchMatches.length === 0) {
       editor.mode = EditorMode.Normal;
       return;
     }
     
-    editor['currentMatchIndex'] = 0;
+    editor.currentMatchIndex = 0;
     editor.mode = EditorMode.FastSearch;
-    editor.cursorY = editor['searchMatches'][0].y;
-    editor.cursorX = editor['searchMatches'][0].x;
-    editor['searchHistory'].push({
-      keyword: editor['searchKeyword'],
-      matches: [...editor['searchMatches']]
+    editor.cursorY = editor.searchMatches[0].y;
+    editor.cursorX = editor.searchMatches[0].x;
+    editor.searchHistory.push({
+      keyword: editor.searchKeyword,
+      matches: [...editor.searchMatches]
     });
   }
 }
