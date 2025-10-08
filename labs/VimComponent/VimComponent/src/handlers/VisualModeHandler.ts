@@ -57,7 +57,7 @@ export class VisualModeHandler extends BaseModeHandler {
   }
   
   private selectInnerWord(editor: any): void {
-    const range = editor['getInnerWordRange']();
+    const range = editor.getInnerWordRange();
     if (!range) {
       editor.mode = EditorMode.Normal;
       return;
@@ -73,7 +73,7 @@ export class VisualModeHandler extends BaseModeHandler {
   }
   
   private selectInnerQuote(editor: any, quoteChar: string): void {
-    const range = editor['getInnerQuoteRange'](quoteChar);
+    const range = editor.getInnerQuoteRange(quoteChar);
     if (!range) {
       return;
     }

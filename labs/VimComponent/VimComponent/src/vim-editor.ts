@@ -861,7 +861,7 @@ export class VimEditor extends LitElement {
     }
   }
 
-  private getInnerWordRange(): { startX: number; endX: number; y: number } | null {
+  getInnerWordRange(): { startX: number; endX: number; y: number } | null {
     const currentLine = this.content[this.cursorY] || '';
     if (currentLine.length === 0) {
       return null;
@@ -890,211 +890,8 @@ export class VimEditor extends LitElement {
     
     return { startX, endX, y: this.cursorY };
   }
-
-
-  private deleteInnerWord() {
-    const range = this.getInnerWordRange();
-    if (!range) {
-      return;
-    }
-    
-    const currentLine = this.content[range.y];
-    const beforeWord = currentLine.substring(0, range.startX);
-    const afterWord = currentLine.substring(range.endX + 1);
-    
-    this.content[range.y] = beforeWord + afterWord;
-    
-    this.cursorX = range.startX;
-    if (this.cursorX >= this.content[range.y].length && this.content[range.y].length > 0) {
-      this.cursorX = this.content[range.y].length - 1;
-    }
-    if (this.cursorX < 0) {
-      this.cursorX = 0;
-    }
-  }
-
-  private deleteInnerQuote(quoteChar: string) {
-    const range = this.getInnerQuoteRange(quoteChar);
-    if (!range) {
-      return;
-    }
-    
-    if (range.startY === range.endY) {
-      const currentLine = this.content[range.startY];
-      const beforeQuote = currentLine.substring(0, range.startX + 1);
-      const afterQuote = currentLine.substring(range.endX);
-      
-      this.content[range.startY] = beforeQuote + afterQuote;
-      
-      this.cursorY = range.startY;
-      this.cursorX = range.startX + 1;
-      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
-        this.cursorX = this.content[this.cursorY].length - 1;
-      }
-    } else {
-      const firstLine = this.content[range.startY];
-      const lastLine = this.content[range.endY];
-      
-      const beforeQuote = firstLine.substring(0, range.startX + 1);
-      const afterQuote = lastLine.substring(range.endX);
-      
-      this.content[range.startY] = beforeQuote + afterQuote;
-      this.content.splice(range.startY + 1, range.endY - range.startY);
-      
-      this.cursorY = range.startY;
-      this.cursorX = range.startX + 1;
-      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
-        this.cursorX = this.content[this.cursorY].length - 1;
-      }
-    }
-  }
-
-  private deleteInnerBracket() {
-    const range = this.getInnerBracketRange();
-    if (!range) {
-      return;
-    }
-    
-    if (range.startY === range.endY) {
-      const currentLine = this.content[range.startY];
-      const beforeBracket = currentLine.substring(0, range.startX + 1);
-      const afterBracket = currentLine.substring(range.endX);
-      
-      this.content[range.startY] = beforeBracket + afterBracket;
-      
-      this.cursorY = range.startY;
-      this.cursorX = range.startX + 1;
-      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
-        this.cursorX = this.content[this.cursorY].length - 1;
-      }
-    } else {
-      const firstLine = this.content[range.startY];
-      const lastLine = this.content[range.endY];
-      
-      const beforeBracket = firstLine.substring(0, range.startX + 1);
-      const afterBracket = lastLine.substring(range.endX);
-      
-      this.content[range.startY] = beforeBracket + afterBracket;
-      this.content.splice(range.startY + 1, range.endY - range.startY);
-      
-      this.cursorY = range.startY;
-      this.cursorX = range.startX + 1;
-      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
-        this.cursorX = this.content[this.cursorY].length - 1;
-      }
-    }
-  }
-
-  private deleteAroundBracket(openChar: string, closeChar: string) {
-    const range = this.findInnerBracketRange(openChar, closeChar);
-    if (!range) {
-      return;
-    }
-    
-    if (range.startY === range.endY) {
-      const currentLine = this.content[range.startY];
-      const beforeBracket = currentLine.substring(0, range.startX);
-      const afterBracket = currentLine.substring(range.endX + 1);
-      
-      this.content[range.startY] = beforeBracket + afterBracket;
-      
-      this.cursorY = range.startY;
-      this.cursorX = range.startX;
-      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
-        this.cursorX = this.content[this.cursorY].length - 1;
-      }
-    } else {
-      const firstLine = this.content[range.startY];
-      const lastLine = this.content[range.endY];
-      
-      const beforeBracket = firstLine.substring(0, range.startX);
-      const afterBracket = lastLine.substring(range.endX + 1);
-      
-      this.content[range.startY] = beforeBracket + afterBracket;
-      this.content.splice(range.startY + 1, range.endY - range.startY);
-      
-      this.cursorY = range.startY;
-      this.cursorX = range.startX;
-      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
-        this.cursorX = this.content[this.cursorY].length - 1;
-      }
-    }
-  }
-
-  private deleteAroundQuote(quoteChar: string) {
-    const range = this.getInnerQuoteRange(quoteChar);
-    if (!range) {
-      return;
-    }
-    
-    if (range.startY === range.endY) {
-      const currentLine = this.content[range.startY];
-      const beforeQuote = currentLine.substring(0, range.startX);
-      const afterQuote = currentLine.substring(range.endX + 1);
-      
-      this.content[range.startY] = beforeQuote + afterQuote;
-      
-      this.cursorY = range.startY;
-      this.cursorX = range.startX;
-      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
-        this.cursorX = this.content[this.cursorY].length - 1;
-      }
-    } else {
-      const firstLine = this.content[range.startY];
-      const lastLine = this.content[range.endY];
-      
-      const beforeQuote = firstLine.substring(0, range.startX);
-      const afterQuote = lastLine.substring(range.endX + 1);
-      
-      this.content[range.startY] = beforeQuote + afterQuote;
-      this.content.splice(range.startY + 1, range.endY - range.startY);
-      
-      this.cursorY = range.startY;
-      this.cursorX = range.startX;
-      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
-        this.cursorX = this.content[this.cursorY].length - 1;
-      }
-    }
-  }
-
-  private deleteAroundAnyBracket() {
-    const range = this.getInnerBracketRange();
-    if (!range) {
-      return;
-    }
-    
-    if (range.startY === range.endY) {
-      const currentLine = this.content[range.startY];
-      const beforeBracket = currentLine.substring(0, range.startX);
-      const afterBracket = currentLine.substring(range.endX + 1);
-      
-      this.content[range.startY] = beforeBracket + afterBracket;
-      
-      this.cursorY = range.startY;
-      this.cursorX = range.startX;
-      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
-        this.cursorX = this.content[this.cursorY].length - 1;
-      }
-    } else {
-      const firstLine = this.content[range.startY];
-      const lastLine = this.content[range.endY];
-      
-      const beforeBracket = firstLine.substring(0, range.startX);
-      const afterBracket = lastLine.substring(range.endX + 1);
-      
-      this.content[range.startY] = beforeBracket + afterBracket;
-      this.content.splice(range.startY + 1, range.endY - range.startY);
-      
-      this.cursorY = range.startY;
-      this.cursorX = range.startX;
-      if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
-        this.cursorX = this.content[this.cursorY].length - 1;
-      }
-    }
-  }
-
-
-  private getInnerQuoteRange(quoteChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
+  
+  getInnerQuoteRange(quoteChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
     const range = this.findMultiLineQuoteRange(quoteChar);
     if (!range) {
       return null;
@@ -1106,8 +903,8 @@ export class VimEditor extends LitElement {
     
     return range;
   }
-
-  private getInnerBracketRange(): { startY: number; startX: number; endY: number; endX: number } | null {
+  
+  getInnerBracketRange(): { startY: number; startX: number; endY: number; endX: number } | null {
     const bracketPairs: Array<[string, string]> = [
       ['[', ']'],
       ['{', '}'],
@@ -1141,7 +938,7 @@ export class VimEditor extends LitElement {
       endX: closestRange.endX,
     };
   }
-
+  
   private findInnerBracketRange(openChar: string, closeChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
     const isQuote = openChar === closeChar;
     
@@ -1170,7 +967,7 @@ export class VimEditor extends LitElement {
     
     return null;
   }
-
+  
   private findOpeningBracketBeforeCursor(openChar: string, closeChar: string): { y: number; x: number } | null {
     let depth = 0;
     let skipFirst = false;
@@ -1208,7 +1005,7 @@ export class VimEditor extends LitElement {
     
     return null;
   }
-
+  
   private findClosingBracketFromPosition(openChar: string, closeChar: string, startY: number, startX: number): { y: number; x: number } | null {
     let depth = 0;
     
@@ -1236,13 +1033,13 @@ export class VimEditor extends LitElement {
     
     return null;
   }
-
+  
   private calculateDistanceFromCursor(startY: number, startX: number, endY: number, endX: number): number {
     const distToStart = Math.abs(this.cursorY - startY) * 1000 + Math.abs(this.cursorX - startX);
     const distToEnd = Math.abs(this.cursorY - endY) * 1000 + Math.abs(this.cursorX - endX);
     return Math.min(distToStart, distToEnd);
   }
-
+  
   private findMultiLineQuoteRange(quoteChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
     let startY = -1;
     let startX = -1;
@@ -1286,7 +1083,7 @@ export class VimEditor extends LitElement {
     
     return null;
   }
-
+  
   private isCursorInRange(startY: number, startX: number, endY: number, endX: number): boolean {
     if (this.cursorY < startY || this.cursorY > endY) {
       return false;

@@ -6,23 +6,23 @@ export class NormalModeHandler extends BaseModeHandler {
   private getCommandPatterns(editor: any) {
     return [
       { pattern: 'gg', action: () => { editor['moveToFirstLine'](); } },
-      { pattern: 'diw', action: () => { editor['saveHistory'](); editor['deleteInnerWord'](); } },
-      { pattern: 'di%', action: () => { editor['saveHistory'](); editor['deleteInnerBracket'](); } },
-      { pattern: 'di`', action: () => { editor['saveHistory'](); editor['deleteInnerQuote']('`'); } },
-      { pattern: "di'", action: () => { editor['saveHistory'](); editor['deleteInnerQuote']("'"); } },
-      { pattern: 'di"', action: () => { editor['saveHistory'](); editor['deleteInnerQuote']('"'); } },
-      { pattern: 'da(', action: () => { editor['saveHistory'](); editor['deleteAroundBracket']('(', ')'); } },
-      { pattern: 'da)', action: () => { editor['saveHistory'](); editor['deleteAroundBracket']('(', ')'); } },
-      { pattern: 'da[', action: () => { editor['saveHistory'](); editor['deleteAroundBracket']('[', ']'); } },
-      { pattern: 'da]', action: () => { editor['saveHistory'](); editor['deleteAroundBracket']('[', ']'); } },
-      { pattern: 'da{', action: () => { editor['saveHistory'](); editor['deleteAroundBracket']('{', '}'); } },
-      { pattern: 'da}', action: () => { editor['saveHistory'](); editor['deleteAroundBracket']('{', '}'); } },
-      { pattern: 'da<', action: () => { editor['saveHistory'](); editor['deleteAroundBracket']('<', '>'); } },
-      { pattern: 'da>', action: () => { editor['saveHistory'](); editor['deleteAroundBracket']('<', '>'); } },
-      { pattern: 'da`', action: () => { editor['saveHistory'](); editor['deleteAroundQuote']('`'); } },
-      { pattern: "da'", action: () => { editor['saveHistory'](); editor['deleteAroundQuote']("'"); } },
-      { pattern: 'da"', action: () => { editor['saveHistory'](); editor['deleteAroundQuote']('"'); } },
-      { pattern: 'da%', action: () => { editor['saveHistory'](); editor['deleteAroundAnyBracket'](); } },
+      { pattern: 'diw', action: () => { editor['saveHistory'](); this.deleteInnerWord(editor); } },
+      { pattern: 'di%', action: () => { editor['saveHistory'](); this.deleteInnerBracket(editor); } },
+      { pattern: 'di`', action: () => { editor['saveHistory'](); this.deleteInnerQuote(editor, '`'); } },
+      { pattern: "di'", action: () => { editor['saveHistory'](); this.deleteInnerQuote(editor, "'"); } },
+      { pattern: 'di"', action: () => { editor['saveHistory'](); this.deleteInnerQuote(editor, '"'); } },
+      { pattern: 'da(', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '(', ')'); } },
+      { pattern: 'da)', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '(', ')'); } },
+      { pattern: 'da[', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '[', ']'); } },
+      { pattern: 'da]', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '[', ']'); } },
+      { pattern: 'da{', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '{', '}'); } },
+      { pattern: 'da}', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '{', '}'); } },
+      { pattern: 'da<', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '<', '>'); } },
+      { pattern: 'da>', action: () => { editor['saveHistory'](); this.deleteAroundBracket(editor, '<', '>'); } },
+      { pattern: 'da`', action: () => { editor['saveHistory'](); this.deleteAroundQuote(editor, '`'); } },
+      { pattern: "da'", action: () => { editor['saveHistory'](); this.deleteAroundQuote(editor, "'"); } },
+      { pattern: 'da"', action: () => { editor['saveHistory'](); this.deleteAroundQuote(editor, '"'); } },
+      { pattern: 'da%', action: () => { editor['saveHistory'](); this.deleteAroundAnyBracket(editor); } },
       { pattern: 'dw', action: () => { editor['saveHistory'](); editor['deleteWord'](); } },
       { pattern: 'de', action: () => { editor['saveHistory'](); editor['deleteToWordEnd'](); } },
       { pattern: 'i', action: () => { editor['enterInsertMode'](); } },
@@ -141,6 +141,207 @@ export class NormalModeHandler extends BaseModeHandler {
   
   clearTMarks(editor: any): void {
     editor['tMarks'] = [];
+  }
+  
+  private deleteInnerWord(editor: any): void {
+    const range = editor.getInnerWordRange();
+    if (!range) {
+      return;
+    }
+    
+    const currentLine = editor.content[range.y];
+    const beforeWord = currentLine.substring(0, range.startX);
+    const afterWord = currentLine.substring(range.endX + 1);
+    
+    editor.content[range.y] = beforeWord + afterWord;
+    
+    editor.cursorX = range.startX;
+    if (editor.cursorX >= editor.content[range.y].length && editor.content[range.y].length > 0) {
+      editor.cursorX = editor.content[range.y].length - 1;
+    }
+    if (editor.cursorX < 0) {
+      editor.cursorX = 0;
+    }
+  }
+  
+  private deleteInnerQuote(editor: any, quoteChar: string): void {
+    const range = editor.getInnerQuoteRange(quoteChar);
+    if (!range) {
+      return;
+    }
+    
+    if (range.startY === range.endY) {
+      const currentLine = editor.content[range.startY];
+      const beforeQuote = currentLine.substring(0, range.startX + 1);
+      const afterQuote = currentLine.substring(range.endX);
+      
+      editor.content[range.startY] = beforeQuote + afterQuote;
+      
+      editor.cursorY = range.startY;
+      editor.cursorX = range.startX + 1;
+      if (editor.cursorX >= editor.content[editor.cursorY].length && editor.content[editor.cursorY].length > 0) {
+        editor.cursorX = editor.content[editor.cursorY].length - 1;
+      }
+    } else {
+      const firstLine = editor.content[range.startY];
+      const lastLine = editor.content[range.endY];
+      
+      const beforeQuote = firstLine.substring(0, range.startX + 1);
+      const afterQuote = lastLine.substring(range.endX);
+      
+      editor.content[range.startY] = beforeQuote + afterQuote;
+      editor.content.splice(range.startY + 1, range.endY - range.startY);
+      
+      editor.cursorY = range.startY;
+      editor.cursorX = range.startX + 1;
+      if (editor.cursorX >= editor.content[editor.cursorY].length && editor.content[editor.cursorY].length > 0) {
+        editor.cursorX = editor.content[editor.cursorY].length - 1;
+      }
+    }
+  }
+  
+  private deleteInnerBracket(editor: any): void {
+    const range = editor.getInnerBracketRange();
+    if (!range) {
+      return;
+    }
+    
+    if (range.startY === range.endY) {
+      const currentLine = editor.content[range.startY];
+      const beforeBracket = currentLine.substring(0, range.startX + 1);
+      const afterBracket = currentLine.substring(range.endX);
+      
+      editor.content[range.startY] = beforeBracket + afterBracket;
+      
+      editor.cursorY = range.startY;
+      editor.cursorX = range.startX + 1;
+      if (editor.cursorX >= editor.content[editor.cursorY].length && editor.content[editor.cursorY].length > 0) {
+        editor.cursorX = editor.content[editor.cursorY].length - 1;
+      }
+    } else {
+      const firstLine = editor.content[range.startY];
+      const lastLine = editor.content[range.endY];
+      
+      const beforeBracket = firstLine.substring(0, range.startX + 1);
+      const afterBracket = lastLine.substring(range.endX);
+      
+      editor.content[range.startY] = beforeBracket + afterBracket;
+      editor.content.splice(range.startY + 1, range.endY - range.startY);
+      
+      editor.cursorY = range.startY;
+      editor.cursorX = range.startX + 1;
+      if (editor.cursorX >= editor.content[editor.cursorY].length && editor.content[editor.cursorY].length > 0) {
+        editor.cursorX = editor.content[editor.cursorY].length - 1;
+      }
+    }
+  }
+  
+  private deleteAroundBracket(editor: any, openChar: string, closeChar: string): void {
+    const range = editor['findInnerBracketRange'](openChar, closeChar);
+    if (!range) {
+      return;
+    }
+    
+    if (range.startY === range.endY) {
+      const currentLine = editor.content[range.startY];
+      const beforeBracket = currentLine.substring(0, range.startX);
+      const afterBracket = currentLine.substring(range.endX + 1);
+      
+      editor.content[range.startY] = beforeBracket + afterBracket;
+      
+      editor.cursorY = range.startY;
+      editor.cursorX = range.startX;
+      if (editor.cursorX >= editor.content[editor.cursorY].length && editor.content[editor.cursorY].length > 0) {
+        editor.cursorX = editor.content[editor.cursorY].length - 1;
+      }
+    } else {
+      const firstLine = editor.content[range.startY];
+      const lastLine = editor.content[range.endY];
+      
+      const beforeBracket = firstLine.substring(0, range.startX);
+      const afterBracket = lastLine.substring(range.endX + 1);
+      
+      editor.content[range.startY] = beforeBracket + afterBracket;
+      editor.content.splice(range.startY + 1, range.endY - range.startY);
+      
+      editor.cursorY = range.startY;
+      editor.cursorX = range.startX;
+      if (editor.cursorX >= editor.content[editor.cursorY].length && editor.content[editor.cursorY].length > 0) {
+        editor.cursorX = editor.content[editor.cursorY].length - 1;
+      }
+    }
+  }
+  
+  private deleteAroundQuote(editor: any, quoteChar: string): void {
+    const range = editor.getInnerQuoteRange(quoteChar);
+    if (!range) {
+      return;
+    }
+    
+    if (range.startY === range.endY) {
+      const currentLine = editor.content[range.startY];
+      const beforeQuote = currentLine.substring(0, range.startX);
+      const afterQuote = currentLine.substring(range.endX + 1);
+      
+      editor.content[range.startY] = beforeQuote + afterQuote;
+      
+      editor.cursorY = range.startY;
+      editor.cursorX = range.startX;
+      if (editor.cursorX >= editor.content[editor.cursorY].length && editor.content[editor.cursorY].length > 0) {
+        editor.cursorX = editor.content[editor.cursorY].length - 1;
+      }
+    } else {
+      const firstLine = editor.content[range.startY];
+      const lastLine = editor.content[range.endY];
+      
+      const beforeQuote = firstLine.substring(0, range.startX);
+      const afterQuote = lastLine.substring(range.endX + 1);
+      
+      editor.content[range.startY] = beforeQuote + afterQuote;
+      editor.content.splice(range.startY + 1, range.endY - range.startY);
+      
+      editor.cursorY = range.startY;
+      editor.cursorX = range.startX;
+      if (editor.cursorX >= editor.content[editor.cursorY].length && editor.content[editor.cursorY].length > 0) {
+        editor.cursorX = editor.content[editor.cursorY].length - 1;
+      }
+    }
+  }
+  
+  private deleteAroundAnyBracket(editor: any): void {
+    const range = editor.getInnerBracketRange();
+    if (!range) {
+      return;
+    }
+    
+    if (range.startY === range.endY) {
+      const currentLine = editor.content[range.startY];
+      const beforeBracket = currentLine.substring(0, range.startX);
+      const afterBracket = currentLine.substring(range.endX + 1);
+      
+      editor.content[range.startY] = beforeBracket + afterBracket;
+      
+      editor.cursorY = range.startY;
+      editor.cursorX = range.startX;
+      if (editor.cursorX >= editor.content[editor.cursorY].length && editor.content[editor.cursorY].length > 0) {
+        editor.cursorX = editor.content[editor.cursorY].length - 1;
+      }
+    } else {
+      const firstLine = editor.content[range.startY];
+      const lastLine = editor.content[range.endY];
+      
+      const beforeBracket = firstLine.substring(0, range.startX);
+      const afterBracket = lastLine.substring(range.endX + 1);
+      
+      editor.content[range.startY] = beforeBracket + afterBracket;
+      editor.content.splice(range.startY + 1, range.endY - range.startY);
+      
+      editor.cursorY = range.startY;
+      editor.cursorX = range.startX;
+      if (editor.cursorX >= editor.content[editor.cursorY].length && editor.content[editor.cursorY].length > 0) {
+        editor.cursorX = editor.content[editor.cursorY].length - 1;
+      }
+    }
   }
 }
 
