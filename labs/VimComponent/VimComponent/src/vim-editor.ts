@@ -2369,7 +2369,7 @@ export class VimEditor extends LitElement {
   }
 
   private drawInsertCursor(p: p5) {
-    if ((this.mode !== EditorMode.Insert && this.mode !== EditorMode.MultiInsert) || !this.cursorVisible) {
+    if ((this.mode !== EditorMode.Insert && this.mode !== EditorMode.MultiInsert && this.mode !== EditorMode.TInsert) || !this.cursorVisible) {
       return;
     }
     
@@ -2916,6 +2916,12 @@ export class VimEditor extends LitElement {
       
       if (deletePos >= 0 && deletePos < line.length) {
         this.content[mark.y] = line.substring(0, deletePos) + line.substring(deletePos + 1);
+        
+        for (let j = i + 1; j < this.tMarks.length; j++) {
+          if (this.tMarks[j].y === mark.y) {
+            this.tMarks[j].x--;
+          }
+        }
       }
     }
     
@@ -2973,6 +2979,12 @@ export class VimEditor extends LitElement {
         line.substring(0, insertPos) +
         char +
         line.substring(insertPos);
+      
+      for (let j = i + 1; j < this.tMarks.length; j++) {
+        if (this.tMarks[j].y === mark.y) {
+          this.tMarks[j].x++;
+        }
+      }
     }
     
     this.cursorX++;
