@@ -15,6 +15,28 @@ export enum EditorMode {
   TInsert = 't-insert',
 }
 
+export interface EditorModeHandler {
+  readonly mode: EditorMode;
+  handleKey(key: string, editor: VimEditor): void;
+  onEnter(editor: VimEditor): void;
+  onExit(editor: VimEditor): void;
+  shouldPreventDefault(key: string): boolean;
+}
+
+export abstract class BaseModeHandler implements EditorModeHandler {
+  abstract readonly mode: EditorMode;
+  
+  onEnter(editor: VimEditor): void {}
+  
+  onExit(editor: VimEditor): void {}
+  
+  shouldPreventDefault(key: string): boolean {
+    return key.length !== 1;
+  }
+  
+  abstract handleKey(key: string, editor: VimEditor): void;
+}
+
 export interface EditorStatus {
   mode: EditorMode;
   cursorX: number;
@@ -45,8 +67,31 @@ export class VimEditor extends LitElement {
   @state()
   private cursorVisible = true;
   
+  private _mode: EditorMode = EditorMode.Normal;
+  
   @property({ type: String })
-  mode: EditorMode = EditorMode.Normal;
+  get mode(): EditorMode {
+    return this._mode;
+  }
+  
+  set mode(newMode: EditorMode) {
+    if (this._mode === newMode) return;
+    
+    const oldMode = this._mode;
+    this._mode = newMode;
+    
+    if (this.modeHandlerRegistry) {
+      const oldHandler = this.modeHandlerRegistry.getHandler(oldMode);
+      const newHandler = this.modeHandlerRegistry.getHandler(newMode);
+      
+      oldHandler.onExit(this);
+      this.previousModeHandler = this.currentModeHandler;
+      this.currentModeHandler = newHandler;
+      newHandler.onEnter(this);
+    }
+    
+    this.requestUpdate('mode', oldMode);
+  }
 
   @property({ type: Number })
   cursorX = 0;
@@ -86,6 +131,10 @@ export class VimEditor extends LitElement {
   private searchHistory: Array<{ keyword: string; matches: Array<{ y: number; x: number }> }> = [];
   
   private tMarks: Array<{ y: number; x: number }> = [];
+  
+  private modeHandlerRegistry!: ModeHandlerRegistry;
+  private currentModeHandler!: EditorModeHandler;
+  private previousModeHandler!: EditorModeHandler;
   
   private commandPatterns = [
     { pattern: 'gg', action: () => { this.moveToFirstLine(); } },
@@ -423,6 +472,10 @@ export class VimEditor extends LitElement {
   }
 
   firstUpdated() {
+    this.modeHandlerRegistry = new ModeHandlerRegistry();
+    this.currentModeHandler = this.modeHandlerRegistry.getHandler(EditorMode.Normal);
+    this.previousModeHandler = this.currentModeHandler;
+    
     this.createHiddenInput();
     this.waitForP5AndInitialize();
   }
@@ -479,6 +532,13 @@ export class VimEditor extends LitElement {
         if (this.p5Instance) {
           this.p5Instance.redraw();
         }
+      } else if (this.mode === EditorMode.MultiInsert && e.data) {
+        for (const char of e.data) {
+          this.multiInsertCharacter(char);
+        }
+        if (this.p5Instance) {
+          this.p5Instance.redraw();
+        }
       }
       this.hiddenInput!.value = '';
     });
@@ -496,6 +556,13 @@ export class VimEditor extends LitElement {
         } else if (value && this.mode === EditorMode.TInsert) {
           for (const char of value) {
             this.tInsertCharacter(char);
+          }
+          if (this.p5Instance) {
+            this.p5Instance.redraw();
+          }
+        } else if (value && this.mode === EditorMode.MultiInsert) {
+          for (const char of value) {
+            this.multiInsertCharacter(char);
           }
           if (this.p5Instance) {
             this.p5Instance.redraw();
@@ -611,30 +678,11 @@ export class VimEditor extends LitElement {
     
     this.lastKeyPressed = key;
     
-    const isNormalChar = key.length === 1 && (this.mode === EditorMode.Insert || this.mode === EditorMode.TInsert);
-    if (!isNormalChar) {
+    if (this.currentModeHandler.shouldPreventDefault(key)) {
       event.preventDefault();
     }
     
-    if (this.mode === EditorMode.Normal) {
-      this.handleNormalMode(key);
-    } else if (this.mode === EditorMode.Insert) {
-      this.handleInsertMode(key);
-    } else if (this.mode === EditorMode.Visual) {
-      this.handleVisualMode(key);
-    } else if (this.mode === EditorMode.VisualLine) {
-      this.handleVisualLineMode(key);
-    } else if (this.mode === EditorMode.FastJump) {
-      this.handleFastJumpMode(key);
-    } else if (this.mode === EditorMode.FastMatch) {
-      this.handleMatchMode(key);
-    } else if (this.mode === EditorMode.FastSearch) {
-      this.handleSearchMode(key);
-    } else if (this.mode === EditorMode.MultiInsert) {
-      this.handleMultiInsertMode(key);
-    } else if (this.mode === EditorMode.TInsert) {
-      this.handleTInsertMode(key);
-    }
+    this.currentModeHandler.handleKey(key, this);
     
     this.adjustScrollToCursor();
     
@@ -3032,5 +3080,404 @@ export class VimEditor extends LitElement {
         }
       </style>
     `;
+  }
+}
+
+class NormalModeHandler extends BaseModeHandler {
+  readonly mode = EditorMode.Normal;
+  
+  handleKey(key: string, editor: VimEditor): void {
+    if (editor['keyBuffer'] === '' && editor['handleMovement'](key)) {
+      return;
+    }
+    
+    editor['keyBuffer'] += key;
+    editor['processKeyBuffer']();
+  }
+}
+
+class InsertModeHandler extends BaseModeHandler {
+  readonly mode = EditorMode.Insert;
+  
+  onEnter(editor: VimEditor): void {
+    editor['hiddenInput']?.focus();
+  }
+  
+  onExit(editor: VimEditor): void {
+    editor['hiddenInput']?.blur();
+    editor['adjustCursorForNormalMode']();
+  }
+  
+  shouldPreventDefault(key: string): boolean {
+    return key.length !== 1;
+  }
+  
+  handleKey(key: string, editor: VimEditor): void {
+    if (key === 'Escape') {
+      editor.mode = EditorMode.Normal;
+      return;
+    }
+    
+    if (key.length === 1) {
+      return;
+    }
+    
+    if (key === 'Backspace') {
+      editor['handleBackspace']();
+    } else if (key === 'Enter') {
+      editor['handleEnter']();
+    } else if (key === 'ArrowLeft') {
+      editor['moveCursorLeft']();
+    } else if (key === 'ArrowRight') {
+      editor['moveCursorRight']();
+    } else if (key === 'ArrowUp') {
+      editor['moveCursorUp']();
+    } else if (key === 'ArrowDown') {
+      editor['moveCursorDown']();
+    }
+  }
+}
+
+class VisualModeHandler extends BaseModeHandler {
+  readonly mode = EditorMode.Visual;
+  
+  handleKey(key: string, editor: VimEditor): void {
+    if (editor['visualKeyBuffer'] === '' && editor['handleMovement'](key)) {
+      return;
+    }
+    
+    if (key === 'Escape') {
+      editor.mode = EditorMode.Normal;
+      editor['visualKeyBuffer'] = '';
+      return;
+    }
+    
+    if (key === 'i' && editor['visualKeyBuffer'] === '') {
+      editor['visualKeyBuffer'] = 'i';
+      return;
+    }
+    
+    if (editor['visualKeyBuffer'] === 'i' && (key === '`' || key === "'" || key === '"')) {
+      editor['selectInnerQuote'](key);
+      editor['visualKeyBuffer'] = '';
+      return;
+    }
+    
+    if (editor['visualKeyBuffer'] === 'i' && key === 'w') {
+      editor['selectInnerWord']();
+      editor['visualKeyBuffer'] = '';
+      return;
+    }
+    
+    editor['visualKeyBuffer'] = '';
+    
+    switch (key) {
+      case 'y':
+        editor['yankVisualSelection']();
+        editor.mode = EditorMode.Normal;
+        break;
+      case 'c':
+      case 'd':
+      case 'x':
+        editor['cutVisualSelection']();
+        editor.mode = EditorMode.Normal;
+        break;
+      case 'f':
+        editor['previousMode'] = EditorMode.Visual;
+        editor.mode = EditorMode.FastJump;
+        editor['fastJumpMatches'] = [];
+        editor['fastJumpInput'] = '';
+        break;
+      case '*':
+        editor['startSearchFromVisualSelection']();
+        break;
+    }
+  }
+}
+
+class VisualLineModeHandler extends BaseModeHandler {
+  readonly mode = EditorMode.VisualLine;
+  
+  handleKey(key: string, editor: VimEditor): void {
+    if (editor['handleMovement'](key)) {
+      return;
+    }
+    
+    switch (key) {
+      case 'Escape':
+        editor.mode = EditorMode.Normal;
+        break;
+      case 'y':
+        editor['yankVisualSelection']();
+        editor.mode = EditorMode.Normal;
+        break;
+      case 'c':
+      case 'd':
+      case 'x':
+        editor['cutVisualLineSelection']();
+        editor.mode = EditorMode.Normal;
+        break;
+      case 'f':
+        editor['previousMode'] = EditorMode.VisualLine;
+        editor.mode = EditorMode.FastJump;
+        editor['fastJumpMatches'] = [];
+        editor['fastJumpInput'] = '';
+        break;
+    }
+  }
+}
+
+class FastJumpModeHandler extends BaseModeHandler {
+  readonly mode = EditorMode.FastJump;
+  
+  handleKey(key: string, editor: VimEditor): void {
+    if (key === 'Escape') {
+      editor.mode = editor['previousMode'];
+      editor['fastJumpMatches'] = [];
+      editor['fastJumpInput'] = '';
+      return;
+    }
+    
+    if (key.length === 1) {
+      const matches = editor['findMatchesInVisibleRange'](key);
+      
+      if (matches.length === 0) {
+        editor.mode = editor['previousMode'];
+        editor['fastJumpMatches'] = [];
+        editor['fastJumpInput'] = '';
+      } else if (matches.length === 1) {
+        editor.cursorX = matches[0].x;
+        editor.cursorY = matches[0].y;
+        editor.mode = editor['previousMode'];
+        editor['fastJumpMatches'] = [];
+        editor['fastJumpInput'] = '';
+      } else {
+        editor['fastJumpMatches'] = matches;
+        editor.mode = EditorMode.FastMatch;
+      }
+    }
+  }
+}
+
+class FastMatchModeHandler extends BaseModeHandler {
+  readonly mode = EditorMode.FastMatch;
+  
+  handleKey(key: string, editor: VimEditor): void {
+    if (key === 'Escape') {
+      editor.mode = editor['previousMode'];
+      editor['fastJumpMatches'] = [];
+      editor['fastJumpInput'] = '';
+      return;
+    }
+    
+    if (key.length === 1 && /[a-z]/.test(key)) {
+      editor['fastJumpInput'] += key;
+      
+      const matchingLabels = editor['fastJumpMatches'].filter((match: any) => 
+        match.label.startsWith(editor['fastJumpInput'])
+      );
+      
+      if (matchingLabels.length === 0) {
+        editor.mode = editor['previousMode'];
+        editor['fastJumpMatches'] = [];
+        editor['fastJumpInput'] = '';
+      } else if (matchingLabels.length === 1 && matchingLabels[0].label === editor['fastJumpInput']) {
+        editor.cursorX = matchingLabels[0].x;
+        editor.cursorY = matchingLabels[0].y;
+        editor.mode = editor['previousMode'];
+        editor['fastJumpMatches'] = [];
+        editor['fastJumpInput'] = '';
+      } else {
+        editor['fastJumpMatches'] = matchingLabels;
+      }
+    }
+  }
+}
+
+class FastSearchModeHandler extends BaseModeHandler {
+  readonly mode = EditorMode.FastSearch;
+  
+  handleKey(key: string, editor: VimEditor): void {
+    if (editor['currentMatchIndex'] >= 0 && editor['searchMatches'].length > 0) {
+      const match = editor['searchMatches'][editor['currentMatchIndex']];
+      const matchEndX = match.x + editor['searchKeyword'].length;
+      
+      if (key === 'h' || key === 'ArrowLeft') {
+        if (editor.cursorX > match.x) {
+          editor.cursorX--;
+        }
+        return;
+      }
+      
+      if (key === 'l' || key === 'ArrowRight') {
+        if (editor.cursorX < matchEndX - 1) {
+          editor.cursorX++;
+        }
+        return;
+      }
+      
+      if (key === '0' || key === 'Home') {
+        editor.cursorX = match.x;
+        return;
+      }
+      
+      if (key === '$' || key === 'End') {
+        editor.cursorX = matchEndX - 1;
+        return;
+      }
+      
+      if (key === 'x') {
+        editor['searchModeDelete']();
+        return;
+      }
+      
+      if (key === 'd') {
+        editor['searchModeDeleteAll']();
+        return;
+      }
+    }
+    
+    switch (key) {
+      case 'Escape':
+        editor.mode = EditorMode.Normal;
+        editor['searchKeyword'] = '';
+        editor['searchMatches'] = [];
+        editor['currentMatchIndex'] = -1;
+        break;
+      case 'n':
+        editor['jumpToNextMatch']();
+        break;
+      case 'N':
+        editor['jumpToPreviousMatch']();
+        break;
+      case 'b':
+        editor['clearSearchMarks']();
+        break;
+      case 'u':
+        editor['restoreSearchMarks']();
+        break;
+      case 'i':
+        editor['saveHistory']();
+        editor.mode = EditorMode.MultiInsert;
+        break;
+      case 'a':
+        if (editor['searchMatches'].length > 0) {
+          const currentMatch = editor['searchMatches'][editor['currentMatchIndex']];
+          const matchEndX = currentMatch.x + editor['searchKeyword'].length;
+          if (editor.cursorX < matchEndX) {
+            editor.cursorX++;
+          }
+        }
+        editor['saveHistory']();
+        editor.mode = EditorMode.MultiInsert;
+        break;
+    }
+  }
+}
+
+class MultiInsertModeHandler extends BaseModeHandler {
+  readonly mode = EditorMode.MultiInsert;
+  
+  onEnter(editor: VimEditor): void {
+    editor['hiddenInput']?.focus();
+  }
+  
+  onExit(editor: VimEditor): void {
+    editor['hiddenInput']?.blur();
+    editor['searchKeyword'] = '';
+    editor['searchMatches'] = [];
+    editor['currentMatchIndex'] = -1;
+    editor['adjustCursorForNormalMode']();
+  }
+  
+  shouldPreventDefault(key: string): boolean {
+    return key.length !== 1;
+  }
+  
+  handleKey(key: string, editor: VimEditor): void {
+    if (key === 'Escape') {
+      editor.mode = EditorMode.FastSearch;
+      return;
+    }
+    
+    if (key === 'Backspace') {
+      editor['multiInsertBackspace']();
+      return;
+    }
+    
+    if (key === 'Enter') {
+      editor['multiInsertNewline']();
+      return;
+    }
+    
+    if (key.length === 1) {
+      editor['multiInsertCharacter'](key);
+    }
+  }
+}
+
+class TInsertModeHandler extends BaseModeHandler {
+  readonly mode = EditorMode.TInsert;
+  
+  onEnter(editor: VimEditor): void {
+    editor['hiddenInput']?.focus();
+  }
+  
+  onExit(editor: VimEditor): void {
+    editor['hiddenInput']?.blur();
+    editor['adjustCursorForNormalMode']();
+  }
+  
+  shouldPreventDefault(key: string): boolean {
+    return key.length !== 1;
+  }
+  
+  handleKey(key: string, editor: VimEditor): void {
+    if (key === 'Escape') {
+      editor.mode = EditorMode.Normal;
+      return;
+    }
+    
+    if (key === 'Backspace') {
+      editor['tInsertBackspace']();
+    } else if (key === 'Enter') {
+      editor['tInsertNewline']();
+    } else if (key === 'ArrowLeft') {
+      editor['moveCursorLeft']();
+    } else if (key === 'ArrowRight') {
+      editor['moveCursorRight']();
+    } else if (key === 'ArrowUp') {
+      editor['moveCursorUp']();
+    } else if (key === 'ArrowDown') {
+      editor['moveCursorDown']();
+    }
+  }
+}
+
+class ModeHandlerRegistry {
+  private handlers: Map<EditorMode, EditorModeHandler> = new Map();
+  
+  constructor() {
+    this.registerHandler(new NormalModeHandler());
+    this.registerHandler(new InsertModeHandler());
+    this.registerHandler(new VisualModeHandler());
+    this.registerHandler(new VisualLineModeHandler());
+    this.registerHandler(new FastJumpModeHandler());
+    this.registerHandler(new FastMatchModeHandler());
+    this.registerHandler(new FastSearchModeHandler());
+    this.registerHandler(new MultiInsertModeHandler());
+    this.registerHandler(new TInsertModeHandler());
+  }
+  
+  private registerHandler(handler: EditorModeHandler): void {
+    this.handlers.set(handler.mode, handler);
+  }
+  
+  getHandler(mode: EditorMode): EditorModeHandler {
+    const handler = this.handlers.get(mode);
+    if (!handler) {
+      throw new Error(`No handler found for mode: ${mode}`);
+    }
+    return handler;
   }
 } 
