@@ -3,8 +3,19 @@ import { customElement, property, state } from 'lit/decorators.js';
 import p5 from 'p5';
 import exampleText from './example.txt?raw';
 
+export enum EditorMode {
+  Normal = 'normal',
+  Insert = 'insert',
+  Visual = 'visual',
+  VisualLine = 'visual-line',
+  FastJump = 'fast-jump',
+  FastMatch = 'fast-match',
+  FastSearch = 'fast-search',
+  MultiInsert = 'multi-insert',
+}
+
 export interface EditorStatus {
-  mode: 'normal' | 'insert' | 'visual' | 'visual-line' | 'fast-jump' | 'match' | 'search' | 'multi-insert';
+  mode: EditorMode;
   cursorX: number;
   cursorY: number;
   cursorVisible: boolean;
@@ -34,7 +45,7 @@ export class VimEditor extends LitElement {
   private cursorVisible = true;
   
   @property({ type: String })
-  mode: 'normal' | 'insert' | 'visual' | 'visual-line' | 'fast-jump' | 'match' | 'search' | 'multi-insert' = 'normal';
+  mode: EditorMode = EditorMode.Normal;
 
   @property({ type: Number })
   cursorX = 0;
@@ -63,7 +74,7 @@ export class VimEditor extends LitElement {
 
   private fastJumpMatches: Array<{ x: number; y: number; label: string }> = [];
   private fastJumpInput = '';
-  private previousMode: 'normal' | 'visual' | 'visual-line' = 'normal';
+  private previousMode: EditorMode.Normal | EditorMode.Visual | EditorMode.VisualLine = EditorMode.Normal;
   
   private keyBuffer = '';
   private visualKeyBuffer = '';
@@ -94,31 +105,31 @@ export class VimEditor extends LitElement {
     { pattern: 'da%', action: () => { this.saveHistory(); this.deleteAroundAnyBracket(); } },
     { pattern: 'dw', action: () => { this.saveHistory(); this.deleteWord(); } },
     { pattern: 'de', action: () => { this.saveHistory(); this.deleteToWordEnd(); } },
-    { pattern: 'i', action: () => { this.mode = 'insert'; this.hiddenInput?.focus(); } },
+    { pattern: 'i', action: () => { this.mode = EditorMode.Insert; this.hiddenInput?.focus(); } },
     { pattern: 'a', action: () => { 
       const currentLine = this.content[this.cursorY] || '';
       if (this.cursorX < currentLine.length) {
         this.cursorX += 1;
       }
-      this.mode = 'insert';
+      this.mode = EditorMode.Insert;
       this.updateInputPosition();
       this.hiddenInput?.focus();
     } },
     { pattern: 'o', action: () => { this.insertLineBelow(); this.hiddenInput?.focus(); } },
     { pattern: 'p', action: () => { this.saveHistory(); this.pasteAfterCursor(); } },
     { pattern: 'v', action: () => { 
-      this.mode = 'visual';
+      this.mode = EditorMode.Visual;
       this.visualStartX = this.cursorX;
       this.visualStartY = this.cursorY;
     } },
     { pattern: 'V', action: () => { 
-      this.mode = 'visual-line';
+      this.mode = EditorMode.VisualLine;
       this.visualStartX = this.cursorX;
       this.visualStartY = this.cursorY;
     } },
     { pattern: 'f', action: () => { 
-      this.previousMode = 'normal';
-      this.mode = 'fast-jump';
+      this.previousMode = EditorMode.Normal;
+      this.mode = EditorMode.FastJump;
       this.fastJumpMatches = [];
       this.fastJumpInput = '';
     } },
@@ -282,7 +293,7 @@ export class VimEditor extends LitElement {
     this.cursorY = 0;
     this.scrollOffsetX = 0;
     this.scrollOffsetY = 0;
-    this.mode = 'normal';
+    this.mode = EditorMode.Normal;
   }
 
   getDisplayColumn(): number {
@@ -326,19 +337,19 @@ export class VimEditor extends LitElement {
         const char = line[contentX] || ' ';
         
         const isCursor = contentY === this.cursorY && contentX === this.cursorX && this.cursorVisible;
-        const isNormalMode = this.mode === 'normal';
-        const isSearchMode = this.mode === 'search';
+        const isNormalMode = this.mode === EditorMode.Normal;
+        const isSearchMode = this.mode === EditorMode.FastSearch;
         
-        const isVisualSelection = this.mode === 'visual' && this.isInVisualSelection(contentY, contentX);
-        const isVisualLineSelection = this.mode === 'visual-line' && this.isInVisualLineSelection(contentY);
+        const isVisualSelection = this.mode === EditorMode.Visual && this.isInVisualSelection(contentY, contentX);
+        const isVisualLineSelection = this.mode === EditorMode.VisualLine && this.isInVisualLineSelection(contentY);
         
-        const isFastJumpMatch = this.mode === 'match' && 
+        const isFastJumpMatch = this.mode === EditorMode.FastMatch && 
           this.fastJumpMatches.some(match => match.x === contentX && match.y === contentY);
         
-        const isSearchMatch = (this.mode === 'search' || this.mode === 'multi-insert') && 
+        const isSearchMatch = (this.mode === EditorMode.FastSearch || this.mode === EditorMode.MultiInsert) && 
           this.isInSearchMatch(contentY, contentX);
         
-        const isCurrentSearchMatch = (this.mode === 'search' || this.mode === 'multi-insert') && 
+        const isCurrentSearchMatch = (this.mode === EditorMode.FastSearch || this.mode === EditorMode.MultiInsert) && 
           this.currentMatchIndex >= 0 && 
           this.isInSearchMatch(contentY, contentX, this.currentMatchIndex);
         
@@ -449,7 +460,7 @@ export class VimEditor extends LitElement {
       if (this.hiddenInput) {
         this.hiddenInput.style.opacity = '0';
       }
-      if (this.mode === 'insert' && e.data) {
+      if (this.mode === EditorMode.Insert && e.data) {
         for (const char of e.data) {
           this.insertCharacter(char);
         }
@@ -463,7 +474,7 @@ export class VimEditor extends LitElement {
     this.hiddenInput.addEventListener('input', (e) => {
       if (!this.isComposing && this.hiddenInput) {
         const value = this.hiddenInput.value;
-        if (value && this.mode === 'insert') {
+        if (value && this.mode === EditorMode.Insert) {
           for (const char of value) {
             this.insertCharacter(char);
           }
@@ -572,7 +583,7 @@ export class VimEditor extends LitElement {
       return;
     }
     
-    if ((event.metaKey || event.ctrlKey) && key === 'v' && this.mode === 'insert') {
+    if ((event.metaKey || event.ctrlKey) && key === 'v' && this.mode === EditorMode.Insert) {
       event.preventDefault();
       this.handlePaste();
       return;
@@ -580,26 +591,26 @@ export class VimEditor extends LitElement {
     
     this.lastKeyPressed = key;
     
-    const isNormalChar = key.length === 1 && this.mode === 'insert';
+    const isNormalChar = key.length === 1 && this.mode === EditorMode.Insert;
     if (!isNormalChar) {
       event.preventDefault();
     }
     
-    if (this.mode === 'normal') {
+    if (this.mode === EditorMode.Normal) {
       this.handleNormalMode(key);
-    } else if (this.mode === 'insert') {
+    } else if (this.mode === EditorMode.Insert) {
       this.handleInsertMode(key);
-    } else if (this.mode === 'visual') {
+    } else if (this.mode === EditorMode.Visual) {
       this.handleVisualMode(key);
-    } else if (this.mode === 'visual-line') {
+    } else if (this.mode === EditorMode.VisualLine) {
       this.handleVisualLineMode(key);
-    } else if (this.mode === 'fast-jump') {
+    } else if (this.mode === EditorMode.FastJump) {
       this.handleFastJumpMode(key);
-    } else if (this.mode === 'match') {
+    } else if (this.mode === EditorMode.FastMatch) {
       this.handleMatchMode(key);
-    } else if (this.mode === 'search') {
+    } else if (this.mode === EditorMode.FastSearch) {
       this.handleSearchMode(key);
-    } else if (this.mode === 'multi-insert') {
+    } else if (this.mode === EditorMode.MultiInsert) {
       this.handleMultiInsertMode(key);
     }
     
@@ -694,7 +705,7 @@ export class VimEditor extends LitElement {
 
   private handleInsertMode(key: string) {
     if (key === 'Escape') {
-      this.mode = 'normal';
+      this.mode = EditorMode.Normal;
       this.hiddenInput?.blur();
       this.adjustCursorForNormalMode();
       return;
@@ -725,7 +736,7 @@ export class VimEditor extends LitElement {
     }
     
     if (key === 'Escape') {
-      this.mode = 'normal';
+      this.mode = EditorMode.Normal;
       this.visualKeyBuffer = '';
       return;
     }
@@ -752,17 +763,17 @@ export class VimEditor extends LitElement {
     switch (key) {
       case 'y':
         this.yankVisualSelection();
-        this.mode = 'normal';
+        this.mode = EditorMode.Normal;
         break;
       case 'c':
       case 'd':
       case 'x':
         this.cutVisualSelection();
-        this.mode = 'normal';
+        this.mode = EditorMode.Normal;
         break;
       case 'f':
-        this.previousMode = 'visual';
-        this.mode = 'fast-jump';
+        this.previousMode = EditorMode.Visual;
+        this.mode = EditorMode.FastJump;
         this.fastJumpMatches = [];
         this.fastJumpInput = '';
         break;
@@ -779,21 +790,21 @@ export class VimEditor extends LitElement {
     
     switch (key) {
       case 'Escape':
-        this.mode = 'normal';
+        this.mode = EditorMode.Normal;
         break;
       case 'y':
         this.yankVisualSelection();
-        this.mode = 'normal';
+        this.mode = EditorMode.Normal;
         break;
       case 'c':
       case 'd':
       case 'x':
         this.cutVisualLineSelection();
-        this.mode = 'normal';
+        this.mode = EditorMode.Normal;
         break;
       case 'f':
-        this.previousMode = 'visual-line';
-        this.mode = 'fast-jump';
+        this.previousMode = EditorMode.VisualLine;
+        this.mode = EditorMode.FastJump;
         this.fastJumpMatches = [];
         this.fastJumpInput = '';
         break;
@@ -823,7 +834,7 @@ export class VimEditor extends LitElement {
         this.fastJumpInput = '';
       } else {
         this.fastJumpMatches = matches;
-        this.mode = 'match';
+        this.mode = EditorMode.FastMatch;
       }
     }
   }
@@ -884,7 +895,7 @@ export class VimEditor extends LitElement {
 
   private moveCursorRight() {
     const currentLine = this.content[this.cursorY] || '';
-    const maxPosition = this.mode === 'insert' ? currentLine.length : currentLine.length - 1;
+    const maxPosition = this.mode === EditorMode.Insert ? currentLine.length : currentLine.length - 1;
     if (this.cursorX < maxPosition) {
       this.cursorX += 1;
       this.updateInputPosition();
@@ -1167,11 +1178,11 @@ export class VimEditor extends LitElement {
   private selectInnerWord() {
     const range = this.getInnerWordRange();
     if (!range) {
-      this.mode = 'normal';
+      this.mode = EditorMode.Normal;
       return;
     }
     
-    this.mode = 'visual';
+    this.mode = EditorMode.Visual;
     this.visualStartY = range.y;
     this.visualStartX = range.startX;
     this.cursorY = range.y;
@@ -1981,7 +1992,7 @@ export class VimEditor extends LitElement {
     this.content.splice(this.cursorY + 1, 0, '');
     this.cursorY += 1;
     this.cursorX = 0;
-    this.mode = 'insert';
+    this.mode = EditorMode.Insert;
     this.updateInputPosition();
   }
 
@@ -2336,7 +2347,7 @@ export class VimEditor extends LitElement {
   }
 
   private drawInsertCursor(p: p5) {
-    if ((this.mode !== 'insert' && this.mode !== 'multi-insert') || !this.cursorVisible) {
+    if ((this.mode !== EditorMode.Insert && this.mode !== EditorMode.MultiInsert) || !this.cursorVisible) {
       return;
     }
     
@@ -2359,7 +2370,7 @@ export class VimEditor extends LitElement {
   }
 
   private drawFastJumpLabels(p: p5) {
-    if (this.mode !== 'match' || this.fastJumpMatches.length === 0) {
+    if (this.mode !== EditorMode.FastMatch || this.fastJumpMatches.length === 0) {
       return;
     }
     
@@ -2414,7 +2425,7 @@ export class VimEditor extends LitElement {
   private startSearchFromVisualSelection() {
     const selection = this.getVisualSelection();
     if (!selection || selection.trim().length === 0) {
-      this.mode = 'normal';
+      this.mode = EditorMode.Normal;
       return;
     }
     
@@ -2422,12 +2433,12 @@ export class VimEditor extends LitElement {
     this.findAllMatches();
     
     if (this.searchMatches.length === 0) {
-      this.mode = 'normal';
+      this.mode = EditorMode.Normal;
       return;
     }
     
     this.currentMatchIndex = 0;
-    this.mode = 'search';
+    this.mode = EditorMode.FastSearch;
     this.cursorY = this.searchMatches[0].y;
     this.cursorX = this.searchMatches[0].x;
     this.searchHistory.push({
@@ -2496,7 +2507,7 @@ export class VimEditor extends LitElement {
     
     switch (key) {
       case 'Escape':
-        this.mode = 'normal';
+        this.mode = EditorMode.Normal;
         this.searchKeyword = '';
         this.searchMatches = [];
         this.currentMatchIndex = -1;
@@ -2556,7 +2567,7 @@ export class VimEditor extends LitElement {
     if (this.searchMatches.length === 0) {
       this.searchKeyword = '';
       this.currentMatchIndex = -1;
-      this.mode = 'normal';
+      this.mode = EditorMode.Normal;
     } else {
       if (this.currentMatchIndex >= this.searchMatches.length) {
         this.currentMatchIndex = 0;
@@ -2586,7 +2597,7 @@ export class VimEditor extends LitElement {
     }
     
     this.currentMatchIndex = 0;
-    this.mode = 'search';
+    this.mode = EditorMode.FastSearch;
     
     if (this.searchMatches.length > 0) {
       this.cursorY = this.searchMatches[0].y;
@@ -2621,7 +2632,7 @@ export class VimEditor extends LitElement {
     if (this.searchKeyword.length === 0) {
       this.searchMatches = [];
       this.currentMatchIndex = -1;
-      this.mode = 'normal';
+      this.mode = EditorMode.Normal;
     } else if (this.cursorX >= match.x + this.searchKeyword.length) {
       this.cursorX = match.x + this.searchKeyword.length - 1;
     }
@@ -2645,7 +2656,7 @@ export class VimEditor extends LitElement {
     this.searchKeyword = '';
     this.searchMatches = [];
     this.currentMatchIndex = -1;
-    this.mode = 'normal';
+    this.mode = EditorMode.Normal;
   }
 
   private enterMultiInsertMode(moveNext: boolean = false) {
@@ -2658,13 +2669,13 @@ export class VimEditor extends LitElement {
     }
     
     this.saveHistory();
-    this.mode = 'multi-insert';
+    this.mode = EditorMode.MultiInsert;
     this.hiddenInput?.focus();
   }
 
   private handleMultiInsertMode(key: string) {
     if (key === 'Escape') {
-      this.mode = 'search';
+      this.mode = EditorMode.FastSearch;
       this.hiddenInput?.blur();
       return;
     }

@@ -1034,7 +1034,7 @@ describe('VimEditor', () => {
       window.dispatchEvent(event);
       
       const status = editor.getStatus();
-      expect(status.mode).toBe('match');
+      expect(status.mode).toBe('fast-match');
     });
 
     it('should jump to correct position after selecting label', async () => {
@@ -1067,7 +1067,7 @@ describe('VimEditor', () => {
       pressKeys('f', 'a');
       
       let status = editor.getStatus();
-      expect(status.mode).toBe('match');
+      expect(status.mode).toBe('fast-match');
       
       pressKey('b');
       
@@ -1152,7 +1152,7 @@ describe('VimEditor', () => {
       event = new KeyboardEvent('keydown', { key: 'b' });
       window.dispatchEvent(event);
       
-      expect(editor.getStatus().mode).toBe('match');
+      expect(editor.getStatus().mode).toBe('fast-match');
       
       event = new KeyboardEvent('keydown', { key: 'b' });
       window.dispatchEvent(event);
@@ -1193,7 +1193,7 @@ describe('VimEditor', () => {
       event = new KeyboardEvent('keydown', { key: 'h' });
       window.dispatchEvent(event);
       
-      expect(editor.getStatus().mode).toBe('match');
+      expect(editor.getStatus().mode).toBe('fast-match');
       
       event = new KeyboardEvent('keydown', { key: 'Escape' });
       window.dispatchEvent(event);
@@ -2710,7 +2710,7 @@ describe('VimEditor', () => {
       pressKeys('v', 'l', 'l', 'l', 'l', '*');
       
       const status = editor.getStatus();
-      expect(status.mode).toBe('search');
+      expect(status.mode).toBe('fast-search');
       expect(status.searchKeyword).toBe('hello');
       expect(status.searchMatchCount).toBe(3);
     });
@@ -2789,7 +2789,7 @@ describe('VimEditor', () => {
       pressKey('b');
       
       const status = editor.getStatus();
-      expect(status.mode).toBe('search');
+      expect(status.mode).toBe('fast-search');
       expect(status.searchKeyword).toBe('hello');
       expect(status.searchMatchCount).toBe(2);
     });
@@ -2810,7 +2810,7 @@ describe('VimEditor', () => {
       pressKey('u');
       
       const status = editor.getStatus();
-      expect(status.mode).toBe('search');
+      expect(status.mode).toBe('fast-search');
       expect(status.searchKeyword).toBe('hello');
       expect(status.searchMatchCount).toBe(3);
     });
@@ -2827,11 +2827,11 @@ describe('VimEditor', () => {
       
       pressKey('b');
       expect(editor.getStatus().searchMatchCount).toBe(2);
-      expect(editor.getStatus().mode).toBe('search');
+      expect(editor.getStatus().mode).toBe('fast-search');
       
       pressKey('b');
       expect(editor.getStatus().searchMatchCount).toBe(1);
-      expect(editor.getStatus().mode).toBe('search');
+      expect(editor.getStatus().mode).toBe('fast-search');
       
       pressKey('b');
       expect(editor.getStatus().searchMatchCount).toBe(undefined);
@@ -3134,7 +3134,7 @@ describe('VimEditor', () => {
       expect(editor.getStatus().mode).toBe('multi-insert');
       
       pressKey('Escape');
-      expect(editor.getStatus().mode).toBe('search');
+      expect(editor.getStatus().mode).toBe('fast-search');
       
       pressKey('Escape');
       expect(editor.getStatus().mode).toBe('normal');
