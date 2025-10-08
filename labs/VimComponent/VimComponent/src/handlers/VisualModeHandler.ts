@@ -47,8 +47,8 @@ export class VisualModeHandler extends BaseModeHandler {
       case 'f':
         editor['previousMode'] = EditorMode.Visual;
         editor.mode = EditorMode.FastJump;
-        editor['fastJumpMatches'] = [];
-        editor['fastJumpInput'] = '';
+        editor.fastJumpMatches = [];
+        editor.fastJumpInput = '';
         break;
       case '*':
         this.startSearchFromVisualSelection(editor);

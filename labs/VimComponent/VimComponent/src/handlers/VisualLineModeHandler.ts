@@ -25,8 +25,8 @@ export class VisualLineModeHandler extends BaseModeHandler {
       case 'f':
         editor['previousMode'] = EditorMode.VisualLine;
         editor.mode = EditorMode.FastJump;
-        editor['fastJumpMatches'] = [];
-        editor['fastJumpInput'] = '';
+        editor.fastJumpMatches = [];
+        editor.fastJumpInput = '';
         break;
     }
   }

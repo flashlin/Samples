@@ -71,8 +71,8 @@ export class VimEditor extends LitElement {
   private scrollOffsetX = 0;
   private scrollOffsetY = 0;
 
-  private fastJumpMatches: Array<{ x: number; y: number; label: string }> = [];
-  private fastJumpInput = '';
+  fastJumpMatches: Array<{ x: number; y: number; label: string }> = [];
+  fastJumpInput = '';
   private previousMode: EditorMode.Normal | EditorMode.Visual | EditorMode.VisualLine = EditorMode.Normal;
   
   private keyBuffer = '';
