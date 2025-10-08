@@ -18,7 +18,11 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "A Vim-like editor component built with Lit and p5.js",
+  "peerDependencies": {
+    "lit": "^3.0.0",
+    "p5": "^1.6.0"
+  },
   "devDependencies": {
     "@types/p5": "^1.7.3",
     "@vitest/ui": "^3.2.4",

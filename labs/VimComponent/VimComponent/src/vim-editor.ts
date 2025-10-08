@@ -479,12 +479,7 @@ export class VimEditor extends LitElement {
   }
 
   private waitForP5AndInitialize() {
-    if (typeof (window as any).p5 === 'undefined') {
-      console.log('Waiting for p5.js to load...');
-      setTimeout(() => this.waitForP5AndInitialize(), 50);
-      return;
-    }
-    
+    // p5 is imported as ES module, so it's available directly
     console.log('p5.js loaded, initializing...');
     this.initializeP5();
   }
@@ -537,7 +532,8 @@ export class VimEditor extends LitElement {
       };
     };
 
-    this.p5Instance = new (window as any).p5(sketch, this.shadowRoot as unknown as HTMLElement);
+    // Create p5 instance directly using the imported p5 class
+    this.p5Instance = new p5(sketch, this.shadowRoot as unknown as HTMLElement);
 
     this.cursorBlinkInterval = window.setInterval(() => {
       this.cursorVisible = !this.cursorVisible;
