@@ -1,47 +1,56 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import '../src/vim-editor';
 
-const mockRedraw = vi.fn();
-const mockP5Constructor = vi.fn((sketch: any, element: any) => {
-  const mockP5Instance = {
-    setup: vi.fn(),
-    draw: vi.fn(),
-    createCanvas: vi.fn(() => ({
-      elt: document.createElement('canvas')
-    })),
-    background: vi.fn(),
-    fill: vi.fn(),
-    stroke: vi.fn(),
-    noFill: vi.fn(),
-    noStroke: vi.fn(),
-    rect: vi.fn(),
-    text: vi.fn(),
-    textSize: vi.fn(),
-    textAlign: vi.fn(),
-    textFont: vi.fn(),
-    textWidth: vi.fn(() => 9),
-    noLoop: vi.fn(),
-    redraw: mockRedraw,
-    width: 800,
-    height: 600,
-    LEFT: 0,
-    TOP: 0,
-  };
-  
-  setTimeout(() => {
-    if (sketch) {
-      sketch(mockP5Instance);
+vi.mock('p5', () => {
+  return {
+    default: vi.fn((sketch: any, element: any) => {
+      const mockCanvas = {
+        elt: document.createElement('canvas'),
+        parent: vi.fn(),
+      };
+      
+      const mockP5Instance = {
+        setup: vi.fn(),
+        draw: vi.fn(),
+        createCanvas: vi.fn(() => mockCanvas),
+        background: vi.fn(),
+        fill: vi.fn(),
+        stroke: vi.fn(),
+        strokeWeight: vi.fn(),
+        line: vi.fn(),
+        noFill: vi.fn(),
+        noStroke: vi.fn(),
+        rect: vi.fn(),
+        text: vi.fn(),
+        textSize: vi.fn(),
+        textAlign: vi.fn(),
+        textFont: vi.fn(),
+        textWidth: vi.fn(() => 9),
+        noLoop: vi.fn(),
+        loop: vi.fn(),
+        redraw: vi.fn(),
+        remove: vi.fn(),
+        width: 800,
+        height: 600,
+        LEFT: 0,
+        TOP: 0,
+      };
+      
       setTimeout(() => {
-        const setupFn = (sketch as any).setup;
-        if (setupFn) setupFn.call(mockP5Instance);
+        if (sketch) {
+          sketch(mockP5Instance);
+          setTimeout(() => {
+            const setupFn = (sketch as any).setup;
+            if (setupFn) setupFn.call(mockP5Instance);
+          }, 0);
+        }
       }, 0);
-    }
-  }, 0);
-  
-  return mockP5Instance;
+      
+      return mockP5Instance;
+    }),
+  };
 });
 
-(window as any).p5 = mockP5Constructor;
+import '../src/vim-editor';
 
 function pressKey(key: string) {
   const event = new KeyboardEvent('keydown', { key });
@@ -56,8 +65,6 @@ describe('VimEditor', () => {
   let editor: any;
 
   beforeEach(async () => {
-    mockRedraw.mockClear();
-    
     editor = document.createElement('vim-editor');
     document.body.appendChild(editor);
     
@@ -3678,6 +3685,404 @@ describe('VimEditor', () => {
       
       expect(editor.content[0]).toBe('const arr = [];');
       expect(editor.cursorX).toBe(13);
+    });
+  });
+
+  describe('da( command (delete around parentheses)', () => {
+    it('should delete content including parentheses when cursor is inside', async () => {
+      editor.setContent(['function test(a, b, c) {']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('(');
+      
+      expect(editor.content[0]).toBe('function test {');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should delete content including parentheses when using closing bracket', async () => {
+      editor.setContent(['function test(a, b, c) {']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey(')');
+      
+      expect(editor.content[0]).toBe('function test {');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should handle nested parentheses', async () => {
+      editor.setContent(['const x = (a + (b * c)) + d;']);
+      await editor.updateComplete;
+      editor.cursorX = 18;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('(');
+      
+      expect(editor.content[0]).toBe('const x = (a + ) + d;');
+      expect(editor.cursorX).toBe(15);
+    });
+
+    it('should handle empty parentheses', async () => {
+      editor.setContent(['function test() {']);
+      await editor.updateComplete;
+      editor.cursorX = 14;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('(');
+      
+      expect(editor.content[0]).toBe('function test {');
+      expect(editor.cursorX).toBe(13);
+    });
+  });
+
+  describe('da[ command (delete around square brackets)', () => {
+    it('should delete content including brackets when cursor is inside', async () => {
+      editor.setContent(['const arr = [1, 2, 3];']);
+      await editor.updateComplete;
+      editor.cursorX = 14;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('[');
+      
+      expect(editor.content[0]).toBe('const arr = ;');
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should work with closing bracket', async () => {
+      editor.setContent(['const arr = [1, 2, 3];']);
+      await editor.updateComplete;
+      editor.cursorX = 14;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey(']');
+      
+      expect(editor.content[0]).toBe('const arr = ;');
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should handle nested brackets', async () => {
+      editor.setContent(['const arr = [[1, 2], [3, 4]];']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('[');
+      
+      expect(editor.content[0]).toBe('const arr = [, [3, 4]];');
+      expect(editor.cursorX).toBe(13);
+    });
+  });
+
+  describe('da{ command (delete around curly braces)', () => {
+    it('should delete content including braces when cursor is inside', async () => {
+      editor.setContent(['if (true) { console.log("test"); }']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('{');
+      
+      expect(editor.content[0]).toBe('if (true) ');
+      expect(editor.cursorX).toBe(9);
+    });
+
+    it('should work with closing brace', async () => {
+      editor.setContent(['if (true) { console.log("test"); }']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('}');
+      
+      expect(editor.content[0]).toBe('if (true) ');
+      expect(editor.cursorX).toBe(9);
+    });
+
+    it('should handle multiline braces', async () => {
+      editor.setContent([
+        'function test() {',
+        '  const x = 1;',
+        '  return x;',
+        '}'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 5;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('{');
+      
+      expect(editor.content).toEqual(['function test() ']);
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(15);
+    });
+  });
+
+  describe('da< command (delete around angle brackets)', () => {
+    it('should delete content including angle brackets when cursor is inside', async () => {
+      editor.setContent(['const tag = <div>content</div>;']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('<');
+      
+      expect(editor.content[0]).toBe('const tag = content</div>;');
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should work with closing angle bracket', async () => {
+      editor.setContent(['const tag = <div>content</div>;']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('>');
+      
+      expect(editor.content[0]).toBe('const tag = content</div>;');
+      expect(editor.cursorX).toBe(12);
+    });
+  });
+
+  describe('da" command (delete around double quotes)', () => {
+    it('should delete content including quotes when cursor is inside', async () => {
+      editor.setContent(['const str = "hello world";']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('"');
+      
+      expect(editor.content[0]).toBe('const str = ;');
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should handle empty quotes', async () => {
+      editor.setContent(['const str = "";']);
+      await editor.updateComplete;
+      editor.cursorX = 13;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('"');
+      
+      expect(editor.content[0]).toBe('const str = ;');
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should handle multiline quotes', async () => {
+      editor.setContent([
+        'const str = "',
+        '  hello',
+        '  world',
+        '";'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('"');
+      
+      expect(editor.content).toEqual(['const str = ;']);
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(12);
+    });
+  });
+
+  describe("da' command (delete around single quotes)", () => {
+    it('should delete content including quotes when cursor is inside', async () => {
+      editor.setContent(["const str = 'hello world';"]);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey("'");
+      
+      expect(editor.content[0]).toBe('const str = ;');
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should handle escaped quotes', async () => {
+      editor.setContent(["const str = 'hello \\' world';"]);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey("'");
+      
+      expect(editor.content[0]).toBe('const str = ;');
+      expect(editor.cursorX).toBe(12);
+    });
+  });
+
+  describe('da` command (delete around backticks)', () => {
+    it('should delete content including backticks when cursor is inside', async () => {
+      editor.setContent(['const str = `hello ${name}`;']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('`');
+      
+      expect(editor.content[0]).toBe('const str = ;');
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should handle multiline template literals', async () => {
+      editor.setContent([
+        'const str = `',
+        '  hello',
+        '  world',
+        '`;'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('`');
+      
+      expect(editor.content).toEqual(['const str = ;']);
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(12);
+    });
+  });
+
+  describe('da% command (delete around any bracket)', () => {
+    it('should delete content including brackets when cursor is inside parentheses', async () => {
+      editor.setContent(['function test(a, b, c) {']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('function test {');
+      expect(editor.cursorX).toBe(13);
+    });
+
+    it('should delete content including brackets when cursor is inside square brackets', async () => {
+      editor.setContent(['const arr = [1, 2, 3];']);
+      await editor.updateComplete;
+      editor.cursorX = 14;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const arr = ;');
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should delete content including brackets when cursor is inside curly braces', async () => {
+      editor.setContent(['if (true) { console.log("test"); }']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('if (true) ');
+      expect(editor.cursorX).toBe(9);
+    });
+
+    it('should delete content including quotes when cursor is inside quotes', async () => {
+      editor.setContent(['const str = "hello world";']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const str = ;');
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should support undo for da%', async () => {
+      editor.setContent(['const arr = [1, 2, 3];']);
+      await editor.updateComplete;
+      editor.cursorX = 14;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      const originalContent = editor.content[0];
+      
+      pressKey('d');
+      pressKey('a');
+      pressKey('%');
+      
+      expect(editor.content[0]).toBe('const arr = ;');
+      
+      pressKey('u');
+      
+      expect(editor.content[0]).toBe(originalContent);
     });
   });
 
