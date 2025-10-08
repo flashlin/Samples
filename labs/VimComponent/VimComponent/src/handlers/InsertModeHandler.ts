@@ -40,5 +40,25 @@ export class InsertModeHandler extends BaseModeHandler {
       editor['moveCursorDown']();
     }
   }
+  
+  handleInput(editor: any, value: string): void {
+    for (const char of value) {
+      editor['insertCharacter'](char);
+    }
+    if (editor['p5Instance']) {
+      editor['p5Instance'].redraw();
+    }
+  }
+  
+  handleCompositionEnd(editor: any, data: string): void {
+    if (data) {
+      for (const char of data) {
+        editor['insertCharacter'](char);
+      }
+      if (editor['p5Instance']) {
+        editor['p5Instance'].redraw();
+      }
+    }
+  }
 }
 

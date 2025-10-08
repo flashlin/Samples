@@ -31,6 +31,8 @@ export interface EditorModeHandler {
   onEnter(editor: any): void;
   onExit(editor: any): void;
   shouldPreventDefault(key: string): boolean;
+  handleInput?(editor: any, value: string): void;
+  handleCompositionEnd?(editor: any, data: string): void;
 }
 
 export abstract class BaseModeHandler implements EditorModeHandler {
@@ -43,6 +45,10 @@ export abstract class BaseModeHandler implements EditorModeHandler {
   shouldPreventDefault(key: string): boolean {
     return key.length !== 1;
   }
+  
+  handleInput(editor: any, value: string): void {}
+  
+  handleCompositionEnd(editor: any, data: string): void {}
   
   abstract handleKey(key: string, editor: any): void;
 }

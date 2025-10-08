@@ -162,5 +162,25 @@ export class TInsertModeHandler extends BaseModeHandler {
     
     return 0;
   }
+  
+  handleInput(editor: any, value: string): void {
+    for (const char of value) {
+      this.tInsertCharacter(editor, char);
+    }
+    if (editor['p5Instance']) {
+      editor['p5Instance'].redraw();
+    }
+  }
+  
+  handleCompositionEnd(editor: any, data: string): void {
+    if (data) {
+      for (const char of data) {
+        this.tInsertCharacter(editor, char);
+      }
+      if (editor['p5Instance']) {
+        editor['p5Instance'].redraw();
+      }
+    }
+  }
 }
 

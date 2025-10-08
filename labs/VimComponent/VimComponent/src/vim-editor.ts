@@ -89,66 +89,6 @@ export class VimEditor extends LitElement {
   private currentModeHandler!: EditorModeHandler;
   private previousModeHandler!: EditorModeHandler;
   
-  private commandPatterns = [
-    { pattern: 'gg', action: () => { this.moveToFirstLine(); } },
-    { pattern: 'diw', action: () => { this.saveHistory(); this.deleteInnerWord(); } },
-    { pattern: 'di%', action: () => { this.saveHistory(); this.deleteInnerBracket(); } },
-    { pattern: 'di`', action: () => { this.saveHistory(); this.deleteInnerQuote('`'); } },
-    { pattern: "di'", action: () => { this.saveHistory(); this.deleteInnerQuote("'"); } },
-    { pattern: 'di"', action: () => { this.saveHistory(); this.deleteInnerQuote('"'); } },
-    { pattern: 'da(', action: () => { this.saveHistory(); this.deleteAroundBracket('(', ')'); } },
-    { pattern: 'da)', action: () => { this.saveHistory(); this.deleteAroundBracket('(', ')'); } },
-    { pattern: 'da[', action: () => { this.saveHistory(); this.deleteAroundBracket('[', ']'); } },
-    { pattern: 'da]', action: () => { this.saveHistory(); this.deleteAroundBracket('[', ']'); } },
-    { pattern: 'da{', action: () => { this.saveHistory(); this.deleteAroundBracket('{', '}'); } },
-    { pattern: 'da}', action: () => { this.saveHistory(); this.deleteAroundBracket('{', '}'); } },
-    { pattern: 'da<', action: () => { this.saveHistory(); this.deleteAroundBracket('<', '>'); } },
-    { pattern: 'da>', action: () => { this.saveHistory(); this.deleteAroundBracket('<', '>'); } },
-    { pattern: 'da`', action: () => { this.saveHistory(); this.deleteAroundQuote('`'); } },
-    { pattern: "da'", action: () => { this.saveHistory(); this.deleteAroundQuote("'"); } },
-    { pattern: 'da"', action: () => { this.saveHistory(); this.deleteAroundQuote('"'); } },
-    { pattern: 'da%', action: () => { this.saveHistory(); this.deleteAroundAnyBracket(); } },
-    { pattern: 'dw', action: () => { this.saveHistory(); this.deleteWord(); } },
-    { pattern: 'de', action: () => { this.saveHistory(); this.deleteToWordEnd(); } },
-    { pattern: 'i', action: () => { this.enterInsertMode(); } },
-    { pattern: 't', action: () => { 
-      const normalHandler = this.modeHandlerRegistry.getHandler(EditorMode.Normal) as any;
-      normalHandler.addTMark(this);
-    } },
-    { pattern: 'T', action: () => { 
-      const normalHandler = this.modeHandlerRegistry.getHandler(EditorMode.Normal) as any;
-      normalHandler.clearTMarks(this);
-    } },
-    { pattern: 'a', action: () => { 
-      const currentLine = this.content[this.cursorY] || '';
-      if (this.cursorX < currentLine.length) {
-        this.cursorX += 1;
-      }
-      this.mode = EditorMode.Insert;
-      this.updateInputPosition();
-      this.hiddenInput?.focus();
-    } },
-    { pattern: 'o', action: () => { this.insertLineBelow(); this.hiddenInput?.focus(); } },
-    { pattern: 'p', action: () => { this.saveHistory(); this.pasteAfterCursor(); } },
-    { pattern: 'v', action: () => { 
-      this.mode = EditorMode.Visual;
-      this.visualStartX = this.cursorX;
-      this.visualStartY = this.cursorY;
-    } },
-    { pattern: 'V', action: () => { 
-      this.mode = EditorMode.VisualLine;
-      this.visualStartX = this.cursorX;
-      this.visualStartY = this.cursorY;
-    } },
-    { pattern: 'f', action: () => { 
-      this.previousMode = EditorMode.Normal;
-      this.mode = EditorMode.FastJump;
-      this.fastJumpMatches = [];
-      this.fastJumpInput = '';
-    } },
-    { pattern: 'u', action: () => { this.undo(); } },
-    { pattern: '%', action: () => { this.jumpToMatchingBracket(); } },
-  ];
 
   private history: Array<{ content: string[]; cursorX: number; cursorY: number }> = [];
   private historyIndex = -1;
@@ -175,48 +115,6 @@ export class VimEditor extends LitElement {
     return label;
   }
 
-  private processKeyBuffer(): boolean {
-    const sortedPatterns = [...this.commandPatterns].sort((a, b) => b.pattern.length - a.pattern.length);
-    
-    for (const { pattern, action } of sortedPatterns) {
-      if (this.keyBuffer === pattern) {
-        this.keyBuffer = '';
-        action();
-        return true;
-      }
-    }
-    
-    const dNumberJMatch = /^d(\d+)j$/.exec(this.keyBuffer);
-    if (dNumberJMatch) {
-      const count = parseInt(dNumberJMatch[1], 10);
-      this.keyBuffer = '';
-      this.saveHistory();
-      this.deleteLinesDown(count);
-      return true;
-    }
-    
-    const dNumberKMatch = /^d(\d+)k$/.exec(this.keyBuffer);
-    if (dNumberKMatch) {
-      const count = parseInt(dNumberKMatch[1], 10);
-      this.keyBuffer = '';
-      this.saveHistory();
-      this.deleteLinesUp(count);
-      return true;
-    }
-    
-    const hasPartialMatch = sortedPatterns.some(({ pattern }) => 
-      pattern.startsWith(this.keyBuffer)
-    );
-    
-    const hasNumberPattern = /^d\d*[jk]?$/.test(this.keyBuffer);
-    
-    if (!hasPartialMatch && !hasNumberPattern) {
-      this.keyBuffer = '';
-      return false;
-    }
-    
-    return false;
-  }
 
   private findMatchesInVisibleRange(targetChar: string): Array<{ x: number; y: number; label: string }> {
     const matches: Array<{ x: number; y: number; label: string }> = [];
@@ -477,33 +375,8 @@ export class VimEditor extends LitElement {
       if (this.hiddenInput) {
         this.hiddenInput.style.opacity = '0';
       }
-      if (this.mode === EditorMode.Insert && e.data) {
-        for (const char of e.data) {
-          this.insertCharacter(char);
-        }
-        if (this.p5Instance) {
-          this.p5Instance.redraw();
-        }
-      } else if (this.mode === EditorMode.TInsert && e.data) {
-        const handler = this.currentModeHandler as any;
-        for (const char of e.data) {
-          if (handler.tInsertCharacter) {
-            handler.tInsertCharacter(this, char);
-          }
-        }
-        if (this.p5Instance) {
-          this.p5Instance.redraw();
-        }
-      } else if (this.mode === EditorMode.MultiInsert && e.data) {
-        const handler = this.currentModeHandler as any;
-        for (const char of e.data) {
-          if (handler.multiInsertCharacter) {
-            handler.multiInsertCharacter(this, char);
-          }
-        }
-        if (this.p5Instance) {
-          this.p5Instance.redraw();
-        }
+      if (e.data && this.currentModeHandler.handleCompositionEnd) {
+        this.currentModeHandler.handleCompositionEnd(this, e.data);
       }
       this.hiddenInput!.value = '';
     });
@@ -511,33 +384,8 @@ export class VimEditor extends LitElement {
     this.hiddenInput.addEventListener('input', (e) => {
       if (!this.isComposing && this.hiddenInput) {
         const value = this.hiddenInput.value;
-        if (value && this.mode === EditorMode.Insert) {
-          for (const char of value) {
-            this.insertCharacter(char);
-          }
-          if (this.p5Instance) {
-            this.p5Instance.redraw();
-          }
-        } else if (value && this.mode === EditorMode.TInsert) {
-          const handler = this.currentModeHandler as any;
-          for (const char of value) {
-            if (handler.tInsertCharacter) {
-              handler.tInsertCharacter(this, char);
-            }
-          }
-          if (this.p5Instance) {
-            this.p5Instance.redraw();
-          }
-        } else if (value && this.mode === EditorMode.MultiInsert) {
-          const handler = this.currentModeHandler as any;
-          for (const char of value) {
-            if (handler.multiInsertCharacter) {
-              handler.multiInsertCharacter(this, char);
-            }
-          }
-          if (this.p5Instance) {
-            this.p5Instance.redraw();
-          }
+        if (value && this.currentModeHandler.handleInput) {
+          this.currentModeHandler.handleInput(this, value);
         }
         this.hiddenInput.value = '';
       }
