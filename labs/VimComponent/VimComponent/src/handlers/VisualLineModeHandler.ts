@@ -13,13 +13,13 @@ export class VisualLineModeHandler extends BaseModeHandler {
         editor.mode = EditorMode.Normal;
         break;
       case 'y':
-        editor['yankVisualSelection']();
+        this.yankVisualSelection(editor);
         editor.mode = EditorMode.Normal;
         break;
       case 'c':
       case 'd':
       case 'x':
-        editor['cutVisualLineSelection']();
+        this.cutVisualLineSelection(editor);
         editor.mode = EditorMode.Normal;
         break;
       case 'f':
@@ -29,6 +29,59 @@ export class VisualLineModeHandler extends BaseModeHandler {
         editor['fastJumpInput'] = '';
         break;
     }
+  }
+  
+  private getVisualSelection(editor: any): string {
+    const startY = Math.min(editor['visualStartY'], editor.cursorY);
+    const endY = Math.max(editor['visualStartY'], editor.cursorY);
+    const startX = editor['visualStartY'] === startY ? 
+      Math.min(editor['visualStartX'], editor.cursorX) : 
+      Math.min(editor.cursorX, editor['visualStartX']);
+    const endX = editor['visualStartY'] === endY ? 
+      Math.max(editor['visualStartX'], editor.cursorX) : 
+      Math.max(editor.cursorX, editor['visualStartX']);
+    
+    if (startY === endY) {
+      return editor.content[startY].slice(startX, endX + 1);
+    }
+    
+    let result = '';
+    for (let y = startY; y <= endY; y++) {
+      if (y === startY) {
+        result += editor.content[y].slice(startX) + '\n';
+      } else if (y === endY) {
+        result += editor.content[y].slice(0, endX + 1);
+      } else {
+        result += editor.content[y] + '\n';
+      }
+    }
+    return result;
+  }
+  
+  private yankVisualSelection(editor: any): void {
+    const selection = this.getVisualSelection(editor);
+    navigator.clipboard.writeText(selection);
+  }
+  
+  private cutVisualLineSelection(editor: any): void {
+    editor['saveHistory']();
+    
+    const selection = this.getVisualSelection(editor);
+    navigator.clipboard.writeText(selection);
+    
+    const startY = Math.min(editor['visualStartY'], editor.cursorY);
+    const endY = Math.max(editor['visualStartY'], editor.cursorY);
+    const linesToDelete = endY - startY + 1;
+    
+    editor.content.splice(startY, linesToDelete);
+    
+    if (editor.content.length === 0) {
+      editor.content = [''];
+    }
+    
+    editor.cursorY = Math.min(startY, editor.content.length - 1);
+    editor.cursorX = 0;
+    editor['adjustCursorX']();
   }
 }
 
