@@ -34,7 +34,6 @@ export interface IVimEditor {
   fastJumpMatches: Array<{ x: number; y: number; label: string }>;
   fastJumpInput: string;
   keyBuffer: string;
-  visualKeyBuffer: string;
   previousMode: EditorMode.Normal | EditorMode.Visual | EditorMode.VisualLine;
   visualStartX: number;
   visualStartY: number;

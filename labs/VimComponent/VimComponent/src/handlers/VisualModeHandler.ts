@@ -2,40 +2,41 @@ import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 
 export class VisualModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.Visual;
+  private visualKeyBuffer = '';
   
   shouldPreventDefault(key: string): boolean {
     return true;
   }
   
   handleKey(key: string, editor: IVimEditor): void {
-    if (editor.visualKeyBuffer === '' && editor.handleMovement(key)) {
+    if (this.visualKeyBuffer === '' && editor.handleMovement(key)) {
       return;
     }
     
     if (key === 'Escape') {
       editor.mode = EditorMode.Normal;
-      editor.visualKeyBuffer = '';
+      this.visualKeyBuffer = '';
       return;
     }
     
-    if (key === 'i' && editor.visualKeyBuffer === '') {
-      editor.visualKeyBuffer = 'i';
+    if (key === 'i' && this.visualKeyBuffer === '') {
+      this.visualKeyBuffer = 'i';
       return;
     }
     
-    if (editor.visualKeyBuffer === 'i' && (key === '`' || key === "'" || key === '"')) {
+    if (this.visualKeyBuffer === 'i' && (key === '`' || key === "'" || key === '"')) {
       this.selectInnerQuote(editor, key);
-      editor.visualKeyBuffer = '';
+      this.visualKeyBuffer = '';
       return;
     }
     
-    if (editor.visualKeyBuffer === 'i' && key === 'w') {
+    if (this.visualKeyBuffer === 'i' && key === 'w') {
       this.selectInnerWord(editor);
-      editor.visualKeyBuffer = '';
+      this.visualKeyBuffer = '';
       return;
     }
     
-    editor.visualKeyBuffer = '';
+    this.visualKeyBuffer = '';
     
     switch (key) {
       case 'y':

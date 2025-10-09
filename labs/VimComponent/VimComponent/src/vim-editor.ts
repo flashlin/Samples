@@ -76,7 +76,6 @@ export class VimEditor extends LitElement {
   previousMode: EditorMode.Normal | EditorMode.Visual | EditorMode.VisualLine = EditorMode.Normal;
   
   keyBuffer = '';
-  visualKeyBuffer = '';
   
   searchKeyword = '';
   searchMatches: Array<{ y: number; x: number }> = [];
