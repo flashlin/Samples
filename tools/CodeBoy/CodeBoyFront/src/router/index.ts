@@ -5,6 +5,7 @@ import BuildDatabaseModelNupkg from '@/views/BuildDatabaseModelNupkg.vue'
 import UseGrpcProtoGeneratorDoc from '@/views/UseGrpcProtoGeneratorDoc.vue'
 import GenTypescriptCodeFromSwagger from '@/views/GenTypescriptCodeFromSwagger.vue'
 import GenDatabaseDto from '@/views/GenDatabaseDto.vue'
+import GenCodeFirstFromDatabase from '@/views/GenCodeFirstFromDatabase.vue'
 import GenProtoCodeFromGrpcClientAssembly from '@/views/GenProtoCodeFromGrpcClientAssembly.vue'
 
 const router = createRouter({
@@ -56,6 +57,14 @@ const router = createRouter({
       component: GenDatabaseDto,
       meta: {
         title: 'Generate Database DTO'
+      }
+    },
+    {
+      path: '/genCodeFirstFromDatabase',
+      name: 'genCodeFirstFromDatabase',
+      component: GenCodeFirstFromDatabase,
+      meta: {
+        title: 'Generate EF Code First from Database'
       }
     },
     {

@@ -37,6 +37,27 @@ export interface GenDatabaseDtoRequest {
   sql: string;
 }
 
+// Request interface for generating EF Code First from database
+export interface GenCodeFirstFromDatabaseRequest {
+  databaseServer: string;
+  loginId: string;
+  loginPassword: string;
+  databaseName: string;
+  namespaceName: string;
+  targetFramework: string;
+}
+
+// Response interface for EF Code First generation
+export interface EfGeneratedFile {
+  fileName: string;
+  fileContent: string;
+}
+
+export interface EfGenerationOutput {
+  csprojFilePath: string;
+  codeFiles: EfGeneratedFile[];
+}
+
 // Request interface for generating proto code from gRPC client assembly
 export interface GenProtoCodeFromGrpcClientAssemblyRequest {
   namespaceName: string;
@@ -98,6 +119,15 @@ export const codeGenApi = {
    */
   genDatabaseDto(params: GenDatabaseDtoRequest): Promise<string> {
     return request.post('/codegen/genDatabaseDto', params);
+  },
+
+  /**
+   * Generate EF Code First models from database
+   * @param params Code First generation request parameters
+   * @returns EF generation output with code files
+   */
+  genCodeFirstFromDatabase(params: GenCodeFirstFromDatabaseRequest): Promise<EfGenerationOutput> {
+    return request.post('/codegen/genCodeFirstFromDatabase', params);
   },
 
   /**
