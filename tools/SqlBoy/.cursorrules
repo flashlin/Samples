@@ -1,0 +1,76 @@
+# CodeBoy Project Rules
+
+## AI Assistant Workflow
+
+### Before Processing Requests
+Before starting to process any user request, the AI assistant MUST:
+1. Scan the current project structure to understand the codebase layout
+2. Review relevant files and understand the context
+3. Only then proceed with processing the user's requirements
+
+This ensures the AI has proper context and understanding of the codebase before making any changes or suggestions.
+
+## Code Generation
+
+### IndentStringBuilder Usage
+When generating code using `IndentStringBuilder` from `T1.Standard.IO`:
+- Use `WriteLine()` method to write lines (NOT `AppendLine()`)
+- Use `Indent` property with `++` to increase indentation
+- Use `Indent` property with `--` to decrease indentation
+- DO NOT use methods like `IncreaseIndent()` or `DecreaseIndent()`
+
+Example:
+```csharp
+var output = new IndentStringBuilder();
+output.WriteLine("namespace MyNamespace");
+output.WriteLine("{");
+output.Indent++;
+output.WriteLine("public class MyClass { }");
+output.Indent--;
+output.WriteLine("}");
+```
+
+## Coding Standards
+
+### Code Style
+1. Keep code concise - remove redundant comments
+2. Extract small methods based on functional blocks
+3. Avoid try-catch to keep code clean
+4. Method bodies should not be too long
+5. Implementation code should NOT contain comments
+
+### Code Reusability Workflow
+Before implementing any new method, the AI assistant MUST follow this workflow:
+
+1. **Search for Similar Implementations**
+   - Search the entire project for similar methods or implementations
+   - Look for methods that solve the same or similar problems
+
+2. **Evaluate Existing Methods**
+   - If a similar method exists, determine if it is:
+     - **Shared/Common method**: Used by multiple components
+     - **Unique/Specific method**: Only used in one specific context
+
+3. **Decide Action Based on Evaluation**
+   - **If similar method exists AND is unique to one component**:
+     - Call the existing method directly
+     - Do NOT duplicate the implementation
+   
+   - **If similar implementation exists but is NOT a shared method**:
+     - Extract the implementation into a common/shared method
+     - Refactor existing code to call the new shared method
+     - Use the shared method in the new implementation
+   
+   - **If NO similar method exists**:
+     - Create a new method with the implementation
+     - Consider if it should be a shared method for future use
+
+4. **DRY Principle**
+   - Always follow "Don't Repeat Yourself" principle
+   - Avoid code duplication across the project
+   - Prefer reusability over reimplementation
+
+### Testing Framework
+1. Use NUnit3
+2. Use Fluent Assertions for assertions
+
