@@ -28,20 +28,41 @@ WORKDIR /app
 # Install curl for health checks and other utilities
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
+# Install additional .NET runtimes that dotnet-ef might need
+RUN apt-get update && \
+    apt-get install -y wget && \
+    rm -rf /var/lib/apt/lists/*
+
 # Create a non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN groupadd -r appuser && useradd -r -g appuser -m appuser
 
 # Copy the published application
 COPY --from=build /app/publish .
 
-# Ensure appuser has access to temp directories for dynamic compilation and .NET operations
-RUN mkdir -p /tmp/.nuget /tmp/.dotnet /home/appuser/.dotnet/tools && \
-    chmod 777 /tmp && \
+# Create necessary directories with proper permissions
+RUN mkdir -p /tmp/.nuget /tmp/.dotnet /home/appuser/.dotnet/tools /home/appuser/.local/share /home/appuser/.templateengine && \
+    chmod -R 777 /tmp && \
     chown -R appuser:appuser /tmp /home/appuser /app
+
+# Set environment variables
+ENV DOTNET_CLI_HOME=/home/appuser
+ENV DOTNET_USER_PROFILE=/home/appuser
+ENV HOME=/home/appuser
+ENV NUGET_PACKAGES=/home/appuser/.nuget/packages
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+ENV PATH="${PATH}:/home/appuser/.dotnet/tools"
+ENV DOTNET_ROOT=/usr/share/dotnet
+ENV DOTNET_ROLL_FORWARD=LatestMajor
+ENV DOTNET_ROLL_FORWARD_TO_PRERELEASE=0
 
 # Switch to appuser and install dotnet-ef tools
 USER appuser
-RUN dotnet tool install --global dotnet-ef
+
+# Install dotnet-ef tool matching the SDK version
+RUN dotnet tool install --global dotnet-ef --version 9.0.0
+
+# Verify installation
+RUN dotnet ef --version || echo "dotnet-ef installation verification"
 
 # Expose the port that ASP.NET Core listens on
 EXPOSE 8080
@@ -49,16 +70,6 @@ EXPOSE 8080
 # Set environment variables
 ENV HTTP_PORTS=8080
 ENV ASPNETCORE_ENVIRONMENT=Production
-
-# Configure .NET environment variables for appuser
-ENV DOTNET_CLI_HOME=/home/appuser
-ENV DOTNET_USER_PROFILE=/home/appuser
-ENV HOME=/home/appuser
-ENV NUGET_PACKAGES=/tmp/.nuget
-ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
-
-# Add .NET tools to PATH for appuser
-ENV PATH="${PATH}:/home/appuser/.dotnet/tools:/root/.dotnet/tools"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
