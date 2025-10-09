@@ -1756,14 +1756,50 @@ export class VimEditor extends LitElement {
       return;
     }
     
-    const bufferY = this.cursorY - this.scrollOffsetY;
-    const bufferX = this.cursorX - this.scrollOffsetX;
+    if (this.mode === EditorMode.TInsert && this.tMarks.length > 0) {
+      const currentMarkIndex = this.findCurrentTMarkIndex();
+      if (currentMarkIndex !== -1) {
+        const currentMark = this.tMarks[currentMarkIndex];
+        const offsetInMark = this.cursorX - currentMark.x;
+        
+        for (const mark of this.tMarks) {
+          this.drawCursorAtPosition(p, mark.x + offsetInMark, mark.y);
+        }
+      }
+    } else {
+      this.drawCursorAtPosition(p, this.cursorX, this.cursorY);
+    }
+  }
+  
+  private findCurrentTMarkIndex(): number {
+    if (this.tMarks.length === 0) return -1;
+    
+    for (let i = 0; i < this.tMarks.length; i++) {
+      const mark = this.tMarks[i];
+      if (mark.y === this.cursorY && mark.x === this.cursorX) {
+        return i;
+      }
+    }
+    
+    for (let i = this.tMarks.length - 1; i >= 0; i--) {
+      const mark = this.tMarks[i];
+      if (mark.y < this.cursorY || (mark.y === this.cursorY && mark.x <= this.cursorX)) {
+        return i;
+      }
+    }
+    
+    return 0;
+  }
+  
+  private drawCursorAtPosition(p: p5, x: number, y: number) {
+    const bufferY = y - this.scrollOffsetY;
+    const bufferX = x - this.scrollOffsetX;
     
     if (bufferY < 0 || bufferY >= this.bufferHeight || bufferX < 0 || bufferX >= this.bufferWidth) {
       return;
     }
     
-    const line = this.content[this.cursorY] || '';
+    const line = this.content[y] || '';
     const visibleLine = line.substring(this.scrollOffsetX);
     const screenX = this.getTextXPosition(visibleLine, bufferX);
     const screenY = this.getRectY(bufferY);

@@ -59,12 +59,6 @@ export class TInsertModeHandler extends BaseModeHandler {
       
       if (deletePos >= 0 && deletePos < line.length) {
         editor.content[mark.y] = line.substring(0, deletePos) + line.substring(deletePos + 1);
-        
-        for (let j = i + 1; j < editor.tMarks.length; j++) {
-          if (editor.tMarks[j].y === mark.y) {
-            editor.tMarks[j].x--;
-          }
-        }
       }
     }
     
@@ -122,12 +116,6 @@ export class TInsertModeHandler extends BaseModeHandler {
         line.substring(0, insertPos) +
         char +
         line.substring(insertPos);
-      
-      for (let j = i + 1; j < editor.tMarks.length; j++) {
-        if (editor.tMarks[j].y === mark.y) {
-          editor.tMarks[j].x++;
-        }
-      }
     }
     
     editor.cursorX++;
