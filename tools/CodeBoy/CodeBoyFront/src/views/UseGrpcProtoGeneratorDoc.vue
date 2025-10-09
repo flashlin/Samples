@@ -92,6 +92,25 @@ builder.Services.AddScoped&lt;IGreeterGrpcService, GreeterService&gt;();
 var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.MapGrpcService&lt;GreeterNativeGrpcService&gt;();</code></pre>
+
+            <p class="mb-4 text-gray-300">Use the generated client wrappers:</p>
+            
+            <pre class="bg-gray-900 text-purple-400 rounded-lg p-4 mb-6 overflow-x-auto"><code>var services = new ServiceCollection();
+// Configure gRPC server settings
+services.Configure&lt;GreeterGrpcConfig&gt;(config =>
+{
+    config.ServerUrl = "https://localhost:7001"; // Your gRPC server address
+});
+// Register gRPC SDK using auto-generated extension method
+services.AddGreeterGrpcSdk();
+// Generated wrapper provides a clean, easy-to-use API
+var client = sp.GetRequiredService&lt;IGreeterGrpcClient&gt;();
+var request = new HelloRequestGrpcDto 
+{ 
+    Name = "World from Consumer App" 
+};
+var response = await grpcClient.SayHelloAsync(request);
+Console.WriteLine(response.Message);</code></pre>
           </section>
 
           <!-- Key Features Section -->
