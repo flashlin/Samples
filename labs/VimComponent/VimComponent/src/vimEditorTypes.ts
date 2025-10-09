@@ -25,6 +25,13 @@ export interface BufferCell {
   background: number[];
 }
 
+export interface TextRange {
+  startY: number;
+  startX: number;
+  endY: number;
+  endX: number;
+}
+
 export interface IVimEditor {
   // State properties
   mode: EditorMode;
@@ -48,9 +55,9 @@ export interface IVimEditor {
   
   // Range methods
   getInnerWordRange(): { startX: number; endX: number; y: number } | null;
-  getInnerQuoteRange(quoteChar: string): { startY: number; startX: number; endY: number; endX: number } | null;
-  getInnerBracketRange(): { startY: number; startX: number; endY: number; endX: number } | null;
-  findInnerBracketRange(openChar: string, closeChar: string): { startY: number; startX: number; endY: number; endX: number } | null;
+  getInnerQuoteRange(quoteChar: string): TextRange | null;
+  getInnerBracketRange(): TextRange | null;
+  findInnerBracketRange(openChar: string, closeChar: string): TextRange | null;
   
   // Movement methods
   handleMovement(key: string): boolean;

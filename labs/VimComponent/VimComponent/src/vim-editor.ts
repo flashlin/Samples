@@ -2,7 +2,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import p5 from 'p5';
 import exampleText from './example.txt?raw';
-import { EditorMode, EditorStatus, BufferCell, EditorModeHandler } from './vimEditorTypes';
+import { EditorMode, EditorStatus, BufferCell, EditorModeHandler, TextRange } from './vimEditorTypes';
 import { ModeHandlerRegistry } from './handlers';
 
 @customElement('vim-editor')
@@ -890,7 +890,7 @@ export class VimEditor extends LitElement {
     return { startX, endX, y: this.cursorY };
   }
   
-  getInnerQuoteRange(quoteChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
+  getInnerQuoteRange(quoteChar: string): TextRange | null {
     const range = this.findMultiLineQuoteRange(quoteChar);
     if (!range) {
       return null;
@@ -903,7 +903,7 @@ export class VimEditor extends LitElement {
     return range;
   }
   
-  getInnerBracketRange(): { startY: number; startX: number; endY: number; endX: number } | null {
+  getInnerBracketRange(): TextRange | null {
     const bracketPairs: Array<[string, string]> = [
       ['[', ']'],
       ['{', '}'],
@@ -938,7 +938,7 @@ export class VimEditor extends LitElement {
     };
   }
   
-  findInnerBracketRange(openChar: string, closeChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
+  findInnerBracketRange(openChar: string, closeChar: string): TextRange | null {
     const isQuote = openChar === closeChar;
     
     if (isQuote) {
@@ -1039,7 +1039,7 @@ export class VimEditor extends LitElement {
     return Math.min(distToStart, distToEnd);
   }
   
-  private findMultiLineQuoteRange(quoteChar: string): { startY: number; startX: number; endY: number; endX: number } | null {
+  private findMultiLineQuoteRange(quoteChar: string): TextRange | null {
     let startY = -1;
     let startX = -1;
     let endY = -1;
