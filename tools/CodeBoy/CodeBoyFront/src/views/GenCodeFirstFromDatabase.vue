@@ -171,23 +171,14 @@
             </button>
           </div>
 
-          <!-- File Tabs -->
-          <div class="border-b border-gray-600 mb-4">
-            <div class="flex flex-wrap -mb-px">
-              <button
-                v-for="(file, index) in generatedFiles"
-                :key="index"
-                @click="selectedFileIndex = index"
-                :class="[
-                  'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
-                  selectedFileIndex === index
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-500'
-                ]"
-              >
-                {{ file.fileName }}
-              </button>
-            </div>
+          <!-- File Selector -->
+          <div class="mb-4">
+            <DropdownSearch 
+              :items="fileSearchItems" 
+              :selected-value="selectedSearchItem"
+              placeholder="選擇檔案..."
+              @select="handleFileSelect"
+            />
           </div>
 
           <!-- Selected File Content -->
@@ -232,6 +223,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { codeGenApi, type GenCodeFirstFromDatabaseRequest, type EfGeneratedFile } from '@/apis/codeGenApi'
 import { LocalStorageService } from '@/services/LocalStorage'
+import DropdownSearch, { type SearchItem } from '@/components/DropdownSearch.vue'
 
 // Form data
 const formData = reactive<GenCodeFirstFromDatabaseRequest>({
@@ -256,6 +248,21 @@ const selectedFile = computed(() => {
   return generatedFiles.value[selectedFileIndex.value] || null
 })
 
+const fileSearchItems = computed<SearchItem[]>(() => {
+  return generatedFiles.value.map((file, index) => ({
+    name: file.fileName,
+    description: `File ${index + 1} of ${generatedFiles.value.length}`,
+    index: index
+  }))
+})
+
+const selectedSearchItem = computed(() => {
+  if (selectedFileIndex.value >= 0 && selectedFileIndex.value < fileSearchItems.value.length) {
+    return fileSearchItems.value[selectedFileIndex.value]
+  }
+  return undefined
+})
+
 // Clear messages
 const clearMessages = () => {
   errorMessage.value = ''
@@ -265,7 +272,13 @@ const clearMessages = () => {
   copiedFileIndex.value = -1
 }
 
-// Copy file to clipboard
+const handleFileSelect = (item: SearchItem) => {
+  const fileIndex = item.index as number
+  if (fileIndex !== undefined) {
+    selectedFileIndex.value = fileIndex
+  }
+}
+
 const copyFileToClipboard = async (file: EfGeneratedFile) => {
   try {
     await navigator.clipboard.writeText(file.fileContent)
