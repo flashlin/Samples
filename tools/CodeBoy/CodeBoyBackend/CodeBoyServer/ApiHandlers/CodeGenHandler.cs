@@ -44,6 +44,11 @@ namespace CodeBoyServer.ApiHandlers
                 .WithTags("CodeGeneration")
                 .WithOpenApi();
             
+            app.MapPost("/api/codegen/genCodeFirstFromDatabase", GenCodeFirstFromDatabase)
+                .WithDescription("Generate EF Code First models from database")
+                .WithTags("CodeGeneration")
+                .WithOpenApi();
+            
             app.MapPost("/api/codegen/genProtoCodeFromGrpcClientAssembly", GenProtoCodeFromGrpcClientAssembly)
                 .WithDescription("Generate proto code from gRPC client assembly")
                 .WithTags("CodeGeneration")
@@ -210,6 +215,46 @@ namespace CodeBoyServer.ApiHandlers
         {
             var generator = new DatabaseDtoGenerator();
             return generator.GenerateEfDtoCode(request.Sql);
+        }
+
+        /// <summary>
+        /// Generate EF Code First models from database
+        /// </summary>
+        /// <param name="request">Code First generation request</param>
+        /// <param name="workflow">Database model workflow service</param>
+        /// <returns>Generated code files</returns>
+        private static async Task<IResult> GenCodeFirstFromDatabase(
+            [FromBody] GenCodeFirstFromDatabaseRequest request,
+            IGenDatabaseModelWorkflow workflow)
+        {
+            var outputPath = Path.Combine(Path.GetTempPath(), $"CodeBoy_EF_{Guid.NewGuid():N}");
+            Directory.CreateDirectory(outputPath);
+
+            var buildParams = new GenDatabaseModelBuildParams
+            {
+                DatabaseServer = request.DatabaseServer,
+                LoginId = request.LoginId,
+                LoginPassword = request.LoginPassword,
+                DatabaseName = request.DatabaseName,
+                NamespaceName = request.NamespaceName,
+                SdkName = request.DatabaseName,
+                SdkVersion = "1.0.0",
+                TargetFrameworks = [request.TargetFramework],
+                OutputPath = outputPath
+            };
+
+            var result = await workflow.GenEfCodeFirst(buildParams, request.TargetFramework);
+
+            if (result.CodeFiles.Count == 0)
+            {
+                return Results.Problem(
+                    detail: "No code files were generated",
+                    statusCode: 500,
+                    title: "Generation Failed"
+                );
+            }
+
+            return Results.Ok(result);
         }
 
         private static async Task<List<ProtoFileInfo>> GenProtoCodeFromGrpcClientAssembly(

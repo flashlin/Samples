@@ -423,6 +423,18 @@ namespace CodeBoyLib.Services
         }
 
         /// <summary>
+        /// Generates EF Code First models for a single target framework
+        /// </summary>
+        /// <param name="buildParams">Build parameters</param>
+        /// <param name="framework">Target framework version</param>
+        /// <returns>EF generation output</returns>
+        public async Task<EfGenerationOutput> GenEfCodeFirst(GenDatabaseModelBuildParams buildParams, string framework)
+        {
+            var generationParams = CreateFrameworkGenerationParams(buildParams, framework);
+            return await _databaseModelGenerator.GenerateEfCode(generationParams);
+        }
+
+        /// <summary>
         /// Cleans up temporary directories for a result
         /// </summary>
         /// <param name="result">Result containing project paths to clean</param>
