@@ -4242,6 +4242,281 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('t-insert mode (multi-cursor editing)', () => {
+    it('should mark positions with t key in normal mode', async () => {
+      editor.setContent(['hello world', 'test code', 'example']);
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      pressKey('t');
+      
+      expect(editor.tMarks.length).toBe(1);
+      expect(editor.tMarks[0]).toEqual({ x: 6, y: 0 });
+    });
+
+    it('should accumulate multiple t-marks', async () => {
+      editor.setContent(['hello world', 'test code', 'example']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      editor.cursorX = 5;
+      editor.cursorY = 1;
+      pressKey('t');
+      
+      editor.cursorX = 3;
+      editor.cursorY = 2;
+      pressKey('t');
+      
+      expect(editor.tMarks.length).toBe(3);
+      expect(editor.tMarks).toEqual([
+        { x: 6, y: 0 },
+        { x: 5, y: 1 },
+        { x: 3, y: 2 }
+      ]);
+    });
+
+    it('should enter t-insert mode when pressing i with t-marks', async () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      pressKey('t');
+      pressKey('i');
+      
+      expect(editor.mode).toBe('t-insert');
+      expect(editor.cursorX).toBe(6);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should insert characters at all t-mark positions', async () => {
+      editor.setContent(['hello world', 'test code', 'example']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      editor.cursorX = 5;
+      editor.cursorY = 1;
+      pressKey('t');
+      
+      editor.cursorX = 3;
+      editor.cursorY = 2;
+      pressKey('t');
+      
+      pressKey('i');
+      
+      const hiddenInput = editor.shadowRoot?.querySelector('input');
+      if (hiddenInput) {
+        hiddenInput.value = 'X';
+        const inputEvent = new Event('input', { bubbles: true });
+        hiddenInput.dispatchEvent(inputEvent);
+        await editor.updateComplete;
+        
+        expect(editor.content[0]).toBe('hello Xworld');
+        expect(editor.content[1]).toBe('test Xcode');
+        expect(editor.content[2]).toBe('exaXmple');
+      }
+    });
+
+    it('should keep t-marks position fixed while cursor moves', async () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      pressKey('t');
+      const originalMark = { ...editor.tMarks[0] };
+      
+      pressKey('i');
+      
+      const hiddenInput = editor.shadowRoot?.querySelector('input');
+      if (hiddenInput) {
+        hiddenInput.value = 'X';
+        const inputEvent = new Event('input', { bubbles: true });
+        hiddenInput.dispatchEvent(inputEvent);
+        await editor.updateComplete;
+        
+        expect(editor.tMarks[0]).toEqual(originalMark);
+        expect(editor.cursorX).toBe(7);
+      }
+    });
+
+    it('should insert multiple characters at all t-mark positions', async () => {
+      editor.setContent(['ab cd', 'ef gh']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      editor.cursorX = 3;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      editor.cursorX = 3;
+      editor.cursorY = 1;
+      pressKey('t');
+      
+      pressKey('i');
+      
+      const hiddenInput = editor.shadowRoot?.querySelector('input');
+      if (hiddenInput) {
+        hiddenInput.value = 'XYZ';
+        const inputEvent = new Event('input', { bubbles: true });
+        hiddenInput.dispatchEvent(inputEvent);
+        await editor.updateComplete;
+        
+        expect(editor.content[0]).toBe('ab XYZcd');
+        expect(editor.content[1]).toBe('ef XYZgh');
+        expect(editor.cursorX).toBe(6);
+      }
+    });
+
+    it('should delete characters at all t-mark positions with backspace', async () => {
+      editor.setContent(['hello world', 'test code']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      editor.cursorX = 5;
+      editor.cursorY = 1;
+      pressKey('t');
+      
+      pressKey('i');
+      
+      const hiddenInput = editor.shadowRoot?.querySelector('input');
+      if (hiddenInput) {
+        hiddenInput.value = 'X';
+        let inputEvent = new Event('input', { bubbles: true });
+        hiddenInput.dispatchEvent(inputEvent);
+        await editor.updateComplete;
+        
+        expect(editor.content[0]).toBe('hello Xworld');
+        expect(editor.content[1]).toBe('test Xcode');
+        
+        pressKey('Backspace');
+        await editor.updateComplete;
+        
+        expect(editor.content[0]).toBe('hello world');
+        expect(editor.content[1]).toBe('test code');
+      }
+    });
+
+    it('should clear all t-marks when pressing T in normal mode', async () => {
+      editor.setContent(['hello world', 'test code']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      editor.cursorX = 5;
+      editor.cursorY = 1;
+      pressKey('t');
+      
+      expect(editor.tMarks.length).toBe(2);
+      
+      pressKey('T');
+      
+      expect(editor.tMarks.length).toBe(0);
+    });
+
+    it('should exit t-insert mode and return to normal with Escape', async () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      pressKey('t');
+      pressKey('i');
+      
+      expect(editor.mode).toBe('t-insert');
+      
+      pressKey('Escape');
+      
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should preserve t-marks after editing and exiting t-insert mode', async () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      pressKey('t');
+      const originalMark = { ...editor.tMarks[0] };
+      
+      pressKey('i');
+      
+      const hiddenInput = editor.shadowRoot?.querySelector('input');
+      if (hiddenInput) {
+        hiddenInput.value = 'X';
+        const inputEvent = new Event('input', { bubbles: true });
+        hiddenInput.dispatchEvent(inputEvent);
+        await editor.updateComplete;
+      }
+      
+      pressKey('Escape');
+      
+      expect(editor.tMarks.length).toBe(1);
+      expect(editor.tMarks[0]).toEqual(originalMark);
+    });
+
+    it('should handle t-marks at different positions on same line', async () => {
+      editor.setContent(['a b c d e']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      editor.cursorX = 2;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      pressKey('i');
+      
+      const hiddenInput = editor.shadowRoot?.querySelector('input');
+      if (hiddenInput) {
+        hiddenInput.value = 'X';
+        const inputEvent = new Event('input', { bubbles: true });
+        hiddenInput.dispatchEvent(inputEvent);
+        await editor.updateComplete;
+        
+        expect(editor.content[0]).toBe('a Xb c Xd e');
+      }
+    });
+
+    it('should not create duplicate t-marks at same position', async () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      pressKey('t');
+      pressKey('t');
+      pressKey('t');
+      
+      expect(editor.tMarks.length).toBe(1);
+    });
+  });
+
   describe('load method (public API)', () => {
     it('should load single line text', async () => {
       const text = 'Hello World';
