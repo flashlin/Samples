@@ -4413,7 +4413,7 @@ describe('VimEditor', () => {
       }
     });
 
-    it('should clear all t-marks when pressing T in normal mode', async () => {
+    it('should clear all t-marks when pressing Escape in normal mode', async () => {
       editor.setContent(['hello world', 'test code']);
       editor.mode = 'normal';
       await editor.updateComplete;
@@ -4428,7 +4428,7 @@ describe('VimEditor', () => {
       
       expect(editor.tMarks.length).toBe(2);
       
-      pressKey('T');
+      pressKey('Escape');
       
       expect(editor.tMarks.length).toBe(0);
     });

@@ -31,7 +31,7 @@ export class NormalModeHandler extends BaseModeHandler {
       { pattern: 'de', action: () => { editor.saveHistory(); editor.deleteToWordEnd(); } },
       { pattern: 'i', action: () => { editor.enterInsertMode(); } },
       { pattern: 't', action: () => { this.addTMark(editor); } },
-      { pattern: 'T', action: () => { this.clearTMarks(editor); } },
+      { pattern: 'Escape', action: () => { this.clearTMarks(editor); } },
       { pattern: 'a', action: () => { 
         const currentLine = editor.content[editor.cursorY] || '';
         if (editor.cursorX < currentLine.length) {
