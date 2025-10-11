@@ -4515,6 +4515,70 @@ describe('VimEditor', () => {
       
       expect(editor.tMarks.length).toBe(1);
     });
+
+    it('should mark next position when pressing T in normal mode', async () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      pressKey('T');
+      
+      expect(editor.tMarks.length).toBe(1);
+      expect(editor.tMarks[0]).toEqual({ x: 6, y: 0 });
+    });
+
+    it('should mark next line start when T pressed at end of line', async () => {
+      editor.setContent(['hello', 'world']);
+      editor.cursorX = 4;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      pressKey('T');
+      
+      expect(editor.tMarks.length).toBe(1);
+      expect(editor.tMarks[0]).toEqual({ x: 0, y: 1 });
+    });
+
+    it('should handle T at the end of last line', async () => {
+      editor.setContent(['hello world']);
+      editor.cursorX = 10;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      pressKey('T');
+      
+      expect(editor.tMarks.length).toBe(1);
+      expect(editor.tMarks[0]).toEqual({ x: 10, y: 0 });
+    });
+
+    it('should accumulate multiple t-marks with t and T', async () => {
+      editor.setContent(['hello world', 'test code']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      pressKey('T');
+      
+      editor.cursorX = 3;
+      editor.cursorY = 1;
+      pressKey('t');
+      
+      expect(editor.tMarks.length).toBe(3);
+      expect(editor.tMarks).toEqual([
+        { x: 0, y: 0 },
+        { x: 6, y: 0 },
+        { x: 3, y: 1 }
+      ]);
+    });
   });
 
   describe('load method (public API)', () => {

@@ -31,6 +31,7 @@ export class NormalModeHandler extends BaseModeHandler {
       { pattern: 'de', action: () => { editor.saveHistory(); editor.deleteToWordEnd(); } },
       { pattern: 'i', action: () => { editor.enterInsertMode(); } },
       { pattern: 't', action: () => { this.addTMark(editor); } },
+      { pattern: 'T', action: () => { this.addTMarkNext(editor); } },
       { pattern: 'Escape', action: () => { this.clearTMarks(editor); } },
       { pattern: 'a', action: () => { 
         const currentLine = editor.content[editor.cursorY] || '';
@@ -136,6 +137,37 @@ export class NormalModeHandler extends BaseModeHandler {
     
     if (existingIndex === -1) {
       editor.tMarks.push({ y: editor.cursorY, x: editor.cursorX });
+      editor.tMarks.sort((a: any, b: any) => {
+        if (a.y !== b.y) return a.y - b.y;
+        return a.x - b.x;
+      });
+    }
+  }
+  
+  addTMarkNext(editor: IVimEditor): void {
+    const currentLine = editor.content[editor.cursorY] || '';
+    // Calculate next position
+    let nextX = editor.cursorX + 1;
+    let nextY = editor.cursorY;
+    
+    // If next position exceeds current line length, move to next line
+    if (nextX >= currentLine.length) {
+      if (editor.cursorY < editor.content.length - 1) {
+        nextY = editor.cursorY + 1;
+        nextX = 0;
+      } else {
+        // At the end of the last line, stay at current position
+        nextX = editor.cursorX;
+      }
+    }
+    
+    // Check if mark already exists at this position
+    const existingIndex = editor.tMarks.findIndex(
+      (mark: any) => mark.y === nextY && mark.x === nextX
+    );
+    
+    if (existingIndex === -1) {
+      editor.tMarks.push({ y: nextY, x: nextX });
       editor.tMarks.sort((a: any, b: any) => {
         if (a.y !== b.y) return a.y - b.y;
         return a.x - b.x;
