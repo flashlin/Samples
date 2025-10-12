@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TsSql Demo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .section {
+      margin-bottom: 30px;
+    }
+    
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #555;
+    }
+    
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      resize: vertical;
+    }
+    
+    button {
+      background: #007acc;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    
+    button:hover {
+      background: #005a9e;
+    }
+    
+    .output {
+      background: #f8f8f8;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      border: 1px solid #ddd;
+      min-height: 100px;
+    }
+    
+    .errors {
+      background: #fee;
+      color: #c00;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #fcc;
+      margin-top: 15px;
+      white-space: pre-wrap;
+    }
+    
+    .success {
+      color: #090;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+    
+    .examples {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e8f4f8;
+      border-radius: 4px;
+    }
+    
+    .example {
+      margin: 10px 0;
+      cursor: pointer;
+      padding: 8px;
+      background: white;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    
+    .example:hover {
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>TsSql - LINQ to T-SQL Converter</h1>
+  
+  <div class="container">
+    <div class="section">
+      <label>LINQ Query (FROM-first syntax):</label>
+      <textarea id="linqInput">FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+WHERE u.age > 18
+WHERE u.status = 1
+GROUP BY u.id, u.name
+HAVING COUNT(o.id) > 0
+ORDER BY u.name ASC
+SELECT u.name, COUNT(o.id) AS order_count</textarea>
+    </div>
+    
+    <button onclick="convert()">Convert to T-SQL</button>
+    
+    <div class="section" style="margin-top: 30px;">
+      <label>T-SQL Output:</label>
+      <div id="output" class="output">Click "Convert to T-SQL" to see the result...</div>
+      <div id="errors" class="errors" style="display: none;"></div>
+      <div id="success" class="success" style="display: none;"></div>
+    </div>
+    
+    <div class="examples">
+      <h3>Example Queries (click to load):</h3>
+      
+      <div class="example" onclick="loadExample(1)">
+        <strong>Simple Query:</strong> FROM users SELECT name, email
+      </div>
+      
+      <div class="example" onclick="loadExample(2)">
+        <strong>With JOIN:</strong> FROM users u JOIN orders o ON u.id = o.user_id SELECT u.name, o.total
+      </div>
+      
+      <div class="example" onclick="loadExample(3)">
+        <strong>With WHERE:</strong> FROM products WHERE price > 100 WHERE stock > 0 SELECT name, price
+      </div>
+      
+      <div class="example" onclick="loadExample(4)">
+        <strong>With GROUP BY:</strong> FROM orders GROUP BY customer_id HAVING COUNT(*) > 5 SELECT customer_id, COUNT(*) AS order_count
+      </div>
+      
+      <div class="example" onclick="loadExample(5)">
+        <strong>Complex Query:</strong> See default query above
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    import { LinqParser, LinqToTSqlConverter, TSqlFormatter } from './src/index.ts';
+    
+    const parser = new LinqParser();
+    const converter = new LinqToTSqlConverter();
+    const formatter = new TSqlFormatter();
+    
+    window.convert = function() {
+      const input = document.getElementById('linqInput').value;
+      const output = document.getElementById('output');
+      const errors = document.getElementById('errors');
+      const success = document.getElementById('success');
+      
+      try {
+        // Parse LINQ query
+        const parseResult = parser.parse(input);
+        
+        // Convert to T-SQL
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        // Format as string
+        const sql = formatter.format(tsqlQuery);
+        
+        // Display result
+        output.textContent = sql;
+        output.style.color = '#000';
+        
+        // Show errors if any
+        if (parseResult.errors.length > 0) {
+          errors.style.display = 'block';
+          errors.textContent = 'Parse Errors:\n' + parseResult.errors.map(e => e.toString()).join('\n');
+          success.style.display = 'none';
+        } else {
+          errors.style.display = 'none';
+          success.style.display = 'block';
+          success.textContent = '✓ Successfully converted!';
+        }
+      } catch (error) {
+        output.textContent = 'Error: ' + error.message;
+        output.style.color = '#c00';
+        errors.style.display = 'block';
+        errors.textContent = error.stack || error.toString();
+        success.style.display = 'none';
+      }
+    };
+    
+    window.loadExample = function(num) {
+      const examples = {
+        1: 'FROM users SELECT name, email',
+        2: 'FROM users u JOIN orders o ON u.id = o.user_id SELECT u.name, o.total',
+        3: 'FROM products WHERE price > 100 WHERE stock > 0 SELECT name, price',
+        4: 'FROM orders GROUP BY customer_id HAVING COUNT(*) > 5 SELECT customer_id, COUNT(*) AS order_count',
+        5: `FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+WHERE u.age > 18
+WHERE u.status = 1
+GROUP BY u.id, u.name
+HAVING COUNT(o.id) > 0
+ORDER BY u.name ASC
+SELECT u.name, COUNT(o.id) AS order_count`
+      };
+      
+      document.getElementById('linqInput').value = examples[num];
+      convert();
+    };
+    
+    // Auto-convert on page load
+    convert();
+  </script>
+</body>
+</html>
+

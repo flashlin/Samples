@@ -1,0 +1,30 @@
+{
+  "name": "tssql",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/tssql.umd.js",
+  "module": "dist/tssql.es.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "keywords": ["tsql", "linq", "sql", "parser", "query"],
+  "author": "",
+  "license": "ISC",
+  "description": "A TypeScript library for parsing LINQ-style queries and converting them to T-SQL",
+  "devDependencies": {
+    "@vitest/ui": "^2.0.0",
+    "happy-dom": "^19.0.2",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0",
+    "vitest": "^2.0.0"
+  }
+}
+
