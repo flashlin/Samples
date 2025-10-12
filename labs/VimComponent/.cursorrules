@@ -1,0 +1,47 @@
+# Project Context
+This is a workspace containing multiple TypeScript projects.
+
+## Code Style Guidelines
+
+### Comments
+- Do not write comments in the code
+- Code should be self-documenting through clear naming and structure
+- Exception: Complex algorithms or non-obvious business logic may have minimal comments
+
+### Method Length
+- Keep method content short and focused
+- Extract code blocks into smaller methods based on functionality
+- Each method should have a single, clear responsibility
+- Aim for methods under 20 lines when possible
+
+### Naming Conventions
+- Use camelCase for variables, methods, and properties
+- Use PascalCase for classes and interfaces
+- Use descriptive names that explain purpose without comments
+- Boolean variables should start with is, has, should, can, etc.
+
+## TypeScript Standards
+- Use strict mode
+- Follow TypeScript best practices
+- Prefer interfaces over types for object shapes
+- Use const for immutable values, let for mutable ones
+- Avoid using any type unless absolutely necessary
+
+## Code Organization
+- Single Responsibility Principle: Each file/class/method does one thing well
+- Extract repeated logic into utility functions
+- Keep related code together
+- Separate concerns (data, logic, presentation)
+
+## File Structure
+- Group related files in directories
+- Use index.ts for clean exports
+- Keep file sizes manageable (under 300 lines when possible)
+
+## Best Practices
+- Prefer composition over inheritance
+- Use early returns to reduce nesting
+- Avoid deep nesting (max 3-4 levels)
+- Extract magic numbers and strings into named constants
+- Use array methods (map, filter, reduce) over loops when appropriate
+
