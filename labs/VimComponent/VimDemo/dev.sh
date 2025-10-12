@@ -18,7 +18,9 @@ rm -rf node_modules/.pnpm/vimcomponent*
 rm -rf node_modules/.pnpm/tssql*
 rm -rf node_modules/vimcomponent
 rm -rf node_modules/tssql
-pnpm install --force
+rm -rf node_modules/.vite
+rm -rf dist
+pnpm install
 
 echo "🚀 Starting dev server..."
 pnpm run dev

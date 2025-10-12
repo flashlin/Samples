@@ -100,7 +100,9 @@ const allTableNameList = ref([
   { name: 'order_items', description: 'Order line items' },
   { name: 'categories', description: 'Product categories' },
   { name: 'suppliers', description: 'Supplier information' },
-  { name: 'employees', description: 'Employee records' }
+  { name: 'employees', description: 'Employee records' },
+  { name: 'homes', description: 'Address records' },
+  { name: 'friends', description: 'Friendship records' },
 ])
 
 const handleEditorChange = (event: CustomEvent) => {
