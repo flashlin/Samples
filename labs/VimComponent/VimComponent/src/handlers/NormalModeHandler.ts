@@ -8,32 +8,63 @@ export class NormalModeHandler extends BaseModeHandler {
   }
   
   private getCommandPatterns(editor: IVimEditor) {
+    // Patterns ordered by priority (most specific first)
+    // Using regex patterns for more flexible matching
     return [
-      { pattern: 'gg', action: () => { editor.moveToFirstLine(); } },
-      { pattern: 'diw', action: () => { editor.saveHistory(); this.deleteInnerWord(editor); } },
-      { pattern: 'di%', action: () => { editor.saveHistory(); this.deleteInnerBracket(editor); } },
-      { pattern: 'di`', action: () => { editor.saveHistory(); this.deleteInnerQuote(editor, '`'); } },
-      { pattern: "di'", action: () => { editor.saveHistory(); this.deleteInnerQuote(editor, "'"); } },
-      { pattern: 'di"', action: () => { editor.saveHistory(); this.deleteInnerQuote(editor, '"'); } },
-      { pattern: 'da(', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '(', ')'); } },
-      { pattern: 'da)', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '(', ')'); } },
-      { pattern: 'da[', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '[', ']'); } },
-      { pattern: 'da]', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '[', ']'); } },
-      { pattern: 'da{', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '{', '}'); } },
-      { pattern: 'da}', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '{', '}'); } },
-      { pattern: 'da<', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '<', '>'); } },
-      { pattern: 'da>', action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '<', '>'); } },
-      { pattern: 'da`', action: () => { editor.saveHistory(); this.deleteAroundQuote(editor, '`'); } },
-      { pattern: "da'", action: () => { editor.saveHistory(); this.deleteAroundQuote(editor, "'"); } },
-      { pattern: 'da"', action: () => { editor.saveHistory(); this.deleteAroundQuote(editor, '"'); } },
-      { pattern: 'da%', action: () => { editor.saveHistory(); this.deleteAroundAnyBracket(editor); } },
-      { pattern: 'dw', action: () => { editor.saveHistory(); editor.deleteWord(); } },
-      { pattern: 'de', action: () => { editor.saveHistory(); editor.deleteToWordEnd(); } },
-      { pattern: 'i', action: () => { editor.enterInsertMode(); } },
-      { pattern: 't', action: () => { this.addTMark(editor); } },
-      { pattern: 'T', action: () => { this.addTMarkNext(editor); } },
-      { pattern: 'Escape', action: () => { this.clearTMarks(editor); } },
-      { pattern: 'a', action: () => { 
+      // Multi-character delete commands with text objects (highest priority)
+      { pattern: /^diw$/, action: () => { editor.saveHistory(); this.deleteInnerWord(editor); } },
+      { pattern: /^di%$/, action: () => { editor.saveHistory(); this.deleteInnerBracket(editor); } },
+      { pattern: /^di`$/, action: () => { editor.saveHistory(); this.deleteInnerQuote(editor, '`'); } },
+      { pattern: /^di'$/, action: () => { editor.saveHistory(); this.deleteInnerQuote(editor, "'"); } },
+      { pattern: /^di"$/, action: () => { editor.saveHistory(); this.deleteInnerQuote(editor, '"'); } },
+      { pattern: /^da\($/, action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '(', ')'); } },
+      { pattern: /^da\)$/, action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '(', ')'); } },
+      { pattern: /^da\[$/, action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '[', ']'); } },
+      { pattern: /^da\]$/, action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '[', ']'); } },
+      { pattern: /^da\{$/, action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '{', '}'); } },
+      { pattern: /^da\}$/, action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '{', '}'); } },
+      { pattern: /^da<$/, action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '<', '>'); } },
+      { pattern: /^da>$/, action: () => { editor.saveHistory(); this.deleteAroundBracket(editor, '<', '>'); } },
+      { pattern: /^da`$/, action: () => { editor.saveHistory(); this.deleteAroundQuote(editor, '`'); } },
+      { pattern: /^da'$/, action: () => { editor.saveHistory(); this.deleteAroundQuote(editor, "'"); } },
+      { pattern: /^da"$/, action: () => { editor.saveHistory(); this.deleteAroundQuote(editor, '"'); } },
+      { pattern: /^da%$/, action: () => { editor.saveHistory(); this.deleteAroundAnyBracket(editor); } },
+      
+      // Delete with count and direction
+      { pattern: /^d(\d+)j$/, action: (match: RegExpMatchArray) => { 
+        const count = parseInt(match[1], 10);
+        editor.saveHistory();
+        editor.deleteLinesDown(count);
+      } },
+      { pattern: /^d(\d+)k$/, action: (match: RegExpMatchArray) => { 
+        const count = parseInt(match[1], 10);
+        editor.saveHistory();
+        editor.deleteLinesUp(count);
+      } },
+      
+      // Double character commands
+      { pattern: /^dd$/, action: () => { 
+        editor.saveHistory();
+        editor['deleteLine']();
+      } },
+      { pattern: /^gg$/, action: () => { editor.moveToFirstLine(); } },
+      
+      // Two-character delete commands
+      { pattern: /^dw$/, action: () => { editor.saveHistory(); editor.deleteWord(); } },
+      { pattern: /^de$/, action: () => { editor.saveHistory(); editor.deleteToWordEnd(); } },
+      
+      // Go to line number
+      { pattern: /^(\d+)G$/, action: (match: RegExpMatchArray) => { 
+        const lineNumber = parseInt(match[1], 10) - 1;
+        editor['moveToLine'](lineNumber);
+      } },
+      
+      // Single character commands (lowest priority)
+      { pattern: /^Escape$/, action: () => { this.clearTMarks(editor); } },
+      { pattern: /^i$/, action: () => { editor.enterInsertMode(); } },
+      { pattern: /^t$/, action: () => { this.addTMark(editor); } },
+      { pattern: /^T$/, action: () => { this.addTMarkNext(editor); } },
+      { pattern: /^a$/, action: () => { 
         const currentLine = editor.content[editor.cursorY] || '';
         if (editor.cursorX < currentLine.length) {
           editor.cursorX += 1;
@@ -42,8 +73,8 @@ export class NormalModeHandler extends BaseModeHandler {
         editor.updateInputPosition();
         editor.hiddenInput?.focus();
       } },
-      { pattern: 'o', action: () => { editor.insertLineBelow(); editor.hiddenInput?.focus(); } },
-      { pattern: 'p', action: () => { 
+      { pattern: /^o$/, action: () => { editor.insertLineBelow(); editor.hiddenInput?.focus(); } },
+      { pattern: /^p$/, action: () => { 
         editor.saveHistory(); 
         if (editor.multiCursorClipboard.length > 0 && editor.tMarks.length > 0) {
           this.pasteMultiCursor(editor);
@@ -58,7 +89,7 @@ export class NormalModeHandler extends BaseModeHandler {
           editor.pasteAfterCursor(); 
         }
       } },
-      { pattern: 'v', action: () => { 
+      { pattern: /^v$/, action: () => { 
         // Check if current cursor position is in tMarks
         const isInTMark = editor.tMarks.some(
           (mark: any) => mark.x === editor.cursorX && mark.y === editor.cursorY
@@ -76,19 +107,19 @@ export class NormalModeHandler extends BaseModeHandler {
           editor.visualStartY = editor.cursorY;
         }
       } },
-      { pattern: 'V', action: () => { 
+      { pattern: /^V$/, action: () => { 
         editor.mode = EditorMode.VisualLine;
         editor.visualStartX = editor.cursorX;
         editor.visualStartY = editor.cursorY;
       } },
-      { pattern: 'f', action: () => { 
+      { pattern: /^f$/, action: () => { 
         editor.previousMode = EditorMode.Normal;
         editor.mode = EditorMode.FastJump;
         editor.fastJumpMatches = [];
         editor.fastJumpInput = '';
       } },
-      { pattern: 'u', action: () => { editor.undo(); } },
-      { pattern: '%', action: () => { editor.jumpToMatchingBracket(); } },
+      { pattern: /^u$/, action: () => { editor.undo(); } },
+      { pattern: /^%$/, action: () => { editor.jumpToMatchingBracket(); } },
     ];
   }
   
@@ -103,52 +134,19 @@ export class NormalModeHandler extends BaseModeHandler {
   
   private processKeyBuffer(editor: IVimEditor): boolean {
     const commandPatterns = this.getCommandPatterns(editor);
-    const sortedPatterns = [...commandPatterns].sort((a, b) => b.pattern.length - a.pattern.length);
     
-    for (const { pattern, action } of sortedPatterns) {
-      if (editor.keyBuffer === pattern) {
+    // Try to match patterns in order (already ordered by priority)
+    for (const { pattern, action } of commandPatterns) {
+      const match = pattern.exec(editor.keyBuffer);
+      if (match) {
         editor.keyBuffer = '';
-        action();
+        // Pass match array to action if it accepts it (for capture groups)
+        action(match);
         return true;
       }
     }
     
-    const dNumberJMatch = /^d(\d+)j$/.exec(editor.keyBuffer);
-    if (dNumberJMatch) {
-      const count = parseInt(dNumberJMatch[1], 10);
-      editor.keyBuffer = '';
-      editor.saveHistory();
-      editor.deleteLinesDown(count);
-      return true;
-    }
-    
-    const dNumberKMatch = /^d(\d+)k$/.exec(editor.keyBuffer);
-    if (dNumberKMatch) {
-      const count = parseInt(dNumberKMatch[1], 10);
-      editor.keyBuffer = '';
-      editor.saveHistory();
-      editor.deleteLinesUp(count);
-      return true;
-    }
-    
-    const numberGMatch = /^(\d+)G$/.exec(editor.keyBuffer);
-    if (numberGMatch) {
-      const lineNumber = parseInt(numberGMatch[1], 10) - 1;
-      editor.keyBuffer = '';
-      editor['moveToLine'](lineNumber);
-      return true;
-    }
-    
-    const ddMatch = /^d{2,}$/.exec(editor.keyBuffer);
-    if (ddMatch) {
-      if (editor.keyBuffer === 'dd') {
-        editor.keyBuffer = '';
-        editor.saveHistory();
-        editor['deleteLine']();
-        return true;
-      }
-    }
-    
+    // If buffer gets too long without matching, clear it
     if (editor.keyBuffer.length > 10) {
       editor.keyBuffer = '';
       return false;
