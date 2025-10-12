@@ -93,16 +93,56 @@ const converter = new LinqToTSqlConverter()
 const formatter = new TSqlFormatter()
 
 const allTableNameList = ref([
-  { name: 'users', description: 'User accounts table' },
-  { name: 'orders', description: 'Order records' },
-  { name: 'products', description: 'Product catalog' },
-  { name: 'customers', description: 'Customer information' },
-  { name: 'order_items', description: 'Order line items' },
-  { name: 'categories', description: 'Product categories' },
-  { name: 'suppliers', description: 'Supplier information' },
-  { name: 'employees', description: 'Employee records' },
-  { name: 'homes', description: 'Address records' },
-  { name: 'friends', description: 'Friendship records' },
+  { 
+    name: 'users', 
+    description: 'User accounts table',
+    fields: ['id', 'name', 'email', 'age', 'status', 'created_at', 'updated_at']
+  },
+  { 
+    name: 'orders', 
+    description: 'Order records',
+    fields: ['id', 'user_id', 'order_date', 'total_amount', 'status', 'shipping_address']
+  },
+  { 
+    name: 'products', 
+    description: 'Product catalog',
+    fields: ['id', 'name', 'description', 'price', 'stock', 'category_id']
+  },
+  { 
+    name: 'customers', 
+    description: 'Customer information',
+    fields: ['id', 'first_name', 'last_name', 'email', 'phone', 'address']
+  },
+  { 
+    name: 'order_items', 
+    description: 'Order line items',
+    fields: ['id', 'order_id', 'product_id', 'quantity', 'unit_price', 'subtotal']
+  },
+  { 
+    name: 'categories', 
+    description: 'Product categories',
+    fields: ['id', 'name', 'description', 'parent_id']
+  },
+  { 
+    name: 'suppliers', 
+    description: 'Supplier information',
+    fields: ['id', 'company_name', 'contact_name', 'email', 'phone', 'address']
+  },
+  { 
+    name: 'employees', 
+    description: 'Employee records',
+    fields: ['id', 'first_name', 'last_name', 'email', 'department', 'salary', 'hire_date']
+  },
+  { 
+    name: 'homes', 
+    description: 'Address records',
+    fields: ['id', 'street', 'city', 'state', 'zip_code', 'country']
+  },
+  { 
+    name: 'friends', 
+    description: 'Friendship records',
+    fields: ['id', 'user_id', 'friend_id', 'status', 'created_at']
+  },
 ])
 
 const handleEditorChange = (event: CustomEvent) => {
@@ -110,49 +150,143 @@ const handleEditorChange = (event: CustomEvent) => {
 }
 
 const extractCurrentWord = (lineBeforeCursor: string): string => {
-  const match = lineBeforeCursor.match(/[a-zA-Z0-9]*$/)
+  const match = lineBeforeCursor.match(/[a-zA-Z0-9_]*$/)
   return match ? match[0] : ''
 }
 
-const detectSqlContext = (beforeCursor: string): string => {
-  const keywords = ['FROM', 'SELECT', 'WHERE', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'ORDER BY', 'GROUP BY', 'HAVING']
+const extractTableAliasMap = (content: string): Map<string, string> => {
+  const aliasMap = new Map<string, string>()
+  
+  try {
+    const parseResult = parser.parse(content)
+    const query = parseResult.result
+    
+    if (query && query.from) {
+      const tableName = query.from.tableName
+      const alias = query.from.alias || tableName
+      aliasMap.set(alias, tableName)
+      if (alias !== tableName) {
+        aliasMap.set(tableName, tableName)
+      }
+    }
+    
+    if (query && query.joins) {
+      query.joins.forEach((join: any) => {
+        const tableName = join.tableName
+        const alias = join.alias || tableName
+        aliasMap.set(alias, tableName)
+        if (alias !== tableName) {
+          aliasMap.set(tableName, tableName)
+        }
+      })
+    }
+  } catch (e) {
+    console.log('[Intellisense] Parse error:', e)
+  }
+  
+  return aliasMap
+}
+
+const detectIntellisenseContext = (beforeCursor: string, content: string): {
+  type: 'table' | 'field' | 'field-with-table',
+  tableName?: string,
+  currentWord: string
+} => {
   const upperText = beforeCursor.toUpperCase()
+  const currentWord = extractCurrentWord(beforeCursor)
   
-  let lastKeyword = ''
-  let lastIndex = -1
+  const fromMatch = upperText.match(/FROM\s+([a-zA-Z0-9_]*)\s*$/i)
+  if (fromMatch) {
+    return { type: 'table', currentWord }
+  }
   
-  for (const keyword of keywords) {
-    const index = upperText.lastIndexOf(keyword)
-    if (index > lastIndex) {
-      lastIndex = index
-      lastKeyword = keyword
+  const joinMatch = upperText.match(/(LEFT\s+JOIN|RIGHT\s+JOIN|INNER\s+JOIN|JOIN)\s+([a-zA-Z0-9_]*)\s*$/i)
+  if (joinMatch) {
+    return { type: 'table', currentWord }
+  }
+  
+  const aliasMap = extractTableAliasMap(content)
+  
+  const fieldWithAliasMatch = beforeCursor.match(/([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]*)$/)
+  if (fieldWithAliasMatch) {
+    const alias = fieldWithAliasMatch[1]
+    const fieldWord = fieldWithAliasMatch[2]
+    const tableName = aliasMap.get(alias) || alias
+    
+    return { 
+      type: 'field-with-table', 
+      tableName,
+      currentWord: fieldWord
     }
   }
   
-  if (lastKeyword.includes('FROM') || lastKeyword.includes('JOIN')) {
-    return 'FROM'
-  } else if (lastKeyword === 'SELECT') {
-    return 'SELECT'
-  } else if (lastKeyword === 'WHERE' || lastKeyword === 'HAVING') {
-    return 'WHERE'
-  } else if (lastKeyword.includes('ORDER') || lastKeyword.includes('GROUP')) {
-    return 'ORDER'
+  const selectMatch = upperText.match(/SELECT\s+[^FROM]*$/i)
+  if (selectMatch) {
+    return { type: 'field', currentWord }
   }
   
-  return 'FROM'
+  const whereMatch = upperText.match(/(WHERE|HAVING|AND|OR)\s+[^FROM]*$/i)
+  if (whereMatch) {
+    return { type: 'field', currentWord }
+  }
+  
+  const orderMatch = upperText.match(/(ORDER\s+BY|GROUP\s+BY)\s+[^FROM]*$/i)
+  if (orderMatch) {
+    return { type: 'field', currentWord }
+  }
+  
+  return { type: 'table', currentWord }
 }
 
-const generateSuggestions = (context: string, currentWord: string): any[] => {
-  if (context === 'FROM') {
+const generateSuggestions = (context: any): any[] => {
+  const suggestions: any[] = []
+  
+  if (context.type === 'table') {
     const filtered = allTableNameList.value.filter(table =>
-      table.name.toLowerCase().startsWith(currentWord.toLowerCase())
+      table.name.toLowerCase().startsWith(context.currentWord.toLowerCase())
     )
     
     return filtered.map(table => ({
       text: table.name,
       description: table.description,
-      action: () => replaceCurrentWord(table.name, currentWord)
+      action: () => replaceCurrentWord(table.name, context.currentWord)
     }))
+  }
+  
+  if (context.type === 'field-with-table' && context.tableName) {
+    const table = allTableNameList.value.find(t => 
+      t.name.toLowerCase() === context.tableName?.toLowerCase()
+    )
+    
+    if (table) {
+      const filtered = table.fields.filter(field =>
+        field.toLowerCase().startsWith(context.currentWord.toLowerCase())
+      )
+      
+      return filtered.map(field => ({
+        text: field,
+        description: `${context.tableName}.${field}`,
+        action: () => replaceCurrentWord(field, context.currentWord)
+      }))
+    }
+  }
+  
+  if (context.type === 'field') {
+    allTableNameList.value.forEach(table => {
+      const filtered = table.fields.filter(field =>
+        field.toLowerCase().startsWith(context.currentWord.toLowerCase())
+      )
+      
+      filtered.forEach(field => {
+        suggestions.push({
+          text: field,
+          description: `${table.name}.${field}`,
+          action: () => replaceCurrentWord(field, context.currentWord)
+        })
+      })
+    })
+    
+    return suggestions
   }
   
   return []
@@ -168,13 +302,21 @@ const replaceCurrentWord = (newText: string, oldWord: string) => {
 const handleIntellisense = (event: CustomEvent<any>) => {
   const ctx = event.detail
   
-  const beforeCursor = ctx.contentBeforeCursor
-  const currentWord = extractCurrentWord(ctx.lineBeforeCursor)
-  const context = detectSqlContext(beforeCursor)
-  const suggestions = generateSuggestions(context, currentWord)
+  console.log('[Intellisense] Context:', ctx)
+  
+  const fullContent = ctx.contentBeforeCursor + ctx.contentAfterCursor
+  const context = detectIntellisenseContext(ctx.contentBeforeCursor, fullContent)
+  
+  console.log('[Intellisense] Detected context:', context)
+  
+  const suggestions = generateSuggestions(context)
+  
+  console.log('[Intellisense] Generated suggestions:', suggestions.length)
   
   if (suggestions.length > 0) {
     vimEditorRef.value?.showIntellisense(suggestions)
+  } else {
+    console.log('[Intellisense] No suggestions found')
   }
 }
 

@@ -15,6 +15,10 @@ export class IntellisenseMenu {
     
     this.container = document.createElement('div');
     this.container.className = 'intellisense-menu';
+    const maxVisibleItems = 8;
+    const itemHeight = 42;
+    const maxHeight = Math.min(items.length, maxVisibleItems) * itemHeight;
+    
     this.container.style.cssText = `
       position: absolute;
       left: ${x}px;
@@ -23,10 +27,10 @@ export class IntellisenseMenu {
       border: 2px solid #555;
       border-radius: 4px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      max-height: 200px;
+      max-height: ${maxHeight}px;
       overflow-y: auto;
       z-index: 10000;
-      min-width: 250px;
+      min-width: 300px;
       font-family: 'Courier New', monospace;
     `;
     
