@@ -14,6 +14,9 @@ importers:
       p5:
         specifier: ^1.11.10
         version: 1.11.10
+      tssql:
+        specifier: file:../TsSql
+        version: file:../TsSql
       vimcomponent:
         specifier: file:../VimComponent
         version: file:../VimComponent(lit@3.3.1)(p5@1.11.10)
@@ -472,6 +475,9 @@ packages:
     resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
     engines: {node: '>=12.0.0'}
 
+  tssql@file:../TsSql:
+    resolution: {directory: ../TsSql, type: directory}
+
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
@@ -913,6 +919,8 @@ snapshots:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
+
+  tssql@file:../TsSql: {}
 
   typescript@5.9.3: {}
 

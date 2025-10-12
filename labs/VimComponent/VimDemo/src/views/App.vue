@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <h1>Vim Editor Demo</h1>
+    <h1>Vim Editor Demo - LINQ to T-SQL Converter</h1>
     
     <div class="editor-section">
       <vim-editor
@@ -10,29 +10,48 @@
         @change="handleEditorChange"
       ></vim-editor>
       
+      <div v-if="parseErrors.length > 0" class="error-panel">
+        <h3>Parse Errors:</h3>
+        <div v-for="(error, index) in parseErrors" :key="index" class="error-message">
+          {{ error }}
+        </div>
+      </div>
+      
       <div class="button-container">
         <button @click="executeCode" class="run-button">Run</button>
+      </div>
+      
+      <div class="output-section">
+        <h3>T-SQL Output:</h3>
+        <textarea 
+          v-model="tsqlOutput" 
+          class="tsql-textarea"
+          readonly
+          placeholder="T-SQL output will appear here..."
+        ></textarea>
       </div>
     </div>
 
     <div class="result-section">
-      <h2>Execution Results</h2>
+      <h2>Execution History</h2>
       <table class="result-table">
         <thead>
           <tr>
             <th>Timestamp</th>
-            <th>Content</th>
-            <th>Result</th>
+            <th>LINQ Query</th>
+            <th>T-SQL Result</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="executionResults.length === 0">
-            <td colspan="3" class="empty-message">No results yet. Click "Run" to execute code.</td>
+            <td colspan="4" class="empty-message">No results yet. Click "Run" to convert LINQ to T-SQL.</td>
           </tr>
           <tr v-for="(result, index) in executionResults" :key="index">
             <td>{{ result.timestamp }}</td>
             <td class="content-cell">{{ result.content }}</td>
-            <td class="result-cell" :class="result.status">{{ result.result }}</td>
+            <td class="result-cell">{{ result.result }}</td>
+            <td class="status-cell" :class="result.status">{{ result.status }}</td>
           </tr>
         </tbody>
       </table>
@@ -42,9 +61,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-
-// Import the VimComponent package
 import 'vimcomponent'
+import { LinqParser, LinqToTSqlConverter, TSqlFormatter } from 'tssql'
 
 interface ExecutionResult {
   timestamp: string
@@ -53,76 +71,66 @@ interface ExecutionResult {
   status: 'success' | 'error'
 }
 
-// Editor configuration
 const editorWidth = '90%'
 const editorHeight = '300px'
 
-// Editor content as a single string
-const editorContent = ref(`// Enter your code here
-console.log('Hello from Vim Editor!');
+const editorContent = ref(`FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+WHERE u.age > 18
+WHERE u.status = 1
+GROUP BY u.id, u.name
+HAVING COUNT(o.id) > 0
+ORDER BY u.name ASC
+SELECT u.name, COUNT(o.id) AS order_count`)
 
-function greet(name: string) {
-  return \`Hello, \${name}!\`;
-}
-
-greet('World');`)
-
-// Editor ref
 const vimEditorRef = ref<any>(null)
-
-// Execution results
 const executionResults = ref<ExecutionResult[]>([])
+const tsqlOutput = ref('')
+const parseErrors = ref<string[]>([])
 
-// Handle editor content change
+const parser = new LinqParser()
+const converter = new LinqToTSqlConverter()
+const formatter = new TSqlFormatter()
+
 const handleEditorChange = (event: CustomEvent) => {
-  // event.detail.content is string[], join back to string
   editorContent.value = event.detail.content.join('\n')
 }
 
-// Execute code function
 const executeCode = () => {
   const timestamp = new Date().toLocaleString()
-  const codeString = editorContent.value
+  const linq = editorContent.value
   
   try {
-    // Capture console.log output
-    const logs: string[] = []
-    const originalLog = console.log
-    console.log = (...args: any[]) => {
-      logs.push(args.join(' '))
-      originalLog.apply(console, args)
-    }
-
-    // Execute the code
-    const result = eval(codeString)
+    const parseResult = parser.parse(linq)
+    const tsqlQuery = converter.convert(parseResult.result)
+    const sql = formatter.format(tsqlQuery)
+    const errors = parseResult.errors.map((e: any) => e.message)
     
-    // Restore console.log
-    console.log = originalLog
+    tsqlOutput.value = sql
+    parseErrors.value = errors
     
-    // Add result to table
     executionResults.value.unshift({
       timestamp,
-      content: codeString.substring(0, 100) + (codeString.length > 100 ? '...' : ''),
-      result: logs.length > 0 ? logs.join('\n') : (result !== undefined ? String(result) : 'Executed successfully'),
-      status: 'success'
+      content: linq.substring(0, 80) + (linq.length > 80 ? '...' : ''),
+      result: sql,
+      status: errors.length > 0 ? 'error' : 'success'
     })
   } catch (error) {
-    // Add error to table
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    tsqlOutput.value = ''
+    parseErrors.value = [errorMsg]
+    
     executionResults.value.unshift({
       timestamp,
-      content: codeString.substring(0, 100) + (codeString.length > 100 ? '...' : ''),
-      result: error instanceof Error ? error.message : String(error),
+      content: linq.substring(0, 80) + (linq.length > 80 ? '...' : ''),
+      result: errorMsg,
       status: 'error'
     })
   }
 }
 
 onMounted(() => {
-  // Wait for the custom element to be defined
   customElements.whenDefined('vim-editor').then(() => {
-    console.log('vim-editor component is ready')
-    
-    // Load initial content using the load() method
     const editor = vimEditorRef.value
     if (editor) {
       editor.load(editorContent.value)
@@ -151,6 +159,13 @@ h2 {
   font-size: 20px;
 }
 
+h3 {
+  color: #555;
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
 .editor-section {
   margin-bottom: 30px;
 }
@@ -163,10 +178,32 @@ vim-editor {
   overflow: hidden;
 }
 
+.error-panel {
+  background-color: #fee;
+  border: 2px solid #fcc;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.error-panel h3 {
+  color: #c00;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.error-message {
+  color: #c00;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  padding: 5px 0;
+}
+
 .button-container {
   display: flex;
   justify-content: flex-start;
   gap: 10px;
+  margin-bottom: 20px;
 }
 
 .run-button {
@@ -187,6 +224,30 @@ vim-editor {
 
 .run-button:active {
   transform: translateY(1px);
+}
+
+.output-section {
+  margin-top: 20px;
+}
+
+.tsql-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 15px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+  background-color: #f8f9fa;
+  color: #333;
+  white-space: pre;
+  overflow: auto;
+}
+
+.tsql-textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
 }
 
 .result-section {
@@ -229,7 +290,7 @@ vim-editor {
 }
 
 .content-cell {
-  max-width: 300px;
+  max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -241,14 +302,20 @@ vim-editor {
   font-family: 'Courier New', monospace;
   font-size: 13px;
   white-space: pre-wrap;
-  max-width: 400px;
+  max-width: 350px;
 }
 
-.result-cell.success {
+.status-cell {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.status-cell.success {
   color: #28a745;
 }
 
-.result-cell.error {
+.status-cell.error {
   color: #dc3545;
 }
 
