@@ -4581,6 +4581,133 @@ describe('VimEditor', () => {
     });
   });
 
+  describe('TVisual mode (multi-cursor visual)', () => {
+    it('should enter TVisual mode when pressing v at tMark position', async () => {
+      editor.setContent(['hello world']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      // Add some tMarks
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      // Press v at a tMark position
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      pressKey('v');
+      
+      expect(editor.mode).toBe('t-visual');
+    });
+
+    it('should enter normal visual mode when pressing v at non-tMark position', async () => {
+      editor.setContent(['hello world']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      // Add a tMark
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      // Press v at a non-tMark position
+      editor.cursorX = 3;
+      editor.cursorY = 0;
+      pressKey('v');
+      
+      expect(editor.mode).toBe('visual');
+    });
+
+    it('should yank multiple selections independently with e key in TVisual mode', async () => {
+      editor.setContent(['tools app', 'hello world']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      // Add tMarks: 't' in "tools" and 'h' in "hello"
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      editor.cursorX = 0;
+      editor.cursorY = 1;
+      pressKey('t');
+      
+      // Start TVisual mode from first tMark
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      pressKey('v');
+      
+      expect(editor.mode).toBe('t-visual');
+      
+      // Press 'e' to move to word end at each mark independently
+      pressKey('e');
+      pressKey('y');
+      
+      expect(editor.multiCursorClipboard.length).toBe(2);
+      expect(editor.multiCursorClipboard[0]).toBe('tools');
+      expect(editor.multiCursorClipboard[1]).toBe('hello');
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should paste at tMark positions and enter TInsert mode', async () => {
+      editor.setContent(['abc def', 'ghi jkl']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      // Add tMarks and yank
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      editor.cursorX = 0;
+      editor.cursorY = 1;
+      pressKey('t');
+      
+      // TVisual yank with 'e'
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      pressKey('v');
+      pressKey('e');
+      pressKey('y');
+      
+      expect(editor.multiCursorClipboard[0]).toBe('abc');
+      expect(editor.multiCursorClipboard[1]).toBe('ghi');
+      
+      // Set new tMarks for pasting
+      editor.tMarks = [
+        { x: 4, y: 0 },
+        { x: 4, y: 1 }
+      ];
+      
+      // Paste should enter TInsert mode
+      pressKey('p');
+      
+      expect(editor.mode).toBe('t-insert');
+      expect(editor.content[0]).toContain('abc');
+      expect(editor.content[1]).toContain('ghi');
+    });
+
+    it('should exit TVisual mode with Escape', async () => {
+      editor.setContent(['hello world']);
+      editor.mode = 'normal';
+      await editor.updateComplete;
+      
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      pressKey('t');
+      
+      pressKey('v');
+      expect(editor.mode).toBe('t-visual');
+      
+      pressKey('Escape');
+      expect(editor.mode).toBe('normal');
+    });
+  });
+
   describe('load method (public API)', () => {
     it('should load single line text', async () => {
       const text = 'Hello World';

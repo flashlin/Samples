@@ -8,6 +8,7 @@ export enum EditorMode {
   FastSearch = 'fast-search',
   MultiInsert = 'multi-insert',
   TInsert = 't-insert',
+  TVisual = 't-visual',
 }
 
 export interface EditorStatus {

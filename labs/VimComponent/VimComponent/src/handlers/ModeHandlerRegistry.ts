@@ -8,6 +8,7 @@ import { FastMatchModeHandler } from './FastMatchModeHandler';
 import { FastSearchModeHandler } from './FastSearchModeHandler';
 import { MultiInsertModeHandler } from './MultiInsertModeHandler';
 import { TInsertModeHandler } from './TInsertModeHandler';
+import { TVisualModeHandler } from './TVisualModeHandler';
 
 export class ModeHandlerRegistry {
   private handlers: Map<EditorMode, EditorModeHandler> = new Map();
@@ -22,6 +23,7 @@ export class ModeHandlerRegistry {
     this.registerHandler(new FastSearchModeHandler());
     this.registerHandler(new MultiInsertModeHandler());
     this.registerHandler(new TInsertModeHandler());
+    this.registerHandler(new TVisualModeHandler());
   }
   
   private registerHandler(handler: EditorModeHandler): void {

@@ -43,11 +43,38 @@ export class NormalModeHandler extends BaseModeHandler {
         editor.hiddenInput?.focus();
       } },
       { pattern: 'o', action: () => { editor.insertLineBelow(); editor.hiddenInput?.focus(); } },
-      { pattern: 'p', action: () => { editor.saveHistory(); editor.pasteAfterCursor(); } },
+      { pattern: 'p', action: () => { 
+        editor.saveHistory(); 
+        if (editor.multiCursorClipboard.length > 0 && editor.tMarks.length > 0) {
+          this.pasteMultiCursor(editor);
+          // After pasting, enter TInsert mode
+          editor.mode = EditorMode.TInsert;
+          const lastMark = editor.tMarks[editor.tMarks.length - 1];
+          editor.cursorY = lastMark.y;
+          editor.cursorX = lastMark.x;
+          editor.updateInputPosition();
+          editor.hiddenInput?.focus();
+        } else {
+          editor.pasteAfterCursor(); 
+        }
+      } },
       { pattern: 'v', action: () => { 
-        editor.mode = EditorMode.Visual;
-        editor.visualStartX = editor.cursorX;
-        editor.visualStartY = editor.cursorY;
+        // Check if current cursor position is in tMarks
+        const isInTMark = editor.tMarks.some(
+          (mark: any) => mark.x === editor.cursorX && mark.y === editor.cursorY
+        );
+        
+        if (isInTMark && editor.tMarks.length > 0) {
+          // Enter TVisual mode (multi-cursor visual based on tMarks)
+          editor.mode = EditorMode.TVisual;
+          editor.visualStartX = editor.cursorX;
+          editor.visualStartY = editor.cursorY;
+        } else {
+          // Normal visual mode
+          editor.mode = EditorMode.Visual;
+          editor.visualStartX = editor.cursorX;
+          editor.visualStartY = editor.cursorY;
+        }
       } },
       { pattern: 'V', action: () => { 
         editor.mode = EditorMode.VisualLine;
@@ -177,6 +204,60 @@ export class NormalModeHandler extends BaseModeHandler {
   
   clearTMarks(editor: IVimEditor): void {
     editor.tMarks = [];
+  }
+  
+  pasteMultiCursor(editor: IVimEditor): void {
+    // Paste each clipboard item at each tMark position
+    const sortedMarks = [...editor.tMarks].sort((a: any, b: any) => {
+      if (a.y !== b.y) return b.y - a.y; // Start from bottom to avoid position shifts
+      return b.x - a.x;
+    });
+    
+    for (let i = 0; i < sortedMarks.length && i < editor.multiCursorClipboard.length; i++) {
+      const mark = sortedMarks[i];
+      const text = editor.multiCursorClipboard[i];
+      
+      if (!text) continue;
+      
+      const currentLine = editor.content[mark.y] || '';
+      const lines = text.split('\n');
+      
+      if (lines.length === 1) {
+        // Single line paste
+        let insertPosition = Math.min(mark.x + 1, currentLine.length);
+        if (currentLine.length === 0) {
+          insertPosition = 0;
+        }
+        
+        const beforeInsert = currentLine.substring(0, insertPosition);
+        const afterInsert = currentLine.substring(insertPosition);
+        editor.content[mark.y] = beforeInsert + text + afterInsert;
+      } else {
+        // Multi-line paste
+        let insertPosition = Math.min(mark.x + 1, currentLine.length);
+        if (currentLine.length === 0) {
+          insertPosition = 0;
+        }
+        
+        const beforeInsert = currentLine.substring(0, insertPosition);
+        const afterInsert = currentLine.substring(insertPosition);
+        
+        editor.content[mark.y] = beforeInsert + lines[0];
+        
+        for (let j = 1; j < lines.length - 1; j++) {
+          editor.content.splice(mark.y + j, 0, lines[j]);
+        }
+        
+        if (lines.length > 1) {
+          const lastLine = lines[lines.length - 1];
+          editor.content.splice(mark.y + lines.length - 1, 0, lastLine + afterInsert);
+        }
+      }
+    }
+    
+    if (editor.p5Instance) {
+      editor.p5Instance.redraw();
+    }
   }
   
   private deleteInnerWord(editor: IVimEditor): void {

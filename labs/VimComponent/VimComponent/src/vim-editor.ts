@@ -66,6 +66,10 @@ export class VimEditor extends LitElement {
   visualStartX = 0;
   visualStartY = 0;
   
+  // TVisual mode (multi-cursor visual based on tMarks)
+  multiCursorClipboard: string[] = [];
+  multiCursorOffsets: Array<{ offsetX: number; offsetY: number }> = [];
+  
   private numberPrefix = '';
   
   private scrollOffsetX = 0;
@@ -252,6 +256,7 @@ export class VimEditor extends LitElement {
         
         const isVisualSelection = this.mode === EditorMode.Visual && this.isInVisualSelection(contentY, contentX);
         const isVisualLineSelection = this.mode === EditorMode.VisualLine && this.isInVisualLineSelection(contentY);
+        const isTVisualSelection = this.mode === EditorMode.TVisual && this.isInTVisualSelection(contentY, contentX);
         
         const isFastJumpMatch = this.mode === EditorMode.FastMatch && 
           this.fastJumpMatches.some(match => match.x === contentX && match.y === contentY);
@@ -263,7 +268,7 @@ export class VimEditor extends LitElement {
           this.currentMatchIndex >= 0 && 
           this.isInSearchMatch(contentY, contentX, this.currentMatchIndex);
         
-        const isHighlighted = isVisualSelection || isVisualLineSelection || isFastJumpMatch || isSearchMatch;
+        const isHighlighted = isVisualSelection || isVisualLineSelection || isTVisualSelection || isFastJumpMatch || isSearchMatch;
         
         this.buffer[bufferY][bufferX] = {
           char,
@@ -305,6 +310,54 @@ export class VimEditor extends LitElement {
     const startY = Math.min(this.visualStartY, this.cursorY);
     const endY = Math.max(this.visualStartY, this.cursorY);
     return y >= startY && y <= endY;
+  }
+
+  private isInTVisualSelection(y: number, x: number): boolean {
+    if (this.tMarks.length === 0 || this.multiCursorOffsets.length === 0) {
+      return false;
+    }
+    
+    // Check each tMark position with its independent offset
+    for (let i = 0; i < this.tMarks.length; i++) {
+      const mark = this.tMarks[i];
+      const offset = this.multiCursorOffsets[i] || { offsetX: 0, offsetY: 0 };
+      
+      const startX = mark.x;
+      const startY = mark.y;
+      const endX = mark.x + offset.offsetX;
+      const endY = mark.y + offset.offsetY;
+      
+      const minY = Math.min(startY, endY);
+      const maxY = Math.max(startY, endY);
+      
+      if (y < minY || y > maxY) {
+        continue;
+      }
+      
+      if (minY === maxY) {
+        const minX = Math.min(startX, endX);
+        const maxX = Math.max(startX, endX);
+        if (x >= minX && x <= maxX) {
+          return true;
+        }
+      } else {
+        if (y === minY) {
+          const minX = (startY === minY) ? startX : endX;
+          if (x >= minX) {
+            return true;
+          }
+        } else if (y === maxY) {
+          const maxX = (startY === maxY) ? startX : endX;
+          if (x <= maxX) {
+            return true;
+          }
+        } else {
+          return true;
+        }
+      }
+    }
+    
+    return false;
   }
 
   private isInSearchMatch(y: number, x: number, matchIndex?: number): boolean {
