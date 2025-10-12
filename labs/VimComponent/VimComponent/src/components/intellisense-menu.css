@@ -1,0 +1,45 @@
+.intellisense-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10000;
+  min-width: 200px;
+  font-family: 'Courier New', monospace;
+}
+
+.intellisense-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.intellisense-item:last-child {
+  border-bottom: none;
+}
+
+.intellisense-item.selected {
+  background: #e8f4f8;
+}
+
+.intellisense-item:hover {
+  background: #f0f0f0;
+}
+
+.intellisense-text {
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+.intellisense-description {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+

@@ -1,4 +1,4 @@
-import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
+import { EditorMode, BaseModeHandler, IVimEditor, IntellisenseContext } from '../vimEditorTypes';
 
 export class InsertModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.Insert;
@@ -14,6 +14,44 @@ export class InsertModeHandler extends BaseModeHandler {
   
   shouldPreventDefault(key: string): boolean {
     return key.length !== 1;
+  }
+  
+  triggerIntellisense(editor: IVimEditor): void {
+    const content = (editor as any).content.join('\n');
+    const cursorOffset = this.calculateCursorOffset(editor);
+    const contentBeforeCursor = content.substring(0, cursorOffset);
+    const contentAfterCursor = content.substring(cursorOffset);
+    
+    const cursorLine = editor.cursorY;
+    const currentLineContent = (editor as any).content[cursorLine] || '';
+    const cursorXInLine = editor.cursorX;
+    const lineBeforeCursor = currentLineContent.substring(0, cursorXInLine);
+    const lineAfterCursor = currentLineContent.substring(cursorXInLine);
+    
+    const context: IntellisenseContext = {
+      mode: 'insert',
+      contentBeforeCursor,
+      contentAfterCursor,
+      cursorLine,
+      lineBeforeCursor,
+      lineAfterCursor,
+      cursorOffset
+    };
+    
+    const event = new CustomEvent('intellisense', { detail: context });
+    editor.dispatchEvent(event);
+  }
+  
+  private calculateCursorOffset(editor: IVimEditor): number {
+    const lines = (editor as any).content;
+    let offset = 0;
+    
+    for (let i = 0; i < editor.cursorY; i++) {
+      offset += lines[i].length + 1;
+    }
+    offset += editor.cursorX;
+    
+    return offset;
   }
   
   private getKeyPatterns(editor: IVimEditor) {

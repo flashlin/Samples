@@ -92,8 +92,88 @@ const parser = new LinqParser()
 const converter = new LinqToTSqlConverter()
 const formatter = new TSqlFormatter()
 
+const allTableNameList = ref([
+  { name: 'users', description: 'User accounts table' },
+  { name: 'orders', description: 'Order records' },
+  { name: 'products', description: 'Product catalog' },
+  { name: 'customers', description: 'Customer information' },
+  { name: 'order_items', description: 'Order line items' },
+  { name: 'categories', description: 'Product categories' },
+  { name: 'suppliers', description: 'Supplier information' },
+  { name: 'employees', description: 'Employee records' }
+])
+
 const handleEditorChange = (event: CustomEvent) => {
   editorContent.value = event.detail.content.join('\n')
+}
+
+const extractCurrentWord = (lineBeforeCursor: string): string => {
+  const match = lineBeforeCursor.match(/[a-zA-Z0-9]*$/)
+  return match ? match[0] : ''
+}
+
+const detectSqlContext = (beforeCursor: string): string => {
+  const keywords = ['FROM', 'SELECT', 'WHERE', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'ORDER BY', 'GROUP BY', 'HAVING']
+  const upperText = beforeCursor.toUpperCase()
+  
+  let lastKeyword = ''
+  let lastIndex = -1
+  
+  for (const keyword of keywords) {
+    const index = upperText.lastIndexOf(keyword)
+    if (index > lastIndex) {
+      lastIndex = index
+      lastKeyword = keyword
+    }
+  }
+  
+  if (lastKeyword.includes('FROM') || lastKeyword.includes('JOIN')) {
+    return 'FROM'
+  } else if (lastKeyword === 'SELECT') {
+    return 'SELECT'
+  } else if (lastKeyword === 'WHERE' || lastKeyword === 'HAVING') {
+    return 'WHERE'
+  } else if (lastKeyword.includes('ORDER') || lastKeyword.includes('GROUP')) {
+    return 'ORDER'
+  }
+  
+  return 'FROM'
+}
+
+const generateSuggestions = (context: string, currentWord: string): any[] => {
+  if (context === 'FROM') {
+    const filtered = allTableNameList.value.filter(table =>
+      table.name.toLowerCase().startsWith(currentWord.toLowerCase())
+    )
+    
+    return filtered.map(table => ({
+      text: table.name,
+      description: table.description,
+      action: () => replaceCurrentWord(table.name, currentWord)
+    }))
+  }
+  
+  return []
+}
+
+const replaceCurrentWord = (newText: string, oldWord: string) => {
+  const editor = vimEditorRef.value
+  if (!editor) return
+  
+  editor.replaceWordAtCursor(oldWord, newText)
+}
+
+const handleIntellisense = (event: CustomEvent<any>) => {
+  const ctx = event.detail
+  
+  const beforeCursor = ctx.contentBeforeCursor
+  const currentWord = extractCurrentWord(ctx.lineBeforeCursor)
+  const context = detectSqlContext(beforeCursor)
+  const suggestions = generateSuggestions(context, currentWord)
+  
+  if (suggestions.length > 0) {
+    vimEditorRef.value?.showIntellisense(suggestions)
+  }
 }
 
 const executeCode = () => {
@@ -134,6 +214,7 @@ onMounted(() => {
     const editor = vimEditorRef.value
     if (editor) {
       editor.load(editorContent.value)
+      editor.addEventListener('intellisense', handleIntellisense)
     }
   })
 })

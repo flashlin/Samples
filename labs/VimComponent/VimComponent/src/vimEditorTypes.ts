@@ -128,3 +128,19 @@ export abstract class BaseModeHandler implements EditorModeHandler {
   abstract handleKey(key: string, editor: IVimEditor): void;
 }
 
+export interface IntellisenseContext {
+  mode: string;
+  contentBeforeCursor: string;
+  contentAfterCursor: string;
+  cursorLine: number;
+  lineBeforeCursor: string;
+  lineAfterCursor: string;
+  cursorOffset: number;
+}
+
+export interface IntellisenseItem {
+  text: string;
+  description?: string;
+  action: () => void;
+}
+

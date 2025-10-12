@@ -2,8 +2,9 @@ import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import p5 from 'p5';
 import exampleText from './example.txt?raw';
-import { EditorMode, EditorStatus, BufferCell, EditorModeHandler, TextRange } from './vimEditorTypes';
+import { EditorMode, EditorStatus, BufferCell, EditorModeHandler, TextRange, IntellisenseItem } from './vimEditorTypes';
 import { ModeHandlerRegistry } from './handlers';
+import { IntellisenseMenu } from './components/IntellisenseMenu';
 
 @customElement('vim-editor')
 export class VimEditor extends LitElement {
@@ -16,6 +17,7 @@ export class VimEditor extends LitElement {
   private textOffsetY = 5;
   private statusBarHeight = 24;
   hiddenInput: HTMLInputElement | null = null;
+  private intellisenseMenu: IntellisenseMenu = new IntellisenseMenu();
   
   @state()
   private cursorVisible = true;
@@ -529,6 +531,14 @@ export class VimEditor extends LitElement {
   private handleKeyDown(event: KeyboardEvent) {
     const key = event.key;
     
+    console.log('[DEBUG] Key pressed:', {
+      key,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      mode: this.mode,
+      isComposing: this.isComposing
+    });
+    
     if (key === 'CapsLock' || key === 'Shift' || key === 'Control' || key === 'Alt' || key === 'Meta') {
       return;
     }
@@ -544,6 +554,21 @@ export class VimEditor extends LitElement {
     if ((event.metaKey || event.ctrlKey) && key === 'v' && this.mode === EditorMode.Insert) {
       event.preventDefault();
       this.handlePaste();
+      return;
+    }
+    
+    if (event.ctrlKey && key === 'j' && this.mode === EditorMode.Insert) {
+      event.preventDefault();
+      console.log('[Intellisense] Ctrl+j pressed in Insert Mode');
+      console.log('[Intellisense] Cursor position:', { x: this.cursorX, y: this.cursorY });
+      console.log('[Intellisense] Current line:', this.content[this.cursorY] || '');
+      const handler = this.currentModeHandler as any;
+      if (handler.triggerIntellisense) {
+        console.log('[Intellisense] Triggering intellisense handler');
+        handler.triggerIntellisense(this);
+      } else {
+        console.warn('[Intellisense] No triggerIntellisense method found on handler');
+      }
       return;
     }
     
@@ -1723,6 +1748,45 @@ export class VimEditor extends LitElement {
     this.historyIndex = -1;
   }
 
+  showIntellisense(items: IntellisenseItem[]): void {
+    if (!this.canvas) return;
+    
+    const rect = this.canvas.getBoundingClientRect();
+    const cursorX = 40 + this.cursorX * this.baseCharWidth;
+    const cursorY = this.cursorY * this.lineHeight;
+    
+    const absoluteX = rect.left + cursorX;
+    const absoluteY = rect.top + cursorY;
+    
+    this.intellisenseMenu.show(items, absoluteX, absoluteY, document.body);
+  }
+
+  hideIntellisense(): void {
+    this.intellisenseMenu.hide();
+  }
+
+  replaceWordAtCursor(oldWord: string, newWord: string): void {
+    const currentLine = this.content[this.cursorY];
+    if (!currentLine) return;
+    
+    const cursorPos = this.cursorX;
+    const wordStart = cursorPos - oldWord.length;
+    if (wordStart < 0) return;
+    
+    const wordAtCursor = currentLine.substring(wordStart, cursorPos);
+    if (wordAtCursor !== oldWord) return;
+    
+    this.content[this.cursorY] = 
+      currentLine.substring(0, wordStart) + 
+      newWord + 
+      currentLine.substring(cursorPos);
+    
+    this.cursorX = wordStart + newWord.length;
+    
+    if (this.p5Instance) {
+      this.p5Instance.redraw();
+    }
+  }
 
   disconnectedCallback() {
     if (this.cursorBlinkInterval) {
