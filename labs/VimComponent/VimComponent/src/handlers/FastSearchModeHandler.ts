@@ -7,70 +7,33 @@ export class FastSearchModeHandler extends BaseModeHandler {
     return true;
   }
   
-  handleKey(key: string, editor: IVimEditor): void {
-    if (editor.currentMatchIndex >= 0 && editor.searchMatches.length > 0) {
-      const match = editor.searchMatches[editor.currentMatchIndex];
-      const matchEndX = match.x + editor.searchKeyword.length;
+  private getKeyPatterns(editor: IVimEditor) {
+    // Patterns ordered by priority
+    return [
+      // Cursor movement patterns (only within match boundaries)
+      { pattern: /^(h|ArrowLeft)$/, action: () => { this.moveCursorLeftInMatch(editor); }, requireMatch: true },
+      { pattern: /^(l|ArrowRight)$/, action: () => { this.moveCursorRightInMatch(editor); }, requireMatch: true },
+      { pattern: /^(0|Home)$/, action: () => { this.moveCursorToMatchStart(editor); }, requireMatch: true },
+      { pattern: /^(\$|End)$/, action: () => { this.moveCursorToMatchEnd(editor); }, requireMatch: true },
+      { pattern: /^x$/, action: () => { this.searchModeDelete(editor); }, requireMatch: true },
+      { pattern: /^d$/, action: () => { this.searchModeDeleteAll(editor); }, requireMatch: true },
       
-      if (key === 'h' || key === 'ArrowLeft') {
-        if (editor.cursorX > match.x) {
-          editor.cursorX--;
-        }
-        return;
-      }
-      
-      if (key === 'l' || key === 'ArrowRight') {
-        if (editor.cursorX < matchEndX - 1) {
-          editor.cursorX++;
-        }
-        return;
-      }
-      
-      if (key === '0' || key === 'Home') {
-        editor.cursorX = match.x;
-        return;
-      }
-      
-      if (key === '$' || key === 'End') {
-        editor.cursorX = matchEndX - 1;
-        return;
-      }
-      
-      if (key === 'x') {
-        this.searchModeDelete(editor);
-        return;
-      }
-      
-      if (key === 'd') {
-        this.searchModeDeleteAll(editor);
-        return;
-      }
-    }
-    
-    switch (key) {
-      case 'Escape':
+      // General search mode commands
+      { pattern: /^Escape$/, action: () => { 
         editor.mode = EditorMode.Normal;
         editor.searchKeyword = '';
         editor.searchMatches = [];
         editor.currentMatchIndex = -1;
-        break;
-      case 'n':
-        this.jumpToNextMatch(editor);
-        break;
-      case 'N':
-        this.jumpToPreviousMatch(editor);
-        break;
-      case 'b':
-        this.clearSearchMarks(editor);
-        break;
-      case 'u':
-        this.restoreSearchMarks(editor);
-        break;
-      case 'i':
+      }, requireMatch: false },
+      { pattern: /^n$/, action: () => { this.jumpToNextMatch(editor); }, requireMatch: false },
+      { pattern: /^N$/, action: () => { this.jumpToPreviousMatch(editor); }, requireMatch: false },
+      { pattern: /^b$/, action: () => { this.clearSearchMarks(editor); }, requireMatch: false },
+      { pattern: /^u$/, action: () => { this.restoreSearchMarks(editor); }, requireMatch: false },
+      { pattern: /^i$/, action: () => { 
         editor.saveHistory();
         editor.mode = EditorMode.MultiInsert;
-        break;
-      case 'a':
+      }, requireMatch: false },
+      { pattern: /^a$/, action: () => { 
         if (editor.searchMatches.length > 0) {
           const currentMatch = editor.searchMatches[editor.currentMatchIndex];
           const matchEndX = currentMatch.x + editor.searchKeyword.length;
@@ -80,8 +43,51 @@ export class FastSearchModeHandler extends BaseModeHandler {
         }
         editor.saveHistory();
         editor.mode = EditorMode.MultiInsert;
-        break;
+      }, requireMatch: false },
+    ];
+  }
+  
+  handleKey(key: string, editor: IVimEditor): void {
+    const keyPatterns = this.getKeyPatterns(editor);
+    const hasMatch = editor.currentMatchIndex >= 0 && editor.searchMatches.length > 0;
+    
+    // Try to match patterns in order
+    for (const { pattern, action, requireMatch } of keyPatterns) {
+      if (requireMatch && !hasMatch) {
+        continue;
+      }
+      
+      if (pattern.test(key)) {
+        action();
+        return;
+      }
     }
+  }
+  
+  private moveCursorLeftInMatch(editor: IVimEditor): void {
+    const match = editor.searchMatches[editor.currentMatchIndex];
+    if (editor.cursorX > match.x) {
+      editor.cursorX--;
+    }
+  }
+  
+  private moveCursorRightInMatch(editor: IVimEditor): void {
+    const match = editor.searchMatches[editor.currentMatchIndex];
+    const matchEndX = match.x + editor.searchKeyword.length;
+    if (editor.cursorX < matchEndX - 1) {
+      editor.cursorX++;
+    }
+  }
+  
+  private moveCursorToMatchStart(editor: IVimEditor): void {
+    const match = editor.searchMatches[editor.currentMatchIndex];
+    editor.cursorX = match.x;
+  }
+  
+  private moveCursorToMatchEnd(editor: IVimEditor): void {
+    const match = editor.searchMatches[editor.currentMatchIndex];
+    const matchEndX = match.x + editor.searchKeyword.length;
+    editor.cursorX = matchEndX - 1;
   }
   
   findAllMatches(editor: IVimEditor): void {

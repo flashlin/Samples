@@ -16,24 +16,28 @@ export class TInsertModeHandler extends BaseModeHandler {
     return key.length !== 1;
   }
   
+  private getKeyPatterns(editor: IVimEditor) {
+    // Patterns ordered by specificity
+    return [
+      { pattern: /^Escape$/, action: () => { editor.mode = EditorMode.Normal; } },
+      { pattern: /^Backspace$/, action: () => { this.tInsertBackspace(editor); } },
+      { pattern: /^Enter$/, action: () => { this.tInsertNewline(editor); } },
+      { pattern: /^ArrowLeft$/, action: () => { editor.moveCursorLeft(); } },
+      { pattern: /^ArrowRight$/, action: () => { editor.moveCursorRight(); } },
+      { pattern: /^ArrowUp$/, action: () => { editor.moveCursorUp(); } },
+      { pattern: /^ArrowDown$/, action: () => { editor.moveCursorDown(); } },
+    ];
+  }
+  
   handleKey(key: string, editor: IVimEditor): void {
-    if (key === 'Escape') {
-      editor.mode = EditorMode.Normal;
-      return;
-    }
+    const keyPatterns = this.getKeyPatterns(editor);
     
-    if (key === 'Backspace') {
-      this.tInsertBackspace(editor);
-    } else if (key === 'Enter') {
-      this.tInsertNewline(editor);
-    } else if (key === 'ArrowLeft') {
-      editor.moveCursorLeft();
-    } else if (key === 'ArrowRight') {
-      editor.moveCursorRight();
-    } else if (key === 'ArrowUp') {
-      editor.moveCursorUp();
-    } else if (key === 'ArrowDown') {
-      editor.moveCursorDown();
+    // Try to match patterns in order
+    for (const { pattern, action } of keyPatterns) {
+      if (pattern.test(key)) {
+        action();
+        return;
+      }
     }
   }
   

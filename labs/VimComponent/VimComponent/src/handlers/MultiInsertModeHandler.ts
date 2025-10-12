@@ -19,24 +19,26 @@ export class MultiInsertModeHandler extends BaseModeHandler {
     return key.length !== 1;
   }
   
+  private getKeyPatterns(editor: IVimEditor) {
+    // Patterns ordered by specificity
+    return [
+      { pattern: /^Escape$/, action: () => { editor.mode = EditorMode.FastSearch; } },
+      { pattern: /^Backspace$/, action: () => { this.multiInsertBackspace(editor); } },
+      { pattern: /^Enter$/, action: () => { this.multiInsertNewline(editor); } },
+      { pattern: /^.$/, action: (match: RegExpMatchArray) => { this.multiInsertCharacter(editor, match[0]); } },
+    ];
+  }
+  
   handleKey(key: string, editor: IVimEditor): void {
-    if (key === 'Escape') {
-      editor.mode = EditorMode.FastSearch;
-      return;
-    }
+    const keyPatterns = this.getKeyPatterns(editor);
     
-    if (key === 'Backspace') {
-      this.multiInsertBackspace(editor);
-      return;
-    }
-    
-    if (key === 'Enter') {
-      this.multiInsertNewline(editor);
-      return;
-    }
-    
-    if (key.length === 1) {
-      this.multiInsertCharacter(editor, key);
+    // Try to match patterns in order
+    for (const { pattern, action } of keyPatterns) {
+      const match = pattern.exec(key);
+      if (match) {
+        action(match);
+        return;
+      }
     }
   }
   
