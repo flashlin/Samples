@@ -1583,6 +1583,7 @@ export class VimEditor extends LitElement {
       this.cursorY -= 1;
     }
     this.updateInputPosition();
+    this.emitChangeEvent();
   }
 
   handleEnter() {
@@ -1596,6 +1597,7 @@ export class VimEditor extends LitElement {
     this.cursorY += 1;
     this.cursorX = 0;
     this.updateInputPosition();
+    this.emitChangeEvent();
   }
 
   insertCharacter(char: string) {
@@ -1606,6 +1608,7 @@ export class VimEditor extends LitElement {
       currentLine.substring(this.cursorX);
     this.cursorX += 1;
     this.updateInputPosition();
+    this.emitChangeEvent();
   }
 
   private async handlePaste() {
@@ -1786,6 +1789,15 @@ export class VimEditor extends LitElement {
     if (this.p5Instance) {
       this.p5Instance.redraw();
     }
+    
+    this.emitChangeEvent();
+  }
+
+  private emitChangeEvent(): void {
+    const event = new CustomEvent('change', {
+      detail: { content: this.content }
+    });
+    this.dispatchEvent(event);
   }
 
   disconnectedCallback() {
