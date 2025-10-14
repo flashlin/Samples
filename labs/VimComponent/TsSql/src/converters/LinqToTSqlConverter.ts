@@ -34,12 +34,24 @@ export class LinqToTSqlConverter {
   convert(linqQuery: LinqQueryExpression): QueryExpression {
     // Convert FROM
     const from = linqQuery.from 
-      ? new FromExpression(linqQuery.from.tableName, linqQuery.from.alias)
+      ? new FromExpression(
+          linqQuery.from.databaseName 
+            ? `${linqQuery.from.databaseName}.${linqQuery.from.tableName}`
+            : linqQuery.from.tableName,
+          linqQuery.from.alias
+        )
       : undefined;
     
     // Convert JOINs
     const joins = linqQuery.joins.map(j => 
-      new JoinExpression(j.joinType, j.tableName, this.convertExpression(j.condition), j.alias)
+      new JoinExpression(
+        j.joinType,
+        j.databaseName
+          ? `${j.databaseName}.${j.tableName}`
+          : j.tableName,
+        this.convertExpression(j.condition),
+        j.alias
+      )
     );
     
     // Convert WHEREs - combine multiple WHERE clauses with AND

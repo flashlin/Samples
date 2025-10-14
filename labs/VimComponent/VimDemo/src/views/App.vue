@@ -92,57 +92,106 @@ const parser = new LinqParser()
 const converter = new LinqToTSqlConverter()
 const formatter = new TSqlFormatter()
 
-const allTableNameList = ref([
-  { 
-    name: 'users', 
-    description: 'User accounts table',
-    fields: ['id', 'name', 'email', 'age', 'status', 'created_at', 'updated_at']
+const allDatabaseList = ref([
+  {
+    name: 'local',
+    description: 'Local tables (no database prefix needed)',
+    tables: [
+      { 
+        name: 'users', 
+        description: 'User accounts table',
+        fields: ['id', 'name', 'email', 'age', 'status', 'created_at', 'updated_at']
+      },
+      { 
+        name: 'orders', 
+        description: 'Order records',
+        fields: ['id', 'user_id', 'order_date', 'total_amount', 'status', 'shipping_address']
+      },
+      { 
+        name: 'customers', 
+        description: 'Customer information',
+        fields: ['id', 'first_name', 'last_name', 'email', 'phone', 'address']
+      },
+      { 
+        name: 'employees', 
+        description: 'Employee records',
+        fields: ['id', 'first_name', 'last_name', 'email', 'department', 'salary', 'hire_date']
+      },
+      { 
+        name: 'homes', 
+        description: 'Address records',
+        fields: ['id', 'street', 'city', 'state', 'zip_code', 'country']
+      },
+      { 
+        name: 'friends', 
+        description: 'Friendship records',
+        fields: ['id', 'user_id', 'friend_id', 'status', 'created_at']
+      }
+    ]
   },
-  { 
-    name: 'orders', 
-    description: 'Order records',
-    fields: ['id', 'user_id', 'order_date', 'total_amount', 'status', 'shipping_address']
+  {
+    name: 'sales',
+    description: 'Sales database',
+    tables: [
+      { 
+        name: 'transactions', 
+        description: 'Sales transactions', 
+        fields: ['id', 'amount', 'date', 'customer_id', 'status', 'payment_method']
+      },
+      { 
+        name: 'customers', 
+        description: 'Sales customers', 
+        fields: ['id', 'name', 'region', 'segment', 'credit_limit']
+      },
+      { 
+        name: 'invoices', 
+        description: 'Sales invoices', 
+        fields: ['id', 'transaction_id', 'invoice_date', 'due_date', 'total']
+      }
+    ]
   },
-  { 
-    name: 'products', 
-    description: 'Product catalog',
-    fields: ['id', 'name', 'description', 'price', 'stock', 'category_id']
+  {
+    name: 'inventory',
+    description: 'Inventory database',
+    tables: [
+      { 
+        name: 'products', 
+        description: 'Product stock', 
+        fields: ['id', 'sku', 'quantity', 'location', 'reorder_level']
+      },
+      { 
+        name: 'warehouses', 
+        description: 'Warehouse locations', 
+        fields: ['id', 'location', 'capacity', 'manager', 'region']
+      },
+      { 
+        name: 'suppliers', 
+        description: 'Product suppliers', 
+        fields: ['id', 'company_name', 'contact', 'phone', 'email']
+      }
+    ]
   },
-  { 
-    name: 'customers', 
-    description: 'Customer information',
-    fields: ['id', 'first_name', 'last_name', 'email', 'phone', 'address']
-  },
-  { 
-    name: 'order_items', 
-    description: 'Order line items',
-    fields: ['id', 'order_id', 'product_id', 'quantity', 'unit_price', 'subtotal']
-  },
-  { 
-    name: 'categories', 
-    description: 'Product categories',
-    fields: ['id', 'name', 'description', 'parent_id']
-  },
-  { 
-    name: 'suppliers', 
-    description: 'Supplier information',
-    fields: ['id', 'company_name', 'contact_name', 'email', 'phone', 'address']
-  },
-  { 
-    name: 'employees', 
-    description: 'Employee records',
-    fields: ['id', 'first_name', 'last_name', 'email', 'department', 'salary', 'hire_date']
-  },
-  { 
-    name: 'homes', 
-    description: 'Address records',
-    fields: ['id', 'street', 'city', 'state', 'zip_code', 'country']
-  },
-  { 
-    name: 'friends', 
-    description: 'Friendship records',
-    fields: ['id', 'user_id', 'friend_id', 'status', 'created_at']
-  },
+  {
+    name: 'hr',
+    description: 'Human Resources database',
+    tables: [
+      { 
+        name: 'employees', 
+        description: 'Employee master data', 
+        fields: ['id', 'employee_number', 'full_name', 'department', 'position', 'hire_date']
+      },
+      { 
+        name: 'departments', 
+        description: 'Department information', 
+        fields: ['id', 'name', 'budget', 'manager_id', 'location']
+      },
+      { 
+        name: 'payroll', 
+        description: 'Payroll records', 
+        fields: ['id', 'employee_id', 'pay_period', 'gross_pay', 'net_pay']
+      }
+    ]
+  }
 ])
 
 const handleEditorChange = (event: CustomEvent) => {
@@ -154,8 +203,8 @@ const extractCurrentWord = (lineBeforeCursor: string): string => {
   return match ? match[0] : ''
 }
 
-const extractTableAliasMap = (content: string): Map<string, string> => {
-  const aliasMap = new Map<string, string>()
+const extractTableAliasMap = (content: string): Map<string, { tableName: string, databaseName?: string }> => {
+  const aliasMap = new Map<string, { tableName: string, databaseName?: string }>()
   
   try {
     const parseResult = parser.parse(content)
@@ -163,20 +212,22 @@ const extractTableAliasMap = (content: string): Map<string, string> => {
     
     if (query && query.from) {
       const tableName = query.from.tableName
+      const databaseName = query.from.databaseName
       const alias = query.from.alias || tableName
-      aliasMap.set(alias, tableName)
+      aliasMap.set(alias, { tableName, databaseName })
       if (alias !== tableName) {
-        aliasMap.set(tableName, tableName)
+        aliasMap.set(tableName, { tableName, databaseName })
       }
     }
     
     if (query && query.joins) {
       query.joins.forEach((join: any) => {
         const tableName = join.tableName
+        const databaseName = join.databaseName
         const alias = join.alias || tableName
-        aliasMap.set(alias, tableName)
+        aliasMap.set(alias, { tableName, databaseName })
         if (alias !== tableName) {
-          aliasMap.set(tableName, tableName)
+          aliasMap.set(tableName, { tableName, databaseName })
         }
       })
     }
@@ -188,34 +239,53 @@ const extractTableAliasMap = (content: string): Map<string, string> => {
 }
 
 const detectIntellisenseContext = (beforeCursor: string, content: string): {
-  type: 'table' | 'field' | 'field-with-table',
+  type: 'database' | 'database.table' | 'table' | 'field' | 'field-with-table',
+  databaseName?: string,
   tableName?: string,
   currentWord: string
 } => {
-  const upperText = beforeCursor.toUpperCase()
   const currentWord = extractCurrentWord(beforeCursor)
+  const upperText = beforeCursor.toUpperCase()
+  
+  const dbTableMatch = beforeCursor.match(/FROM\s+([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]*)\s*$/i)
+  if (dbTableMatch) {
+    return { 
+      type: 'database.table', 
+      databaseName: dbTableMatch[1],
+      currentWord: dbTableMatch[2]
+    }
+  }
   
   const fromMatch = upperText.match(/FROM\s+([a-zA-Z0-9_]*)\s*$/i)
   if (fromMatch) {
-    return { type: 'table', currentWord }
+    return { type: 'database', currentWord }
+  }
+  
+  const joinDbTableMatch = beforeCursor.match(/(LEFT\s+JOIN|RIGHT\s+JOIN|INNER\s+JOIN|JOIN)\s+([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]*)\s*$/i)
+  if (joinDbTableMatch) {
+    return {
+      type: 'database.table',
+      databaseName: joinDbTableMatch[2],
+      currentWord: joinDbTableMatch[3]
+    }
   }
   
   const joinMatch = upperText.match(/(LEFT\s+JOIN|RIGHT\s+JOIN|INNER\s+JOIN|JOIN)\s+([a-zA-Z0-9_]*)\s*$/i)
   if (joinMatch) {
-    return { type: 'table', currentWord }
+    return { type: 'database', currentWord }
   }
   
   const aliasMap = extractTableAliasMap(content)
-  
   const fieldWithAliasMatch = beforeCursor.match(/([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]*)$/)
   if (fieldWithAliasMatch) {
     const alias = fieldWithAliasMatch[1]
     const fieldWord = fieldWithAliasMatch[2]
-    const tableName = aliasMap.get(alias) || alias
+    const tableInfo = aliasMap.get(alias) || { tableName: alias }
     
     return { 
       type: 'field-with-table', 
-      tableName,
+      tableName: tableInfo.tableName,
+      databaseName: tableInfo.databaseName,
       currentWord: fieldWord
     }
   }
@@ -235,31 +305,76 @@ const detectIntellisenseContext = (beforeCursor: string, content: string): {
     return { type: 'field', currentWord }
   }
   
-  return { type: 'table', currentWord }
+  return { type: 'database', currentWord }
 }
 
 const generateSuggestions = (context: any): any[] => {
   const suggestions: any[] = []
   
-  if (context.type === 'table') {
-    const filtered = allTableNameList.value.filter(table =>
-      table.name.toLowerCase().startsWith(context.currentWord.toLowerCase())
+  if (context.type === 'database') {
+    allDatabaseList.value.forEach(db => {
+      if (db.name !== 'local' && db.name.toLowerCase().startsWith(context.currentWord.toLowerCase())) {
+        suggestions.push({
+          text: db.name + '.',
+          description: db.description,
+          action: () => replaceCurrentWord(db.name + '.', context.currentWord)
+        })
+      }
+    })
+    
+    const localDb = allDatabaseList.value.find(db => db.name === 'local')
+    if (localDb) {
+      localDb.tables.forEach(table => {
+        if (table.name.toLowerCase().startsWith(context.currentWord.toLowerCase())) {
+          suggestions.push({
+            text: table.name,
+            description: table.description,
+            action: () => replaceCurrentWord(table.name, context.currentWord)
+          })
+        }
+      })
+    }
+    
+    return suggestions
+  }
+  
+  if (context.type === 'database.table' && context.databaseName) {
+    const db = allDatabaseList.value.find(d => 
+      d.name.toLowerCase() === context.databaseName?.toLowerCase()
     )
     
-    return filtered.map(table => ({
-      text: table.name,
-      description: table.description,
-      action: () => replaceCurrentWord(table.name, context.currentWord)
-    }))
+    if (db) {
+      const filtered = db.tables.filter(table =>
+        table.name.toLowerCase().startsWith(context.currentWord.toLowerCase())
+      )
+      
+      return filtered.map(table => ({
+        text: table.name,
+        description: `${context.databaseName}.${table.name} - ${table.description}`,
+        action: () => replaceCurrentWord(table.name, context.currentWord)
+      }))
+    }
+    
+    return []
   }
   
   if (context.type === 'field-with-table' && context.tableName) {
-    const table = allTableNameList.value.find(t => 
-      t.name.toLowerCase() === context.tableName?.toLowerCase()
-    )
+    let targetTable = null
     
-    if (table) {
-      const filtered = table.fields.filter(field =>
+    for (const db of allDatabaseList.value) {
+      if (context.databaseName && db.name.toLowerCase() !== context.databaseName.toLowerCase()) {
+        continue
+      }
+      
+      targetTable = db.tables.find(t => 
+        t.name.toLowerCase() === context.tableName?.toLowerCase()
+      )
+      
+      if (targetTable) break
+    }
+    
+    if (targetTable) {
+      const filtered = targetTable.fields.filter(field =>
         field.toLowerCase().startsWith(context.currentWord.toLowerCase())
       )
       
@@ -272,16 +387,19 @@ const generateSuggestions = (context: any): any[] => {
   }
   
   if (context.type === 'field') {
-    allTableNameList.value.forEach(table => {
-      const filtered = table.fields.filter(field =>
-        field.toLowerCase().startsWith(context.currentWord.toLowerCase())
-      )
-      
-      filtered.forEach(field => {
-        suggestions.push({
-          text: field,
-          description: `${table.name}.${field}`,
-          action: () => replaceCurrentWord(field, context.currentWord)
+    allDatabaseList.value.forEach(db => {
+      db.tables.forEach(table => {
+        const filtered = table.fields.filter(field =>
+          field.toLowerCase().startsWith(context.currentWord.toLowerCase())
+        )
+        
+        filtered.forEach(field => {
+          const prefix = db.name === 'local' ? '' : `${db.name}.`
+          suggestions.push({
+            text: field,
+            description: `${prefix}${table.name}.${field}`,
+            action: () => replaceCurrentWord(field, context.currentWord)
+          })
         })
       })
     })

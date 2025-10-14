@@ -107,7 +107,21 @@ export class LinqParser {
       return undefined;
     }
     
-    const tableName = this.advance().value;
+    const firstIdentifier = this.advance().value;
+    let databaseName: string | undefined;
+    let tableName: string;
+    
+    if (this.match(TokenType.DOT)) {
+      if (!this.check(TokenType.IDENTIFIER)) {
+        this.addError('Expected table name after database.');
+        return new LinqFromExpression(firstIdentifier);
+      }
+      databaseName = firstIdentifier;
+      tableName = this.advance().value;
+    } else {
+      tableName = firstIdentifier;
+    }
+    
     let alias: string | undefined;
     
     if (this.match(TokenType.AS)) {
@@ -120,7 +134,7 @@ export class LinqParser {
       alias = this.advance().value;
     }
     
-    return new LinqFromExpression(tableName, alias);
+    return new LinqFromExpression(tableName, alias, databaseName);
   }
   
   // Parse JOIN clause
@@ -154,7 +168,23 @@ export class LinqParser {
       return undefined;
     }
     
-    const tableName = this.advance().value;
+    const firstIdentifier = this.advance().value;
+    let databaseName: string | undefined;
+    let tableName: string;
+    
+    if (this.match(TokenType.DOT)) {
+      if (!this.check(TokenType.IDENTIFIER)) {
+        this.addError('Expected table name after database.');
+        databaseName = firstIdentifier;
+        tableName = firstIdentifier;
+      } else {
+        databaseName = firstIdentifier;
+        tableName = this.advance().value;
+      }
+    } else {
+      tableName = firstIdentifier;
+    }
+    
     let alias: string | undefined;
     
     if (this.match(TokenType.AS)) {
@@ -176,7 +206,7 @@ export class LinqParser {
       condition = new LiteralExpression(true, 'boolean'); // CROSS JOIN has no condition
     }
     
-    return new LinqJoinExpression(joinType, tableName, condition!, alias);
+    return new LinqJoinExpression(joinType, tableName, condition!, alias, databaseName);
   }
   
   // Parse WHERE clause
