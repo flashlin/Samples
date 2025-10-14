@@ -1586,6 +1586,19 @@ export class VimEditor extends LitElement {
     this.emitChangeEvent();
   }
 
+  handleDelete() {
+    const currentLine = this.content[this.cursorY];
+    if (this.cursorX < currentLine.length) {
+      this.content[this.cursorY] = currentLine.substring(0, this.cursorX) + currentLine.substring(this.cursorX + 1);
+    } else if (this.cursorY < this.content.length - 1) {
+      const nextLine = this.content[this.cursorY + 1];
+      this.content[this.cursorY] = currentLine + nextLine;
+      this.content.splice(this.cursorY + 1, 1);
+    }
+    this.updateInputPosition();
+    this.emitChangeEvent();
+  }
+
   handleEnter() {
     const currentLine = this.content[this.cursorY];
     const lineBeforeCursor = currentLine.substring(0, this.cursorX);

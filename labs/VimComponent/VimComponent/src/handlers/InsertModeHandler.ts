@@ -60,6 +60,7 @@ export class InsertModeHandler extends BaseModeHandler {
       { pattern: /^Escape$/, action: () => { editor.mode = EditorMode.Normal; } },
       { pattern: /^.$/, action: () => { /* Single character input handled by handleInput */ } },
       { pattern: /^Backspace$/, action: () => { editor.handleBackspace(); } },
+      { pattern: /^Delete$/, action: () => { editor.handleDelete(); } },
       { pattern: /^Enter$/, action: () => { editor.handleEnter(); } },
       { pattern: /^ArrowLeft$/, action: () => { editor.moveCursorLeft(); } },
       { pattern: /^ArrowRight$/, action: () => { editor.moveCursorRight(); } },
