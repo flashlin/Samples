@@ -14,10 +14,10 @@ importers:
       p5:
         specifier: ^1.11.10
         version: 1.11.10
-      tssql:
+      t1-tssql:
         specifier: file:../TsSql
         version: file:../TsSql
-      vimcomponent:
+      t1-vim-editor:
         specifier: file:../VimComponent
         version: file:../VimComponent(lit@3.3.1)(p5@1.11.10)
       vue:
@@ -471,23 +471,23 @@ packages:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
+  t1-tssql@file:../TsSql:
+    resolution: {directory: ../TsSql, type: directory}
+
+  t1-vim-editor@file:../VimComponent:
+    resolution: {directory: ../VimComponent, type: directory}
+    peerDependencies:
+      lit: ^3.0.0
+      p5: ^1.6.0
+
   tinyglobby@0.2.15:
     resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
     engines: {node: '>=12.0.0'}
-
-  tssql@file:../TsSql:
-    resolution: {directory: ../TsSql, type: directory}
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
-
-  vimcomponent@file:../VimComponent:
-    resolution: {directory: ../VimComponent, type: directory}
-    peerDependencies:
-      lit: ^3.0.0
-      p5: ^1.6.0
 
   vite@7.1.9:
     resolution: {integrity: sha512-4nVGliEpxmhCL8DslSAUdxlB6+SMrhB0a1v5ijlh1xB1nEPuy1mxaHxysVucLHuWryAxLWg6a5ei+U4TLn/rFg==}
@@ -915,19 +915,19 @@ snapshots:
 
   source-map-js@1.2.1: {}
 
+  t1-tssql@file:../TsSql: {}
+
+  t1-vim-editor@file:../VimComponent(lit@3.3.1)(p5@1.11.10):
+    dependencies:
+      lit: 3.3.1
+      p5: 1.11.10
+
   tinyglobby@0.2.15:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
 
-  tssql@file:../TsSql: {}
-
   typescript@5.9.3: {}
-
-  vimcomponent@file:../VimComponent(lit@3.3.1)(p5@1.11.10):
-    dependencies:
-      lit: 3.3.1
-      p5: 1.11.10
 
   vite@7.1.9:
     dependencies:
