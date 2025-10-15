@@ -1,5 +1,5 @@
 {
-  "name": "vimcomponent",
+  "name": "t1-vim-editor",
   "version": "1.0.0",
   "type": "module",
   "main": "dist/vim-editor.umd.js",
@@ -13,7 +13,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "publish:private": "npm publish --registry http://localhost:4873",
+    "publish:public": "npm publish --registry https://registry.npmjs.org"
   },
   "keywords": [],
   "author": "",
