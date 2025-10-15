@@ -10,8 +10,8 @@
   "dependencies": {
     "lit": "^3.3.1",
     "p5": "^1.11.10",
-    "t1-tssql": "file:../TsSql",
-    "t1-vim-editor": "file:../VimComponent",
+    "@mrbrain/t1-tssql": "file:../TsSql",
+    "@mrbrain/t1-vim-editor": "file:../VimComponent",
     "vue": "^3.5.22"
   },
   "devDependencies": {

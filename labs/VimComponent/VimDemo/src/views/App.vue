@@ -61,8 +61,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import 't1-vim-editor'
-import { LinqParser, LinqToTSqlConverter, TSqlFormatter } from 't1-tssql'
+import '@mrbrain/t1-vim-editor'
+import { LinqParser, LinqToTSqlConverter, TSqlFormatter } from '@mrbrain/t1-tssql'
 
 interface ExecutionResult {
   timestamp: string

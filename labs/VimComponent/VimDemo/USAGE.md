@@ -67,7 +67,7 @@ const editorContent = ref<string[]>([
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import 't1-vim-editor'
+import '@mrbrain/t1-vim-editor'
 
 // Content as array of lines
 const content = ref<string[]>([
@@ -324,7 +324,7 @@ const editorRef = ref<HTMLElement & {
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import 't1-vim-editor'
+import '@mrbrain/t1-vim-editor'
 
 // Editor content (array of lines)
 const editorContent = ref<string[]>([

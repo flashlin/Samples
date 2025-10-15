@@ -1,5 +1,5 @@
 {
-  "name": "t1-tssql",
+  "name": "@mrbrain/t1-tssql",
   "version": "1.0.0",
   "type": "module",
   "main": "dist/tssql.umd.js",

@@ -34,7 +34,7 @@ VimComponent 提供兩種方式來設定編輯器內容。
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import 't1-vim-editor'
+import '@mrbrain/t1-vim-editor'
 
 // Content as array of lines
 const editorContent = ref<string[]>([
@@ -82,7 +82,7 @@ watch(someOtherData, (newValue) => {
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import 't1-vim-editor'
+import '@mrbrain/t1-vim-editor'
 
 // Content as single string (easier to work with)
 const editorContent = ref(`// Enter your code here

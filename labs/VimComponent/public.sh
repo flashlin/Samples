@@ -3,10 +3,10 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REGISTRY="http://localhost:4873"
+REGISTRY="https://registry.npmjs.org"
 
 echo "=========================================="
-echo "Publishing packages to private registry"
+echo "Publishing packages to public registry"
 echo "Registry: $REGISTRY"
 echo "=========================================="
 echo ""
@@ -29,7 +29,7 @@ publish_package() {
     fi
     
     echo "Publishing $package_name to $REGISTRY..."
-    npm run publish:private
+    npm run publish:public
     
     if [ $? -ne 0 ]; then
         echo "❌ Publish failed for $package_name"
