@@ -1852,7 +1852,7 @@ export class VimEditor extends LitElement {
 
   private emitChangeEvent(): void {
     const event = new CustomEvent('change', {
-      detail: { content: this.content }
+      detail: { content: [...this.content] }
     });
     this.dispatchEvent(event);
   }
