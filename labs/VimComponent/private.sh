@@ -11,12 +11,39 @@ echo "Registry: $REGISTRY"
 echo "=========================================="
 echo ""
 
+get_registry_version() {
+    local package_name=$1
+    local registry=$2
+    
+    local version=$(npm view "$package_name" version --registry="$registry" 2>/dev/null || echo "")
+    echo "$version"
+}
+
+get_local_version() {
+    local package_dir=$1
+    
+    local version=$(node -p "require('./$package_dir/package.json').version" 2>/dev/null || echo "")
+    echo "$version"
+}
+
 publish_package() {
     local package_dir=$1
     local package_name=$2
     
     echo "Publishing $package_name..."
     echo "------------------------------------------"
+    
+    local registry_version=$(get_registry_version "$package_name" "$REGISTRY")
+    local local_version=$(get_local_version "$package_dir")
+    
+    echo "Local version: $local_version"
+    echo "Registry version: $registry_version"
+    
+    if [ "$registry_version" = "$local_version" ] && [ -n "$registry_version" ]; then
+        echo "⏭️  Skipping $package_name - version $local_version already published"
+        echo ""
+        return 0
+    fi
     
     cd "$SCRIPT_DIR/$package_dir"
     
