@@ -122,6 +122,8 @@ export class LinqParser {
       tableName = firstIdentifier;
     }
     
+    const hints = this.parseTableHints();
+    
     let alias: string | undefined;
     
     if (this.match(TokenType.AS)) {
@@ -134,7 +136,7 @@ export class LinqParser {
       alias = this.advance().value;
     }
     
-    return new LinqFromExpression(tableName, alias, databaseName);
+    return new LinqFromExpression(tableName, alias, databaseName, hints);
   }
   
   // Parse JOIN clause
@@ -185,6 +187,8 @@ export class LinqParser {
       tableName = firstIdentifier;
     }
     
+    const hints = this.parseTableHints();
+    
     let alias: string | undefined;
     
     if (this.match(TokenType.AS)) {
@@ -206,7 +210,7 @@ export class LinqParser {
       condition = new LiteralExpression(true, 'boolean'); // CROSS JOIN has no condition
     }
     
-    return new LinqJoinExpression(joinType, tableName, condition!, alias, databaseName);
+    return new LinqJoinExpression(joinType, tableName, condition!, alias, databaseName, hints);
   }
   
   // Parse WHERE clause
@@ -509,9 +513,40 @@ export class LinqParser {
       TokenType.HAVING, TokenType.ORDER, TokenType.SELECT, TokenType.INNER,
       TokenType.LEFT, TokenType.RIGHT, TokenType.FULL, TokenType.CROSS,
       TokenType.ON, TokenType.BY, TokenType.AS, TokenType.DISTINCT,
-      TokenType.AND, TokenType.OR, TokenType.NOT, TokenType.ASC, TokenType.DESC
+      TokenType.AND, TokenType.OR, TokenType.NOT, TokenType.ASC, TokenType.DESC,
+      TokenType.WITH
     ];
     return keywords.includes(token.type);
+  }
+  
+  private parseTableHints(): string[] | undefined {
+    if (!this.match(TokenType.WITH)) {
+      return undefined;
+    }
+    
+    if (!this.match(TokenType.LEFT_PAREN)) {
+      this.addError('Expected opening parenthesis after WITH');
+      return undefined;
+    }
+    
+    const hints: string[] = [];
+    
+    if (!this.check(TokenType.RIGHT_PAREN)) {
+      do {
+        if (this.check(TokenType.IDENTIFIER)) {
+          hints.push(this.advance().value.toUpperCase());
+        } else {
+          this.addError('Expected hint identifier');
+          break;
+        }
+      } while (this.match(TokenType.COMMA));
+    }
+    
+    if (!this.match(TokenType.RIGHT_PAREN)) {
+      this.addError('Expected closing parenthesis after hints');
+    }
+    
+    return hints.length > 0 ? hints : undefined;
   }
   
   private addError(message: string): void {

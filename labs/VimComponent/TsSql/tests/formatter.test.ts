@@ -135,5 +135,41 @@ describe('TSqlFormatter', () => {
     expect(sql).toContain('FROM users');
     expect(sql).toContain('WHERE age > 18');
   });
+  
+  it('should format FROM with NOLOCK hint', () => {
+    const sql = formatLinqQuery('FROM users WITH(NOLOCK) SELECT name');
+    
+    expect(sql).toContain('FROM users WITH(NOLOCK)');
+  });
+  
+  it('should format FROM with multiple hints', () => {
+    const sql = formatLinqQuery('FROM users WITH(NOLOCK, READUNCOMMITTED) u SELECT u.name');
+    
+    expect(sql).toContain('FROM users WITH(NOLOCK, READUNCOMMITTED) u');
+  });
+  
+  it('should format JOIN with NOLOCK hint', () => {
+    const sql = formatLinqQuery('FROM users u JOIN orders WITH(NOLOCK) o ON u.id = o.user_id SELECT u.name');
+    
+    expect(sql).toContain('INNER JOIN orders WITH(NOLOCK) o ON u.id = o.user_id');
+  });
+  
+  it('should format LEFT JOIN with hints', () => {
+    const sql = formatLinqQuery('FROM users LEFT JOIN orders WITH(NOLOCK) ON users.id = orders.user_id SELECT *');
+    
+    expect(sql).toContain('LEFT JOIN orders WITH(NOLOCK) ON users.id = orders.user_id');
+  });
+  
+  it('should format complex query with multiple hints', () => {
+    const sql = formatLinqQuery(`
+      FROM users WITH(NOLOCK) u
+      LEFT JOIN orders WITH(NOLOCK, READUNCOMMITTED) o ON u.id = o.user_id
+      WHERE u.age > 18
+      SELECT u.name, COUNT(o.id) AS order_count
+    `);
+    
+    expect(sql).toContain('FROM users WITH(NOLOCK) u');
+    expect(sql).toContain('LEFT JOIN orders WITH(NOLOCK, READUNCOMMITTED) o ON u.id = o.user_id');
+  });
 });
 

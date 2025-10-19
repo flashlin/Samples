@@ -9,7 +9,8 @@ export class LinqJoinExpression extends BaseExpression {
     public readonly tableName: string,
     public readonly condition: Expression,
     public readonly alias?: string,
-    public readonly databaseName?: string
+    public readonly databaseName?: string,
+    public readonly hints?: string[]
   ) {
     super(ExpressionType.LinqJoin);
   }

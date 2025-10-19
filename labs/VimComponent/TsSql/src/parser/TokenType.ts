@@ -17,6 +17,7 @@ export enum TokenType {
   SELECT = 'SELECT',
   DISTINCT = 'DISTINCT',
   AS = 'AS',
+  WITH = 'WITH',
   
   // Logical operators
   AND = 'AND',

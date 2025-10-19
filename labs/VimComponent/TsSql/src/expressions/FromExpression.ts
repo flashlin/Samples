@@ -6,7 +6,8 @@ import { ExpressionVisitor } from '../types/ExpressionVisitor';
 export class FromExpression extends BaseExpression {
   constructor(
     public readonly tableName: string,
-    public readonly alias?: string
+    public readonly alias?: string,
+    public readonly hints?: string[]
   ) {
     super(ExpressionType.From);
   }

@@ -160,5 +160,63 @@ describe('Integration Tests', () => {
     expect(lines.some(l => l.trim().startsWith('WHERE'))).toBe(true);
     expect(lines.some(l => l.trim().startsWith('ORDER BY'))).toBe(true);
   });
+  
+  it('should convert LINQ with NOLOCK hint to T-SQL', () => {
+    const { sql, errors } = linqToSql('FROM users WITH(NOLOCK) SELECT name, email');
+    
+    expect(errors).toHaveLength(0);
+    expect(sql).toBe('SELECT name, email\nFROM users WITH(NOLOCK)');
+  });
+  
+  it('should convert LINQ with multiple hints to T-SQL', () => {
+    const { sql, errors } = linqToSql('FROM users WITH(NOLOCK, READUNCOMMITTED) u SELECT u.name');
+    
+    expect(errors).toHaveLength(0);
+    expect(sql).toContain('FROM users WITH(NOLOCK, READUNCOMMITTED) u');
+  });
+  
+  it('should convert JOIN with NOLOCK hint to T-SQL', () => {
+    const { sql, errors } = linqToSql('FROM users u JOIN orders WITH(NOLOCK) o ON u.id = o.user_id SELECT u.name, o.total');
+    
+    expect(errors).toHaveLength(0);
+    expect(sql).toContain('FROM users u');
+    expect(sql).toContain('INNER JOIN orders WITH(NOLOCK) o ON u.id = o.user_id');
+  });
+  
+  it('should convert complex query with multiple WITH hints', () => {
+    const linq = `
+      FROM users WITH(NOLOCK) u
+      LEFT JOIN orders WITH(NOLOCK, READUNCOMMITTED) o ON u.id = o.user_id
+      WHERE u.age > 18
+      GROUP BY u.id, u.name
+      HAVING COUNT(o.id) > 0
+      ORDER BY u.name ASC
+      SELECT u.name, COUNT(o.id) AS order_count
+    `;
+    
+    const { sql, errors } = linqToSql(linq);
+    
+    expect(errors).toHaveLength(0);
+    expect(sql).toContain('FROM users WITH(NOLOCK) u');
+    expect(sql).toContain('LEFT JOIN orders WITH(NOLOCK, READUNCOMMITTED) o ON u.id = o.user_id');
+    expect(sql).toContain('WHERE u.age > 18');
+    expect(sql).toContain('GROUP BY u.id, u.name');
+    expect(sql).toContain('HAVING COUNT(o.id) > 0');
+    expect(sql).toContain('ORDER BY u.name ASC');
+  });
+  
+  it('should handle hints with database-qualified table names', () => {
+    const { sql, errors } = linqToSql('FROM mydb.users WITH(NOLOCK) u SELECT u.name');
+    
+    expect(errors).toHaveLength(0);
+    expect(sql).toContain('FROM mydb.users WITH(NOLOCK) u');
+  });
+  
+  it('should preserve hint case as uppercase', () => {
+    const { sql, errors } = linqToSql('FROM users WITH(nolock, readuncommitted) SELECT name');
+    
+    expect(errors).toHaveLength(0);
+    expect(sql).toContain('WITH(NOLOCK, READUNCOMMITTED)');
+  });
 });
 

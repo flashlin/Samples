@@ -19,6 +19,7 @@ const KEYWORDS: Record<string, TokenType> = {
   'SELECT': TokenType.SELECT,
   'DISTINCT': TokenType.DISTINCT,
   'AS': TokenType.AS,
+  'WITH': TokenType.WITH,
   'AND': TokenType.AND,
   'OR': TokenType.OR,
   'NOT': TokenType.NOT,

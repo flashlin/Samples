@@ -38,7 +38,8 @@ export class LinqToTSqlConverter {
           linqQuery.from.databaseName 
             ? `${linqQuery.from.databaseName}.${linqQuery.from.tableName}`
             : linqQuery.from.tableName,
-          linqQuery.from.alias
+          linqQuery.from.alias,
+          linqQuery.from.hints
         )
       : undefined;
     
@@ -50,7 +51,8 @@ export class LinqToTSqlConverter {
           ? `${j.databaseName}.${j.tableName}`
           : j.tableName,
         this.convertExpression(j.condition),
-        j.alias
+        j.alias,
+        j.hints
       )
     );
     

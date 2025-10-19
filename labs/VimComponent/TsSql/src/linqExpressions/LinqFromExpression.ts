@@ -7,7 +7,8 @@ export class LinqFromExpression extends BaseExpression {
   constructor(
     public readonly tableName: string,
     public readonly alias?: string,
-    public readonly databaseName?: string
+    public readonly databaseName?: string,
+    public readonly hints?: string[]
   ) {
     super(ExpressionType.LinqFrom);
   }

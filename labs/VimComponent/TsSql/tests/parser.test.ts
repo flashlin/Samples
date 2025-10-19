@@ -129,5 +129,62 @@ describe('LinqParser', () => {
     expect(result.errors).toHaveLength(0);
     expect(result.result.wheres).toHaveLength(1);
   });
+  
+  it('should parse FROM with NOLOCK hint', () => {
+    const result = parser.parse('FROM users WITH(NOLOCK) SELECT name');
+    
+    expect(result.errors).toHaveLength(0);
+    expect(result.result.from?.tableName).toBe('users');
+    expect(result.result.from?.hints).toEqual(['NOLOCK']);
+  });
+  
+  it('should parse FROM with multiple hints', () => {
+    const result = parser.parse('FROM users WITH(NOLOCK, READUNCOMMITTED) u SELECT u.name');
+    
+    expect(result.errors).toHaveLength(0);
+    expect(result.result.from?.tableName).toBe('users');
+    expect(result.result.from?.alias).toBe('u');
+    expect(result.result.from?.hints).toEqual(['NOLOCK', 'READUNCOMMITTED']);
+  });
+  
+  it('should parse JOIN with NOLOCK hint', () => {
+    const result = parser.parse('FROM users u JOIN orders WITH(NOLOCK) o ON u.id = o.user_id SELECT u.name');
+    
+    expect(result.errors).toHaveLength(0);
+    expect(result.result.joins).toHaveLength(1);
+    expect(result.result.joins[0].tableName).toBe('orders');
+    expect(result.result.joins[0].alias).toBe('o');
+    expect(result.result.joins[0].hints).toEqual(['NOLOCK']);
+  });
+  
+  it('should parse complex query with multiple WITH hints', () => {
+    const result = parser.parse(`
+      FROM users WITH(NOLOCK) u
+      LEFT JOIN orders WITH(NOLOCK, READUNCOMMITTED) o ON u.id = o.user_id
+      WHERE u.age > 18
+      SELECT u.name, COUNT(o.id) AS order_count
+    `);
+    
+    expect(result.errors).toHaveLength(0);
+    expect(result.result.from?.hints).toEqual(['NOLOCK']);
+    expect(result.result.joins).toHaveLength(1);
+    expect(result.result.joins[0].hints).toEqual(['NOLOCK', 'READUNCOMMITTED']);
+  });
+  
+  it('should parse FROM with hint and AS alias', () => {
+    const result = parser.parse('FROM users WITH(NOLOCK) AS u SELECT u.name');
+    
+    expect(result.errors).toHaveLength(0);
+    expect(result.result.from?.tableName).toBe('users');
+    expect(result.result.from?.hints).toEqual(['NOLOCK']);
+    expect(result.result.from?.alias).toBe('u');
+  });
+  
+  it('should convert hint names to uppercase', () => {
+    const result = parser.parse('FROM users WITH(nolock, ReadUncommitted) SELECT name');
+    
+    expect(result.errors).toHaveLength(0);
+    expect(result.result.from?.hints).toEqual(['NOLOCK', 'READUNCOMMITTED']);
+  });
 });
 

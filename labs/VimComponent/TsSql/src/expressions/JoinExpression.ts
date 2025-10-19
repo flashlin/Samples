@@ -8,7 +8,8 @@ export class JoinExpression extends BaseExpression {
     public readonly joinType: JoinType,
     public readonly tableName: string,
     public readonly condition: Expression,
-    public readonly alias?: string
+    public readonly alias?: string,
+    public readonly hints?: string[]
   ) {
     super(ExpressionType.Join);
   }
