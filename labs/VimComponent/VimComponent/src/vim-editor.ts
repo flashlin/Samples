@@ -594,6 +594,8 @@ export class VimEditor extends LitElement {
       return;
     }
     
+    this.emitKeyPressEvent(key, event);
+    
     if ((event.metaKey || event.ctrlKey) && key === 'v' && this.mode === EditorMode.Insert) {
       event.preventDefault();
       this.handlePaste();
@@ -1853,6 +1855,22 @@ export class VimEditor extends LitElement {
   private emitChangeEvent(): void {
     const event = new CustomEvent('change', {
       detail: { content: [...this.content] }
+    });
+    this.dispatchEvent(event);
+  }
+
+  private emitKeyPressEvent(key: string, originalEvent: KeyboardEvent): void {
+    const event = new CustomEvent('keypress', {
+      detail: {
+        key,
+        mode: this.mode,
+        ctrlKey: originalEvent.ctrlKey,
+        shiftKey: originalEvent.shiftKey,
+        altKey: originalEvent.altKey,
+        metaKey: originalEvent.metaKey,
+        cursorX: this.cursorX,
+        cursorY: this.cursorY
+      }
     });
     this.dispatchEvent(event);
   }

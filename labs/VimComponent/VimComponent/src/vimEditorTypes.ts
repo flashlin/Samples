@@ -144,3 +144,18 @@ export interface IntellisenseItem {
   action: () => void;
 }
 
+export interface KeyPressEventDetail {
+  key: string;
+  mode: EditorMode;
+  ctrlKey: boolean;
+  shiftKey: boolean;
+  altKey: boolean;
+  metaKey: boolean;
+  cursorX: number;
+  cursorY: number;
+}
+
+export interface ChangeEventDetail {
+  content: string[];
+}
+

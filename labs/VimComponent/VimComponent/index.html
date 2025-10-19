@@ -55,6 +55,22 @@
     <script type="module">
         const editor = document.querySelector('vim-editor');
 
+        editor.addEventListener('change', (event) => {
+            console.log('Content changed:', event.detail.content.join('\n'));
+        });
+
+        editor.addEventListener('keypress', (event) => {
+            console.log('Key pressed:', {
+                key: event.detail.key,
+                mode: event.detail.mode,
+                ctrl: event.detail.ctrlKey,
+                shift: event.detail.shiftKey,
+                alt: event.detail.altKey,
+                meta: event.detail.metaKey,
+                cursor: `${event.detail.cursorX},${event.detail.cursorY}`
+            });
+        });
+
         window.loadSampleCode = function() {
             const code = `function fibonacci(n) {
   if (n <= 1) {
