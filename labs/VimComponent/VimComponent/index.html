@@ -17,8 +17,6 @@
             min-height: 100vh;
         }
         vim-editor {
-            width: 800px;
-            height: 600px;
             border: 1px solid #333;
             background-color: #000;
             display: block;
@@ -52,7 +50,7 @@
         <button onclick="loadMarkdown()">Load Markdown</button>
         <button onclick="loadJSON()">Load JSON</button>
     </div>
-    <vim-editor></vim-editor>
+    <vim-editor width="90%" height="300px"></vim-editor>
     <script type="module" src="/src/vim-editor.ts"></script>
     <script type="module">
         const editor = document.querySelector('vim-editor');

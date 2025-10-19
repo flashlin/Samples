@@ -48,11 +48,11 @@ export class VimEditor extends LitElement {
     this.requestUpdate('mode', oldMode);
   }
 
-  @property({ type: Number })
-  width = 800;
+  @property({ type: String })
+  width: string | number = 800;
 
-  @property({ type: Number })
-  height = 600;
+  @property({ type: String })
+  height: string | number = 600;
 
   @property({ type: Number })
   cursorX = 0;
@@ -104,6 +104,41 @@ export class VimEditor extends LitElement {
   private history: Array<{ content: string[]; cursorX: number; cursorY: number }> = [];
   private historyIndex = -1;
   private maxHistorySize = 100;
+
+  private parseSize(value: string | number, containerSize?: number): number {
+    if (typeof value === 'number') {
+      return value;
+    }
+    
+    const str = value.toString().trim();
+    
+    if (str.endsWith('%')) {
+      const percent = parseFloat(str);
+      if (containerSize !== undefined) {
+        return Math.floor((percent / 100) * containerSize);
+      }
+      return 800;
+    }
+    
+    if (str.endsWith('px')) {
+      return parseFloat(str);
+    }
+    
+    const num = parseFloat(str);
+    return isNaN(num) ? 800 : num;
+  }
+
+  private getComputedWidth(): number {
+    const container = this.shadowRoot?.host as HTMLElement;
+    const parentWidth = container?.parentElement?.clientWidth || window.innerWidth;
+    return this.parseSize(this.width, parentWidth);
+  }
+
+  private getComputedHeight(): number {
+    const container = this.shadowRoot?.host as HTMLElement;
+    const parentHeight = container?.parentElement?.clientHeight || window.innerHeight;
+    return this.parseSize(this.height, parentHeight);
+  }
 
   private getRectY(lineIndex: number): number {
     return this.textPadding + lineIndex * this.lineHeight;
@@ -230,8 +265,10 @@ export class VimEditor extends LitElement {
   }
 
   private initializeBuffer() {
-    const editableWidth = Math.floor((this.width - 60) / this.baseCharWidth);
-    const editableHeight = Math.floor((this.height - this.statusBarHeight) / this.lineHeight);
+    const computedWidth = this.getComputedWidth();
+    const computedHeight = this.getComputedHeight();
+    const editableWidth = Math.floor((computedWidth - 60) / this.baseCharWidth);
+    const editableHeight = Math.floor((computedHeight - this.statusBarHeight) / this.lineHeight);
     
     this.bufferWidth = editableWidth;
     this.bufferHeight = editableHeight;
@@ -473,8 +510,8 @@ export class VimEditor extends LitElement {
   }
 
   private initializeP5() {
-    const width = this.width;
-    const height = this.height;
+    const width = this.getComputedWidth();
+    const height = this.getComputedHeight();
     
     console.log('Canvas size:', width, height);
 
@@ -486,8 +523,8 @@ export class VimEditor extends LitElement {
         
         canvas.elt.style.cssText = `
           display: block !important;
-          width: ${this.width}px !important;
-          height: ${this.height}px !important;
+          width: ${width}px !important;
+          height: ${height}px !important;
           position: absolute !important;
           left: 0 !important;
           top: 0 !important;
@@ -887,7 +924,8 @@ export class VimEditor extends LitElement {
     }
     
     const currentLine = this.content[this.cursorY] || '';
-    const availablePixelWidth = (this.width - 60) - (this.baseCharWidth * 2);
+    const computedWidth = this.getComputedWidth();
+    const availablePixelWidth = (computedWidth - 60) - (this.baseCharWidth * 2);
     
     let linePixelWidth = 0;
     for (let i = 0; i < currentLine.length; i++) {
@@ -2076,12 +2114,15 @@ export class VimEditor extends LitElement {
 
 
   render() {
+    const widthStr = typeof this.width === 'number' ? `${this.width}px` : this.width;
+    const heightStr = typeof this.height === 'number' ? `${this.height}px` : this.height;
+    
     return html`
       <style>
         :host {
           display: block;
-          width: ${this.width}px;
-          height: ${this.height}px;
+          width: ${widthStr};
+          height: ${heightStr};
           background-color: #000;
           position: relative;
         }
