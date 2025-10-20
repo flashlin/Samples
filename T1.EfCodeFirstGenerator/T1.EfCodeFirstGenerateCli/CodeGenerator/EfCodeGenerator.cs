@@ -74,15 +74,15 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             var generatedFiles = new Dictionary<string, string>();
 
             var dbContextCode = GenerateDbContext(dbSchema, targetNamespace);
-            generatedFiles[$"{dbSchema.DatabaseName}DbContext.cs"] = dbContextCode;
+            generatedFiles[$"{dbSchema.DatabaseName}/{dbSchema.DatabaseName}DbContext.cs"] = dbContextCode;
 
             foreach (var table in dbSchema.Tables)
             {
                 var entityCode = GenerateEntity(table, targetNamespace);
-                generatedFiles[$"Entities/{table.TableName}Entity.cs"] = entityCode;
+                generatedFiles[$"{dbSchema.DatabaseName}/Entities/{table.TableName}Entity.cs"] = entityCode;
 
                 var configCode = GenerateEntityConfiguration(table, targetNamespace);
-                generatedFiles[$"Configurations/{table.TableName}EntityConfiguration.cs"] = configCode;
+                generatedFiles[$"{dbSchema.DatabaseName}/Configurations/{table.TableName}EntityConfiguration.cs"] = configCode;
             }
 
             return generatedFiles;

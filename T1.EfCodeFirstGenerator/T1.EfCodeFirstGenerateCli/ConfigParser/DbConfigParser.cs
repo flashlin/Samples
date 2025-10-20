@@ -26,6 +26,7 @@ namespace T1.EfCodeFirstGenerateCli.ConfigParser
                     var config = ParseConnectionString(lineText);
                     if (config != null)
                     {
+                        config.DbFilePath = dbFile;
                         configs.Add(config);
                     }
                 }

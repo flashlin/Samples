@@ -58,8 +58,32 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
         {
             Log.LogMessage(MessageImportance.Normal, $"Processing: {dbConfig.ServerName}/{dbConfig.DatabaseName}");
 
+            // Get the directory where the .db file is located
+            var dbFileDir = Path.GetDirectoryName(dbConfig.DbFilePath);
+            if (string.IsNullOrEmpty(dbFileDir))
+            {
+                Log.LogWarning($"  Unable to determine .db file directory.");
+                return;
+            }
+
+            // Calculate namespace based on the relative path from project root to .db file directory
+            var relativeDbDir = Path.GetRelativePath(ProjectDirectory, dbFileDir);
+            var targetNamespace = relativeDbDir.Replace(Path.DirectorySeparatorChar, '.').Replace(Path.AltDirectorySeparatorChar, '.');
+            
+            // Remove leading/trailing dots
+            targetNamespace = targetNamespace.Trim('.');
+            
+            // If the .db file is in the project root, use the project directory name as namespace
+            if (string.IsNullOrEmpty(targetNamespace) || targetNamespace == ".")
+            {
+                var projectDirName = new DirectoryInfo(ProjectDirectory).Name;
+                targetNamespace = string.IsNullOrEmpty(projectDirName) ? "Generated" : projectDirName;
+            }
+
+            Log.LogMessage(MessageImportance.Normal, $"  Target namespace: {targetNamespace}");
+
             var schemaFileName = $"{SanitizeFileName(dbConfig.ServerName)}_{SanitizeFileName(dbConfig.DatabaseName)}.schema";
-            var generatedDir = Path.Combine(ProjectDirectory, "Generated");
+            var generatedDir = Path.Combine(dbFileDir, "Generated");
             Directory.CreateDirectory(generatedDir);
 
             var schemaFilePath = Path.Combine(generatedDir, schemaFileName);
@@ -98,7 +122,6 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
             {
                 Log.LogMessage(MessageImportance.Low, $"  Generating EF Core code...");
                 var generator = new EfCodeGenerator();
-                var targetNamespace = "Generated";
                 var generatedFiles = generator.GenerateCodeFirstFromSchema(dbSchema, targetNamespace);
 
                 foreach (var kvp in generatedFiles)
