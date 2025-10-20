@@ -8,7 +8,7 @@ using T1.EfCodeFirstGenerateCli.Models;
 
 namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 {
-    internal class EfCodeGenerator
+    public class EfCodeGenerator
     {
         private readonly SqlTypeToCSharpTypeConverter _typeConverter;
 

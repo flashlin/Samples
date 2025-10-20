@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleUsage", "Example\Exa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T1.EfCodeFirstGenerateCli", "T1.EfCodeFirstGenerateCli\T1.EfCodeFirstGenerateCli.csproj", "{EFCCFA14-012E-4314-8357-997E18102F48}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T1.EfCodeFirstGenerateCliTest", "T1.EfCodeFirstGenerateCliTest\T1.EfCodeFirstGenerateCliTest.csproj", "{A544A8DD-3981-4674-B3C0-56BB2C474D23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,18 @@ Global
 		{EFCCFA14-012E-4314-8357-997E18102F48}.Release|x64.Build.0 = Release|Any CPU
 		{EFCCFA14-012E-4314-8357-997E18102F48}.Release|x86.ActiveCfg = Release|Any CPU
 		{EFCCFA14-012E-4314-8357-997E18102F48}.Release|x86.Build.0 = Release|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Debug|x64.Build.0 = Debug|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Debug|x86.Build.0 = Debug|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Release|x64.ActiveCfg = Release|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Release|x64.Build.0 = Release|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Release|x86.ActiveCfg = Release|Any CPU
+		{A544A8DD-3981-4674-B3C0-56BB2C474D23}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,96 @@
+{
+  "DatabaseName": "TestDb",
+  "Tables": [
+    {
+      "TableName": "Users",
+      "Fields": [
+        {
+          "FieldName": "Id",
+          "SqlDataType": "int",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "IsPrimaryKey": true,
+          "IsAutoIncrement": true
+        },
+        {
+          "FieldName": "Username",
+          "SqlDataType": "nvarchar(100)",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "IsPrimaryKey": false,
+          "IsAutoIncrement": false
+        },
+        {
+          "FieldName": "Email",
+          "SqlDataType": "nvarchar(255)",
+          "IsNullable": true,
+          "DefaultValue": null,
+          "IsPrimaryKey": false,
+          "IsAutoIncrement": false
+        },
+        {
+          "FieldName": "CreatedAt",
+          "SqlDataType": "datetime2",
+          "IsNullable": false,
+          "DefaultValue": "getdate()",
+          "IsPrimaryKey": false,
+          "IsAutoIncrement": false
+        },
+        {
+          "FieldName": "IsActive",
+          "SqlDataType": "bit",
+          "IsNullable": false,
+          "DefaultValue": "1",
+          "IsPrimaryKey": false,
+          "IsAutoIncrement": false
+        }
+      ]
+    },
+    {
+      "TableName": "Products",
+      "Fields": [
+        {
+          "FieldName": "Id",
+          "SqlDataType": "int",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "IsPrimaryKey": true,
+          "IsAutoIncrement": true
+        },
+        {
+          "FieldName": "Name",
+          "SqlDataType": "nvarchar(200)",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "IsPrimaryKey": false,
+          "IsAutoIncrement": false
+        },
+        {
+          "FieldName": "Price",
+          "SqlDataType": "decimal(18,2)",
+          "IsNullable": false,
+          "DefaultValue": null,
+          "IsPrimaryKey": false,
+          "IsAutoIncrement": false
+        },
+        {
+          "FieldName": "Stock",
+          "SqlDataType": "int",
+          "IsNullable": true,
+          "DefaultValue": null,
+          "IsPrimaryKey": false,
+          "IsAutoIncrement": false
+        },
+        {
+          "FieldName": "IsActive",
+          "SqlDataType": "bit",
+          "IsNullable": false,
+          "DefaultValue": "1",
+          "IsPrimaryKey": false,
+          "IsAutoIncrement": false
+        }
+      ]
+    }
+  ]
+}
+

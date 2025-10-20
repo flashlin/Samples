@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace T1.EfCodeFirstGenerateCli.Converters
 {
-    internal class SqlTypeToCSharpTypeConverter
+    public class SqlTypeToCSharpTypeConverter
     {
         private readonly Dictionary<string, Func<string, bool, string>> _customMappings = new Dictionary<string, Func<string, bool, string>>();
 
