@@ -14,6 +14,7 @@
     <Description>Entity Framework Core Code First generator from database schema. Automatically generates DbContext, Entity classes, and Entity Configurations from your database.</Description>
     <PackageTags>ef-core;entity-framework;code-generator;database;code-first</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/your-repo/T1.EfCodeFirstGenerateCli</RepositoryUrl>
     <PackageProjectUrl>https://github.com/your-repo/T1.EfCodeFirstGenerateCli</PackageProjectUrl>
     <PackAsTool>false</PackAsTool>
@@ -32,6 +33,7 @@
   <!-- Package build files and tools -->
   <ItemGroup>
     <None Include="build\**" Pack="true" PackagePath="build\" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <!-- Copy all output files to tools directory in the package -->
