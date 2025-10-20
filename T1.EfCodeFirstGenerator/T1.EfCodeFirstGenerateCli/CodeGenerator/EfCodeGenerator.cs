@@ -22,6 +22,53 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             _typeConverter = typeConverter;
         }
 
+        private string SanitizeIdentifier(string identifier)
+        {
+            if (string.IsNullOrEmpty(identifier))
+            {
+                return identifier;
+            }
+
+            // C# reserved keywords
+            var reservedKeywords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked",
+                "class", "const", "continue", "decimal", "default", "delegate", "do", "double", "else",
+                "enum", "event", "explicit", "extern", "false", "finally", "fixed", "float", "for",
+                "foreach", "goto", "if", "implicit", "in", "int", "interface", "internal", "is", "lock",
+                "long", "namespace", "new", "null", "object", "operator", "out", "override", "params",
+                "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short",
+                "sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true",
+                "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual",
+                "void", "volatile", "while"
+            };
+
+            var sanitized = identifier;
+            
+            // If identifier starts with a digit, prepend an underscore
+            if (char.IsDigit(sanitized[0]))
+            {
+                sanitized = "_" + sanitized;
+            }
+            
+            // Replace other invalid characters with underscore
+            sanitized = Regex.Replace(sanitized, @"[^\w]", "_");
+            
+            // If after sanitization it starts with a digit, prepend underscore
+            if (char.IsDigit(sanitized[0]))
+            {
+                sanitized = "_" + sanitized;
+            }
+            
+            // If it's a reserved keyword, prepend underscore
+            if (reservedKeywords.Contains(sanitized))
+            {
+                sanitized = "_" + sanitized;
+            }
+            
+            return sanitized;
+        }
+
         public Dictionary<string, string> GenerateCodeFirstFromSchema(DbSchema dbSchema, string targetNamespace)
         {
             var generatedFiles = new Dictionary<string, string>();
@@ -57,7 +104,8 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 
             foreach (var table in dbSchema.Tables)
             {
-                output.WriteLine($"public DbSet<{table.TableName}Entity> {table.TableName} {{ get; set; }}");
+                var propertyName = SanitizeIdentifier(table.TableName);
+                output.WriteLine($"public DbSet<{table.TableName}Entity> {propertyName} {{ get; set; }}");
             }
 
             output.WriteLine();
@@ -100,7 +148,8 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             {
                 var csharpType = _typeConverter.ConvertType(field.SqlDataType, field.IsNullable);
                 var requiredModifier = IsNonNullableReferenceType(csharpType) ? "required " : "";
-                output.WriteLine($"public {requiredModifier}{csharpType} {field.FieldName} {{ get; set; }}");
+                var propertyName = SanitizeIdentifier(field.FieldName);
+                output.WriteLine($"public {requiredModifier}{csharpType} {propertyName} {{ get; set; }}");
             }
 
             output.Indent--;
@@ -143,11 +192,12 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             if (primaryKeys.Count == 1)
             {
                 var pk = primaryKeys[0];
-                output.WriteLine($"builder.HasKey(x => x.{pk.FieldName});");
+                var pkPropertyName = SanitizeIdentifier(pk.FieldName);
+                output.WriteLine($"builder.HasKey(x => x.{pkPropertyName});");
             }
             else if (primaryKeys.Count > 1)
             {
-                var pkFields = string.Join(", ", primaryKeys.Select(pk => $"x.{pk.FieldName}"));
+                var pkFields = string.Join(", ", primaryKeys.Select(pk => $"x.{SanitizeIdentifier(pk.FieldName)}"));
                 output.WriteLine($"builder.HasKey(x => new {{ {pkFields} }});");
             }
 
@@ -173,9 +223,17 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         private void GeneratePropertyConfiguration(IndentStringBuilder output, FieldSchema field)
         {
             var columnType = _typeConverter.GetColumnType(field.SqlDataType);
+            var propertyName = SanitizeIdentifier(field.FieldName);
             
-            output.WriteLine($"builder.Property(x => x.{field.FieldName})");
+            output.WriteLine($"builder.Property(x => x.{propertyName})");
             output.Indent++;
+            
+            // If property name was sanitized, add HasColumnName to map to original column
+            if (propertyName != field.FieldName)
+            {
+                output.WriteLine($".HasColumnName(\"{field.FieldName}\")");
+            }
+            
             output.WriteLine($".HasColumnType(\"{columnType}\")");
 
             if (field.IsPrimaryKey)
