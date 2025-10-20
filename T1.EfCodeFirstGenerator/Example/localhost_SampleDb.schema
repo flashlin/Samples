@@ -1,0 +1,79 @@
+{
+  "DatabaseName": "SampleDb",
+  "Tables": [
+    {
+      "TableName": "Users",
+      "Fields": [
+        {
+          "FieldName": "Id",
+          "SqlDataType": "int",
+          "IsPrimaryKey": true,
+          "IsNullable": false,
+          "DefaultValue": null
+        },
+        {
+          "FieldName": "Username",
+          "SqlDataType": "nvarchar(100)",
+          "IsPrimaryKey": false,
+          "IsNullable": false,
+          "DefaultValue": null
+        },
+        {
+          "FieldName": "Email",
+          "SqlDataType": "nvarchar(255)",
+          "IsPrimaryKey": false,
+          "IsNullable": false,
+          "DefaultValue": null
+        },
+        {
+          "FieldName": "CreatedAt",
+          "SqlDataType": "datetime2",
+          "IsPrimaryKey": false,
+          "IsNullable": false,
+          "DefaultValue": "getdate()"
+        },
+        {
+          "FieldName": "IsActive",
+          "SqlDataType": "bit",
+          "IsPrimaryKey": false,
+          "IsNullable": false,
+          "DefaultValue": "1"
+        }
+      ]
+    },
+    {
+      "TableName": "Products",
+      "Fields": [
+        {
+          "FieldName": "Id",
+          "SqlDataType": "int",
+          "IsPrimaryKey": true,
+          "IsNullable": false,
+          "DefaultValue": null
+        },
+        {
+          "FieldName": "Name",
+          "SqlDataType": "nvarchar(200)",
+          "IsPrimaryKey": false,
+          "IsNullable": false,
+          "DefaultValue": null
+        },
+        {
+          "FieldName": "Price",
+          "SqlDataType": "decimal(18,2)",
+          "IsPrimaryKey": false,
+          "IsNullable": false,
+          "DefaultValue": null
+        },
+        {
+          "FieldName": "Description",
+          "SqlDataType": "nvarchar(max)",
+          "IsPrimaryKey": false,
+          "IsNullable": true,
+          "DefaultValue": null
+        }
+      ]
+    }
+  ]
+}
+

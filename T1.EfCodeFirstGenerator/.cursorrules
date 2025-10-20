@@ -1,0 +1,44 @@
+# CodeBoy Project Rules
+
+## AI Assistant Workflow
+
+### Before Processing Requests
+Before starting to process any user request, the AI assistant MUST:
+1. Scan the current project structure to understand the codebase layout
+2. Review relevant files and understand the context
+3. Only then proceed with processing the user's requirements
+
+This ensures the AI has proper context and understanding of the codebase before making any changes or suggestions.
+
+## Code Generation
+
+### IndentStringBuilder Usage
+When generating code using `IndentStringBuilder` from `T1.Standard.IO`:
+- Use `WriteLine()` method to write lines (NOT `AppendLine()`)
+- Use `Indent` property with `++` to increase indentation
+- Use `Indent` property with `--` to decrease indentation
+- DO NOT use methods like `IncreaseIndent()` or `DecreaseIndent()`
+
+Example:
+```csharp
+var output = new IndentStringBuilder();
+output.WriteLine("namespace MyNamespace");
+output.WriteLine("{");
+output.Indent++;
+output.WriteLine("public class MyClass { }");
+output.Indent--;
+output.WriteLine("}");
+```
+
+## Coding Standards
+
+### Code Style
+1. Keep code concise - remove redundant comments
+2. Extract small methods based on functional blocks
+3. Avoid try-catch to keep code clean
+4. Method bodies should not be too long
+
+### Testing Framework
+1. Use NUnit3
+2. Use Fluent Assertions for assertions
+
