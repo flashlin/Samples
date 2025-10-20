@@ -20,7 +20,7 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
         {
             try
             {
-                Log.LogMessage(MessageImportance.High, "T1.EfCodeFirstGenerator: Starting code generation...");
+                Log.LogMessage(MessageImportance.High, "T1.EfCodeFirstGenerateCli: Starting code generation...");
 
                 if (!Directory.Exists(ProjectDirectory))
                 {
@@ -43,7 +43,7 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
                     ProcessDbConfig(dbConfig);
                 }
 
-                Log.LogMessage(MessageImportance.High, "T1.EfCodeFirstGenerator: Code generation completed.");
+                Log.LogMessage(MessageImportance.High, "T1.EfCodeFirstGenerateCli: Code generation completed.");
                 return true;
             }
             catch (Exception ex)

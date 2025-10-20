@@ -13,7 +13,7 @@ namespace T1.EfCodeFirstGenerateCli
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("T1.EfCodeFirstGenerator - EF Core Code Generator");
+            Console.WriteLine("T1.EfCodeFirstGenerateCli - EF Core Code Generator");
             Console.WriteLine("================================================");
             Console.WriteLine();
 
