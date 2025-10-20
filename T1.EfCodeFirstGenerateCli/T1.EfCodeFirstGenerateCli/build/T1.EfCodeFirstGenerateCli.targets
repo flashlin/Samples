@@ -6,7 +6,10 @@
   <Target Name="T1GenerateEfCode" 
           BeforeTargets="CoreCompile" 
           Condition="Exists('$(T1EfCodeFirstGeneratorTaskAssembly)')">
-    <GenerateEfCodeTask ProjectDirectory="$(ProjectDir)" />
+    <GenerateEfCodeTask 
+        ProjectDirectory="$(ProjectDir)" 
+        RootNamespace="$(RootNamespace)"
+        AssemblyName="$(AssemblyName)" />
   </Target>
 </Project>
 

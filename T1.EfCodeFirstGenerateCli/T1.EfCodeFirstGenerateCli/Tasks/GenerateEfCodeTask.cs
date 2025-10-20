@@ -16,6 +16,10 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
         [Required]
         public string ProjectDirectory { get; set; } = string.Empty;
 
+        public string? RootNamespace { get; set; }
+        
+        public string? AssemblyName { get; set; }
+
         public override bool Execute()
         {
             try
@@ -66,18 +70,26 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
                 return;
             }
 
-            // Calculate namespace based on the relative path from project root to .db file directory
+            // Get project base namespace
+            var projectNamespace = GetProjectNamespace();
+            
+            // Calculate relative path from project root to .db file directory
             var relativeDbDir = Path.GetRelativePath(ProjectDirectory, dbFileDir);
-            var targetNamespace = relativeDbDir.Replace(Path.DirectorySeparatorChar, '.').Replace(Path.AltDirectorySeparatorChar, '.');
             
-            // Remove leading/trailing dots
-            targetNamespace = targetNamespace.Trim('.');
-            
-            // If the .db file is in the project root, use the project directory name as namespace
-            if (string.IsNullOrEmpty(targetNamespace) || targetNamespace == ".")
+            // Build target namespace
+            string targetNamespace;
+            if (string.IsNullOrEmpty(relativeDbDir) || relativeDbDir == ".")
             {
-                var projectDirName = new DirectoryInfo(ProjectDirectory).Name;
-                targetNamespace = string.IsNullOrEmpty(projectDirName) ? "Generated" : projectDirName;
+                // .db file is in project root
+                targetNamespace = projectNamespace;
+            }
+            else
+            {
+                // .db file is in subdirectory
+                var subNamespace = relativeDbDir.Replace(Path.DirectorySeparatorChar, '.')
+                                                .Replace(Path.AltDirectorySeparatorChar, '.')
+                                                .Trim('.');
+                targetNamespace = $"{projectNamespace}.{subNamespace}";
             }
 
             Log.LogMessage(MessageImportance.Normal, $"  Target namespace: {targetNamespace}");
@@ -163,6 +175,20 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
         {
             var invalid = Path.GetInvalidFileNameChars();
             return string.Join("_", fileName.Split(invalid, StringSplitOptions.RemoveEmptyEntries));
+        }
+
+        private string GetProjectNamespace()
+        {
+            // Priority: RootNamespace → AssemblyName → Project directory name
+            if (!string.IsNullOrEmpty(RootNamespace))
+                return RootNamespace;
+            
+            if (!string.IsNullOrEmpty(AssemblyName))
+                return AssemblyName;
+            
+            // Fallback to project directory name
+            var projectDirName = new DirectoryInfo(ProjectDirectory).Name;
+            return string.IsNullOrEmpty(projectDirName) ? "Generated" : projectDirName;
         }
     }
 }
