@@ -121,6 +121,22 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
             try
             {
                 Log.LogMessage(MessageImportance.Low, $"  Generating EF Core code...");
+                
+                // Clear the Generated/{DatabaseName}/ directory before generating new code
+                var databaseDir = Path.Combine(generatedDir, dbConfig.DatabaseName);
+                if (Directory.Exists(databaseDir))
+                {
+                    try
+                    {
+                        Directory.Delete(databaseDir, true);
+                        Log.LogMessage(MessageImportance.Low, $"  Cleared existing generated code directory.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.LogWarning($"  Warning: Failed to clear directory {databaseDir}: {ex.Message}");
+                    }
+                }
+                
                 var generator = new EfCodeGenerator();
                 var generatedFiles = generator.GenerateCodeFirstFromSchema(dbSchema, targetNamespace);
 
