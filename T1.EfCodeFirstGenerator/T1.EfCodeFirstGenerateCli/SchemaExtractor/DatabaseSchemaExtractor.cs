@@ -140,11 +140,11 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                     {
                         var field = new FieldSchema
                         {
-                            FieldName = reader.GetString(0),
-                            SqlDataType = reader.GetString(1),
-                            IsNullable = reader.GetString(2).Equals("YES", StringComparison.OrdinalIgnoreCase),
+                            FieldName = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
+                            SqlDataType = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                            IsNullable = reader.IsDBNull(2) ? false : reader.GetString(2).Equals("YES", StringComparison.OrdinalIgnoreCase),
                             DefaultValue = reader.IsDBNull(3) ? null : reader.GetString(3),
-                            IsPrimaryKey = reader.GetInt32(4) == 1
+                            IsPrimaryKey = reader.IsDBNull(4) ? false : reader.GetInt32(4) == 1
                         };
                         fields.Add(field);
                     }
@@ -181,11 +181,11 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                     {
                         var field = new FieldSchema
                         {
-                            FieldName = reader.GetString(0),
-                            SqlDataType = reader.GetString(1),
-                            IsNullable = reader.GetString(2).Equals("YES", StringComparison.OrdinalIgnoreCase),
+                            FieldName = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
+                            SqlDataType = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                            IsNullable = reader.IsDBNull(2) ? false : reader.GetString(2).Equals("YES", StringComparison.OrdinalIgnoreCase),
                             DefaultValue = reader.IsDBNull(3) ? null : reader.GetString(3),
-                            IsPrimaryKey = reader.GetString(4).Equals("PRI", StringComparison.OrdinalIgnoreCase)
+                            IsPrimaryKey = reader.IsDBNull(4) ? false : reader.GetString(4).Equals("PRI", StringComparison.OrdinalIgnoreCase)
                         };
                         fields.Add(field);
                     }
