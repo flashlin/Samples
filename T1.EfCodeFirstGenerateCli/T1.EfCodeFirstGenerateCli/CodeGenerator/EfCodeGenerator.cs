@@ -236,7 +236,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             
             output.WriteLine($".HasColumnType(\"{columnType}\")");
 
-            if (field.IsPrimaryKey)
+            if (field.IsAutoIncrement)
             {
                 output.WriteLine(".ValueGeneratedOnAdd()");
             }

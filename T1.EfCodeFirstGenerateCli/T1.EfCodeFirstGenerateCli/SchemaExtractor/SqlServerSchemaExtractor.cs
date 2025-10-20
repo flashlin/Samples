@@ -51,7 +51,8 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                         END AS DATA_TYPE_FULL,
                     c.IS_NULLABLE,
                     c.COLUMN_DEFAULT,
-                    CASE WHEN pk.COLUMN_NAME IS NOT NULL THEN 1 ELSE 0 END AS IS_PRIMARY_KEY
+                    CASE WHEN pk.COLUMN_NAME IS NOT NULL THEN 1 ELSE 0 END AS IS_PRIMARY_KEY,
+                    CASE WHEN ic.object_id IS NOT NULL THEN 1 ELSE 0 END AS IS_IDENTITY
                 FROM INFORMATION_SCHEMA.COLUMNS c
                 LEFT JOIN (
                     SELECT ku.TABLE_NAME, ku.COLUMN_NAME
@@ -60,6 +61,8 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                         ON tc.CONSTRAINT_TYPE = 'PRIMARY KEY' 
                         AND tc.CONSTRAINT_NAME = ku.CONSTRAINT_NAME
                 ) pk ON c.TABLE_NAME = pk.TABLE_NAME AND c.COLUMN_NAME = pk.COLUMN_NAME
+                LEFT JOIN sys.identity_columns ic ON ic.object_id = OBJECT_ID(c.TABLE_SCHEMA + '.' + c.TABLE_NAME) 
+                    AND ic.name = c.COLUMN_NAME
                 WHERE c.TABLE_NAME = @TableName
                 ORDER BY c.ORDINAL_POSITION";
 
@@ -77,7 +80,8 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                             SqlDataType = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
                             IsNullable = reader.IsDBNull(2) ? false : reader.GetString(2).Equals("YES", StringComparison.OrdinalIgnoreCase),
                             DefaultValue = reader.IsDBNull(3) ? null : reader.GetString(3),
-                            IsPrimaryKey = reader.IsDBNull(4) ? false : reader.GetInt32(4) == 1
+                            IsPrimaryKey = reader.IsDBNull(4) ? false : reader.GetInt32(4) == 1,
+                            IsAutoIncrement = reader.IsDBNull(5) ? false : reader.GetInt32(5) == 1
                         };
                         fields.Add(field);
                     }

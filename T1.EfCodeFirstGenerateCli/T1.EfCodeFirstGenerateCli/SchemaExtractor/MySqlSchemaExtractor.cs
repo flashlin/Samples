@@ -44,7 +44,8 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                     c.COLUMN_TYPE,
                     c.IS_NULLABLE,
                     c.COLUMN_DEFAULT,
-                    c.COLUMN_KEY
+                    c.COLUMN_KEY,
+                    c.EXTRA
                 FROM INFORMATION_SCHEMA.COLUMNS c
                 WHERE c.TABLE_SCHEMA = @DatabaseName
                 AND c.TABLE_NAME = @TableName
@@ -59,13 +60,15 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                 {
                     while (reader.Read())
                     {
+                        var extraInfo = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
                         var field = new FieldSchema
                         {
                             FieldName = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
                             SqlDataType = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
                             IsNullable = reader.IsDBNull(2) ? false : reader.GetString(2).Equals("YES", StringComparison.OrdinalIgnoreCase),
                             DefaultValue = reader.IsDBNull(3) ? null : reader.GetString(3),
-                            IsPrimaryKey = reader.IsDBNull(4) ? false : reader.GetString(4).Equals("PRI", StringComparison.OrdinalIgnoreCase)
+                            IsPrimaryKey = reader.IsDBNull(4) ? false : reader.GetString(4).Equals("PRI", StringComparison.OrdinalIgnoreCase),
+                            IsAutoIncrement = extraInfo.IndexOf("auto_increment", StringComparison.OrdinalIgnoreCase) >= 0
                         };
                         fields.Add(field);
                     }
