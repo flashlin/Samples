@@ -13,11 +13,13 @@
 
 ## 快速開始
 
-### 方法 1: 使用 CLI 工具（開發階段）
+### 方法 1: 開發階段（使用 ProjectReference）
+
+**適用於開發和偵錯 T1.EfCodeFirstGenerateCli**
 
 1. **建立連線字串檔案**
 
-在專案目錄建立 `databases.db` 檔案：
+在專案目錄建立 `example.db` 檔案：
 
 ```
 # SQL Server
@@ -27,20 +29,42 @@ Server=localhost;Database=MyDatabase;User Id=sa;Password=YourPassword;TrustServe
 Server=localhost;Database=TestDb;Uid=root;Pwd=password;
 ```
 
-2. **執行 CLI 工具產生程式碼**
+2. **設定專案參考**
 
-```bash
-cd YourProject
-dotnet run --project ../T1.EfCodeFirstGenerateCli -- .
+在 `YourProject.csproj` 中添加：
+
+```xml
+<ItemGroup>
+  <!-- 開發環境：引用專案以便偵錯 -->
+  <ProjectReference Include="../T1.EfCodeFirstGenerateCli/T1.EfCodeFirstGenerateCli.csproj">
+    <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    <OutputItemType>Analyzer</OutputItemType>
+  </ProjectReference>
+</ItemGroup>
+
+<!-- 導入 MSBuild targets -->
+<Import Project="../T1.EfCodeFirstGenerateCli/build/T1.EfCodeFirstGenerateCli.targets" 
+        Condition="Exists('../T1.EfCodeFirstGenerateCli/build/T1.EfCodeFirstGenerateCli.targets')" />
+
+<PropertyGroup>
+  <!-- 指定 Task Assembly 路徑 -->
+  <T1EfCodeFirstGeneratorTaskAssembly>$(MSBuildThisFileDirectory)../T1.EfCodeFirstGenerateCli/bin/$(Configuration)/net8.0/T1.EfCodeFirstGenerateCli.dll</T1EfCodeFirstGeneratorTaskAssembly>
+</PropertyGroup>
 ```
 
 3. **建置專案**
 
-生成的程式碼會在 `Generated/` 目錄中，直接編譯使用。
+MSBuild Task 會自動執行，產生程式碼到 `Generated/` 目錄：
 
 ```bash
 dotnet build
 ```
+
+**優點：**
+- ✅ 可以在 T1.EfCodeFirstGenerateCli 中設定中斷點偵錯
+- ✅ 修改 CLI 工具後自動重建
+- ✅ 建置時自動產生程式碼
+- ✅ 建置目標正確（Example 專案的目錄）
 
 ### 方法 2: 使用 NuGet 套件（生產環境）
 

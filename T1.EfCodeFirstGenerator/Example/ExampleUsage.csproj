@@ -8,11 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Reference the Code Generator (for MSBuild Task integration during development) -->
-    <!-- Note: The code generator will run before build and generate files in Generated/ -->
-    <!-- No runtime dependency needed, just build-time code generation -->
+    <!-- Development: Reference project for debugging -->
+    <ProjectReference Include="../T1.EfCodeFirstGenerateCli/T1.EfCodeFirstGenerateCli.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
     
-    <!-- Or use NuGet package (in production) -->
+    <!-- Production: Use NuGet package -->
     <!-- <PackageReference Include="T1.EfCodeFirstGenerateCli" Version="1.0.0" /> -->
   </ItemGroup>
 
@@ -24,5 +26,14 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
   </ItemGroup>
+
+  <!-- Import MSBuild Task for automatic code generation during build -->
+  <Import Project="../T1.EfCodeFirstGenerateCli/build/T1.EfCodeFirstGenerateCli.targets" 
+          Condition="Exists('../T1.EfCodeFirstGenerateCli/build/T1.EfCodeFirstGenerateCli.targets')" />
+
+  <PropertyGroup>
+    <!-- Point to the development build of the task assembly -->
+    <T1EfCodeFirstGeneratorTaskAssembly>$(MSBuildThisFileDirectory)../T1.EfCodeFirstGenerateCli/bin/$(Configuration)/net8.0/T1.EfCodeFirstGenerateCli.dll</T1EfCodeFirstGeneratorTaskAssembly>
+  </PropertyGroup>
 
 </Project>

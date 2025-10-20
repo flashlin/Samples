@@ -1,8 +1,11 @@
 <Project>
   <UsingTask TaskName="T1.EfCodeFirstGenerateCli.Tasks.GenerateEfCodeTask" 
-             AssemblyFile="$(T1EfCodeFirstGeneratorTaskAssembly)" />
+             AssemblyFile="$(T1EfCodeFirstGeneratorTaskAssembly)" 
+             Condition="Exists('$(T1EfCodeFirstGeneratorTaskAssembly)')" />
 
-  <Target Name="T1GenerateEfCode" BeforeTargets="BeforeBuild">
+  <Target Name="T1GenerateEfCode" 
+          BeforeTargets="CoreCompile" 
+          Condition="Exists('$(T1EfCodeFirstGeneratorTaskAssembly)')">
     <GenerateEfCodeTask ProjectDirectory="$(ProjectDir)" />
   </Target>
 </Project>
