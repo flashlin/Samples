@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace T1.EfCodeFirstGenerator.Common
+namespace T1.EfCodeFirstGenerateCli.Common
 {
     internal class IndentStringBuilder
     {

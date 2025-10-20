@@ -7,15 +7,15 @@
     <Nullable>enable</Nullable>
     
     <!-- NuGet Package Configuration -->
-    <PackageId>T1.EfCodeFirstGenerator</PackageId>
+    <PackageId>T1.EfCodeFirstGenerateCli</PackageId>
     <Version>1.0.0</Version>
     <Authors>T1 Team</Authors>
     <Company>T1</Company>
     <Description>Entity Framework Core Code First generator from database schema. Automatically generates DbContext, Entity classes, and Entity Configurations from your database.</Description>
     <PackageTags>ef-core;entity-framework;code-generator;database;code-first</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/your-repo/T1.EfCodeFirstGenerator</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/your-repo/T1.EfCodeFirstGenerator</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/your-repo/T1.EfCodeFirstGenerateCli</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/your-repo/T1.EfCodeFirstGenerateCli</PackageProjectUrl>
     <PackAsTool>false</PackAsTool>
     <IncludeBuildOutput>true</IncludeBuildOutput>
     <DevelopmentDependency>true</DevelopmentDependency>

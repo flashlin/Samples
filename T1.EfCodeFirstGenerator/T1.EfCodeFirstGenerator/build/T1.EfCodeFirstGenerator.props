@@ -1,6 +1,0 @@
-<Project>
-  <PropertyGroup>
-    <T1EfCodeFirstGeneratorTaskAssembly>$(MSBuildThisFileDirectory)..\tools\net8.0\T1.EfCodeFirstGenerator.dll</T1EfCodeFirstGeneratorTaskAssembly>
-  </PropertyGroup>
-</Project>
-

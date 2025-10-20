@@ -1,4 +1,4 @@
-# T1.EfCodeFirstGenerator
+# T1.EfCodeFirstGenerateCli
 
 自動從資料庫 schema 產生 Entity Framework Core Code First 程式碼的工具。
 
@@ -31,7 +31,7 @@ Server=localhost;Database=TestDb;Uid=root;Pwd=password;
 
 ```bash
 cd YourProject
-dotnet run --project ../T1.EfCodeFirstGenerator -- .
+dotnet run --project ../T1.EfCodeFirstGenerateCli -- .
 ```
 
 3. **建置專案**
@@ -47,7 +47,7 @@ dotnet build
 1. **安裝套件**
 
 ```bash
-dotnet add package T1.EfCodeFirstGenerator
+dotnet add package T1.EfCodeFirstGenerateCli
 ```
 
 2. **建立連線字串檔案**
@@ -111,11 +111,11 @@ await context.SaveChangesAsync();
 ## 打包為 NuGet 套件
 
 ```bash
-cd T1.EfCodeFirstGenerator
+cd T1.EfCodeFirstGenerateCli
 dotnet pack -c Release
 
 # 測試本地套件
-dotnet add package T1.EfCodeFirstGenerator --source ./bin/Release
+dotnet add package T1.EfCodeFirstGenerateCli --source ./bin/Release
 ```
 
 ## 支援的資料庫

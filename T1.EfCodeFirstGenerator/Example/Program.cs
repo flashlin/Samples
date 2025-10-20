@@ -7,10 +7,10 @@ namespace ExampleUsage
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("T1.EfCodeFirstGenerator Example");
-            Console.WriteLine("================================");
+            Console.WriteLine("T1.EfCodeFirstGenerateCli Example");
+            Console.WriteLine("==================================");
             Console.WriteLine();
-            Console.WriteLine("This project demonstrates the usage of T1.EfCodeFirstGenerator.");
+            Console.WriteLine("This project demonstrates the usage of T1.EfCodeFirstGenerateCli.");
             Console.WriteLine();
             
             // Example: Using the generated DbContext
@@ -20,7 +20,7 @@ namespace ExampleUsage
             
             Console.WriteLine("To use the generated code:");
             Console.WriteLine("1. Configure database connection in example.db");
-            Console.WriteLine("2. Run: dotnet run --project ../T1.EfCodeFirstGenerator -- .");
+            Console.WriteLine("2. Run: dotnet run --project ../T1.EfCodeFirstGenerateCli -- .");
             Console.WriteLine("3. Build this project to compile the generated code");
             Console.WriteLine();
             

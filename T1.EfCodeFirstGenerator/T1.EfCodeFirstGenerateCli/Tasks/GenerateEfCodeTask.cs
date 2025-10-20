@@ -5,11 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
-using T1.EfCodeFirstGenerator.ConfigParser;
-using T1.EfCodeFirstGenerator.SchemaExtractor;
-using T1.EfCodeFirstGenerator.CodeGenerator;
+using T1.EfCodeFirstGenerateCli.ConfigParser;
+using T1.EfCodeFirstGenerateCli.SchemaExtractor;
+using T1.EfCodeFirstGenerateCli.CodeGenerator;
 
-namespace T1.EfCodeFirstGenerator.Tasks
+namespace T1.EfCodeFirstGenerateCli.Tasks
 {
     public class GenerateEfCodeTask : Task
     {

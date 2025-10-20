@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace T1.EfCodeFirstGenerator.Converters
+namespace T1.EfCodeFirstGenerateCli.Converters
 {
     internal class SqlTypeToCSharpTypeConverter
     {

@@ -13,7 +13,7 @@
     <!-- No runtime dependency needed, just build-time code generation -->
     
     <!-- Or use NuGet package (in production) -->
-    <!-- <PackageReference Include="T1.EfCodeFirstGenerator" Version="1.0.0" /> -->
+    <!-- <PackageReference Include="T1.EfCodeFirstGenerateCli" Version="1.0.0" /> -->
   </ItemGroup>
 
   <!-- Generated code files are automatically included by SDK -->

@@ -3,11 +3,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
-using T1.EfCodeFirstGenerator.ConfigParser;
-using T1.EfCodeFirstGenerator.SchemaExtractor;
-using T1.EfCodeFirstGenerator.CodeGenerator;
+using T1.EfCodeFirstGenerateCli.ConfigParser;
+using T1.EfCodeFirstGenerateCli.SchemaExtractor;
+using T1.EfCodeFirstGenerateCli.CodeGenerator;
 
-namespace T1.EfCodeFirstGenerator
+namespace T1.EfCodeFirstGenerateCli
 {
     class Program
     {

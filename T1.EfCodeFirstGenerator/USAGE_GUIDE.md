@@ -1,4 +1,4 @@
-# T1.EfCodeFirstGenerator 詳細使用指南
+# T1.EfCodeFirstGenerateCli 詳細使用指南
 
 ## 目錄
 
@@ -18,15 +18,15 @@
 
 ```bash
 # Clone 或下載專案
-git clone https://github.com/your-repo/T1.EfCodeFirstGenerator.git
+git clone https://github.com/your-repo/T1.EfCodeFirstGenerateCli.git
 
 # 建置專案
-cd T1.EfCodeFirstGenerator/T1.EfCodeFirstGenerator
+cd T1.EfCodeFirstGenerateCli/T1.EfCodeFirstGenerateCli
 dotnet build
 
 # 在目標專案執行
 cd /path/to/your/project
-dotnet run --project /path/to/T1.EfCodeFirstGenerator/T1.EfCodeFirstGenerator.csproj -- .
+dotnet run --project /path/to/T1.EfCodeFirstGenerateCli/T1.EfCodeFirstGenerateCli.csproj -- .
 ```
 
 ### 方式 2: NuGet 套件（生產環境）
@@ -35,7 +35,7 @@ dotnet run --project /path/to/T1.EfCodeFirstGenerator/T1.EfCodeFirstGenerator.cs
 
 ```bash
 # 安裝套件
-dotnet add package T1.EfCodeFirstGenerator
+dotnet add package T1.EfCodeFirstGenerateCli
 
 # 建置時自動執行
 dotnet build
@@ -69,7 +69,7 @@ Server=localhost;Database=DB2;User Id=sa;Password=pass2;
 
 **使用 CLI：**
 ```bash
-dotnet run --project path/to/T1.EfCodeFirstGenerator.csproj -- /path/to/your/project
+dotnet run --project path/to/T1.EfCodeFirstGenerateCli.csproj -- /path/to/your/project
 ```
 
 **使用 NuGet（自動）：**
@@ -202,9 +202,9 @@ var generator = new EfCodeGenerator(converter);
 
 ### NuGet 套件如何工作
 
-當您安裝 `T1.EfCodeFirstGenerator` NuGet 套件時：
+當您安裝 `T1.EfCodeFirstGenerateCli` NuGet 套件時：
 
-1. `build/T1.EfCodeFirstGenerator.targets` 會被導入到專案
+1. `build/T1.EfCodeFirstGenerateCli.targets` 會被導入到專案
 2. `GenerateEfCodeTask` 在 `BeforeBuild` 目標執行
 3. Task 掃描 `.db` 檔案並產生程式碼
 4. 生成的 `.cs` 檔案被包含在編譯中
@@ -413,7 +413,7 @@ steps:
       echo "Server=${{ secrets.DB_SERVER }};Database=${{ secrets.DB_NAME }};..." > databases.db
   
   - name: Generate code
-    run: dotnet run --project T1.EfCodeFirstGenerator -- .
+    run: dotnet run --project T1.EfCodeFirstGenerateCli -- .
   
   - name: Build
     run: dotnet build
@@ -436,7 +436,7 @@ steps:
 ```bash
 # 強制重新生成
 rm Generated/*.schema
-dotnet run --project T1.EfCodeFirstGenerator -- .
+dotnet run --project T1.EfCodeFirstGenerateCli -- .
 ```
 
 ## 相關資源

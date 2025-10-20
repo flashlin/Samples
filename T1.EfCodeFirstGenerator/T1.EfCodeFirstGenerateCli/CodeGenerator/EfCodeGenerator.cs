@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using T1.EfCodeFirstGenerator.Common;
-using T1.EfCodeFirstGenerator.Converters;
-using T1.EfCodeFirstGenerator.Models;
+using T1.EfCodeFirstGenerateCli.Common;
+using T1.EfCodeFirstGenerateCli.Converters;
+using T1.EfCodeFirstGenerateCli.Models;
 
-namespace T1.EfCodeFirstGenerator.CodeGenerator
+namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 {
     internal class EfCodeGenerator
     {

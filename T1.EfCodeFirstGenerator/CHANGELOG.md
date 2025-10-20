@@ -1,11 +1,11 @@
 # Changelog
 
-All notable changes to T1.EfCodeFirstGenerator will be documented in this file.
+All notable changes to T1.EfCodeFirstGenerateCli will be documented in this file.
 
 ## [1.0.0] - 2025-10-20
 
 ### Added
-- Initial release of T1.EfCodeFirstGenerator
+- Initial release of T1.EfCodeFirstGenerateCli
 - CLI tool for database schema extraction and code generation
 - MSBuild Task integration for automatic code generation during build
 - Support for SQL Server and MySQL databases
