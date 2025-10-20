@@ -5,6 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     
     <!-- NuGet Package Configuration -->
     <PackageId>T1.EfCodeFirstGenerateCli</PackageId>
@@ -37,17 +38,14 @@
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
-  <!-- Copy all output files to tools directory in the package -->
-  <Target Name="PackTaskDependencies" AfterTargets="Build">
-    <ItemGroup>
-      <_PackageFiles Include="$(OutputPath)**\*.dll" PackagePath="tools\" />
-      <_PackageFiles Include="$(OutputPath)**\*.json" PackagePath="tools\" />
-    </ItemGroup>
-  </Target>
-
+  <!-- Copy all output files and dependencies to tools directory in the package -->
   <ItemGroup>
-    <None Include="$(OutputPath)\*.dll" Pack="true" PackagePath="tools\net8.0\" />
-    <None Include="$(OutputPath)\*.json" Pack="true" PackagePath="tools\net8.0\" />
+    <!-- Include all DLLs (main assembly and dependencies) -->
+    <None Include="$(OutputPath)*.dll" Pack="true" PackagePath="tools\net8.0\" />
+    <None Include="$(OutputPath)*.json" Pack="true" PackagePath="tools\net8.0\" />
+    
+    <!-- Include native libraries for Microsoft.Data.SqlClient -->
+    <None Include="$(OutputPath)runtimes\**\*" Pack="true" PackagePath="tools\net8.0\runtimes\" />
   </ItemGroup>
 
 </Project>
