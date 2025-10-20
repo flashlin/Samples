@@ -45,6 +45,16 @@ All notable changes to T1.EfCodeFirstGenerateCli will be documented in this file
 
 ## [Unreleased]
 
+## [1.0.1] - 2025-10-20
+
+### Fixed
+- **Cross-platform compatibility**: Replaced `System.Data.SqlClient` with `Microsoft.Data.SqlClient` to resolve "System.Data.SqlClient is not supported on this platform" error on macOS and Linux
+- Now fully supports Windows, macOS, and Linux platforms
+
+### Changed
+- Updated dependency from `System.Data.SqlClient 4.8.6` to `Microsoft.Data.SqlClient 5.2.2`
+- Added cross-platform support section to README
+
 ### Planned Features
 - PostgreSQL support
 - Oracle support

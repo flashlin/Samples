@@ -151,6 +151,13 @@ dotnet add package T1.EfCodeFirstGenerateCli --source ./bin/Release
 | PostgreSQL | 🚧 規劃中 |
 | Oracle | 🚧 規劃中 |
 
+## 跨平台支援
+
+此套件使用 `Microsoft.Data.SqlClient` 連接 SQL Server，完全支援：
+- ✅ Windows
+- ✅ macOS
+- ✅ Linux
+
 ## SQL 型別對應
 
 | SQL 型別 | C# 型別 |

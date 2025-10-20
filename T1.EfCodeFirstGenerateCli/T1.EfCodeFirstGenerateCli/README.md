@@ -117,6 +117,13 @@ dotnet build
 - ✅ MySQL / MariaDB
 - 🚧 PostgreSQL (planned)
 
+## Cross-Platform Support
+
+This package uses `Microsoft.Data.SqlClient` for SQL Server connectivity, which is fully supported on:
+- ✅ Windows
+- ✅ macOS
+- ✅ Linux
+
 ## License
 MIT License
 

@@ -8,11 +8,11 @@
     
     <!-- NuGet Package Configuration -->
     <PackageId>T1.EfCodeFirstGenerateCli</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>MrBrain</Authors>
     <Company>MrBrain</Company>
-    <Description>Entity Framework Core Code First generator from database schema. Automatically generates DbContext, Entity classes, and Entity Configurations from your database.</Description>
-    <PackageTags>ef-core;entity-framework;code-generator;database;code-first</PackageTags>
+    <Description>Entity Framework Core Code First generator from database schema. Automatically generates DbContext, Entity classes, and Entity Configurations from your database. Cross-platform support for Windows, macOS, and Linux.</Description>
+    <PackageTags>ef-core;entity-framework;code-generator;database;code-first;cross-platform</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/your-repo/T1.EfCodeFirstGenerateCli</RepositoryUrl>
@@ -21,10 +21,11 @@
     <IncludeBuildOutput>true</IncludeBuildOutput>
     <DevelopmentDependency>true</DevelopmentDependency>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageReleaseNotes>Fixed cross-platform compatibility by replacing System.Data.SqlClient with Microsoft.Data.SqlClient</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageReference Include="MySql.Data" Version="8.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.14.28" />

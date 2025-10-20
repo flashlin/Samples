@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using T1.EfCodeFirstGenerateCli.Models;
 
 namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
