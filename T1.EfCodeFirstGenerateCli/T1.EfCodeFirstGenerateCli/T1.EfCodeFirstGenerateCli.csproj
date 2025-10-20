@@ -9,8 +9,8 @@
     <!-- NuGet Package Configuration -->
     <PackageId>T1.EfCodeFirstGenerateCli</PackageId>
     <Version>1.0.0</Version>
-    <Authors>T1 Team</Authors>
-    <Company>T1</Company>
+    <Authors>MrBrain</Authors>
+    <Company>MrBrain</Company>
     <Description>Entity Framework Core Code First generator from database schema. Automatically generates DbContext, Entity classes, and Entity Configurations from your database.</Description>
     <PackageTags>ef-core;entity-framework;code-generator;database;code-first</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

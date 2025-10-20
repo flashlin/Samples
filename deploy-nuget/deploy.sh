@@ -21,6 +21,7 @@ projectNames=(
     "T1.SqlSharp"
     "T1.SlackSDK"
     "T1.GrpcProtoGenerator"
+    "T1.EfCodeFirstGenerateCli"
 )
 
 # Show project selection with fzf
