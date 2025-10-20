@@ -1,22 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Reference the Source Generator -->
-    <ProjectReference Include="../T1.EfCodeFirstGenerator.csproj" 
-                      OutputItemType="Analyzer" 
-                      ReferenceOutputAssembly="false" />
+    <!-- Reference the Code Generator (for MSBuild Task integration during development) -->
+    <!-- Note: The code generator will run before build and generate files in Generated/ -->
+    <!-- No runtime dependency needed, just build-time code generation -->
+    
+    <!-- Or use NuGet package (in production) -->
+    <!-- <PackageReference Include="T1.EfCodeFirstGenerator" Version="1.0.0" /> -->
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Include .schema files as additional files for the generator -->
-    <AdditionalFiles Include="*.schema" />
-  </ItemGroup>
+  <!-- Generated code files are automatically included by SDK -->
 
   <ItemGroup>
     <!-- Add EF Core packages -->
@@ -26,4 +26,3 @@
   </ItemGroup>
 
 </Project>
-

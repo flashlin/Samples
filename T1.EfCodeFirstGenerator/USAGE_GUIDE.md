@@ -1,329 +1,453 @@
-# T1.EfCodeFirstGenerator 使用指南
+# T1.EfCodeFirstGenerator 詳細使用指南
 
-## 概述
+## 目錄
 
-T1.EfCodeFirstGenerator 是一個兩階段的程式碼生成工具，用於從資料庫 schema 自動產生 Entity Framework Core Code First 程式碼。
+1. [安裝方式](#安裝方式)
+2. [基本使用](#基本使用)
+3. [進階配置](#進階配置)
+4. [MSBuild 整合](#msbuild-整合)
+5. [生成程式碼說明](#生成程式碼說明)
+6. [自訂擴展](#自訂擴展)
+7. [疑難排解](#疑難排解)
 
-## 架構
+## 安裝方式
 
-### 1. CLI 工具 (T1.EfCodeFirstGenerator.CLI)
-- 連接到資料庫
-- 提取 schema 資訊
-- 產生 `.schema` 檔案（JSON 格式）
+### 方式 1: CLI 工具（開發環境）
 
-### 2. Source Generator (T1.EfCodeFirstGenerator)
-- 在編譯時讀取 `.schema` 檔案
-- 自動產生 EF Core 程式碼
-- 程式碼直接加入編譯（不寫入硬碟）
-
-## 完整使用流程
-
-### 步驟 1: 準備連線字串檔案
-
-在專案目錄建立 `.db` 檔案（例如：`databases.db`）：
-
-```
-# SQL Server 連線
-Server=localhost;Database=MyDatabase;User Id=sa;Password=YourPassword;TrustServerCertificate=true
-
-# MySQL 連線
-Server=192.168.1.100;Database=AnotherDb;Uid=root;Pwd=secret;
-```
-
-**注意事項：**
-- 每一行一個連線字串
-- 以 `#` 或 `//` 開頭的行視為註解
-- 支援標準 ADO.NET 連線字串格式
-
-### 步驟 2: 執行 CLI 工具提取 Schema
+適用於開發階段，手動控制程式碼生成時機。
 
 ```bash
-# 方法 1: 直接執行
-cd YourProjectDirectory
-dotnet run --project ../T1.EfCodeFirstGenerator.CLI/T1.EfCodeFirstGenerator.CLI.csproj
+# Clone 或下載專案
+git clone https://github.com/your-repo/T1.EfCodeFirstGenerator.git
 
-# 方法 2: 指定目錄
-dotnet run --project ../T1.EfCodeFirstGenerator.CLI/T1.EfCodeFirstGenerator.CLI.csproj -- /path/to/your/project
+# 建置專案
+cd T1.EfCodeFirstGenerator/T1.EfCodeFirstGenerator
+dotnet build
+
+# 在目標專案執行
+cd /path/to/your/project
+dotnet run --project /path/to/T1.EfCodeFirstGenerator/T1.EfCodeFirstGenerator.csproj -- .
 ```
 
-執行後會產生 `{ServerName}_{DatabaseName}.schema` 檔案，例如：
-- `localhost_MyDatabase.schema`
-- `192.168.1.100_AnotherDb.schema`
+### 方式 2: NuGet 套件（生產環境）
 
-### 步驟 3: 設定專案引用
-
-在您的專案 `.csproj` 檔案中加入：
-
-```xml
-<ItemGroup>
-  <!-- 引用 Source Generator -->
-  <ProjectReference Include="../T1.EfCodeFirstGenerator/T1.EfCodeFirstGenerator.csproj" 
-                    OutputItemType="Analyzer" 
-                    ReferenceOutputAssembly="false" />
-</ItemGroup>
-
-<ItemGroup>
-  <!-- 將 .schema 檔案標記為 AdditionalFiles -->
-  <AdditionalFiles Include="*.schema" />
-</ItemGroup>
-
-<ItemGroup>
-  <!-- 加入必要的 EF Core 套件 -->
-  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
-  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
-  <!-- 或 MySQL -->
-  <!-- <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.0" /> -->
-</ItemGroup>
-```
-
-### 步驟 4: 建置專案
+適用於團隊協作和 CI/CD 環境。
 
 ```bash
+# 安裝套件
+dotnet add package T1.EfCodeFirstGenerator
+
+# 建置時自動執行
 dotnet build
 ```
 
-建置時，Source Generator 會自動產生以下程式碼：
+## 基本使用
 
-1. **DbContext**: `{DatabaseName}DbContext.cs`
-2. **Entity 類別**: `{TableName}Entity.cs` （每個資料表一個）
-3. **Entity Configuration**: `{TableName}EntityConfiguration.cs` （每個資料表一個）
+### 步驟 1: 準備連線字串檔案
 
-### 步驟 5: 使用生成的程式碼
+在專案根目錄建立 `.db` 檔案（例如：`databases.db`）：
 
-```csharp
-using Generated.Example; // namespace 根據 .schema 檔案位置而定
+```
+# 註解行以 # 或 // 開頭
 
-// 使用 DbContext
-public class MyService
-{
-    private readonly SampleDbDbContext _context;
+# SQL Server 範例
+Server=localhost;Database=MyDatabase;User Id=sa;Password=YourPassword;TrustServerCertificate=true
 
-    public MyService(SampleDbDbContext context)
-    {
-        _context = context;
-    }
+# MySQL 範例  
+Server=192.168.1.100;Database=TestDb;Uid=root;Pwd=secret;
 
-    public async Task<List<UsersEntity>> GetAllUsers()
-    {
-        return await _context.Users.ToListAsync();
-    }
-
-    public async Task AddUser(UsersEntity user)
-    {
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-    }
-}
+# 多個資料庫
+Server=localhost;Database=DB1;User Id=sa;Password=pass1;
+Server=localhost;Database=DB2;User Id=sa;Password=pass2;
 ```
 
-## 生成的程式碼範例
+**支援的連線字串格式：**
+- SQL Server: 標準 ADO.NET 格式
+- MySQL: MySQL Connector/NET 格式
 
-假設有一個 `Users` 資料表：
+### 步驟 2: 執行程式碼生成
 
-### UsersEntity.cs
-```csharp
-using System;
-
-namespace Generated.Example
-{
-    public class UsersEntity
-    {
-        public int Id { get; set; }
-        public required string Username { get; set; }
-        public required string Email { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public bool IsActive { get; set; }
-    }
-}
+**使用 CLI：**
+```bash
+dotnet run --project path/to/T1.EfCodeFirstGenerator.csproj -- /path/to/your/project
 ```
 
-### UsersEntityConfiguration.cs
-```csharp
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Generated.Example
-{
-    public class UsersEntityConfiguration : IEntityTypeConfiguration<UsersEntity>
-    {
-        public void Configure(EntityTypeBuilder<UsersEntity> builder)
-        {
-            builder.ToTable("Users");
-
-            builder.HasKey(x => x.Id);
-
-            builder.Property(x => x.Id)
-                .HasColumnType("int")
-                .ValueGeneratedOnAdd()
-                .IsRequired();
-
-            builder.Property(x => x.Username)
-                .HasColumnType("nvarchar(100)")
-                .IsRequired()
-                .HasMaxLength(100);
-
-            builder.Property(x => x.Email)
-                .HasColumnType("nvarchar(255)")
-                .IsRequired()
-                .HasMaxLength(255);
-
-            builder.Property(x => x.CreatedAt)
-                .HasColumnType("datetime2")
-                .IsRequired()
-                .HasDefaultValue(getdate());
-
-            builder.Property(x => x.IsActive)
-                .HasColumnType("bit")
-                .IsRequired()
-                .HasDefaultValue(true);
-        }
-    }
-}
+**使用 NuGet（自動）：**
+```bash
+dotnet build  # MSBuild Task 會自動執行
 ```
 
-### SampleDbDbContext.cs
+### 步驟 3: 檢視生成的程式碼
+
+程式碼會生成在 `Generated/` 目錄：
+
+```
+Generated/
+├── localhost_MyDatabase.schema          # Schema 快取檔案
+├── MyDatabaseDbContext.cs              # DbContext
+├── Entities/
+│   ├── UsersEntity.cs
+│   ├── ProductsEntity.cs
+│   └── OrdersEntity.cs
+└── Configurations/
+    ├── UsersEntityConfiguration.cs
+    ├── ProductsEntityConfiguration.cs
+    └── OrdersEntityConfiguration.cs
+```
+
+### 步驟 4: 使用生成的程式碼
+
 ```csharp
+using Generated;
 using Microsoft.EntityFrameworkCore;
 
-namespace Generated.Example
+public class Program
 {
-    public partial class SampleDbDbContext : DbContext
+    public static async Task Main(string[] args)
     {
-        public DbSet<UsersEntity> Users { get; set; }
-        public DbSet<ProductsEntity> Products { get; set; }
+        // 配置 DbContext
+        var options = new DbContextOptionsBuilder<MyDatabaseDbContext>()
+            .UseSqlServer("Server=localhost;Database=MyDatabase;...")
+            .Options;
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        using var context = new MyDatabaseDbContext(options);
+
+        // CRUD 操作
+        var users = await context.Users.ToListAsync();
+        
+        var newUser = new UsersEntity
         {
-            modelBuilder.ApplyConfiguration(new UsersEntityConfiguration());
-            modelBuilder.ApplyConfiguration(new ProductsEntityConfiguration());
-        }
+            Username = "john_doe",
+            Email = "john@example.com",
+            CreatedAt = DateTime.Now,
+            IsActive = true
+        };
+
+        context.Users.Add(newUser);
+        await context.SaveChangesAsync();
     }
 }
 ```
 
-## Schema 檔案格式
-
-`.schema` 檔案是 JSON 格式：
-
-```json
-{
-  "DatabaseName": "SampleDb",
-  "Tables": [
-    {
-      "TableName": "Users",
-      "Fields": [
-        {
-          "FieldName": "Id",
-          "SqlDataType": "int",
-          "IsPrimaryKey": true,
-          "IsNullable": false,
-          "DefaultValue": null
-        },
-        {
-          "FieldName": "Username",
-          "SqlDataType": "nvarchar(100)",
-          "IsPrimaryKey": false,
-          "IsNullable": false,
-          "DefaultValue": null
-        }
-      ]
-    }
-  ]
-}
-```
-
-## 支援的資料庫
-
-- ✅ SQL Server
-- ✅ MySQL / MariaDB
-- 🚧 PostgreSQL (規劃中)
-- 🚧 Oracle (規劃中)
-
-## SQL 型別對應
-
-| SQL Type | C# Type |
-|----------|---------|
-| int, integer | int |
-| bigint | long |
-| smallint | short |
-| tinyint | byte |
-| bit, boolean | bool |
-| decimal, numeric, money | decimal |
-| float, real | double |
-| date, datetime, datetime2 | DateTime |
-| time | TimeSpan |
-| uniqueidentifier, guid | Guid |
-| varchar, nvarchar, text | string |
-| binary, varbinary, image | byte[] |
-
-## 常見問題
-
-### Q1: 如何更新 Schema？
-刪除 `.schema` 檔案，重新執行 CLI 工具。
-
-### Q2: 如何自訂型別對應？
-可以修改 `SqlTypeToCSharpTypeConverter` 類別並註冊自訂對應規則。
-
-### Q3: 生成的程式碼在哪裡？
-程式碼在編譯時產生並直接加入記憶體，不會寫入硬碟。可以在 IDE 中透過 "Go to Definition" 查看。
-
-### Q4: 如何自訂 namespace？
-Namespace 根據 `.schema` 檔案所在的目錄決定。
-
-### Q5: 支援複合主鍵嗎？
-是的，會自動偵測並產生對應的 `HasKey` 設定。
-
-## 進階用法
+## 進階配置
 
 ### 自訂 DbContext
 
-由於生成的 DbContext 是 `partial class`，您可以在另一個檔案中擴展它：
+由於生成的 DbContext 是 `partial class`，您可以在另一個檔案中擴展：
 
 ```csharp
-// SampleDbDbContext.Extensions.cs
-namespace Generated.Example
+// MyDatabaseDbContext.Extensions.cs
+using Microsoft.EntityFrameworkCore;
+
+namespace Generated
 {
-    public partial class SampleDbDbContext
+    public partial class MyDatabaseDbContext
     {
-        public SampleDbDbContext(DbContextOptions<SampleDbDbContext> options)
+        // 自訂建構子
+        public MyDatabaseDbContext(DbContextOptions<MyDatabaseDbContext> options)
             : base(options)
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        // 自訂配置
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
+            // 添加自訂配置
+            modelBuilder.Entity<UsersEntity>()
+                .HasMany(u => u.Orders)
+                .WithOne(o => o.User);
+        }
+    }
+}
+```
+
+### 排除特定資料表
+
+編輯 `.schema` 檔案，移除不需要的資料表：
+
+```json
+{
+  "DatabaseName": "MyDatabase",
+  "Tables": [
+    {
+      "TableName": "Users",
+      "Fields": [...]
+    }
+    // 移除不需要的資料表
+  ]
+}
+```
+
+### 自訂 Namespace
+
+修改 `Program.cs` 中的 `targetNamespace`：
+
+```csharp
+var targetNamespace = "YourCompany.Data.Models";
+```
+
+### 自訂型別對應
+
+```csharp
+var converter = new SqlTypeToCSharpTypeConverter();
+
+// 註冊自訂對應
+converter.RegisterCustomMapping("geometry", (sqlType, isNullable) => 
+    isNullable ? "NetTopologySuite.Geometries.Geometry?" : "NetTopologySuite.Geometries.Geometry");
+
+var generator = new EfCodeGenerator(converter);
+```
+
+## MSBuild 整合
+
+### NuGet 套件如何工作
+
+當您安裝 `T1.EfCodeFirstGenerator` NuGet 套件時：
+
+1. `build/T1.EfCodeFirstGenerator.targets` 會被導入到專案
+2. `GenerateEfCodeTask` 在 `BeforeBuild` 目標執行
+3. Task 掃描 `.db` 檔案並產生程式碼
+4. 生成的 `.cs` 檔案被包含在編譯中
+
+### 自訂 MSBuild 行為
+
+在您的 `.csproj` 中：
+
+```xml
+<PropertyGroup>
+  <!-- 停用自動生成 -->
+  <T1SkipCodeGeneration>true</T1SkipCodeGeneration>
+</PropertyGroup>
+```
+
+### 手動觸發生成
+
+```bash
+dotnet msbuild /t:T1GenerateEfCode
+```
+
+## 生成程式碼說明
+
+### DbContext
+
+```csharp
+public partial class MyDatabaseDbContext : DbContext
+{
+    public DbSet<UsersEntity> Users { get; set; }
+    public DbSet<ProductsEntity> Products { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new UsersEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductsEntityConfiguration());
+    }
+}
+```
+
+### Entity
+
+```csharp
+public class UsersEntity
+{
+    public int Id { get; set; }
+    public required string Username { get; set; }
+    public required string Email { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public bool IsActive { get; set; }
+}
+```
+
+**注意：** 非 nullable 的 reference type（如 `string`）會加上 `required` 修飾符。
+
+### EntityConfiguration
+
+```csharp
+public class UsersEntityConfiguration : IEntityTypeConfiguration<UsersEntity>
+{
+    public void Configure(EntityTypeBuilder<UsersEntity> builder)
+    {
+        builder.ToTable("Users");
+
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Id)
+            .HasColumnType("int")
+            .ValueGeneratedOnAdd()
+            .IsRequired();
+
+        builder.Property(x => x.Username)
+            .HasColumnType("nvarchar(100)")
+            .IsRequired()
+            .HasMaxLength(100);
+
+        builder.Property(x => x.CreatedAt)
+            .HasColumnType("datetime2")
+            .IsRequired()
+            .HasDefaultValue(getdate());
+    }
+}
+```
+
+## 自訂擴展
+
+### 添加導航屬性
+
+```csharp
+// UsersEntity.Extensions.cs
+namespace Generated
+{
+    public partial class UsersEntity
+    {
+        public virtual ICollection<OrdersEntity> Orders { get; set; }
+    }
+}
+
+// UsersEntityConfiguration.Extensions.cs
+namespace Generated
+{
+    public partial class UsersEntityConfiguration
+    {
+        partial void ConfigureRelations(EntityTypeBuilder<UsersEntity> builder)
+        {
+            builder.HasMany(u => u.Orders)
+                .WithOne(o => o.User)
+                .HasForeignKey(o => o.UserId);
+        }
+    }
+}
+```
+
+### 添加資料驗證
+
+```csharp
+using System.ComponentModel.DataAnnotations;
+
+namespace Generated
+{
+    public partial class UsersEntity : IValidatableObject
+    {
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (string.IsNullOrWhiteSpace(Username))
             {
-                optionsBuilder.UseSqlServer("your-connection-string");
+                yield return new ValidationResult(
+                    "Username is required",
+                    new[] { nameof(Username) });
             }
         }
     }
 }
 ```
 
-### 註冊到 DI 容器
-
-```csharp
-// Program.cs or Startup.cs
-services.AddDbContext<SampleDbDbContext>(options =>
-    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-```
-
-## 最佳實踐
-
-1. **版本控制**: 將 `.schema` 檔案加入版本控制，但不要提交 `.db` 檔案（包含密碼）
-2. **環境分離**: 不同環境使用不同的 `.db` 檔案
-3. **定期更新**: 當資料庫 schema 變更時，重新產生 `.schema` 檔案
-4. **部分類別**: 使用 `partial class` 擴展生成的程式碼，不要直接修改生成的檔案
-
 ## 疑難排解
 
-### 錯誤: "Could not load file or assembly 'Newtonsoft.Json'"
-確保 Source Generator 專案正確配置了 Newtonsoft.Json 套件。
+### 問題 1: "No .db files found"
 
-### 錯誤: "No schema files found"
-確保 `.schema` 檔案已加入 `<AdditionalFiles>` 中。
+**原因：** 專案目錄沒有 `.db` 檔案。
 
-### 錯誤: "Connection failed"
-檢查連線字串是否正確，資料庫是否可存取。
+**解決：** 確認 `.db` 檔案存在於專案根目錄。
 
+### 問題 2: "Login failed for user"
+
+**原因：** 資料庫連線字串不正確或資料庫無法存取。
+
+**解決：** 
+- 檢查連線字串是否正確
+- 確認資料庫服務正在執行
+- 檢查防火牆設定
+
+### 問題 3: 生成的程式碼無法編譯
+
+**原因：** 可能是 schema 檔案損壞或型別對應問題。
+
+**解決：**
+- 刪除 `.schema` 檔案重新產生
+- 檢查自訂型別對應是否正確
+
+### 問題 4: MSBuild Task 不執行
+
+**原因：** NuGet 套件未正確安裝或 targets 檔案未被導入。
+
+**解決：**
+```bash
+dotnet restore
+dotnet clean
+dotnet build
+```
+
+### 問題 5: "Duplicate Compile items"
+
+**原因：** 手動添加了 `<Compile Include="Generated\**\*.cs" />`。
+
+**解決：** 移除手動添加的 Compile 項目，SDK 會自動包含。
+
+## Git 版本控制最佳實踐
+
+### 建議 Commit 的檔案
+
+```gitignore
+# Commit schema 檔案（小且穩定）
+Generated/*.schema
+
+# Commit 生成的程式碼（方便 code review）
+Generated/**/*.cs
+```
+
+### 不建議 Commit 的檔案
+
+```gitignore
+# 不要 commit .db 檔案（包含敏感資訊）
+*.db
+
+# 使用環境變數或加密存儲
+# 在 CI/CD 中動態生成 .db 檔案
+```
+
+### CI/CD 整合
+
+```yaml
+# .github/workflows/build.yml
+steps:
+  - name: Setup .db file
+    run: |
+      echo "Server=${{ secrets.DB_SERVER }};Database=${{ secrets.DB_NAME }};..." > databases.db
+  
+  - name: Generate code
+    run: dotnet run --project T1.EfCodeFirstGenerator -- .
+  
+  - name: Build
+    run: dotnet build
+```
+
+## 效能考量
+
+### Schema 快取
+
+`.schema` 檔案會被快取，避免重複連接資料庫：
+
+- **首次執行：** 連接資料庫，提取 schema，產生 `.schema` 檔案
+- **後續執行：** 直接讀取 `.schema` 檔案，快速產生程式碼
+
+### 何時重新生成 Schema
+
+- 資料庫結構變更（新增/修改資料表）
+- 需要更新欄位屬性（型別、長度、預設值）
+
+```bash
+# 強制重新生成
+rm Generated/*.schema
+dotnet run --project T1.EfCodeFirstGenerator -- .
+```
+
+## 相關資源
+
+- [Entity Framework Core 文件](https://docs.microsoft.com/ef/core/)
+- [Fluent API 參考](https://docs.microsoft.com/ef/core/modeling/)
+- [MSBuild Tasks](https://docs.microsoft.com/visualstudio/msbuild/msbuild-tasks)
+
+## 支援
+
+如有問題或建議，請：
+- 提交 GitHub Issue
+- 查看常見問題
+- 參考範例專案

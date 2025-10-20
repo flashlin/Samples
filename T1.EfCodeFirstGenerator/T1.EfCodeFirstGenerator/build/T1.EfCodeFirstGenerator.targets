@@ -1,0 +1,9 @@
+<Project>
+  <UsingTask TaskName="T1.EfCodeFirstGenerator.Tasks.GenerateEfCodeTask" 
+             AssemblyFile="$(T1EfCodeFirstGeneratorTaskAssembly)" />
+
+  <Target Name="T1GenerateEfCode" BeforeTargets="BeforeBuild">
+    <GenerateEfCodeTask ProjectDirectory="$(ProjectDir)" />
+  </Target>
+</Project>
+

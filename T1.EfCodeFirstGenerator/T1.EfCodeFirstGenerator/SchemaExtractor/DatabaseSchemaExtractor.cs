@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.SqlClient;
 using MySql.Data.MySqlClient;
-using T1.EfCodeFirstGenerator.CLI.Models;
+using T1.EfCodeFirstGenerator.Models;
 
-namespace T1.EfCodeFirstGenerator.CLI.SchemaExtractor
+namespace T1.EfCodeFirstGenerator.SchemaExtractor
 {
     internal class DatabaseSchemaExtractor
     {

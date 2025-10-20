@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using T1.EfCodeFirstGenerator.CLI.Models;
+using T1.EfCodeFirstGenerator.Models;
 
-namespace T1.EfCodeFirstGenerator.CLI.ConfigParser
+namespace T1.EfCodeFirstGenerator.ConfigParser
 {
     internal class DbConfigParser
     {

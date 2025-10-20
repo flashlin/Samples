@@ -1,37 +1,50 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    <IsRoslynComponent>true</IsRoslynComponent>
+    
+    <!-- NuGet Package Configuration -->
+    <PackageId>T1.EfCodeFirstGenerator</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>T1 Team</Authors>
+    <Company>T1</Company>
+    <Description>Entity Framework Core Code First generator from database schema. Automatically generates DbContext, Entity classes, and Entity Configurations from your database.</Description>
+    <PackageTags>ef-core;entity-framework;code-generator;database;code-first</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/your-repo/T1.EfCodeFirstGenerator</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/your-repo/T1.EfCodeFirstGenerator</PackageProjectUrl>
+    <PackAsTool>false</PackAsTool>
+    <IncludeBuildOutput>true</IncludeBuildOutput>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageReference Include="MySql.Data" Version="8.3.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.11.4" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
-  </PropertyGroup>
+  <!-- Package build files and tools -->
+  <ItemGroup>
+    <None Include="build\**" Pack="true" PackagePath="build\" />
+  </ItemGroup>
 
-  <Target Name="GetDependencyTargetPaths">
+  <!-- Copy all output files to tools directory in the package -->
+  <Target Name="PackTaskDependencies" AfterTargets="Build">
     <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker Include="$(PKGNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" IncludeRuntimeDependency="false" />
+      <_PackageFiles Include="$(OutputPath)**\*.dll" PackagePath="tools\" />
+      <_PackageFiles Include="$(OutputPath)**\*.json" PackagePath="tools\" />
     </ItemGroup>
   </Target>
 
   <ItemGroup>
-    <!-- Exclude CLI project files -->
-    <Compile Remove="T1.EfCodeFirstGenerator.CLI/**" />
-    <!-- Exclude Example project files -->
-    <Compile Remove="Example/**" />
-    <!-- Exclude ConfigParser and SchemaExtractor as they are not needed in the source generator -->
-    <Compile Remove="ConfigParser/**" />
-    <Compile Remove="SchemaExtractor/**" />
+    <None Include="$(OutputPath)\*.dll" Pack="true" PackagePath="tools\net8.0\" />
+    <None Include="$(OutputPath)\*.json" Pack="true" PackagePath="tools\net8.0\" />
   </ItemGroup>
 
 </Project>

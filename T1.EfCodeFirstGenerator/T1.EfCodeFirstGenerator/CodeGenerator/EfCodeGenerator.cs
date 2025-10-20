@@ -32,10 +32,10 @@ namespace T1.EfCodeFirstGenerator.CodeGenerator
             foreach (var table in dbSchema.Tables)
             {
                 var entityCode = GenerateEntity(table, targetNamespace);
-                generatedFiles[$"{table.TableName}Entity.cs"] = entityCode;
+                generatedFiles[$"Entities/{table.TableName}Entity.cs"] = entityCode;
 
                 var configCode = GenerateEntityConfiguration(table, targetNamespace);
-                generatedFiles[$"{table.TableName}EntityConfiguration.cs"] = configCode;
+                generatedFiles[$"Configurations/{table.TableName}EntityConfiguration.cs"] = configCode;
             }
 
             return generatedFiles;

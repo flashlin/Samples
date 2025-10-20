@@ -1,199 +1,194 @@
 # T1.EfCodeFirstGenerator
 
-A two-stage C# tool that generates Entity Framework Core Code First entities, configurations, and DbContext from database schemas.
+自動從資料庫 schema 產生 Entity Framework Core Code First 程式碼的工具。
 
-## Architecture
+## 特點
 
-This tool consists of two components:
+- ✅ 支援 SQL Server 和 MySQL
+- ✅ 自動產生 DbContext、Entity 和 EntityConfiguration
+- ✅ 可作為 CLI 工具或 NuGet 套件使用
+- ✅ MSBuild 整合，自動在建置前執行
+- ✅ 產生的程式碼包含完整的 Fluent API 配置
+- ✅ 支援主鍵、外鍵、索引、預設值等資料庫特性
 
-1. **CLI Tool** (`T1.EfCodeFirstGenerator.CLI`): Connects to databases and extracts schema to `.schema` files
-2. **Source Generator** (`T1.EfCodeFirstGenerator`): Reads `.schema` files and generates EF Core code during compilation
+## 快速開始
 
-## Features
+### 方法 1: 使用 CLI 工具（開發階段）
 
-- Extracts database schema from SQL Server and MySQL
-- Generates schema files (`.schema`) in JSON format
-- Generates EF Core entities with proper property types
-- Generates entity configurations with complete Fluent API setup
-- Generates DbContext with all DbSets and configurations
-- Customizable type mappings
+1. **建立連線字串檔案**
 
-## Installation
-
-### Step 1: Install CLI Tool (Global)
-
-```bash
-cd T1.EfCodeFirstGenerator.CLI
-dotnet pack
-dotnet tool install --global --add-source ./bin/Debug T1.EfCodeFirstGenerator.CLI
-```
-
-Or run locally:
-```bash
-cd T1.EfCodeFirstGenerator.CLI
-dotnet run -- <path-to-your-project>
-```
-
-### Step 2: Add Source Generator to Your Project
-
-Add this project as an analyzer reference in your target project:
-
-```xml
-<ItemGroup>
-  <ProjectReference Include="../T1.EfCodeFirstGenerator/T1.EfCodeFirstGenerator.csproj" 
-                    OutputItemType="Analyzer" 
-                    ReferenceOutputAssembly="false" />
-</ItemGroup>
-```
-
-## Usage
-
-### 1. Create a `.db` file
-
-Create a file with `.db` extension (e.g., `connections.db`) in your project directory and add connection strings, one per line:
+在專案目錄建立 `databases.db` 檔案：
 
 ```
-Server=localhost;Database=MyDatabase;User Id=sa;Password=MyPassword;TrustServerCertificate=true
-Server=192.168.1.100;Database=AnotherDb;Uid=root;Pwd=secret;
+# SQL Server
+Server=localhost;Database=MyDatabase;User Id=sa;Password=YourPassword;TrustServerCertificate=true
+
+# MySQL
+Server=localhost;Database=TestDb;Uid=root;Pwd=password;
 ```
 
-Lines starting with `#` or `//` are treated as comments.
-
-### 2. Run CLI Tool to Extract Schema
-
-Run the CLI tool in your project directory:
+2. **執行 CLI 工具產生程式碼**
 
 ```bash
 cd YourProject
-dotnet run --project ../T1.EfCodeFirstGenerator.CLI/T1.EfCodeFirstGenerator.CLI.csproj
+dotnet run --project ../T1.EfCodeFirstGenerator -- .
 ```
 
-This will:
-- Scan for all `.db` files in the directory
-- Connect to each database
-- Extract table schemas (fields, types, primary keys, nullable, defaults)
-- Save to `{ServerName}_{DatabaseName}.schema` files
+3. **建置專案**
 
-### 3. Include `.schema` Files as AdditionalFiles
+生成的程式碼會在 `Generated/` 目錄中，直接編譯使用。
 
-Add to your project's `.csproj`:
-
-```xml
-<ItemGroup>
-  <AdditionalFiles Include="*.schema" />
-</ItemGroup>
+```bash
+dotnet build
 ```
 
-### 4. Build Your Project
+### 方法 2: 使用 NuGet 套件（生產環境）
 
-When you build, the Source Generator will:
-1. Read all `.schema` files
-2. Generate for each schema:
-   - `{DatabaseName}DbContext.cs`
-   - `{TableName}Entity.cs` for each table
-   - `{TableName}EntityConfiguration.cs` for each table
+1. **安裝套件**
 
-The generated code is added directly to your compilation (in-memory, not written to disk).
-
-## Generated Code Example
-
-For a database with a `Users` table, the generator creates:
-
-**MyDatabaseDbContext.cs**
-```csharp
-public partial class MyDatabaseDbContext : DbContext
-{
-    public DbSet<UsersEntity> Users { get; set; }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ApplyConfiguration(new UsersEntityConfiguration());
-    }
-}
+```bash
+dotnet add package T1.EfCodeFirstGenerator
 ```
 
-**UsersEntity.cs**
-```csharp
-public class UsersEntity
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string Email { get; set; }
-}
+2. **建立連線字串檔案**
+
+在專案根目錄建立 `.db` 檔案（內容同上）。
+
+3. **建置專案**
+
+MSBuild Task 會自動在建置前執行，產生程式碼到 `Generated/` 目錄。
+
+```bash
+dotnet build
 ```
 
-**UsersEntityConfiguration.cs**
-```csharp
-public class UsersEntityConfiguration : IEntityTypeConfiguration<UsersEntity>
-{
-    public void Configure(EntityTypeBuilder<UsersEntity> builder)
-    {
-        builder.ToTable("Users");
-        builder.HasKey(x => x.Id);
-        
-        builder.Property(x => x.Id)
-            .HasColumnType("int")
-            .ValueGeneratedOnAdd()
-            .IsRequired();
-        
-        builder.Property(x => x.Name)
-            .HasColumnType("nvarchar(100)")
-            .IsRequired()
-            .HasMaxLength(100);
-        
-        builder.Property(x => x.Email)
-            .HasColumnType("nvarchar(255)")
-            .IsRequired()
-            .HasMaxLength(255);
-    }
-}
+## 生成的程式碼結構
+
+```
+YourProject/
+├── databases.db
+└── Generated/
+    ├── {ServerName}_{DatabaseName}.schema
+    ├── {DatabaseName}DbContext.cs
+    ├── Entities/
+    │   ├── UsersEntity.cs
+    │   ├── ProductsEntity.cs
+    │   └── ...
+    └── Configurations/
+        ├── UsersEntityConfiguration.cs
+        ├── ProductsEntityConfiguration.cs
+        └── ...
 ```
 
-## Supported Databases
-
-- SQL Server
-- MySQL
-- PostgreSQL (planned)
-- Oracle (planned)
-
-## Custom Type Mappings
-
-You can extend the type converter by registering custom mappings:
+## 使用範例
 
 ```csharp
-var converter = new SqlTypeToCSharpTypeConverter();
-converter.RegisterCustomMapping("geometry", (sqlType, isNullable) => 
-    isNullable ? "Geometry?" : "Geometry");
-```
+using Generated;
+using Microsoft.EntityFrameworkCore;
 
-## Schema File Format
+// 配置 DbContext
+var options = new DbContextOptionsBuilder<SampleDbDbContext>()
+    .UseSqlServer("your-connection-string")
+    .Options;
 
-Schema files are JSON format with the following structure:
+using var context = new SampleDbDbContext(options);
 
-```json
+// 使用生成的 Entity
+var users = await context.Users.ToListAsync();
+
+var newUser = new UsersEntity
 {
-  "DatabaseName": "MyDatabase",
-  "Tables": [
-    {
-      "TableName": "Users",
-      "Fields": [
-        {
-          "FieldName": "Id",
-          "SqlDataType": "int",
-          "IsPrimaryKey": true,
-          "IsNullable": false,
-          "DefaultValue": null
-        }
-      ]
-    }
-  ]
-}
+    Username = "john",
+    Email = "john@example.com",
+    CreatedAt = DateTime.Now,
+    IsActive = true
+};
+
+context.Users.Add(newUser);
+await context.SaveChangesAsync();
 ```
 
-## Notes
+## 打包為 NuGet 套件
 
-- Schema files are cached to avoid repeated database connections
-- Delete `.schema` files to force schema regeneration
-- Connection strings support standard ADO.NET format
-- Generated files are placed in memory during compilation (not written to disk)
+```bash
+cd T1.EfCodeFirstGenerator
+dotnet pack -c Release
 
+# 測試本地套件
+dotnet add package T1.EfCodeFirstGenerator --source ./bin/Release
+```
+
+## 支援的資料庫
+
+| 資料庫 | 狀態 |
+|--------|------|
+| SQL Server | ✅ 完全支援 |
+| MySQL / MariaDB | ✅ 完全支援 |
+| PostgreSQL | 🚧 規劃中 |
+| Oracle | 🚧 規劃中 |
+
+## SQL 型別對應
+
+| SQL 型別 | C# 型別 |
+|----------|---------|
+| int, integer | int |
+| bigint | long |
+| varchar, nvarchar, text | string |
+| decimal, numeric | decimal |
+| bit, boolean | bool |
+| datetime, datetime2 | DateTime |
+| uniqueidentifier | Guid |
+| binary, varbinary | byte[] |
+
+## 設定選項
+
+### 自訂 Namespace
+
+預設 namespace 為 `Generated`。可以在 CLI 工具中修改 `Program.cs` 來自訂。
+
+### 排除特定資料表
+
+編輯生成的 `.schema` 檔案，移除不需要的資料表。
+
+### 自訂型別對應
+
+修改 `SqlTypeToCSharpTypeConverter` 類別來註冊自訂對應規則。
+
+## Git 版本控制建議
+
+```gitignore
+# 建議 commit .schema 檔案（小且穩定）
+# *.schema
+
+# 建議 commit Generated/ 目錄（方便查看變更）
+# Generated/
+
+# 不要 commit .db 檔案（包含密碼）
+*.db
+```
+
+## 常見問題
+
+### Q: 如何更新 Schema？
+
+刪除 `.schema` 檔案，重新執行 CLI 工具。
+
+### Q: 可以手動修改生成的程式碼嗎？
+
+可以！由於 DbContext 是 `partial class`，您可以在另一個檔案中擴展它。
+
+### Q: 支援複合主鍵嗎？
+
+是的，會自動偵測並產生對應的 `HasKey` 設定。
+
+### Q: 如何處理多個資料庫？
+
+在 `.db` 檔案中添加多行連線字串，每行一個資料庫。
+
+## License
+
+MIT License
+
+## 貢獻
+
+歡迎提交 Issue 和 Pull Request！
