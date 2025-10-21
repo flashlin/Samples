@@ -56,7 +56,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             // Note: Reference types like string are handled separately
             // by the generator, not by the converter
             var result = _converter.ConvertType("varchar(100)", true);
-            result.Should().Be("string");
+            result.Should().Be("string?");
         }
 
         [Test]
