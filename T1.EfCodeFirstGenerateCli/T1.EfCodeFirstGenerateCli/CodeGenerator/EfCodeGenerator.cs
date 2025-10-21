@@ -140,7 +140,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             output.WriteLine("{");
             output.Indent++;
 
-            output.WriteLine($"public class {table.TableName}Entity");
+            output.WriteLine($"public partial class {table.TableName}Entity");
             output.WriteLine("{");
             output.Indent++;
 
@@ -177,7 +177,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             output.WriteLine("{");
             output.Indent++;
 
-            output.WriteLine($"public class {table.TableName}EntityConfiguration : IEntityTypeConfiguration<{table.TableName}Entity>");
+            output.WriteLine($"public partial class {table.TableName}EntityConfiguration : IEntityTypeConfiguration<{table.TableName}Entity>");
             output.WriteLine("{");
             output.Indent++;
 
