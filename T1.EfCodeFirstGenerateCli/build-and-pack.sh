@@ -13,6 +13,7 @@ cd T1.EfCodeFirstGenerateCli
 
 # Clean previous builds
 echo "Cleaning previous builds..."
+rm bin/Release/*.nupkg
 dotnet clean
 
 # Restore dependencies
