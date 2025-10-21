@@ -251,6 +251,38 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
 
             dbContextCode.Should().Contain("public TestDbDbContext()");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_LowercaseFieldName_ConvertsToPascalCase()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "testTable"
+            };
+            table.Fields.Add(TestHelper.CreateField("userid", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("username", "nvarchar(100)", false, null, false, false));
+            table.Fields.Add(TestHelper.CreateField("created_at", "datetime2", false, null, false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var entityCode = result["TestDb/Entities/testTableEntity.cs"];
+            var configCode = result["TestDb/Configurations/testTableEntityConfiguration.cs"];
+
+            entityCode.Should().Contain("public int Userid { get; set; }");
+            entityCode.Should().Contain("public required string Username { get; set; }");
+            entityCode.Should().Contain("public DateTime Created_at { get; set; }");
+            
+            configCode.Should().Contain("builder.Property(x => x.Userid)");
+            configCode.Should().Contain(".HasColumnName(\"userid\")");
+            configCode.Should().Contain("builder.Property(x => x.Username)");
+            configCode.Should().Contain(".HasColumnName(\"username\")");
+            configCode.Should().Contain("builder.Property(x => x.Created_at)");
+            configCode.Should().Contain(".HasColumnName(\"created_at\")");
+        }
     }
 }
 

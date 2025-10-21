@@ -69,6 +69,21 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             return sanitized;
         }
 
+        private string ToPascalCase(string identifier)
+        {
+            if (string.IsNullOrEmpty(identifier))
+                return identifier;
+            
+            var sanitized = SanitizeIdentifier(identifier);
+            
+            if (char.IsLower(sanitized[0]))
+            {
+                return char.ToUpper(sanitized[0]) + sanitized.Substring(1);
+            }
+            
+            return sanitized;
+        }
+
         public Dictionary<string, string> GenerateCodeFirstFromSchema(DbSchema dbSchema, string targetNamespace)
         {
             var generatedFiles = new Dictionary<string, string>();
@@ -120,7 +135,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 
             foreach (var table in dbSchema.Tables)
             {
-                var propertyName = SanitizeIdentifier(table.TableName);
+                var propertyName = ToPascalCase(table.TableName);
                 output.WriteLine($"public DbSet<{table.TableName}Entity> {propertyName} {{ get; set; }}");
             }
 
@@ -166,7 +181,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             {
                 var csharpType = _typeConverter.ConvertType(field.SqlDataType, field.IsNullable);
                 var requiredModifier = IsNonNullableReferenceType(csharpType) ? "required " : "";
-                var propertyName = SanitizeIdentifier(field.FieldName);
+                var propertyName = ToPascalCase(field.FieldName);
                 output.WriteLine($"public {requiredModifier}{csharpType} {propertyName} {{ get; set; }}");
             }
 
@@ -244,7 +259,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         private void GeneratePropertyConfiguration(IndentStringBuilder output, FieldSchema field)
         {
             var columnType = _typeConverter.GetColumnType(field.SqlDataType);
-            var propertyName = SanitizeIdentifier(field.FieldName);
+            var propertyName = ToPascalCase(field.FieldName);
             
             output.WriteLine($"builder.Property(x => x.{propertyName})");
             output.Indent++;
