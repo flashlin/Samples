@@ -78,10 +78,10 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 
             foreach (var table in dbSchema.Tables)
             {
-                var entityCode = GenerateEntity(table, targetNamespace + ".Entities");
+                var entityCode = GenerateEntity(table, targetNamespace);
                 generatedFiles[$"{dbSchema.DatabaseName}/Entities/{table.TableName}Entity.cs"] = entityCode;
 
-                var configCode = GenerateEntityConfiguration(table, targetNamespace + ".Configurations");
+                var configCode = GenerateEntityConfiguration(table, targetNamespace);
                 generatedFiles[$"{dbSchema.DatabaseName}/Configurations/{table.TableName}EntityConfiguration.cs"] = configCode;
             }
 
@@ -154,7 +154,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             output.WriteLine($"// Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             output.WriteLine("using System;");
             output.WriteLine();
-            output.WriteLine($"namespace {targetNamespace}");
+            output.WriteLine($"namespace {targetNamespace}.Entities");
             output.WriteLine("{");
             output.Indent++;
 
@@ -194,7 +194,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             output.WriteLine("using Microsoft.EntityFrameworkCore.Metadata.Builders;");
             output.WriteLine($"using {targetNamespace}.Entities;");
             output.WriteLine();
-            output.WriteLine($"namespace {targetNamespace}");
+            output.WriteLine($"namespace {targetNamespace}.Configurations");
             output.WriteLine("{");
             output.Indent++;
 
