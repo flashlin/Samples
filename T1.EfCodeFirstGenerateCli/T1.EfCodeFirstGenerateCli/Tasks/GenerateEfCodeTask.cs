@@ -144,24 +144,12 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
         {
             Log.LogMessage(MessageImportance.Low, $"  Generating EF Core code...");
             
-            ClearGeneratedDirectory(dbConfig, generatedDir);
-            
             var generator = new EfCodeGenerator();
             var generatedFiles = generator.GenerateCodeFirstFromSchema(dbSchema, targetNamespace);
 
             WriteGeneratedFiles(generatedFiles, generatedDir);
             
             Log.LogMessage(MessageImportance.Normal, $"  Generated {generatedFiles.Count} file(s).");
-        }
-
-        private void ClearGeneratedDirectory(Models.DbConfig dbConfig, string generatedDir)
-        {
-            var databaseDir = Path.Combine(generatedDir, dbConfig.DatabaseName);
-            if (Directory.Exists(databaseDir))
-            {
-                Directory.Delete(databaseDir, true);
-                Log.LogMessage(MessageImportance.Low, $"  Cleared existing generated code directory.");
-            }
         }
 
         private void WriteGeneratedFiles(System.Collections.Generic.Dictionary<string, string> generatedFiles, string generatedDir)
@@ -174,13 +162,57 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
                 {
                     Directory.CreateDirectory(fileDir);
                 }
-                if (!File.Exists(filePath))
-                {
-                    File.WriteAllText(filePath, kvp.Value, Encoding.UTF8);
-                }
+                File.WriteAllText(filePath, kvp.Value, Encoding.UTF8);
             }
             
+            CleanObsoleteFiles(generatedFiles, generatedDir);
+        }
+
+        private void CleanObsoleteFiles(System.Collections.Generic.Dictionary<string, string> generatedFiles, string generatedDir)
+        {
+            var expectedFiles = new System.Collections.Generic.HashSet<string>(
+                generatedFiles.Keys.Select(k => Path.GetFullPath(Path.Combine(generatedDir, k))),
+                StringComparer.OrdinalIgnoreCase
+            );
             
+            // Find database directory (e.g., generatedDir/DatabaseName/)
+            if (!Directory.Exists(generatedDir)) 
+                return;
+            
+            var dbDirs = Directory.GetDirectories(generatedDir);
+            foreach (var dbDir in dbDirs)
+            {
+                var existingFiles = Directory.GetFiles(dbDir, "*", SearchOption.AllDirectories);
+                foreach (var existingFile in existingFiles)
+                {
+                    var fullPath = Path.GetFullPath(existingFile);
+                    
+                    // Skip .schema files
+                    if (Path.GetExtension(fullPath).Equals(".schema", StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    
+                    // Delete if not in expected files
+                    if (!expectedFiles.Contains(fullPath))
+                    {
+                        File.Delete(fullPath);
+                        Log.LogMessage(MessageImportance.Low, $"  Deleted obsolete file: {Path.GetRelativePath(generatedDir, fullPath)}");
+                    }
+                }
+                
+                CleanEmptyDirectories(dbDir);
+            }
+        }
+
+        private void CleanEmptyDirectories(string directory)
+        {
+            foreach (var subDir in Directory.GetDirectories(directory))
+            {
+                CleanEmptyDirectories(subDir);
+                if (!Directory.EnumerateFileSystemEntries(subDir).Any())
+                {
+                    Directory.Delete(subDir);
+                }
+            }
         }
 
         public string SanitizeFileName(string fileName)
