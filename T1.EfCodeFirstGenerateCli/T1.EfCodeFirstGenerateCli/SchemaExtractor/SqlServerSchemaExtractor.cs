@@ -45,8 +45,10 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                         CASE 
                             WHEN c.CHARACTER_MAXIMUM_LENGTH IS NOT NULL AND c.CHARACTER_MAXIMUM_LENGTH != -1 
                                 THEN '(' + CAST(c.CHARACTER_MAXIMUM_LENGTH AS VARCHAR) + ')'
-                            WHEN c.NUMERIC_PRECISION IS NOT NULL 
+                            WHEN c.NUMERIC_PRECISION IS NOT NULL AND c.NUMERIC_SCALE IS NOT NULL
                                 THEN '(' + CAST(c.NUMERIC_PRECISION AS VARCHAR) + ',' + CAST(c.NUMERIC_SCALE AS VARCHAR) + ')'
+                            WHEN c.NUMERIC_PRECISION IS NOT NULL AND c.NUMERIC_SCALE IS NULL
+                                THEN '(' + CAST(c.NUMERIC_PRECISION AS VARCHAR) + ')'
                             ELSE ''
                         END AS DATA_TYPE_FULL,
                     c.IS_NULLABLE,
