@@ -1,5 +1,7 @@
 using FluentAssertions;
+using Microsoft.Build.Framework;
 using NUnit.Framework;
+using System.Collections;
 using System.IO;
 using T1.EfCodeFirstGenerateCli.Tasks;
 using T1.EfCodeFirstGenerateCliTest.Helpers;
@@ -10,11 +12,13 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
     public class GenerateEfCodeTaskTests
     {
         private string _testDirectory = null!;
+        private MockBuildEngine _mockEngine = null!;
 
         [SetUp]
         public void Setup()
         {
             _testDirectory = TestHelper.CreateTempTestDirectory();
+            _mockEngine = new MockBuildEngine();
         }
 
         [TearDown]
@@ -28,6 +32,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
         {
             var task = new GenerateEfCodeTask
             {
+                BuildEngine = _mockEngine,
                 ProjectDirectory = _testDirectory,
                 RootNamespace = "TestProject",
                 AssemblyName = "TestAssembly"
@@ -43,6 +48,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
         {
             var task = new GenerateEfCodeTask
             {
+                BuildEngine = _mockEngine,
                 ProjectDirectory = Path.Combine(_testDirectory, "NonExistent"),
                 RootNamespace = "TestProject",
                 AssemblyName = "TestAssembly"
@@ -58,6 +64,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
         {
             var task = new GenerateEfCodeTask
             {
+                BuildEngine = _mockEngine,
                 ProjectDirectory = _testDirectory,
                 RootNamespace = "MyRootNamespace",
                 AssemblyName = "MyAssembly"
@@ -76,6 +83,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
         {
             var task = new GenerateEfCodeTask
             {
+                BuildEngine = _mockEngine,
                 ProjectDirectory = _testDirectory,
                 RootNamespace = null,
                 AssemblyName = "MyAssembly"
@@ -93,6 +101,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
         {
             var task = new GenerateEfCodeTask
             {
+                BuildEngine = _mockEngine,
                 ProjectDirectory = _testDirectory,
                 RootNamespace = null,
                 AssemblyName = null
@@ -123,6 +132,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
 
             var task = new GenerateEfCodeTask
             {
+                BuildEngine = _mockEngine,
                 ProjectDirectory = _testDirectory,
                 RootNamespace = "TestNamespace",
                 AssemblyName = "TestAssembly"
@@ -155,6 +165,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
 
             var task = new GenerateEfCodeTask
             {
+                BuildEngine = _mockEngine,
                 ProjectDirectory = _testDirectory,
                 RootNamespace = "TestNamespace",
                 AssemblyName = "TestAssembly"
@@ -178,19 +189,38 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
         {
             var task = new GenerateEfCodeTask
             {
+                BuildEngine = _mockEngine,
                 ProjectDirectory = _testDirectory
             };
 
             var method = typeof(GenerateEfCodeTask).GetMethod("SanitizeFileName",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
+            method.Should().NotBeNull("SanitizeFileName method should exist");
+            
             var result = method?.Invoke(task, new object[] { "test<>:file|name" }) as string;
 
+            result.Should().NotBeNull();
             result.Should().NotContain("<");
             result.Should().NotContain(">");
             result.Should().NotContain(":");
             result.Should().NotContain("|");
         }
+    }
+
+    // Simple Mock BuildEngine for testing MSBuild tasks
+    public class MockBuildEngine : IBuildEngine
+    {
+        public bool ContinueOnError => false;
+        public int LineNumberOfTaskNode => 0;
+        public int ColumnNumberOfTaskNode => 0;
+        public string ProjectFileOfTaskNode => "";
+
+        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs) => true;
+        public void LogCustomEvent(CustomBuildEventArgs e) { }
+        public void LogErrorEvent(BuildErrorEventArgs e) { }
+        public void LogMessageEvent(BuildMessageEventArgs e) { }
+        public void LogWarningEvent(BuildWarningEventArgs e) { }
     }
 }
 

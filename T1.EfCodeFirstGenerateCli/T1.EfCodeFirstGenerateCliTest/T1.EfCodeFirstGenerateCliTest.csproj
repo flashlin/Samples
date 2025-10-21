@@ -7,6 +7,7 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <RootNamespace>T1.EfCodeFirstGenerateCliTest</RootNamespace>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,10 +15,21 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="17.14.28">
+      <ExcludeAssets></ExcludeAssets>
+      <IncludeAssets>compile; runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.14.28">
+      <ExcludeAssets></ExcludeAssets>
+      <IncludeAssets>compile; runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../T1.EfCodeFirstGenerateCli/T1.EfCodeFirstGenerateCli.csproj" />
+    <ProjectReference Include="../T1.EfCodeFirstGenerateCli/T1.EfCodeFirstGenerateCli.csproj">
+      <Private>true</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +37,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <!-- Copy Microsoft.Build assemblies to output directory -->
+  <Target Name="CopyMicrosoftBuildAssemblies" AfterTargets="Build">
+    <PropertyGroup>
+      <NuGetPackagesPath Condition="'$(NuGetPackageRoot)' == ''">$(UserProfile)\.nuget\packages</NuGetPackagesPath>
+      <NuGetPackagesPath Condition="'$(NuGetPackageRoot)' != ''">$(NuGetPackageRoot)</NuGetPackagesPath>
+      <NuGetPackagesPath Condition="$([MSBuild]::IsOsPlatform('OSX')) or $([MSBuild]::IsOsPlatform('Linux'))">$(HOME)/.nuget/packages</NuGetPackagesPath>
+    </PropertyGroup>
+    <ItemGroup>
+      <MicrosoftBuildDlls Include="$(NuGetPackagesPath)/microsoft.build.framework/17.14.28/lib/net472/*.dll" />
+      <MicrosoftBuildDlls Include="$(NuGetPackagesPath)/microsoft.build.utilities.core/17.14.28/lib/net472/*.dll" />
+      <MicrosoftBuildDlls Include="$(NuGetPackagesPath)/microsoft.net.stringtools/17.14.28/lib/net472/*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(MicrosoftBuildDlls)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>
 

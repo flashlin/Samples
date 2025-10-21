@@ -1,0 +1,16 @@
+{
+  "configProperties": {
+    "System.Runtime.TieredCompilation": false
+  },
+  "runtimeOptions": {
+    "tfm": "net8.0",
+    "rollForward": "LatestMinor",
+    "frameworks": [
+      {
+        "name": "Microsoft.NETCore.App",
+        "version": "8.0.0"
+      }
+    ]
+  }
+}
+
