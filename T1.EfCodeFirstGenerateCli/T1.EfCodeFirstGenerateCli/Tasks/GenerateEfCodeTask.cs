@@ -174,8 +174,13 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
                 {
                     Directory.CreateDirectory(fileDir);
                 }
-                File.WriteAllText(filePath, kvp.Value, Encoding.UTF8);
+                if (!File.Exists(filePath))
+                {
+                    File.WriteAllText(filePath, kvp.Value, Encoding.UTF8);
+                }
             }
+            
+            
         }
 
         public string SanitizeFileName(string fileName)
