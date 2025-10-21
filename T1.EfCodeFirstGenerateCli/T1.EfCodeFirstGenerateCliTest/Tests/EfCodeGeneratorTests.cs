@@ -199,8 +199,9 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             var configCode = result["TestDb/Configurations/ProductsEntityConfiguration.cs"];
             
             // Stock is nullable int
-            var stockPropertyConfig = configCode.Substring(
-                configCode.IndexOf("builder.Property(x => x.Stock)"));
+            var stockStart = configCode.IndexOf("builder.Property(x => x.Stock)");
+            var nextPropertyStart = configCode.IndexOf("builder.Property(x => x.IsActive)", stockStart);
+            var stockPropertyConfig = configCode.Substring(stockStart, nextPropertyStart - stockStart);
             
             stockPropertyConfig.Should().NotContain(".IsRequired()");
         }
