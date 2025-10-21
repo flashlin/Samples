@@ -78,10 +78,10 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 
             foreach (var table in dbSchema.Tables)
             {
-                var entityCode = GenerateEntity(table, targetNamespace);
+                var entityCode = GenerateEntity(table, targetNamespace + ".Entities");
                 generatedFiles[$"{dbSchema.DatabaseName}/Entities/{table.TableName}Entity.cs"] = entityCode;
 
-                var configCode = GenerateEntityConfiguration(table, targetNamespace);
+                var configCode = GenerateEntityConfiguration(table, targetNamespace + ".Configurations");
                 generatedFiles[$"{dbSchema.DatabaseName}/Configurations/{table.TableName}EntityConfiguration.cs"] = configCode;
             }
 
@@ -92,7 +92,11 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         {
             var output = new IndentStringBuilder();
 
+            output.WriteLine($"// This file is auto-generated. Do not modify manually.");
+            output.WriteLine($"// Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             output.WriteLine("using Microsoft.EntityFrameworkCore;");
+            output.WriteLine($"using {targetNamespace}.Entities;");
+            output.WriteLine($"using {targetNamespace}.Configurations;");
             output.WriteLine();
             output.WriteLine($"namespace {targetNamespace}");
             output.WriteLine("{");
@@ -133,7 +137,9 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         private string GenerateEntity(TableSchema table, string targetNamespace)
         {
             var output = new IndentStringBuilder();
-
+            
+            output.WriteLine($"// This file is auto-generated. Do not modify manually.");
+            output.WriteLine($"// Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             output.WriteLine("using System;");
             output.WriteLine();
             output.WriteLine($"namespace {targetNamespace}");
@@ -170,6 +176,8 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         {
             var output = new IndentStringBuilder();
 
+            output.WriteLine($"// This file is auto-generated. Do not modify manually.");
+            output.WriteLine($"// Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             output.WriteLine("using Microsoft.EntityFrameworkCore;");
             output.WriteLine("using Microsoft.EntityFrameworkCore.Metadata.Builders;");
             output.WriteLine();
