@@ -278,6 +278,12 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 
         private string FormatDefaultValue(string defaultValue, string sqlDataType)
         {
+            // Check if it's a SQL function or expression (contains parentheses or special keywords)
+            if (IsSqlFunctionOrExpression(defaultValue))
+            {
+                return defaultValue;
+            }
+
             defaultValue = defaultValue.Trim('(', ')', '\'', '"');
             
             var baseType = Regex.Match(sqlDataType, @"^(\w+)").Groups[1].Value.ToLower();
@@ -305,6 +311,32 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
                 default:
                     return string.Empty;
             }
+        }
+
+        private bool IsSqlFunctionOrExpression(string defaultValue)
+        {
+            var trimmedValue = defaultValue.Trim();
+            
+            // Check if it contains function call pattern
+            if (Regex.IsMatch(trimmedValue, @"\w+\s*\(.*\)", RegexOptions.IgnoreCase))
+            {
+                return true;
+            }
+            
+            // Check for common SQL functions
+            var sqlFunctions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "getdate", "getutcdate", "newid", "current_timestamp", "current_date", 
+                "current_time", "now", "uuid", "user", "session_user", "system_user"
+            };
+            
+            var functionName = Regex.Match(trimmedValue, @"^(\w+)", RegexOptions.IgnoreCase).Groups[1].Value;
+            if (sqlFunctions.Contains(functionName))
+            {
+                return true;
+            }
+            
+            return false;
         }
     }
 }

@@ -24,9 +24,16 @@ namespace T1.EfCodeFirstGenerateCli.Converters
 
             var csharpType = GetDefaultCSharpType(baseType);
             
-            if (isNullable && IsValueType(csharpType))
+            if (isNullable)
             {
-                return $"{csharpType}?";
+                if (IsValueType(csharpType))
+                {
+                    return $"{csharpType}?";
+                }
+                else if (csharpType == "string")
+                {
+                    return "string?";
+                }
             }
 
             return csharpType;
