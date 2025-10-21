@@ -171,13 +171,13 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
             }
         }
 
-        private string SanitizeFileName(string fileName)
+        public string SanitizeFileName(string fileName)
         {
             var invalid = Path.GetInvalidFileNameChars();
             return string.Join("_", fileName.Split(invalid, StringSplitOptions.RemoveEmptyEntries));
         }
 
-        private string GetProjectNamespace()
+        public string GetProjectNamespace()
         {
             // Priority: RootNamespace → AssemblyName → Project directory name
             if (!string.IsNullOrEmpty(RootNamespace))

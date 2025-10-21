@@ -70,10 +70,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
                 AssemblyName = "MyAssembly"
             };
 
-            // Use reflection to test private method
-            var method = typeof(GenerateEfCodeTask).GetMethod("GetProjectNamespace",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var result = method?.Invoke(task, null) as string;
+            var result = task.GetProjectNamespace();
 
             result.Should().Be("MyRootNamespace");
         }
@@ -89,9 +86,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
                 AssemblyName = "MyAssembly"
             };
 
-            var method = typeof(GenerateEfCodeTask).GetMethod("GetProjectNamespace",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var result = method?.Invoke(task, null) as string;
+            var result = task.GetProjectNamespace();
 
             result.Should().Be("MyAssembly");
         }
@@ -107,9 +102,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
                 AssemblyName = null
             };
 
-            var method = typeof(GenerateEfCodeTask).GetMethod("GetProjectNamespace",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var result = method?.Invoke(task, null) as string;
+            var result = task.GetProjectNamespace();
 
             result.Should().NotBeNullOrEmpty();
         }
@@ -193,12 +186,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
                 ProjectDirectory = _testDirectory
             };
 
-            var method = typeof(GenerateEfCodeTask).GetMethod("SanitizeFileName",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            method.Should().NotBeNull("SanitizeFileName method should exist");
-            
-            var result = method?.Invoke(task, new object[] { "test<>:file|name" }) as string;
+            var result = task.SanitizeFileName("test<>:file|name");
 
             result.Should().NotBeNull();
             result.Should().NotContain("<");
