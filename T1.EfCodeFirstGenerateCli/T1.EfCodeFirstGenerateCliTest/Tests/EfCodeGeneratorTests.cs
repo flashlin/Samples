@@ -180,14 +180,25 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
         }
 
         [Test]
-        public void GenerateCodeFirstFromSchema_FieldWithDefault_ConfigurationHasDefaultValue()
+        public void GenerateCodeFirstFromSchema_FieldWithSqlFunctionDefault_ConfigurationHasDefaultValueSql()
         {
             var schema = TestHelper.CreateTestSchema("TestDb");
 
             var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
             var configCode = result["TestDb/Configurations/UsersEntityConfiguration.cs"];
 
-            configCode.Should().Contain(".HasDefaultValue(getdate())");
+            configCode.Should().Contain(".HasDefaultValueSql(\"getdate()\")");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_FieldWithConstantDefault_ConfigurationHasDefaultValue()
+        {
+            var schema = TestHelper.CreateTestSchema("TestDb");
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/UsersEntityConfiguration.cs"];
+
+            configCode.Should().Contain(".HasDefaultValue(true)");
         }
 
         [Test]

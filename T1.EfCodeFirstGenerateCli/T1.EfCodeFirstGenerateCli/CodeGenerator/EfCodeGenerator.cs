@@ -254,10 +254,11 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 
             if (!string.IsNullOrEmpty(field.DefaultValue))
             {
-                var defaultValue = FormatDefaultValue(field.DefaultValue!, field.SqlDataType);
+                var (isSqlFunction, defaultValue) = FormatDefaultValue(field.DefaultValue!, field.SqlDataType);
                 if (!string.IsNullOrEmpty(defaultValue))
                 {
-                    output.WriteLine($".HasDefaultValue({defaultValue})");
+                    var method = isSqlFunction ? "HasDefaultValueSql" : "HasDefaultValue";
+                    output.WriteLine($".{method}({defaultValue})");
                 }
             }
 
@@ -276,12 +277,12 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             return null;
         }
 
-        private string FormatDefaultValue(string defaultValue, string sqlDataType)
+        private (bool isSqlFunction, string value) FormatDefaultValue(string defaultValue, string sqlDataType)
         {
             // Check if it's a SQL function or expression (contains parentheses or special keywords)
             if (IsSqlFunctionOrExpression(defaultValue))
             {
-                return defaultValue;
+                return (true, $"\"{defaultValue.Trim()}\"");
             }
 
             defaultValue = defaultValue.Trim('(', ')', '\'', '"');
@@ -298,18 +299,18 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
                 case "numeric":
                 case "float":
                 case "real":
-                    return defaultValue;
+                    return (false, defaultValue);
                 case "bit":
                 case "boolean":
-                    return defaultValue.ToLower() == "1" || defaultValue.ToLower() == "true" ? "true" : "false";
+                    return (false, defaultValue.ToLower() == "1" || defaultValue.ToLower() == "true" ? "true" : "false");
                 case "varchar":
                 case "nvarchar":
                 case "char":
                 case "nchar":
                 case "text":
-                    return $"\"{defaultValue}\"";
+                    return (false, $"\"{defaultValue}\"");
                 default:
-                    return string.Empty;
+                    return (false, string.Empty);
             }
         }
 
