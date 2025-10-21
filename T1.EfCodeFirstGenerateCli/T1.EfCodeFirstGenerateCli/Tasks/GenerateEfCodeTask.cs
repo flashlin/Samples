@@ -62,112 +62,119 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
         {
             Log.LogMessage(MessageImportance.Normal, $"Processing: {dbConfig.ServerName}/{dbConfig.DatabaseName}");
 
-            // Get the directory where the .db file is located
+            var dbFileDir = GetDbFileDirectory(dbConfig);
+            if (string.IsNullOrEmpty(dbFileDir))
+                return;
+
+            var targetNamespace = CalculateTargetNamespace(dbFileDir);
+            Log.LogMessage(MessageImportance.Normal, $"  Target namespace: {targetNamespace}");
+
+            var generatedDir = Path.Combine(dbFileDir, "Generated");
+            Directory.CreateDirectory(generatedDir);
+
+            var dbSchema = LoadOrExtractSchema(dbConfig, generatedDir);
+            if (dbSchema == null)
+                return;
+
+            GenerateEfCoreCode(dbConfig, dbSchema, targetNamespace, generatedDir);
+        }
+
+        private string? GetDbFileDirectory(Models.DbConfig dbConfig)
+        {
             var dbFileDir = Path.GetDirectoryName(dbConfig.DbFilePath);
             if (string.IsNullOrEmpty(dbFileDir))
             {
                 Log.LogWarning($"  Unable to determine .db file directory.");
-                return;
+                return null;
             }
+            return dbFileDir;
+        }
 
-            // Get project base namespace
+        private string CalculateTargetNamespace(string dbFileDir)
+        {
             var projectNamespace = GetProjectNamespace();
-            
-            // Calculate relative path from project root to .db file directory
             var relativeDbDir = Path.GetRelativePath(ProjectDirectory, dbFileDir);
             
-            // Build target namespace
-            string targetNamespace;
             if (string.IsNullOrEmpty(relativeDbDir) || relativeDbDir == ".")
             {
-                // .db file is in project root
-                targetNamespace = projectNamespace;
+                return projectNamespace;
             }
-            else
-            {
-                // .db file is in subdirectory
-                var subNamespace = relativeDbDir.Replace(Path.DirectorySeparatorChar, '.')
-                                                .Replace(Path.AltDirectorySeparatorChar, '.')
-                                                .Trim('.');
-                targetNamespace = $"{projectNamespace}.{subNamespace}";
-            }
+            
+            var subNamespace = relativeDbDir.Replace(Path.DirectorySeparatorChar, '.')
+                                            .Replace(Path.AltDirectorySeparatorChar, '.')
+                                            .Trim('.');
+            return $"{projectNamespace}.{subNamespace}";
+        }
 
-            Log.LogMessage(MessageImportance.Normal, $"  Target namespace: {targetNamespace}");
-
+        private Models.DbSchema? LoadOrExtractSchema(Models.DbConfig dbConfig, string generatedDir)
+        {
             var schemaFileName = $"{SanitizeFileName(dbConfig.ServerName)}_{SanitizeFileName(dbConfig.DatabaseName)}.schema";
-            var generatedDir = Path.Combine(dbFileDir, "Generated");
-            Directory.CreateDirectory(generatedDir);
-
             var schemaFilePath = Path.Combine(generatedDir, schemaFileName);
-
-            Models.DbSchema dbSchema;
 
             if (File.Exists(schemaFilePath))
             {
-                Log.LogMessage(MessageImportance.Low, $"  Loading existing schema: {schemaFileName}");
-                var json = File.ReadAllText(schemaFilePath, Encoding.UTF8);
-                dbSchema = JsonConvert.DeserializeObject<Models.DbSchema>(json)!;
+                return LoadExistingSchema(schemaFilePath, schemaFileName);
             }
-            else
+            
+            return ExtractAndSaveSchema(dbConfig, schemaFilePath, schemaFileName);
+        }
+
+        private Models.DbSchema LoadExistingSchema(string schemaFilePath, string schemaFileName)
+        {
+            Log.LogMessage(MessageImportance.Low, $"  Loading existing schema: {schemaFileName}");
+            var json = File.ReadAllText(schemaFilePath, Encoding.UTF8);
+            return JsonConvert.DeserializeObject<Models.DbSchema>(json)!;
+        }
+
+        private Models.DbSchema? ExtractAndSaveSchema(Models.DbConfig dbConfig, string schemaFilePath, string schemaFileName)
+        {
+            Log.LogMessage(MessageImportance.Normal, $"  Connecting to database...");
+            var dbSchema = DatabaseSchemaExtractor.CreateDatabaseSchema(dbConfig);
+
+            Log.LogMessage(MessageImportance.Normal, $"  Extracted {dbSchema.Tables.Count} table(s).");
+
+            var json = JsonConvert.SerializeObject(dbSchema, Formatting.Indented);
+            File.WriteAllText(schemaFilePath, json, Encoding.UTF8);
+
+            Log.LogMessage(MessageImportance.Normal, $"  Schema saved to: {schemaFileName}");
+            return dbSchema;
+        }
+
+        private void GenerateEfCoreCode(Models.DbConfig dbConfig, Models.DbSchema dbSchema, string targetNamespace, string generatedDir)
+        {
+            Log.LogMessage(MessageImportance.Low, $"  Generating EF Core code...");
+            
+            ClearGeneratedDirectory(dbConfig, generatedDir);
+            
+            var generator = new EfCodeGenerator();
+            var generatedFiles = generator.GenerateCodeFirstFromSchema(dbSchema, targetNamespace);
+
+            WriteGeneratedFiles(generatedFiles, generatedDir);
+            
+            Log.LogMessage(MessageImportance.Normal, $"  Generated {generatedFiles.Count} file(s).");
+        }
+
+        private void ClearGeneratedDirectory(Models.DbConfig dbConfig, string generatedDir)
+        {
+            var databaseDir = Path.Combine(generatedDir, dbConfig.DatabaseName);
+            if (Directory.Exists(databaseDir))
             {
-                try
-                {
-                    Log.LogMessage(MessageImportance.Normal, $"  Connecting to database...");
-                    dbSchema = DatabaseSchemaExtractor.CreateDatabaseSchema(dbConfig);
-
-                    Log.LogMessage(MessageImportance.Normal, $"  Extracted {dbSchema.Tables.Count} table(s).");
-
-                    var json = JsonConvert.SerializeObject(dbSchema, Formatting.Indented);
-                    File.WriteAllText(schemaFilePath, json, Encoding.UTF8);
-
-                    Log.LogMessage(MessageImportance.Normal, $"  Schema saved to: {schemaFileName}");
-                }
-                catch (Exception ex)
-                {
-                    Log.LogWarning($"  Failed to extract schema for {dbConfig.DatabaseName}: {ex.Message}");
-                    return;
-                }
+                Directory.Delete(databaseDir, true);
+                Log.LogMessage(MessageImportance.Low, $"  Cleared existing generated code directory.");
             }
+        }
 
-            // Generate EF Core code
-            try
+        private void WriteGeneratedFiles(System.Collections.Generic.Dictionary<string, string> generatedFiles, string generatedDir)
+        {
+            foreach (var kvp in generatedFiles)
             {
-                Log.LogMessage(MessageImportance.Low, $"  Generating EF Core code...");
-                
-                // Clear the Generated/{DatabaseName}/ directory before generating new code
-                var databaseDir = Path.Combine(generatedDir, dbConfig.DatabaseName);
-                if (Directory.Exists(databaseDir))
+                var filePath = Path.Combine(generatedDir, kvp.Key);
+                var fileDir = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrEmpty(fileDir))
                 {
-                    try
-                    {
-                        Directory.Delete(databaseDir, true);
-                        Log.LogMessage(MessageImportance.Low, $"  Cleared existing generated code directory.");
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.LogWarning($"  Warning: Failed to clear directory {databaseDir}: {ex.Message}");
-                    }
+                    Directory.CreateDirectory(fileDir);
                 }
-                
-                var generator = new EfCodeGenerator();
-                var generatedFiles = generator.GenerateCodeFirstFromSchema(dbSchema, targetNamespace);
-
-                foreach (var kvp in generatedFiles)
-                {
-                    var filePath = Path.Combine(generatedDir, kvp.Key);
-                    var fileDir = Path.GetDirectoryName(filePath);
-                    if (!string.IsNullOrEmpty(fileDir))
-                    {
-                        Directory.CreateDirectory(fileDir);
-                    }
-                    File.WriteAllText(filePath, kvp.Value, Encoding.UTF8);
-                }
-
-                Log.LogMessage(MessageImportance.Normal, $"  Generated {generatedFiles.Count} file(s).");
-            }
-            catch (Exception ex)
-            {
-                Log.LogWarning($"  Failed to generate code for {dbConfig.DatabaseName}: {ex.Message}");
+                File.WriteAllText(filePath, kvp.Value, Encoding.UTF8);
             }
         }
 
