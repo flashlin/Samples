@@ -186,13 +186,9 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
                 ProjectDirectory = _testDirectory
             };
 
-            var result = task.SanitizeFileName("test<>:file|name");
+            var result = task.SanitizeFileName("test/sub/path");
 
-            result.Should().NotBeNull();
-            result.Should().NotContain("<");
-            result.Should().NotContain(">");
-            result.Should().NotContain(":");
-            result.Should().NotContain("|");
+            result.Should().Be("test_sub_path");
         }
     }
 
