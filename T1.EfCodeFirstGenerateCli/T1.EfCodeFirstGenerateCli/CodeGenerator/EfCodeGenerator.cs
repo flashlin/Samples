@@ -192,6 +192,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             output.WriteLine($"// Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             output.WriteLine("using Microsoft.EntityFrameworkCore;");
             output.WriteLine("using Microsoft.EntityFrameworkCore.Metadata.Builders;");
+            output.WriteLine($"using {targetNamespace}.Entities;");
             output.WriteLine();
             output.WriteLine($"namespace {targetNamespace}");
             output.WriteLine("{");
