@@ -106,6 +106,18 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             output.WriteLine("{");
             output.Indent++;
 
+            output.WriteLine($"public {dbSchema.DatabaseName}DbContext(DbContextOptions<{dbSchema.DatabaseName}DbContext> options)");
+            output.Indent++;
+            output.WriteLine(": base(options)");
+            output.Indent--;
+            output.WriteLine("{");
+            output.WriteLine("}");
+            output.WriteLine();
+            output.WriteLine($"public {dbSchema.DatabaseName}DbContext()");
+            output.WriteLine("{");
+            output.WriteLine("}");
+            output.WriteLine();
+
             foreach (var table in dbSchema.Tables)
             {
                 var propertyName = SanitizeIdentifier(table.TableName);

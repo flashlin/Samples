@@ -228,6 +228,29 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             result["TestDb/Entities/UsersEntity.cs"].Should().Contain("namespace Custom.Namespace");
             result["TestDb/Configurations/UsersEntityConfiguration.cs"].Should().Contain("namespace Custom.Namespace");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_DbContext_HasConstructorWithOptions()
+        {
+            var schema = TestHelper.CreateTestSchema("TestDb");
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var dbContextCode = result["TestDb/TestDbDbContext.cs"];
+
+            dbContextCode.Should().Contain("public TestDbDbContext(DbContextOptions<TestDbDbContext> options)");
+            dbContextCode.Should().Contain(": base(options)");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_DbContext_HasParameterlessConstructor()
+        {
+            var schema = TestHelper.CreateTestSchema("TestDb");
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var dbContextCode = result["TestDb/TestDbDbContext.cs"];
+
+            dbContextCode.Should().Contain("public TestDbDbContext()");
+        }
     }
 }
 

@@ -9,7 +9,7 @@
     
     <!-- NuGet Package Configuration -->
     <PackageId>T1.EfCodeFirstGenerateCli</PackageId>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <Authors>MrBrain</Authors>
     <Company>MrBrain</Company>
     <Description>Entity Framework Core Code First generator from database schema. Automatically generates DbContext, Entity classes, and Entity Configurations from your database. Cross-platform support for Windows, macOS, and Linux.</Description>
