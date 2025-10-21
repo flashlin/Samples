@@ -276,12 +276,35 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             entityCode.Should().Contain("public required string Username { get; set; }");
             entityCode.Should().Contain("public DateTime Created_at { get; set; }");
             
+            configCode.Should().Contain("builder.HasKey(x => x.Userid);");
             configCode.Should().Contain("builder.Property(x => x.Userid)");
             configCode.Should().Contain(".HasColumnName(\"userid\")");
             configCode.Should().Contain("builder.Property(x => x.Username)");
             configCode.Should().Contain(".HasColumnName(\"username\")");
             configCode.Should().Contain("builder.Property(x => x.Created_at)");
             configCode.Should().Contain(".HasColumnName(\"created_at\")");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_CompositePrimaryKey_ConvertsToPascalCase()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "orderLines"
+            };
+            table.Fields.Add(TestHelper.CreateField("orderid", "int", false, null, true, false));
+            table.Fields.Add(TestHelper.CreateField("lineid", "int", false, null, true, false));
+            table.Fields.Add(TestHelper.CreateField("product_name", "nvarchar(200)", false, null, false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/orderLinesEntityConfiguration.cs"];
+
+            configCode.Should().Contain("builder.HasKey(x => new { x.Orderid, x.Lineid });");
         }
     }
 }

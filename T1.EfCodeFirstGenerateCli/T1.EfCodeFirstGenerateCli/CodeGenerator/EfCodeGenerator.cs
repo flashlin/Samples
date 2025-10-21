@@ -228,12 +228,12 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             if (primaryKeys.Count == 1)
             {
                 var pk = primaryKeys[0];
-                var pkPropertyName = SanitizeIdentifier(pk.FieldName);
+                var pkPropertyName = ToPascalCase(pk.FieldName);
                 output.WriteLine($"builder.HasKey(x => x.{pkPropertyName});");
             }
             else if (primaryKeys.Count > 1)
             {
-                var pkFields = string.Join(", ", primaryKeys.Select(pk => $"x.{SanitizeIdentifier(pk.FieldName)}"));
+                var pkFields = string.Join(", ", primaryKeys.Select(pk => $"x.{ToPascalCase(pk.FieldName)}"));
                 output.WriteLine($"builder.HasKey(x => new {{ {pkFields} }});");
             }
 
