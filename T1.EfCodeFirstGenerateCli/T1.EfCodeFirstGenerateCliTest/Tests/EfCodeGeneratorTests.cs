@@ -395,16 +395,12 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             };
             table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
             table.Fields.Add(TestHelper.CreateField("Value", "int", false, "100", false, false));
-            table.Fields.Add(TestHelper.CreateField("SmallValue", "smallint", false, "10", false, false));
-            table.Fields.Add(TestHelper.CreateField("TinyValue", "tinyint", false, "1", false, false));
             schema.Tables.Add(table);
 
             var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
             var configCode = result["TestDb/Configurations/CountersEntityConfiguration.cs"];
 
             configCode.Should().Contain(".HasDefaultValue(100)");
-            configCode.Should().Contain(".HasDefaultValue(10)");
-            configCode.Should().Contain(".HasDefaultValue(1)");
             configCode.Should().NotContain("100L");
             configCode.Should().NotContain("100m");
             configCode.Should().NotContain("100f");
@@ -430,6 +426,58 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             var configCode = result["TestDb/Configurations/PricesEntityConfiguration.cs"];
 
             configCode.Should().Contain(".HasDefaultValue(0m)");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_TinyIntFieldWithDefaultValue_HasByteCast()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "TransInfo"
+            };
+            table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("BankFeeStatus", "tinyint", true, "1", false, false));
+            table.Fields.Add(TestHelper.CreateField("Status", "tinyint", false, "0", false, false));
+            table.Fields.Add(TestHelper.CreateField("MaxValue", "tinyint", false, "255", false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/TransInfoEntityConfiguration.cs"];
+
+            configCode.Should().Contain(".HasDefaultValue((byte)1)");
+            configCode.Should().Contain(".HasDefaultValue((byte)0)");
+            configCode.Should().Contain(".HasDefaultValue((byte)255)");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_SmallIntFieldWithDefaultValue_HasShortCast()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Settings"
+            };
+            table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("Timeout", "smallint", true, "10", false, false));
+            table.Fields.Add(TestHelper.CreateField("RetryCount", "smallint", false, "0", false, false));
+            table.Fields.Add(TestHelper.CreateField("MaxConnections", "smallint", false, "100", false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/SettingsEntityConfiguration.cs"];
+
+            configCode.Should().Contain(".HasDefaultValue((short)10)");
+            configCode.Should().Contain(".HasDefaultValue((short)0)");
+            configCode.Should().Contain(".HasDefaultValue((short)100)");
         }
     }
 }

@@ -353,9 +353,23 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
                     }
                     return (false, defaultValue);
                     
-                case "int":
-                case "smallint":
                 case "tinyint":
+                    // Add explicit cast for byte types
+                    if (byte.TryParse(defaultValue, out var byteValue))
+                    {
+                        return (false, $"(byte){byteValue}");
+                    }
+                    return (false, defaultValue);
+                    
+                case "smallint":
+                    // Add explicit cast for short types
+                    if (short.TryParse(defaultValue, out var shortValue))
+                    {
+                        return (false, $"(short){shortValue}");
+                    }
+                    return (false, defaultValue);
+                    
+                case "int":
                     return (false, defaultValue);
                     
                 case "bit":
