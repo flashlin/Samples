@@ -311,6 +311,24 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             
             var columnType = _typeConverter.GetColumnType(field.SqlDataType);
             
+            // Check if this is timestamp/rowversion
+            var baseType = ExtractBaseType(field.SqlDataType);
+            var isTimestamp = baseType.Equals("timestamp", StringComparison.OrdinalIgnoreCase) ||
+                              baseType.Equals("rowversion", StringComparison.OrdinalIgnoreCase);
+            
+            if (isTimestamp)
+            {
+                // timestamp/rowversion special handling
+                output.WriteLine($".HasColumnType(\"{columnType}\")");
+                output.WriteLine(".IsRowVersion()");
+                output.WriteLine(".ValueGeneratedOnAddOrUpdate()");
+                
+                output.Indent--;
+                output.WriteLine(";");
+                output.WriteLine();
+                return;
+            }
+            
             // If property name was sanitized, add HasColumnName to map to original column
             if (propertyName != field.FieldName)
             {
@@ -466,6 +484,12 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             return table.Fields.Any(f => 
                 f.FieldName != currentField.FieldName && 
                 f.IsAutoIncrement);
+        }
+
+        private string ExtractBaseType(string sqlDataType)
+        {
+            var match = Regex.Match(sqlDataType, @"^(\w+)", RegexOptions.IgnoreCase);
+            return match.Success ? match.Groups[1].Value : sqlDataType;
         }
     }
 }

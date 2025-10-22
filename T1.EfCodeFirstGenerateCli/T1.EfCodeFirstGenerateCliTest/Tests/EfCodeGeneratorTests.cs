@@ -753,6 +753,68 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             configCode.Should().Contain(".ValueGeneratedNever();");
             configCode.Should().Contain("builder.Property(x => x.Year)");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_TimestampField_HasIsRowVersion()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Products"
+            };
+            
+            table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("Name", "nvarchar(100)", false, null, false, false));
+            table.Fields.Add(TestHelper.CreateField("TStamp", "timestamp", false, null, false, false));
+            
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            // Check Entity
+            var entityCode = result["TestDb/Entities/ProductsEntity.cs"];
+            entityCode.Should().Contain("public required byte[] TStamp { get; set; }");
+            
+            // Check Configuration
+            var configCode = result["TestDb/Configurations/ProductsEntityConfiguration.cs"];
+            configCode.Should().Contain("builder.Property(x => x.TStamp)");
+            configCode.Should().Contain(".HasColumnType(\"timestamp\")");
+            configCode.Should().Contain(".IsRowVersion()");
+            configCode.Should().Contain(".ValueGeneratedOnAddOrUpdate()");
+            
+            // Should NOT have these
+            configCode.Should().NotContain("TStamp).IsRequired()");
+            configCode.Should().NotContain("TStamp).ValueGeneratedOnAdd()");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_RowversionField_HasIsRowVersion()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Orders"
+            };
+            
+            table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("RowVer", "rowversion", false, null, false, false));
+            
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/OrdersEntityConfiguration.cs"];
+            
+            configCode.Should().Contain(".IsRowVersion()");
+            configCode.Should().Contain(".ValueGeneratedOnAddOrUpdate()");
+        }
     }
 }
 

@@ -79,8 +79,10 @@ namespace T1.EfCodeFirstGenerateCli.Converters
                 case "datetime":
                 case "datetime2":
                 case "smalldatetime":
-                case "timestamp":
                     return "DateTime";
+                case "timestamp":
+                case "rowversion":
+                    return "byte[]";
                 case "time":
                     return "TimeSpan";
                 case "datetimeoffset":

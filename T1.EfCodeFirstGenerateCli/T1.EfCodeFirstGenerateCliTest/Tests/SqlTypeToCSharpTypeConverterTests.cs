@@ -188,6 +188,20 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
         }
 
         [Test]
+        public void Convert_Timestamp_ReturnsByteArray()
+        {
+            var result = _converter.ConvertType("timestamp", false);
+            result.Should().Be("byte[]");
+        }
+
+        [Test]
+        public void Convert_Rowversion_ReturnsByteArray()
+        {
+            var result = _converter.ConvertType("rowversion", false);
+            result.Should().Be("byte[]");
+        }
+
+        [Test]
         public void RegisterCustomMapping_CustomType_ReturnsCustomCSharpType()
         {
             _converter.RegisterCustomMapping("geometry", (sqlType, isNullable) =>
