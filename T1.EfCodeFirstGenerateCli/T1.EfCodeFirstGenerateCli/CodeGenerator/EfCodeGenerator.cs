@@ -89,15 +89,15 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             var generatedFiles = new Dictionary<string, string>();
 
             var dbContextCode = GenerateDbContext(dbSchema, targetNamespace);
-            generatedFiles[$"{dbSchema.DatabaseName}/{dbSchema.DatabaseName}DbContext.cs"] = dbContextCode;
+            generatedFiles[$"{dbSchema.ContextName}/{dbSchema.ContextName}DbContext.cs"] = dbContextCode;
 
             foreach (var table in dbSchema.Tables)
             {
                 var entityCode = GenerateEntity(table, targetNamespace);
-                generatedFiles[$"{dbSchema.DatabaseName}/Entities/{table.TableName}Entity.cs"] = entityCode;
+                generatedFiles[$"{dbSchema.ContextName}/Entities/{table.TableName}Entity.cs"] = entityCode;
 
                 var configCode = GenerateEntityConfiguration(table, targetNamespace);
-                generatedFiles[$"{dbSchema.DatabaseName}/Configurations/{table.TableName}EntityConfiguration.cs"] = configCode;
+                generatedFiles[$"{dbSchema.ContextName}/Configurations/{table.TableName}EntityConfiguration.cs"] = configCode;
             }
 
             return generatedFiles;
@@ -117,18 +117,18 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             output.WriteLine("{");
             output.Indent++;
 
-            output.WriteLine($"public partial class {dbSchema.DatabaseName}DbContext : DbContext");
+            output.WriteLine($"public partial class {dbSchema.ContextName}DbContext : DbContext");
             output.WriteLine("{");
             output.Indent++;
 
-            output.WriteLine($"public {dbSchema.DatabaseName}DbContext(DbContextOptions<{dbSchema.DatabaseName}DbContext> options)");
+            output.WriteLine($"public {dbSchema.ContextName}DbContext(DbContextOptions<{dbSchema.ContextName}DbContext> options)");
             output.Indent++;
             output.WriteLine(": base(options)");
             output.Indent--;
             output.WriteLine("{");
             output.WriteLine("}");
             output.WriteLine();
-            output.WriteLine($"public {dbSchema.DatabaseName}DbContext()");
+            output.WriteLine($"public {dbSchema.ContextName}DbContext()");
             output.WriteLine("{");
             output.WriteLine("}");
             output.WriteLine();

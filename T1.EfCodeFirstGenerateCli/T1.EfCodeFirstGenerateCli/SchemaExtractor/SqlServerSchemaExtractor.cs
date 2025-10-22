@@ -11,7 +11,8 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
         {
             var schema = new DbSchema
             {
-                DatabaseName = dbConfig.DatabaseName
+                DatabaseName = dbConfig.DatabaseName,
+                ContextName = dbConfig.ContextName
             };
 
             using (var connection = new SqlConnection(dbConfig.GetConnectionString()))

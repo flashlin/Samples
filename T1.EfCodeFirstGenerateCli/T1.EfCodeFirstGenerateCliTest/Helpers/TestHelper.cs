@@ -32,7 +32,8 @@ namespace T1.EfCodeFirstGenerateCliTest.Helpers
         {
             var schema = new DbSchema
             {
-                DatabaseName = databaseName
+                DatabaseName = databaseName,
+                ContextName = databaseName
             };
 
             // Add Users table

@@ -257,7 +257,8 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
         {
             var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
             {
-                DatabaseName = "TestDb"
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
             };
             var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
             {
@@ -290,7 +291,8 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
         {
             var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
             {
-                DatabaseName = "TestDb"
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
             };
             var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
             {

@@ -108,7 +108,7 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
 
         private Models.DbSchema? LoadOrExtractSchema(Models.DbConfig dbConfig, string generatedDir)
         {
-            var schemaFileName = $"{SanitizeFileName(dbConfig.ServerName)}_{SanitizeFileName(dbConfig.DatabaseName)}.schema";
+            var schemaFileName = $"{dbConfig.ContextName}.schema";
             var schemaFilePath = Path.Combine(generatedDir, schemaFileName);
 
             if (File.Exists(schemaFilePath))

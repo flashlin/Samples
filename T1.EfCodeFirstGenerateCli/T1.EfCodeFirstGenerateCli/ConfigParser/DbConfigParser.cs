@@ -16,6 +16,7 @@ namespace T1.EfCodeFirstGenerateCli.ConfigParser
             foreach (var dbFile in dbFiles)
             {
                 var lines = File.ReadAllLines(dbFile);
+                var fileName = Path.GetFileNameWithoutExtension(dbFile);
                 
                 foreach (var line in lines)
                 {
@@ -27,7 +28,9 @@ namespace T1.EfCodeFirstGenerateCli.ConfigParser
                     if (config != null)
                     {
                         config.DbFilePath = dbFile;
+                        config.ContextName = fileName;
                         configs.Add(config);
+                        break;
                     }
                 }
             }
