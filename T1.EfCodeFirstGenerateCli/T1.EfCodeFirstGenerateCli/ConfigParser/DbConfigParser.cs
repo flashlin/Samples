@@ -38,6 +38,27 @@ namespace T1.EfCodeFirstGenerateCli.ConfigParser
             return configs;
         }
 
+        public static void ProcessAllConfigs(
+            string directory,
+            Action<DbConfig> processAction,
+            Action<string>? logAction = null)
+        {
+            var dbConfigs = GetAllDbConnectionConfigs(directory);
+
+            if (dbConfigs.Count == 0)
+            {
+                logAction?.Invoke("No .db files found or no valid connection strings.");
+                return;
+            }
+
+            logAction?.Invoke($"Found {dbConfigs.Count} database configuration(s).");
+
+            foreach (var dbConfig in dbConfigs)
+            {
+                processAction(dbConfig);
+            }
+        }
+
         private static DbConfig? ParseConnectionString(string connectionString)
         {
             var config = new DbConfig();

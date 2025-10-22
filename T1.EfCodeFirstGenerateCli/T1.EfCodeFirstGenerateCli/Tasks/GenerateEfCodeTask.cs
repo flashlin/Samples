@@ -32,20 +32,11 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
                     return true; // Not a failure, just skip
                 }
 
-                var dbConfigs = DbConfigParser.GetAllDbConnectionConfigs(ProjectDirectory);
-
-                if (dbConfigs.Count == 0)
-                {
-                    Log.LogMessage(MessageImportance.Low, "No .db files found or no valid connection strings.");
-                    return true;
-                }
-
-                Log.LogMessage(MessageImportance.Normal, $"Found {dbConfigs.Count} database configuration(s).");
-
-                foreach (var dbConfig in dbConfigs)
-                {
-                    ProcessDbConfig(dbConfig);
-                }
+                DbConfigParser.ProcessAllConfigs(
+                    ProjectDirectory,
+                    ProcessDbConfig,
+                    msg => Log.LogMessage(MessageImportance.Normal, msg)
+                );
 
                 Log.LogMessage(MessageImportance.High, "T1.EfCodeFirstGenerateCli: Code generation completed.");
                 return true;

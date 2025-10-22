@@ -28,21 +28,11 @@ namespace T1.EfCodeFirstGenerateCli
             Console.WriteLine($"Scanning directory: {targetDirectory}");
             Console.WriteLine();
 
-            var dbConfigs = DbConfigParser.GetAllDbConnectionConfigs(targetDirectory);
-
-            if (dbConfigs.Count == 0)
-            {
-                Console.WriteLine("No .db files found or no valid connection strings.");
-                return;
-            }
-
-            Console.WriteLine($"Found {dbConfigs.Count} database configuration(s).");
-            Console.WriteLine();
-
-            foreach (var dbConfig in dbConfigs)
-            {
-                ProcessDbConfig(dbConfig, targetDirectory);
-            }
+            DbConfigParser.ProcessAllConfigs(
+                targetDirectory,
+                config => ProcessDbConfig(config, targetDirectory),
+                msg => Console.WriteLine(msg)
+            );
 
             Console.WriteLine();
             Console.WriteLine("Code generation completed.");
