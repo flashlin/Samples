@@ -533,6 +533,116 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             configCode.Should().Contain("builder.Property(x => x.Timestamp)");
             configCode.Should().Contain(".IsRequired()");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_ComputedColumnPersisted_HasComputedColumnSqlWithStoredTrue()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Orders"
+            };
+            
+            table.Fields.Add(TestHelper.CreateField("OrderId", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("Quantity", "int", false, null, false, false));
+            table.Fields.Add(TestHelper.CreateField("UnitPrice", "decimal(10,2)", false, null, false, false));
+            
+            // Computed column - PERSISTED
+            table.Fields.Add(TestHelper.CreateComputedField("TotalPrice", "decimal(21,2)", true, "([Quantity]*[UnitPrice])", true));
+            
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/OrdersEntityConfiguration.cs"];
+
+            configCode.Should().Contain(".HasComputedColumnSql(\"([Quantity]*[UnitPrice])\", stored: true)");
+            configCode.Should().NotContain("TotalPrice).HasDefaultValue");
+            configCode.Should().NotContain("TotalPrice).IsRequired");
+            configCode.Should().NotContain("TotalPrice).HasColumnType");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_ComputedColumnNotPersisted_HasComputedColumnSqlWithStoredFalse()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Orders"
+            };
+            
+            table.Fields.Add(TestHelper.CreateField("OrderId", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("Quantity", "int", false, null, false, false));
+            table.Fields.Add(TestHelper.CreateField("UnitPrice", "decimal(10,2)", false, null, false, false));
+            
+            // Computed column - NOT PERSISTED (virtual)
+            table.Fields.Add(TestHelper.CreateComputedField("TotalPriceWithTax", "decimal(21,2)", true, "([Quantity]*[UnitPrice]*(1.1))", false));
+            
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/OrdersEntityConfiguration.cs"];
+
+            configCode.Should().Contain(".HasComputedColumnSql(\"([Quantity]*[UnitPrice]*(1.1))\", stored: false)");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_ComputedColumn_EntityHasProperty()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Orders"
+            };
+            
+            table.Fields.Add(TestHelper.CreateField("OrderId", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateComputedField("TotalPrice", "decimal(21,2)", true, "([Quantity]*[UnitPrice])", true));
+            
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var entityCode = result["TestDb/Entities/OrdersEntity.cs"];
+
+            // Computed columns should still have properties in the entity
+            entityCode.Should().Contain("public decimal? TotalPrice { get; set; }");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_ComputedColumnWithSpecialCharacters_EscapesQuotes()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Test"
+            };
+            
+            table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            // SQL expression with quotes (edge case)
+            table.Fields.Add(TestHelper.CreateComputedField("ComputedField", "nvarchar(100)", true, "(CASE WHEN [Status] = 'Active' THEN 'Yes' ELSE 'No' END)", true));
+            
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/TestEntityConfiguration.cs"];
+
+            // Should escape the quotes properly
+            configCode.Should().Contain("HasComputedColumnSql");
+        }
     }
 }
 

@@ -263,11 +263,29 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 
         private void GeneratePropertyConfiguration(IndentStringBuilder output, FieldSchema field)
         {
-            var columnType = _typeConverter.GetColumnType(field.SqlDataType);
             var propertyName = ToPascalCase(field.FieldName);
             
             output.WriteLine($"builder.Property(x => x.{propertyName})");
             output.Indent++;
+            
+            // Check if this is a computed column
+            if (field.IsComputed && !string.IsNullOrEmpty(field.ComputedColumnSql))
+            {
+                var computedSql = field.ComputedColumnSql.Trim();
+                // Escape double quotes in SQL expression
+                computedSql = computedSql.Replace("\"", "\\\"");
+                var storedParam = field.IsComputedColumnStored ? "stored: true" : "stored: false";
+                
+                output.WriteLine($".HasComputedColumnSql(\"{computedSql}\", {storedParam})");
+                
+                // Computed columns don't need other configurations
+                output.Indent--;
+                output.WriteLine(";");
+                output.WriteLine();
+                return;
+            }
+            
+            var columnType = _typeConverter.GetColumnType(field.SqlDataType);
             
             // If property name was sanitized, add HasColumnName to map to original column
             if (propertyName != field.FieldName)

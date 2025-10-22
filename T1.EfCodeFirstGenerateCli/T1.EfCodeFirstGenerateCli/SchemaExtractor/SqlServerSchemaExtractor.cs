@@ -55,7 +55,10 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                     c.IS_NULLABLE,
                     c.COLUMN_DEFAULT,
                     CASE WHEN pk.COLUMN_NAME IS NOT NULL THEN 1 ELSE 0 END AS IS_PRIMARY_KEY,
-                    CASE WHEN ic.object_id IS NOT NULL THEN 1 ELSE 0 END AS IS_IDENTITY
+                    CASE WHEN ic.object_id IS NOT NULL THEN 1 ELSE 0 END AS IS_IDENTITY,
+                    CASE WHEN cc.object_id IS NOT NULL THEN 1 ELSE 0 END AS IS_COMPUTED,
+                    cc.definition AS COMPUTED_DEFINITION,
+                    CASE WHEN cc.is_persisted = 1 THEN 1 ELSE 0 END AS IS_PERSISTED
                 FROM INFORMATION_SCHEMA.COLUMNS c
                 LEFT JOIN (
                     SELECT ku.TABLE_NAME, ku.COLUMN_NAME
@@ -66,6 +69,8 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                 ) pk ON c.TABLE_NAME = pk.TABLE_NAME AND c.COLUMN_NAME = pk.COLUMN_NAME
                 LEFT JOIN sys.identity_columns ic ON ic.object_id = OBJECT_ID(c.TABLE_SCHEMA + '.' + c.TABLE_NAME) 
                     AND ic.name = c.COLUMN_NAME
+                LEFT JOIN sys.computed_columns cc ON cc.object_id = OBJECT_ID(c.TABLE_SCHEMA + '.' + c.TABLE_NAME)
+                    AND cc.name = c.COLUMN_NAME
                 WHERE c.TABLE_NAME = @TableName
                 ORDER BY c.ORDINAL_POSITION";
 
@@ -84,7 +89,10 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                             IsNullable = reader.IsDBNull(2) ? false : reader.GetString(2).Equals("YES", StringComparison.OrdinalIgnoreCase),
                             DefaultValue = reader.IsDBNull(3) ? null : reader.GetString(3),
                             IsPrimaryKey = reader.IsDBNull(4) ? false : reader.GetInt32(4) == 1,
-                            IsAutoIncrement = reader.IsDBNull(5) ? false : reader.GetInt32(5) == 1
+                            IsAutoIncrement = reader.IsDBNull(5) ? false : reader.GetInt32(5) == 1,
+                            IsComputed = reader.IsDBNull(6) ? false : reader.GetInt32(6) == 1,
+                            ComputedColumnSql = reader.IsDBNull(7) ? null : reader.GetString(7),
+                            IsComputedColumnStored = reader.IsDBNull(8) ? false : reader.GetInt32(8) == 1
                         };
                         fields.Add(field);
                     }

@@ -82,6 +82,26 @@ namespace T1.EfCodeFirstGenerateCliTest.Helpers
             };
         }
 
+        public static FieldSchema CreateComputedField(
+            string fieldName,
+            string sqlDataType,
+            bool isNullable,
+            string computedSql,
+            bool isStored)
+        {
+            return new FieldSchema
+            {
+                FieldName = fieldName,
+                SqlDataType = sqlDataType,
+                IsNullable = isNullable,
+                IsPrimaryKey = false,
+                IsAutoIncrement = false,
+                IsComputed = true,
+                ComputedColumnSql = computedSql,
+                IsComputedColumnStored = isStored
+            };
+        }
+
         public static bool FileContainsText(string filePath, string text)
         {
             if (!File.Exists(filePath))
