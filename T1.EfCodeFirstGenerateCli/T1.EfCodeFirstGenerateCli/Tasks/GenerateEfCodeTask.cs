@@ -147,12 +147,12 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
             var generator = new EfCodeGenerator();
             var generatedFiles = generator.GenerateCodeFirstFromSchema(dbSchema, targetNamespace);
 
-            WriteGeneratedFiles(generatedFiles, generatedDir);
+            WriteGeneratedFiles(generatedFiles, generatedDir, dbSchema.DatabaseName);
             
             Log.LogMessage(MessageImportance.Normal, $"  Generated {generatedFiles.Count} file(s).");
         }
 
-        private void WriteGeneratedFiles(System.Collections.Generic.Dictionary<string, string> generatedFiles, string generatedDir)
+        private void WriteGeneratedFiles(System.Collections.Generic.Dictionary<string, string> generatedFiles, string generatedDir, string databaseName)
         {
             foreach (var kvp in generatedFiles)
             {
@@ -165,42 +165,39 @@ namespace T1.EfCodeFirstGenerateCli.Tasks
                 File.WriteAllText(filePath, kvp.Value, Encoding.UTF8);
             }
             
-            CleanObsoleteFiles(generatedFiles, generatedDir);
+            CleanObsoleteFiles(generatedFiles, generatedDir, databaseName);
         }
 
-        private void CleanObsoleteFiles(System.Collections.Generic.Dictionary<string, string> generatedFiles, string generatedDir)
+        private void CleanObsoleteFiles(System.Collections.Generic.Dictionary<string, string> generatedFiles, string generatedDir, string databaseName)
         {
             var expectedFiles = new System.Collections.Generic.HashSet<string>(
                 generatedFiles.Keys.Select(k => Path.GetFullPath(Path.Combine(generatedDir, k))),
                 StringComparer.OrdinalIgnoreCase
             );
             
-            // Find database directory (e.g., generatedDir/DatabaseName/)
-            if (!Directory.Exists(generatedDir)) 
+            // Only clean files in the current database directory
+            var currentDbDir = Path.Combine(generatedDir, databaseName);
+            if (!Directory.Exists(currentDbDir)) 
                 return;
             
-            var dbDirs = Directory.GetDirectories(generatedDir);
-            foreach (var dbDir in dbDirs)
+            var existingFiles = Directory.GetFiles(currentDbDir, "*", SearchOption.AllDirectories);
+            foreach (var existingFile in existingFiles)
             {
-                var existingFiles = Directory.GetFiles(dbDir, "*", SearchOption.AllDirectories);
-                foreach (var existingFile in existingFiles)
-                {
-                    var fullPath = Path.GetFullPath(existingFile);
-                    
-                    // Skip .schema files
-                    if (Path.GetExtension(fullPath).Equals(".schema", StringComparison.OrdinalIgnoreCase))
-                        continue;
-                    
-                    // Delete if not in expected files
-                    if (!expectedFiles.Contains(fullPath))
-                    {
-                        File.Delete(fullPath);
-                        Log.LogMessage(MessageImportance.Low, $"  Deleted obsolete file: {Path.GetRelativePath(generatedDir, fullPath)}");
-                    }
-                }
+                var fullPath = Path.GetFullPath(existingFile);
                 
-                CleanEmptyDirectories(dbDir);
+                // Skip .schema files
+                if (Path.GetExtension(fullPath).Equals(".schema", StringComparison.OrdinalIgnoreCase))
+                    continue;
+                
+                // Delete if not in expected files
+                if (!expectedFiles.Contains(fullPath))
+                {
+                    File.Delete(fullPath);
+                    Log.LogMessage(MessageImportance.Low, $"  Deleted obsolete file: {Path.GetRelativePath(generatedDir, fullPath)}");
+                }
             }
+            
+            CleanEmptyDirectories(currentDbDir);
         }
 
         private void CleanEmptyDirectories(string directory)

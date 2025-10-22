@@ -6,7 +6,7 @@ using T1.EfCodeFirstGenerateCli.Models;
 
 namespace T1.EfCodeFirstGenerateCli.ConfigParser
 {
-    internal class DbConfigParser
+    public class DbConfigParser
     {
         public static List<DbConfig> GetAllDbConnectionConfigs(string directory)
         {
