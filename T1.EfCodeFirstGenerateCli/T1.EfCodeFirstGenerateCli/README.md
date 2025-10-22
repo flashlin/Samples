@@ -18,7 +18,7 @@ dotnet build
 
 ### Step 1: Create Connection String Configuration File
 
-Create a `.db` file in your project root directory (e.g., `databases.db`):
+Create a `.db` file in your project root directory (e.g., `Test.db`):
 
 ```
 # Comment lines start with # or //
@@ -28,10 +28,6 @@ Server=localhost;Database=MyDatabase;User Id=sa;Password=YourPassword;TrustServe
 
 # MySQL example  
 Server=localhost;Database=TestDb;Uid=root;Pwd=secret;
-
-# Multiple databases
-Server=localhost;Database=DB1;User Id=sa;Password=pass1;
-Server=localhost;Database=DB2;User Id=sa;Password=pass2;
 ```
 
 **Supported connection string formats:**
@@ -52,16 +48,17 @@ Generated code will be placed in the `Generated/` directory:
 
 ```
 Generated/
-├── localhost_MyDatabase.schema          # Schema cache file
-├── MyDatabaseDbContext.cs               # DbContext
-├── Entities/
-│   ├── UsersEntity.cs
-│   ├── ProductsEntity.cs
-│   └── OrdersEntity.cs
-└── Configurations/
-    ├── UsersEntityConfiguration.cs
-    ├── ProductsEntityConfiguration.cs
-    └── OrdersEntityConfiguration.cs
+├── Test.schema          # Schema cache file
+└── Test/
+    ├── TestDbContext.cs               # DbContext
+    ├── Entities/
+    │   ├── UsersEntity.cs
+    │   ├── ProductsEntity.cs
+    │   └── OrdersEntity.cs
+    └── Configurations/
+        ├── UsersEntityConfiguration.cs
+        ├── ProductsEntityConfiguration.cs
+        └── OrdersEntityConfiguration.cs
 ```
 
 Use the generated code in your application:
@@ -70,11 +67,11 @@ Use the generated code in your application:
 using Generated;
 using Microsoft.EntityFrameworkCore;
 
-var options = new DbContextOptionsBuilder<MyDatabaseDbContext>()
+var options = new DbContextOptionsBuilder<TestDbContext>()
     .UseSqlServer("your-connection-string")
     .Options;
 
-using var context = new MyDatabaseDbContext(options);
+using var context = new TestDbContext(options);
 var users = await context.Users.ToListAsync();
 ```
 
@@ -85,10 +82,9 @@ var users = await context.Users.ToListAsync();
 Since the generated DbContext is a `partial class`, you can extend it in another file:
 
 ```csharp
-// MyDatabaseDbContext.Extensions.cs
 namespace Generated
 {
-    public partial class MyDatabaseDbContext
+    public partial class TestDbContext
     {
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
         {
@@ -107,7 +103,7 @@ The `.schema` file is cached for performance:
 When your database structure changes, delete the `.schema` file to regenerate:
 
 ```bash
-rm Generated/*.schema
+rm Generated/*
 dotnet build
 ```
 
