@@ -236,6 +236,11 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
                 var pkFields = string.Join(", ", primaryKeys.Select(pk => $"x.{ToPascalCase(pk.FieldName)}"));
                 output.WriteLine($"builder.HasKey(x => new {{ {pkFields} }});");
             }
+            else
+            {
+                // No primary key - this is a keyless entity
+                output.WriteLine("builder.HasNoKey();");
+            }
 
             output.WriteLine();
 

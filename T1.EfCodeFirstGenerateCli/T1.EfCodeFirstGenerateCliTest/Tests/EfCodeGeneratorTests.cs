@@ -479,6 +479,60 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             configCode.Should().Contain(".HasDefaultValue((short)0)");
             configCode.Should().Contain(".HasDefaultValue((short)100)");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_TableWithoutPrimaryKey_HasNoKey()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "AdminIP"
+            };
+            // Add fields without primary key
+            table.Fields.Add(TestHelper.CreateField("IP", "varchar(50)", false, null, false, false));
+            table.Fields.Add(TestHelper.CreateField("Status", "bit", true, null, false, false));
+            table.Fields.Add(TestHelper.CreateField("CreatedOn", "datetime", true, null, false, false));
+            table.Fields.Add(TestHelper.CreateField("CreatedBy", "nvarchar(50)", true, null, false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/AdminIPEntityConfiguration.cs"];
+
+            configCode.Should().Contain("builder.HasNoKey();");
+            configCode.Should().NotContain("builder.HasKey(");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_TableWithoutPrimaryKey_ConfigurationStillValid()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "LogEntries"
+            };
+            table.Fields.Add(TestHelper.CreateField("Message", "nvarchar(500)", false, null, false, false));
+            table.Fields.Add(TestHelper.CreateField("Timestamp", "datetime2", false, null, false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/LogEntriesEntityConfiguration.cs"];
+
+            // Verify HasNoKey is present
+            configCode.Should().Contain("builder.HasNoKey();");
+            
+            // Verify properties are still configured
+            configCode.Should().Contain("builder.Property(x => x.Message)");
+            configCode.Should().Contain("builder.Property(x => x.Timestamp)");
+            configCode.Should().Contain(".IsRequired()");
+        }
     }
 }
 
