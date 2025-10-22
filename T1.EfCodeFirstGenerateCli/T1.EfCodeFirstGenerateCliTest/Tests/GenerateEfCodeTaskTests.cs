@@ -173,7 +173,7 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             if (File.Exists(dbContextPath))
             {
                 var content = File.ReadAllText(dbContextPath);
-                content.Should().Contain("namespace TestNamespace.Config");
+                content.Should().Contain("namespace TestNamespace.Config.Databases.ConfigDb");
             }
         }
 
@@ -272,6 +272,19 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             Directory.Exists(db1ConfigsDir).Should().BeTrue("Database1 Configurations directory should exist");
             Directory.Exists(db2ConfigsDir).Should().BeTrue("Database2 Configurations directory should exist");
             Directory.Exists(db3ConfigsDir).Should().BeTrue("Database3 Configurations directory should exist");
+
+            // Verify namespace structure includes Databases layer
+            var db1Content = File.ReadAllText(db1ContextPath);
+            db1Content.Should().Contain("namespace TestNamespace.Databases.Database1", 
+                "Database1 should have Databases namespace layer");
+            
+            var db2Content = File.ReadAllText(db2ContextPath);
+            db2Content.Should().Contain("namespace TestNamespace.Databases.Database2",
+                "Database2 should have Databases namespace layer");
+            
+            var db3Content = File.ReadAllText(db3ContextPath);
+            db3Content.Should().Contain("namespace TestNamespace.Databases.Database3",
+                "Database3 should have Databases namespace layer");
         }
     }
 

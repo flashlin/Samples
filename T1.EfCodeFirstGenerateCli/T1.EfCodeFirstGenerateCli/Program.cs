@@ -123,8 +123,11 @@ namespace T1.EfCodeFirstGenerateCli
                     }
                 }
                 
+                // Add database-specific namespace layer to avoid naming conflicts
+                var databaseNamespace = $"{targetNamespace}.Databases.{dbSchema.ContextName}";
+                
                 var generator = new EfCodeGenerator();
-                var generatedFiles = generator.GenerateCodeFirstFromSchema(dbSchema, targetNamespace);
+                var generatedFiles = generator.GenerateCodeFirstFromSchema(dbSchema, databaseNamespace);
 
                 foreach (var kvp in generatedFiles)
                 {
