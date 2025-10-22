@@ -230,11 +230,35 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
                 var pk = primaryKeys[0];
                 var pkPropertyName = ToPascalCase(pk.FieldName);
                 output.WriteLine($"builder.HasKey(x => x.{pkPropertyName});");
+                
+                // Check if primary key needs ValueGeneratedNever
+                if (!pk.IsAutoIncrement && HasOtherAutoIncrementFields(table, pk))
+                {
+                    output.WriteLine();
+                    output.WriteLine($"builder.Property(x => x.{pkPropertyName})");
+                    output.Indent++;
+                    output.WriteLine(".ValueGeneratedNever();");
+                    output.Indent--;
+                }
             }
             else if (primaryKeys.Count > 1)
             {
                 var pkFields = string.Join(", ", primaryKeys.Select(pk => $"x.{ToPascalCase(pk.FieldName)}"));
                 output.WriteLine($"builder.HasKey(x => new {{ {pkFields} }});");
+                
+                // Check each primary key field
+                foreach (var pk in primaryKeys)
+                {
+                    if (!pk.IsAutoIncrement && HasOtherAutoIncrementFields(table, pk))
+                    {
+                        var pkPropertyName = ToPascalCase(pk.FieldName);
+                        output.WriteLine();
+                        output.WriteLine($"builder.Property(x => x.{pkPropertyName})");
+                        output.Indent++;
+                        output.WriteLine(".ValueGeneratedNever();");
+                        output.Indent--;
+                    }
+                }
             }
             else
             {
@@ -435,6 +459,13 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             }
             
             return false;
+        }
+
+        private bool HasOtherAutoIncrementFields(TableSchema table, FieldSchema currentField)
+        {
+            return table.Fields.Any(f => 
+                f.FieldName != currentField.FieldName && 
+                f.IsAutoIncrement);
         }
     }
 }

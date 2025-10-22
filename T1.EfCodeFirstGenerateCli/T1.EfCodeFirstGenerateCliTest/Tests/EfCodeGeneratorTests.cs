@@ -643,6 +643,116 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             // Should escape the quotes properly
             configCode.Should().Contain("HasComputedColumnSql");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_NonIdentityPrimaryKeyWithOtherIdentityField_HasValueGeneratedNever()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "CustomerAccountTier"
+            };
+            
+            // Id is Identity but NOT primary key
+            var idField = TestHelper.CreateField("Id", "int", false, null, false, false);
+            idField.IsAutoIncrement = true;
+            table.Fields.Add(idField);
+            
+            // CustID is primary key but NOT Identity
+            var custIdField = TestHelper.CreateField("CustID", "int", false, null, true, false);
+            custIdField.IsPrimaryKey = true;
+            custIdField.IsAutoIncrement = false;
+            table.Fields.Add(custIdField);
+            
+            table.Fields.Add(TestHelper.CreateField("UserName", "nvarchar(50)", false, null, false, false));
+            
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/CustomerAccountTierEntityConfiguration.cs"];
+
+            // Should have ValueGeneratedNever for non-identity primary key
+            configCode.Should().Contain("builder.HasKey(x => x.CustID);");
+            configCode.Should().Contain("builder.Property(x => x.CustID)");
+            configCode.Should().Contain(".ValueGeneratedNever();");
+            
+            // Should have ValueGeneratedOnAdd for identity non-primary field
+            configCode.Should().Contain("builder.Property(x => x.Id)");
+            configCode.Should().Contain(".ValueGeneratedOnAdd()");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_IdentityPrimaryKey_NoValueGeneratedNever()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Users"
+            };
+            
+            // Normal case: primary key IS identity
+            var idField = TestHelper.CreateField("Id", "int", false, null, true, true);
+            idField.IsPrimaryKey = true;
+            idField.IsAutoIncrement = true;
+            table.Fields.Add(idField);
+            
+            table.Fields.Add(TestHelper.CreateField("Name", "nvarchar(100)", false, null, false, false));
+            
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/UsersEntityConfiguration.cs"];
+
+            // Should NOT have ValueGeneratedNever
+            configCode.Should().NotContain(".ValueGeneratedNever()");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_CompositePrimaryKeyWithIdentityField_HasValueGeneratedNever()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Orders"
+            };
+            
+            // Identity field (not part of primary key)
+            var idField = TestHelper.CreateField("Id", "int", false, null, false, false);
+            idField.IsAutoIncrement = true;
+            table.Fields.Add(idField);
+            
+            // Composite primary key (non-identity)
+            var orderNoField = TestHelper.CreateField("OrderNo", "int", false, null, false, false);
+            orderNoField.IsPrimaryKey = true;
+            table.Fields.Add(orderNoField);
+            
+            var yearField = TestHelper.CreateField("Year", "int", false, null, false, false);
+            yearField.IsPrimaryKey = true;
+            table.Fields.Add(yearField);
+            
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/OrdersEntityConfiguration.cs"];
+
+            // Composite primary key should both have ValueGeneratedNever
+            configCode.Should().Contain("builder.HasKey(x => new { x.OrderNo, x.Year });");
+            configCode.Should().Contain("builder.Property(x => x.OrderNo)");
+            configCode.Should().Contain(".ValueGeneratedNever();");
+            configCode.Should().Contain("builder.Property(x => x.Year)");
+        }
     }
 }
 
