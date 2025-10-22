@@ -308,6 +308,129 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
 
             configCode.Should().Contain("builder.HasKey(x => new { x.Orderid, x.Lineid });");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_DecimalFieldWithDefaultValue_HasDecimalSuffix()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Currencies"
+            };
+            table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("CasinoPlayableLimit", "decimal(19,2)", true, "0", false, false));
+            table.Fields.Add(TestHelper.CreateField("Rate", "decimal(18,4)", false, "1.5", false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/CurrenciesEntityConfiguration.cs"];
+
+            configCode.Should().Contain(".HasDefaultValue(0m)");
+            configCode.Should().Contain(".HasDefaultValue(1.5m)");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_FloatFieldWithDefaultValue_HasFloatSuffix()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Measurements"
+            };
+            table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("Temperature", "float", true, "0", false, false));
+            table.Fields.Add(TestHelper.CreateField("Pressure", "real", false, "1.5", false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/MeasurementsEntityConfiguration.cs"];
+
+            configCode.Should().Contain(".HasDefaultValue(0f)");
+            configCode.Should().Contain(".HasDefaultValue(1.5f)");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_BigIntFieldWithDefaultValue_HasLongSuffix()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "LargeNumbers"
+            };
+            table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("Counter", "bigint", true, "0", false, false));
+            table.Fields.Add(TestHelper.CreateField("MaxValue", "bigint", false, "9999999999", false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/LargeNumbersEntityConfiguration.cs"];
+
+            configCode.Should().Contain(".HasDefaultValue(0L)");
+            configCode.Should().Contain(".HasDefaultValue(9999999999L)");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_IntFieldWithDefaultValue_NoSuffix()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Counters"
+            };
+            table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("Value", "int", false, "100", false, false));
+            table.Fields.Add(TestHelper.CreateField("SmallValue", "smallint", false, "10", false, false));
+            table.Fields.Add(TestHelper.CreateField("TinyValue", "tinyint", false, "1", false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/CountersEntityConfiguration.cs"];
+
+            configCode.Should().Contain(".HasDefaultValue(100)");
+            configCode.Should().Contain(".HasDefaultValue(10)");
+            configCode.Should().Contain(".HasDefaultValue(1)");
+            configCode.Should().NotContain("100L");
+            configCode.Should().NotContain("100m");
+            configCode.Should().NotContain("100f");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_NumericFieldWithDefaultValue_HasDecimalSuffix()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema
+            {
+                TableName = "Prices"
+            };
+            table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("Amount", "numeric(10,2)", false, "0", false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/PricesEntityConfiguration.cs"];
+
+            configCode.Should().Contain(".HasDefaultValue(0m)");
+        }
     }
 }
 

@@ -327,24 +327,48 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             
             switch (baseType)
             {
-                case "int":
-                case "bigint":
-                case "smallint":
-                case "tinyint":
                 case "decimal":
                 case "numeric":
+                    // Add 'm' suffix for decimal types
+                    if (decimal.TryParse(defaultValue, out var decimalValue))
+                    {
+                        return (false, $"{decimalValue}m");
+                    }
+                    return (false, defaultValue);
+                    
                 case "float":
                 case "real":
+                    // Add 'f' suffix for float types
+                    if (double.TryParse(defaultValue, out var floatValue))
+                    {
+                        return (false, $"{floatValue}f");
+                    }
                     return (false, defaultValue);
+                    
+                case "bigint":
+                    // Add 'L' suffix for long types
+                    if (long.TryParse(defaultValue, out var longValue))
+                    {
+                        return (false, $"{longValue}L");
+                    }
+                    return (false, defaultValue);
+                    
+                case "int":
+                case "smallint":
+                case "tinyint":
+                    return (false, defaultValue);
+                    
                 case "bit":
                 case "boolean":
                     return (false, defaultValue.ToLower() == "1" || defaultValue.ToLower() == "true" ? "true" : "false");
+                    
                 case "varchar":
                 case "nvarchar":
                 case "char":
                 case "nchar":
                 case "text":
                     return (false, $"\"{defaultValue}\"");
+                    
                 default:
                     return (false, string.Empty);
             }
