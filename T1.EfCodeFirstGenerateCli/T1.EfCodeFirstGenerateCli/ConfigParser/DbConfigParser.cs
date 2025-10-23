@@ -54,19 +54,34 @@ namespace T1.EfCodeFirstGenerateCli.ConfigParser
         {
             var fileName = Path.GetFileNameWithoutExtension(filePath);
             var validLines = ReadValidLines(filePath);
+            DbConfig? config = null;
             
             foreach (var line in validLines)
             {
-                var config = ParseConnectionString(line);
+                // First, try to parse as connection string
+                if (config == null)
+                {
+                    config = ParseConnectionString(line);
+                    if (config != null)
+                    {
+                        config.DbFilePath = filePath;
+                        config.ContextName = fileName;
+                        continue; // Continue parsing for relationships
+                    }
+                }
+                
+                // If config exists, try to parse relationships
                 if (config != null)
                 {
-                    config.DbFilePath = filePath;
-                    config.ContextName = fileName;
-                    return config;
+                    var relationship = MermaidRelationshipParser.ParseRelationship(line);
+                    if (relationship != null)
+                    {
+                        config.Relationships.Add(relationship);
+                    }
                 }
             }
             
-            return null;
+            return config;
         }
 
         public static void ProcessAllConfigs(
