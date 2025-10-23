@@ -8,7 +8,15 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
         public static DbSchema CreateDatabaseSchema(DbConfig dbConfig)
         {
             ISchemaExtractor extractor = CreateExtractor(dbConfig.DbType);
-            return extractor.ExtractSchema(dbConfig);
+            var dbSchema = extractor.ExtractSchema(dbConfig);
+            
+            // Add relationships from .db file to schema
+            if (dbConfig.Relationships != null && dbConfig.Relationships.Count > 0)
+            {
+                dbSchema.Relationships.AddRange(dbConfig.Relationships);
+            }
+            
+            return dbSchema;
         }
 
         private static ISchemaExtractor CreateExtractor(DbType dbType)
