@@ -667,90 +667,97 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             {
                 if (rel.NavigationType == NavigationType.Bidirectional)
                 {
-                    var depNav = rel.DependentNavigationName ?? rel.PrincipalEntity;
-                    var prinNav = rel.PrincipalNavigationName ?? rel.DependentEntity;
-                    output.WriteLine($"builder.HasOne(x => x.{depNav})");
-                    output.Indent++;
-                    output.WriteLine($".WithOne(x => x.{prinNav})");
-                    
-                    // Add IsRequired(false) if dependent is optional
-                    if (rel.IsDependentOptional)
-                    {
-                        output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp})");
-                        output.WriteLine(".IsRequired(false);");
-                    }
-                    else
-                    {
-                        output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp});");
-                    }
-                    
-                    output.Indent--;
+                    WriteOneToOneBidirectionalRelationship(output, dependentTable, rel, fkProp);
                 }
-                else // Unidirectional
+                else
                 {
-                    output.WriteLine($"builder.HasOne<{rel.PrincipalEntity}Entity>()");
-                    output.Indent++;
-                    output.WriteLine(".WithOne()");
-                    
-                    // Add IsRequired(false) if dependent is optional
-                    if (rel.IsDependentOptional)
-                    {
-                        output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp})");
-                        output.WriteLine(".IsRequired(false);");
-                    }
-                    else
-                    {
-                        output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp});");
-                    }
-                    
-                    output.Indent--;
+                    WriteOneToOneUnidirectionalRelationship(output, dependentTable, rel, fkProp);
                 }
             }
             else // OneToMany or ManyToOne
             {
                 if (rel.NavigationType == NavigationType.Bidirectional)
                 {
-                    var depNav = rel.DependentNavigationName ?? rel.PrincipalEntity;
-                    var prinNav = rel.PrincipalNavigationName ?? (rel.DependentEntity + "s");
-                    output.WriteLine($"builder.HasOne(x => x.{depNav})");
-                    output.Indent++;
-                    output.WriteLine($".WithMany(x => x.{prinNav})");
-                    
-                    // Add IsRequired(false) if dependent is optional
-                    if (rel.IsDependentOptional)
-                    {
-                        output.WriteLine($".HasForeignKey(x => x.{fkProp})");
-                        output.WriteLine(".IsRequired(false);");
-                    }
-                    else
-                    {
-                        output.WriteLine($".HasForeignKey(x => x.{fkProp});");
-                    }
-                    
-                    output.Indent--;
+                    WriteOneToManyBidirectionalRelationship(output, rel, fkProp);
                 }
-                else // Unidirectional
+                else
                 {
-                    output.WriteLine($"builder.HasOne<{rel.PrincipalEntity}Entity>()");
-                    output.Indent++;
-                    output.WriteLine(".WithMany()");
-                    
-                    // Add IsRequired(false) if dependent is optional
-                    if (rel.IsDependentOptional)
-                    {
-                        output.WriteLine($".HasForeignKey(x => x.{fkProp})");
-                        output.WriteLine(".IsRequired(false);");
-                    }
-                    else
-                    {
-                        output.WriteLine($".HasForeignKey(x => x.{fkProp});");
-                    }
-                    
-                    output.Indent--;
+                    WriteOneToManyUnidirectionalRelationship(output, rel, fkProp);
                 }
             }
             
             output.WriteLine();
+        }
+
+        private void WriteOneToOneBidirectionalRelationship(
+            IndentStringBuilder output,
+            string dependentTable,
+            EntityRelationship rel,
+            string fkProp)
+        {
+            var depNav = rel.DependentNavigationName ?? rel.PrincipalEntity;
+            var prinNav = rel.PrincipalNavigationName ?? rel.DependentEntity;
+            output.WriteLine($"builder.HasOne(x => x.{depNav})");
+            output.Indent++;
+            output.WriteLine($".WithOne(x => x.{prinNav})");
+            WriteForeignKeyWithOptional(output, $"<{dependentTable}Entity>", fkProp, rel.IsDependentOptional);
+            output.Indent--;
+        }
+
+        private void WriteOneToOneUnidirectionalRelationship(
+            IndentStringBuilder output,
+            string dependentTable,
+            EntityRelationship rel,
+            string fkProp)
+        {
+            output.WriteLine($"builder.HasOne<{rel.PrincipalEntity}Entity>()");
+            output.Indent++;
+            output.WriteLine(".WithOne()");
+            WriteForeignKeyWithOptional(output, $"<{dependentTable}Entity>", fkProp, rel.IsDependentOptional);
+            output.Indent--;
+        }
+
+        private void WriteOneToManyBidirectionalRelationship(
+            IndentStringBuilder output,
+            EntityRelationship rel,
+            string fkProp)
+        {
+            var depNav = rel.DependentNavigationName ?? rel.PrincipalEntity;
+            var prinNav = rel.PrincipalNavigationName ?? (rel.DependentEntity + "s");
+            output.WriteLine($"builder.HasOne(x => x.{depNav})");
+            output.Indent++;
+            output.WriteLine($".WithMany(x => x.{prinNav})");
+            WriteForeignKeyWithOptional(output, "", fkProp, rel.IsDependentOptional);
+            output.Indent--;
+        }
+
+        private void WriteOneToManyUnidirectionalRelationship(
+            IndentStringBuilder output,
+            EntityRelationship rel,
+            string fkProp)
+        {
+            output.WriteLine($"builder.HasOne<{rel.PrincipalEntity}Entity>()");
+            output.Indent++;
+            output.WriteLine(".WithMany()");
+            WriteForeignKeyWithOptional(output, "", fkProp, rel.IsDependentOptional);
+            output.Indent--;
+        }
+
+        private void WriteForeignKeyWithOptional(
+            IndentStringBuilder output,
+            string entityTypeParameter,
+            string fkProp,
+            bool isOptional)
+        {
+            if (isOptional)
+            {
+                output.WriteLine($".HasForeignKey{entityTypeParameter}(x => x.{fkProp})");
+                output.WriteLine(".IsRequired(false);");
+            }
+            else
+            {
+                output.WriteLine($".HasForeignKey{entityTypeParameter}(x => x.{fkProp});");
+            }
         }
     }
 }
