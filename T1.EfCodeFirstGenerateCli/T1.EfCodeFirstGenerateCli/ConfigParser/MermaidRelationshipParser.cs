@@ -6,10 +6,14 @@ namespace T1.EfCodeFirstGenerateCli.ConfigParser
 {
     public static class MermaidRelationshipParser
     {
-        // Regex pattern to match Mermaid relationship syntax
+        // Regex pattern components to match Mermaid relationship syntax
         // Format: PrincipalEntity ||--o{ DependentEntity : "Principal.Key = Dependent.ForeignKey"
+        private const string EntityNamePattern = @"(\w+)";                    // Captures entity name (e.g., User, Order)
+        private const string RelationshipSymbolPattern = @"([\|\}o\{\-\>]+)"; // Captures symbols (e.g., ||--o{, ||-->||)
+        private const string KeyMappingPattern = @"""([^""]+)""";             // Captures quoted key mapping
+        
         private static readonly Regex RelationshipPattern = new Regex(
-            @"^\s*(\w+)\s+([\|\}o\{\-\>]+)\s+(\w+)\s*:\s*""([^""]+)""",
+            @$"^\s*{EntityNamePattern}\s+{RelationshipSymbolPattern}\s+{EntityNamePattern}\s*:\s*{KeyMappingPattern}",
             RegexOptions.Compiled
         );
 
