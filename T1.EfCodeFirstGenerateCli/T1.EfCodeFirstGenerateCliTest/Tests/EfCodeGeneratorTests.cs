@@ -815,6 +815,32 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             configCode.Should().Contain(".IsRowVersion()");
             configCode.Should().Contain(".ValueGeneratedOnAddOrUpdate()");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_EntityConfiguration_HasPartialMethod()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            var table = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Users" };
+            table.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            table.Fields.Add(TestHelper.CreateField("Email", "nvarchar(255)", false, null, false, false));
+            schema.Tables.Add(table);
+
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            var configCode = result["TestDb/Configurations/UsersEntityConfiguration.cs"];
+
+            // Should have partial class
+            configCode.Should().Contain("public partial class UsersEntityConfiguration");
+            
+            // Should call partial method
+            configCode.Should().Contain("ConfigureCustomProperties(builder);");
+            
+            // Should declare partial method
+            configCode.Should().Contain("partial void ConfigureCustomProperties(EntityTypeBuilder<UsersEntity> builder);");
+        }
     }
 }
 

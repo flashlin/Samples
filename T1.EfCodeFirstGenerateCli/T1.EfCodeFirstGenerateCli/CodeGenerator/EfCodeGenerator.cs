@@ -273,8 +273,13 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
                 GeneratePropertyConfiguration(output, field);
             }
 
+            output.WriteLine($"ConfigureCustomProperties(builder);");
+
             output.Indent--;
             output.WriteLine("}");
+            output.WriteLine();
+
+            output.WriteLine($"partial void ConfigureCustomProperties(EntityTypeBuilder<{table.TableName}Entity> builder);");
 
             output.Indent--;
             output.WriteLine("}");

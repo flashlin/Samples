@@ -94,6 +94,45 @@ namespace Generated
 }
 ```
 
+### Custom Entity Configuration
+
+All generated EntityConfiguration classes are `partial class` and provide a `ConfigureCustomProperties` partial method for adding custom configurations without modifying the auto-generated code.
+
+**Example:** Create a custom configuration file (e.g., `UsersEntityConfiguration.Custom.cs`):
+
+```csharp
+namespace Generated.Databases.MyDb.Configurations
+{
+    public partial class UsersEntityConfiguration
+    {
+        partial void ConfigureCustomProperties(EntityTypeBuilder<UsersEntity> builder)
+        {
+            // Add custom indexes
+            builder.HasIndex(x => x.Email)
+                .IsUnique()
+                .HasDatabaseName("UX_Users_Email");
+            
+            // Add column comments
+            builder.Property(x => x.Email)
+                .HasComment("User email address");
+            
+            // Define relationships (if navigation properties exist)
+            builder.HasMany(x => x.Orders)
+                .WithOne(o => o.User)
+                .HasForeignKey(o => o.UserId);
+        }
+    }
+}
+```
+
+**Benefits:**
+- ✅ Custom configuration files are NOT overwritten during regeneration
+- ✅ Zero performance overhead (compiler removes unused partial methods)
+- ✅ Add indexes, comments, relationships, and other EF Core configurations
+- ✅ Type-safe with full IntelliSense support
+
+**Note:** Avoid overriding auto-generated property configurations in the partial method as this may cause conflicts.
+
 ### Schema Caching
 
 The `.schema` file is cached for performance:
