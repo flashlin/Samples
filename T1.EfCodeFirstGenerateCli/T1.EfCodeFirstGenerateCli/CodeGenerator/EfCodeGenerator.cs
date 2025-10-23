@@ -639,7 +639,18 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
                     output.WriteLine($"builder.HasOne(x => x.{depNav})");
                     output.Indent++;
                     output.WriteLine($".WithOne(x => x.{prinNav})");
-                    output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp});");
+                    
+                    // Add IsRequired(false) if dependent is optional
+                    if (rel.IsDependentOptional)
+                    {
+                        output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp})");
+                        output.WriteLine(".IsRequired(false);");
+                    }
+                    else
+                    {
+                        output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp});");
+                    }
+                    
                     output.Indent--;
                 }
                 else // Unidirectional
@@ -647,7 +658,18 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
                     output.WriteLine($"builder.HasOne<{rel.PrincipalEntity}Entity>()");
                     output.Indent++;
                     output.WriteLine(".WithOne()");
-                    output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp});");
+                    
+                    // Add IsRequired(false) if dependent is optional
+                    if (rel.IsDependentOptional)
+                    {
+                        output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp})");
+                        output.WriteLine(".IsRequired(false);");
+                    }
+                    else
+                    {
+                        output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp});");
+                    }
+                    
                     output.Indent--;
                 }
             }
@@ -660,7 +682,18 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
                     output.WriteLine($"builder.HasOne(x => x.{depNav})");
                     output.Indent++;
                     output.WriteLine($".WithMany(x => x.{prinNav})");
-                    output.WriteLine($".HasForeignKey(x => x.{fkProp});");
+                    
+                    // Add IsRequired(false) if dependent is optional
+                    if (rel.IsDependentOptional)
+                    {
+                        output.WriteLine($".HasForeignKey(x => x.{fkProp})");
+                        output.WriteLine(".IsRequired(false);");
+                    }
+                    else
+                    {
+                        output.WriteLine($".HasForeignKey(x => x.{fkProp});");
+                    }
+                    
                     output.Indent--;
                 }
                 else // Unidirectional
@@ -668,7 +701,18 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
                     output.WriteLine($"builder.HasOne<{rel.PrincipalEntity}Entity>()");
                     output.Indent++;
                     output.WriteLine(".WithMany()");
-                    output.WriteLine($".HasForeignKey(x => x.{fkProp});");
+                    
+                    // Add IsRequired(false) if dependent is optional
+                    if (rel.IsDependentOptional)
+                    {
+                        output.WriteLine($".HasForeignKey(x => x.{fkProp})");
+                        output.WriteLine(".IsRequired(false);");
+                    }
+                    else
+                    {
+                        output.WriteLine($".HasForeignKey(x => x.{fkProp});");
+                    }
+                    
                     output.Indent--;
                 }
             }

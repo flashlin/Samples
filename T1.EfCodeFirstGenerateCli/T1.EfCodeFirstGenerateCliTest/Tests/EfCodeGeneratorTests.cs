@@ -1271,6 +1271,70 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             // Should include System.Collections.Generic using
             userEntityCode.Should().Contain("using System.Collections.Generic;");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_OptionalDependentRelationship_GeneratesIsRequiredFalse()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var profileTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Profile" };
+            profileTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            profileTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(profileTable);
+            
+            var relationship = TestHelper.CreateRelationship(
+                "User", "Id", "Profile", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToOne,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional);
+            relationship.IsDependentOptional = true;
+            schema.Relationships.Add(relationship);
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var profileConfigCode = result["TestDb/Configurations/ProfileEntityConfiguration.cs"];
+            profileConfigCode.Should().Contain(".HasForeignKey<ProfileEntity>(x => x.UserId)");
+            profileConfigCode.Should().Contain(".IsRequired(false);");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_RequiredDependentRelationship_NoIsRequired()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var profileTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Profile" };
+            profileTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            profileTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(profileTable);
+            
+            var relationship = TestHelper.CreateRelationship(
+                "User", "Id", "Profile", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToOne,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional);
+            relationship.IsDependentOptional = false;
+            schema.Relationships.Add(relationship);
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var profileConfigCode = result["TestDb/Configurations/ProfileEntityConfiguration.cs"];
+            profileConfigCode.Should().Contain(".HasForeignKey<ProfileEntity>(x => x.UserId);");
+            profileConfigCode.Should().NotContain(".IsRequired(false)");
+        }
     }
 }
 

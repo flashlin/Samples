@@ -27,7 +27,7 @@ namespace T1.EfCodeFirstGenerateCli.ConfigParser
             var keyMapping = match.Groups[4].Value;
 
             // Parse relationship type and navigation type
-            var (relType, navType) = ParseRelationshipSymbol(relationshipSymbol);
+            var (relType, navType, isPrincipalOptional, isDependentOptional) = ParseRelationshipSymbol(relationshipSymbol);
             if (!relType.HasValue)
             {
                 return null;
@@ -47,24 +47,34 @@ namespace T1.EfCodeFirstGenerateCli.ConfigParser
                 DependentEntity = dependentEntity,
                 ForeignKey = keys.Value.ForeignKey,
                 Type = relType.Value,
-                NavigationType = navType
+                NavigationType = navType,
+                IsPrincipalOptional = isPrincipalOptional,
+                IsDependentOptional = isDependentOptional
             };
         }
 
-        private static (RelationshipType?, NavigationType) ParseRelationshipSymbol(string symbol)
+        private static (RelationshipType?, NavigationType, bool IsPrincipalOptional, bool IsDependentOptional) ParseRelationshipSymbol(string symbol)
         {
             // Remove all spaces for easier matching
             var cleaned = symbol.Replace(" ", "");
 
             return cleaned switch
             {
-                "||--o{" => (RelationshipType.OneToMany, NavigationType.Bidirectional),
-                "||--||" => (RelationshipType.OneToOne, NavigationType.Bidirectional),
-                "||-->o{" => (RelationshipType.OneToMany, NavigationType.Unidirectional),
-                "||-->||" => (RelationshipType.OneToOne, NavigationType.Unidirectional),
-                "o{--||" => (RelationshipType.ManyToOne, NavigationType.Bidirectional),
-                "o{-->||" => (RelationshipType.ManyToOne, NavigationType.Unidirectional),
-                _ => (null, NavigationType.Bidirectional)
+                // Existing patterns
+                "||--o{" => (RelationshipType.OneToMany, NavigationType.Bidirectional, false, false),
+                "||--||" => (RelationshipType.OneToOne, NavigationType.Bidirectional, false, false),
+                "||-->o{" => (RelationshipType.OneToMany, NavigationType.Unidirectional, false, false),
+                "||-->||" => (RelationshipType.OneToOne, NavigationType.Unidirectional, false, false),
+                "o{--||" => (RelationshipType.ManyToOne, NavigationType.Bidirectional, false, false),
+                "o{-->||" => (RelationshipType.ManyToOne, NavigationType.Unidirectional, false, false),
+                
+                // New patterns with zero-or-one
+                "||--o|" => (RelationshipType.OneToOne, NavigationType.Bidirectional, false, true),   // dependent optional
+                "||-->o|" => (RelationshipType.OneToOne, NavigationType.Unidirectional, false, true), // dependent optional
+                "o|--||" => (RelationshipType.OneToOne, NavigationType.Bidirectional, true, false),   // principal optional
+                "o|-->||" => (RelationshipType.OneToOne, NavigationType.Unidirectional, true, false), // principal optional
+                
+                _ => (null, NavigationType.Bidirectional, false, false)
             };
         }
 

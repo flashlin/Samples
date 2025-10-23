@@ -187,6 +187,94 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             
             result.Should().BeNull();
         }
+
+        [Test]
+        public void ParseRelationship_OneToZeroOrOneBidirectional_ParsesCorrectly()
+        {
+            var line = "User ||--o| Profile : \"User.Id = Profile.UserId\"";
+            
+            var result = MermaidRelationshipParser.ParseRelationship(line);
+            
+            var expected = new EntityRelationship
+            {
+                PrincipalEntity = "User",
+                PrincipalKey = "Id",
+                DependentEntity = "Profile",
+                ForeignKey = "UserId",
+                Type = RelationshipType.OneToOne,
+                NavigationType = NavigationType.Bidirectional,
+                IsPrincipalOptional = false,
+                IsDependentOptional = true
+            };
+            
+            result.Should().BeEquivalentTo(expected);
+        }
+
+        [Test]
+        public void ParseRelationship_OneToZeroOrOneUnidirectional_ParsesCorrectly()
+        {
+            var line = "User ||-->o| Profile : \"User.Id = Profile.UserId\"";
+            
+            var result = MermaidRelationshipParser.ParseRelationship(line);
+            
+            var expected = new EntityRelationship
+            {
+                PrincipalEntity = "User",
+                PrincipalKey = "Id",
+                DependentEntity = "Profile",
+                ForeignKey = "UserId",
+                Type = RelationshipType.OneToOne,
+                NavigationType = NavigationType.Unidirectional,
+                IsPrincipalOptional = false,
+                IsDependentOptional = true
+            };
+            
+            result.Should().BeEquivalentTo(expected);
+        }
+
+        [Test]
+        public void ParseRelationship_ZeroOrOneToOneBidirectional_ParsesCorrectly()
+        {
+            var line = "Profile o|--|| User : \"Profile.UserId = User.Id\"";
+            
+            var result = MermaidRelationshipParser.ParseRelationship(line);
+            
+            var expected = new EntityRelationship
+            {
+                PrincipalEntity = "Profile",
+                PrincipalKey = "UserId",
+                DependentEntity = "User",
+                ForeignKey = "Id",
+                Type = RelationshipType.OneToOne,
+                NavigationType = NavigationType.Bidirectional,
+                IsPrincipalOptional = true,
+                IsDependentOptional = false
+            };
+            
+            result.Should().BeEquivalentTo(expected);
+        }
+
+        [Test]
+        public void ParseRelationship_ZeroOrOneToOneUnidirectional_ParsesCorrectly()
+        {
+            var line = "Profile o|-->|| User : \"Profile.UserId = User.Id\"";
+            
+            var result = MermaidRelationshipParser.ParseRelationship(line);
+            
+            var expected = new EntityRelationship
+            {
+                PrincipalEntity = "Profile",
+                PrincipalKey = "UserId",
+                DependentEntity = "User",
+                ForeignKey = "Id",
+                Type = RelationshipType.OneToOne,
+                NavigationType = NavigationType.Unidirectional,
+                IsPrincipalOptional = true,
+                IsDependentOptional = false
+            };
+            
+            result.Should().BeEquivalentTo(expected);
+        }
     }
 }
 
