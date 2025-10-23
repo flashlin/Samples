@@ -254,27 +254,59 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         {
             var output = new IndentStringBuilder();
 
+            WriteConfigurationFileHeader(output, targetNamespace);
+            WriteConfigurationNamespace(output, targetNamespace);
+            WriteConfigurationClassDeclaration(output, table.TableName);
+            WriteConfigureMethodStart(output, table.TableName);
+            WriteTableConfiguration(output, table.TableName);
+            WritePrimaryKeyConfiguration(output, table);
+            WritePropertiesConfiguration(output, table);
+            GenerateRelationshipConfigurations(output, table.TableName, relationships);
+            WriteConfigureMethodEnd(output, table.TableName);
+            CloseConfigurationClass(output);
+
+            return output.ToString();
+        }
+
+        private void WriteConfigurationFileHeader(IndentStringBuilder output, string targetNamespace)
+        {
             output.WriteLine($"// This file is auto-generated. Do not modify manually.");
             output.WriteLine($"// Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             output.WriteLine("using Microsoft.EntityFrameworkCore;");
             output.WriteLine("using Microsoft.EntityFrameworkCore.Metadata.Builders;");
             output.WriteLine($"using {targetNamespace}.Entities;");
             output.WriteLine();
+        }
+
+        private void WriteConfigurationNamespace(IndentStringBuilder output, string targetNamespace)
+        {
             output.WriteLine($"namespace {targetNamespace}.Configurations");
             output.WriteLine("{");
             output.Indent++;
+        }
 
-            output.WriteLine($"public partial class {table.TableName}EntityConfiguration : IEntityTypeConfiguration<{table.TableName}Entity>");
+        private void WriteConfigurationClassDeclaration(IndentStringBuilder output, string tableName)
+        {
+            output.WriteLine($"public partial class {tableName}EntityConfiguration : IEntityTypeConfiguration<{tableName}Entity>");
             output.WriteLine("{");
             output.Indent++;
+        }
 
-            output.WriteLine($"public void Configure(EntityTypeBuilder<{table.TableName}Entity> builder)");
+        private void WriteConfigureMethodStart(IndentStringBuilder output, string tableName)
+        {
+            output.WriteLine($"public void Configure(EntityTypeBuilder<{tableName}Entity> builder)");
             output.WriteLine("{");
             output.Indent++;
+        }
 
-            output.WriteLine($"builder.ToTable(\"{table.TableName}\");");
+        private void WriteTableConfiguration(IndentStringBuilder output, string tableName)
+        {
+            output.WriteLine($"builder.ToTable(\"{tableName}\");");
             output.WriteLine();
+        }
 
+        private void WritePrimaryKeyConfiguration(IndentStringBuilder output, TableSchema table)
+        {
             var primaryKeys = table.Fields.Where(f => f.IsPrimaryKey).ToList();
             if (primaryKeys.Count == 1)
             {
@@ -318,30 +350,31 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             }
 
             output.WriteLine();
+        }
 
+        private void WritePropertiesConfiguration(IndentStringBuilder output, TableSchema table)
+        {
             foreach (var field in table.Fields)
             {
                 GeneratePropertyConfiguration(output, field);
             }
+        }
 
-            // Generate relationship configurations
-            GenerateRelationshipConfigurations(output, table.TableName, relationships);
-
+        private void WriteConfigureMethodEnd(IndentStringBuilder output, string tableName)
+        {
             output.WriteLine($"ConfigureCustomProperties(builder);");
-
             output.Indent--;
             output.WriteLine("}");
             output.WriteLine();
+            output.WriteLine($"partial void ConfigureCustomProperties(EntityTypeBuilder<{tableName}Entity> builder);");
+        }
 
-            output.WriteLine($"partial void ConfigureCustomProperties(EntityTypeBuilder<{table.TableName}Entity> builder);");
-
+        private void CloseConfigurationClass(IndentStringBuilder output)
+        {
             output.Indent--;
             output.WriteLine("}");
-
             output.Indent--;
             output.WriteLine("}");
-
-            return output.ToString();
         }
 
         private void GeneratePropertyConfiguration(IndentStringBuilder output, FieldSchema field)
