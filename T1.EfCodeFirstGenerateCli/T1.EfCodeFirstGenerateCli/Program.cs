@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using T1.EfCodeFirstGenerateCli.Common;
 using T1.EfCodeFirstGenerateCli.ConfigParser;
 using T1.EfCodeFirstGenerateCli.SchemaExtractor;
 using T1.EfCodeFirstGenerateCli.CodeGenerator;
@@ -129,18 +130,13 @@ namespace T1.EfCodeFirstGenerateCli
                 var generator = new EfCodeGenerator();
                 var generatedFiles = generator.GenerateCodeFirstFromSchema(dbSchema, databaseNamespace);
 
-                foreach (var kvp in generatedFiles)
-                {
-                    var filePath = Path.Combine(generatedDir, kvp.Key);
-                    var fileDir = Path.GetDirectoryName(filePath);
-                    if (!string.IsNullOrEmpty(fileDir))
-                    {
-                        Directory.CreateDirectory(fileDir);
-                    }
-                    File.WriteAllText(filePath, kvp.Value, Encoding.UTF8);
-                }
+                var writtenCount = FileWriterHelper.WriteGeneratedFiles(
+                    generatedFiles,
+                    generatedDir,
+                    Console.WriteLine
+                );
 
-                Console.WriteLine($"  Generated {generatedFiles.Count} file(s).");
+                Console.WriteLine($"  Wrote {writtenCount} file(s).");
             }
             catch (Exception ex)
             {

@@ -133,6 +133,29 @@ namespace Generated.Databases.MyDb.Configurations
 
 **Note:** Avoid overriding auto-generated property configurations in the partial method as this may cause conflicts.
 
+### File Management
+
+**Regeneration Behavior:**
+- When running `dotnet build`, the tool checks if files already exist
+- If a file already exists, it will be **skipped** (not overwritten)
+- If you want to update auto-generated files (e.g., after database schema changes), manually delete the corresponding files or the entire `Generated/` directory
+
+**Example: Updating Generated Code**
+
+```bash
+# Option 1: Delete the entire Generated directory
+rm -rf Generated/
+dotnet build
+
+# Option 2: Delete only specific database files
+rm -rf Generated/MyDatabase/
+dotnet build
+
+# Option 3: Delete only schema cache file (will reconnect to database)
+rm Generated/*.schema
+dotnet build
+```
+
 ### Schema Caching
 
 The `.schema` file is cached for performance:
