@@ -171,54 +171,78 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         {
             var output = new IndentStringBuilder();
             
+            WriteEntityFileHeader(output);
+            WriteEntityNamespace(output, targetNamespace);
+            WriteEntityClassDeclaration(output, table.TableName);
+            WriteEntityProperties(output, table.Fields);
+            WriteEntityNavigationProperties(output, table.TableName, relationships);
+            CloseEntityClass(output);
+            
+            return output.ToString();
+        }
+
+        private void WriteEntityFileHeader(IndentStringBuilder output)
+        {
             output.WriteLine($"// This file is auto-generated. Do not modify manually.");
             output.WriteLine($"// Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             output.WriteLine("using System;");
             output.WriteLine("using System.Collections.Generic;");
             output.WriteLine();
+        }
+
+        private void WriteEntityNamespace(IndentStringBuilder output, string targetNamespace)
+        {
             output.WriteLine($"namespace {targetNamespace}.Entities");
             output.WriteLine("{");
             output.Indent++;
+        }
 
-            output.WriteLine($"public partial class {table.TableName}Entity");
+        private void WriteEntityClassDeclaration(IndentStringBuilder output, string tableName)
+        {
+            output.WriteLine($"public partial class {tableName}Entity");
             output.WriteLine("{");
             output.Indent++;
+        }
 
-            // 1. Generate regular properties
-            foreach (var field in table.Fields)
+        private void WriteEntityProperties(IndentStringBuilder output, List<FieldSchema> fields)
+        {
+            foreach (var field in fields)
             {
                 var csharpType = _typeConverter.ConvertType(field.SqlDataType, field.IsNullable);
                 var requiredModifier = IsNonNullableReferenceType(csharpType) ? "required " : "";
                 var propertyName = ToPascalCase(field.FieldName);
                 output.WriteLine($"public {requiredModifier}{csharpType} {propertyName} {{ get; set; }}");
             }
+        }
 
-            // 2. Generate navigation properties
-            var navProps = GetNavigationPropertiesForEntity(table.TableName, relationships);
-            if (navProps.Count > 0)
+        private void WriteEntityNavigationProperties(IndentStringBuilder output, string tableName, List<EntityRelationship> relationships)
+        {
+            var navProps = GetNavigationPropertiesForEntity(tableName, relationships);
+            if (navProps.Count == 0)
+                return;
+            
+            output.WriteLine();
+            output.WriteLine("// Navigation properties");
+            
+            foreach (var navProp in navProps)
             {
-                output.WriteLine();
-                output.WriteLine("// Navigation properties");
-                foreach (var navProp in navProps)
+                if (navProp.Type.StartsWith("ICollection"))
                 {
-                    if (navProp.Type.StartsWith("ICollection"))
-                    {
-                        output.WriteLine($"public {navProp.Type} {navProp.Name} {{ get; set; }} = new List<{ExtractGenericType(navProp.Type)}>();");
-                    }
-                    else
-                    {
-                        output.WriteLine($"public {navProp.Type}? {navProp.Name} {{ get; set; }}");
-                    }
+                    output.WriteLine($"public {navProp.Type} {navProp.Name} {{ get; set; }} = new List<{ExtractGenericType(navProp.Type)}>();");
+                }
+                else
+                {
+                    output.WriteLine($"public {navProp.Type}? {navProp.Name} {{ get; set; }}");
                 }
             }
+        }
 
+        private void CloseEntityClass(IndentStringBuilder output)
+        {
             output.Indent--;
             output.WriteLine("}");
-
             output.Indent--;
             output.WriteLine("}");
-
-            return output.ToString();
         }
 
         private bool IsNonNullableReferenceType(string csharpType)
