@@ -22,6 +22,12 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             _typeConverter = typeConverter;
         }
 
+        private class NavigationProperty
+        {
+            public string Name { get; set; } = string.Empty;
+            public string Type { get; set; } = string.Empty;
+        }
+
         private string SanitizeIdentifier(string identifier)
         {
             if (string.IsNullOrEmpty(identifier))
@@ -93,10 +99,10 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 
             foreach (var table in dbSchema.Tables)
             {
-                var entityCode = GenerateEntity(table, targetNamespace);
+                var entityCode = GenerateEntity(table, targetNamespace, dbSchema.Relationships);
                 generatedFiles[$"{dbSchema.ContextName}/Entities/{table.TableName}Entity.cs"] = entityCode;
 
-                var configCode = GenerateEntityConfiguration(table, targetNamespace);
+                var configCode = GenerateEntityConfiguration(table, targetNamespace, dbSchema.Relationships);
                 generatedFiles[$"{dbSchema.ContextName}/Configurations/{table.TableName}EntityConfiguration.cs"] = configCode;
             }
 
@@ -161,13 +167,14 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             return output.ToString();
         }
 
-        private string GenerateEntity(TableSchema table, string targetNamespace)
+        private string GenerateEntity(TableSchema table, string targetNamespace, List<EntityRelationship> relationships)
         {
             var output = new IndentStringBuilder();
             
             output.WriteLine($"// This file is auto-generated. Do not modify manually.");
             output.WriteLine($"// Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             output.WriteLine("using System;");
+            output.WriteLine("using System.Collections.Generic;");
             output.WriteLine();
             output.WriteLine($"namespace {targetNamespace}.Entities");
             output.WriteLine("{");
@@ -177,12 +184,32 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             output.WriteLine("{");
             output.Indent++;
 
+            // 1. Generate regular properties
             foreach (var field in table.Fields)
             {
                 var csharpType = _typeConverter.ConvertType(field.SqlDataType, field.IsNullable);
                 var requiredModifier = IsNonNullableReferenceType(csharpType) ? "required " : "";
                 var propertyName = ToPascalCase(field.FieldName);
                 output.WriteLine($"public {requiredModifier}{csharpType} {propertyName} {{ get; set; }}");
+            }
+
+            // 2. Generate navigation properties
+            var navProps = GetNavigationPropertiesForEntity(table.TableName, relationships);
+            if (navProps.Count > 0)
+            {
+                output.WriteLine();
+                output.WriteLine("// Navigation properties");
+                foreach (var navProp in navProps)
+                {
+                    if (navProp.Type.StartsWith("ICollection"))
+                    {
+                        output.WriteLine($"public {navProp.Type} {navProp.Name} {{ get; set; }} = new List<{ExtractGenericType(navProp.Type)}>();");
+                    }
+                    else
+                    {
+                        output.WriteLine($"public {navProp.Type}? {navProp.Name} {{ get; set; }}");
+                    }
+                }
             }
 
             output.Indent--;
@@ -199,7 +226,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             return (csharpType == "string" || csharpType == "byte[]") && !csharpType.EndsWith("?");
         }
 
-        private string GenerateEntityConfiguration(TableSchema table, string targetNamespace)
+        private string GenerateEntityConfiguration(TableSchema table, string targetNamespace, List<EntityRelationship> relationships)
         {
             var output = new IndentStringBuilder();
 
@@ -272,6 +299,9 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             {
                 GeneratePropertyConfiguration(output, field);
             }
+
+            // Generate relationship configurations
+            GenerateRelationshipConfigurations(output, table.TableName, relationships);
 
             output.WriteLine($"ConfigureCustomProperties(builder);");
 
@@ -495,6 +525,131 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         {
             var match = Regex.Match(sqlDataType, @"^(\w+)", RegexOptions.IgnoreCase);
             return match.Success ? match.Groups[1].Value : sqlDataType;
+        }
+
+        private List<NavigationProperty> GetNavigationPropertiesForEntity(
+            string tableName, 
+            List<EntityRelationship> relationships)
+        {
+            var navProps = new List<NavigationProperty>();
+            
+            // Find relationships where this entity is the principal
+            foreach (var rel in relationships)
+            {
+                if (rel.PrincipalEntity == tableName)
+                {
+                    // Generate navigation on principal side (for both bidirectional and unidirectional)
+                    var navName = rel.PrincipalNavigationName ?? GetDefaultNavigationName(rel);
+                    var navType = (rel.Type == RelationshipType.OneToOne) 
+                        ? $"{rel.DependentEntity}Entity"
+                        : $"ICollection<{rel.DependentEntity}Entity>";
+                    navProps.Add(new NavigationProperty { Name = navName, Type = navType });
+                }
+                
+                if (rel.DependentEntity == tableName)
+                {
+                    // Generate navigation on dependent side only if bidirectional
+                    if (rel.NavigationType == NavigationType.Bidirectional)
+                    {
+                        var navName = rel.DependentNavigationName ?? rel.PrincipalEntity;
+                        var navType = $"{rel.PrincipalEntity}Entity";
+                        navProps.Add(new NavigationProperty { Name = navName, Type = navType });
+                    }
+                }
+            }
+            
+            return navProps;
+        }
+
+        private string GetDefaultNavigationName(EntityRelationship rel)
+        {
+            // OneToMany/ManyToOne: plural form for collection
+            if (rel.Type == RelationshipType.OneToMany || rel.Type == RelationshipType.ManyToOne)
+            {
+                return rel.DependentEntity + "s"; // Simple pluralization
+            }
+            // OneToOne: singular form
+            return rel.DependentEntity;
+        }
+
+        private string ExtractGenericType(string type)
+        {
+            // Extract "OrderEntity" from "ICollection<OrderEntity>"
+            var match = Regex.Match(type, @"<(.+)>");
+            return match.Success ? match.Groups[1].Value : type;
+        }
+
+        private void GenerateRelationshipConfigurations(
+            IndentStringBuilder output, 
+            string tableName, 
+            List<EntityRelationship> relationships)
+        {
+            var relevantRels = relationships.Where(r => 
+                r.DependentEntity == tableName).ToList();
+            
+            if (relevantRels.Count == 0)
+                return;
+            
+            output.WriteLine();
+            output.WriteLine("// Relationship configurations");
+            
+            foreach (var rel in relevantRels)
+            {
+                GenerateSingleRelationship(output, tableName, rel);
+            }
+        }
+
+        private void GenerateSingleRelationship(
+            IndentStringBuilder output, 
+            string dependentTable, 
+            EntityRelationship rel)
+        {
+            var fkProp = ToPascalCase(rel.ForeignKey);
+            
+            if (rel.Type == RelationshipType.OneToOne)
+            {
+                if (rel.NavigationType == NavigationType.Bidirectional)
+                {
+                    var depNav = rel.DependentNavigationName ?? rel.PrincipalEntity;
+                    var prinNav = rel.PrincipalNavigationName ?? rel.DependentEntity;
+                    output.WriteLine($"builder.HasOne(x => x.{depNav})");
+                    output.Indent++;
+                    output.WriteLine($".WithOne(x => x.{prinNav})");
+                    output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp});");
+                    output.Indent--;
+                }
+                else // Unidirectional
+                {
+                    output.WriteLine($"builder.HasOne<{rel.PrincipalEntity}Entity>()");
+                    output.Indent++;
+                    output.WriteLine(".WithOne()");
+                    output.WriteLine($".HasForeignKey<{dependentTable}Entity>(x => x.{fkProp});");
+                    output.Indent--;
+                }
+            }
+            else // OneToMany or ManyToOne
+            {
+                if (rel.NavigationType == NavigationType.Bidirectional)
+                {
+                    var depNav = rel.DependentNavigationName ?? rel.PrincipalEntity;
+                    var prinNav = rel.PrincipalNavigationName ?? (rel.DependentEntity + "s");
+                    output.WriteLine($"builder.HasOne(x => x.{depNav})");
+                    output.Indent++;
+                    output.WriteLine($".WithMany(x => x.{prinNav})");
+                    output.WriteLine($".HasForeignKey(x => x.{fkProp});");
+                    output.Indent--;
+                }
+                else // Unidirectional
+                {
+                    output.WriteLine($"builder.HasOne<{rel.PrincipalEntity}Entity>()");
+                    output.Indent++;
+                    output.WriteLine(".WithMany()");
+                    output.WriteLine($".HasForeignKey(x => x.{fkProp});");
+                    output.Indent--;
+                }
+            }
+            
+            output.WriteLine();
         }
     }
 }

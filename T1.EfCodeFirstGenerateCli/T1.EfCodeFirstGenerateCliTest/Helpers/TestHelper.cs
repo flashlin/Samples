@@ -119,6 +119,29 @@ namespace T1.EfCodeFirstGenerateCliTest.Helpers
             var content = File.ReadAllText(filePath);
             return content.Contains($"namespace {expectedNamespace}");
         }
+
+        public static EntityRelationship CreateRelationship(
+            string principalEntity,
+            string principalKey,
+            string dependentEntity,
+            string foreignKey,
+            RelationshipType type,
+            NavigationType navType,
+            string? principalNavName = null,
+            string? dependentNavName = null)
+        {
+            return new EntityRelationship
+            {
+                PrincipalEntity = principalEntity,
+                PrincipalKey = principalKey,
+                DependentEntity = dependentEntity,
+                ForeignKey = foreignKey,
+                Type = type,
+                NavigationType = navType,
+                PrincipalNavigationName = principalNavName,
+                DependentNavigationName = dependentNavName
+            };
+        }
     }
 }
 

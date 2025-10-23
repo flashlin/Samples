@@ -841,6 +841,436 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             // Should declare partial method
             configCode.Should().Contain("partial void ConfigureCustomProperties(EntityTypeBuilder<UsersEntity> builder);");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_OneToManyBidirectional_GeneratesNavigationProperties()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var orderTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Order" };
+            orderTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            orderTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(orderTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "User", "Id", "Order", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToMany,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            // Verify principal side navigation (User -> Orders)
+            var userEntityCode = result["TestDb/Entities/UserEntity.cs"];
+            userEntityCode.Should().Contain("public ICollection<OrderEntity> Orders { get; set; } = new List<OrderEntity>();");
+            
+            // Verify dependent side navigation (Order -> User)
+            var orderEntityCode = result["TestDb/Entities/OrderEntity.cs"];
+            orderEntityCode.Should().Contain("public UserEntity? User { get; set; }");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_OneToManyBidirectional_GeneratesRelationshipConfiguration()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var orderTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Order" };
+            orderTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            orderTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(orderTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "User", "Id", "Order", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToMany,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var orderConfigCode = result["TestDb/Configurations/OrderEntityConfiguration.cs"];
+            orderConfigCode.Should().Contain("builder.HasOne(x => x.User)");
+            orderConfigCode.Should().Contain(".WithMany(x => x.Orders)");
+            orderConfigCode.Should().Contain(".HasForeignKey(x => x.UserId);");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_OneToManyUnidirectional_GeneratesNavigationProperties()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var categoryTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Category" };
+            categoryTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(categoryTable);
+            
+            var productTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Product" };
+            productTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            productTable.Fields.Add(TestHelper.CreateField("CategoryId", "int", false, null, false, false));
+            schema.Tables.Add(productTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "Category", "Id", "Product", "CategoryId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToMany,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Unidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            // Verify principal side navigation (Category -> Products)
+            var categoryEntityCode = result["TestDb/Entities/CategoryEntity.cs"];
+            categoryEntityCode.Should().Contain("public ICollection<ProductEntity> Products { get; set; } = new List<ProductEntity>();");
+            
+            // Verify dependent side has NO navigation (Product should not have Category property)
+            var productEntityCode = result["TestDb/Entities/ProductEntity.cs"];
+            productEntityCode.Should().NotContain("CategoryEntity");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_OneToManyUnidirectional_GeneratesRelationshipConfiguration()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var categoryTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Category" };
+            categoryTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(categoryTable);
+            
+            var productTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Product" };
+            productTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            productTable.Fields.Add(TestHelper.CreateField("CategoryId", "int", false, null, false, false));
+            schema.Tables.Add(productTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "Category", "Id", "Product", "CategoryId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToMany,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Unidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var productConfigCode = result["TestDb/Configurations/ProductEntityConfiguration.cs"];
+            productConfigCode.Should().Contain("builder.HasOne<CategoryEntity>()");
+            productConfigCode.Should().Contain(".WithMany()");
+            productConfigCode.Should().Contain(".HasForeignKey(x => x.CategoryId);");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_OneToOneBidirectional_GeneratesNavigationProperties()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var profileTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Profile" };
+            profileTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            profileTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(profileTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "User", "Id", "Profile", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToOne,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            // Verify principal side navigation (User -> Profile)
+            var userEntityCode = result["TestDb/Entities/UserEntity.cs"];
+            userEntityCode.Should().Contain("public ProfileEntity? Profile { get; set; }");
+            
+            // Verify dependent side navigation (Profile -> User)
+            var profileEntityCode = result["TestDb/Entities/ProfileEntity.cs"];
+            profileEntityCode.Should().Contain("public UserEntity? User { get; set; }");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_OneToOneBidirectional_GeneratesRelationshipConfiguration()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var profileTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Profile" };
+            profileTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            profileTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(profileTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "User", "Id", "Profile", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToOne,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var profileConfigCode = result["TestDb/Configurations/ProfileEntityConfiguration.cs"];
+            profileConfigCode.Should().Contain("builder.HasOne(x => x.User)");
+            profileConfigCode.Should().Contain(".WithOne(x => x.Profile)");
+            profileConfigCode.Should().Contain(".HasForeignKey<ProfileEntity>(x => x.UserId);");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_OneToOneUnidirectional_GeneratesNavigationProperties()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var addressTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Address" };
+            addressTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            addressTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(addressTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "User", "Id", "Address", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToOne,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Unidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            // Verify principal side navigation (User -> Address)
+            var userEntityCode = result["TestDb/Entities/UserEntity.cs"];
+            userEntityCode.Should().Contain("public AddressEntity? Address { get; set; }");
+            
+            // Verify dependent side has NO navigation
+            var addressEntityCode = result["TestDb/Entities/AddressEntity.cs"];
+            addressEntityCode.Should().NotContain("UserEntity");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_OneToOneUnidirectional_GeneratesRelationshipConfiguration()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var addressTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Address" };
+            addressTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            addressTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(addressTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "User", "Id", "Address", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToOne,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Unidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var addressConfigCode = result["TestDb/Configurations/AddressEntityConfiguration.cs"];
+            addressConfigCode.Should().Contain("builder.HasOne<UserEntity>()");
+            addressConfigCode.Should().Contain(".WithOne()");
+            addressConfigCode.Should().Contain(".HasForeignKey<AddressEntity>(x => x.UserId);");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_NoRelationships_NoNavigationProperties()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            userTable.Fields.Add(TestHelper.CreateField("Name", "nvarchar(100)", false, null, false, false));
+            schema.Tables.Add(userTable);
+            
+            // No relationships added
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var userEntityCode = result["TestDb/Entities/UserEntity.cs"];
+            userEntityCode.Should().NotContain("// Navigation properties");
+            userEntityCode.Should().NotContain("ICollection<");
+            
+            var userConfigCode = result["TestDb/Configurations/UserEntityConfiguration.cs"];
+            userConfigCode.Should().NotContain("// Relationship configurations");
+            userConfigCode.Should().NotContain("HasOne");
+            userConfigCode.Should().NotContain("WithMany");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_MultipleRelationships_GeneratesAllNavigationProperties()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var orderTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Order" };
+            orderTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            orderTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(orderTable);
+            
+            var profileTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Profile" };
+            profileTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            profileTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(profileTable);
+            
+            // Add multiple relationships
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "User", "Id", "Order", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToMany,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional));
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "User", "Id", "Profile", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToOne,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            // Verify User has both navigation properties
+            var userEntityCode = result["TestDb/Entities/UserEntity.cs"];
+            userEntityCode.Should().Contain("public ICollection<OrderEntity> Orders { get; set; } = new List<OrderEntity>();");
+            userEntityCode.Should().Contain("public ProfileEntity? Profile { get; set; }");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_CollectionNavigation_InitializesWithList()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var orderTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Order" };
+            orderTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            orderTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(orderTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "User", "Id", "Order", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToMany,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var userEntityCode = result["TestDb/Entities/UserEntity.cs"];
+            // Should initialize collection with new List<>
+            userEntityCode.Should().Contain("= new List<OrderEntity>()");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_CustomNavigationNames_UsesCustomNames()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var orderTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Order" };
+            orderTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            orderTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(orderTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "User", "Id", "Order", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToMany,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional,
+                principalNavName: "CustomerOrders",
+                dependentNavName: "Customer"));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            // Verify custom names are used
+            var userEntityCode = result["TestDb/Entities/UserEntity.cs"];
+            userEntityCode.Should().Contain("public ICollection<OrderEntity> CustomerOrders { get; set; }");
+            
+            var orderEntityCode = result["TestDb/Entities/OrderEntity.cs"];
+            orderEntityCode.Should().Contain("public UserEntity? Customer { get; set; }");
+            
+            // Verify configuration uses custom names
+            var orderConfigCode = result["TestDb/Configurations/OrderEntityConfiguration.cs"];
+            orderConfigCode.Should().Contain("builder.HasOne(x => x.Customer)");
+            orderConfigCode.Should().Contain(".WithMany(x => x.CustomerOrders)");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_WithRelationships_IncludesCollectionUsing()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var userTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "User" };
+            userTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(userTable);
+            
+            var orderTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Order" };
+            orderTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            orderTable.Fields.Add(TestHelper.CreateField("UserId", "int", false, null, false, false));
+            schema.Tables.Add(orderTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "User", "Id", "Order", "UserId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToMany,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var userEntityCode = result["TestDb/Entities/UserEntity.cs"];
+            // Should include System.Collections.Generic using
+            userEntityCode.Should().Contain("using System.Collections.Generic;");
+        }
     }
 }
 
