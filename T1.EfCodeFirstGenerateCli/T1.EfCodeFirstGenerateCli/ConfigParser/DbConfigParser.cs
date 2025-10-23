@@ -11,31 +11,62 @@ namespace T1.EfCodeFirstGenerateCli.ConfigParser
         public static List<DbConfig> GetAllDbConnectionConfigs(string directory)
         {
             var configs = new List<DbConfig>();
-            var dbFiles = Directory.GetFiles(directory, "*.db", SearchOption.AllDirectories);
+            var dbFiles = FindDbFiles(directory);
 
             foreach (var dbFile in dbFiles)
             {
-                var lines = File.ReadAllLines(dbFile);
-                var fileName = Path.GetFileNameWithoutExtension(dbFile);
-                
-                foreach (var line in lines)
+                var config = ParseDbFile(dbFile);
+                if (config != null)
                 {
-                    var lineText = line.Trim();
-                    if (string.IsNullOrWhiteSpace(lineText) || lineText.StartsWith("#") || lineText.StartsWith("//"))
-                        continue;
-
-                    var config = ParseConnectionString(lineText);
-                    if (config != null)
-                    {
-                        config.DbFilePath = dbFile;
-                        config.ContextName = fileName;
-                        configs.Add(config);
-                        break;
-                    }
+                    configs.Add(config);
                 }
             }
 
             return configs;
+        }
+
+        private static string[] FindDbFiles(string directory)
+        {
+            return Directory.GetFiles(directory, "*.db", SearchOption.AllDirectories);
+        }
+
+        private static IEnumerable<string> ReadValidLines(string filePath)
+        {
+            var lines = File.ReadAllLines(filePath);
+            
+            foreach (var line in lines)
+            {
+                var lineText = line.Trim();
+                
+                // Skip empty lines and comments
+                if (string.IsNullOrWhiteSpace(lineText) || 
+                    lineText.StartsWith("#") || 
+                    lineText.StartsWith("//"))
+                {
+                    continue;
+                }
+                
+                yield return lineText;
+            }
+        }
+
+        private static DbConfig? ParseDbFile(string filePath)
+        {
+            var fileName = Path.GetFileNameWithoutExtension(filePath);
+            var validLines = ReadValidLines(filePath);
+            
+            foreach (var line in validLines)
+            {
+                var config = ParseConnectionString(line);
+                if (config != null)
+                {
+                    config.DbFilePath = filePath;
+                    config.ContextName = fileName;
+                    return config;
+                }
+            }
+            
+            return null;
         }
 
         public static void ProcessAllConfigs(
