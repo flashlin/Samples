@@ -30,6 +30,32 @@ Server=localhost;Database=MyDatabase;User Id=sa;Password=YourPassword;TrustServe
 Server=localhost;Database=TestDb;Uid=root;Pwd=secret;
 ```
 
+The tool automatically extracts foreign key relationships from your database schema. You can also (optionally) define additional relationships or override automatically extracted ones using Mermaid ER diagram syntax inside the `.db` file.
+
+**Example:**
+
+```
+Server=localhost;Database=MyDb;User Id=sa;Password=***;TrustServerCertificate=True
+# Table relationships (optional, using Mermaid ER diagram syntax)
+User ||--o{ Order : "User.Id = Order.UserId"
+User ||--|| Profile : "User.Id = Profile.UserId"
+```
+
+**Relationship Syntax (Mermaid ER Diagram):**
+- `||--o{` : One-to-Many, Bidirectional (e.g., User has many Orders, Order belongs to User)
+- `||-->o{` : One-to-Many, Unidirectional (only principal has navigation property)
+- `||--||` : One-to-One, Bidirectional (e.g., User has one Profile, Profile belongs to User)
+- `||-->||` : One-to-One, Unidirectional
+- `||--o|` : One-to-Zero-or-One, Bidirectional (dependent is optional)
+- `o|--||` : Zero-or-One-to-One, Bidirectional (principal is optional)
+
+**Relationship Extraction:**
+The tool automatically extracts foreign key relationships from the database schema. Relationships defined in the `.db` file (Mermaid syntax) will **override** automatically extracted ones, allowing you to:
+- Specify unidirectional relationships (database FK cannot determine this)
+- Customize navigation property names
+- Define logical relationships without actual FK constraints
+
+
 **Supported connection string formats:**
 - SQL Server: Standard ADO.NET format
 - MySQL: MySQL Connector/NET format
@@ -116,10 +142,9 @@ namespace Generated.Databases.MyDb.Configurations
             builder.Property(x => x.Email)
                 .HasComment("User email address");
             
-            // Define relationships (if navigation properties exist)
-            builder.HasMany(x => x.Orders)
-                .WithOne(o => o.User)
-                .HasForeignKey(o => o.UserId);
+            // Add custom validations
+            builder.Property(x => x.Username)
+                .HasMaxLength(50);
         }
     }
 }
@@ -128,8 +153,9 @@ namespace Generated.Databases.MyDb.Configurations
 **Benefits:**
 - ✅ Custom configuration files are NOT overwritten during regeneration
 - ✅ Zero performance overhead (compiler removes unused partial methods)
-- ✅ Add indexes, comments, relationships, and other EF Core configurations
+- ✅ Add indexes, comments, validations, and other EF Core configurations
 - ✅ Type-safe with full IntelliSense support
+- ✅ Navigation properties and relationships are automatically generated from database FK constraints or Mermaid definitions
 
 **Note:** Avoid overriding auto-generated property configurations in the partial method as this may cause conflicts.
 
