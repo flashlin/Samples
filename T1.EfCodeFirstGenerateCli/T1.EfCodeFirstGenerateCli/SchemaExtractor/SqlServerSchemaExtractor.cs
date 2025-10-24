@@ -101,6 +101,83 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
 
             return fields;
         }
+
+        public List<EntityRelationship> ExtractRelationships(DbConfig dbConfig)
+        {
+            var relationships = new List<EntityRelationship>();
+
+            using (var connection = new SqlConnection(dbConfig.GetConnectionString()))
+            {
+                connection.Open();
+
+                var query = @"
+                    SELECT 
+                        OBJECT_NAME(fk.parent_object_id) AS DependentTable,
+                        COL_NAME(fkc.parent_object_id, fkc.parent_column_id) AS ForeignKeyColumn,
+                        OBJECT_NAME(fk.referenced_object_id) AS PrincipalTable,
+                        COL_NAME(fkc.referenced_object_id, fkc.referenced_column_id) AS PrincipalKeyColumn,
+                        c.is_nullable AS IsNullable
+                    FROM sys.foreign_keys fk
+                    INNER JOIN sys.foreign_key_columns fkc ON fk.object_id = fkc.constraint_object_id
+                    INNER JOIN sys.columns c ON fkc.parent_object_id = c.object_id 
+                        AND fkc.parent_column_id = c.column_id
+                    ORDER BY DependentTable, ForeignKeyColumn";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var dependentTable = reader.GetString(0);
+                            var foreignKeyColumn = reader.GetString(1);
+                            var principalTable = reader.GetString(2);
+                            var principalKeyColumn = reader.GetString(3);
+                            var isNullable = reader.GetBoolean(4);
+
+                            // Determine relationship type (OneToOne or OneToMany)
+                            var relType = DetermineRelationshipType(connection, dependentTable, foreignKeyColumn);
+
+                            relationships.Add(new EntityRelationship
+                            {
+                                PrincipalEntity = principalTable,
+                                PrincipalKey = principalKeyColumn,
+                                DependentEntity = dependentTable,
+                                ForeignKey = foreignKeyColumn,
+                                Type = relType,
+                                NavigationType = NavigationType.Bidirectional,
+                                IsPrincipalOptional = false,
+                                IsDependentOptional = isNullable
+                            });
+                        }
+                    }
+                }
+            }
+
+            return relationships;
+        }
+
+        private RelationshipType DetermineRelationshipType(SqlConnection connection, string tableName, string columnName)
+        {
+            // Check if the foreign key column is part of a unique constraint or primary key
+            var query = @"
+                SELECT COUNT(*) 
+                FROM sys.indexes i
+                INNER JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+                INNER JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+                WHERE i.is_unique = 1 
+                    AND OBJECT_NAME(i.object_id) = @TableName 
+                    AND c.name = @ColumnName";
+
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@TableName", tableName);
+                command.Parameters.AddWithValue("@ColumnName", columnName);
+
+                var count = (int)command.ExecuteScalar();
+                return count > 0 ? RelationshipType.OneToOne : RelationshipType.OneToMany;
+            }
+        }
     }
 }
 

@@ -84,6 +84,92 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
 
             return fields;
         }
+
+        public List<EntityRelationship> ExtractRelationships(DbConfig dbConfig)
+        {
+            var relationships = new List<EntityRelationship>();
+
+            using (var connection = new MySqlConnection(dbConfig.GetConnectionString()))
+            {
+                connection.Open();
+
+                var query = @"
+                    SELECT 
+                        kcu.TABLE_NAME AS DependentTable,
+                        kcu.COLUMN_NAME AS ForeignKeyColumn,
+                        kcu.REFERENCED_TABLE_NAME AS PrincipalTable,
+                        kcu.REFERENCED_COLUMN_NAME AS PrincipalKeyColumn,
+                        c.IS_NULLABLE AS IsNullable
+                    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+                    JOIN INFORMATION_SCHEMA.COLUMNS c 
+                        ON kcu.TABLE_SCHEMA = c.TABLE_SCHEMA 
+                        AND kcu.TABLE_NAME = c.TABLE_NAME 
+                        AND kcu.COLUMN_NAME = c.COLUMN_NAME
+                    WHERE kcu.CONSTRAINT_SCHEMA = @DatabaseName 
+                        AND kcu.REFERENCED_TABLE_NAME IS NOT NULL
+                    ORDER BY DependentTable, ForeignKeyColumn";
+
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@DatabaseName", dbConfig.DatabaseName);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var dependentTable = reader.GetString(0);
+                            var foreignKeyColumn = reader.GetString(1);
+                            var principalTable = reader.GetString(2);
+                            var principalKeyColumn = reader.GetString(3);
+                            var isNullable = reader.GetString(4).Equals("YES", StringComparison.OrdinalIgnoreCase);
+
+                            // Determine relationship type (OneToOne or OneToMany)
+                            var relType = DetermineRelationshipType(connection, dbConfig.DatabaseName, dependentTable, foreignKeyColumn);
+
+                            relationships.Add(new EntityRelationship
+                            {
+                                PrincipalEntity = principalTable,
+                                PrincipalKey = principalKeyColumn,
+                                DependentEntity = dependentTable,
+                                ForeignKey = foreignKeyColumn,
+                                Type = relType,
+                                NavigationType = NavigationType.Bidirectional,
+                                IsPrincipalOptional = false,
+                                IsDependentOptional = isNullable
+                            });
+                        }
+                    }
+                }
+            }
+
+            return relationships;
+        }
+
+        private RelationshipType DetermineRelationshipType(MySqlConnection connection, string databaseName, string tableName, string columnName)
+        {
+            // Check if the foreign key column is part of a unique constraint or primary key
+            var query = @"
+                SELECT COUNT(*) 
+                FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+                JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu 
+                    ON tc.CONSTRAINT_SCHEMA = kcu.CONSTRAINT_SCHEMA 
+                    AND tc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
+                    AND tc.TABLE_NAME = kcu.TABLE_NAME
+                WHERE tc.CONSTRAINT_TYPE IN ('PRIMARY KEY', 'UNIQUE')
+                    AND tc.TABLE_SCHEMA = @DatabaseName
+                    AND tc.TABLE_NAME = @TableName
+                    AND kcu.COLUMN_NAME = @ColumnName";
+
+            using (var command = new MySqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@DatabaseName", databaseName);
+                command.Parameters.AddWithValue("@TableName", tableName);
+                command.Parameters.AddWithValue("@ColumnName", columnName);
+
+                var count = Convert.ToInt32(command.ExecuteScalar());
+                return count > 0 ? RelationshipType.OneToOne : RelationshipType.OneToMany;
+            }
+        }
     }
 }
 
