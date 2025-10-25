@@ -574,14 +574,6 @@ export class VimEditor extends LitElement {
   private handleKeyDown(event: KeyboardEvent) {
     const key = event.key;
     
-    console.log('[DEBUG] Key pressed:', {
-      key,
-      ctrlKey: event.ctrlKey,
-      metaKey: event.metaKey,
-      mode: this.mode,
-      isComposing: this.isComposing
-    });
-    
     if (key === 'CapsLock' || key === 'Shift' || key === 'Control' || key === 'Alt' || key === 'Meta') {
       return;
     }
