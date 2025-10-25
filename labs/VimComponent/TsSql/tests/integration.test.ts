@@ -172,7 +172,7 @@ describe('Integration Tests', () => {
     const { sql, errors } = linqToSql('FROM users WITH(NOLOCK, READUNCOMMITTED) u SELECT u.name');
     
     expect(errors).toHaveLength(0);
-    expect(sql).toContain('FROM users WITH(NOLOCK, READUNCOMMITTED) u');
+    expect(sql).toContain('FROM users u WITH(NOLOCK, READUNCOMMITTED)');
   });
   
   it('should convert JOIN with NOLOCK hint to T-SQL', () => {
@@ -180,7 +180,7 @@ describe('Integration Tests', () => {
     
     expect(errors).toHaveLength(0);
     expect(sql).toContain('FROM users u');
-    expect(sql).toContain('INNER JOIN orders WITH(NOLOCK) o ON u.id = o.user_id');
+    expect(sql).toContain('INNER JOIN orders o WITH(NOLOCK) ON u.id = o.user_id');
   });
   
   it('should convert complex query with multiple WITH hints', () => {
@@ -197,8 +197,8 @@ describe('Integration Tests', () => {
     const { sql, errors } = linqToSql(linq);
     
     expect(errors).toHaveLength(0);
-    expect(sql).toContain('FROM users WITH(NOLOCK) u');
-    expect(sql).toContain('LEFT JOIN orders WITH(NOLOCK, READUNCOMMITTED) o ON u.id = o.user_id');
+    expect(sql).toContain('FROM users u WITH(NOLOCK)');
+    expect(sql).toContain('LEFT JOIN orders o WITH(NOLOCK, READUNCOMMITTED) ON u.id = o.user_id');
     expect(sql).toContain('WHERE u.age > 18');
     expect(sql).toContain('GROUP BY u.id, u.name');
     expect(sql).toContain('HAVING COUNT(o.id) > 0');
@@ -209,7 +209,7 @@ describe('Integration Tests', () => {
     const { sql, errors } = linqToSql('FROM mydb.users WITH(NOLOCK) u SELECT u.name');
     
     expect(errors).toHaveLength(0);
-    expect(sql).toContain('FROM mydb.users WITH(NOLOCK) u');
+    expect(sql).toContain('FROM mydb.users u WITH(NOLOCK)');
   });
   
   it('should preserve hint case as uppercase', () => {

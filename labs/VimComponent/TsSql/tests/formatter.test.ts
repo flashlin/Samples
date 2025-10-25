@@ -145,13 +145,13 @@ describe('TSqlFormatter', () => {
   it('should format FROM with multiple hints', () => {
     const sql = formatLinqQuery('FROM users WITH(NOLOCK, READUNCOMMITTED) u SELECT u.name');
     
-    expect(sql).toContain('FROM users WITH(NOLOCK, READUNCOMMITTED) u');
+    expect(sql).toContain('FROM users u WITH(NOLOCK, READUNCOMMITTED)');
   });
   
   it('should format JOIN with NOLOCK hint', () => {
     const sql = formatLinqQuery('FROM users u JOIN orders WITH(NOLOCK) o ON u.id = o.user_id SELECT u.name');
     
-    expect(sql).toContain('INNER JOIN orders WITH(NOLOCK) o ON u.id = o.user_id');
+    expect(sql).toContain('INNER JOIN orders o WITH(NOLOCK) ON u.id = o.user_id');
   });
   
   it('should format LEFT JOIN with hints', () => {
@@ -168,8 +168,28 @@ describe('TSqlFormatter', () => {
       SELECT u.name, COUNT(o.id) AS order_count
     `);
     
-    expect(sql).toContain('FROM users WITH(NOLOCK) u');
-    expect(sql).toContain('LEFT JOIN orders WITH(NOLOCK, READUNCOMMITTED) o ON u.id = o.user_id');
+    expect(sql).toContain('FROM users u WITH(NOLOCK)');
+    expect(sql).toContain('LEFT JOIN orders o WITH(NOLOCK, READUNCOMMITTED) ON u.id = o.user_id');
+  });
+
+  it('should format FROM with alias and hints in correct order', () => {
+    const sql = formatLinqQuery('FROM users WITH(NOLOCK) u SELECT u.name');
+    expect(sql).toContain('FROM users u WITH(NOLOCK)');
+  });
+
+  it('should format JOIN with alias and hints in correct order', () => {
+    const sql = formatLinqQuery('FROM users u JOIN orders WITH(NOLOCK) o ON u.id = o.user_id SELECT u.name');
+    expect(sql).toContain('INNER JOIN orders o WITH(NOLOCK) ON u.id = o.user_id');
+  });
+
+  it('should format FROM without alias but with hints', () => {
+    const sql = formatLinqQuery('FROM users WITH(NOLOCK) SELECT name');
+    expect(sql).toContain('FROM users WITH(NOLOCK)');
+  });
+
+  it('should format JOIN without alias but with hints', () => {
+    const sql = formatLinqQuery('FROM users JOIN orders WITH(NOLOCK) ON users.id = orders.user_id SELECT *');
+    expect(sql).toContain('INNER JOIN orders WITH(NOLOCK) ON users.id = orders.user_id');
   });
 });
 

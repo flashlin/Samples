@@ -91,21 +91,21 @@ export class TSqlFormatter implements ExpressionVisitor<string> {
   
   // Visit FROM Expression
   visitFrom(expr: FromExpression): string {
+    const alias = expr.alias ? ` ${expr.alias}` : '';
     const hints = expr.hints && expr.hints.length > 0 
       ? ` WITH(${expr.hints.join(', ')})` 
       : '';
-    const alias = expr.alias ? ` ${expr.alias}` : '';
-    return `FROM ${expr.tableName}${hints}${alias}`;
+    return `FROM ${expr.tableName}${alias}${hints}`;
   }
   
   // Visit JOIN Expression
   visitJoin(expr: JoinExpression): string {
+    const alias = expr.alias ? ` ${expr.alias}` : '';
     const hints = expr.hints && expr.hints.length > 0 
       ? ` WITH(${expr.hints.join(', ')})` 
       : '';
-    const alias = expr.alias ? ` ${expr.alias}` : '';
     const condition = expr.condition.accept(this);
-    return `${expr.joinType} JOIN ${expr.tableName}${hints}${alias} ON ${condition}`;
+    return `${expr.joinType} JOIN ${expr.tableName}${alias}${hints} ON ${condition}`;
   }
   
   // Visit WHERE Expression
