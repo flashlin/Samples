@@ -59,8 +59,9 @@ export class VisualLineModeHandler extends BaseModeHandler {
     const selection = this.getVisualSelection(editor);
     console.log('[VisualLine] Cut selection:', selection);
     console.log('[VisualLine] keyBuffer before cut:', editor.keyBuffer);
-    await navigator.clipboard.writeText(selection);
-    console.log('[VisualLine] Clipboard written successfully');
+    // Add trailing newline to indicate line-wise operation
+    await navigator.clipboard.writeText(selection + '\n');
+    console.log('[VisualLine] Clipboard written successfully (with trailing newline)');
     
     const startY = Math.min(editor.visualStartY, editor.cursorY);
     const endY = Math.max(editor.visualStartY, editor.cursorY);
