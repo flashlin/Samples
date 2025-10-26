@@ -1,4 +1,6 @@
 import { vi } from 'vitest';
+import type { VimEditor } from '../src/vim-editor';
+import { EditorMode } from '../src/vimEditorTypes';
 
 // P5.js Mock Setup
 export function setupP5Mock() {
@@ -74,16 +76,16 @@ export function pressKeys(...keys: string[]) {
 
 // Editor Setup/Teardown
 export async function createTestEditor() {
-  const editor = document.createElement('vim-editor');
+  const editor = document.createElement('vim-editor') as VimEditor;
   document.body.appendChild(editor);
   (globalThis as any).testEditor = editor;
   
   await new Promise(resolve => setTimeout(resolve, 50));
   
-  editor.mode = 'normal';
+  editor.mode = EditorMode.Normal;
   editor.cursorX = 0;
   editor.cursorY = 0;
-  editor.hasFocus = true;
+  (editor as any).hasFocus = true;
   editor.focus();
   
   return editor;
