@@ -1,10 +1,10 @@
 import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 
-export class CommandModeHandler extends BaseModeHandler {
-  readonly mode = EditorMode.Command;
+export class SearchInputModeHandler extends BaseModeHandler {
+  readonly mode = EditorMode.SearchInput;
   
   onEnter(editor: IVimEditor): void {
-    editor.commandInput = ':';
+    editor.searchInput = '/';
     if (editor.hiddenInput) {
       const p5Instance = editor.p5Instance;
       if (p5Instance) {
@@ -39,32 +39,45 @@ export class CommandModeHandler extends BaseModeHandler {
       { 
         pattern: /^Enter$/, 
         action: () => { 
-          const command = editor.commandInput.substring(1);
-          
-          if (command === 'noh' || command === 'nohl' || command === 'nohlsearch') {
-            editor.searchKeyword = '';
-            editor.searchMatches = [];
-            editor.currentMatchIndex = -1;
-          } else {
-            this.dispatchCommandEvent(editor, command);
+          const searchKeyword = editor.searchInput.substring(1);
+          if (searchKeyword.length > 0) {
+            editor.searchKeyword = searchKeyword;
+            this.performSearch(editor);
+            if (editor.searchMatches.length > 0) {
+              editor.currentMatchIndex = 0;
+              const firstMatch = editor.searchMatches[0];
+              editor.cursorY = firstMatch.y;
+              editor.cursorX = firstMatch.x;
+            }
           }
-          
-          editor.commandInput = '';
+          editor.searchInput = '';
           editor.mode = EditorMode.Normal;
         } 
       },
       { 
         pattern: /^Escape$/, 
         action: () => { 
-          editor.commandInput = '';
+          editor.searchInput = '';
+          editor.searchKeyword = '';
+          editor.searchMatches = [];
+          editor.currentMatchIndex = -1;
           editor.mode = EditorMode.Normal;
         } 
       },
       { 
         pattern: /^Backspace$/, 
         action: () => { 
-          if (editor.commandInput.length > 1) {
-            editor.commandInput = editor.commandInput.slice(0, -1);
+          if (editor.searchInput.length > 1) {
+            editor.searchInput = editor.searchInput.slice(0, -1);
+            const searchKeyword = editor.searchInput.substring(1);
+            if (searchKeyword.length > 0) {
+              editor.searchKeyword = searchKeyword;
+              this.performSearch(editor);
+            } else {
+              editor.searchKeyword = '';
+              editor.searchMatches = [];
+              editor.currentMatchIndex = -1;
+            }
             this.updateInputPosition(editor);
           }
         } 
@@ -87,7 +100,17 @@ export class CommandModeHandler extends BaseModeHandler {
   }
   
   handleInput(editor: IVimEditor, value: string): void {
-    editor.commandInput += value;
+    editor.searchInput += value;
+    const searchKeyword = editor.searchInput.substring(1);
+    editor.searchKeyword = searchKeyword;
+    
+    if (searchKeyword.length > 0) {
+      this.performSearch(editor);
+    } else {
+      editor.searchMatches = [];
+      editor.currentMatchIndex = -1;
+    }
+    
     this.updateInputPosition(editor);
     
     if (editor.p5Instance) {
@@ -97,7 +120,14 @@ export class CommandModeHandler extends BaseModeHandler {
   
   handleCompositionEnd(editor: IVimEditor, data: string): void {
     if (data) {
-      editor.commandInput += data;
+      editor.searchInput += data;
+      const searchKeyword = editor.searchInput.substring(1);
+      editor.searchKeyword = searchKeyword;
+      
+      if (searchKeyword.length > 0) {
+        this.performSearch(editor);
+      }
+      
       this.updateInputPosition(editor);
       if (editor.p5Instance) {
         editor.p5Instance.redraw();
@@ -105,10 +135,32 @@ export class CommandModeHandler extends BaseModeHandler {
     }
   }
   
+  private performSearch(editor: IVimEditor): void {
+    editor.searchMatches = [];
+    const keyword = editor.searchKeyword;
+    
+    if (keyword.length === 0) {
+      return;
+    }
+    
+    for (let y = 0; y < editor.content.length; y++) {
+      const line = editor.content[y];
+      let startIndex = 0;
+      
+      while (true) {
+        const index = line.toLowerCase().indexOf(keyword.toLowerCase(), startIndex);
+        if (index === -1) break;
+        
+        editor.searchMatches.push({ y, x: index });
+        startIndex = index + 1;
+      }
+    }
+  }
+  
   private updateInputPosition(editor: IVimEditor): void {
     if (editor.hiddenInput && editor.p5Instance) {
       const p5Instance = editor.p5Instance;
-      const textWidth = p5Instance.textWidth(editor.commandInput);
+      const textWidth = p5Instance.textWidth(editor.searchInput);
       const statusBarHeight = 24;
       const editorHeight = p5Instance.height - statusBarHeight;
       const statusY = editorHeight;
@@ -116,15 +168,6 @@ export class CommandModeHandler extends BaseModeHandler {
       editor.hiddenInput.style.left = `${10 + textWidth}px`;
       editor.hiddenInput.style.top = `${statusY + 3}px`;
     }
-  }
-  
-  private dispatchCommandEvent(editor: IVimEditor, command: string): void {
-    const event = new CustomEvent('vim-command', {
-      detail: { command },
-      bubbles: true,
-      composed: true
-    });
-    editor.dispatchEvent(event);
   }
 }
 

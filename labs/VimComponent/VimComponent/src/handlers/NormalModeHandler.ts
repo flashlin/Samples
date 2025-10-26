@@ -119,6 +119,9 @@ export class NormalModeHandler extends BaseModeHandler {
         editor.fastJumpInput = '';
       } },
       { pattern: /^:$/, action: () => { editor.mode = EditorMode.Command; } },
+      { pattern: /^\/$/, action: () => { editor.mode = EditorMode.SearchInput; } },
+      { pattern: /^n$/, action: () => { this.jumpToNextMatch(editor); } },
+      { pattern: /^N$/, action: () => { this.jumpToPreviousMatch(editor); } },
       { pattern: /^u$/, action: () => { editor.undo(); } },
       { pattern: /^%$/, action: () => { editor.jumpToMatchingBracket(); } },
     ];
@@ -458,6 +461,34 @@ export class NormalModeHandler extends BaseModeHandler {
         editor.cursorX = editor.content[editor.cursorY].length - 1;
       }
     }
+  }
+  
+  private jumpToNextMatch(editor: IVimEditor): void {
+    if (editor.searchMatches.length === 0) return;
+    
+    if (editor.currentMatchIndex === -1) {
+      editor.currentMatchIndex = 0;
+    } else {
+      editor.currentMatchIndex = (editor.currentMatchIndex + 1) % editor.searchMatches.length;
+    }
+    
+    const match = editor.searchMatches[editor.currentMatchIndex];
+    editor.cursorY = match.y;
+    editor.cursorX = match.x;
+  }
+  
+  private jumpToPreviousMatch(editor: IVimEditor): void {
+    if (editor.searchMatches.length === 0) return;
+    
+    if (editor.currentMatchIndex === -1) {
+      editor.currentMatchIndex = editor.searchMatches.length - 1;
+    } else {
+      editor.currentMatchIndex = (editor.currentMatchIndex - 1 + editor.searchMatches.length) % editor.searchMatches.length;
+    }
+    
+    const match = editor.searchMatches[editor.currentMatchIndex];
+    editor.cursorY = match.y;
+    editor.cursorX = match.x;
   }
 }
 

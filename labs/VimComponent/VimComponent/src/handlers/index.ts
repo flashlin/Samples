@@ -9,5 +9,6 @@ export { MultiInsertModeHandler } from './MultiInsertModeHandler';
 export { TInsertModeHandler } from './TInsertModeHandler';
 export { TVisualModeHandler } from './TVisualModeHandler';
 export { CommandModeHandler } from './CommandModeHandler';
+export { SearchInputModeHandler } from './SearchInputModeHandler';
 export { ModeHandlerRegistry } from './ModeHandlerRegistry';
 

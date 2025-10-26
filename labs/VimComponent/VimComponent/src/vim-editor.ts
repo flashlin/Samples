@@ -102,6 +102,9 @@ export class VimEditor extends LitElement {
   @property({ type: String })
   commandInput = '';
   
+  @property({ type: String })
+  searchInput = '';
+  
   modeHandlerRegistry!: ModeHandlerRegistry;
   private currentModeHandler!: EditorModeHandler;
   private previousModeHandler!: EditorModeHandler;
@@ -320,10 +323,10 @@ export class VimEditor extends LitElement {
         const isFastJumpMatch = this.mode === EditorMode.FastMatch && 
           this.fastJumpMatches.some(match => match.x === contentX && match.y === contentY);
         
-        const isSearchMatch = (this.mode === EditorMode.FastSearch || this.mode === EditorMode.MultiInsert) && 
+        const isSearchMatch = (this.mode === EditorMode.FastSearch || this.mode === EditorMode.MultiInsert || this.mode === EditorMode.SearchInput || this.mode === EditorMode.Normal) && 
           this.isInSearchMatch(contentY, contentX);
         
-        const isCurrentSearchMatch = (this.mode === EditorMode.FastSearch || this.mode === EditorMode.MultiInsert) && 
+        const isCurrentSearchMatch = (this.mode === EditorMode.FastSearch || this.mode === EditorMode.MultiInsert || this.mode === EditorMode.SearchInput || this.mode === EditorMode.Normal) && 
           this.currentMatchIndex >= 0 && 
           this.isInSearchMatch(contentY, contentX, this.currentMatchIndex);
         
@@ -2171,10 +2174,28 @@ export class VimEditor extends LitElement {
         p.fill(255);
         p.rect(10 + textWidth, statusY + 2, 2, this.statusBarHeight - 4);
       }
+    } else if (this.mode === EditorMode.SearchInput) {
+      const searchText = this.searchInput;
+      p.text(searchText, 10, statusY + 3);
+      
+      if (this.cursorVisible) {
+        const textWidth = p.textWidth(searchText);
+        p.fill(255);
+        p.rect(10 + textWidth, statusY + 2, 2, this.statusBarHeight - 4);
+      }
+      
+      if (this.searchMatches.length > 0) {
+        const matchInfo = ` (${this.searchMatches.length} matches)`;
+        const searchTextWidth = p.textWidth(searchText);
+        p.text(matchInfo, 10 + searchTextWidth + 10, statusY + 3);
+      }
     } else {
       let statusText = `Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.getDisplayColumn() + 1}`;
       if (this.lastKeyPressed) {
         statusText += ` | Key: "${this.lastKeyPressed}"`;
+      }
+      if (this.searchMatches.length > 0) {
+        statusText += ` | Matches: ${this.searchMatches.length}`;
       }
       p.text(statusText, 10, statusY + 3);
     }

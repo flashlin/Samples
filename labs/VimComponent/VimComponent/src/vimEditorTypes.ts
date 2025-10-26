@@ -10,6 +10,7 @@ export enum EditorMode {
   TInsert = 't-insert',
   TVisual = 't-visual',
   Command = 'command',
+  SearchInput = 'search-input',
 }
 
 export interface EditorStatus {
@@ -52,6 +53,7 @@ export interface IVimEditor {
   searchHistory: Array<{ keyword: string; matches: Array<{ y: number; x: number }> }>;
   tMarks: Array<{ y: number; x: number }>;
   commandInput: string;
+  searchInput: string;
   hiddenInput: HTMLInputElement | null;
   p5Instance: any;
   modeHandlerRegistry: any;
