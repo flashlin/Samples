@@ -8,6 +8,16 @@ export class CommandModeHandler extends BaseModeHandler {
     editor.commandInput = ':';
     console.log('hiddenInput exists:', !!editor.hiddenInput);
     if (editor.hiddenInput) {
+      const p5Instance = editor.p5Instance;
+      if (p5Instance) {
+        const statusBarHeight = 24;
+        const editorHeight = p5Instance.height - statusBarHeight;
+        const statusY = editorHeight;
+        
+        editor.hiddenInput.style.left = '10px';
+        editor.hiddenInput.style.top = `${statusY + 3}px`;
+      }
+      
       console.log('Focusing hiddenInput...');
       editor.hiddenInput.focus();
       console.log('hiddenInput focused, activeElement:', document.activeElement);
