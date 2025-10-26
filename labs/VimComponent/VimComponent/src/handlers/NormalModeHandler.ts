@@ -52,6 +52,7 @@ export class NormalModeHandler extends BaseModeHandler {
       // Two-character delete commands
       { pattern: /^dw$/, action: () => { editor.saveHistory(); editor.deleteWord(); } },
       { pattern: /^de$/, action: () => { editor.saveHistory(); editor.deleteToWordEnd(); } },
+      { pattern: /^d\$$/, action: () => { editor.saveHistory(); editor.deleteToLineEnd(); } },
       
       // Go to line number
       { pattern: /^(\d+)G$/, action: (match: RegExpMatchArray) => { 

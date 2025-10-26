@@ -672,4 +672,50 @@ describe('VimEditor - Editing', () => {
       expect(editor.cursorY).toBe(1);
     });
   });
+
+  describe('d$ command (delete to end of line)', () => {
+    it('should delete from cursor to end of line', async () => {
+      editor.content = ['hello world', 'test line'];
+      editor.cursorY = 0;
+      editor.cursorX = 6;
+      
+      await pressKeys('d', '$');
+      
+      expect(editor.content[0]).toBe('hello ');
+      expect(editor.cursorX).toBe(5);
+    });
+    
+    it('should do nothing if cursor is at end of line', async () => {
+      editor.content = ['hello'];
+      editor.cursorY = 0;
+      editor.cursorX = 5;
+      
+      await pressKeys('d', '$');
+      
+      expect(editor.content[0]).toBe('hello');
+    });
+    
+    it('should support undo after d$', async () => {
+      editor.content = ['hello world'];
+      editor.cursorY = 0;
+      editor.cursorX = 6;
+      
+      await pressKeys('d', '$');
+      expect(editor.content[0]).toBe('hello ');
+      
+      await pressKey('u');
+      expect(editor.content[0]).toBe('hello world');
+    });
+    
+    it('should handle Chinese characters correctly', async () => {
+      editor.content = ['你好世界'];
+      editor.cursorY = 0;
+      editor.cursorX = 2;
+      
+      await pressKeys('d', '$');
+      
+      expect(editor.content[0]).toBe('你好');
+      expect(editor.cursorX).toBe(1);
+    });
+  });
 });
