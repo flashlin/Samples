@@ -29,7 +29,6 @@ export class TInsertModeHandler extends BaseModeHandler {
       { pattern: /^ArrowRight$/, action: () => { editor.moveCursorRight(); } },
       { pattern: /^ArrowUp$/, action: () => { editor.moveCursorUp(); } },
       { pattern: /^ArrowDown$/, action: () => { editor.moveCursorDown(); } },
-      { pattern: /^.$/, action: (match: RegExpMatchArray) => { this.tInsertCharacter(editor, match[0]); } },
     ];
   }
   
@@ -38,9 +37,8 @@ export class TInsertModeHandler extends BaseModeHandler {
     
     // Try to match patterns in order
     for (const { pattern, action } of keyPatterns) {
-      const match = pattern.exec(key);
-      if (match) {
-        action(match);
+      if (pattern.test(key)) {
+        action();
         return;
       }
     }
