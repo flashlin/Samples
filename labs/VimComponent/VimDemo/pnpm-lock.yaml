@@ -8,18 +8,18 @@ importers:
 
   .:
     dependencies:
+      '@mrbrain/t1-tssql':
+        specifier: file:../TsSql
+        version: file:../TsSql
+      '@mrbrain/t1-vim-editor':
+        specifier: file:../VimComponent
+        version: file:../VimComponent(lit@3.3.1)(p5@1.11.10)
       lit:
         specifier: ^3.3.1
         version: 3.3.1
       p5:
         specifier: ^1.11.10
         version: 1.11.10
-      t1-tssql:
-        specifier: file:../TsSql
-        version: file:../TsSql
-      t1-vim-editor:
-        specifier: file:../VimComponent
-        version: file:../VimComponent(lit@3.3.1)(p5@1.11.10)
       vue:
         specifier: ^3.5.22
         version: 3.5.22(typescript@5.9.3)
@@ -220,6 +220,15 @@ packages:
 
   '@lit/reactive-element@2.1.1':
     resolution: {integrity: sha512-N+dm5PAYdQ8e6UlywyyrgI2t++wFGXfHx+dSJ1oBrg6FAxUj40jId++EaRm80MKX5JnlH1sBsyZ5h0bcZKemCg==}
+
+  '@mrbrain/t1-tssql@file:../TsSql':
+    resolution: {directory: ../TsSql, type: directory}
+
+  '@mrbrain/t1-vim-editor@file:../VimComponent':
+    resolution: {directory: ../VimComponent, type: directory}
+    peerDependencies:
+      lit: ^3.0.0
+      p5: ^1.6.0
 
   '@rolldown/pluginutils@1.0.0-beta.29':
     resolution: {integrity: sha512-NIJgOsMjbxAXvoGq/X0gD7VPMQ8j9g0BiDaNjVNVjvl+iKXxL3Jre0v31RmBYeLEmkbj2s02v8vFTbUXi5XS2Q==}
@@ -471,15 +480,6 @@ packages:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
-  t1-tssql@file:../TsSql:
-    resolution: {directory: ../TsSql, type: directory}
-
-  t1-vim-editor@file:../VimComponent:
-    resolution: {directory: ../VimComponent, type: directory}
-    peerDependencies:
-      lit: ^3.0.0
-      p5: ^1.6.0
-
   tinyglobby@0.2.15:
     resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
     engines: {node: '>=12.0.0'}
@@ -646,6 +646,13 @@ snapshots:
   '@lit/reactive-element@2.1.1':
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.4.0
+
+  '@mrbrain/t1-tssql@file:../TsSql': {}
+
+  '@mrbrain/t1-vim-editor@file:../VimComponent(lit@3.3.1)(p5@1.11.10)':
+    dependencies:
+      lit: 3.3.1
+      p5: 1.11.10
 
   '@rolldown/pluginutils@1.0.0-beta.29': {}
 
@@ -914,13 +921,6 @@ snapshots:
       fsevents: 2.3.3
 
   source-map-js@1.2.1: {}
-
-  t1-tssql@file:../TsSql: {}
-
-  t1-vim-editor@file:../VimComponent(lit@3.3.1)(p5@1.11.10):
-    dependencies:
-      lit: 3.3.1
-      p5: 1.11.10
 
   tinyglobby@0.2.15:
     dependencies:
