@@ -453,6 +453,12 @@ export class VimEditor extends LitElement {
       
       host.addEventListener('focus', () => {
         this.hasFocus = true;
+        // If we're in a mode that needs hiddenInput, refocus it
+        if (this.mode === EditorMode.Insert || 
+            this.mode === EditorMode.MultiInsert || 
+            this.mode === EditorMode.TInsert) {
+          this.hiddenInput?.focus();
+        }
         if (this.p5Instance) {
           this.p5Instance.redraw();
         }
