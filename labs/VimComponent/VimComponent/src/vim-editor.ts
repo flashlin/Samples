@@ -2,12 +2,32 @@ import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import p5 from 'p5';
 import exampleText from './example.txt?raw';
-import { EditorMode, EditorStatus, BufferCell, EditorModeHandler, TextRange, IntellisenseItem } from './vimEditorTypes';
+import { EditorMode, EditorStatus, BufferCell, EditorModeHandler, TextRange, IntellisenseItem, VimEditorEventMap } from './vimEditorTypes';
 import { ModeHandlerRegistry } from './handlers';
 import { IntellisenseMenu } from './components/IntellisenseMenu';
 
+/**
+ * Vim-like editor component
+ * 
+ * @fires change - Fired when editor content changes
+ * @fires keypress - Fired on every keypress
+ * @fires vim-command - Fired when a command is executed in Command Mode
+ * @fires intellisense - Fired to request intellisense suggestions
+ */
 @customElement('vim-editor')
 export class VimEditor extends LitElement {
+  declare addEventListener: <K extends keyof VimEditorEventMap>(
+    type: K,
+    listener: (this: VimEditor, ev: VimEditorEventMap[K]) => void,
+    options?: boolean | AddEventListenerOptions
+  ) => void;
+  
+  declare removeEventListener: <K extends keyof VimEditorEventMap>(
+    type: K,
+    listener: (this: VimEditor, ev: VimEditorEventMap[K]) => void,
+    options?: boolean | EventListenerOptions
+  ) => void;
+  
   p5Instance: p5 | null = null;
   private canvas: HTMLCanvasElement | null = null;
   private cursorBlinkInterval: number | null = null;

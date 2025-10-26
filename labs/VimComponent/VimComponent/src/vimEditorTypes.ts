@@ -171,3 +171,21 @@ export interface CommandEventDetail {
   command: string;
 }
 
+export interface KeyPressEventDetail {
+  key: string;
+  mode: EditorMode;
+  ctrlKey: boolean;
+  shiftKey: boolean;
+  altKey: boolean;
+  metaKey: boolean;
+  cursorX: number;
+  cursorY: number;
+}
+
+export interface VimEditorEventMap {
+  'change': CustomEvent<ChangeEventDetail>;
+  'keypress': CustomEvent<KeyPressEventDetail>;
+  'vim-command': CustomEvent<CommandEventDetail>;
+  'intellisense': CustomEvent<IntellisenseContext>;
+}
+
