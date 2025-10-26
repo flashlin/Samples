@@ -22,6 +22,9 @@ export class VimEditor extends LitElement {
   @state()
   private cursorVisible = true;
   
+  @state()
+  private hasFocus = false;
+  
   private _mode: EditorMode = EditorMode.Normal;
   
   @property({ type: String })
@@ -295,7 +298,7 @@ export class VimEditor extends LitElement {
         const line = this.content[contentY] || '';
         const char = line[contentX] || ' ';
         
-        const isCursor = contentY === this.cursorY && contentX === this.cursorX && this.cursorVisible;
+        const isCursor = contentY === this.cursorY && contentX === this.cursorX && this.cursorVisible && this.hasFocus;
         const isNormalMode = this.mode === EditorMode.Normal;
         const isSearchMode = this.mode === EditorMode.FastSearch;
         
@@ -430,8 +433,31 @@ export class VimEditor extends LitElement {
     this.currentModeHandler = this.modeHandlerRegistry.getHandler(EditorMode.Normal);
     this.previousModeHandler = this.currentModeHandler;
     
+    this.setupFocusManagement();
     this.createHiddenInput();
     this.waitForP5AndInitialize();
+  }
+
+  private setupFocusManagement() {
+    const host = this.shadowRoot?.host as HTMLElement;
+    if (host) {
+      host.setAttribute('tabindex', '0');
+      
+      host.addEventListener('focus', () => {
+        this.hasFocus = true;
+        if (this.p5Instance) {
+          this.p5Instance.redraw();
+        }
+      });
+      
+      host.addEventListener('blur', () => {
+        this.hasFocus = false;
+        this.cursorVisible = false;
+        if (this.p5Instance) {
+          this.p5Instance.redraw();
+        }
+      });
+    }
   }
 
   private createHiddenInput() {
@@ -562,16 +588,35 @@ export class VimEditor extends LitElement {
     this.p5Instance = new p5(sketch, this.shadowRoot as unknown as HTMLElement);
 
     this.cursorBlinkInterval = window.setInterval(() => {
-      this.cursorVisible = !this.cursorVisible;
-      if (this.p5Instance) {
-        this.p5Instance.redraw();
+      if (this.hasFocus) {
+        this.cursorVisible = !this.cursorVisible;
+        if (this.p5Instance) {
+          this.p5Instance.redraw();
+        }
       }
     }, 500);
 
-    window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    const host = this.shadowRoot?.host as HTMLElement;
+    if (host) {
+      host.addEventListener('keydown', this.handleKeyDown.bind(this));
+    }
+    
+    if (this.canvas) {
+      this.canvas.addEventListener('mousedown', () => {
+        const host = this.shadowRoot?.host as HTMLElement;
+        if (host) {
+          host.focus();
+        }
+        this.hiddenInput?.focus();
+      });
+    }
   }
 
   private handleKeyDown(event: KeyboardEvent) {
+    if (!this.hasFocus) {
+      return;
+    }
+    
     const key = event.key;
     
     if (key === 'CapsLock' || key === 'Shift' || key === 'Control' || key === 'Alt' || key === 'Meta') {
@@ -1877,15 +1922,25 @@ export class VimEditor extends LitElement {
     if (this.hiddenInput) {
       this.hiddenInput.remove();
     }
-    window.removeEventListener('keydown', this.handleKeyDown.bind(this));
+    const host = this.shadowRoot?.host as HTMLElement;
+    if (host) {
+      host.removeEventListener('keydown', this.handleKeyDown.bind(this));
+    }
     super.disconnectedCallback();
   }
 
   private drawBorder(p: p5) {
-    p.stroke(100);
+    if (this.hasFocus) {
+      p.stroke(100, 149, 237);
+      p.strokeWeight(2);
+    } else {
+      p.stroke(100);
+      p.strokeWeight(1);
+    }
     p.noFill();
     p.rect(0, 0, p.width - 1, p.height - 1);
     p.noStroke();
+    p.strokeWeight(1);
   }
 
   private drawEditorBackground(p: p5) {
@@ -1948,7 +2003,7 @@ export class VimEditor extends LitElement {
   }
 
   private drawInsertCursor(p: p5) {
-    if ((this.mode !== EditorMode.Insert && this.mode !== EditorMode.MultiInsert && this.mode !== EditorMode.TInsert) || !this.cursorVisible) {
+    if ((this.mode !== EditorMode.Insert && this.mode !== EditorMode.MultiInsert && this.mode !== EditorMode.TInsert) || !this.cursorVisible || !this.hasFocus) {
       return;
     }
     

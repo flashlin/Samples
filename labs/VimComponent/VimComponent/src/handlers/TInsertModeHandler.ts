@@ -8,7 +8,10 @@ export class TInsertModeHandler extends BaseModeHandler {
   }
   
   onExit(editor: IVimEditor): void {
-    editor.hiddenInput?.blur();
+    const host = (editor as any).shadowRoot?.host as HTMLElement;
+    if (host) {
+      host.focus();
+    }
     editor.adjustCursorForNormalMode();
   }
   

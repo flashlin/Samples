@@ -53,8 +53,8 @@ vi.mock('p5', () => {
 import '../src/vim-editor';
 
 function pressKey(key: string) {
-  const event = new KeyboardEvent('keydown', { key });
-  window.dispatchEvent(event);
+  const event = new KeyboardEvent('keydown', { key, bubbles: true });
+  (globalThis as any).testEditor?.dispatchEvent(event);
 }
 
 function pressKeys(...keys: string[]) {
@@ -67,12 +67,15 @@ describe('VimEditor', () => {
   beforeEach(async () => {
     editor = document.createElement('vim-editor');
     document.body.appendChild(editor);
+    (globalThis as any).testEditor = editor;
     
     await new Promise(resolve => setTimeout(resolve, 50));
     
     editor.mode = 'normal';
     editor.cursorX = 0;
     editor.cursorY = 0;
+    editor.hasFocus = true;
+    editor.focus();
   });
 
   describe('$ key in normal mode', () => {
