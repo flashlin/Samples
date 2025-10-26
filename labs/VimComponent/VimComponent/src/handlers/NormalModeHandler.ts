@@ -3,6 +3,12 @@ import { EditorMode, BaseModeHandler, IVimEditor } from '../vimEditorTypes';
 export class NormalModeHandler extends BaseModeHandler {
   readonly mode = EditorMode.Normal;
   
+  onEnter(editor: IVimEditor): void {
+    console.log('[Normal] onEnter - keyBuffer before clear:', editor.keyBuffer);
+    editor.keyBuffer = '';
+    console.log('[Normal] onEnter - keyBuffer after clear:', editor.keyBuffer);
+  }
+  
   shouldPreventDefault(key: string): boolean {
     return true;
   }
@@ -90,7 +96,11 @@ export class NormalModeHandler extends BaseModeHandler {
           editor.pasteAfterCursor(); 
         }
       } },
-      { pattern: /^P$/, action: () => { 
+      { pattern: /^P$/, action: async () => { 
+        console.log('[Normal] P command triggered');
+        console.log('[Normal] keyBuffer:', editor.keyBuffer);
+        const clipboardText = await navigator.clipboard.readText();
+        console.log('[Normal] Clipboard content:', clipboardText);
         editor.saveHistory(); 
         editor.pasteBeforeCursor(); 
       } },

@@ -7,7 +7,7 @@ export class VisualLineModeHandler extends BaseModeHandler {
     return true;
   }
   
-  handleKey(key: string, editor: IVimEditor): void {
+  async handleKey(key: string, editor: IVimEditor): Promise<void> {
     if (editor.handleMovement(key)) {
       return;
     }
@@ -17,13 +17,13 @@ export class VisualLineModeHandler extends BaseModeHandler {
         editor.mode = EditorMode.Normal;
         break;
       case 'y':
-        this.yankVisualSelection(editor);
+        await this.yankVisualSelection(editor);
         editor.mode = EditorMode.Normal;
         break;
       case 'c':
       case 'd':
       case 'x':
-        this.cutVisualLineSelection(editor);
+        await this.cutVisualLineSelection(editor);
         editor.mode = EditorMode.Normal;
         break;
       case 'f':
@@ -38,40 +38,29 @@ export class VisualLineModeHandler extends BaseModeHandler {
   private getVisualSelection(editor: IVimEditor): string {
     const startY = Math.min(editor.visualStartY, editor.cursorY);
     const endY = Math.max(editor.visualStartY, editor.cursorY);
-    const startX = editor.visualStartY === startY ? 
-      Math.min(editor.visualStartX, editor.cursorX) : 
-      Math.min(editor.cursorX, editor.visualStartX);
-    const endX = editor.visualStartY === endY ? 
-      Math.max(editor.visualStartX, editor.cursorX) : 
-      Math.max(editor.cursorX, editor.visualStartX);
     
-    if (startY === endY) {
-      return editor.content[startY].slice(startX, endX + 1);
-    }
-    
-    let result = '';
+    // Visual Line Mode: always select entire lines
+    const lines: string[] = [];
     for (let y = startY; y <= endY; y++) {
-      if (y === startY) {
-        result += editor.content[y].slice(startX) + '\n';
-      } else if (y === endY) {
-        result += editor.content[y].slice(0, endX + 1);
-      } else {
-        result += editor.content[y] + '\n';
-      }
+      lines.push(editor.content[y]);
     }
-    return result;
+    
+    return lines.join('\n');
   }
   
-  private yankVisualSelection(editor: IVimEditor): void {
+  private async yankVisualSelection(editor: IVimEditor): Promise<void> {
     const selection = this.getVisualSelection(editor);
-    navigator.clipboard.writeText(selection);
+    await navigator.clipboard.writeText(selection);
   }
   
-  private cutVisualLineSelection(editor: IVimEditor): void {
+  private async cutVisualLineSelection(editor: IVimEditor): Promise<void> {
     editor.saveHistory();
     
     const selection = this.getVisualSelection(editor);
-    navigator.clipboard.writeText(selection);
+    console.log('[VisualLine] Cut selection:', selection);
+    console.log('[VisualLine] keyBuffer before cut:', editor.keyBuffer);
+    await navigator.clipboard.writeText(selection);
+    console.log('[VisualLine] Clipboard written successfully');
     
     const startY = Math.min(editor.visualStartY, editor.cursorY);
     const endY = Math.max(editor.visualStartY, editor.cursorY);
@@ -86,6 +75,7 @@ export class VisualLineModeHandler extends BaseModeHandler {
     editor.cursorY = Math.min(startY, editor.content.length - 1);
     editor.cursorX = 0;
     editor.adjustCursorX();
+    console.log('[VisualLine] keyBuffer after cut:', editor.keyBuffer);
   }
 }
 

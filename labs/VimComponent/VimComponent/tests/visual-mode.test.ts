@@ -244,8 +244,9 @@ describe('VimEditor - Visual Mode', () => {
       pressKey('j');
       await editor.updateComplete;
       
-      pressKey('x');
+      await pressKey('x');
       await editor.updateComplete;
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.content).toEqual(['line1', 'line4', 'line5']);
       const status = editor.getStatus();
@@ -264,8 +265,9 @@ describe('VimEditor - Visual Mode', () => {
       pressKey('V');
       await editor.updateComplete;
       
-      pressKey('x');
+      await pressKey('x');
       await editor.updateComplete;
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.content).toEqual(['line1', 'line3']);
       const status = editor.getStatus();
