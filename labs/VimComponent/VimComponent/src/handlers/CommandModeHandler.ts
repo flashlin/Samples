@@ -61,6 +61,7 @@ export class CommandModeHandler extends BaseModeHandler {
         action: () => { 
           if (editor.commandInput.length > 1) {
             editor.commandInput = editor.commandInput.slice(0, -1);
+            this.updateInputPosition(editor);
           }
         } 
       },
@@ -89,6 +90,9 @@ export class CommandModeHandler extends BaseModeHandler {
     console.log('Current commandInput:', editor.commandInput);
     editor.commandInput += value;
     console.log('Updated commandInput:', editor.commandInput);
+    
+    this.updateInputPosition(editor);
+    
     if (editor.p5Instance) {
       editor.p5Instance.redraw();
     }
@@ -97,9 +101,23 @@ export class CommandModeHandler extends BaseModeHandler {
   handleCompositionEnd(editor: IVimEditor, data: string): void {
     if (data) {
       editor.commandInput += data;
+      this.updateInputPosition(editor);
       if (editor.p5Instance) {
         editor.p5Instance.redraw();
       }
+    }
+  }
+  
+  private updateInputPosition(editor: IVimEditor): void {
+    if (editor.hiddenInput && editor.p5Instance) {
+      const p5Instance = editor.p5Instance;
+      const textWidth = p5Instance.textWidth(editor.commandInput);
+      const statusBarHeight = 24;
+      const editorHeight = p5Instance.height - statusBarHeight;
+      const statusY = editorHeight;
+      
+      editor.hiddenInput.style.left = `${10 + textWidth}px`;
+      editor.hiddenInput.style.top = `${statusY + 3}px`;
     }
   }
   

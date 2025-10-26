@@ -73,6 +73,11 @@
             });
         });
 
+        editor.addEventListener('vim-command', (event) => {
+            console.log('Vim command received:', event.detail.command);
+            alert(`Command executed: ${event.detail.command}`);
+        });
+
         window.loadSampleCode = function() {
             const code = `function fibonacci(n) {
   if (n <= 1) {
