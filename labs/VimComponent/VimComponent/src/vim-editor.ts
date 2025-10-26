@@ -133,12 +133,20 @@ export class VimEditor extends LitElement {
 
   private getComputedWidth(): number {
     const container = this.shadowRoot?.host as HTMLElement;
+    // Use the actual rendered width of the host element
+    if (container && container.clientWidth > 0) {
+      return container.clientWidth;
+    }
     const parentWidth = container?.parentElement?.clientWidth || window.innerWidth;
     return this.parseSize(this.width, parentWidth);
   }
 
   private getComputedHeight(): number {
     const container = this.shadowRoot?.host as HTMLElement;
+    // Use the actual rendered height of the host element
+    if (container && container.clientHeight > 0) {
+      return container.clientHeight;
+    }
     const parentHeight = container?.parentElement?.clientHeight || window.innerHeight;
     return this.parseSize(this.height, parentHeight);
   }
@@ -585,13 +593,13 @@ export class VimEditor extends LitElement {
         
         p.background(0);
         
-        this.drawBorder(p);
         this.drawEditorBackground(p);
         this.drawLineNumbers(p);
         this.renderBuffer(p);
         this.drawTMarks(p);
         this.drawFastJumpLabels(p);
         this.drawStatusBar(p);
+        this.drawBorder(p);
       };
     };
 
@@ -1941,15 +1949,18 @@ export class VimEditor extends LitElement {
   }
 
   private drawBorder(p: p5) {
+    p.noFill();
     if (this.hasFocus) {
       p.stroke(100, 149, 237);
       p.strokeWeight(2);
+      // When strokeWeight is 2, draw from (1,1) to avoid clipping
+      p.rect(1, 1, p.width - 2, p.height - 2);
     } else {
       p.stroke(100);
       p.strokeWeight(1);
+      // When strokeWeight is 1, draw from (0.5,0.5) for pixel-perfect rendering
+      p.rect(0.5, 0.5, p.width - 1, p.height - 1);
     }
-    p.noFill();
-    p.rect(0, 0, p.width - 1, p.height - 1);
     p.noStroke();
     p.strokeWeight(1);
   }
