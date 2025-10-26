@@ -418,7 +418,8 @@ describe('VimEditor - Multi-Cursor Editing', () => {
       
       // Press 'e' to move to word end at each mark independently
       pressKey('e');
-      pressKey('y');
+      await pressKey('y');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.multiCursorClipboard.length).toBe(2);
       expect(editor.multiCursorClipboard[0]).toBe('tools');
@@ -445,7 +446,8 @@ describe('VimEditor - Multi-Cursor Editing', () => {
       editor.cursorY = 0;
       pressKey('v');
       pressKey('e');
-      pressKey('y');
+      await pressKey('y');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.multiCursorClipboard[0]).toBe('abc');
       expect(editor.multiCursorClipboard[1]).toBe('ghi');

@@ -345,7 +345,8 @@ describe('VimEditor - Text Objects', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      pressKeys('v', 'i', '`', 'x');
+      await pressKeys('v', 'i', '`', 'x');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.content[0]).toBe('const str = ``;');
       expect(editor.mode).toBe('normal');
@@ -423,7 +424,8 @@ describe('VimEditor - Text Objects', () => {
         configurable: true
       });
       
-      pressKeys('v', 'i', "'", 'y');
+      await pressKeys('v', 'i', "'", 'y');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(mockWriteText).toHaveBeenCalledWith('hello world');
       expect(editor.mode).toBe('normal');
@@ -466,7 +468,8 @@ describe('VimEditor - Text Objects', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      pressKeys('v', 'i', '"', 'd');
+      await pressKeys('v', 'i', '"', 'd');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.content[0]).toBe('const str = "";');
       expect(editor.mode).toBe('normal');
@@ -564,7 +567,8 @@ describe('VimEditor - Text Objects', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      pressKeys('v', 'i', 'w', 'x');
+      await pressKeys('v', 'i', 'w', 'x');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.content).toEqual(['hello  test']);
       expect(editor.mode).toBe('normal');
@@ -756,7 +760,8 @@ describe('VimEditor - Text Objects', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      pressKeys('v', 'i', '`', 'x');
+      await pressKeys('v', 'i', '`', 'x');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.content).toEqual(['const str = ``;']);
       expect(editor.mode).toBe('normal');
