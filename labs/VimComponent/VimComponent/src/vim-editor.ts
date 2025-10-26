@@ -16,17 +16,33 @@ import { IntellisenseMenu } from './components/IntellisenseMenu';
  */
 @customElement('vim-editor')
 export class VimEditor extends LitElement {
-  declare addEventListener: <K extends keyof VimEditorEventMap>(
+  addEventListener<K extends keyof VimEditorEventMap>(
     type: K,
     listener: (this: VimEditor, ev: VimEditorEventMap[K]) => void,
     options?: boolean | AddEventListenerOptions
-  ) => void;
+  ): void;
+  addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  addEventListener(type: any, listener: any, options?: any): void {
+    super.addEventListener(type, listener, options);
+  }
   
-  declare removeEventListener: <K extends keyof VimEditorEventMap>(
+  removeEventListener<K extends keyof VimEditorEventMap>(
     type: K,
     listener: (this: VimEditor, ev: VimEditorEventMap[K]) => void,
     options?: boolean | EventListenerOptions
-  ) => void;
+  ): void;
+  removeEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | EventListenerOptions
+  ): void;
+  removeEventListener(type: any, listener: any, options?: any): void {
+    super.removeEventListener(type, listener, options);
+  }
   
   p5Instance: p5 | null = null;
   private canvas: HTMLCanvasElement | null = null;
