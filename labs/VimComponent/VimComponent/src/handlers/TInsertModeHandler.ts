@@ -16,7 +16,7 @@ export class TInsertModeHandler extends BaseModeHandler {
   }
   
   shouldPreventDefault(key: string): boolean {
-    return key.length !== 1;
+    return true;
   }
   
   private getKeyPatterns(editor: IVimEditor) {

@@ -450,7 +450,11 @@ export class VimEditor extends LitElement {
         }
       });
       
-      host.addEventListener('blur', () => {
+      host.addEventListener('blur', (event: FocusEvent) => {
+        // Don't lose focus if the focus moved to hiddenInput
+        if (event.relatedTarget === this.hiddenInput) {
+          return;
+        }
         this.hasFocus = false;
         this.cursorVisible = false;
         if (this.p5Instance) {
