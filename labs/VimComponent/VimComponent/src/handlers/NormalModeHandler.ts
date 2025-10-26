@@ -118,6 +118,7 @@ export class NormalModeHandler extends BaseModeHandler {
         editor.fastJumpMatches = [];
         editor.fastJumpInput = '';
       } },
+      { pattern: /^:$/, action: () => { editor.mode = EditorMode.Command; } },
       { pattern: /^u$/, action: () => { editor.undo(); } },
       { pattern: /^%$/, action: () => { editor.jumpToMatchingBracket(); } },
     ];

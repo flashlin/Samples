@@ -9,6 +9,7 @@ export enum EditorMode {
   MultiInsert = 'multi-insert',
   TInsert = 't-insert',
   TVisual = 't-visual',
+  Command = 'command',
 }
 
 export interface EditorStatus {
@@ -50,6 +51,7 @@ export interface IVimEditor {
   currentMatchIndex: number;
   searchHistory: Array<{ keyword: string; matches: Array<{ y: number; x: number }> }>;
   tMarks: Array<{ y: number; x: number }>;
+  commandInput: string;
   hiddenInput: HTMLInputElement | null;
   p5Instance: any;
   modeHandlerRegistry: any;
@@ -157,5 +159,9 @@ export interface KeyPressEventDetail {
 
 export interface ChangeEventDetail {
   content: string[];
+}
+
+export interface CommandEventDetail {
+  command: string;
 }
 

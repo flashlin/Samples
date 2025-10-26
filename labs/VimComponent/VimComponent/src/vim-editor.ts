@@ -99,6 +99,9 @@ export class VimEditor extends LitElement {
   
   tMarks: Array<{ y: number; x: number }> = [];
   
+  @property({ type: String })
+  commandInput = '';
+  
   modeHandlerRegistry!: ModeHandlerRegistry;
   private currentModeHandler!: EditorModeHandler;
   private previousModeHandler!: EditorModeHandler;
@@ -2151,27 +2154,30 @@ export class VimEditor extends LitElement {
   }
 
   private drawStatusBar(p: p5) {
-    // 計算編輯區域的高度
     const editorHeight = p.height - this.statusBarHeight;
-    // 將狀態列放在編輯區域的底部
     const statusY = editorHeight;
     
-    // 繪製狀態列背景 - 使用暗灰色而不是藍色
-    p.fill(50); // 暗灰色背景
+    p.fill(50);
     p.rect(0, statusY, p.width, this.statusBarHeight);
     
-    // 繪製狀態列文字，包含最後按下的按鍵
     p.fill(255);
-    let statusText = `Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.getDisplayColumn() + 1}`;
-    if (this.lastKeyPressed) {
-      statusText += ` | Key: "${this.lastKeyPressed}"`;
-    }
     
-    p.text(
-      statusText,
-      10,
-      statusY + 3 // 計算垂直居中位置
-    );
+    if (this.mode === EditorMode.Command) {
+      const commandText = this.commandInput;
+      p.text(commandText, 10, statusY + 3);
+      
+      if (this.cursorVisible) {
+        const textWidth = p.textWidth(commandText);
+        p.fill(255);
+        p.rect(10 + textWidth, statusY + 2, 2, this.statusBarHeight - 4);
+      }
+    } else {
+      let statusText = `Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.getDisplayColumn() + 1}`;
+      if (this.lastKeyPressed) {
+        statusText += ` | Key: "${this.lastKeyPressed}"`;
+      }
+      p.text(statusText, 10, statusY + 3);
+    }
   }
 
 

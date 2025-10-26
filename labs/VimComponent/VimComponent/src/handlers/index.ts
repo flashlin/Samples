@@ -8,5 +8,6 @@ export { FastSearchModeHandler } from './FastSearchModeHandler';
 export { MultiInsertModeHandler } from './MultiInsertModeHandler';
 export { TInsertModeHandler } from './TInsertModeHandler';
 export { TVisualModeHandler } from './TVisualModeHandler';
+export { CommandModeHandler } from './CommandModeHandler';
 export { ModeHandlerRegistry } from './ModeHandlerRegistry';
 
