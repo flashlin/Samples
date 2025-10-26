@@ -52,13 +52,23 @@ vi.mock('p5', () => {
 
 import '../src/vim-editor';
 
-function pressKey(key: string) {
+// Unified keyboard event dispatch helper
+function dispatchKeyEvent(key: string, target?: any) {
+  const editor = target || (globalThis as any).testEditor;
+  if (!editor) {
+    console.warn('No editor target found for key event:', key);
+    return;
+  }
   const event = new KeyboardEvent('keydown', { key, bubbles: true });
-  (globalThis as any).testEditor?.dispatchEvent(event);
+  editor.dispatchEvent(event);
+}
+
+function pressKey(key: string) {
+  dispatchKeyEvent(key);
 }
 
 function pressKeys(...keys: string[]) {
-  keys.forEach(key => pressKey(key));
+  keys.forEach(key => dispatchKeyEvent(key));
 }
 
 describe('VimEditor', () => {
@@ -123,8 +133,7 @@ describe('VimEditor', () => {
     it('should move to last character of long line', () => {
       editor.setContent(['hello world']);
       
-      const event = new KeyboardEvent('keydown', { key: '$' });
-      editor.dispatchEvent(event);
+      pressKey('$');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(10);
@@ -137,8 +146,7 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(6);
@@ -150,8 +158,7 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(3);
@@ -163,20 +170,17 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      let event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       let status = editor.getStatus();
       expect(status.cursorX).toBe(6);
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       status = editor.getStatus();
       expect(status.cursorX).toBe(9);
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       status = editor.getStatus();
       expect(status.cursorX).toBe(13);
@@ -187,8 +191,7 @@ describe('VimEditor', () => {
       editor.cursorX = 14;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(14);
@@ -200,8 +203,7 @@ describe('VimEditor', () => {
       editor.cursorX = 4;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(0);
@@ -215,8 +217,7 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'W' });
-      editor.dispatchEvent(event);
+      pressKey('W');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(12);
@@ -228,8 +229,7 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'W' });
-      editor.dispatchEvent(event);
+      pressKey('W');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(13);
@@ -240,8 +240,7 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'W' });
-      editor.dispatchEvent(event);
+      pressKey('W');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(13);
@@ -254,8 +253,7 @@ describe('VimEditor', () => {
       editor.cursorX = 12;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'B' });
-      editor.dispatchEvent(event);
+      pressKey('B');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(0);
@@ -267,8 +265,7 @@ describe('VimEditor', () => {
       editor.cursorX = 13;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'B' });
-      editor.dispatchEvent(event);
+      pressKey('B');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(0);
@@ -279,8 +276,7 @@ describe('VimEditor', () => {
       editor.cursorX = 13;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'B' });
-      editor.dispatchEvent(event);
+      pressKey('B');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(0);
@@ -293,8 +289,7 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'e' });
-      editor.dispatchEvent(event);
+      pressKey('e');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(4);
@@ -306,8 +301,7 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'e' });
-      editor.dispatchEvent(event);
+      pressKey('e');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(3);
@@ -318,8 +312,7 @@ describe('VimEditor', () => {
       editor.cursorX = 5;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'e' });
-      editor.dispatchEvent(event);
+      pressKey('e');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(5);
@@ -330,8 +323,7 @@ describe('VimEditor', () => {
       editor.cursorX = 2;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'e' });
-      editor.dispatchEvent(event);
+      pressKey('e');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(4);
@@ -342,8 +334,7 @@ describe('VimEditor', () => {
       editor.cursorX = 4;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'e' });
-      editor.dispatchEvent(event);
+      pressKey('e');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(10);
@@ -354,8 +345,7 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: 'e' });
-      editor.dispatchEvent(event);
+      pressKey('e');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(4);
@@ -366,11 +356,9 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      let event = new KeyboardEvent('keydown', { key: '2' });
-      editor.dispatchEvent(event);
+      pressKey('2');
       
-      event = new KeyboardEvent('keydown', { key: 'e' });
-      editor.dispatchEvent(event);
+      pressKey('e');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(6);
@@ -383,8 +371,7 @@ describe('VimEditor', () => {
       editor.cursorX = 8;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: '^' });
-      editor.dispatchEvent(event);
+      pressKey('^');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(2);
@@ -396,8 +383,7 @@ describe('VimEditor', () => {
       editor.cursorX = 8;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: '^' });
-      editor.dispatchEvent(event);
+      pressKey('^');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(0);
@@ -408,8 +394,7 @@ describe('VimEditor', () => {
       editor.cursorX = 3;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: '^' });
-      editor.dispatchEvent(event);
+      pressKey('^');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(0);
@@ -420,8 +405,7 @@ describe('VimEditor', () => {
       editor.cursorX = 5;
       editor.cursorY = 0;
       
-      const event = new KeyboardEvent('keydown', { key: '^' });
-      editor.dispatchEvent(event);
+      pressKey('^');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(3);
@@ -435,11 +419,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: '5' });
-      editor.dispatchEvent(event);
+      pressKey('5');
       
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('j');
       
       const status = editor.getStatus();
       expect(status.cursorY).toBe(5);
@@ -451,11 +433,9 @@ describe('VimEditor', () => {
       editor.cursorY = 6;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: '3' });
-      editor.dispatchEvent(event);
+      pressKey('3');
       
-      event = new KeyboardEvent('keydown', { key: 'k' });
-      editor.dispatchEvent(event);
+      pressKey('k');
       
       const status = editor.getStatus();
       expect(status.cursorY).toBe(3);
@@ -468,14 +448,11 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: '1' });
-      editor.dispatchEvent(event);
+      pressKey('1');
       
-      event = new KeyboardEvent('keydown', { key: '0' });
-      editor.dispatchEvent(event);
+      pressKey('0');
       
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('j');
       
       const status = editor.getStatus();
       expect(status.cursorY).toBe(10);
@@ -487,11 +464,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: '5' });
-      editor.dispatchEvent(event);
+      pressKey('5');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(24);
@@ -506,8 +481,7 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       await editor.updateComplete;
       
-      const event = new KeyboardEvent('keydown', { key: 'a' });
-      editor.dispatchEvent(event);
+      pressKey('a');
       await editor.updateComplete;
       
       const status = editor.getStatus();
@@ -523,8 +497,7 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       await editor.updateComplete;
       
-      const event = new KeyboardEvent('keydown', { key: 'a' });
-      editor.dispatchEvent(event);
+      pressKey('a');
       await editor.updateComplete;
       
       expect(editor.content[0]).toBe('hello world');
@@ -540,8 +513,7 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       await editor.updateComplete;
       
-      const event = new KeyboardEvent('keydown', { key: 'a' });
-      editor.dispatchEvent(event);
+      pressKey('a');
       await editor.updateComplete;
       
       expect(editor.cursorX).toBe(5);
@@ -557,8 +529,7 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       await editor.updateComplete;
       
-      const event = new KeyboardEvent('keydown', { key: 'a' });
-      editor.dispatchEvent(event);
+      pressKey('a');
       await editor.updateComplete;
       
       expect(editor.cursorX).toBe(0);
@@ -574,8 +545,7 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       await editor.updateComplete;
       
-      const aEvent = new KeyboardEvent('keydown', { key: 'a' });
-      editor.dispatchEvent(aEvent);
+      pressKey('a');
       await editor.updateComplete;
       
       expect(editor.cursorX).toBe(2);
@@ -601,8 +571,7 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       await editor.updateComplete;
       
-      const event = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(event);
+      pressKey('i');
       await editor.updateComplete;
       
       const status = editor.getStatus();
@@ -618,8 +587,7 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       await editor.updateComplete;
       
-      const event = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(event);
+      pressKey('i');
       await editor.updateComplete;
       
       expect(editor.content[0]).toBe('hello world');
@@ -635,8 +603,7 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       await editor.updateComplete;
       
-      const iEvent = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(iEvent);
+      pressKey('i');
       await editor.updateComplete;
       
       expect(editor.cursorX).toBe(2);
@@ -661,11 +628,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'v' });
-      editor.dispatchEvent(event);
+      pressKey('v');
       
-      event = new KeyboardEvent('keydown', { key: '$' });
-      editor.dispatchEvent(event);
+      pressKey('$');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(10);
@@ -678,11 +643,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'v' });
-      editor.dispatchEvent(event);
+      pressKey('v');
       
-      event = new KeyboardEvent('keydown', { key: '^' });
-      editor.dispatchEvent(event);
+      pressKey('^');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(2);
@@ -695,11 +658,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'v' });
-      editor.dispatchEvent(event);
+      pressKey('v');
       
-      event = new KeyboardEvent('keydown', { key: '$' });
-      editor.dispatchEvent(event);
+      pressKey('$');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(2);
@@ -718,14 +679,11 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'v' });
-      editor.dispatchEvent(event);
+      pressKey('v');
       
-      event = new KeyboardEvent('keydown', { key: '5' });
-      editor.dispatchEvent(event);
+      pressKey('5');
       
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('j');
       
       const status = editor.getStatus();
       expect(status.cursorY).toBe(5);
@@ -745,14 +703,11 @@ describe('VimEditor', () => {
       editor.cursorY = 6;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'v' });
-      editor.dispatchEvent(event);
+      pressKey('v');
       
-      event = new KeyboardEvent('keydown', { key: '3' });
-      editor.dispatchEvent(event);
+      pressKey('3');
       
-      event = new KeyboardEvent('keydown', { key: 'k' });
-      editor.dispatchEvent(event);
+      pressKey('k');
       
       const status = editor.getStatus();
       expect(status.cursorY).toBe(3);
@@ -767,15 +722,13 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
       
-      let event = new KeyboardEvent('keydown', { key: 'v' });
-      editor.dispatchEvent(event);
+      pressKey('v');
       await editor.updateComplete;
       
       editor.cursorX = 4;
       await editor.updateComplete;
       
-      event = new KeyboardEvent('keydown', { key: 'x' });
-      editor.dispatchEvent(event);
+      pressKey('x');
       await editor.updateComplete;
       
       expect(editor.content[0]).toBe(' world');
@@ -791,20 +744,16 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
       
-      let event = new KeyboardEvent('keydown', { key: 'v' });
-      editor.dispatchEvent(event);
+      pressKey('v');
       await editor.updateComplete;
       
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('j');
       await editor.updateComplete;
       
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('j');
       await editor.updateComplete;
       
-      event = new KeyboardEvent('keydown', { key: 'x' });
-      editor.dispatchEvent(event);
+      pressKey('x');
       await editor.updateComplete;
       
       expect(editor.content).toEqual(['line1', 'lie4']);
@@ -821,8 +770,7 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      const event = new KeyboardEvent('keydown', { key: 'V' });
-      editor.dispatchEvent(event);
+      pressKey('V');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('visual-line');
@@ -834,8 +782,7 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      const event = new KeyboardEvent('keydown', { key: 'V' });
-      editor.dispatchEvent(event);
+      pressKey('V');
       
       editor.updateBuffer();
       const buffer = editor.getBuffer();
@@ -851,14 +798,11 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'V' });
-      editor.dispatchEvent(event);
+      pressKey('V');
       
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('j');
       
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('j');
       
       const status = editor.getStatus();
       expect(status.cursorY).toBe(2);
@@ -880,14 +824,11 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'V' });
-      editor.dispatchEvent(event);
+      pressKey('V');
       
-      event = new KeyboardEvent('keydown', { key: '3' });
-      editor.dispatchEvent(event);
+      pressKey('3');
       
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('j');
       
       const status = editor.getStatus();
       expect(status.cursorY).toBe(3);
@@ -902,16 +843,13 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
       
-      let event = new KeyboardEvent('keydown', { key: 'V' });
-      editor.dispatchEvent(event);
+      pressKey('V');
       await editor.updateComplete;
       
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('j');
       await editor.updateComplete;
       
-      event = new KeyboardEvent('keydown', { key: 'x' });
-      editor.dispatchEvent(event);
+      pressKey('x');
       await editor.updateComplete;
       
       expect(editor.content).toEqual(['line1', 'line4', 'line5']);
@@ -928,12 +866,10 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
       
-      let event = new KeyboardEvent('keydown', { key: 'V' });
-      editor.dispatchEvent(event);
+      pressKey('V');
       await editor.updateComplete;
       
-      event = new KeyboardEvent('keydown', { key: 'x' });
-      editor.dispatchEvent(event);
+      pressKey('x');
       await editor.updateComplete;
       
       expect(editor.content).toEqual(['line1', 'line3']);
@@ -952,8 +888,7 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       
       for (let i = 0; i < 30; i++) {
-        const event = new KeyboardEvent('keydown', { key: 'j' });
-        editor.dispatchEvent(event);
+        pressKey('j');
       }
       
       const status = editor.getStatus();
@@ -971,13 +906,11 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       
       for (let i = 0; i < 30; i++) {
-        const event = new KeyboardEvent('keydown', { key: 'j' });
-        editor.dispatchEvent(event);
+        pressKey('j');
       }
       
       for (let i = 0; i < 60; i++) {
-        const event = new KeyboardEvent('keydown', { key: 'k' });
-        editor.dispatchEvent(event);
+        pressKey('k');
       }
       
       const status = editor.getStatus();
@@ -995,8 +928,7 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       
       for (let i = 0; i < 90; i++) {
-        const event = new KeyboardEvent('keydown', { key: 'l' });
-        editor.dispatchEvent(event);
+        pressKey('l');
       }
       
       const status = editor.getStatus();
@@ -1014,8 +946,7 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       
       for (let i = 0; i < 90; i++) {
-        const event = new KeyboardEvent('keydown', { key: 'h' });
-        editor.dispatchEvent(event);
+        pressKey('h');
       }
       
       const status = editor.getStatus();
@@ -1032,8 +963,7 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      const event = new KeyboardEvent('keydown', { key: '$' });
-      editor.dispatchEvent(event);
+      pressKey('$');
       
       const status = editor.getStatus();
       expect(status.cursorX).toBe(99);
@@ -1150,8 +1080,7 @@ describe('VimEditor', () => {
       editor.setContent(['hello world']);
       await editor.updateComplete;
       
-      const event = new KeyboardEvent('keydown', { key: 'f' });
-      editor.dispatchEvent(event);
+      pressKey('f');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('fast-jump');
@@ -1161,11 +1090,9 @@ describe('VimEditor', () => {
       editor.setContent(['hello world']);
       await editor.updateComplete;
       
-      let event = new KeyboardEvent('keydown', { key: 'f' });
-      editor.dispatchEvent(event);
+      pressKey('f');
       
-      event = new KeyboardEvent('keydown', { key: 'x' });
-      editor.dispatchEvent(event);
+      pressKey('x');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('normal');
@@ -1177,11 +1104,9 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      let event = new KeyboardEvent('keydown', { key: 'f' });
-      editor.dispatchEvent(event);
+      pressKey('f');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('normal');
@@ -1193,11 +1118,9 @@ describe('VimEditor', () => {
       editor.setContent(['hello hello hello']);
       await editor.updateComplete;
       
-      let event = new KeyboardEvent('keydown', { key: 'f' });
-      editor.dispatchEvent(event);
+      pressKey('f');
       
-      event = new KeyboardEvent('keydown', { key: 'h' });
-      editor.dispatchEvent(event);
+      pressKey('h');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('fast-match');
@@ -1209,14 +1132,11 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      let event = new KeyboardEvent('keydown', { key: 'f' });
-      editor.dispatchEvent(event);
+      pressKey('f');
       
-      event = new KeyboardEvent('keydown', { key: 'h' });
-      editor.dispatchEvent(event);
+      pressKey('h');
       
-      event = new KeyboardEvent('keydown', { key: 'b' });
-      editor.dispatchEvent(event);
+      pressKey('b');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('normal');
@@ -1247,11 +1167,9 @@ describe('VimEditor', () => {
       editor.setContent(['hello world']);
       await editor.updateComplete;
       
-      let event = new KeyboardEvent('keydown', { key: 'f' });
-      editor.dispatchEvent(event);
+      pressKey('f');
       
-      event = new KeyboardEvent('keydown', { key: 'Escape' });
-      editor.dispatchEvent(event);
+      pressKey('Escape');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('normal');
@@ -1261,14 +1179,11 @@ describe('VimEditor', () => {
       editor.setContent(['hello hello hello']);
       await editor.updateComplete;
       
-      let event = new KeyboardEvent('keydown', { key: 'f' });
-      editor.dispatchEvent(event);
+      pressKey('f');
       
-      event = new KeyboardEvent('keydown', { key: 'h' });
-      editor.dispatchEvent(event);
+      pressKey('h');
       
-      event = new KeyboardEvent('keydown', { key: 'Escape' });
-      editor.dispatchEvent(event);
+      pressKey('Escape');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('normal');
@@ -1280,18 +1195,15 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      let event = new KeyboardEvent('keydown', { key: 'v' });
-      editor.dispatchEvent(event);
+      pressKey('v');
       
       expect(editor.getStatus().mode).toBe('visual');
       
-      event = new KeyboardEvent('keydown', { key: 'f' });
-      editor.dispatchEvent(event);
+      pressKey('f');
       
       expect(editor.getStatus().mode).toBe('fast-jump');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('visual');
@@ -1305,23 +1217,19 @@ describe('VimEditor', () => {
       editor.cursorX = 0;
       editor.cursorY = 0;
       
-      let event = new KeyboardEvent('keydown', { key: 'V' });
-      editor.dispatchEvent(event);
+      pressKey('V');
       
       expect(editor.getStatus().mode).toBe('visual-line');
       
-      event = new KeyboardEvent('keydown', { key: 'f' });
-      editor.dispatchEvent(event);
+      pressKey('f');
       
       expect(editor.getStatus().mode).toBe('fast-jump');
       
-      event = new KeyboardEvent('keydown', { key: 'b' });
-      editor.dispatchEvent(event);
+      pressKey('b');
       
       expect(editor.getStatus().mode).toBe('fast-match');
       
-      event = new KeyboardEvent('keydown', { key: 'b' });
-      editor.dispatchEvent(event);
+      pressKey('b');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('visual-line');
@@ -1333,14 +1241,11 @@ describe('VimEditor', () => {
       editor.setContent(['hello world']);
       await editor.updateComplete;
       
-      let event = new KeyboardEvent('keydown', { key: 'v' });
-      editor.dispatchEvent(event);
+      pressKey('v');
       
-      event = new KeyboardEvent('keydown', { key: 'f' });
-      editor.dispatchEvent(event);
+      pressKey('f');
       
-      event = new KeyboardEvent('keydown', { key: 'Escape' });
-      editor.dispatchEvent(event);
+      pressKey('Escape');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('visual');
@@ -1350,19 +1255,15 @@ describe('VimEditor', () => {
       editor.setContent(['hello hello hello']);
       await editor.updateComplete;
       
-      let event = new KeyboardEvent('keydown', { key: 'v' });
-      editor.dispatchEvent(event);
+      pressKey('v');
       
-      event = new KeyboardEvent('keydown', { key: 'f' });
-      editor.dispatchEvent(event);
+      pressKey('f');
       
-      event = new KeyboardEvent('keydown', { key: 'h' });
-      editor.dispatchEvent(event);
+      pressKey('h');
       
       expect(editor.getStatus().mode).toBe('fast-match');
       
-      event = new KeyboardEvent('keydown', { key: 'Escape' });
-      editor.dispatchEvent(event);
+      pressKey('Escape');
       
       const status = editor.getStatus();
       expect(status.mode).toBe('visual');
@@ -1377,14 +1278,11 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(event);
+      pressKey('i');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('hello  test');
       expect(editor.cursorX).toBe(6);
@@ -1397,14 +1295,11 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(event);
+      pressKey('i');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('');
       expect(editor.cursorX).toBe(0);
@@ -1417,14 +1312,11 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(event);
+      pressKey('i');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('hello  test');
       expect(editor.cursorX).toBe(6);
@@ -1437,14 +1329,11 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(event);
+      pressKey('i');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe(' world');
       expect(editor.cursorX).toBe(0);
@@ -1457,14 +1346,11 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(event);
+      pressKey('i');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('hello ');
       expect(editor.cursorX).toBe(5);
@@ -1477,14 +1363,11 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(event);
+      pressKey('i');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('hello world');
     });
@@ -1496,14 +1379,11 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(event);
+      pressKey('i');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('helloworld');
       expect(editor.cursorX).toBe(5);
@@ -2153,11 +2033,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('world test');
       expect(editor.cursorX).toBe(0);
@@ -2170,11 +2048,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('heworld test');
       expect(editor.cursorX).toBe(2);
@@ -2187,11 +2063,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('');
       expect(editor.cursorX).toBe(0);
@@ -2204,11 +2078,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('world');
       expect(editor.cursorX).toBe(0);
@@ -2221,11 +2093,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('helloworld');
       expect(editor.cursorX).toBe(5);
@@ -2238,11 +2108,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('world');
       expect(editor.cursorX).toBe(0);
@@ -2255,11 +2123,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('hello ');
       expect(editor.cursorX).toBe(5);
@@ -2272,11 +2138,9 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
       
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       
       expect(editor.content[0]).toBe('你好world');
       expect(editor.cursorX).toBe(0);
@@ -2442,8 +2306,7 @@ describe('VimEditor', () => {
 
       mockReadText.mockResolvedValue('TEST');
 
-      const event = new KeyboardEvent('keydown', { key: 'p' });
-      editor.dispatchEvent(event);
+      pressKey('p');
 
       await new Promise(resolve => setTimeout(resolve, 10));
       await editor.updateComplete;
@@ -2462,8 +2325,7 @@ describe('VimEditor', () => {
 
       mockReadText.mockResolvedValue('X');
 
-      const event = new KeyboardEvent('keydown', { key: 'p' });
-      editor.dispatchEvent(event);
+      pressKey('p');
 
       await new Promise(resolve => setTimeout(resolve, 10));
       await editor.updateComplete;
@@ -2481,8 +2343,7 @@ describe('VimEditor', () => {
 
       mockReadText.mockResolvedValue('!');
 
-      const event = new KeyboardEvent('keydown', { key: 'p' });
-      editor.dispatchEvent(event);
+      pressKey('p');
 
       await new Promise(resolve => setTimeout(resolve, 10));
       await editor.updateComplete;
@@ -2500,8 +2361,7 @@ describe('VimEditor', () => {
 
       mockReadText.mockResolvedValue('AAA\nBBB\nCCC');
 
-      const event = new KeyboardEvent('keydown', { key: 'p' });
-      editor.dispatchEvent(event);
+      pressKey('p');
 
       await new Promise(resolve => setTimeout(resolve, 10));
       await editor.updateComplete;
@@ -2522,8 +2382,7 @@ describe('VimEditor', () => {
 
       mockReadText.mockResolvedValue('測試');
 
-      const event = new KeyboardEvent('keydown', { key: 'p' });
-      editor.dispatchEvent(event);
+      pressKey('p');
 
       await new Promise(resolve => setTimeout(resolve, 10));
       await editor.updateComplete;
@@ -2541,8 +2400,7 @@ describe('VimEditor', () => {
 
       mockReadText.mockResolvedValue('test');
 
-      const event = new KeyboardEvent('keydown', { key: 'p' });
-      editor.dispatchEvent(event);
+      pressKey('p');
 
       await new Promise(resolve => setTimeout(resolve, 10));
       await editor.updateComplete;
@@ -2560,8 +2418,7 @@ describe('VimEditor', () => {
 
       mockReadText.mockResolvedValue('line1\nline2\nline3');
 
-      const event = new KeyboardEvent('keydown', { key: 'p' });
-      editor.dispatchEvent(event);
+      pressKey('p');
 
       await new Promise(resolve => setTimeout(resolve, 10));
       await editor.updateComplete;
@@ -2583,8 +2440,7 @@ describe('VimEditor', () => {
       editor.cursorY = 0;
       editor.mode = 'normal';
 
-      const event = new KeyboardEvent('keydown', { key: 'u' });
-      editor.dispatchEvent(event);
+      pressKey('u');
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe('hello');
@@ -2598,20 +2454,16 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
 
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
 
-      event = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(event);
+      pressKey('i');
 
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe('hello  test');
 
-      event = new KeyboardEvent('keydown', { key: 'u' });
-      editor.dispatchEvent(event);
+      pressKey('u');
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe('hello world test');
@@ -2626,17 +2478,14 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
 
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
 
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('w');
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe('world');
 
-      event = new KeyboardEvent('keydown', { key: 'u' });
-      editor.dispatchEvent(event);
+      pressKey('u');
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe('hello world');
@@ -2665,16 +2514,14 @@ describe('VimEditor', () => {
 
       mockReadText.mockResolvedValue(' world');
 
-      let event = new KeyboardEvent('keydown', { key: 'p' });
-      editor.dispatchEvent(event);
+      pressKey('p');
 
       await new Promise(resolve => setTimeout(resolve, 10));
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe('hello world');
 
-      event = new KeyboardEvent('keydown', { key: 'u' });
-      editor.dispatchEvent(event);
+      pressKey('u');
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe('hello');
@@ -2689,20 +2536,17 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
 
-      let event = new KeyboardEvent('keydown', { key: 'v' });
-      editor.dispatchEvent(event);
+      pressKey('v');
       await editor.updateComplete;
 
       editor.cursorX = 4;
 
-      event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
+      pressKey('d');
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe(' world');
 
-      event = new KeyboardEvent('keydown', { key: 'u' });
-      editor.dispatchEvent(event);
+      pressKey('u');
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe('hello world');
@@ -2717,18 +2561,14 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
 
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: 'i' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: 'w' });
-      editor.dispatchEvent(event);
+      pressKey('d');
+      pressKey('i');
+      pressKey('w');
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe(' world');
 
-      event = new KeyboardEvent('keydown', { key: 'u' });
-      editor.dispatchEvent(event);
+      pressKey('u');
       await editor.updateComplete;
 
       expect(editor.content[0]).toBe('hello world');
@@ -2744,12 +2584,9 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
 
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: '2' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('d');
+      pressKey('2');
+      pressKey('j');
       await editor.updateComplete;
 
       expect(editor.content).toEqual(['line1', 'line5']);
@@ -2765,12 +2602,9 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
 
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: '2' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: 'k' });
-      editor.dispatchEvent(event);
+      pressKey('d');
+      pressKey('2');
+      pressKey('k');
       await editor.updateComplete;
 
       expect(editor.content).toEqual(['line1', 'line5']);
@@ -2786,12 +2620,9 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
 
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: '1' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('d');
+      pressKey('1');
+      pressKey('j');
       await editor.updateComplete;
 
       expect(editor.content).toEqual(['line3']);
@@ -2806,12 +2637,9 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
 
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: '5' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('d');
+      pressKey('5');
+      pressKey('j');
       await editor.updateComplete;
 
       expect(editor.content).toEqual(['']);
@@ -2826,12 +2654,9 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
 
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: '5' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: 'k' });
-      editor.dispatchEvent(event);
+      pressKey('d');
+      pressKey('5');
+      pressKey('k');
       await editor.updateComplete;
 
       expect(editor.content).toEqual(['line3']);
@@ -2846,18 +2671,14 @@ describe('VimEditor', () => {
       editor.mode = 'normal';
       editor.resetHistory();
 
-      let event = new KeyboardEvent('keydown', { key: 'd' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: '3' });
-      editor.dispatchEvent(event);
-      event = new KeyboardEvent('keydown', { key: 'j' });
-      editor.dispatchEvent(event);
+      pressKey('d');
+      pressKey('3');
+      pressKey('j');
       await editor.updateComplete;
 
       expect(editor.content).toEqual(['line1', 'line6']);
 
-      event = new KeyboardEvent('keydown', { key: 'u' });
-      editor.dispatchEvent(event);
+      pressKey('u');
       await editor.updateComplete;
 
       expect(editor.content).toEqual(['line1', 'line2', 'line3', 'line4', 'line5', 'line6']);
