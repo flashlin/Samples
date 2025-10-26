@@ -767,4 +767,195 @@ describe('VimEditor - Text Objects', () => {
       expect(editor.mode).toBe('normal');
     });
   });
+
+  describe('vi] command (visual select square bracket)', () => {
+    it('should select content between square brackets', async () => {
+      editor.setContent(['const arr = [hello world];']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', ']');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.visualStartY).toBe(0);
+      expect(editor.cursorX).toBe(23);
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should select and delete with vi]x', async () => {
+      editor.setContent(['const arr = [hello world];']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      await pressKeys('v', 'i', ']', 'x');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      expect(editor.content[0]).toBe('const arr = [];');
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should work with vi[ as well', async () => {
+      editor.setContent(['const arr = [hello world];']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', '[');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorX).toBe(23);
+    });
+
+    it('should handle cursor on opening bracket', async () => {
+      editor.setContent(['[test content]']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', ']');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(1);
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should handle cursor on closing bracket', async () => {
+      editor.setContent(['[test content]']);
+      await editor.updateComplete;
+      editor.cursorX = 13;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', ']');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(1);
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should handle nested brackets (select innermost)', async () => {
+      editor.setContent(['const nested = [outer [inner] text];']);
+      await editor.updateComplete;
+      editor.cursorX = 24;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', ']');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(23);
+      expect(editor.cursorX).toBe(27);
+    });
+
+    it('should select multiline bracket content', async () => {
+      editor.setContent([
+        'const arr = [',
+        '  line1,',
+        '  line2',
+        '];'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', ']');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartY).toBe(0);
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorY).toBe(3);
+      expect(editor.cursorX).toBe(-1);
+    });
+
+    it('should delete multiline bracket content with vi]x', async () => {
+      editor.setContent([
+        'const arr = [',
+        '  line1,',
+        '  line2',
+        '];'
+      ]);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      
+      await pressKeys('v', 'i', ']', 'x');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      expect(editor.content).toEqual(['const arr = [];']);
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should yank bracket content with vi]y', async () => {
+      editor.setContent(['const arr = [hello world];']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      const mockWriteText = vi.fn();
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: mockWriteText },
+        writable: true,
+        configurable: true
+      });
+      
+      await pressKeys('v', 'i', ']', 'y');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      expect(mockWriteText).toHaveBeenCalledWith('hello world');
+      expect(editor.mode).toBe('normal');
+    });
+
+    it('should handle empty bracket content', async () => {
+      editor.setContent(['const arr = [];']);
+      await editor.updateComplete;
+      editor.cursorX = 13;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', ']');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorX).toBe(12);
+    });
+
+    it('should handle cursor between nested brackets', async () => {
+      editor.setContent(['array = [[inner]];']);
+      await editor.updateComplete;
+      editor.cursorX = 10;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', ']');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(10);
+      expect(editor.cursorX).toBe(14);
+    });
+
+    it('should handle bracket with special characters', async () => {
+      editor.setContent(['const obj = [a, b, c];']);
+      await editor.updateComplete;
+      editor.cursorX = 15;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('v', 'i', ']');
+      
+      expect(editor.mode).toBe('visual');
+      expect(editor.visualStartX).toBe(13);
+      expect(editor.cursorX).toBe(19);
+    });
+  });
 });

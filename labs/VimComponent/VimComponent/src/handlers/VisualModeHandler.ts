@@ -36,6 +36,12 @@ export class VisualModeHandler extends BaseModeHandler {
       return;
     }
     
+    if (this.visualKeyBuffer === 'i' && (key === '[' || key === ']')) {
+      this.selectInnerBracket(editor, '[', ']');
+      this.visualKeyBuffer = '';
+      return;
+    }
+    
     this.visualKeyBuffer = '';
     
     switch (key) {
@@ -79,6 +85,20 @@ export class VisualModeHandler extends BaseModeHandler {
   
   private selectInnerQuote(editor: IVimEditor, quoteChar: string): void {
     const range = editor.getInnerQuoteRange(quoteChar);
+    if (!range) {
+      return;
+    }
+    
+    editor.visualStartY = range.startY;
+    editor.visualStartX = range.startX + 1;
+    editor.cursorY = range.endY;
+    editor.cursorX = range.endX - 1;
+    
+    editor.updateInputPosition();
+  }
+  
+  private selectInnerBracket(editor: IVimEditor, openChar: string, closeChar: string): void {
+    const range = editor.findInnerBracketRange(openChar, closeChar);
     if (!range) {
       return;
     }
