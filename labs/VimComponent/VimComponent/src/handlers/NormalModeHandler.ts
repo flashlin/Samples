@@ -49,7 +49,11 @@ export class NormalModeHandler extends BaseModeHandler {
       } },
       
       // Double character commands
-      { pattern: /^dd$/, action: () => { 
+      { pattern: /^yy$/, action: async () => { 
+        await this.yankCurrentLine(editor);
+      } },
+      { pattern: /^dd$/, action: async () => { 
+        await this.yankCurrentLine(editor);
         editor.saveHistory();
         editor.deleteLine();
       } },
@@ -142,16 +146,16 @@ export class NormalModeHandler extends BaseModeHandler {
     ];
   }
   
-  handleKey(key: string, editor: IVimEditor): void {
+  async handleKey(key: string, editor: IVimEditor): Promise<void> {
     if (editor.keyBuffer === '' && editor.handleMovement(key)) {
       return;
     }
     
     editor.keyBuffer += key;
-    this.processKeyBuffer(editor);
+    await this.processKeyBuffer(editor);
   }
   
-  private processKeyBuffer(editor: IVimEditor): boolean {
+  private async processKeyBuffer(editor: IVimEditor): Promise<boolean> {
     const commandPatterns = this.getCommandPatterns(editor);
     
     // Try to match patterns in order (already ordered by priority)
@@ -160,7 +164,7 @@ export class NormalModeHandler extends BaseModeHandler {
       if (match) {
         editor.keyBuffer = '';
         // Pass match array to action if it accepts it (for capture groups)
-        action(match);
+        await action(match);
         return true;
       }
     }
@@ -504,6 +508,11 @@ export class NormalModeHandler extends BaseModeHandler {
     const match = editor.searchMatches[editor.currentMatchIndex];
     editor.cursorY = match.y;
     editor.cursorX = match.x;
+  }
+
+  private async yankCurrentLine(editor: IVimEditor): Promise<void> {
+    const line = editor.content[editor.cursorY] || '';
+    await editor.copyToClipboard(line, true);
   }
 }
 

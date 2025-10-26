@@ -8,7 +8,7 @@ export class VisualModeHandler extends BaseModeHandler {
     return true;
   }
   
-  handleKey(key: string, editor: IVimEditor): void {
+  async handleKey(key: string, editor: IVimEditor): Promise<void> {
     if (this.visualKeyBuffer === '' && editor.handleMovement(key)) {
       return;
     }
@@ -40,13 +40,13 @@ export class VisualModeHandler extends BaseModeHandler {
     
     switch (key) {
       case 'y':
-        this.yankVisualSelection(editor);
+        await this.yankVisualSelection(editor);
         editor.mode = EditorMode.Normal;
         break;
       case 'c':
       case 'd':
       case 'x':
-        this.cutVisualSelection(editor);
+        await this.cutVisualSelection(editor);
         editor.mode = EditorMode.Normal;
         break;
       case 'f':
@@ -118,14 +118,14 @@ export class VisualModeHandler extends BaseModeHandler {
     return result;
   }
   
-  private yankVisualSelection(editor: IVimEditor): void {
+  private async yankVisualSelection(editor: IVimEditor): Promise<void> {
     const selection = this.getVisualSelection(editor);
-    navigator.clipboard.writeText(selection);
+    await editor.copyToClipboard(selection, false);
   }
   
-  private cutVisualSelection(editor: IVimEditor): void {
+  private async cutVisualSelection(editor: IVimEditor): Promise<void> {
     const selection = this.getVisualSelection(editor);
-    navigator.clipboard.writeText(selection);
+    await editor.copyToClipboard(selection, false);
     
     const startY = Math.min(editor.visualStartY, editor.cursorY);
     const endY = Math.max(editor.visualStartY, editor.cursorY);

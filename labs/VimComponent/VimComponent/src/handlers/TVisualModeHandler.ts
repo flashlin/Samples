@@ -17,7 +17,7 @@ export class TVisualModeHandler extends BaseModeHandler {
     editor.multiCursorOffsets = [];
   }
   
-  handleKey(key: string, editor: IVimEditor): void {
+  async handleKey(key: string, editor: IVimEditor): Promise<void> {
     // Handle independent movement for each tMark
     if (this.handleIndependentMovement(key, editor)) {
       return;
@@ -30,7 +30,7 @@ export class TVisualModeHandler extends BaseModeHandler {
     
     switch (key) {
       case 'y':
-        this.yankTVisualSelections(editor);
+        await this.yankTVisualSelections(editor);
         editor.mode = EditorMode.Normal;
         break;
       case 'd':
@@ -287,7 +287,7 @@ export class TVisualModeHandler extends BaseModeHandler {
     }
   }
   
-  private yankTVisualSelections(editor: IVimEditor): void {
+  private async yankTVisualSelections(editor: IVimEditor): Promise<void> {
     const selections: string[] = [];
     
     for (let i = 0; i < editor.tMarks.length; i++) {
@@ -328,7 +328,7 @@ export class TVisualModeHandler extends BaseModeHandler {
     editor.multiCursorClipboard = selections;
     
     if (selections.length > 0) {
-      navigator.clipboard.writeText(selections.join('\n'));
+      await editor.copyToClipboard(selections.join('\n'), false);
     }
   }
 }

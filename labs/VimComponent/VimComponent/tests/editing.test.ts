@@ -726,6 +726,7 @@ describe('VimEditor - Editing', () => {
       editor.cursorX = 3;
       
       await pressKeys('d', 'd');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.content).toEqual(['line 1', 'line 3']);
       expect(editor.cursorY).toBe(1);
@@ -738,6 +739,7 @@ describe('VimEditor - Editing', () => {
       editor.cursorX = 2;
       
       await pressKeys('d', 'd');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.content).toEqual(['second', 'third']);
       expect(editor.cursorY).toBe(0);
@@ -750,6 +752,7 @@ describe('VimEditor - Editing', () => {
       editor.cursorX = 1;
       
       await pressKeys('d', 'd');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.content).toEqual(['first', 'second']);
       expect(editor.cursorY).toBe(1);
@@ -762,6 +765,7 @@ describe('VimEditor - Editing', () => {
       editor.cursorX = 3;
       
       await pressKeys('d', 'd');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.content).toEqual(['']);
       expect(editor.cursorY).toBe(0);
@@ -774,6 +778,7 @@ describe('VimEditor - Editing', () => {
       editor.cursorX = 0;
       
       await pressKeys('d', 'd');
+      await new Promise(resolve => setTimeout(resolve, 50));
       expect(editor.content).toEqual(['line 1', 'line 3']);
       
       await pressKey('u');
@@ -786,6 +791,7 @@ describe('VimEditor - Editing', () => {
       editor.cursorX = 1;
       
       await pressKeys('d', 'd');
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       expect(editor.content).toEqual(['第一行', '第三行']);
       expect(editor.cursorY).toBe(1);
@@ -887,6 +893,133 @@ describe('VimEditor - Editing', () => {
       
       expect(editor.content[0]).toBe('content');
       expect(editor.cursorX).toBe(6);
+    });
+  });
+
+  describe('yy command (yank/copy line)', () => {
+    it('should copy current line to clipboard with line-wise marker', async () => {
+      editor.setContent(['line1', 'line2', 'line3']);
+      await editor.updateComplete;
+      editor.cursorY = 1;
+      editor.cursorX = 2;
+      editor.mode = 'normal';
+      
+      await pressKeys('y', 'y');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      const clipboardText = await navigator.clipboard.readText();
+      expect(clipboardText).toBe('line2\n');
+      
+      // Content should not change
+      expect(editor.content).toEqual(['line1', 'line2', 'line3']);
+      // Cursor should not move
+      expect(editor.cursorY).toBe(1);
+    });
+
+    it('should allow pasting yanked line with p', async () => {
+      editor.setContent(['line1', 'line2', 'line3']);
+      await editor.updateComplete;
+      editor.cursorY = 1;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      // Yank line2
+      await pressKeys('y', 'y');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Move to line1
+      await pressKey('k');
+      expect(editor.cursorY).toBe(0);
+      
+      // Paste after line1
+      await pressKey('p');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // line2 should be inserted after line1
+      expect(editor.content).toEqual(['line1', 'line2', 'line2', 'line3']);
+      expect(editor.cursorY).toBe(1);
+    });
+
+    it('should work with empty line', async () => {
+      editor.setContent(['line1', '', 'line3']);
+      await editor.updateComplete;
+      editor.cursorY = 1;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      
+      await pressKeys('y', 'y');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      const clipboardText = await navigator.clipboard.readText();
+      expect(clipboardText).toBe('\n');
+    });
+  });
+
+  describe('dd command (delete and copy line)', () => {
+    it('should copy line to clipboard before deleting', async () => {
+      editor.setContent(['line1', 'line2', 'line3']);
+      await editor.updateComplete;
+      editor.cursorY = 1;
+      editor.cursorX = 2;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKeys('d', 'd');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Check clipboard has line-wise content
+      const clipboardText = await navigator.clipboard.readText();
+      expect(clipboardText).toBe('line2\n');
+      
+      // Content should be deleted
+      expect(editor.content).toEqual(['line1', 'line3']);
+      expect(editor.cursorY).toBe(1);
+    });
+
+    it('should allow pasting deleted line with p', async () => {
+      editor.setContent(['line1', 'line2', 'line3']);
+      await editor.updateComplete;
+      editor.cursorY = 1;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      // Delete line2
+      await pressKeys('d', 'd');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      expect(editor.content).toEqual(['line1', 'line3']);
+      expect(editor.cursorY).toBe(1);
+      
+      // Move to line1
+      await pressKey('k');
+      expect(editor.cursorY).toBe(0);
+      
+      // Paste after line1
+      await pressKey('p');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // line2 should be restored
+      expect(editor.content).toEqual(['line1', 'line2', 'line3']);
+      expect(editor.cursorY).toBe(1);
+    });
+
+    it('should support undo after dd', async () => {
+      editor.setContent(['line1', 'line2', 'line3']);
+      await editor.updateComplete;
+      editor.cursorY = 1;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKeys('d', 'd');
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      expect(editor.content).toEqual(['line1', 'line3']);
+      
+      await pressKey('u');
+      expect(editor.content).toEqual(['line1', 'line2', 'line3']);
     });
   });
 });

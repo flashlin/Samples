@@ -50,18 +50,14 @@ export class VisualLineModeHandler extends BaseModeHandler {
   
   private async yankVisualSelection(editor: IVimEditor): Promise<void> {
     const selection = this.getVisualSelection(editor);
-    await navigator.clipboard.writeText(selection);
+    await editor.copyToClipboard(selection, true);
   }
   
   private async cutVisualLineSelection(editor: IVimEditor): Promise<void> {
     editor.saveHistory();
     
     const selection = this.getVisualSelection(editor);
-    console.log('[VisualLine] Cut selection:', selection);
-    console.log('[VisualLine] keyBuffer before cut:', editor.keyBuffer);
-    // Add trailing newline to indicate line-wise operation
-    await navigator.clipboard.writeText(selection + '\n');
-    console.log('[VisualLine] Clipboard written successfully (with trailing newline)');
+    await editor.copyToClipboard(selection, true);
     
     const startY = Math.min(editor.visualStartY, editor.cursorY);
     const endY = Math.max(editor.visualStartY, editor.cursorY);
@@ -76,7 +72,6 @@ export class VisualLineModeHandler extends BaseModeHandler {
     editor.cursorY = Math.min(startY, editor.content.length - 1);
     editor.cursorX = 0;
     editor.adjustCursorX();
-    console.log('[VisualLine] keyBuffer after cut:', editor.keyBuffer);
   }
 }
 

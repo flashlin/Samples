@@ -84,6 +84,7 @@ export interface IVimEditor {
   deleteLinesDown(count: number): void;
   deleteLinesUp(count: number): void;
   deleteMultiLineSelection(startY: number, endY: number, startX: number, endX: number): void;
+  copyToClipboard(content: string, isLinewise?: boolean): Promise<void>;
   pasteAfterCursor(): void;
   pasteBeforeCursor(): void;
   insertLineBelow(): void;

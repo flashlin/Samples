@@ -1781,6 +1781,11 @@ export class VimEditor extends LitElement {
     }
   }
 
+  async copyToClipboard(content: string, isLinewise: boolean = false): Promise<void> {
+    const textToCopy = isLinewise ? content + '\n' : content;
+    await navigator.clipboard.writeText(textToCopy);
+  }
+
   async pasteAfterCursor() {
     try {
       const text = await navigator.clipboard.readText();
