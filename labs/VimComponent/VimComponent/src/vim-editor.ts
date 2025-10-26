@@ -467,6 +467,13 @@ export class VimEditor extends LitElement {
   private createHiddenInput() {
     this.hiddenInput = document.createElement('input');
     this.hiddenInput.setAttribute('type', 'text');
+    this.hiddenInput.setAttribute('data-gramm', 'false');
+    this.hiddenInput.setAttribute('data-gramm_editor', 'false');
+    this.hiddenInput.setAttribute('data-enable-grammarly', 'false');
+    this.hiddenInput.setAttribute('autocomplete', 'off');
+    this.hiddenInput.setAttribute('autocorrect', 'off');
+    this.hiddenInput.setAttribute('autocapitalize', 'off');
+    this.hiddenInput.setAttribute('spellcheck', 'false');
     this.hiddenInput.style.cssText = `
       position: absolute;
       width: 200px;
