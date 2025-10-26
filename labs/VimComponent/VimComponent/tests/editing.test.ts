@@ -718,4 +718,78 @@ describe('VimEditor - Editing', () => {
       expect(editor.cursorX).toBe(1);
     });
   });
+
+  describe('dd command (delete current line)', () => {
+    it('should delete current line and move to beginning of next line', async () => {
+      editor.content = ['line 1', 'line 2', 'line 3'];
+      editor.cursorY = 1;
+      editor.cursorX = 3;
+      
+      await pressKeys('d', 'd');
+      
+      expect(editor.content).toEqual(['line 1', 'line 3']);
+      expect(editor.cursorY).toBe(1);
+      expect(editor.cursorX).toBe(0);
+    });
+    
+    it('should delete first line', async () => {
+      editor.content = ['first', 'second', 'third'];
+      editor.cursorY = 0;
+      editor.cursorX = 2;
+      
+      await pressKeys('d', 'd');
+      
+      expect(editor.content).toEqual(['second', 'third']);
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(0);
+    });
+    
+    it('should delete last line', async () => {
+      editor.content = ['first', 'second', 'third'];
+      editor.cursorY = 2;
+      editor.cursorX = 1;
+      
+      await pressKeys('d', 'd');
+      
+      expect(editor.content).toEqual(['first', 'second']);
+      expect(editor.cursorY).toBe(1);
+      expect(editor.cursorX).toBe(0);
+    });
+    
+    it('should leave empty line when deleting only line', async () => {
+      editor.content = ['only line'];
+      editor.cursorY = 0;
+      editor.cursorX = 3;
+      
+      await pressKeys('d', 'd');
+      
+      expect(editor.content).toEqual(['']);
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(0);
+    });
+    
+    it('should support undo after dd', async () => {
+      editor.content = ['line 1', 'line 2', 'line 3'];
+      editor.cursorY = 1;
+      editor.cursorX = 0;
+      
+      await pressKeys('d', 'd');
+      expect(editor.content).toEqual(['line 1', 'line 3']);
+      
+      await pressKey('u');
+      expect(editor.content).toEqual(['line 1', 'line 2', 'line 3']);
+    });
+    
+    it('should handle Chinese content', async () => {
+      editor.content = ['第一行', '第二行', '第三行'];
+      editor.cursorY = 1;
+      editor.cursorX = 1;
+      
+      await pressKeys('d', 'd');
+      
+      expect(editor.content).toEqual(['第一行', '第三行']);
+      expect(editor.cursorY).toBe(1);
+      expect(editor.cursorX).toBe(0);
+    });
+  });
 });

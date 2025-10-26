@@ -1379,6 +1379,23 @@ export class VimEditor extends LitElement {
     }
   }
 
+  deleteLine() {
+    if (this.content.length === 1) {
+      this.content = [''];
+      this.cursorX = 0;
+      return;
+    }
+    
+    this.content.splice(this.cursorY, 1);
+    
+    if (this.cursorY >= this.content.length) {
+      this.cursorY = this.content.length - 1;
+    }
+    
+    this.cursorX = 0;
+    this.adjustCursorX();
+  }
+
   deleteLinesDown(count: number) {
     const startY = this.cursorY;
     const endY = Math.min(startY + count, this.content.length - 1);

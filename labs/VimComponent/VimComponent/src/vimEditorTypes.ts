@@ -79,6 +79,8 @@ export interface IVimEditor {
   handleBackspace(): void;
   deleteWord(): void;
   deleteToWordEnd(): void;
+  deleteToLineEnd(): void;
+  deleteLine(): void;
   deleteLinesDown(count: number): void;
   deleteLinesUp(count: number): void;
   deleteMultiLineSelection(startY: number, endY: number, startX: number, endX: number): void;

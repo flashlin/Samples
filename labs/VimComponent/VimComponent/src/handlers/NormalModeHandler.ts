@@ -45,7 +45,7 @@ export class NormalModeHandler extends BaseModeHandler {
       // Double character commands
       { pattern: /^dd$/, action: () => { 
         editor.saveHistory();
-        editor['deleteLine']();
+        editor.deleteLine();
       } },
       { pattern: /^gg$/, action: () => { editor.moveToFirstLine(); } },
       
