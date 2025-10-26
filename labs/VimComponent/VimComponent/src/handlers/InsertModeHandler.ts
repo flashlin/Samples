@@ -41,8 +41,7 @@ export class InsertModeHandler extends BaseModeHandler {
       cursorOffset
     };
     
-    const event = new CustomEvent('intellisense', { detail: context });
-    editor.dispatchEvent(event);
+    editor.emitIntellisense(context);
   }
   
   private calculateCursorOffset(editor: IVimEditor): number {

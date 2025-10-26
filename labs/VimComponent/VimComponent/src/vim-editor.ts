@@ -2,7 +2,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import p5 from 'p5';
 import exampleText from './example.txt?raw';
-import { EditorMode, EditorStatus, BufferCell, EditorModeHandler, TextRange, IntellisenseItem, VimEditorEventMap } from './vimEditorTypes';
+import { EditorMode, EditorStatus, BufferCell, EditorModeHandler, TextRange, IntellisenseItem, IntellisenseContext, VimEditorEventMap } from './vimEditorTypes';
 import { ModeHandlerRegistry } from './handlers';
 import { IntellisenseMenu } from './components/IntellisenseMenu';
 
@@ -682,7 +682,7 @@ export class VimEditor extends LitElement {
       return;
     }
     
-    this.emitKeyPressEvent(key, event);
+    this.emitKeyPress(key, event);
     
     if ((event.metaKey || event.ctrlKey) && key === 'v' && this.mode === EditorMode.Insert) {
       event.preventDefault();
@@ -1748,7 +1748,7 @@ export class VimEditor extends LitElement {
       this.cursorY -= 1;
     }
     this.updateInputPosition();
-    this.emitChangeEvent();
+    this.emitChange();
   }
 
   handleDelete() {
@@ -1761,7 +1761,7 @@ export class VimEditor extends LitElement {
       this.content.splice(this.cursorY + 1, 1);
     }
     this.updateInputPosition();
-    this.emitChangeEvent();
+    this.emitChange();
   }
 
   handleEnter() {
@@ -1775,7 +1775,7 @@ export class VimEditor extends LitElement {
     this.cursorY += 1;
     this.cursorX = 0;
     this.updateInputPosition();
-    this.emitChangeEvent();
+    this.emitChange();
   }
 
   insertCharacter(char: string) {
@@ -1786,7 +1786,7 @@ export class VimEditor extends LitElement {
       currentLine.substring(this.cursorX);
     this.cursorX += 1;
     this.updateInputPosition();
-    this.emitChangeEvent();
+    this.emitChange();
   }
 
   private async handlePaste() {
@@ -2052,17 +2052,17 @@ export class VimEditor extends LitElement {
       this.p5Instance.redraw();
     }
     
-    this.emitChangeEvent();
+    this.emitChange();
   }
 
-  private emitChangeEvent(): void {
+  emitChange(): void {
     const event = new CustomEvent('change', {
       detail: { content: [...this.content] }
     });
     this.dispatchEvent(event);
   }
 
-  private emitKeyPressEvent(key: string, originalEvent: KeyboardEvent): void {
+  emitKeyPress(key: string, originalEvent: KeyboardEvent): void {
     const event = new CustomEvent('keypress', {
       detail: {
         key,
@@ -2074,6 +2074,22 @@ export class VimEditor extends LitElement {
         cursorX: this.cursorX,
         cursorY: this.cursorY
       }
+    });
+    this.dispatchEvent(event);
+  }
+  
+  emitCommand(command: string): void {
+    const event = new CustomEvent('vim-command', {
+      detail: { command },
+      bubbles: true,
+      composed: true
+    });
+    this.dispatchEvent(event);
+  }
+  
+  emitIntellisense(context: IntellisenseContext): void {
+    const event = new CustomEvent('intellisense', {
+      detail: context
     });
     this.dispatchEvent(event);
   }

@@ -119,12 +119,7 @@ export class CommandModeHandler extends BaseModeHandler {
   }
   
   private dispatchCommandEvent(editor: IVimEditor, command: string): void {
-    const event = new CustomEvent('vim-command', {
-      detail: { command },
-      bubbles: true,
-      composed: true
-    });
-    editor.dispatchEvent(event);
+    editor.emitCommand(command);
   }
 }
 

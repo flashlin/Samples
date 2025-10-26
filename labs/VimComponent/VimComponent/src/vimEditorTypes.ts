@@ -104,6 +104,12 @@ export interface IVimEditor {
   
   requestUpdate(property?: string, oldValue?: any): void;
   
+  // Event emitter methods
+  emitCommand(command: string): void;
+  emitChange(): void;
+  emitKeyPress(key: string, originalEvent: KeyboardEvent): void;
+  emitIntellisense(context: IntellisenseContext): void;
+  
   // Allow access to internal properties via index signature
   [key: string]: any;
 }
