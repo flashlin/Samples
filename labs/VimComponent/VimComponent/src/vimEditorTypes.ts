@@ -85,6 +85,7 @@ export interface IVimEditor {
   deleteLinesUp(count: number): void;
   deleteMultiLineSelection(startY: number, endY: number, startX: number, endX: number): void;
   pasteAfterCursor(): void;
+  pasteBeforeCursor(): void;
   insertLineBelow(): void;
   
   // Mode methods

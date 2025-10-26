@@ -90,6 +90,10 @@ export class NormalModeHandler extends BaseModeHandler {
           editor.pasteAfterCursor(); 
         }
       } },
+      { pattern: /^P$/, action: () => { 
+        editor.saveHistory(); 
+        editor.pasteBeforeCursor(); 
+      } },
       { pattern: /^v$/, action: () => { 
         // Check if current cursor position is in tMarks
         const isInTMark = editor.tMarks.some(
