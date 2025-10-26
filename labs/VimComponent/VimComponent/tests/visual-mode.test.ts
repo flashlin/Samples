@@ -274,5 +274,145 @@ describe('VimEditor - Visual Mode', () => {
       expect(status.mode).toBe('normal');
       expect(status.cursorY).toBe(1);
     });
+
+    it('should support line-wise paste with P (paste before) after cutting lines', async () => {
+      editor.setContent(['line1', 'line2', 'line3', 'line4']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      // Select line2
+      pressKey('V');
+      await editor.updateComplete;
+      
+      // Cut line2 (should add trailing newline to clipboard)
+      await pressKey('x');
+      await editor.updateComplete;
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      expect(editor.content).toEqual(['line1', 'line3', 'line4']);
+      expect(editor.cursorY).toBe(1);
+      
+      // Move to line1
+      pressKey('k');
+      await editor.updateComplete;
+      expect(editor.cursorY).toBe(0);
+      
+      // Paste before line1 (should insert as complete line)
+      await pressKey('P');
+      await editor.updateComplete;
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // line2 should be inserted before line1
+      expect(editor.content).toEqual(['line2', 'line1', 'line3', 'line4']);
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should support line-wise paste with p (paste after) after cutting lines', async () => {
+      editor.setContent(['line1', 'line2', 'line3', 'line4']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      // Select line2
+      pressKey('V');
+      await editor.updateComplete;
+      
+      // Cut line2
+      await pressKey('x');
+      await editor.updateComplete;
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      expect(editor.content).toEqual(['line1', 'line3', 'line4']);
+      expect(editor.cursorY).toBe(1);
+      
+      // Move to line1
+      pressKey('k');
+      await editor.updateComplete;
+      expect(editor.cursorY).toBe(0);
+      
+      // Paste after line1 (should insert as complete line)
+      await pressKey('p');
+      await editor.updateComplete;
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // line2 should be inserted after line1
+      expect(editor.content).toEqual(['line1', 'line2', 'line3', 'line4']);
+      expect(editor.cursorY).toBe(1);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should support line-wise paste with multiple lines', async () => {
+      editor.setContent(['line1', 'line2', 'line3', 'line4', 'line5']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      // Select line2 and line3
+      pressKey('V');
+      await editor.updateComplete;
+      pressKey('j');
+      await editor.updateComplete;
+      
+      // Cut line2 and line3
+      await pressKey('x');
+      await editor.updateComplete;
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      expect(editor.content).toEqual(['line1', 'line4', 'line5']);
+      expect(editor.cursorY).toBe(1);
+      
+      // Move to line5
+      pressKey('j');
+      await editor.updateComplete;
+      expect(editor.cursorY).toBe(2);
+      
+      // Paste after line5
+      await pressKey('p');
+      await editor.updateComplete;
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // line2 and line3 should be inserted after line5
+      expect(editor.content).toEqual(['line1', 'line4', 'line5', 'line2', 'line3']);
+      expect(editor.cursorY).toBe(3);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should restore original content with V-x-P sequence', async () => {
+      editor.setContent(['line1', 'line2', 'line3']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 1;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      // Select line2
+      pressKey('V');
+      await editor.updateComplete;
+      
+      // Cut line2
+      await pressKey('x');
+      await editor.updateComplete;
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Content should be: line1, line3
+      expect(editor.content).toEqual(['line1', 'line3']);
+      
+      // Paste before current line (line3 became line2)
+      await pressKey('P');
+      await editor.updateComplete;
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Original content should be restored
+      expect(editor.content).toEqual(['line1', 'line2', 'line3']);
+      expect(editor.cursorY).toBe(1);
+    });
   });
 });
