@@ -57,6 +57,9 @@ export interface IVimEditor {
   hiddenInput: HTMLInputElement | null;
   p5Instance: any;
   modeHandlerRegistry: any;
+  intellisenseActive: boolean;
+  intellisenseFilterText: string;
+  intellisenseOriginalItems: IntellisenseItem[];
   
   // Range methods
   getInnerWordRange(): { startX: number; endX: number; y: number } | null;
@@ -109,6 +112,11 @@ export interface IVimEditor {
   emitChange(): void;
   emitKeyPress(key: string, originalEvent: KeyboardEvent): void;
   emitIntellisense(context: IntellisenseContext): void;
+  
+  // Intellisense methods
+  showIntellisense(items: IntellisenseItem[], initialFilterText?: string): void;
+  hideIntellisense(): void;
+  filterIntellisense(filterText: string): void;
   
   // Allow access to internal properties via index signature
   [key: string]: any;

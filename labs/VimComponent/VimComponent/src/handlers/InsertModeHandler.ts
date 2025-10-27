@@ -57,7 +57,23 @@ export class InsertModeHandler extends BaseModeHandler {
   }
   
   private getKeyPatterns(editor: IVimEditor) {
-    // Patterns ordered by specificity
+    if (editor.intellisenseActive) {
+      return [
+        { pattern: /^Escape$/, action: () => { 
+          editor.hideIntellisense(); 
+        }},
+        { pattern: /^Backspace$/, action: () => {
+          if (editor.intellisenseFilterText.length > 0) {
+            const newFilter = editor.intellisenseFilterText.slice(0, -1);
+            editor.filterIntellisense(newFilter);
+          } else {
+            editor.hideIntellisense();
+          }
+        }},
+        { pattern: /^.$/, action: () => { /* Single character input handled by handleInput */ } },
+      ];
+    }
+    
     return [
       { pattern: /^Escape$/, action: () => { editor.mode = EditorMode.Normal; } },
       { pattern: /^.$/, action: () => { /* Single character input handled by handleInput */ } },
@@ -84,6 +100,12 @@ export class InsertModeHandler extends BaseModeHandler {
   }
   
   handleInput(editor: IVimEditor, value: string): void {
+    if (editor.intellisenseActive) {
+      const newFilter = editor.intellisenseFilterText + value;
+      editor.filterIntellisense(newFilter);
+      return;
+    }
+    
     for (const char of value) {
       editor.insertCharacter(char);
     }
