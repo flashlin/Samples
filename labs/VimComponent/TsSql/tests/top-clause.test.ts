@@ -91,6 +91,53 @@ describe('TOP Clause Support', () => {
   });
   
   describe('LinqToTSqlConverter - TOP conversion', () => {
+    it('should convert FROM customers u SELECT TOP 1 u.name with detailed validation', () => {
+      const input = 'FROM customers u SELECT TOP 1 u.name';
+      
+      const parseResult = parser.parse(input);
+      expect(parseResult.errors).toHaveLength(0);
+      expect(parseResult.result).toBeDefined();
+      expect(parseResult.result.isComplete).toBe(true);
+      
+      const linqQuery = parseResult.result;
+      expect(linqQuery.from).toBeDefined();
+      expect(linqQuery.from?.tableName).toBe('customers');
+      expect(linqQuery.from?.alias).toBe('u');
+      expect(linqQuery.select).toBeDefined();
+      expect(linqQuery.select?.topCount).toBe(1);
+      expect(linqQuery.select?.items).toHaveLength(1);
+      
+      const tsqlQuery = converter.convert(linqQuery);
+      
+      expect(tsqlQuery.select).toBeDefined();
+      expect(tsqlQuery.select?.topCount).toBe(1);
+      expect(tsqlQuery.select?.isDistinct).toBe(false);
+      expect(tsqlQuery.select?.items).toHaveLength(1);
+      
+      const selectItem = tsqlQuery.select?.items[0];
+      expect(selectItem).toBeDefined();
+      expect(selectItem?.expression.type).toBe(ExpressionType.Column);
+      const columnExpr = selectItem?.expression as ColumnExpression;
+      expect(columnExpr.columnName).toBe('name');
+      expect(columnExpr.tableName).toBe('u');
+      expect(selectItem?.alias).toBeUndefined();
+      
+      expect(tsqlQuery.from).toBeDefined();
+      expect(tsqlQuery.from?.tableName).toBe('customers');
+      expect(tsqlQuery.from?.alias).toBe('u');
+      
+      expect(tsqlQuery.joins).toEqual([]);
+      expect(tsqlQuery.where).toBeUndefined();
+      expect(tsqlQuery.groupBy).toBeUndefined();
+      expect(tsqlQuery.having).toBeUndefined();
+      expect(tsqlQuery.orderBy).toBeUndefined();
+      
+      const sql = formatter.format(tsqlQuery);
+      expect(sql).toContain('SELECT TOP 1 u.name');
+      expect(sql).toContain('FROM customers u');
+      expect(sql.trim()).toBe('SELECT TOP 1 u.name\nFROM customers u');
+    });
+    
     it('should convert LINQ query with TOP to T-SQL expression', () => {
       const linqResult = parser.parse('FROM customers u SELECT TOP 1 u.name');
       const tsqlQuery = converter.convert(linqResult.result);
