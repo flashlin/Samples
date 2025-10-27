@@ -1,6 +1,6 @@
 {
   "name": "@mrbrain/t1-vim-editor",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "module",
   "main": "dist/vim-editor.umd.js",
   "module": "dist/vim-editor.es.js",
