@@ -60,6 +60,7 @@ export interface IVimEditor {
   intellisenseActive: boolean;
   intellisenseFilterText: string;
   intellisenseOriginalItems: IntellisenseItem[];
+  intellisenseOriginalWord: string;
   
   // Range methods
   getInnerWordRange(): { startX: number; endX: number; y: number } | null;

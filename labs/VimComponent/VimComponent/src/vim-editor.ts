@@ -148,6 +148,7 @@ export class VimEditor extends LitElement {
   intellisenseActive = false;
   intellisenseFilterText = '';
   intellisenseOriginalItems: IntellisenseItem[] = [];
+  intellisenseOriginalWord = '';
   
 
   private history: Array<{ content: string[]; cursorX: number; cursorY: number }> = [];
@@ -2038,6 +2039,7 @@ export class VimEditor extends LitElement {
     
     this.intellisenseOriginalItems = items;
     this.intellisenseFilterText = initialFilterText;
+    this.intellisenseOriginalWord = initialFilterText;
     this.intellisenseActive = true;
     
     const rect = this.canvas.getBoundingClientRect();
@@ -2063,6 +2065,7 @@ export class VimEditor extends LitElement {
     this.intellisenseActive = false;
     this.intellisenseFilterText = '';
     this.intellisenseOriginalItems = [];
+    this.intellisenseOriginalWord = '';
   }
   
   filterIntellisense(filterText: string): void {

@@ -400,9 +400,26 @@ const replaceCurrentWord = (newText: string) => {
   const editor = vimEditorRef.value
   if (!editor) return
   
-  const oldWord = editor.intellisenseFilterText
-  editor.replaceWordAtCursor(oldWord, newText)
+  const oldWord = editor.intellisenseOriginalWord
+  
+  console.log('[replaceCurrentWord] Called with:', { newText, oldWord, filterText: editor.intellisenseFilterText })
+  
+  if (!oldWord || oldWord === '') {
+    console.log('[replaceCurrentWord] Inserting text character by character')
+    for (const char of newText) {
+      editor.insertCharacter(char)
+    }
+    console.log('[replaceCurrentWord] Insert completed')
+  } else {
+    console.log('[replaceCurrentWord] Replacing oldWord with newText')
+    editor.replaceWordAtCursor(oldWord, newText)
+  }
+  
   editor.hideIntellisense()
+  
+  if (editor.p5Instance) {
+    editor.p5Instance.redraw()
+  }
 }
 
 const handleIntellisense = (event: CustomEvent<any>) => {
