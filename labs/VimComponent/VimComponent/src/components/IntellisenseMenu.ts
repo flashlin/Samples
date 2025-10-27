@@ -185,10 +185,6 @@ export class IntellisenseMenu {
     
     switch (event.key) {
       case 'Escape':
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        this.hide();
         break;
         
       case 'ArrowUp':

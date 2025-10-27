@@ -478,6 +478,9 @@ onMounted(() => {
     if (editor) {
       editor.load(editorContent.value)
       editor.addEventListener('intellisense', handleIntellisense)
+      editor.addEventListener('intellisense-closed', () => {
+        console.log('[Intellisense] Intellisense closed event received')
+      })
     }
   })
 })

@@ -2066,6 +2066,18 @@ export class VimEditor extends LitElement {
     this.intellisenseFilterText = '';
     this.intellisenseOriginalItems = [];
     this.intellisenseOriginalWord = '';
+    
+    this.dispatchEvent(new CustomEvent('intellisense-closed', {
+      bubbles: true,
+      composed: true,
+      detail: {}
+    }));
+    
+    const host = this.shadowRoot?.host as HTMLElement;
+    if (host) {
+      host.focus();
+    }
+    this.hiddenInput?.focus();
   }
   
   filterIntellisense(filterText: string): void {
