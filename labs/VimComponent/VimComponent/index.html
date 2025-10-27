@@ -78,6 +78,55 @@
             alert(`Command executed: ${event.detail.command}`);
         });
 
+        editor.addEventListener('intellisense', (event) => {
+            console.log('Intellisense triggered:', event.detail);
+            
+            const testSuggestions = [
+                {
+                    text: 'apple',
+                    description: 'A delicious fruit',
+                    action: () => {
+                        editor.replaceWordAtCursor(editor.intellisenseFilterText, 'apple');
+                        editor.hideIntellisense();
+                    }
+                },
+                {
+                    text: 'application',
+                    description: 'A software program',
+                    action: () => {
+                        editor.replaceWordAtCursor(editor.intellisenseFilterText, 'application');
+                        editor.hideIntellisense();
+                    }
+                },
+                {
+                    text: 'banana',
+                    description: 'A yellow fruit',
+                    action: () => {
+                        editor.replaceWordAtCursor(editor.intellisenseFilterText, 'banana');
+                        editor.hideIntellisense();
+                    }
+                },
+                {
+                    text: 'cherry',
+                    description: 'A red fruit',
+                    action: () => {
+                        editor.replaceWordAtCursor(editor.intellisenseFilterText, 'cherry');
+                        editor.hideIntellisense();
+                    }
+                },
+                {
+                    text: 'about',
+                    description: 'Regarding something',
+                    action: () => {
+                        editor.replaceWordAtCursor(editor.intellisenseFilterText, 'about');
+                        editor.hideIntellisense();
+                    }
+                }
+            ];
+            
+            editor.showIntellisense(testSuggestions);
+        });
+
         window.loadSampleCode = function() {
             const code = `function fibonacci(n) {
   if (n <= 1) {

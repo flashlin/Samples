@@ -145,6 +145,10 @@ export class VimEditor extends LitElement {
   private currentModeHandler!: EditorModeHandler;
   private previousModeHandler!: EditorModeHandler;
   
+  intellisenseActive = false;
+  intellisenseFilterText = '';
+  intellisenseOriginalItems: IntellisenseItem[] = [];
+  
 
   private history: Array<{ content: string[]; cursorX: number; cursorY: number }> = [];
   private historyIndex = -1;
@@ -2029,8 +2033,12 @@ export class VimEditor extends LitElement {
     this.historyIndex = -1;
   }
 
-  showIntellisense(items: IntellisenseItem[]): void {
+  showIntellisense(items: IntellisenseItem[], initialFilterText: string = ''): void {
     if (!this.canvas) return;
+    
+    this.intellisenseOriginalItems = items;
+    this.intellisenseFilterText = initialFilterText;
+    this.intellisenseActive = true;
     
     const rect = this.canvas.getBoundingClientRect();
     const cursorX = 40 + this.cursorX * this.baseCharWidth;
@@ -2039,11 +2047,28 @@ export class VimEditor extends LitElement {
     const absoluteX = rect.left + cursorX;
     const absoluteY = rect.top + cursorY;
     
-    this.intellisenseMenu.show(items, absoluteX, absoluteY, document.body);
+    const filteredItems = initialFilterText 
+      ? this.intellisenseMenu.filterItems(initialFilterText, items)
+      : items;
+    
+    this.intellisenseMenu.show(filteredItems, absoluteX, absoluteY, document.body);
+    
+    if (initialFilterText) {
+      this.intellisenseMenu.updateFilterDisplay(initialFilterText);
+    }
   }
 
   hideIntellisense(): void {
     this.intellisenseMenu.hide();
+    this.intellisenseActive = false;
+    this.intellisenseFilterText = '';
+    this.intellisenseOriginalItems = [];
+  }
+  
+  filterIntellisense(filterText: string): void {
+    this.intellisenseFilterText = filterText;
+    const filteredItems = this.intellisenseMenu.filterItems(filterText, this.intellisenseOriginalItems);
+    this.intellisenseMenu.updateItems(filteredItems, filterText);
   }
 
   replaceWordAtCursor(oldWord: string, newWord: string): void {

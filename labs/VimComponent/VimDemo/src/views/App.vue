@@ -313,11 +313,11 @@ const generateSuggestions = (context: any): any[] => {
   
   if (context.type === 'database') {
     allDatabaseList.value.forEach(db => {
-      if (db.name !== 'local' && db.name.toLowerCase().startsWith(context.currentWord.toLowerCase())) {
+      if (db.name !== 'local') {
         suggestions.push({
           text: db.name + '.',
           description: db.description,
-          action: () => replaceCurrentWord(db.name + '.', context.currentWord)
+          action: () => replaceCurrentWord(db.name + '.')
         })
       }
     })
@@ -325,13 +325,11 @@ const generateSuggestions = (context: any): any[] => {
     const localDb = allDatabaseList.value.find(db => db.name === 'local')
     if (localDb) {
       localDb.tables.forEach(table => {
-        if (table.name.toLowerCase().startsWith(context.currentWord.toLowerCase())) {
-          suggestions.push({
-            text: table.name,
-            description: table.description,
-            action: () => replaceCurrentWord(table.name, context.currentWord)
-          })
-        }
+        suggestions.push({
+          text: table.name,
+          description: table.description,
+          action: () => replaceCurrentWord(table.name)
+        })
       })
     }
     
@@ -344,14 +342,10 @@ const generateSuggestions = (context: any): any[] => {
     )
     
     if (db) {
-      const filtered = db.tables.filter(table =>
-        table.name.toLowerCase().startsWith(context.currentWord.toLowerCase())
-      )
-      
-      return filtered.map(table => ({
+      return db.tables.map(table => ({
         text: table.name,
         description: `${context.databaseName}.${table.name} - ${table.description}`,
-        action: () => replaceCurrentWord(table.name, context.currentWord)
+        action: () => replaceCurrentWord(table.name)
       }))
     }
     
@@ -374,14 +368,10 @@ const generateSuggestions = (context: any): any[] => {
     }
     
     if (targetTable) {
-      const filtered = targetTable.fields.filter(field =>
-        field.toLowerCase().startsWith(context.currentWord.toLowerCase())
-      )
-      
-      return filtered.map(field => ({
+      return targetTable.fields.map(field => ({
         text: field,
         description: `${context.tableName}.${field}`,
-        action: () => replaceCurrentWord(field, context.currentWord)
+        action: () => replaceCurrentWord(field)
       }))
     }
   }
@@ -389,16 +379,12 @@ const generateSuggestions = (context: any): any[] => {
   if (context.type === 'field') {
     allDatabaseList.value.forEach(db => {
       db.tables.forEach(table => {
-        const filtered = table.fields.filter(field =>
-          field.toLowerCase().startsWith(context.currentWord.toLowerCase())
-        )
-        
-        filtered.forEach(field => {
+        table.fields.forEach(field => {
           const prefix = db.name === 'local' ? '' : `${db.name}.`
           suggestions.push({
             text: field,
             description: `${prefix}${table.name}.${field}`,
-            action: () => replaceCurrentWord(field, context.currentWord)
+            action: () => replaceCurrentWord(field)
           })
         })
       })
@@ -410,11 +396,13 @@ const generateSuggestions = (context: any): any[] => {
   return []
 }
 
-const replaceCurrentWord = (newText: string, oldWord: string) => {
+const replaceCurrentWord = (newText: string) => {
   const editor = vimEditorRef.value
   if (!editor) return
   
+  const oldWord = editor.intellisenseFilterText
   editor.replaceWordAtCursor(oldWord, newText)
+  editor.hideIntellisense()
 }
 
 const handleIntellisense = (event: CustomEvent<any>) => {
@@ -429,12 +417,8 @@ const handleIntellisense = (event: CustomEvent<any>) => {
   
   const suggestions = generateSuggestions(context)
   
-  console.log('[Intellisense] Generated suggestions:', suggestions.length)
-  
   if (suggestions.length > 0) {
-    vimEditorRef.value?.showIntellisense(suggestions)
-  } else {
-    console.log('[Intellisense] No suggestions found')
+    vimEditorRef.value?.showIntellisense(suggestions, context.currentWord)
   }
 }
 
