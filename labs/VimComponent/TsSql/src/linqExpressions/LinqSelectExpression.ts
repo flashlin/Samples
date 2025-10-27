@@ -12,7 +12,8 @@ export interface LinqSelectItem {
 export class LinqSelectExpression extends BaseExpression {
   constructor(
     public readonly items: LinqSelectItem[],
-    public readonly isDistinct: boolean = false
+    public readonly isDistinct: boolean = false,
+    public readonly topCount?: number
   ) {
     super(ExpressionType.LinqSelect);
   }

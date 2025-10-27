@@ -16,6 +16,7 @@ export enum TokenType {
   ORDER = 'ORDER',
   SELECT = 'SELECT',
   DISTINCT = 'DISTINCT',
+  TOP = 'TOP',
   AS = 'AS',
   WITH = 'WITH',
   

@@ -18,6 +18,7 @@ const KEYWORDS: Record<string, TokenType> = {
   'ORDER': TokenType.ORDER,
   'SELECT': TokenType.SELECT,
   'DISTINCT': TokenType.DISTINCT,
+  'TOP': TokenType.TOP,
   'AS': TokenType.AS,
   'WITH': TokenType.WITH,
   'AND': TokenType.AND,

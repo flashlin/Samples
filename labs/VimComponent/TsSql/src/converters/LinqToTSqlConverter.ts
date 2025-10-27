@@ -104,7 +104,8 @@ export class LinqToTSqlConverter {
             expression: this.convertExpression(item.expression),
             alias: item.alias
           })),
-          linqQuery.select.isDistinct
+          linqQuery.select.isDistinct,
+          linqQuery.select.topCount
         )
       : undefined;
     

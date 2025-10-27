@@ -288,6 +288,15 @@ export class LinqParser {
       return undefined;
     }
     
+    let topCount: number | undefined;
+    if (this.match(TokenType.TOP)) {
+      if (this.check(TokenType.NUMBER)) {
+        topCount = parseInt(this.advance().value, 10);
+      } else {
+        this.addError('Expected number after TOP');
+      }
+    }
+    
     const isDistinct = this.match(TokenType.DISTINCT);
     const items: LinqSelectItem[] = [];
     
@@ -304,7 +313,7 @@ export class LinqParser {
       items.push({ expression, alias });
     } while (this.match(TokenType.COMMA));
     
-    return new LinqSelectExpression(items, isDistinct);
+    return new LinqSelectExpression(items, isDistinct, topCount);
   }
   
   // Parse expression (simplified - handles basic expressions)
