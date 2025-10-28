@@ -143,6 +143,7 @@ export class NormalModeHandler extends BaseModeHandler {
       { pattern: /^N$/, action: () => { this.jumpToPreviousMatch(editor); } },
       { pattern: /^u$/, action: () => { editor.undo(); } },
       { pattern: /^%$/, action: () => { editor.jumpToMatchingBracket(); } },
+      { pattern: /^D$/, action: () => { editor.saveHistory(); editor.deleteToLineEnd(); } },
     ];
   }
   

@@ -967,6 +967,143 @@ describe('VimEditor - Editing', () => {
     });
   });
 
+  describe('D command (delete to end of line)', () => {
+    it('should delete from cursor to end of line', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 6;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('D');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('hello ');
+      expect(editor.cursorX).toBe(5);
+    });
+
+    it('should delete entire line when cursor at beginning', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('D');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should do nothing if cursor is at end of line', async () => {
+      editor.setContent(['hello']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 5;
+      editor.mode = 'normal';
+      
+      await pressKey('D');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('hello');
+    });
+
+    it('should handle Chinese characters correctly', async () => {
+      editor.setContent(['你好世界測試']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 2;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('D');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('你好');
+      expect(editor.cursorX).toBe(1);
+    });
+
+    it('should handle empty line', async () => {
+      editor.setContent(['']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      
+      await pressKey('D');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should support undo after D', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 6;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('D');
+      await editor.updateComplete;
+      expect(editor.content[0]).toBe('hello ');
+      
+      await pressKey('u');
+      expect(editor.content[0]).toBe('hello world test');
+      expect(editor.cursorX).toBe(6);
+    });
+
+    it('should handle cursor in middle of line', async () => {
+      editor.setContent(['abcdefghijk']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 5;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('D');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('abcde');
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should handle multi-line content correctly', async () => {
+      editor.setContent(['line one', 'line two', 'line three']);
+      await editor.updateComplete;
+      editor.cursorY = 1;
+      editor.cursorX = 5;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('D');
+      await editor.updateComplete;
+      
+      expect(editor.content).toEqual(['line one', 'line ', 'line three']);
+      expect(editor.cursorY).toBe(1);
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should work with mixed English and Chinese', async () => {
+      editor.setContent(['hello你好world世界']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 7;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('D');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('hello你好');
+      expect(editor.cursorX).toBe(6);
+    });
+  });
+
   describe('dd command (delete and copy line)', () => {
     // NOTE: These tests are skipped due to clipboard state pollution in the test environment.
     // The implementation is correct and works properly in actual usage.

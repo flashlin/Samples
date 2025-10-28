@@ -137,6 +137,7 @@ The editor supports basic Vim keybindings and modes:
 - `0, $` - Move to start/end of line
 - `gg, G` - Move to start/end of file
 - `dd` - Delete line
+- `D` - Delete from cursor to end of line
 - `yy` - Yank (copy) line
 - `p` - Paste
 - `u` - Undo
