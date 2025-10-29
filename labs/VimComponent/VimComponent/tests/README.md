@@ -19,7 +19,19 @@ npm run test:ui
 ## Test Structure
 
 ### Test Files
-- `vim-editor.test.ts` - Main test suite for VimEditor component
+- `editing.test.ts` - Editing commands and text manipulation (77 tests)
+- `navigation.test.ts` - Cursor movement commands (multiple tests)
+- `visual-mode.test.ts` - Visual mode operations
+- `insert-mode.test.ts` - Insert mode functionality
+- `command-mode.test.ts` - Command mode operations
+- `search-mode.test.ts` - Search functionality
+- `multi-cursor.test.ts` - Multi-cursor operations
+- `fast-jump.test.ts` - Fast jump navigation
+- `text-objects.test.ts` - Text object selection
+- `bracket-matching.test.ts` - Bracket matching
+- `focus-management.test.ts` - Focus handling
+- `system.test.ts` - System integration
+- `clipboard.test.ts` - Clipboard operations (11 tests, **skipped** - see [CLIPBOARD_TESTS.md](./CLIPBOARD_TESTS.md))
 
 ### Test Coverage
 
