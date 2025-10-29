@@ -136,6 +136,8 @@ The editor supports basic Vim keybindings and modes:
 - `w, b` - Move by word (forward, backward)
 - `0, $` - Move to start/end of line
 - `gg, G` - Move to start/end of file
+- `{` - Move to previous paragraph
+- `}` - Move to next paragraph
 - `dd` - Delete line
 - `D` - Delete from cursor to end of line
 - `x` - Delete character under cursor

@@ -153,6 +153,8 @@ export class NormalModeHandler extends BaseModeHandler {
       { pattern: /^D$/, action: () => { editor.saveHistory(); editor.deleteToLineEnd(); } },
       { pattern: /^x$/, action: () => { editor.saveHistory(); editor.deleteCharUnderCursor(); } },
       { pattern: /^X$/, action: () => { editor.saveHistory(); editor.deleteCharBeforeCursor(); } },
+      { pattern: /^\{$/, action: () => { editor.moveToPreviousParagraph(); } },
+      { pattern: /^\}$/, action: () => { editor.moveToNextParagraph(); } },
     ];
   }
   

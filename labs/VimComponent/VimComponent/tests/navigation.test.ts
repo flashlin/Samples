@@ -487,5 +487,132 @@ describe('VimEditor - Navigation', () => {
       expect(scroll.x).toBeGreaterThan(0);
     });
   });
+
+  describe('{ command (previous paragraph)', () => {
+    it('should move to previous paragraph', async () => {
+      editor.setContent(['Line 1', 'Line 2', '', 'Line 4', 'Line 5']);
+      await editor.updateComplete;
+      editor.cursorY = 4;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      
+      await pressKey('{');
+      
+      expect(editor.cursorY).toBe(3);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should handle multiple paragraphs', async () => {
+      editor.setContent(['P1 Line 1', 'P1 Line 2', '', 'P2 Line 1', '', 'P3 Line 1']);
+      await editor.updateComplete;
+      editor.cursorY = 5;
+      editor.mode = 'normal';
+      
+      await pressKey('{');
+      expect(editor.cursorY).toBe(3);
+      
+      await pressKey('{');
+      expect(editor.cursorY).toBe(0);
+    });
+
+    it('should handle consecutive empty lines', async () => {
+      editor.setContent(['Line 1', '', '', 'Line 4']);
+      await editor.updateComplete;
+      editor.cursorY = 3;
+      editor.mode = 'normal';
+      
+      await pressKey('{');
+      
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should stay at beginning when already at first paragraph', async () => {
+      editor.setContent(['Line 1', 'Line 2', '', 'Line 4']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      await pressKey('{');
+      
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should handle single paragraph', async () => {
+      editor.setContent(['Line 1', 'Line 2', 'Line 3']);
+      await editor.updateComplete;
+      editor.cursorY = 2;
+      editor.mode = 'normal';
+      
+      await pressKey('{');
+      
+      expect(editor.cursorY).toBe(0);
+      expect(editor.cursorX).toBe(0);
+    });
+  });
+
+  describe('} command (next paragraph)', () => {
+    it('should move to next paragraph', async () => {
+      editor.setContent(['Line 1', 'Line 2', '', 'Line 4', 'Line 5']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      
+      await pressKey('}');
+      
+      expect(editor.cursorY).toBe(3);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should handle multiple paragraphs forward', async () => {
+      editor.setContent(['P1 Line 1', '', 'P2 Line 1', '', 'P3 Line 1']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      await pressKey('}');
+      expect(editor.cursorY).toBe(2);
+      
+      await pressKey('}');
+      expect(editor.cursorY).toBe(4);
+    });
+
+    it('should handle consecutive empty lines', async () => {
+      editor.setContent(['Line 1', '', '', 'Line 4', 'Line 5']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      await pressKey('}');
+      
+      expect(editor.cursorY).toBe(3);
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should stay at end when already at last paragraph', async () => {
+      editor.setContent(['Line 1', '', 'Line 3', 'Line 4']);
+      await editor.updateComplete;
+      editor.cursorY = 3;
+      editor.mode = 'normal';
+      
+      await pressKey('}');
+      
+      expect(editor.cursorY).toBe(3);
+    });
+
+    it('should handle single paragraph', async () => {
+      editor.setContent(['Line 1', 'Line 2', 'Line 3']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      await pressKey('}');
+      
+      expect(editor.cursorY).toBe(2);
+    });
+  });
+
 });
 

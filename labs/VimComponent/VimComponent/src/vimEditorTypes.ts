@@ -76,6 +76,10 @@ export interface IVimEditor {
   moveCursorRight(): void;
   moveToFirstLine(): void;
   jumpToMatchingBracket(): void;
+  moveToPreviousParagraph(): void;
+  moveToNextParagraph(): void;
+  moveToPreviousSentence(): void;
+  moveToNextSentence(): void;
   
   // Edit methods
   insertCharacter(char: string): void;

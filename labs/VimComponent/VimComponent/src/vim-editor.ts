@@ -1093,6 +1093,15 @@ export class VimEditor extends LitElement {
     }
   }
 
+  private isEmptyLine(lineIndex: number): boolean {
+    if (lineIndex < 0 || lineIndex >= this.content.length) {
+      return false;
+    }
+    const line = this.content[lineIndex];
+    return line.trim().length === 0;
+  }
+
+
   getInnerWordRange(): { startX: number; endX: number; y: number } | null {
     const currentLine = this.content[this.cursorY] || '';
     if (currentLine.length === 0) {
@@ -1735,6 +1744,63 @@ export class VimEditor extends LitElement {
       this.cursorX = currentLine.length - 1;
     }
   }
+
+  moveToPreviousParagraph() {
+    if (this.content.length === 0) return;
+    
+    let targetY = this.cursorY;
+    
+    if (targetY > 0) {
+      targetY--;
+    } else {
+      return;
+    }
+    
+    if (this.isEmptyLine(targetY)) {
+      while (targetY > 0 && this.isEmptyLine(targetY)) {
+        targetY--;
+      }
+      if (targetY === 0) {
+        this.cursorY = 0;
+        this.cursorX = 0;
+        this.updateInputPosition();
+        return;
+      }
+    }
+    
+    while (targetY > 0 && !this.isEmptyLine(targetY - 1)) {
+      targetY--;
+    }
+    
+    this.cursorY = targetY;
+    this.cursorX = 0;
+    this.updateInputPosition();
+  }
+
+  moveToNextParagraph() {
+    if (this.content.length === 0) return;
+    
+    let targetY = this.cursorY;
+    
+    while (targetY < this.content.length - 1 && !this.isEmptyLine(targetY)) {
+      targetY++;
+    }
+    
+    while (targetY < this.content.length - 1 && this.isEmptyLine(targetY)) {
+      targetY++;
+    }
+    
+    this.cursorY = targetY;
+    this.cursorX = 0;
+    this.updateInputPosition();
+  }
+
+  moveToPreviousSentence() {
+  }
+
+  moveToNextSentence() {
+  }
+
 
   insertLineBelow() {
     this.content.splice(this.cursorY + 1, 0, '');
