@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import { VimEditor } from '../src/vim-editor';
+import { EditorMode } from '../src/vimEditorTypes';
 import { createTestEditor, cleanupTestEditor, pressKey, pressKeys } from './test-helpers';
 
 describe.skip.sequential('VimEditor - Clipboard Operations', () => {
@@ -36,7 +37,7 @@ describe.skip.sequential('VimEditor - Clipboard Operations', () => {
       editor.content = ['hello world'];
       editor.cursorY = 0;
       editor.cursorX = 6;
-      editor.mode = 'normal';
+      editor.mode = EditorMode.Normal;
       
       await navigator.clipboard.writeText('TEST');
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -145,7 +146,7 @@ describe.skip.sequential('VimEditor - Clipboard Operations', () => {
       await editor.updateComplete;
       editor.cursorY = 1;
       editor.cursorX = 2;
-      editor.mode = 'normal';
+      editor.mode = EditorMode.Normal;
       
       await pressKeys('y', 'y');
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -165,7 +166,7 @@ describe.skip.sequential('VimEditor - Clipboard Operations', () => {
       await editor.updateComplete;
       editor.cursorY = 1;
       editor.cursorX = 0;
-      editor.mode = 'normal';
+      editor.mode = EditorMode.Normal;
       
       await pressKeys('y', 'y');
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -188,7 +189,7 @@ describe.skip.sequential('VimEditor - Clipboard Operations', () => {
       await editor.updateComplete;
       editor.cursorY = 1;
       editor.cursorX = 0;
-      editor.mode = 'normal';
+      editor.mode = EditorMode.Normal;
       
       await pressKeys('y', 'y');
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -207,7 +208,7 @@ describe.skip.sequential('VimEditor - Clipboard Operations', () => {
       await editor.updateComplete;
       editor.cursorY = 1;
       editor.cursorX = 2;
-      editor.mode = 'normal';
+      editor.mode = EditorMode.Normal;
       
       await pressKeys('d', 'd');
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -227,7 +228,7 @@ describe.skip.sequential('VimEditor - Clipboard Operations', () => {
       await editor.updateComplete;
       editor.cursorY = 1;
       editor.cursorX = 0;
-      editor.mode = 'normal';
+      editor.mode = EditorMode.Normal;
       
       await pressKeys('d', 'd');
       await new Promise(resolve => setTimeout(resolve, 50));
