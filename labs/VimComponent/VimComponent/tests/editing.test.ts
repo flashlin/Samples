@@ -1104,6 +1104,312 @@ describe('VimEditor - Editing', () => {
     });
   });
 
+  describe('x command (delete character under cursor)', () => {
+    it('should delete character under cursor', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('x');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('ello world');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete character in middle of line', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 6;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('x');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('hello orld');
+      expect(editor.cursorX).toBe(6);
+    });
+
+    it('should delete Chinese character', async () => {
+      editor.setContent(['你好世界']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('x');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('好世界');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should do nothing at end of line', async () => {
+      editor.setContent(['hello']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 5;
+      editor.mode = 'normal';
+      
+      await pressKey('x');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('hello');
+      expect(editor.cursorX).toBe(5);
+    });
+
+    it('should do nothing on empty line', async () => {
+      editor.setContent(['']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      
+      await pressKey('x');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should support undo', async () => {
+      editor.setContent(['hello']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('x');
+      await editor.updateComplete;
+      expect(editor.content[0]).toBe('ello');
+      
+      await pressKey('u');
+      expect(editor.content[0]).toBe('hello');
+    });
+
+    it('should adjust cursor when deleting last character', async () => {
+      editor.setContent(['hello']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 4;
+      editor.mode = 'normal';
+      
+      await pressKey('x');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('hell');
+      expect(editor.cursorX).toBe(3);
+    });
+  });
+
+  describe('X command (delete character before cursor)', () => {
+    it('should delete character before cursor', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 5;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('X');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('hell world');
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should do nothing at beginning of line', async () => {
+      editor.setContent(['hello']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      
+      await pressKey('X');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('hello');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete Chinese character before cursor', async () => {
+      editor.setContent(['你好世界']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 2;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('X');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('你世界');
+      expect(editor.cursorX).toBe(1);
+    });
+
+    it('should support undo', async () => {
+      editor.setContent(['hello']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 3;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKey('X');
+      await editor.updateComplete;
+      expect(editor.content[0]).toBe('helo');
+      
+      await pressKey('u');
+      expect(editor.content[0]).toBe('hello');
+    });
+  });
+
+  describe('r command (replace character)', () => {
+    it('should replace character with another character', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKeys('r', 'H');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('Hello world');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should replace character in middle of line', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 6;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKeys('r', 'W');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('hello World');
+      expect(editor.cursorX).toBe(6);
+    });
+
+    it('should replace with Chinese character', async () => {
+      editor.setContent(['hello']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKeys('r', '你');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('你ello');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should replace Chinese character with English', async () => {
+      editor.setContent(['你好世界']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKeys('r', 'H');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('H好世界');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should replace with space', async () => {
+      editor.setContent(['hello']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 2;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKeys('r', ' ');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('he lo');
+      expect(editor.cursorX).toBe(2);
+    });
+
+    it('should do nothing at end of line', async () => {
+      editor.setContent(['hello']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 5;
+      editor.mode = 'normal';
+      
+      await pressKeys('r', 'x');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('hello');
+      expect(editor.cursorX).toBe(5);
+    });
+
+    it('should do nothing on empty line', async () => {
+      editor.setContent(['']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      
+      await pressKeys('r', 'x');
+      await editor.updateComplete;
+      
+      expect(editor.content[0]).toBe('');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should support undo', async () => {
+      editor.setContent(['hello']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKeys('r', 'H');
+      await editor.updateComplete;
+      expect(editor.content[0]).toBe('Hello');
+      
+      await pressKey('u');
+      expect(editor.content[0]).toBe('hello');
+    });
+
+    it('should allow multiple replacements', async () => {
+      editor.setContent(['hello']);
+      await editor.updateComplete;
+      editor.cursorY = 0;
+      editor.cursorX = 0;
+      editor.mode = 'normal';
+      editor.resetHistory();
+      
+      await pressKeys('r', 'H');
+      await editor.updateComplete;
+      expect(editor.content[0]).toBe('Hello');
+      
+      editor.cursorX = 1;
+      await pressKeys('r', 'a');
+      await editor.updateComplete;
+      expect(editor.content[0]).toBe('Hallo');
+    });
+  });
+
   describe('dd command (delete and copy line)', () => {
     // NOTE: These tests are skipped due to clipboard state pollution in the test environment.
     // The implementation is correct and works properly in actual usage.

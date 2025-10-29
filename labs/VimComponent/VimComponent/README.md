@@ -138,6 +138,9 @@ The editor supports basic Vim keybindings and modes:
 - `gg, G` - Move to start/end of file
 - `dd` - Delete line
 - `D` - Delete from cursor to end of line
+- `x` - Delete character under cursor
+- `X` - Delete character before cursor
+- `r{char}` - Replace character under cursor with {char}
 - `yy` - Yank (copy) line
 - `p` - Paste
 - `u` - Undo

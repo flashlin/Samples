@@ -64,6 +64,13 @@ export class NormalModeHandler extends BaseModeHandler {
       { pattern: /^de$/, action: () => { editor.saveHistory(); editor.deleteToWordEnd(); } },
       { pattern: /^d\$$/, action: () => { editor.saveHistory(); editor.deleteToLineEnd(); } },
       
+      // Replace character command
+      { pattern: /^r.$/, action: (match: RegExpMatchArray) => { 
+        const replacementChar = match[0][1];
+        editor.saveHistory(); 
+        this.replaceCharUnderCursor(editor, replacementChar); 
+      } },
+      
       // Go to line number
       { pattern: /^(\d+)G$/, action: (match: RegExpMatchArray) => { 
         const lineNumber = parseInt(match[1], 10) - 1;
@@ -144,6 +151,8 @@ export class NormalModeHandler extends BaseModeHandler {
       { pattern: /^u$/, action: () => { editor.undo(); } },
       { pattern: /^%$/, action: () => { editor.jumpToMatchingBracket(); } },
       { pattern: /^D$/, action: () => { editor.saveHistory(); editor.deleteToLineEnd(); } },
+      { pattern: /^x$/, action: () => { editor.saveHistory(); editor.deleteCharUnderCursor(); } },
+      { pattern: /^X$/, action: () => { editor.saveHistory(); editor.deleteCharBeforeCursor(); } },
     ];
   }
   
@@ -514,6 +523,19 @@ export class NormalModeHandler extends BaseModeHandler {
   private async yankCurrentLine(editor: IVimEditor): Promise<void> {
     const line = editor.content[editor.cursorY] || '';
     await editor.copyToClipboard(line, true);
+  }
+
+  private replaceCharUnderCursor(editor: IVimEditor, char: string): void {
+    const currentLine = editor.content[editor.cursorY] || '';
+    if (editor.cursorX >= currentLine.length || currentLine.length === 0) {
+      return;
+    }
+    
+    const beforeCursor = currentLine.substring(0, editor.cursorX);
+    const afterCursor = currentLine.substring(editor.cursorX + 1);
+    
+    editor.content[editor.cursorY] = beforeCursor + char + afterCursor;
+    editor.emitChange();
   }
 }
 
