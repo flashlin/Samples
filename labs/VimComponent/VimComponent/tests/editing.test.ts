@@ -272,7 +272,7 @@ describe('VimEditor - Editing', () => {
     });
   });
 
-  describe('dt<space> command (delete to space)', () => {
+  describe('dt{char} command (delete till character)', () => {
     it('should delete from cursor to next space', async () => {
       editor.setContent(['hello world test']);
       await editor.updateComplete;
@@ -428,6 +428,85 @@ describe('VimEditor - Editing', () => {
       
       expect(editor.content[0]).toBe('hello world');
       expect(editor.content[1]).toBe('next');
+    });
+
+    it('should delete till character a', async () => {
+      editor.setContent(['hello world and test']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', 'a');
+      
+      expect(editor.content[0]).toBe('and test');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete till comma', async () => {
+      editor.setContent(['one, two, three']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ',');
+      
+      expect(editor.content[0]).toBe(', two, three');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete till Chinese character', async () => {
+      editor.setContent(['hello世界test']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', '世');
+      
+      expect(editor.content[0]).toBe('世界test');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete till dot from middle of word', async () => {
+      editor.setContent(['hello.world.test']);
+      await editor.updateComplete;
+      editor.cursorX = 6;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', '.');
+      
+      expect(editor.content[0]).toBe('hello..test');
+      expect(editor.cursorX).toBe(6);
+    });
+
+    it('should handle special characters', async () => {
+      editor.setContent(['test@example.com']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', '@');
+      
+      expect(editor.content[0]).toBe('@example.com');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should support undo for dt{char}', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', 'w');
+      expect(editor.content[0]).toBe('world test');
+      
+      pressKey('u');
+      expect(editor.content[0]).toBe('hello world test');
     });
   });
 

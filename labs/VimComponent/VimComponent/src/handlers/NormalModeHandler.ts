@@ -63,9 +63,10 @@ export class NormalModeHandler extends BaseModeHandler {
       { pattern: /^dw$/, action: () => { editor.saveHistory(); editor.deleteWord(); } },
       { pattern: /^de$/, action: () => { editor.saveHistory(); editor.deleteToWordEnd(); } },
       { pattern: /^d\$$/, action: () => { editor.saveHistory(); editor.deleteToLineEnd(); } },
-      { pattern: /^dt $/, action: () => { 
+      { pattern: /^dt(.)$/, action: (match: RegExpMatchArray) => { 
+        const targetChar = match[1];
         editor.saveHistory(); 
-        this.deleteToSpace(editor); 
+        this.deleteToChar(editor, targetChar); 
       } },
       
       // Replace character command
@@ -544,14 +545,13 @@ export class NormalModeHandler extends BaseModeHandler {
     editor.emitChange();
   }
 
-  private deleteToSpace(editor: IVimEditor): void {
+  private deleteToChar(editor: IVimEditor, targetChar: string): void {
     const currentLine = editor.content[editor.cursorY] || '';
     let deleteEndX = editor.cursorX;
-    
     let found = false;
     
     for (let i = editor.cursorX; i < currentLine.length; i++) {
-      if (currentLine[i] === ' ') {
+      if (currentLine[i] === targetChar) {
         deleteEndX = i;
         found = true;
         break;
@@ -559,13 +559,8 @@ export class NormalModeHandler extends BaseModeHandler {
     }
     
     if (!found) {
-      if (editor.cursorY < editor.content.length - 1) {
-        deleteEndX = currentLine.length;
-        found = true;
-      } else {
-        deleteEndX = currentLine.length;
-        found = true;
-      }
+      deleteEndX = currentLine.length;
+      found = true;
     }
     
     if (found) {
