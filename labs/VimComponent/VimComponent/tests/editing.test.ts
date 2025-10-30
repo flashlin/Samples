@@ -271,6 +271,166 @@ describe('VimEditor - Editing', () => {
       expect(editor.cursorX).toBe(3);
     });
   });
+
+  describe('dt<space> command (delete to space)', () => {
+    it('should delete from cursor to next space', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      
+      expect(editor.content[0]).toBe(' world test');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete from middle of word to next space', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorX = 2;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      
+      expect(editor.content[0]).toBe('he world test');
+      expect(editor.cursorX).toBe(2);
+    });
+
+    it('should delete to end of line if no space found', async () => {
+      editor.setContent(['helloworld']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      
+      expect(editor.content[0]).toBe('');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should delete to end of line when not last line', async () => {
+      editor.setContent(['helloworld', 'next line']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      
+      expect(editor.content[0]).toBe('');
+      expect(editor.content[1]).toBe('next line');
+    });
+
+    it('should handle cursor before space', async () => {
+      editor.setContent(['hello world']);
+      await editor.updateComplete;
+      editor.cursorX = 4;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      
+      expect(editor.content[0]).toBe('hell world');
+      expect(editor.cursorX).toBe(4);
+    });
+
+    it('should handle cursor on space', async () => {
+      editor.setContent(['hello  world']);
+      await editor.updateComplete;
+      editor.cursorX = 5;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      
+      expect(editor.content[0]).toBe('hello  world');
+      expect(editor.cursorX).toBe(5);
+    });
+
+    it('should handle Chinese characters', async () => {
+      editor.setContent(['你好 世界 測試']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      
+      expect(editor.content[0]).toBe(' 世界 測試');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should handle mixed English and Chinese', async () => {
+      editor.setContent(['hello你好 world']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      
+      expect(editor.content[0]).toBe(' world');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should do nothing on empty line', async () => {
+      editor.setContent(['']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      
+      expect(editor.content[0]).toBe('');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should support undo', async () => {
+      editor.setContent(['hello world test']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      expect(editor.content[0]).toBe(' world test');
+      
+      pressKey('u');
+      expect(editor.content[0]).toBe('hello world test');
+    });
+
+    it('should handle multiple spaces', async () => {
+      editor.setContent(['hello    world']);
+      await editor.updateComplete;
+      editor.cursorX = 0;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      
+      expect(editor.content[0]).toBe('    world');
+      expect(editor.cursorX).toBe(0);
+    });
+
+    it('should handle cursor at end of line', async () => {
+      editor.setContent(['hello world', 'next']);
+      await editor.updateComplete;
+      editor.cursorX = 11;
+      editor.cursorY = 0;
+      editor.mode = 'normal';
+      
+      pressKeys('d', 't', ' ');
+      
+      expect(editor.content[0]).toBe('hello world');
+      expect(editor.content[1]).toBe('next');
+    });
+  });
+
   describe('p command (paste)', () => {
     let mockReadText: any;
     let mockWriteText: any;
