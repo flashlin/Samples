@@ -191,5 +191,31 @@ describe('TSqlFormatter', () => {
     const sql = formatLinqQuery('FROM users JOIN orders WITH(NOLOCK) ON users.id = orders.user_id SELECT *');
     expect(sql).toContain('INNER JOIN orders WITH(NOLOCK) ON users.id = orders.user_id');
   });
+  
+  it('should format WHERE with IS NULL', () => {
+    const sql = formatLinqQuery('FROM users WHERE email IS NULL SELECT name');
+    
+    expect(sql).toContain('WHERE email IS NULL');
+  });
+  
+  it('should format WHERE with IS NOT NULL', () => {
+    const sql = formatLinqQuery('FROM users WHERE d.field IS NOT NULL SELECT name');
+    
+    expect(sql).toContain('WHERE d.field IS NOT NULL');
+  });
+  
+  it('should format IS NULL in complex WHERE conditions', () => {
+    const sql = formatLinqQuery('FROM users WHERE age > 18 WHERE email IS NULL SELECT name');
+    
+    expect(sql).toContain('IS NULL');
+    expect(sql).toContain('AND');
+  });
+  
+  it('should format IS NOT NULL with OR condition', () => {
+    const sql = formatLinqQuery('FROM users WHERE status = 1 WHERE field IS NOT NULL SELECT name');
+    
+    expect(sql).toContain('IS NOT NULL');
+    expect(sql).toContain('AND');
+  });
 });
 
