@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { LinqParser } from '../src/parser/LinqParser';
-import { ExpressionType } from '../src/types/ExpressionType';
+import { ExpressionType, UnaryOperator } from '../src/types/ExpressionType';
+import { UnaryExpression } from '../src/expressions/UnaryExpression';
 
 describe('LinqParser', () => {
   const parser = new LinqParser();
@@ -185,6 +186,40 @@ describe('LinqParser', () => {
     
     expect(result.errors).toHaveLength(0);
     expect(result.result.from?.hints).toEqual(['NOLOCK', 'READUNCOMMITTED']);
+  });
+  
+  it('should parse WHERE with IS NULL', () => {
+    const result = parser.parse('FROM users WHERE email IS NULL SELECT name');
+    
+    expect(result.errors).toHaveLength(0);
+    expect(result.result.wheres).toHaveLength(1);
+    expect(result.result.wheres[0].condition).toBeInstanceOf(UnaryExpression);
+    const condition = result.result.wheres[0].condition as UnaryExpression;
+    expect(condition.operator).toBe(UnaryOperator.IsNull);
+  });
+  
+  it('should parse WHERE with IS NOT NULL', () => {
+    const result = parser.parse('FROM users WHERE d.field IS NOT NULL SELECT name');
+    
+    expect(result.errors).toHaveLength(0);
+    expect(result.result.wheres).toHaveLength(1);
+    expect(result.result.wheres[0].condition).toBeInstanceOf(UnaryExpression);
+    const condition = result.result.wheres[0].condition as UnaryExpression;
+    expect(condition.operator).toBe(UnaryOperator.IsNotNull);
+  });
+  
+  it('should parse WHERE with IS NULL in complex conditions', () => {
+    const result = parser.parse('FROM users WHERE age > 18 AND email IS NULL SELECT name');
+    
+    expect(result.errors).toHaveLength(0);
+    expect(result.result.wheres).toHaveLength(1);
+  });
+  
+  it('should parse WHERE with IS NOT NULL in complex conditions', () => {
+    const result = parser.parse('FROM users WHERE status = 1 OR d.field IS NOT NULL SELECT name');
+    
+    expect(result.errors).toHaveLength(0);
+    expect(result.result.wheres).toHaveLength(1);
   });
 });
 

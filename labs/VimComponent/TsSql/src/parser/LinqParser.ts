@@ -3,7 +3,7 @@ import { Token, TokenType } from './TokenType';
 import { ParseError } from '../types/ParseError';
 import { ParseResult, failure, success } from '../types/ParseResult';
 import { Expression } from '../types/BaseExpression';
-import { BinaryOperator, JoinType, OrderDirection } from '../types/ExpressionType';
+import { BinaryOperator, JoinType, OrderDirection, UnaryOperator } from '../types/ExpressionType';
 
 // LINQ expressions
 import { LinqQueryExpression } from '../linqExpressions/LinqQueryExpression';
@@ -19,6 +19,7 @@ import { LinqSelectExpression, LinqSelectItem } from '../linqExpressions/LinqSel
 import { ColumnExpression } from '../expressions/ColumnExpression';
 import { LiteralExpression } from '../expressions/LiteralExpression';
 import { BinaryExpression } from '../expressions/BinaryExpression';
+import { UnaryExpression } from '../expressions/UnaryExpression';
 import { FunctionExpression } from '../expressions/FunctionExpression';
 
 // LINQ Parser - Recursive Descent Parser with Error Recovery
@@ -366,6 +367,18 @@ export class LinqParser {
         expr = new BinaryExpression(expr, BinaryOperator.Like, this.parseAdditive());
       } else if (this.match(TokenType.IN)) {
         expr = new BinaryExpression(expr, BinaryOperator.In, this.parseAdditive());
+      } else if (this.match(TokenType.IS)) {
+        if (this.match(TokenType.NOT)) {
+          if (this.match(TokenType.NULL)) {
+            expr = new UnaryExpression(UnaryOperator.IsNotNull, expr);
+          } else {
+            this.addError('Expected NULL after IS NOT');
+          }
+        } else if (this.match(TokenType.NULL)) {
+          expr = new UnaryExpression(UnaryOperator.IsNull, expr);
+        } else {
+          this.addError('Expected NULL after IS');
+        }
       } else {
         break;
       }
