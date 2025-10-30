@@ -63,6 +63,10 @@ export class NormalModeHandler extends BaseModeHandler {
       { pattern: /^dw$/, action: () => { editor.saveHistory(); editor.deleteWord(); } },
       { pattern: /^de$/, action: () => { editor.saveHistory(); editor.deleteToWordEnd(); } },
       { pattern: /^d\$$/, action: () => { editor.saveHistory(); editor.deleteToLineEnd(); } },
+      { pattern: /^dt $/, action: () => { 
+        editor.saveHistory(); 
+        this.deleteToSpace(editor); 
+      } },
       
       // Replace character command
       { pattern: /^r.$/, action: (match: RegExpMatchArray) => { 
@@ -538,6 +542,43 @@ export class NormalModeHandler extends BaseModeHandler {
     
     editor.content[editor.cursorY] = beforeCursor + char + afterCursor;
     editor.emitChange();
+  }
+
+  private deleteToSpace(editor: IVimEditor): void {
+    const currentLine = editor.content[editor.cursorY] || '';
+    let deleteEndX = editor.cursorX;
+    
+    let found = false;
+    
+    for (let i = editor.cursorX; i < currentLine.length; i++) {
+      if (currentLine[i] === ' ') {
+        deleteEndX = i;
+        found = true;
+        break;
+      }
+    }
+    
+    if (!found) {
+      if (editor.cursorY < editor.content.length - 1) {
+        deleteEndX = currentLine.length;
+        found = true;
+      } else {
+        deleteEndX = currentLine.length;
+        found = true;
+      }
+    }
+    
+    if (found) {
+      const beforeDelete = currentLine.substring(0, editor.cursorX);
+      const afterDelete = currentLine.substring(deleteEndX);
+      editor.content[editor.cursorY] = beforeDelete + afterDelete;
+      
+      if (editor.cursorX >= editor.content[editor.cursorY].length && editor.content[editor.cursorY].length > 0) {
+        editor.cursorX = editor.content[editor.cursorY].length - 1;
+      }
+      
+      editor.emitChange();
+    }
   }
 }
 
