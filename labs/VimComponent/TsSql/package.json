@@ -1,6 +1,6 @@
 {
   "name": "@mrbrain/t1-tssql",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "module",
   "main": "dist/tssql.umd.js",
   "module": "dist/tssql.es.js",
