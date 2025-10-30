@@ -218,5 +218,37 @@ describe('Integration Tests', () => {
     expect(errors).toHaveLength(0);
     expect(sql).toContain('WITH(NOLOCK, READUNCOMMITTED)');
   });
+  
+  it('should convert WHERE with IS NULL to T-SQL', () => {
+    const { sql, errors } = linqToSql('FROM users WHERE email IS NULL SELECT name');
+    
+    expect(errors).toHaveLength(0);
+    expect(sql).toContain('WHERE email IS NULL');
+  });
+  
+  it('should convert WHERE with IS NOT NULL to T-SQL', () => {
+    const { sql, errors } = linqToSql('FROM users WHERE d.field IS NOT NULL SELECT name');
+    
+    expect(errors).toHaveLength(0);
+    expect(sql).toContain('WHERE d.field IS NOT NULL');
+  });
+  
+  it('should convert WHERE with IS NULL in complex conditions', () => {
+    const { sql, errors } = linqToSql('FROM users WHERE age > 18 WHERE email IS NULL SELECT name');
+    
+    expect(errors).toHaveLength(0);
+    expect(sql).toContain('WHERE');
+    expect(sql).toContain('IS NULL');
+    expect(sql).toContain('AND');
+  });
+  
+  it('should convert WHERE with IS NOT NULL in complex conditions', () => {
+    const { sql, errors } = linqToSql('FROM users WHERE status = 1 WHERE d.field IS NOT NULL SELECT name');
+    
+    expect(errors).toHaveLength(0);
+    expect(sql).toContain('WHERE');
+    expect(sql).toContain('IS NOT NULL');
+    expect(sql).toContain('AND');
+  });
 });
 
