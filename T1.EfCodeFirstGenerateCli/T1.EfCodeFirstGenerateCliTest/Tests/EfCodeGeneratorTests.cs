@@ -1397,6 +1397,64 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             
             duplicates.Should().BeEmpty("不應該有重複的 PromotionTypes 導航屬性定義");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_IrregularPluralEntity_UsesCorrectPluralForm()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var personTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Person" };
+            personTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(personTable);
+            
+            var addressTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Address" };
+            addressTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            addressTable.Fields.Add(TestHelper.CreateField("PersonId", "int", false, null, false, false));
+            schema.Tables.Add(addressTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "Person", "Id", "Address", "PersonId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToMany,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var personEntityCode = result["TestDb/Entities/PersonEntity.cs"];
+            personEntityCode.Should().Contain("public ICollection<AddressEntity> Addresses { get; set; }");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_RegularPluralEntity_UsesCorrectPluralForm()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var categoryTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Category" };
+            categoryTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(categoryTable);
+            
+            var productTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Product" };
+            productTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            productTable.Fields.Add(TestHelper.CreateField("CategoryId", "int", false, null, false, false));
+            schema.Tables.Add(productTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "Category", "Id", "Product", "CategoryId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToMany,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var categoryEntityCode = result["TestDb/Entities/CategoryEntity.cs"];
+            categoryEntityCode.Should().Contain("public ICollection<ProductEntity> Products { get; set; }");
+        }
     }
 }
 

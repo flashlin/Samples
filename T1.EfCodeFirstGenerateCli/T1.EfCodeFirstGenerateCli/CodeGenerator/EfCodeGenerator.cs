@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Humanizer;
 using T1.EfCodeFirstGenerateCli.Common;
 using T1.EfCodeFirstGenerateCli.Converters;
 using T1.EfCodeFirstGenerateCli.Models;
@@ -88,6 +89,11 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             }
             
             return sanitized;
+        }
+
+        private string ToPlural(string singular)
+        {
+            return singular.Pluralize();
         }
 
         public Dictionary<string, string> GenerateCodeFirstFromSchema(DbSchema dbSchema, string targetNamespace)
@@ -644,7 +650,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         {
             if (rel.Type == RelationshipType.OneToMany || rel.Type == RelationshipType.ManyToOne)
             {
-                return rel.DependentEntity + "s";
+                return ToPlural(rel.DependentEntity);
             }
             return rel.DependentEntity;
         }
@@ -659,7 +665,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             
             if (rel.Type == RelationshipType.OneToMany || rel.Type == RelationshipType.ManyToOne)
             {
-                return $"{rel.DependentEntity}sBy{fkName}";
+                return $"{ToPlural(rel.DependentEntity)}By{fkName}";
             }
             return $"{rel.DependentEntity}By{fkName}";
         }
