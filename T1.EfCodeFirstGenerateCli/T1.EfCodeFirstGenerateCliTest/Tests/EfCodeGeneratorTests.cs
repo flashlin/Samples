@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using FluentAssertions;
 using NUnit.Framework;
 using T1.EfCodeFirstGenerateCli.CodeGenerator;
@@ -1334,6 +1336,40 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             var profileConfigCode = result["TestDb/Configurations/ProfileEntityConfiguration.cs"];
             profileConfigCode.Should().Contain(".HasForeignKey<ProfileEntity>(x => x.UserId);");
             profileConfigCode.Should().NotContain(".IsRequired(false)");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_Example1Schema_DetectsDuplicateNavigationPropertiesInEntity()
+        {
+            var schemaJson = File.ReadAllText("TestData/example1.schema");
+            var schema = System.Text.Json.JsonSerializer.Deserialize<T1.EfCodeFirstGenerateCli.Models.DbSchema>(schemaJson);
+            schema.Should().NotBeNull();
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema!, "TestNamespace");
+            
+            var promotionTypesEntityCode = result["PromotionManagement/Entities/PromotionTypesEntity.cs"];
+            
+            var navigationPropertyPattern = @"public\s+ICollection<PromotionTypeWhiteListEntity>\s+PromotionTypeWhiteLists\s*\{\s*get;\s*set;\s*\}";
+            var matches = System.Text.RegularExpressions.Regex.Matches(promotionTypesEntityCode, navigationPropertyPattern);
+            
+            matches.Count.Should().Be(1, "導航屬性 PromotionTypeWhiteLists 不應該重複定義");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_Example1Schema_DetectsDuplicateRelationshipConfigurationsInConfiguration()
+        {
+            var schemaJson = File.ReadAllText("TestData/example1.schema");
+            var schema = System.Text.Json.JsonSerializer.Deserialize<T1.EfCodeFirstGenerateCli.Models.DbSchema>(schemaJson);
+            schema.Should().NotBeNull();
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema!, "TestNamespace");
+            
+            var whiteListConfigCode = result["PromotionManagement/Configurations/PromotionTypeWhiteListEntityConfiguration.cs"];
+            
+            var hasOnePattern = @"builder\.HasOne<PromotionTypesEntity>";
+            var matches = System.Text.RegularExpressions.Regex.Matches(whiteListConfigCode, hasOnePattern);
+            
+            matches.Count.Should().Be(2, "PromotionTypeWhiteList 應該有 2 個 HasOne<PromotionTypesEntity> 配置（SourceId 和 TargetId）");
         }
     }
 }
