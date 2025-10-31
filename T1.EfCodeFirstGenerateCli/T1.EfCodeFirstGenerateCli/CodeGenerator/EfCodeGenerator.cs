@@ -114,7 +114,6 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             var output = new IndentStringBuilder();
 
             output.WriteLine($"// This file is auto-generated. Do not modify manually.");
-            output.WriteLine($"// Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             output.WriteLine("using Microsoft.EntityFrameworkCore;");
             output.WriteLine($"using {targetNamespace}.Entities;");
             output.WriteLine($"using {targetNamespace}.Configurations;");
@@ -184,7 +183,6 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         private void WriteEntityFileHeader(IndentStringBuilder output)
         {
             output.WriteLine($"// This file is auto-generated. Do not modify manually.");
-            output.WriteLine($"// Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             output.WriteLine("using System;");
             output.WriteLine("using System.Collections.Generic;");
             output.WriteLine();
@@ -271,7 +269,6 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         private void WriteConfigurationFileHeader(IndentStringBuilder output, string targetNamespace)
         {
             output.WriteLine($"// This file is auto-generated. Do not modify manually.");
-            output.WriteLine($"// Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
             output.WriteLine("using Microsoft.EntityFrameworkCore;");
             output.WriteLine("using Microsoft.EntityFrameworkCore.Metadata.Builders;");
             output.WriteLine($"using {targetNamespace}.Entities;");
