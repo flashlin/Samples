@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using T1.EfCodeFirstGenerateCli.CodeGenerator;
@@ -1372,6 +1373,29 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             whiteListConfigCode.Should().Contain(".WithMany(x => x.PromotionTypeWhiteListsByTarget)", "應該包含 TargetId 的關係配置");
             whiteListConfigCode.Should().Contain("HasForeignKey(x => x.SourceId)", "應該有 SourceId 的外鍵配置");
             whiteListConfigCode.Should().Contain("HasForeignKey(x => x.TargetId)", "應該有 TargetId 的外鍵配置");
+        }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_Example1Schema_NoDuplicateDependentNavigationProperties()
+        {
+            var schemaJson = File.ReadAllText("TestData/example1.schema");
+            var schema = System.Text.Json.JsonSerializer.Deserialize<T1.EfCodeFirstGenerateCli.Models.DbSchema>(schemaJson);
+            schema.Should().NotBeNull();
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema!, "TestNamespace");
+            
+            var whiteListEntityCode = result["PromotionManagement/Entities/PromotionTypeWhiteListEntity.cs"];
+            
+            whiteListEntityCode.Should().Contain("PromotionTypesBySource", "應該包含基於 SourceId 的唯一導航屬性");
+            whiteListEntityCode.Should().Contain("PromotionTypesByTarget", "應該包含基於 TargetId 的唯一導航屬性");
+            
+            var lines = whiteListEntityCode.Split('\n');
+            var promotionTypesLines = lines.Where(l => l.Contains("public PromotionTypesEntity?") && l.Contains("PromotionTypes ")).ToList();
+            
+            var distinctLines = promotionTypesLines.Select(l => l.Trim()).Distinct().ToList();
+            var duplicates = promotionTypesLines.Select(l => l.Trim()).GroupBy(l => l).Where(g => g.Count() > 1).ToList();
+            
+            duplicates.Should().BeEmpty("不應該有重複的 PromotionTypes 導航屬性定義");
         }
     }
 }

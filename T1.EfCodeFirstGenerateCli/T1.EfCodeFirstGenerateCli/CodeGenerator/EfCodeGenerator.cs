@@ -614,16 +614,26 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
                 }
             }
             
-            foreach (var rel in relationships)
+            var dependentRels = relationships.Where(r => r.DependentEntity == tableName && r.NavigationType == NavigationType.Bidirectional).ToList();
+            var dependentGrouped = dependentRels.GroupBy(r => r.PrincipalEntity);
+            
+            foreach (var group in dependentGrouped)
             {
-                if (rel.DependentEntity == tableName)
+                if (group.Count() > 1)
                 {
-                    if (rel.NavigationType == NavigationType.Bidirectional)
+                    foreach (var rel in group)
                     {
-                        var navName = rel.DependentNavigationName ?? rel.PrincipalEntity;
+                        var navName = rel.DependentNavigationName ?? GetDependentNavigationName(rel, relationships);
                         var navType = $"{rel.PrincipalEntity}Entity";
                         navProps.Add(new NavigationProperty { Name = navName, Type = navType });
                     }
+                }
+                else
+                {
+                    var rel = group.First();
+                    var navName = rel.DependentNavigationName ?? rel.PrincipalEntity;
+                    var navType = $"{rel.PrincipalEntity}Entity";
+                    navProps.Add(new NavigationProperty { Name = navName, Type = navType });
                 }
             }
             
@@ -678,6 +688,30 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             }
             
             return GetDefaultNavigationName(rel);
+        }
+
+        private string GetDependentNavigationName(EntityRelationship rel, List<EntityRelationship> allRelationships)
+        {
+            if (!string.IsNullOrEmpty(rel.DependentNavigationName))
+            {
+                return rel.DependentNavigationName;
+            }
+            
+            var samePrincipalRels = allRelationships
+                .Where(r => r.DependentEntity == rel.DependentEntity && r.PrincipalEntity == rel.PrincipalEntity)
+                .ToList();
+            
+            if (samePrincipalRels.Count > 1)
+            {
+                var fkName = ToPascalCase(rel.ForeignKey);
+                if (fkName.EndsWith("Id"))
+                {
+                    fkName = fkName.Substring(0, fkName.Length - 2);
+                }
+                return $"{rel.PrincipalEntity}By{fkName}";
+            }
+            
+            return rel.PrincipalEntity;
         }
 
         private void GenerateRelationshipConfigurations(
@@ -741,7 +775,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             string fkProp,
             List<EntityRelationship> allRelationships)
         {
-            var depNav = rel.DependentNavigationName ?? rel.PrincipalEntity;
+            var depNav = GetDependentNavigationName(rel, allRelationships);
             var prinNav = GetPrincipalNavigationName(rel, allRelationships);
             output.WriteLine($"builder.HasOne(x => x.{depNav})");
             output.Indent++;
@@ -769,7 +803,7 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             string fkProp,
             List<EntityRelationship> allRelationships)
         {
-            var depNav = rel.DependentNavigationName ?? rel.PrincipalEntity;
+            var depNav = GetDependentNavigationName(rel, allRelationships);
             var prinNav = GetPrincipalNavigationName(rel, allRelationships);
             output.WriteLine($"builder.HasOne(x => x.{depNav})");
             output.Indent++;
