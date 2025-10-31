@@ -587,22 +587,37 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         {
             var navProps = new List<NavigationProperty>();
             
-            // Find relationships where this entity is the principal
-            foreach (var rel in relationships)
+            var principalRels = relationships.Where(r => r.PrincipalEntity == tableName).ToList();
+            var grouped = principalRels.GroupBy(r => r.DependentEntity);
+            
+            foreach (var group in grouped)
             {
-                if (rel.PrincipalEntity == tableName)
+                if (group.Count() > 1)
                 {
-                    // Generate navigation on principal side (for both bidirectional and unidirectional)
+                    foreach (var rel in group)
+                    {
+                        var navName = rel.PrincipalNavigationName ?? GenerateUniqueNavigationName(rel, rel.ForeignKey);
+                        var navType = (rel.Type == RelationshipType.OneToOne) 
+                            ? $"{rel.DependentEntity}Entity"
+                            : $"ICollection<{rel.DependentEntity}Entity>";
+                        navProps.Add(new NavigationProperty { Name = navName, Type = navType });
+                    }
+                }
+                else
+                {
+                    var rel = group.First();
                     var navName = rel.PrincipalNavigationName ?? GetDefaultNavigationName(rel);
                     var navType = (rel.Type == RelationshipType.OneToOne) 
                         ? $"{rel.DependentEntity}Entity"
                         : $"ICollection<{rel.DependentEntity}Entity>";
                     navProps.Add(new NavigationProperty { Name = navName, Type = navType });
                 }
-                
+            }
+            
+            foreach (var rel in relationships)
+            {
                 if (rel.DependentEntity == tableName)
                 {
-                    // Generate navigation on dependent side only if bidirectional
                     if (rel.NavigationType == NavigationType.Bidirectional)
                     {
                         var navName = rel.DependentNavigationName ?? rel.PrincipalEntity;
@@ -617,13 +632,26 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 
         private string GetDefaultNavigationName(EntityRelationship rel)
         {
-            // OneToMany/ManyToOne: plural form for collection
             if (rel.Type == RelationshipType.OneToMany || rel.Type == RelationshipType.ManyToOne)
             {
-                return rel.DependentEntity + "s"; // Simple pluralization
+                return rel.DependentEntity + "s";
             }
-            // OneToOne: singular form
             return rel.DependentEntity;
+        }
+
+        private string GenerateUniqueNavigationName(EntityRelationship rel, string foreignKeyName)
+        {
+            var fkName = ToPascalCase(foreignKeyName);
+            if (fkName.EndsWith("Id"))
+            {
+                fkName = fkName.Substring(0, fkName.Length - 2);
+            }
+            
+            if (rel.Type == RelationshipType.OneToMany || rel.Type == RelationshipType.ManyToOne)
+            {
+                return $"{rel.DependentEntity}sBy{fkName}";
+            }
+            return $"{rel.DependentEntity}By{fkName}";
         }
 
         private string ExtractGenericType(string type)
@@ -631,6 +659,25 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             // Extract "OrderEntity" from "ICollection<OrderEntity>"
             var match = Regex.Match(type, @"<(.+)>");
             return match.Success ? match.Groups[1].Value : type;
+        }
+
+        private string GetPrincipalNavigationName(EntityRelationship rel, List<EntityRelationship> allRelationships)
+        {
+            if (!string.IsNullOrEmpty(rel.PrincipalNavigationName))
+            {
+                return rel.PrincipalNavigationName;
+            }
+            
+            var sameTargetRels = allRelationships
+                .Where(r => r.PrincipalEntity == rel.PrincipalEntity && r.DependentEntity == rel.DependentEntity)
+                .ToList();
+            
+            if (sameTargetRels.Count > 1)
+            {
+                return GenerateUniqueNavigationName(rel, rel.ForeignKey);
+            }
+            
+            return GetDefaultNavigationName(rel);
         }
 
         private void GenerateRelationshipConfigurations(
@@ -649,14 +696,15 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             
             foreach (var rel in relevantRels)
             {
-                GenerateSingleRelationship(output, tableName, rel);
+                GenerateSingleRelationship(output, tableName, rel, relationships);
             }
         }
 
         private void GenerateSingleRelationship(
             IndentStringBuilder output, 
             string dependentTable, 
-            EntityRelationship rel)
+            EntityRelationship rel,
+            List<EntityRelationship> allRelationships)
         {
             var fkProp = ToPascalCase(rel.ForeignKey);
             
@@ -664,18 +712,18 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             {
                 if (rel.NavigationType == NavigationType.Bidirectional)
                 {
-                    WriteOneToOneBidirectionalRelationship(output, dependentTable, rel, fkProp);
+                    WriteOneToOneBidirectionalRelationship(output, dependentTable, rel, fkProp, allRelationships);
                 }
                 else
                 {
                     WriteOneToOneUnidirectionalRelationship(output, dependentTable, rel, fkProp);
                 }
             }
-            else // OneToMany or ManyToOne
+            else
             {
                 if (rel.NavigationType == NavigationType.Bidirectional)
                 {
-                    WriteOneToManyBidirectionalRelationship(output, rel, fkProp);
+                    WriteOneToManyBidirectionalRelationship(output, rel, fkProp, allRelationships);
                 }
                 else
                 {
@@ -690,10 +738,11 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
             IndentStringBuilder output,
             string dependentTable,
             EntityRelationship rel,
-            string fkProp)
+            string fkProp,
+            List<EntityRelationship> allRelationships)
         {
             var depNav = rel.DependentNavigationName ?? rel.PrincipalEntity;
-            var prinNav = rel.PrincipalNavigationName ?? rel.DependentEntity;
+            var prinNav = GetPrincipalNavigationName(rel, allRelationships);
             output.WriteLine($"builder.HasOne(x => x.{depNav})");
             output.Indent++;
             output.WriteLine($".WithOne(x => x.{prinNav})");
@@ -717,10 +766,11 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
         private void WriteOneToManyBidirectionalRelationship(
             IndentStringBuilder output,
             EntityRelationship rel,
-            string fkProp)
+            string fkProp,
+            List<EntityRelationship> allRelationships)
         {
             var depNav = rel.DependentNavigationName ?? rel.PrincipalEntity;
-            var prinNav = rel.PrincipalNavigationName ?? (rel.DependentEntity + "s");
+            var prinNav = GetPrincipalNavigationName(rel, allRelationships);
             output.WriteLine($"builder.HasOne(x => x.{depNav})");
             output.Indent++;
             output.WriteLine($".WithMany(x => x.{prinNav})");

@@ -1349,10 +1349,12 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             
             var promotionTypesEntityCode = result["PromotionManagement/Entities/PromotionTypesEntity.cs"];
             
-            var navigationPropertyPattern = @"public\s+ICollection<PromotionTypeWhiteListEntity>\s+PromotionTypeWhiteLists\s*\{\s*get;\s*set;\s*\}";
-            var matches = System.Text.RegularExpressions.Regex.Matches(promotionTypesEntityCode, navigationPropertyPattern);
+            promotionTypesEntityCode.Should().Contain("PromotionTypeWhiteListsBySource", "應該包含基於 SourceId 的唯一導航屬性");
+            promotionTypesEntityCode.Should().Contain("PromotionTypeWhiteListsByTarget", "應該包含基於 TargetId 的唯一導航屬性");
             
-            matches.Count.Should().Be(1, "導航屬性 PromotionTypeWhiteLists 不應該重複定義");
+            var duplicatePattern = @"public\s+ICollection<PromotionTypeWhiteListEntity>\s+PromotionTypeWhiteLists\s*\{\s*get;\s*set;\s*\}";
+            var duplicateMatches = System.Text.RegularExpressions.Regex.Matches(promotionTypesEntityCode, duplicatePattern);
+            duplicateMatches.Count.Should().Be(0, "不應該有重複的 PromotionTypeWhiteLists 導航屬性");
         }
 
         [Test]
@@ -1366,10 +1368,10 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             
             var whiteListConfigCode = result["PromotionManagement/Configurations/PromotionTypeWhiteListEntityConfiguration.cs"];
             
-            var hasOnePattern = @"builder\.HasOne<PromotionTypesEntity>";
-            var matches = System.Text.RegularExpressions.Regex.Matches(whiteListConfigCode, hasOnePattern);
-            
-            matches.Count.Should().Be(2, "PromotionTypeWhiteList 應該有 2 個 HasOne<PromotionTypesEntity> 配置（SourceId 和 TargetId）");
+            whiteListConfigCode.Should().Contain(".WithMany(x => x.PromotionTypeWhiteListsBySource)", "應該包含 SourceId 的關係配置");
+            whiteListConfigCode.Should().Contain(".WithMany(x => x.PromotionTypeWhiteListsByTarget)", "應該包含 TargetId 的關係配置");
+            whiteListConfigCode.Should().Contain("HasForeignKey(x => x.SourceId)", "應該有 SourceId 的外鍵配置");
+            whiteListConfigCode.Should().Contain("HasForeignKey(x => x.TargetId)", "應該有 TargetId 的外鍵配置");
         }
     }
 }
