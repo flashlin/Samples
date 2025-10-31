@@ -110,6 +110,9 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
             {
                 connection.Open();
 
+                // Step 1: Collect all foreign key data first
+                var foreignKeyData = new List<(string DependentTable, string ForeignKeyColumn, string PrincipalTable, string PrincipalKeyColumn, bool IsNullable)>();
+
                 var query = @"
                     SELECT 
                         OBJECT_NAME(fk.parent_object_id) AS DependentTable,
@@ -129,28 +132,33 @@ namespace T1.EfCodeFirstGenerateCli.SchemaExtractor
                     {
                         while (reader.Read())
                         {
-                            var dependentTable = reader.GetString(0);
-                            var foreignKeyColumn = reader.GetString(1);
-                            var principalTable = reader.GetString(2);
-                            var principalKeyColumn = reader.GetString(3);
-                            var isNullable = reader.GetBoolean(4);
-
-                            // Determine relationship type (OneToOne or OneToMany)
-                            var relType = DetermineRelationshipType(connection, dependentTable, foreignKeyColumn);
-
-                            relationships.Add(new EntityRelationship
-                            {
-                                PrincipalEntity = principalTable,
-                                PrincipalKey = principalKeyColumn,
-                                DependentEntity = dependentTable,
-                                ForeignKey = foreignKeyColumn,
-                                Type = relType,
-                                NavigationType = NavigationType.Bidirectional,
-                                IsPrincipalOptional = false,
-                                IsDependentOptional = isNullable
-                            });
+                            foreignKeyData.Add((
+                                reader.GetString(0),
+                                reader.GetString(1),
+                                reader.GetString(2),
+                                reader.GetString(3),
+                                reader.GetBoolean(4)
+                            ));
                         }
                     }
+                }
+
+                // Step 2: Process collected data and determine relationship types
+                foreach (var fk in foreignKeyData)
+                {
+                    var relType = DetermineRelationshipType(connection, fk.DependentTable, fk.ForeignKeyColumn);
+
+                    relationships.Add(new EntityRelationship
+                    {
+                        PrincipalEntity = fk.PrincipalTable,
+                        PrincipalKey = fk.PrincipalKeyColumn,
+                        DependentEntity = fk.DependentTable,
+                        ForeignKey = fk.ForeignKeyColumn,
+                        Type = relType,
+                        NavigationType = NavigationType.Bidirectional,
+                        IsPrincipalOptional = false,
+                        IsDependentOptional = fk.IsNullable
+                    });
                 }
             }
 
