@@ -93,7 +93,14 @@ namespace T1.EfCodeFirstGenerateCli.CodeGenerator
 
         private string ToPlural(string singular)
         {
-            return singular.Pluralize();
+            var pluralized = singular.Pluralize();
+            
+            if (pluralized == singular)
+            {
+                return singular;
+            }
+            
+            return pluralized;
         }
 
         public Dictionary<string, string> GenerateCodeFirstFromSchema(DbSchema dbSchema, string targetNamespace)

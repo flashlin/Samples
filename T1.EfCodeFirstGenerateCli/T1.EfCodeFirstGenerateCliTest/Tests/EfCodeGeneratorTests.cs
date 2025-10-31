@@ -1455,6 +1455,37 @@ namespace T1.EfCodeFirstGenerateCliTest.Tests
             var categoryEntityCode = result["TestDb/Entities/CategoryEntity.cs"];
             categoryEntityCode.Should().Contain("public ICollection<ProductEntity> Products { get; set; }");
         }
+
+        [Test]
+        public void GenerateCodeFirstFromSchema_AlreadyPluralEntity_DoesNotDoublePluralize()
+        {
+            var schema = new T1.EfCodeFirstGenerateCli.Models.DbSchema
+            {
+                DatabaseName = "TestDb",
+                ContextName = "TestDb"
+            };
+            
+            var targetsTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "CustomerPromotionTargets" };
+            targetsTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            schema.Tables.Add(targetsTable);
+            
+            var itemTable = new T1.EfCodeFirstGenerateCli.Models.TableSchema { TableName = "Item" };
+            itemTable.Fields.Add(TestHelper.CreateField("Id", "int", false, null, true, true));
+            itemTable.Fields.Add(TestHelper.CreateField("TargetId", "int", false, null, false, false));
+            schema.Tables.Add(itemTable);
+            
+            schema.Relationships.Add(TestHelper.CreateRelationship(
+                "CustomerPromotionTargets", "Id", "Item", "TargetId",
+                T1.EfCodeFirstGenerateCli.Models.RelationshipType.OneToMany,
+                T1.EfCodeFirstGenerateCli.Models.NavigationType.Bidirectional));
+            
+            var result = _generator.GenerateCodeFirstFromSchema(schema, "TestNamespace");
+            
+            var targetsEntityCode = result["TestDb/Entities/CustomerPromotionTargetsEntity.cs"];
+            targetsEntityCode.Should().Contain("public ICollection<ItemEntity> Items { get; set; }");
+            targetsEntityCode.Should().NotContain("Itemss");
+            targetsEntityCode.Should().NotContain("CustomerPromotionTargetss");
+        }
     }
 }
 
