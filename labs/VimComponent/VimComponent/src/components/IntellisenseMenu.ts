@@ -267,8 +267,8 @@ export class IntellisenseMenu {
   private selectItem(index: number): void {
     if (index >= 0 && index < this.items.length) {
       const item = this.items[index];
-      this.hide();
       item.action();
+      this.hide();
     }
   }
   
