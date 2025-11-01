@@ -11,6 +11,7 @@ import { LinqGroupByExpression } from '../linqExpressions/LinqGroupByExpression'
 import { LinqHavingExpression } from '../linqExpressions/LinqHavingExpression';
 import { LinqOrderByExpression } from '../linqExpressions/LinqOrderByExpression';
 import { LinqSelectExpression } from '../linqExpressions/LinqSelectExpression';
+import { LinqDropTableExpression } from '../linqExpressions/LinqDropTableExpression';
 
 // T-SQL expressions
 import { QueryExpression } from '../expressions/QueryExpression';
@@ -21,6 +22,7 @@ import { GroupByExpression } from '../expressions/GroupByExpression';
 import { HavingExpression } from '../expressions/HavingExpression';
 import { OrderByExpression, OrderByItem } from '../expressions/OrderByExpression';
 import { SelectExpression, SelectItem } from '../expressions/SelectExpression';
+import { DropTableExpression } from '../expressions/DropTableExpression';
 import { ColumnExpression } from '../expressions/ColumnExpression';
 import { LiteralExpression } from '../expressions/LiteralExpression';
 import { BinaryExpression } from '../expressions/BinaryExpression';
@@ -31,7 +33,14 @@ import { FunctionExpression } from '../expressions/FunctionExpression';
 export class LinqToTSqlConverter {
   
   // Convert LINQ query to T-SQL query
-  convert(linqQuery: LinqQueryExpression): QueryExpression {
+  convert(linqQuery: LinqQueryExpression | LinqDropTableExpression): QueryExpression | DropTableExpression {
+    if (linqQuery instanceof LinqDropTableExpression) {
+      const tableName = linqQuery.databaseName 
+        ? `${linqQuery.databaseName}.${linqQuery.tableName}`
+        : linqQuery.tableName;
+      return new DropTableExpression(tableName);
+    }
+    
     // Convert FROM
     const from = linqQuery.from 
       ? new FromExpression(

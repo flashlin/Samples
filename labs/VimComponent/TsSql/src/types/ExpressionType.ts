@@ -9,6 +9,7 @@ export enum ExpressionType {
   GroupBy = 'GroupBy',
   Having = 'Having',
   OrderBy = 'OrderBy',
+  DropTable = 'DropTable',
   
   // T-SQL Condition and Operation Expressions
   Column = 'Column',

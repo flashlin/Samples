@@ -12,4 +12,5 @@ export * from './HavingExpression';
 export * from './OrderByExpression';
 export * from './SelectExpression';
 export * from './QueryExpression';
+export * from './DropTableExpression';
 
