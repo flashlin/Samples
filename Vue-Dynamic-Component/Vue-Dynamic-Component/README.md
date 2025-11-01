@@ -1,3 +1,0 @@
-﻿# Vue-Dynamic-Component
-
-
