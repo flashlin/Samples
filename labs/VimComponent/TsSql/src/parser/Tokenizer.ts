@@ -23,6 +23,8 @@ const KEYWORDS: Record<string, TokenType> = {
   'WITH': TokenType.WITH,
   'DROP': TokenType.DROP,
   'TABLE': TokenType.TABLE,
+  'DELETE': TokenType.DELETE,
+  'PERCENT': TokenType.PERCENT,
   'AND': TokenType.AND,
   'OR': TokenType.OR,
   'NOT': TokenType.NOT,

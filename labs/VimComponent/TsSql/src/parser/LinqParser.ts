@@ -15,6 +15,7 @@ import { LinqHavingExpression } from '../linqExpressions/LinqHavingExpression';
 import { LinqOrderByExpression, LinqOrderByItem } from '../linqExpressions/LinqOrderByExpression';
 import { LinqSelectExpression, LinqSelectItem } from '../linqExpressions/LinqSelectExpression';
 import { LinqDropTableExpression } from '../linqExpressions/LinqDropTableExpression';
+import { LinqDeleteExpression } from '../linqExpressions/LinqDeleteExpression';
 
 // Basic expressions
 import { ColumnExpression } from '../expressions/ColumnExpression';
@@ -30,7 +31,7 @@ export class LinqParser {
   private errors: ParseError[] = [];
   
   // Parse LINQ query from string
-  parse(input: string): ParseResult<LinqQueryExpression | LinqDropTableExpression> {
+  parse(input: string): ParseResult<LinqQueryExpression | LinqDropTableExpression | LinqDeleteExpression> {
     // Reset state
     this.current = 0;
     this.errors = [];
@@ -46,6 +47,15 @@ export class LinqParser {
       const dropTable = this.parseDropTable();
       return {
         result: dropTable,
+        errors: this.errors
+      };
+    }
+    
+    // Check if it's a DELETE statement
+    if (this.check(TokenType.DELETE)) {
+      const deleteExpr = this.parseDelete();
+      return {
+        result: deleteExpr,
         errors: this.errors
       };
     }
@@ -466,6 +476,73 @@ export class LinqParser {
     }
     
     return new LinqDropTableExpression(tableName, databaseName);
+  }
+  
+  private parseDelete(): LinqDeleteExpression {
+    if (!this.match(TokenType.DELETE)) {
+      this.addError('Expected DELETE keyword');
+      return new LinqDeleteExpression('');
+    }
+    
+    let topCount: number | undefined;
+    let isPercent: boolean | undefined;
+    
+    if (this.match(TokenType.TOP)) {
+      if (!this.match(TokenType.LEFT_PAREN)) {
+        this.addError('Expected ( after TOP');
+        return new LinqDeleteExpression('');
+      }
+      
+      if (!this.check(TokenType.NUMBER)) {
+        this.addError('Expected number after TOP (');
+        return new LinqDeleteExpression('');
+      }
+      
+      topCount = parseInt(this.advance().value, 10);
+      
+      if (!this.match(TokenType.RIGHT_PAREN)) {
+        this.addError('Expected ) after TOP count');
+        return new LinqDeleteExpression('');
+      }
+      
+      if (this.match(TokenType.PERCENT)) {
+        isPercent = true;
+      }
+    }
+    
+    if (!this.match(TokenType.FROM)) {
+      this.addError('Expected FROM keyword after DELETE');
+      return new LinqDeleteExpression('');
+    }
+    
+    if (!this.check(TokenType.IDENTIFIER)) {
+      this.addError('Expected table name after FROM');
+      return new LinqDeleteExpression('');
+    }
+    
+    const firstIdentifier = this.advance().value;
+    let databaseName: string | undefined;
+    let tableName: string;
+    
+    if (this.match(TokenType.DOT)) {
+      if (!this.check(TokenType.IDENTIFIER)) {
+        this.addError('Expected table name after database.');
+        return new LinqDeleteExpression(firstIdentifier);
+      }
+      databaseName = firstIdentifier;
+      tableName = this.advance().value;
+    } else {
+      tableName = firstIdentifier;
+    }
+    
+    let whereCondition: Expression | undefined;
+    
+    if (this.check(TokenType.WHERE)) {
+      this.match(TokenType.WHERE);
+      whereCondition = this.parseExpression();
+    }
+    
+    return new LinqDeleteExpression(tableName, whereCondition, databaseName, topCount, isPercent);
   }
   
   // Parse primary expressions

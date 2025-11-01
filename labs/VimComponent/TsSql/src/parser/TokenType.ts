@@ -21,6 +21,8 @@ export enum TokenType {
   WITH = 'WITH',
   DROP = 'DROP',
   TABLE = 'TABLE',
+  DELETE = 'DELETE',
+  PERCENT = 'PERCENT',
   
   // Logical operators
   AND = 'AND',

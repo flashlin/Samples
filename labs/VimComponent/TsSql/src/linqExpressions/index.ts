@@ -8,4 +8,5 @@ export * from './LinqOrderByExpression';
 export * from './LinqSelectExpression';
 export * from './LinqQueryExpression';
 export * from './LinqDropTableExpression';
+export * from './LinqDeleteExpression';
 

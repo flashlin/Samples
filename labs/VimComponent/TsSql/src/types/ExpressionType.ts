@@ -10,6 +10,7 @@ export enum ExpressionType {
   Having = 'Having',
   OrderBy = 'OrderBy',
   DropTable = 'DropTable',
+  Delete = 'Delete',
   
   // T-SQL Condition and Operation Expressions
   Column = 'Column',
@@ -28,6 +29,7 @@ export enum ExpressionType {
   LinqOrderBy = 'LinqOrderBy',
   LinqSelect = 'LinqSelect',
   LinqDropTable = 'LinqDropTable',
+  LinqDelete = 'LinqDelete',
 }
 
 // Join types

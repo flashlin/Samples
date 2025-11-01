@@ -12,6 +12,7 @@ import { LinqHavingExpression } from '../linqExpressions/LinqHavingExpression';
 import { LinqOrderByExpression } from '../linqExpressions/LinqOrderByExpression';
 import { LinqSelectExpression } from '../linqExpressions/LinqSelectExpression';
 import { LinqDropTableExpression } from '../linqExpressions/LinqDropTableExpression';
+import { LinqDeleteExpression } from '../linqExpressions/LinqDeleteExpression';
 
 // T-SQL expressions
 import { QueryExpression } from '../expressions/QueryExpression';
@@ -23,6 +24,7 @@ import { HavingExpression } from '../expressions/HavingExpression';
 import { OrderByExpression, OrderByItem } from '../expressions/OrderByExpression';
 import { SelectExpression, SelectItem } from '../expressions/SelectExpression';
 import { DropTableExpression } from '../expressions/DropTableExpression';
+import { DeleteExpression } from '../expressions/DeleteExpression';
 import { ColumnExpression } from '../expressions/ColumnExpression';
 import { LiteralExpression } from '../expressions/LiteralExpression';
 import { BinaryExpression } from '../expressions/BinaryExpression';
@@ -33,12 +35,29 @@ import { FunctionExpression } from '../expressions/FunctionExpression';
 export class LinqToTSqlConverter {
   
   // Convert LINQ query to T-SQL query
-  convert(linqQuery: LinqQueryExpression | LinqDropTableExpression): QueryExpression | DropTableExpression {
+  convert(linqQuery: LinqQueryExpression | LinqDropTableExpression | LinqDeleteExpression): QueryExpression | DropTableExpression | DeleteExpression {
     if (linqQuery instanceof LinqDropTableExpression) {
       const tableName = linqQuery.databaseName 
         ? `${linqQuery.databaseName}.${linqQuery.tableName}`
         : linqQuery.tableName;
       return new DropTableExpression(tableName);
+    }
+    
+    if (linqQuery instanceof LinqDeleteExpression) {
+      const tableName = linqQuery.databaseName 
+        ? `${linqQuery.databaseName}.${linqQuery.tableName}`
+        : linqQuery.tableName;
+      
+      const where = linqQuery.whereCondition 
+        ? new WhereExpression(linqQuery.whereCondition)
+        : undefined;
+      
+      return new DeleteExpression(
+        tableName,
+        where,
+        linqQuery.topCount,
+        linqQuery.isPercent
+      );
     }
     
     // Convert FROM

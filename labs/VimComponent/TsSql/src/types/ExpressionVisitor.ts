@@ -8,6 +8,7 @@ import type { GroupByExpression } from '../expressions/GroupByExpression';
 import type { HavingExpression } from '../expressions/HavingExpression';
 import type { OrderByExpression } from '../expressions/OrderByExpression';
 import type { DropTableExpression } from '../expressions/DropTableExpression';
+import type { DeleteExpression } from '../expressions/DeleteExpression';
 import type { ColumnExpression } from '../expressions/ColumnExpression';
 import type { LiteralExpression } from '../expressions/LiteralExpression';
 import type { BinaryExpression } from '../expressions/BinaryExpression';
@@ -24,6 +25,7 @@ import type { LinqHavingExpression } from '../linqExpressions/LinqHavingExpressi
 import type { LinqOrderByExpression } from '../linqExpressions/LinqOrderByExpression';
 import type { LinqSelectExpression } from '../linqExpressions/LinqSelectExpression';
 import type { LinqDropTableExpression } from '../linqExpressions/LinqDropTableExpression';
+import type { LinqDeleteExpression } from '../linqExpressions/LinqDeleteExpression';
 
 // Visitor pattern interface
 export interface ExpressionVisitor<T> {
@@ -37,6 +39,7 @@ export interface ExpressionVisitor<T> {
   visitHaving(expr: HavingExpression): T;
   visitOrderBy(expr: OrderByExpression): T;
   visitDropTable(expr: DropTableExpression): T;
+  visitDelete(expr: DeleteExpression): T;
   
   // T-SQL Condition and Operation Expressions
   visitColumn(expr: ColumnExpression): T;
@@ -55,5 +58,6 @@ export interface ExpressionVisitor<T> {
   visitLinqOrderBy(expr: LinqOrderByExpression): T;
   visitLinqSelect(expr: LinqSelectExpression): T;
   visitLinqDropTable(expr: LinqDropTableExpression): T;
+  visitLinqDelete(expr: LinqDeleteExpression): T;
 }
 

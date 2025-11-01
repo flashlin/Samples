@@ -11,6 +11,7 @@ import { GroupByExpression } from '../expressions/GroupByExpression';
 import { HavingExpression } from '../expressions/HavingExpression';
 import { OrderByExpression } from '../expressions/OrderByExpression';
 import { DropTableExpression } from '../expressions/DropTableExpression';
+import { DeleteExpression } from '../expressions/DeleteExpression';
 import { ColumnExpression } from '../expressions/ColumnExpression';
 import { LiteralExpression } from '../expressions/LiteralExpression';
 import { BinaryExpression } from '../expressions/BinaryExpression';
@@ -27,6 +28,7 @@ import { LinqHavingExpression } from '../linqExpressions/LinqHavingExpression';
 import { LinqOrderByExpression } from '../linqExpressions/LinqOrderByExpression';
 import { LinqSelectExpression } from '../linqExpressions/LinqSelectExpression';
 import { LinqDropTableExpression } from '../linqExpressions/LinqDropTableExpression';
+import { LinqDeleteExpression } from '../linqExpressions/LinqDeleteExpression';
 
 // T-SQL Formatter - converts T-SQL expressions to formatted SQL string
 export class TSqlFormatter implements ExpressionVisitor<string> {
@@ -192,6 +194,25 @@ export class TSqlFormatter implements ExpressionVisitor<string> {
     return `DROP TABLE ${expr.tableName}`;
   }
   
+  visitDelete(expr: DeleteExpression): string {
+    let sql = 'DELETE';
+    
+    if (expr.topCount !== undefined) {
+      sql += ` TOP (${expr.topCount})`;
+      if (expr.isPercent) {
+        sql += ' PERCENT';
+      }
+    }
+    
+    sql += ` FROM ${expr.tableName}`;
+    
+    if (expr.where) {
+      sql += ` WHERE ${expr.where.accept(this)}`;
+    }
+    
+    return sql;
+  }
+  
   // LINQ expressions (should not be formatted, but need to handle)
   visitLinqQuery(expr: LinqQueryExpression): string {
     throw new Error('Cannot format LINQ query directly. Convert to T-SQL first.');
@@ -227,6 +248,10 @@ export class TSqlFormatter implements ExpressionVisitor<string> {
   
   visitLinqDropTable(expr: LinqDropTableExpression): string {
     throw new Error('Cannot format LINQ DROP TABLE directly. Convert to T-SQL first.');
+  }
+  
+  visitLinqDelete(expr: LinqDeleteExpression): string {
+    throw new Error('Cannot format LINQ DELETE directly. Convert to T-SQL first.');
   }
   
   // Helper methods
