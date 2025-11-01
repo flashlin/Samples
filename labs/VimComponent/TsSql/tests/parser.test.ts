@@ -222,6 +222,35 @@ describe('LinqParser', () => {
     expect(result.result.wheres).toHaveLength(1);
   });
   
+  describe('DROP TABLE Statement Parsing', () => {
+    it('should parse DROP TABLE users', () => {
+      const result = parser.parse('DROP TABLE users');
+      
+      expect(result.errors).toHaveLength(0);
+      expect(result.result.type).toBe(ExpressionType.LinqDropTable);
+      expect(result.result.tableName).toBe('users');
+      expect(result.result.databaseName).toBeUndefined();
+    });
+    
+    it('should parse DROP TABLE mydb.users', () => {
+      const result = parser.parse('DROP TABLE mydb.users');
+      
+      expect(result.errors).toHaveLength(0);
+      expect(result.result.type).toBe(ExpressionType.LinqDropTable);
+      expect(result.result.databaseName).toBe('mydb');
+      expect(result.result.tableName).toBe('users');
+    });
+    
+    it('should parse DROP TABLE testdb.temp_logs', () => {
+      const result = parser.parse('DROP TABLE testdb.temp_logs');
+      
+      expect(result.errors).toHaveLength(0);
+      expect(result.result.type).toBe(ExpressionType.LinqDropTable);
+      expect(result.result.databaseName).toBe('testdb');
+      expect(result.result.tableName).toBe('temp_logs');
+    });
+  });
+  
   describe('DELETE Statement Parsing', () => {
     it('should parse DELETE FROM table WHERE condition', () => {
       const result = parser.parse('DELETE FROM users WHERE id = 1');

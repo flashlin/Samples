@@ -251,6 +251,29 @@ describe('Integration Tests', () => {
     expect(sql).toContain('AND');
   });
   
+  describe('DROP TABLE Statement Integration', () => {
+    it('should convert DROP TABLE users', () => {
+      const { sql, errors } = linqToSql('DROP TABLE users');
+      
+      expect(errors).toHaveLength(0);
+      expect(sql).toBe('DROP TABLE users');
+    });
+    
+    it('should convert DROP TABLE mydb.users', () => {
+      const { sql, errors } = linqToSql('DROP TABLE mydb.users');
+      
+      expect(errors).toHaveLength(0);
+      expect(sql).toBe('DROP TABLE mydb.users');
+    });
+    
+    it('should convert DROP TABLE testdb.temp_logs', () => {
+      const { sql, errors } = linqToSql('DROP TABLE testdb.temp_logs');
+      
+      expect(errors).toHaveLength(0);
+      expect(sql).toBe('DROP TABLE testdb.temp_logs');
+    });
+  });
+  
   describe('DELETE Statement Integration', () => {
     it('should convert DELETE FROM table WHERE condition', () => {
       const { sql, errors } = linqToSql('DELETE FROM users WHERE id = 1');

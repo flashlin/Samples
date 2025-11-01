@@ -218,6 +218,28 @@ describe('TSqlFormatter', () => {
     expect(sql).toContain('AND');
   });
   
+  describe('DROP TABLE Statement Formatting', () => {
+    it('should format DROP TABLE users', () => {
+      const sql = formatLinqQuery('DROP TABLE users');
+      
+      expect(sql).toBe('DROP TABLE users');
+    });
+    
+    it('should format DROP TABLE mydb.users', () => {
+      const sql = formatLinqQuery('DROP TABLE mydb.users');
+      
+      expect(sql).toBe('DROP TABLE mydb.users');
+    });
+    
+    it('should throw error for LinqDropTableExpression', () => {
+      const parseResult = parser.parse('DROP TABLE users');
+      
+      expect(() => {
+        formatter.format(parseResult.result);
+      }).toThrow('Cannot format LINQ DROP TABLE directly');
+    });
+  });
+  
   describe('DELETE Statement Formatting', () => {
     it('should format DELETE FROM table WHERE condition', () => {
       const sql = formatLinqQuery('DELETE FROM users WHERE id = 1');

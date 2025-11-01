@@ -108,6 +108,24 @@ describe('LinqToTSqlConverter', () => {
     expect(tsqlQuery.isComplete).toBe(false);
   });
   
+  describe('DROP TABLE Statement Conversion', () => {
+    it('should convert basic DROP TABLE statement', () => {
+      const parseResult = parser.parse('DROP TABLE users');
+      const tsqlExpr = converter.convert(parseResult.result);
+      
+      expect(tsqlExpr.type).toBe(ExpressionType.DropTable);
+      expect(tsqlExpr.tableName).toBe('users');
+    });
+    
+    it('should convert DROP TABLE with database.table format', () => {
+      const parseResult = parser.parse('DROP TABLE mydb.users');
+      const tsqlExpr = converter.convert(parseResult.result);
+      
+      expect(tsqlExpr.type).toBe(ExpressionType.DropTable);
+      expect(tsqlExpr.tableName).toBe('mydb.users');
+    });
+  });
+  
   describe('DELETE Statement Conversion', () => {
     it('should convert basic DELETE statement', () => {
       const parseResult = parser.parse('DELETE FROM users WHERE id = 1');
