@@ -1,8 +1,0 @@
-{
-   "copyFiles": [
-      {
-         "from": "public/**/*",
-         "to": "dist/"
-      }
-   ]
-}
