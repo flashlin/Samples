@@ -22,6 +22,7 @@ import type { LinqGroupByExpression } from '../linqExpressions/LinqGroupByExpres
 import type { LinqHavingExpression } from '../linqExpressions/LinqHavingExpression';
 import type { LinqOrderByExpression } from '../linqExpressions/LinqOrderByExpression';
 import type { LinqSelectExpression } from '../linqExpressions/LinqSelectExpression';
+import type { LinqDropTableExpression } from '../linqExpressions/LinqDropTableExpression';
 
 // Visitor pattern interface
 export interface ExpressionVisitor<T> {
@@ -51,5 +52,6 @@ export interface ExpressionVisitor<T> {
   visitLinqHaving(expr: LinqHavingExpression): T;
   visitLinqOrderBy(expr: LinqOrderByExpression): T;
   visitLinqSelect(expr: LinqSelectExpression): T;
+  visitLinqDropTable(expr: LinqDropTableExpression): T;
 }
 

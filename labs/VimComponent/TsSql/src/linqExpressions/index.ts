@@ -7,4 +7,5 @@ export * from './LinqHavingExpression';
 export * from './LinqOrderByExpression';
 export * from './LinqSelectExpression';
 export * from './LinqQueryExpression';
+export * from './LinqDropTableExpression';
 

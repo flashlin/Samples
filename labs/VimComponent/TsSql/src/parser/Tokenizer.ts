@@ -21,6 +21,8 @@ const KEYWORDS: Record<string, TokenType> = {
   'TOP': TokenType.TOP,
   'AS': TokenType.AS,
   'WITH': TokenType.WITH,
+  'DROP': TokenType.DROP,
+  'TABLE': TokenType.TABLE,
   'AND': TokenType.AND,
   'OR': TokenType.OR,
   'NOT': TokenType.NOT,

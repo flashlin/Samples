@@ -19,6 +19,8 @@ export enum TokenType {
   TOP = 'TOP',
   AS = 'AS',
   WITH = 'WITH',
+  DROP = 'DROP',
+  TABLE = 'TABLE',
   
   // Logical operators
   AND = 'AND',

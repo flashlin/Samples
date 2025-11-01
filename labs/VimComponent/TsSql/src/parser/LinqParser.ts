@@ -14,6 +14,7 @@ import { LinqGroupByExpression } from '../linqExpressions/LinqGroupByExpression'
 import { LinqHavingExpression } from '../linqExpressions/LinqHavingExpression';
 import { LinqOrderByExpression, LinqOrderByItem } from '../linqExpressions/LinqOrderByExpression';
 import { LinqSelectExpression, LinqSelectItem } from '../linqExpressions/LinqSelectExpression';
+import { LinqDropTableExpression } from '../linqExpressions/LinqDropTableExpression';
 
 // Basic expressions
 import { ColumnExpression } from '../expressions/ColumnExpression';
@@ -29,7 +30,7 @@ export class LinqParser {
   private errors: ParseError[] = [];
   
   // Parse LINQ query from string
-  parse(input: string): ParseResult<LinqQueryExpression> {
+  parse(input: string): ParseResult<LinqQueryExpression | LinqDropTableExpression> {
     // Reset state
     this.current = 0;
     this.errors = [];
@@ -39,6 +40,15 @@ export class LinqParser {
     const { tokens, errors } = tokenizer.tokenize();
     this.tokens = tokens;
     this.errors.push(...errors);
+    
+    // Check if it's a DROP TABLE statement
+    if (this.check(TokenType.DROP)) {
+      const dropTable = this.parseDropTable();
+      return {
+        result: dropTable,
+        errors: this.errors
+      };
+    }
     
     // Parse query
     const query = this.parseQuery();
@@ -421,6 +431,41 @@ export class LinqParser {
     }
     
     return expr;
+  }
+  
+  // Parse DROP TABLE statement
+  private parseDropTable(): LinqDropTableExpression {
+    if (!this.match(TokenType.DROP)) {
+      this.addError('Expected DROP keyword');
+      return new LinqDropTableExpression('');
+    }
+    
+    if (!this.match(TokenType.TABLE)) {
+      this.addError('Expected TABLE keyword after DROP');
+      return new LinqDropTableExpression('');
+    }
+    
+    if (!this.check(TokenType.IDENTIFIER)) {
+      this.addError('Expected table name after DROP TABLE');
+      return new LinqDropTableExpression('');
+    }
+    
+    const firstIdentifier = this.advance().value;
+    let databaseName: string | undefined;
+    let tableName: string;
+    
+    if (this.match(TokenType.DOT)) {
+      if (!this.check(TokenType.IDENTIFIER)) {
+        this.addError('Expected table name after database.');
+        return new LinqDropTableExpression(firstIdentifier);
+      }
+      databaseName = firstIdentifier;
+      tableName = this.advance().value;
+    } else {
+      tableName = firstIdentifier;
+    }
+    
+    return new LinqDropTableExpression(tableName, databaseName);
   }
   
   // Parse primary expressions

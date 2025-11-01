@@ -26,6 +26,7 @@ export enum ExpressionType {
   LinqHaving = 'LinqHaving',
   LinqOrderBy = 'LinqOrderBy',
   LinqSelect = 'LinqSelect',
+  LinqDropTable = 'LinqDropTable',
 }
 
 // Join types
