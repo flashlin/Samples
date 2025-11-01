@@ -1,0 +1,12 @@
+# 測試執行規則
+
+## Vitest 測試
+執行測試時使用 `npm test -- --run` 而不是 `npm test`，這樣可以在測試完成後直接退出，不會進入 watch 模式等待檔案變更。
+
+範例：
+```bash
+npm test -- --run
+```
+
+這會避免測試執行後出現 "Waiting for file changes..." 的提示訊息。
+
