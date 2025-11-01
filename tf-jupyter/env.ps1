@@ -1,1 +1,0 @@
-$env:PYTHONPATH = $env:PYTHONPATH + ";D:/Users/flash/miniconda3/Lib/site-packages/pywin32_system32"
