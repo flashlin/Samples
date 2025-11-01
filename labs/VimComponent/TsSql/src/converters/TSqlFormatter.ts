@@ -207,7 +207,7 @@ export class TSqlFormatter implements ExpressionVisitor<string> {
     sql += ` FROM ${expr.tableName}`;
     
     if (expr.where) {
-      sql += ` WHERE ${expr.where.accept(this)}`;
+      sql += ` WHERE ${expr.where.condition.accept(this)}`;
     }
     
     return sql;

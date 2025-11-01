@@ -221,5 +221,66 @@ describe('LinqParser', () => {
     expect(result.errors).toHaveLength(0);
     expect(result.result.wheres).toHaveLength(1);
   });
+  
+  describe('DELETE Statement Parsing', () => {
+    it('should parse DELETE FROM table WHERE condition', () => {
+      const result = parser.parse('DELETE FROM users WHERE id = 1');
+      
+      expect(result.errors).toHaveLength(0);
+      expect(result.result.type).toBe(ExpressionType.LinqDelete);
+      expect(result.result.tableName).toBe('users');
+      expect(result.result.whereCondition).toBeDefined();
+      expect(result.result.topCount).toBeUndefined();
+      expect(result.result.isPercent).toBeUndefined();
+    });
+    
+    it('should parse DELETE TOP (10) FROM table WHERE condition', () => {
+      const result = parser.parse('DELETE TOP (10) FROM users WHERE age < 18');
+      
+      expect(result.errors).toHaveLength(0);
+      expect(result.result.type).toBe(ExpressionType.LinqDelete);
+      expect(result.result.topCount).toBe(10);
+      expect(result.result.isPercent).toBeUndefined();
+    });
+    
+    it('should parse DELETE TOP (50) PERCENT FROM table WHERE condition', () => {
+      const result = parser.parse('DELETE TOP (50) PERCENT FROM users WHERE status = 0');
+      
+      expect(result.errors).toHaveLength(0);
+      expect(result.result.type).toBe(ExpressionType.LinqDelete);
+      expect(result.result.topCount).toBe(50);
+      expect(result.result.isPercent).toBe(true);
+    });
+    
+    it('should parse DELETE FROM database.table WHERE condition', () => {
+      const result = parser.parse('DELETE FROM mydb.users WHERE active = false');
+      
+      expect(result.errors).toHaveLength(0);
+      expect(result.result.type).toBe(ExpressionType.LinqDelete);
+      expect(result.result.databaseName).toBe('mydb');
+      expect(result.result.tableName).toBe('users');
+    });
+    
+    it('should parse DELETE TOP (5) PERCENT FROM database.table WHERE condition', () => {
+      const result = parser.parse('DELETE TOP (5) PERCENT FROM testdb.logs WHERE level = 1');
+      
+      expect(result.errors).toHaveLength(0);
+      expect(result.result.type).toBe(ExpressionType.LinqDelete);
+      expect(result.result.databaseName).toBe('testdb');
+      expect(result.result.tableName).toBe('logs');
+      expect(result.result.topCount).toBe(5);
+      expect(result.result.isPercent).toBe(true);
+      expect(result.result.whereCondition).toBeDefined();
+    });
+    
+    it('should parse DELETE FROM table without WHERE', () => {
+      const result = parser.parse('DELETE FROM temp_table');
+      
+      expect(result.errors).toHaveLength(0);
+      expect(result.result.type).toBe(ExpressionType.LinqDelete);
+      expect(result.result.tableName).toBe('temp_table');
+      expect(result.result.whereCondition).toBeUndefined();
+    });
+  });
 });
 

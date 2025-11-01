@@ -107,5 +107,50 @@ describe('LinqToTSqlConverter', () => {
     expect(tsqlQuery.select).toBeUndefined();
     expect(tsqlQuery.isComplete).toBe(false);
   });
+  
+  describe('DELETE Statement Conversion', () => {
+    it('should convert basic DELETE statement', () => {
+      const parseResult = parser.parse('DELETE FROM users WHERE id = 1');
+      const tsqlExpr = converter.convert(parseResult.result);
+      
+      expect(tsqlExpr.type).toBe(ExpressionType.Delete);
+      expect(tsqlExpr.tableName).toBe('users');
+      expect(tsqlExpr.where).toBeDefined();
+    });
+    
+    it('should convert DELETE with TOP', () => {
+      const parseResult = parser.parse('DELETE TOP (10) FROM users WHERE age < 18');
+      const tsqlExpr = converter.convert(parseResult.result);
+      
+      expect(tsqlExpr.type).toBe(ExpressionType.Delete);
+      expect(tsqlExpr.topCount).toBe(10);
+      expect(tsqlExpr.isPercent).toBeUndefined();
+    });
+    
+    it('should convert DELETE with TOP PERCENT', () => {
+      const parseResult = parser.parse('DELETE TOP (50) PERCENT FROM orders WHERE status = 0');
+      const tsqlExpr = converter.convert(parseResult.result);
+      
+      expect(tsqlExpr.type).toBe(ExpressionType.Delete);
+      expect(tsqlExpr.topCount).toBe(50);
+      expect(tsqlExpr.isPercent).toBe(true);
+    });
+    
+    it('should convert DELETE with database.table format', () => {
+      const parseResult = parser.parse('DELETE FROM mydb.users WHERE active = false');
+      const tsqlExpr = converter.convert(parseResult.result);
+      
+      expect(tsqlExpr.type).toBe(ExpressionType.Delete);
+      expect(tsqlExpr.tableName).toBe('mydb.users');
+    });
+    
+    it('should convert DELETE WHERE condition correctly', () => {
+      const parseResult = parser.parse('DELETE FROM logs WHERE level = 1');
+      const tsqlExpr = converter.convert(parseResult.result);
+      
+      expect(tsqlExpr.where).toBeDefined();
+      expect(tsqlExpr.where?.condition).toBeDefined();
+    });
+  });
 });
 

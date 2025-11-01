@@ -250,5 +250,52 @@ describe('Integration Tests', () => {
     expect(sql).toContain('IS NOT NULL');
     expect(sql).toContain('AND');
   });
+  
+  describe('DELETE Statement Integration', () => {
+    it('should convert DELETE FROM table WHERE condition', () => {
+      const { sql, errors } = linqToSql('DELETE FROM users WHERE id = 1');
+      
+      expect(errors).toHaveLength(0);
+      expect(sql).toBe('DELETE FROM users WHERE id = 1');
+    });
+    
+    it('should convert DELETE TOP (10) FROM table WHERE condition', () => {
+      const { sql, errors } = linqToSql('DELETE TOP (10) FROM users WHERE age < 18');
+      
+      expect(errors).toHaveLength(0);
+      expect(sql).toBe('DELETE TOP (10) FROM users WHERE age < 18');
+    });
+    
+    it('should convert DELETE TOP (50) PERCENT FROM table WHERE condition', () => {
+      const { sql, errors } = linqToSql("DELETE TOP (50) PERCENT FROM orders WHERE created_date < '2020-01-01'");
+      
+      expect(errors).toHaveLength(0);
+      expect(sql).toBe("DELETE TOP (50) PERCENT FROM orders WHERE created_date < '2020-01-01'");
+    });
+    
+    it('should convert DELETE FROM database.table WHERE condition', () => {
+      const { sql, errors } = linqToSql("DELETE FROM mydb.users WHERE status = 'inactive'");
+      
+      expect(errors).toHaveLength(0);
+      expect(sql).toBe("DELETE FROM mydb.users WHERE status = 'inactive'");
+    });
+    
+    it('should convert DELETE TOP (25) PERCENT FROM database.table WHERE condition', () => {
+      const { sql, errors } = linqToSql("DELETE TOP (25) PERCENT FROM testdb.logs WHERE level = 'DEBUG'");
+      
+      expect(errors).toHaveLength(0);
+      expect(sql).toBe("DELETE TOP (25) PERCENT FROM testdb.logs WHERE level = 'DEBUG'");
+    });
+    
+    it('should convert DELETE with complex WHERE condition', () => {
+      const { sql, errors } = linqToSql("DELETE FROM users WHERE age > 18 AND status = 'pending'");
+      
+      expect(errors).toHaveLength(0);
+      expect(sql).toContain('DELETE FROM users WHERE');
+      expect(sql).toContain('age > 18');
+      expect(sql).toContain('AND');
+      expect(sql).toContain("status = 'pending'");
+    });
+  });
 });
 

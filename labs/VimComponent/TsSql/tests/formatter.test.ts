@@ -217,5 +217,45 @@ describe('TSqlFormatter', () => {
     expect(sql).toContain('IS NOT NULL');
     expect(sql).toContain('AND');
   });
+  
+  describe('DELETE Statement Formatting', () => {
+    it('should format DELETE FROM table WHERE condition', () => {
+      const sql = formatLinqQuery('DELETE FROM users WHERE id = 1');
+      
+      expect(sql).toBe('DELETE FROM users WHERE id = 1');
+    });
+    
+    it('should format DELETE TOP (10) FROM table WHERE condition', () => {
+      const sql = formatLinqQuery('DELETE TOP (10) FROM users WHERE age < 18');
+      
+      expect(sql).toBe('DELETE TOP (10) FROM users WHERE age < 18');
+    });
+    
+    it('should format DELETE TOP (50) PERCENT FROM table WHERE condition', () => {
+      const sql = formatLinqQuery('DELETE TOP (50) PERCENT FROM users WHERE status = 0');
+      
+      expect(sql).toBe('DELETE TOP (50) PERCENT FROM users WHERE status = 0');
+    });
+    
+    it('should format DELETE FROM database.table WHERE condition', () => {
+      const sql = formatLinqQuery('DELETE FROM mydb.users WHERE active = false');
+      
+      expect(sql).toBe('DELETE FROM mydb.users WHERE active = false');
+    });
+    
+    it('should format DELETE without WHERE', () => {
+      const sql = formatLinqQuery('DELETE FROM temp_table');
+      
+      expect(sql).toBe('DELETE FROM temp_table');
+    });
+    
+    it('should throw error for LinqDeleteExpression', () => {
+      const parseResult = parser.parse('DELETE FROM users WHERE id = 1');
+      
+      expect(() => {
+        formatter.format(parseResult.result);
+      }).toThrow('Cannot format LINQ DELETE directly');
+    });
+  });
 });
 
