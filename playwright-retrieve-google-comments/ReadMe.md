@@ -1,4 +1,0 @@
-
-
-* Playwright Test for VSCode
-* 
