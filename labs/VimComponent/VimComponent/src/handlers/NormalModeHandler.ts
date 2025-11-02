@@ -163,47 +163,13 @@ export class NormalModeHandler extends BaseModeHandler {
     ];
   }
   
-  private isCommandPrefix(buffer: string, editor: IVimEditor): boolean {
-    const patterns = this.getCommandPatterns(editor);
-    
-    for (const { pattern } of patterns) {
-      const patternStr = pattern.source;
-      
-      const cleanPattern = patternStr.replace(/^\^/, '').replace(/\$$/, '');
-      
-      if (cleanPattern.startsWith(buffer)) {
-        return true;
-      }
-      
-      const escapedBuffer = buffer.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const prefixTest = new RegExp('^' + escapedBuffer);
-      if (prefixTest.test(cleanPattern)) {
-        return true;
-      }
-    }
-    
-    return false;
-  }
-
   async handleKey(key: string, editor: IVimEditor): Promise<void> {
     if (editor.keyBuffer === '' && editor.handleMovement(key)) {
       return;
     }
     
     editor.keyBuffer += key;
-    const matched = await this.processKeyBuffer(editor);
-    
-    if (!matched && !this.isCommandPrefix(editor.keyBuffer, editor)) {
-      const lastKey = key;
-      editor.keyBuffer = '';
-      
-      if (editor.handleMovement(lastKey)) {
-        return;
-      }
-      
-      editor.keyBuffer = lastKey;
-      await this.processKeyBuffer(editor);
-    }
+    await this.processKeyBuffer(editor);
   }
   
   private async processKeyBuffer(editor: IVimEditor): Promise<boolean> {

@@ -2509,8 +2509,8 @@ export class VimEditor extends LitElement {
       }
     } else {
       let statusText = `Mode: ${this.mode} | Line: ${this.cursorY + 1}, Col: ${this.getDisplayColumn() + 1}`;
-      if (this.lastKeyPressed) {
-        statusText += ` | Key: "${this.lastKeyPressed}"`;
+      if (this.keyBuffer) {
+        statusText += ` | Keys: "${this.keyBuffer}"`;
       }
       if (this.searchMatches.length > 0) {
         statusText += ` | Matches: ${this.searchMatches.length}`;
