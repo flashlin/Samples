@@ -2004,6 +2004,7 @@ export class VimEditor extends LitElement {
       }
       
       this.updateInputPosition();
+      this.emitChange();
     }
   }
 
@@ -2073,6 +2074,7 @@ export class VimEditor extends LitElement {
     }
     
     this.updateInputPosition();
+    this.emitChange();
   }
 
   private pasteTextBeforeCursor(text: string) {
@@ -2123,6 +2125,7 @@ export class VimEditor extends LitElement {
     }
     
     this.updateInputPosition();
+    this.emitChange();
   }
 
   saveHistory(cursorPos: { cursorX: number; cursorY: number } | null = null) {
