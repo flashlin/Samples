@@ -100,7 +100,7 @@ export class VimEditor extends LitElement {
   cursorY = 0;
 
   @property({ type: Array })
-  content: string[] = exampleText.split('\n');
+  content: string[] = [];
   
   @state()
   private lastKeyPressed = '';

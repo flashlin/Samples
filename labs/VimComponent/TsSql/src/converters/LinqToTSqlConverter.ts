@@ -1,6 +1,7 @@
 import { ExpressionVisitor } from '../types/ExpressionVisitor';
 import { Expression, BaseExpression } from '../types/BaseExpression';
-import { BinaryOperator } from '../types/ExpressionType';
+import { BinaryOperator, ExpressionType } from '../types/ExpressionType';
+import type { LinqStatement, TSqlStatement } from '../types/StatementTypes';
 
 // LINQ expressions
 import { LinqQueryExpression } from '../linqExpressions/LinqQueryExpression';
@@ -35,29 +36,39 @@ import { FunctionExpression } from '../expressions/FunctionExpression';
 export class LinqToTSqlConverter {
   
   // Convert LINQ query to T-SQL query
-  convert(linqQuery: LinqQueryExpression | LinqDropTableExpression | LinqDeleteExpression): QueryExpression | DropTableExpression | DeleteExpression {
-    if (linqQuery instanceof LinqDropTableExpression) {
-      const tableName = linqQuery.databaseName 
-        ? `${linqQuery.databaseName}.${linqQuery.tableName}`
-        : linqQuery.tableName;
-      return new DropTableExpression(tableName);
-    }
-    
-    if (linqQuery instanceof LinqDeleteExpression) {
-      const tableName = linqQuery.databaseName 
-        ? `${linqQuery.databaseName}.${linqQuery.tableName}`
-        : linqQuery.tableName;
+  convert(linqQuery: LinqStatement): TSqlStatement {
+    switch (linqQuery.type) {
+      case ExpressionType.LinqDropTable: {
+        const tableName = linqQuery.databaseName 
+          ? `${linqQuery.databaseName}.${linqQuery.tableName}`
+          : linqQuery.tableName;
+        return new DropTableExpression(tableName);
+      }
       
-      const where = linqQuery.whereCondition 
-        ? new WhereExpression(linqQuery.whereCondition)
-        : undefined;
+      case ExpressionType.LinqDelete: {
+        const tableName = linqQuery.databaseName 
+          ? `${linqQuery.databaseName}.${linqQuery.tableName}`
+          : linqQuery.tableName;
+        
+        const where = linqQuery.whereCondition 
+          ? new WhereExpression(linqQuery.whereCondition)
+          : undefined;
+        
+        return new DeleteExpression(
+          tableName,
+          where,
+          linqQuery.topCount,
+          linqQuery.isPercent
+        );
+      }
       
-      return new DeleteExpression(
-        tableName,
-        where,
-        linqQuery.topCount,
-        linqQuery.isPercent
-      );
+      case ExpressionType.LinqQuery:
+        break;
+      
+      default: {
+        const _exhaustive: never = linqQuery;
+        throw new Error(`Unknown LINQ statement type`);
+      }
     }
     
     // Convert FROM

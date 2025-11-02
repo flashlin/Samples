@@ -4,6 +4,7 @@ import { ParseError } from '../types/ParseError';
 import { ParseResult, failure, success } from '../types/ParseResult';
 import { Expression } from '../types/BaseExpression';
 import { BinaryOperator, JoinType, OrderDirection, UnaryOperator } from '../types/ExpressionType';
+import type { LinqStatement } from '../types/StatementTypes';
 
 // LINQ expressions
 import { LinqQueryExpression } from '../linqExpressions/LinqQueryExpression';
@@ -31,7 +32,7 @@ export class LinqParser {
   private errors: ParseError[] = [];
   
   // Parse LINQ query from string
-  parse(input: string): ParseResult<LinqQueryExpression | LinqDropTableExpression | LinqDeleteExpression> {
+  parse(input: string): ParseResult<LinqStatement> {
     // Reset state
     this.current = 0;
     this.errors = [];
