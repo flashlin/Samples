@@ -710,6 +710,10 @@ export class VimEditor extends LitElement {
     
     this.emitKeyPress(key, event);
     
+    if (/^F([1-9]|1[0-2])$/.test(key)) {
+      return;
+    }
+    
     if ((event.metaKey || event.ctrlKey) && key === 'v' && this.mode === EditorMode.Insert) {
       event.preventDefault();
       this.handlePaste();
