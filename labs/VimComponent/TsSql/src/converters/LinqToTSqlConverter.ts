@@ -39,116 +39,120 @@ export class LinqToTSqlConverter {
   convert(linqQuery: LinqStatement): TSqlStatement {
     switch (linqQuery.type) {
       case ExpressionType.LinqDropTable: {
-        const tableName = linqQuery.databaseName 
-          ? `${linqQuery.databaseName}.${linqQuery.tableName}`
-          : linqQuery.tableName;
+        const dropTable = linqQuery as LinqDropTableExpression;
+        const tableName = dropTable.databaseName 
+          ? `${dropTable.databaseName}.${dropTable.tableName}`
+          : dropTable.tableName;
         return new DropTableExpression(tableName);
       }
       
       case ExpressionType.LinqDelete: {
-        const tableName = linqQuery.databaseName 
-          ? `${linqQuery.databaseName}.${linqQuery.tableName}`
-          : linqQuery.tableName;
+        const deleteExpr = linqQuery as LinqDeleteExpression;
+        const tableName = deleteExpr.databaseName 
+          ? `${deleteExpr.databaseName}.${deleteExpr.tableName}`
+          : deleteExpr.tableName;
         
-        const where = linqQuery.whereCondition 
-          ? new WhereExpression(linqQuery.whereCondition)
+        const where = deleteExpr.whereCondition 
+          ? new WhereExpression(deleteExpr.whereCondition)
           : undefined;
         
         return new DeleteExpression(
           tableName,
           where,
-          linqQuery.topCount,
-          linqQuery.isPercent
+          deleteExpr.topCount,
+          deleteExpr.isPercent
         );
       }
       
-      case ExpressionType.LinqQuery:
-        break;
+      case ExpressionType.LinqQuery: {
+        // LinqQuery 的轉換邏輯
+        const query = linqQuery as LinqQueryExpression;
+        
+        // Convert FROM
+        const from = query.from 
+          ? new FromExpression(
+              query.from.databaseName 
+                ? `${query.from.databaseName}.${query.from.tableName}`
+                : query.from.tableName,
+              query.from.alias,
+              query.from.hints
+            )
+          : undefined;
+        
+        // Convert JOINs
+        const joins = query.joins.map(j => 
+          new JoinExpression(
+            j.joinType,
+            j.databaseName
+              ? `${j.databaseName}.${j.tableName}`
+              : j.tableName,
+            this.convertExpression(j.condition),
+            j.alias,
+            j.hints
+          )
+        );
+        
+        // Convert WHEREs - combine multiple WHERE clauses with AND
+        let where: WhereExpression | undefined;
+        if (query.wheres.length > 0) {
+          let combinedCondition: Expression = this.convertExpression(query.wheres[0].condition);
+          
+          for (let i = 1; i < query.wheres.length; i++) {
+            const nextCondition = this.convertExpression(query.wheres[i].condition);
+            combinedCondition = new BinaryExpression(combinedCondition, BinaryOperator.And, nextCondition);
+          }
+          
+          where = new WhereExpression(combinedCondition);
+        }
+        
+        // Convert GROUP BYs - combine multiple GROUP BY clauses
+        let groupBy: GroupByExpression | undefined;
+        if (query.groupBys.length > 0) {
+          const allColumns: Expression[] = [];
+          for (const gb of query.groupBys) {
+            allColumns.push(...gb.columns.map(c => this.convertExpression(c)));
+          }
+          groupBy = new GroupByExpression(allColumns);
+        }
+        
+        // Convert HAVING
+        const having = query.having 
+          ? new HavingExpression(this.convertExpression(query.having.condition))
+          : undefined;
+        
+        // Convert ORDER BYs - combine multiple ORDER BY clauses
+        let orderBy: OrderByExpression | undefined;
+        if (query.orderBys.length > 0) {
+          const allItems: OrderByItem[] = [];
+          for (const ob of query.orderBys) {
+            allItems.push(...ob.items.map(item => ({
+              expression: this.convertExpression(item.expression),
+              direction: item.direction
+            })));
+          }
+          orderBy = new OrderByExpression(allItems);
+        }
+        
+        // Convert SELECT
+        const select = query.select 
+          ? new SelectExpression(
+              query.select.items.map(item => ({
+                expression: this.convertExpression(item.expression),
+                alias: item.alias
+              })),
+              query.select.isDistinct,
+              query.select.topCount
+            )
+          : undefined;
+        
+        return new QueryExpression(select, from, joins, where, groupBy, having, orderBy);
+      }
       
       default: {
-        const _exhaustive: never = linqQuery;
+        const _exhaustive: never = linqQuery as never;
         throw new Error(`Unknown LINQ statement type`);
       }
     }
-    
-    // Convert FROM
-    const from = linqQuery.from 
-      ? new FromExpression(
-          linqQuery.from.databaseName 
-            ? `${linqQuery.from.databaseName}.${linqQuery.from.tableName}`
-            : linqQuery.from.tableName,
-          linqQuery.from.alias,
-          linqQuery.from.hints
-        )
-      : undefined;
-    
-    // Convert JOINs
-    const joins = linqQuery.joins.map(j => 
-      new JoinExpression(
-        j.joinType,
-        j.databaseName
-          ? `${j.databaseName}.${j.tableName}`
-          : j.tableName,
-        this.convertExpression(j.condition),
-        j.alias,
-        j.hints
-      )
-    );
-    
-    // Convert WHEREs - combine multiple WHERE clauses with AND
-    let where: WhereExpression | undefined;
-    if (linqQuery.wheres.length > 0) {
-      let combinedCondition: Expression = this.convertExpression(linqQuery.wheres[0].condition);
-      
-      for (let i = 1; i < linqQuery.wheres.length; i++) {
-        const nextCondition = this.convertExpression(linqQuery.wheres[i].condition);
-        combinedCondition = new BinaryExpression(combinedCondition, BinaryOperator.And, nextCondition);
-      }
-      
-      where = new WhereExpression(combinedCondition);
-    }
-    
-    // Convert GROUP BYs - combine multiple GROUP BY clauses
-    let groupBy: GroupByExpression | undefined;
-    if (linqQuery.groupBys.length > 0) {
-      const allColumns: Expression[] = [];
-      for (const gb of linqQuery.groupBys) {
-        allColumns.push(...gb.columns.map(c => this.convertExpression(c)));
-      }
-      groupBy = new GroupByExpression(allColumns);
-    }
-    
-    // Convert HAVING
-    const having = linqQuery.having 
-      ? new HavingExpression(this.convertExpression(linqQuery.having.condition))
-      : undefined;
-    
-    // Convert ORDER BYs - combine multiple ORDER BY clauses
-    let orderBy: OrderByExpression | undefined;
-    if (linqQuery.orderBys.length > 0) {
-      const allItems: OrderByItem[] = [];
-      for (const ob of linqQuery.orderBys) {
-        allItems.push(...ob.items.map(item => ({
-          expression: this.convertExpression(item.expression),
-          direction: item.direction
-        })));
-      }
-      orderBy = new OrderByExpression(allItems);
-    }
-    
-    // Convert SELECT
-    const select = linqQuery.select 
-      ? new SelectExpression(
-          linqQuery.select.items.map(item => ({
-            expression: this.convertExpression(item.expression),
-            alias: item.alias
-          })),
-          linqQuery.select.isDistinct,
-          linqQuery.select.topCount
-        )
-      : undefined;
-    
-    return new QueryExpression(select, from, joins, where, groupBy, having, orderBy);
   }
   
   // Convert individual expression (recursive)
