@@ -32,7 +32,7 @@ export class LinqParser {
   private errors: ParseError[] = [];
   
   // Parse LINQ query from string
-  parse(input: string): ParseResult<LinqStatement> {
+  parse(input: string): ParseResult {
     // Reset state
     this.current = 0;
     this.errors = [];
