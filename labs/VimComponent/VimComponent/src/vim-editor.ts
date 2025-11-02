@@ -1396,6 +1396,7 @@ export class VimEditor extends LitElement {
     if (this.cursorX < 0) {
       this.cursorX = 0;
     }
+    this.emitChange();
   }
 
   deleteToWordEnd() {
@@ -1430,6 +1431,7 @@ export class VimEditor extends LitElement {
     if (this.cursorX < 0) {
       this.cursorX = 0;
     }
+    this.emitChange();
   }
 
   deleteToLineEnd() {
@@ -1444,12 +1446,14 @@ export class VimEditor extends LitElement {
     if (this.cursorX >= this.content[this.cursorY].length && this.content[this.cursorY].length > 0) {
       this.cursorX = this.content[this.cursorY].length - 1;
     }
+    this.emitChange();
   }
 
   deleteLine() {
     if (this.content.length === 1) {
       this.content = [''];
       this.cursorX = 0;
+      this.emitChange();
       return;
     }
     
@@ -1461,6 +1465,7 @@ export class VimEditor extends LitElement {
     
     this.cursorX = 0;
     this.adjustCursorX();
+    this.emitChange();
   }
 
   deleteLinesDown(count: number) {
@@ -1480,6 +1485,7 @@ export class VimEditor extends LitElement {
     
     this.cursorX = 0;
     this.adjustCursorX();
+    this.emitChange();
   }
 
   deleteLinesUp(count: number) {
@@ -1500,6 +1506,7 @@ export class VimEditor extends LitElement {
     
     this.cursorX = 0;
     this.adjustCursorX();
+    this.emitChange();
   }
 
   private moveToNextWord() {
@@ -1835,6 +1842,7 @@ export class VimEditor extends LitElement {
     this.content.splice(startY + 1, endY - startY);
     this.cursorX = startX;
     this.cursorY = startY;
+    this.emitChange();
   }
 
   handleBackspace() {
