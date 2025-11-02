@@ -1,9 +1,9 @@
 import { ParseError } from './ParseError';
-import { Expression } from './BaseExpression';
+import { LinqStatement } from './StatementTypes';
 
 // Parse result containing partial expression and errors
-export interface ParseResult<T extends Expression = Expression> {
-  result: T;
+export interface ParseResult {
+  result: LinqStatement;
   errors: ParseError[];
 }
 
@@ -13,7 +13,7 @@ export function isSuccessful(result: ParseResult): boolean {
 }
 
 // Helper to create successful result
-export function success<T extends Expression>(expr: T): ParseResult<T> {
+export function success(expr: LinqStatement): ParseResult {
   return {
     result: expr,
     errors: []
@@ -21,7 +21,7 @@ export function success<T extends Expression>(expr: T): ParseResult<T> {
 }
 
 // Helper to create error result
-export function failure<T extends Expression>(expr: T, ...errors: ParseError[]): ParseResult<T> {
+export function failure(expr: LinqStatement, ...errors: ParseError[]): ParseResult {
   return {
     result: expr,
     errors
