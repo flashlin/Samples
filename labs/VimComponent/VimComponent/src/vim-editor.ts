@@ -301,6 +301,14 @@ export class VimEditor extends LitElement {
     }
   }
 
+  getContent(): string {
+    return this.content.join('\n');
+  }
+
+  getContentLines(): string[] {
+    return [...this.content];
+  }
+
   load(text: string): void {
     const lines = text.split('\n');
     this.setContent(lines);
