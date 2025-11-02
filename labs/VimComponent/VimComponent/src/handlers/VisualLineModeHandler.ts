@@ -72,6 +72,7 @@ export class VisualLineModeHandler extends BaseModeHandler {
     editor.cursorY = Math.min(startY, editor.content.length - 1);
     editor.cursorX = 0;
     editor.adjustCursorX();
+    editor.emitChange();
   }
 }
 

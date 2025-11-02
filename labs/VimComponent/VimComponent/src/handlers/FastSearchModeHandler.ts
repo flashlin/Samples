@@ -211,6 +211,8 @@ export class FastSearchModeHandler extends BaseModeHandler {
     } else if (editor.cursorX >= match.x + editor.searchKeyword.length) {
       editor.cursorX = match.x + editor.searchKeyword.length - 1;
     }
+    
+    editor.emitChange();
   }
   
   private searchModeDeleteAll(editor: IVimEditor): void {
@@ -232,6 +234,7 @@ export class FastSearchModeHandler extends BaseModeHandler {
     editor.searchMatches = [];
     editor.currentMatchIndex = -1;
     editor.mode = EditorMode.Normal;
+    editor.emitChange();
   }
 }
 
