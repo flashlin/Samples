@@ -1899,7 +1899,10 @@ export class VimEditor extends LitElement {
   }
 
   insertCharacter(char: string) {
-    const currentLine = this.content[this.cursorY];
+    if (this.content.length === 0) {
+      this.content = [''];
+    }
+    const currentLine = this.content[this.cursorY] || '';
     this.content[this.cursorY] = 
       currentLine.substring(0, this.cursorX) + 
       char + 
