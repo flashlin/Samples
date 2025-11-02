@@ -62,6 +62,11 @@
         });
 
         editor.addEventListener('keypress', (event) => {
+            if (event.detail.key === 'F5') {
+                const content = editor.content.join('\n');
+                console.log('Vim Editor Content:', content);
+            }
+            
             console.log('Key pressed:', {
                 key: event.detail.key,
                 mode: event.detail.mode,
