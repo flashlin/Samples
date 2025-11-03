@@ -743,7 +743,7 @@ export class VimEditor extends LitElement {
       return;
     }
     
-    if (event.ctrlKey && key === 'a' && this.mode === EditorMode.Normal) {
+    if (event.ctrlKey && key === 'a' && (this.mode === EditorMode.Normal || this.mode === EditorMode.Insert)) {
       event.preventDefault();
       this.selectAll();
       return;
