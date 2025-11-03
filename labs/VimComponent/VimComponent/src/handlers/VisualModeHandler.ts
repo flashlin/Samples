@@ -56,6 +56,7 @@ export class VisualModeHandler extends BaseModeHandler {
         editor.mode = EditorMode.Normal;
         break;
       case 'Delete':
+      case 'Backspace':
         this.deleteVisualSelection(editor);
         editor.mode = EditorMode.Normal;
         break;
