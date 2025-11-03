@@ -743,6 +743,12 @@ export class VimEditor extends LitElement {
       return;
     }
     
+    if (event.ctrlKey && key === 'a' && this.mode === EditorMode.Normal) {
+      event.preventDefault();
+      this.selectAll();
+      return;
+    }
+    
     this.lastKeyPressed = key;
     
     if (this.currentModeHandler.shouldPreventDefault(key)) {
@@ -2565,6 +2571,23 @@ export class VimEditor extends LitElement {
       this.mode = EditorMode.Insert;
     }
     this.hiddenInput?.focus();
+  }
+
+  selectAll() {
+    this.mode = EditorMode.Visual;
+    this.visualStartX = 0;
+    this.visualStartY = 0;
+    
+    if (this.content.length > 0) {
+      this.cursorY = this.content.length - 1;
+      const lastLine = this.content[this.cursorY] || '';
+      this.cursorX = Math.max(0, lastLine.length - 1);
+    }
+    
+    this.updateInputPosition();
+    if (this.p5Instance) {
+      this.p5Instance.redraw();
+    }
   }
 
 

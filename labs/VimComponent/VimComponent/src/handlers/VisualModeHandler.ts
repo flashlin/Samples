@@ -55,6 +55,10 @@ export class VisualModeHandler extends BaseModeHandler {
         await this.cutVisualSelection(editor);
         editor.mode = EditorMode.Normal;
         break;
+      case 'Delete':
+        this.deleteVisualSelection(editor);
+        editor.mode = EditorMode.Normal;
+        break;
       case 'f':
         editor.previousMode = EditorMode.Visual;
         editor.mode = EditorMode.FastJump;
@@ -147,6 +151,30 @@ export class VisualModeHandler extends BaseModeHandler {
     const selection = this.getVisualSelection(editor);
     await editor.copyToClipboard(selection, false);
     
+    const startY = Math.min(editor.visualStartY, editor.cursorY);
+    const endY = Math.max(editor.visualStartY, editor.cursorY);
+    
+    let startX, endX;
+    if (startY === endY) {
+      startX = Math.min(editor.visualStartX, editor.cursorX);
+      endX = Math.max(editor.visualStartX, editor.cursorX);
+    } else {
+      if (editor.visualStartY === startY) {
+        startX = editor.visualStartX;
+        endX = editor.cursorX;
+      } else {
+        startX = editor.cursorX;
+        endX = editor.visualStartX;
+      }
+    }
+
+    editor.saveHistory({ cursorX: endX, cursorY: endY });
+    
+    editor.deleteMultiLineSelection(startY, endY, startX, endX);
+    editor.adjustCursorX();
+  }
+  
+  private deleteVisualSelection(editor: IVimEditor): void {
     const startY = Math.min(editor.visualStartY, editor.cursorY);
     const endY = Math.max(editor.visualStartY, editor.cursorY);
     
