@@ -8,7 +8,8 @@ export class LinqDeleteExpression extends BaseExpression {
     public readonly whereCondition?: Expression,
     public readonly databaseName?: string,
     public readonly topCount?: number,
-    public readonly isPercent?: boolean
+    public readonly isPercent?: boolean,
+    public readonly schemaName?: string
   ) {
     super(ExpressionType.LinqDelete);
   }

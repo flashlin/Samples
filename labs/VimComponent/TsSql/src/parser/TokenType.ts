@@ -52,6 +52,8 @@ export enum TokenType {
   // Delimiters
   LEFT_PAREN = '(',
   RIGHT_PAREN = ')',
+  LEFT_BRACKET = '[',
+  RIGHT_BRACKET = ']',
   COMMA = ',',
   DOT = '.',
   

@@ -35,22 +35,39 @@ import { FunctionExpression } from '../expressions/FunctionExpression';
 // Converter from LINQ expressions to T-SQL expressions
 export class LinqToTSqlConverter {
   
+  private formatTableName(
+    tableName: string, 
+    databaseName?: string, 
+    schemaName?: string
+  ): string {
+    if (databaseName && schemaName) {
+      return `${databaseName}.${schemaName}.${tableName}`;
+    } else if (databaseName) {
+      return `${databaseName}.${tableName}`;
+    }
+    return tableName;
+  }
+  
   // Convert LINQ query to T-SQL query
   convert(linqQuery: LinqStatement): TSqlStatement {
     switch (linqQuery.type) {
       case ExpressionType.LinqDropTable: {
         const dropTable = linqQuery as LinqDropTableExpression;
-        const tableName = dropTable.databaseName 
-          ? `${dropTable.databaseName}.${dropTable.tableName}`
-          : dropTable.tableName;
+        const tableName = this.formatTableName(
+          dropTable.tableName,
+          dropTable.databaseName,
+          dropTable.schemaName
+        );
         return new DropTableExpression(tableName);
       }
       
       case ExpressionType.LinqDelete: {
         const deleteExpr = linqQuery as LinqDeleteExpression;
-        const tableName = deleteExpr.databaseName 
-          ? `${deleteExpr.databaseName}.${deleteExpr.tableName}`
-          : deleteExpr.tableName;
+        const tableName = this.formatTableName(
+          deleteExpr.tableName,
+          deleteExpr.databaseName,
+          deleteExpr.schemaName
+        );
         
         const where = deleteExpr.whereCondition 
           ? new WhereExpression(deleteExpr.whereCondition)
@@ -71,9 +88,11 @@ export class LinqToTSqlConverter {
         // Convert FROM
         const from = query.from 
           ? new FromExpression(
-              query.from.databaseName 
-                ? `${query.from.databaseName}.${query.from.tableName}`
-                : query.from.tableName,
+              this.formatTableName(
+                query.from.tableName,
+                query.from.databaseName,
+                query.from.schemaName
+              ),
               query.from.alias,
               query.from.hints
             )
@@ -83,9 +102,11 @@ export class LinqToTSqlConverter {
         const joins = query.joins.map(j => 
           new JoinExpression(
             j.joinType,
-            j.databaseName
-              ? `${j.databaseName}.${j.tableName}`
-              : j.tableName,
+            this.formatTableName(
+              j.tableName,
+              j.databaseName,
+              j.schemaName
+            ),
             this.convertExpression(j.condition),
             j.alias,
             j.hints

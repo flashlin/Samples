@@ -8,7 +8,8 @@ export class LinqFromExpression extends BaseExpression {
     public readonly tableName: string,
     public readonly alias?: string,
     public readonly databaseName?: string,
-    public readonly hints?: string[]
+    public readonly hints?: string[],
+    public readonly schemaName?: string
   ) {
     super(ExpressionType.LinqFrom);
   }

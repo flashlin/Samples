@@ -90,6 +90,12 @@ export class Tokenizer {
         continue;
       }
       
+      // Bracketed identifiers
+      if (char === '[') {
+        this.scanBracketedIdentifier();
+        continue;
+      }
+      
       // Operators and delimiters
       if (this.scanOperator()) {
         continue;
@@ -246,6 +252,44 @@ export class Tokenizer {
     
     this.tokens.push(new Token(
       tokenType,
+      value,
+      startPos,
+      startLine,
+      startCol
+    ));
+  }
+  
+  private scanBracketedIdentifier(): void {
+    const startPos = this.position;
+    const startLine = this.line;
+    const startCol = this.column;
+    
+    this.advance();
+    
+    let value = '';
+    while (this.position < this.input.length && this.current() !== ']') {
+      if (this.current() === ']' && this.peek() === ']') {
+        value += this.advance();
+        this.advance();
+      } else {
+        value += this.advance();
+      }
+    }
+    
+    if (this.position >= this.input.length) {
+      this.errors.push(new ParseError(
+        'Unterminated bracketed identifier',
+        startPos,
+        startLine,
+        startCol,
+        'UNTERMINATED_BRACKET'
+      ));
+    } else {
+      this.advance();
+    }
+    
+    this.tokens.push(new Token(
+      TokenType.IDENTIFIER,
       value,
       startPos,
       startLine,

@@ -5,7 +5,8 @@ import { ExpressionVisitor } from '../types/ExpressionVisitor';
 export class LinqDropTableExpression extends BaseExpression {
   constructor(
     public readonly tableName: string,
-    public readonly databaseName?: string
+    public readonly databaseName?: string,
+    public readonly schemaName?: string
   ) {
     super(ExpressionType.LinqDropTable);
   }

@@ -129,19 +129,10 @@ export class LinqParser {
       return undefined;
     }
     
-    const firstIdentifier = this.advance().value;
-    let databaseName: string | undefined;
-    let tableName: string;
-    
-    if (this.match(TokenType.DOT)) {
-      if (!this.check(TokenType.IDENTIFIER)) {
-        this.addError('Expected table name after database.');
-        return new LinqFromExpression(firstIdentifier);
-      }
-      databaseName = firstIdentifier;
-      tableName = this.advance().value;
-    } else {
-      tableName = firstIdentifier;
+    const tableInfo = this.parseTableName();
+    if (!tableInfo) {
+      this.addError('Expected table name after FROM');
+      return new LinqFromExpression('');
     }
     
     const hints = this.parseTableHints();
@@ -158,7 +149,13 @@ export class LinqParser {
       alias = this.advance().value;
     }
     
-    return new LinqFromExpression(tableName, alias, databaseName, hints);
+    return new LinqFromExpression(
+      tableInfo.tableName, 
+      alias, 
+      tableInfo.databaseName, 
+      hints,
+      tableInfo.schemaName
+    );
   }
   
   // Parse JOIN clause
@@ -192,21 +189,10 @@ export class LinqParser {
       return undefined;
     }
     
-    const firstIdentifier = this.advance().value;
-    let databaseName: string | undefined;
-    let tableName: string;
-    
-    if (this.match(TokenType.DOT)) {
-      if (!this.check(TokenType.IDENTIFIER)) {
-        this.addError('Expected table name after database.');
-        databaseName = firstIdentifier;
-        tableName = firstIdentifier;
-      } else {
-        databaseName = firstIdentifier;
-        tableName = this.advance().value;
-      }
-    } else {
-      tableName = firstIdentifier;
+    const tableInfo = this.parseTableName();
+    if (!tableInfo) {
+      this.addError('Expected table name after JOIN');
+      return undefined;
     }
     
     const hints = this.parseTableHints();
@@ -232,7 +218,15 @@ export class LinqParser {
       condition = new LiteralExpression(true, 'boolean'); // CROSS JOIN has no condition
     }
     
-    return new LinqJoinExpression(joinType, tableName, condition!, alias, databaseName, hints);
+    return new LinqJoinExpression(
+      joinType, 
+      tableInfo.tableName, 
+      condition!, 
+      alias, 
+      tableInfo.databaseName, 
+      hints,
+      tableInfo.schemaName
+    );
   }
   
   // Parse WHERE clause
@@ -461,22 +455,17 @@ export class LinqParser {
       return new LinqDropTableExpression('');
     }
     
-    const firstIdentifier = this.advance().value;
-    let databaseName: string | undefined;
-    let tableName: string;
-    
-    if (this.match(TokenType.DOT)) {
-      if (!this.check(TokenType.IDENTIFIER)) {
-        this.addError('Expected table name after database.');
-        return new LinqDropTableExpression(firstIdentifier);
-      }
-      databaseName = firstIdentifier;
-      tableName = this.advance().value;
-    } else {
-      tableName = firstIdentifier;
+    const tableInfo = this.parseTableName();
+    if (!tableInfo) {
+      this.addError('Expected table name after DROP TABLE');
+      return new LinqDropTableExpression('');
     }
     
-    return new LinqDropTableExpression(tableName, databaseName);
+    return new LinqDropTableExpression(
+      tableInfo.tableName, 
+      tableInfo.databaseName,
+      tableInfo.schemaName
+    );
   }
   
   private parseDelete(): LinqDeleteExpression {
@@ -521,19 +510,10 @@ export class LinqParser {
       return new LinqDeleteExpression('');
     }
     
-    const firstIdentifier = this.advance().value;
-    let databaseName: string | undefined;
-    let tableName: string;
-    
-    if (this.match(TokenType.DOT)) {
-      if (!this.check(TokenType.IDENTIFIER)) {
-        this.addError('Expected table name after database.');
-        return new LinqDeleteExpression(firstIdentifier);
-      }
-      databaseName = firstIdentifier;
-      tableName = this.advance().value;
-    } else {
-      tableName = firstIdentifier;
+    const tableInfo = this.parseTableName();
+    if (!tableInfo) {
+      this.addError('Expected table name after FROM');
+      return new LinqDeleteExpression('');
     }
     
     let whereCondition: Expression | undefined;
@@ -543,7 +523,14 @@ export class LinqParser {
       whereCondition = this.parseExpression();
     }
     
-    return new LinqDeleteExpression(tableName, whereCondition, databaseName, topCount, isPercent);
+    return new LinqDeleteExpression(
+      tableInfo.tableName, 
+      whereCondition, 
+      tableInfo.databaseName, 
+      topCount, 
+      isPercent,
+      tableInfo.schemaName
+    );
   }
   
   // Parse primary expressions
@@ -662,6 +649,45 @@ export class LinqParser {
       TokenType.WITH
     ];
     return keywords.includes(token.type);
+  }
+  
+  private parseTableName(): { 
+    tableName: string; 
+    databaseName?: string; 
+    schemaName?: string;
+  } | undefined {
+    if (!this.check(TokenType.IDENTIFIER)) {
+      return undefined;
+    }
+    
+    const parts: string[] = [];
+    
+    parts.push(this.advance().value);
+    
+    while (this.match(TokenType.DOT)) {
+      if (!this.check(TokenType.IDENTIFIER)) {
+        this.addError('Expected identifier after dot');
+        break;
+      }
+      parts.push(this.advance().value);
+    }
+    
+    if (parts.length === 1) {
+      return { tableName: parts[0] };
+    } else if (parts.length === 2) {
+      return { 
+        databaseName: parts[0], 
+        tableName: parts[1] 
+      };
+    } else if (parts.length === 3) {
+      return { 
+        databaseName: parts[0], 
+        schemaName: parts[1], 
+        tableName: parts[2] 
+      };
+    }
+    
+    return { tableName: parts[0] };
   }
   
   private parseTableHints(): string[] | undefined {
