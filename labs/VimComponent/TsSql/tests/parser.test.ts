@@ -311,5 +311,202 @@ describe('LinqParser', () => {
       expect(result.result.whereCondition).toBeUndefined();
     });
   });
+  
+  describe('Three-Part Table Names and Bracketed Identifiers', () => {
+    describe('FROM clause with three-part names', () => {
+      it('should parse FROM with three-part table name', () => {
+        const result = parser.parse('FROM MyDatabase.dbo.Users SELECT *');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.from).toBeDefined();
+        expect(result.result.from?.tableName).toBe('Users');
+        expect(result.result.from?.databaseName).toBe('MyDatabase');
+        expect(result.result.from?.schemaName).toBe('dbo');
+      });
+      
+      it('should parse FROM with bracketed three-part name', () => {
+        const result = parser.parse('FROM [MyDatabase].[dbo].[Users] SELECT *');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.from).toBeDefined();
+        expect(result.result.from?.tableName).toBe('Users');
+        expect(result.result.from?.databaseName).toBe('MyDatabase');
+        expect(result.result.from?.schemaName).toBe('dbo');
+      });
+      
+      it('should parse FROM with bracketed single table name', () => {
+        const result = parser.parse('FROM [Users] SELECT *');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.from).toBeDefined();
+        expect(result.result.from?.tableName).toBe('Users');
+        expect(result.result.from?.databaseName).toBeUndefined();
+        expect(result.result.from?.schemaName).toBeUndefined();
+      });
+      
+      it('should parse FROM with bracketed two-part name', () => {
+        const result = parser.parse('FROM [MyDatabase].[Users] SELECT *');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.from).toBeDefined();
+        expect(result.result.from?.tableName).toBe('Users');
+        expect(result.result.from?.databaseName).toBe('MyDatabase');
+        expect(result.result.from?.schemaName).toBeUndefined();
+      });
+      
+      it('should parse FROM with three-part name and alias', () => {
+        const result = parser.parse('FROM MyDatabase.dbo.Users u SELECT u.name');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.from).toBeDefined();
+        expect(result.result.from?.tableName).toBe('Users');
+        expect(result.result.from?.databaseName).toBe('MyDatabase');
+        expect(result.result.from?.schemaName).toBe('dbo');
+        expect(result.result.from?.alias).toBe('u');
+      });
+      
+      it('should parse FROM with bracketed names containing spaces', () => {
+        const result = parser.parse('FROM [My Database].[dbo].[User Table] SELECT *');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.from).toBeDefined();
+        expect(result.result.from?.tableName).toBe('User Table');
+        expect(result.result.from?.databaseName).toBe('My Database');
+        expect(result.result.from?.schemaName).toBe('dbo');
+      });
+    });
+    
+    describe('JOIN clause with three-part names', () => {
+      it('should parse JOIN with three-part table name', () => {
+        const result = parser.parse('FROM Users JOIN MyDB.dbo.Orders ON Users.id = Orders.user_id SELECT *');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.joins).toHaveLength(1);
+        expect(result.result.joins[0].tableName).toBe('Orders');
+        expect(result.result.joins[0].databaseName).toBe('MyDB');
+        expect(result.result.joins[0].schemaName).toBe('dbo');
+      });
+      
+      it('should parse JOIN with bracketed three-part name', () => {
+        const result = parser.parse('FROM Users JOIN [MyDB].[dbo].[Orders] ON Users.id = Orders.user_id SELECT *');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.joins).toHaveLength(1);
+        expect(result.result.joins[0].tableName).toBe('Orders');
+        expect(result.result.joins[0].databaseName).toBe('MyDB');
+        expect(result.result.joins[0].schemaName).toBe('dbo');
+      });
+      
+      it('should parse mixed format FROM and JOIN', () => {
+        const result = parser.parse('FROM [Database1].[dbo].[Table1] JOIN Database2.dbo.Table2 ON Table1.id = Table2.id SELECT *');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.from).toBeDefined();
+        expect(result.result.from?.tableName).toBe('Table1');
+        expect(result.result.from?.databaseName).toBe('Database1');
+        expect(result.result.from?.schemaName).toBe('dbo');
+        
+        expect(result.result.joins).toHaveLength(1);
+        expect(result.result.joins[0].tableName).toBe('Table2');
+        expect(result.result.joins[0].databaseName).toBe('Database2');
+        expect(result.result.joins[0].schemaName).toBe('dbo');
+      });
+      
+      it('should parse LEFT JOIN with three-part name', () => {
+        const result = parser.parse('FROM Users LEFT JOIN MyDB.dbo.Orders ON Users.id = Orders.user_id SELECT *');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.joins).toHaveLength(1);
+        expect(result.result.joins[0].joinType).toBe('LEFT');
+        expect(result.result.joins[0].tableName).toBe('Orders');
+        expect(result.result.joins[0].databaseName).toBe('MyDB');
+        expect(result.result.joins[0].schemaName).toBe('dbo');
+      });
+      
+      it('should parse multiple JOINs with three-part names', () => {
+        const result = parser.parse('FROM DB1.dbo.Users JOIN DB2.dbo.Orders ON Users.id = Orders.user_id JOIN DB3.dbo.Products ON Orders.product_id = Products.id SELECT *');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.from?.tableName).toBe('Users');
+        expect(result.result.from?.databaseName).toBe('DB1');
+        expect(result.result.from?.schemaName).toBe('dbo');
+        
+        expect(result.result.joins).toHaveLength(2);
+        expect(result.result.joins[0].tableName).toBe('Orders');
+        expect(result.result.joins[0].databaseName).toBe('DB2');
+        expect(result.result.joins[0].schemaName).toBe('dbo');
+        
+        expect(result.result.joins[1].tableName).toBe('Products');
+        expect(result.result.joins[1].databaseName).toBe('DB3');
+        expect(result.result.joins[1].schemaName).toBe('dbo');
+      });
+    });
+    
+    describe('DELETE statement with three-part names', () => {
+      it('should parse DELETE with three-part table name', () => {
+        const result = parser.parse('DELETE FROM MyDatabase.dbo.Users WHERE id = 1');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.type).toBe(ExpressionType.LinqDelete);
+        expect(result.result.tableName).toBe('Users');
+        expect(result.result.databaseName).toBe('MyDatabase');
+        expect(result.result.schemaName).toBe('dbo');
+        expect(result.result.whereCondition).toBeDefined();
+      });
+      
+      it('should parse DELETE with bracketed three-part name', () => {
+        const result = parser.parse('DELETE FROM [MyDatabase].[dbo].[Users] WHERE id = 1');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.type).toBe(ExpressionType.LinqDelete);
+        expect(result.result.tableName).toBe('Users');
+        expect(result.result.databaseName).toBe('MyDatabase');
+        expect(result.result.schemaName).toBe('dbo');
+      });
+      
+      it('should parse DELETE TOP with three-part name', () => {
+        const result = parser.parse('DELETE TOP (10) FROM MyDB.dbo.TempTable WHERE status = 0');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.type).toBe(ExpressionType.LinqDelete);
+        expect(result.result.tableName).toBe('TempTable');
+        expect(result.result.databaseName).toBe('MyDB');
+        expect(result.result.schemaName).toBe('dbo');
+        expect(result.result.topCount).toBe(10);
+      });
+    });
+    
+    describe('DROP TABLE statement with three-part names', () => {
+      it('should parse DROP TABLE with three-part name', () => {
+        const result = parser.parse('DROP TABLE MyDatabase.dbo.OldTable');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.type).toBe(ExpressionType.LinqDropTable);
+        expect(result.result.tableName).toBe('OldTable');
+        expect(result.result.databaseName).toBe('MyDatabase');
+        expect(result.result.schemaName).toBe('dbo');
+      });
+      
+      it('should parse DROP TABLE with bracketed three-part name', () => {
+        const result = parser.parse('DROP TABLE [MyDatabase].[dbo].[OldTable]');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.type).toBe(ExpressionType.LinqDropTable);
+        expect(result.result.tableName).toBe('OldTable');
+        expect(result.result.databaseName).toBe('MyDatabase');
+        expect(result.result.schemaName).toBe('dbo');
+      });
+      
+      it('should parse DROP TABLE with bracketed single name', () => {
+        const result = parser.parse('DROP TABLE [TempTable]');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.type).toBe(ExpressionType.LinqDropTable);
+        expect(result.result.tableName).toBe('TempTable');
+        expect(result.result.databaseName).toBeUndefined();
+        expect(result.result.schemaName).toBeUndefined();
+      });
+    });
+  });
 });
 

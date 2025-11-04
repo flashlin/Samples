@@ -279,5 +279,122 @@ describe('TSqlFormatter', () => {
       }).toThrow('Cannot format LINQ DELETE directly');
     });
   });
+  
+  describe('Three-Part Table Names Formatting', () => {
+    describe('FROM clause formatting', () => {
+      it('should format FROM with three-part table name', () => {
+        const sql = formatLinqQuery('FROM MyDatabase.dbo.Users SELECT *');
+        
+        expect(sql).toContain('FROM MyDatabase.dbo.Users');
+      });
+      
+      it('should format FROM with bracketed three-part name', () => {
+        const sql = formatLinqQuery('FROM [MyDatabase].[dbo].[Users] SELECT *');
+        
+        expect(sql).toContain('FROM MyDatabase.dbo.Users');
+      });
+      
+      it('should format FROM with bracketed single name', () => {
+        const sql = formatLinqQuery('FROM [Users] SELECT *');
+        
+        expect(sql).toContain('FROM Users');
+      });
+      
+      it('should format FROM with three-part name and alias', () => {
+        const sql = formatLinqQuery('FROM MyDatabase.dbo.Users u SELECT u.name');
+        
+        expect(sql).toContain('FROM MyDatabase.dbo.Users u');
+      });
+    });
+    
+    describe('JOIN clause formatting', () => {
+      it('should format JOIN with three-part table name', () => {
+        const sql = formatLinqQuery('FROM Users JOIN MyDB.dbo.Orders ON Users.id = Orders.user_id SELECT *');
+        
+        expect(sql).toContain('FROM Users');
+        expect(sql).toContain('INNER JOIN MyDB.dbo.Orders');
+      });
+      
+      it('should format JOIN with bracketed three-part name', () => {
+        const sql = formatLinqQuery('FROM Users JOIN [MyDB].[dbo].[Orders] ON Users.id = Orders.user_id SELECT *');
+        
+        expect(sql).toContain('INNER JOIN MyDB.dbo.Orders');
+      });
+      
+      it('should format LEFT JOIN with three-part name', () => {
+        const sql = formatLinqQuery('FROM Users LEFT JOIN MyDB.dbo.Orders ON Users.id = Orders.user_id SELECT *');
+        
+        expect(sql).toContain('LEFT JOIN MyDB.dbo.Orders');
+      });
+      
+      it('should format multiple JOINs with three-part names', () => {
+        const sql = formatLinqQuery('FROM DB1.dbo.Users JOIN DB2.dbo.Orders ON Users.id = Orders.user_id JOIN DB3.dbo.Products ON Orders.product_id = Products.id SELECT *');
+        
+        expect(sql).toContain('FROM DB1.dbo.Users');
+        expect(sql).toContain('INNER JOIN DB2.dbo.Orders');
+        expect(sql).toContain('INNER JOIN DB3.dbo.Products');
+      });
+      
+      it('should format mixed format FROM and JOIN', () => {
+        const sql = formatLinqQuery('FROM [Database1].[dbo].[Table1] JOIN Database2.dbo.Table2 ON Table1.id = Table2.id SELECT *');
+        
+        expect(sql).toContain('FROM Database1.dbo.Table1');
+        expect(sql).toContain('INNER JOIN Database2.dbo.Table2');
+      });
+    });
+    
+    describe('Complex queries with three-part names', () => {
+      it('should format complex query with WHERE and ORDER BY', () => {
+        const sql = formatLinqQuery('FROM MyDB.dbo.Users WHERE age > 18 ORDER BY name ASC SELECT name, email');
+        
+        expect(sql).toContain('FROM MyDB.dbo.Users');
+        expect(sql).toContain('WHERE age > 18');
+        expect(sql).toContain('ORDER BY name ASC');
+        expect(sql).toContain('SELECT name, email');
+      });
+      
+      it('should format query with GROUP BY and HAVING', () => {
+        const sql = formatLinqQuery('FROM DB1.dbo.Orders GROUP BY customer_id HAVING COUNT(*) > 5 SELECT customer_id, COUNT(*) AS order_count');
+        
+        expect(sql).toContain('FROM DB1.dbo.Orders');
+        expect(sql).toContain('GROUP BY customer_id');
+        expect(sql).toContain('HAVING COUNT(*) > 5');
+      });
+    });
+    
+    describe('DELETE and DROP TABLE formatting', () => {
+      it('should format DELETE with three-part table name', () => {
+        const parseResult = parser.parse('DELETE FROM MyDatabase.dbo.Users WHERE id = 1');
+        const tsqlExpr = converter.convert(parseResult.result);
+        const sql = formatter.format(tsqlExpr);
+        
+        expect(sql).toBe('DELETE FROM MyDatabase.dbo.Users WHERE id = 1');
+      });
+      
+      it('should format DELETE with bracketed three-part name', () => {
+        const parseResult = parser.parse('DELETE FROM [MyDatabase].[dbo].[Users] WHERE id = 1');
+        const tsqlExpr = converter.convert(parseResult.result);
+        const sql = formatter.format(tsqlExpr);
+        
+        expect(sql).toBe('DELETE FROM MyDatabase.dbo.Users WHERE id = 1');
+      });
+      
+      it('should format DROP TABLE with three-part name', () => {
+        const parseResult = parser.parse('DROP TABLE MyDatabase.dbo.OldTable');
+        const tsqlExpr = converter.convert(parseResult.result);
+        const sql = formatter.format(tsqlExpr);
+        
+        expect(sql).toBe('DROP TABLE MyDatabase.dbo.OldTable');
+      });
+      
+      it('should format DROP TABLE with bracketed three-part name', () => {
+        const parseResult = parser.parse('DROP TABLE [MyDatabase].[dbo].[OldTable]');
+        const tsqlExpr = converter.convert(parseResult.result);
+        const sql = formatter.format(tsqlExpr);
+        
+        expect(sql).toBe('DROP TABLE MyDatabase.dbo.OldTable');
+      });
+    });
+  });
 });
 

@@ -170,5 +170,150 @@ describe('LinqToTSqlConverter', () => {
       expect(tsqlExpr.where?.condition).toBeDefined();
     });
   });
+  
+  describe('Three-Part Table Names Conversion', () => {
+    describe('FROM clause conversion', () => {
+      it('should convert FROM with three-part table name', () => {
+        const parseResult = parser.parse('FROM MyDatabase.dbo.Users SELECT *');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.from).toBeDefined();
+        expect(tsqlQuery.from?.tableName).toBe('MyDatabase.dbo.Users');
+      });
+      
+      it('should convert FROM with bracketed three-part name', () => {
+        const parseResult = parser.parse('FROM [MyDatabase].[dbo].[Users] SELECT *');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.from).toBeDefined();
+        expect(tsqlQuery.from?.tableName).toBe('MyDatabase.dbo.Users');
+      });
+      
+      it('should convert FROM with bracketed single name', () => {
+        const parseResult = parser.parse('FROM [Users] SELECT *');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.from).toBeDefined();
+        expect(tsqlQuery.from?.tableName).toBe('Users');
+      });
+      
+      it('should convert FROM with bracketed two-part name', () => {
+        const parseResult = parser.parse('FROM [MyDatabase].[Users] SELECT *');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.from).toBeDefined();
+        expect(tsqlQuery.from?.tableName).toBe('MyDatabase.Users');
+      });
+      
+      it('should preserve alias with three-part name', () => {
+        const parseResult = parser.parse('FROM MyDatabase.dbo.Users u SELECT u.name');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.from).toBeDefined();
+        expect(tsqlQuery.from?.tableName).toBe('MyDatabase.dbo.Users');
+        expect(tsqlQuery.from?.alias).toBe('u');
+      });
+    });
+    
+    describe('JOIN clause conversion', () => {
+      it('should convert JOIN with three-part table name', () => {
+        const parseResult = parser.parse('FROM Users JOIN MyDB.dbo.Orders ON Users.id = Orders.user_id SELECT *');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.joins).toHaveLength(1);
+        expect(tsqlQuery.joins[0].tableName).toBe('MyDB.dbo.Orders');
+      });
+      
+      it('should convert JOIN with bracketed three-part name', () => {
+        const parseResult = parser.parse('FROM Users JOIN [MyDB].[dbo].[Orders] ON Users.id = Orders.user_id SELECT *');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.joins).toHaveLength(1);
+        expect(tsqlQuery.joins[0].tableName).toBe('MyDB.dbo.Orders');
+      });
+      
+      it('should convert multiple JOINs with three-part names', () => {
+        const parseResult = parser.parse('FROM DB1.dbo.Users JOIN DB2.dbo.Orders ON Users.id = Orders.user_id JOIN DB3.dbo.Products ON Orders.product_id = Products.id SELECT *');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.from?.tableName).toBe('DB1.dbo.Users');
+        expect(tsqlQuery.joins).toHaveLength(2);
+        expect(tsqlQuery.joins[0].tableName).toBe('DB2.dbo.Orders');
+        expect(tsqlQuery.joins[1].tableName).toBe('DB3.dbo.Products');
+      });
+      
+      it('should convert LEFT JOIN with three-part name', () => {
+        const parseResult = parser.parse('FROM Users LEFT JOIN MyDB.dbo.Orders ON Users.id = Orders.user_id SELECT *');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.joins).toHaveLength(1);
+        expect(tsqlQuery.joins[0].joinType).toBe('LEFT');
+        expect(tsqlQuery.joins[0].tableName).toBe('MyDB.dbo.Orders');
+      });
+      
+      it('should convert mixed format FROM and JOIN', () => {
+        const parseResult = parser.parse('FROM [Database1].[dbo].[Table1] JOIN Database2.dbo.Table2 ON Table1.id = Table2.id SELECT *');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.from?.tableName).toBe('Database1.dbo.Table1');
+        expect(tsqlQuery.joins).toHaveLength(1);
+        expect(tsqlQuery.joins[0].tableName).toBe('Database2.dbo.Table2');
+      });
+    });
+    
+    describe('DELETE statement conversion', () => {
+      it('should convert DELETE with three-part table name', () => {
+        const parseResult = parser.parse('DELETE FROM MyDatabase.dbo.Users WHERE id = 1');
+        const tsqlExpr = converter.convert(parseResult.result);
+        
+        expect(tsqlExpr.type).toBe(ExpressionType.Delete);
+        expect(tsqlExpr.tableName).toBe('MyDatabase.dbo.Users');
+        expect(tsqlExpr.where).toBeDefined();
+      });
+      
+      it('should convert DELETE with bracketed three-part name', () => {
+        const parseResult = parser.parse('DELETE FROM [MyDatabase].[dbo].[Users] WHERE id = 1');
+        const tsqlExpr = converter.convert(parseResult.result);
+        
+        expect(tsqlExpr.type).toBe(ExpressionType.Delete);
+        expect(tsqlExpr.tableName).toBe('MyDatabase.dbo.Users');
+      });
+      
+      it('should convert DELETE TOP with three-part name', () => {
+        const parseResult = parser.parse('DELETE TOP (10) FROM MyDB.dbo.TempTable WHERE status = 0');
+        const tsqlExpr = converter.convert(parseResult.result);
+        
+        expect(tsqlExpr.type).toBe(ExpressionType.Delete);
+        expect(tsqlExpr.tableName).toBe('MyDB.dbo.TempTable');
+        expect(tsqlExpr.topCount).toBe(10);
+      });
+    });
+    
+    describe('DROP TABLE statement conversion', () => {
+      it('should convert DROP TABLE with three-part name', () => {
+        const parseResult = parser.parse('DROP TABLE MyDatabase.dbo.OldTable');
+        const tsqlExpr = converter.convert(parseResult.result);
+        
+        expect(tsqlExpr.type).toBe(ExpressionType.DropTable);
+        expect(tsqlExpr.tableName).toBe('MyDatabase.dbo.OldTable');
+      });
+      
+      it('should convert DROP TABLE with bracketed three-part name', () => {
+        const parseResult = parser.parse('DROP TABLE [MyDatabase].[dbo].[OldTable]');
+        const tsqlExpr = converter.convert(parseResult.result);
+        
+        expect(tsqlExpr.type).toBe(ExpressionType.DropTable);
+        expect(tsqlExpr.tableName).toBe('MyDatabase.dbo.OldTable');
+      });
+      
+      it('should convert DROP TABLE with bracketed single name', () => {
+        const parseResult = parser.parse('DROP TABLE [TempTable]');
+        const tsqlExpr = converter.convert(parseResult.result);
+        
+        expect(tsqlExpr.type).toBe(ExpressionType.DropTable);
+        expect(tsqlExpr.tableName).toBe('TempTable');
+      });
+    });
+  });
 });
 

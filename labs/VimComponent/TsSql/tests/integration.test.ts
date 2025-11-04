@@ -320,5 +320,169 @@ describe('Integration Tests', () => {
       expect(sql).toContain("status = 'pending'");
     });
   });
+  
+  describe('Three-Part Names Integration', () => {
+    describe('End-to-end with three-part names', () => {
+      it('should handle FROM with three-part table name', () => {
+        const { sql, errors } = linqToSql('FROM MyDatabase.dbo.Users SELECT *');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM MyDatabase.dbo.Users');
+        expect(sql).toContain('SELECT *');
+      });
+      
+      it('should handle FROM with bracketed three-part name', () => {
+        const { sql, errors } = linqToSql('FROM [MyDatabase].[dbo].[Users] SELECT *');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM MyDatabase.dbo.Users');
+      });
+      
+      it('should handle bracketed single table name', () => {
+        const { sql, errors } = linqToSql('FROM [Users] SELECT name, email');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM Users');
+        expect(sql).toContain('SELECT name, email');
+      });
+      
+      it('should handle bracketed two-part name', () => {
+        const { sql, errors } = linqToSql('FROM [MyDatabase].[Users] SELECT *');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM MyDatabase.Users');
+      });
+    });
+    
+    describe('Complex queries with three-part names', () => {
+      it('should handle JOIN with three-part names', () => {
+        const { sql, errors } = linqToSql('FROM DB1.dbo.Users u JOIN DB2.dbo.Orders o ON u.id = o.user_id SELECT u.name, o.total');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM DB1.dbo.Users u');
+        expect(sql).toContain('INNER JOIN DB2.dbo.Orders o');
+        expect(sql).toContain('ON u.id = o.user_id');
+      });
+      
+      it('should handle multiple JOINs with three-part names', () => {
+        const { sql, errors } = linqToSql('FROM DB1.dbo.Users JOIN DB2.dbo.Orders ON Users.id = Orders.user_id JOIN DB3.dbo.Products ON Orders.product_id = Products.id SELECT *');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM DB1.dbo.Users');
+        expect(sql).toContain('INNER JOIN DB2.dbo.Orders');
+        expect(sql).toContain('INNER JOIN DB3.dbo.Products');
+      });
+      
+      it('should handle LEFT JOIN with three-part names', () => {
+        const { sql, errors } = linqToSql('FROM Users LEFT JOIN MyDB.dbo.Orders ON Users.id = Orders.user_id SELECT *');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('LEFT JOIN MyDB.dbo.Orders');
+      });
+      
+      it('should handle WHERE clause with three-part names', () => {
+        const { sql, errors } = linqToSql('FROM MyDB.dbo.Users WHERE age > 18 SELECT name');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM MyDB.dbo.Users');
+        expect(sql).toContain('WHERE age > 18');
+      });
+      
+      it('should handle GROUP BY and HAVING with three-part names', () => {
+        const { sql, errors } = linqToSql('FROM DB1.dbo.Orders GROUP BY customer_id HAVING COUNT(*) > 5 SELECT customer_id, COUNT(*) AS order_count');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM DB1.dbo.Orders');
+        expect(sql).toContain('GROUP BY customer_id');
+        expect(sql).toContain('HAVING COUNT(*) > 5');
+      });
+      
+      it('should handle ORDER BY with three-part names', () => {
+        const { sql, errors } = linqToSql('FROM MyDB.dbo.Users ORDER BY name ASC SELECT *');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM MyDB.dbo.Users');
+        expect(sql).toContain('ORDER BY name ASC');
+      });
+    });
+    
+    describe('Mixed format queries', () => {
+      it('should handle mixed bracketed and non-bracketed names', () => {
+        const { sql, errors } = linqToSql('FROM [Database1].[dbo].[Table1] JOIN Database2.dbo.Table2 ON Table1.id = Table2.id SELECT *');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM Database1.dbo.Table1');
+        expect(sql).toContain('INNER JOIN Database2.dbo.Table2');
+      });
+      
+      it('should handle bracketed names with spaces', () => {
+        const { sql, errors } = linqToSql('FROM [My Database].[dbo].[User Table] SELECT *');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM My Database.dbo.User Table');
+      });
+    });
+    
+    describe('DELETE and DROP TABLE with three-part names', () => {
+      it('should handle DELETE with three-part name', () => {
+        const { sql, errors } = linqToSql('DELETE FROM MyDatabase.dbo.Users WHERE id = 1');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toBe('DELETE FROM MyDatabase.dbo.Users WHERE id = 1');
+      });
+      
+      it('should handle DELETE with bracketed three-part name', () => {
+        const { sql, errors } = linqToSql('DELETE FROM [MyDatabase].[dbo].[Users] WHERE id = 1');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toBe('DELETE FROM MyDatabase.dbo.Users WHERE id = 1');
+      });
+      
+      it('should handle DELETE TOP with three-part name', () => {
+        const { sql, errors } = linqToSql('DELETE TOP (10) FROM MyDB.dbo.TempTable WHERE status = 0');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toBe('DELETE TOP (10) FROM MyDB.dbo.TempTable WHERE status = 0');
+      });
+      
+      it('should handle DROP TABLE with three-part name', () => {
+        const { sql, errors } = linqToSql('DROP TABLE MyDatabase.dbo.OldTable');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toBe('DROP TABLE MyDatabase.dbo.OldTable');
+      });
+      
+      it('should handle DROP TABLE with bracketed three-part name', () => {
+        const { sql, errors } = linqToSql('DROP TABLE [MyDatabase].[dbo].[OldTable]');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toBe('DROP TABLE MyDatabase.dbo.OldTable');
+      });
+    });
+    
+    describe('Full integration scenarios', () => {
+      it('should handle complex query with all clauses and three-part names', () => {
+        const { sql, errors } = linqToSql(`
+          FROM DB1.dbo.Users u
+          LEFT JOIN DB2.dbo.Orders o ON u.id = o.user_id
+          WHERE u.age > 18
+          WHERE o.status = 'completed'
+          GROUP BY u.id, u.name
+          HAVING COUNT(o.id) > 3
+          ORDER BY u.name ASC
+          SELECT u.name, COUNT(o.id) AS order_count
+        `);
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('FROM DB1.dbo.Users u');
+        expect(sql).toContain('LEFT JOIN DB2.dbo.Orders o');
+        expect(sql).toContain('WHERE u.age > 18');
+        expect(sql).toContain("AND o.status = 'completed'");
+        expect(sql).toContain('GROUP BY u.id, u.name');
+        expect(sql).toContain('HAVING COUNT(o.id) > 3');
+        expect(sql).toContain('ORDER BY u.name ASC');
+      });
+    });
+  });
 });
 
