@@ -84,7 +84,15 @@ export class TSqlFormatter implements ExpressionVisitor<string> {
   
   // Visit SELECT Expression
   visitSelect(expr: SelectExpression): string {
-    const top = expr.topCount ? `TOP ${expr.topCount} ` : '';
+    let top = '';
+    if (expr.topCount !== undefined) {
+      if (typeof expr.topCount === 'number') {
+        top = `TOP ${expr.topCount} `;
+      } else {
+        top = `TOP ${expr.topCount.accept(this)} `;
+      }
+    }
+    
     const distinct = expr.isDistinct ? 'DISTINCT ' : '';
     const items = expr.items.map(item => {
       const exprStr = item.expression.accept(this);

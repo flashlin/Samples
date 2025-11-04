@@ -304,12 +304,32 @@ export class LinqParser {
       return undefined;
     }
     
-    let topCount: number | undefined;
+    let topCount: number | Expression | undefined;
     if (this.match(TokenType.TOP)) {
       if (this.check(TokenType.NUMBER)) {
         topCount = parseInt(this.advance().value, 10);
+      } else if (this.check(TokenType.IDENTIFIER)) {
+        const functionName = this.advance().value;
+        
+        if (this.match(TokenType.LEFT_PAREN)) {
+          const args: Expression[] = [];
+          
+          if (!this.check(TokenType.RIGHT_PAREN)) {
+            do {
+              args.push(this.parseExpression());
+            } while (this.match(TokenType.COMMA));
+          }
+          
+          if (!this.match(TokenType.RIGHT_PAREN)) {
+            this.addError('Expected ) after function arguments');
+          }
+          
+          topCount = new FunctionExpression(functionName, args);
+        } else {
+          this.addError('Expected ( after function name in TOP clause');
+        }
       } else {
-        this.addError('Expected number after TOP');
+        this.addError('Expected number or function after TOP');
       }
     }
     

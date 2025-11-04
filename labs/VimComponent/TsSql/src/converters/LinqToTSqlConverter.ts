@@ -162,7 +162,11 @@ export class LinqToTSqlConverter {
                 alias: item.alias
               })),
               query.select.isDistinct,
-              query.select.topCount
+              typeof query.select.topCount === 'number' 
+                ? query.select.topCount 
+                : query.select.topCount 
+                  ? this.convertExpression(query.select.topCount)
+                  : undefined
             )
           : undefined;
         

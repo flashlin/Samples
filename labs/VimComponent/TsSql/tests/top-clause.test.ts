@@ -82,11 +82,11 @@ describe('TOP Clause Support', () => {
       expect(result.result.select?.items).toHaveLength(2);
     });
     
-    it('should add error when TOP is not followed by a number', () => {
+    it('should add error when TOP is not followed by a number or function', () => {
       const result = parser.parse('FROM users SELECT TOP name');
       
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors.some(e => e.message.includes('Expected number after TOP'))).toBe(true);
+      expect(result.errors.some(e => e.message.includes('Expected ( after function name in TOP clause'))).toBe(true);
     });
   });
   
@@ -254,6 +254,178 @@ describe('TOP Clause Support', () => {
       
       expect(sql).toContain('SELECT TOP 10');
       expect(sql).toContain('c.name, COUNT(o.id) AS order_count');
+    });
+  });
+  
+  describe('TOP with function call support', () => {
+    describe('LinqParser - TOP function parsing', () => {
+      it('should parse TOP count(1)', () => {
+        const result = parser.parse('FROM users SELECT TOP count(1) name');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.select).toBeDefined();
+        expect(result.result.select?.topCount).toBeDefined();
+        expect(result.result.select?.topCount).not.toBeTypeOf('number');
+        expect((result.result.select?.topCount as any).type).toBe(ExpressionType.Function);
+      });
+      
+      it('should parse TOP count(5)', () => {
+        const result = parser.parse('FROM users SELECT TOP count(5) id, name');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.select?.topCount).toBeDefined();
+        expect((result.result.select?.topCount as any).type).toBe(ExpressionType.Function);
+      });
+      
+      it('should parse TOP sum(10)', () => {
+        const result = parser.parse('FROM products SELECT TOP sum(10) name');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.select?.topCount).toBeDefined();
+        expect((result.result.select?.topCount as any).type).toBe(ExpressionType.Function);
+      });
+      
+      it('should parse TOP count(1) with DISTINCT', () => {
+        const result = parser.parse('FROM users SELECT TOP count(1) DISTINCT category');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.select?.topCount).toBeDefined();
+        expect(result.result.select?.isDistinct).toBe(true);
+      });
+      
+      it('should parse TOP max(100) with multiple columns', () => {
+        const result = parser.parse('FROM orders SELECT TOP max(100) id, customer_id, total');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.select?.topCount).toBeDefined();
+        expect(result.result.select?.items).toHaveLength(3);
+      });
+      
+      it('should still support TOP with direct number', () => {
+        const result = parser.parse('FROM users SELECT TOP 10 name');
+        
+        expect(result.errors).toHaveLength(0);
+        expect(result.result.select?.topCount).toBe(10);
+        expect(typeof result.result.select?.topCount).toBe('number');
+      });
+    });
+    
+    describe('LinqToTSqlConverter - TOP function conversion', () => {
+      it('should convert TOP count(1) correctly', () => {
+        const parseResult = parser.parse('FROM users SELECT TOP count(1) name');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.select).toBeDefined();
+        expect(tsqlQuery.select?.topCount).toBeDefined();
+        expect(typeof tsqlQuery.select?.topCount).not.toBe('number');
+      });
+      
+      it('should convert TOP sum(5) in complex query', () => {
+        const parseResult = parser.parse('FROM users u JOIN orders o ON u.id = o.user_id WHERE u.active = 1 SELECT TOP sum(5) u.name, o.total');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.select?.topCount).toBeDefined();
+        expect(tsqlQuery.from).toBeDefined();
+        expect(tsqlQuery.joins).toHaveLength(1);
+      });
+      
+      it('should preserve number type for direct TOP', () => {
+        const parseResult = parser.parse('FROM users SELECT TOP 10 name');
+        const tsqlQuery = converter.convert(parseResult.result);
+        
+        expect(tsqlQuery.select?.topCount).toBe(10);
+        expect(typeof tsqlQuery.select?.topCount).toBe('number');
+      });
+    });
+    
+    describe('TSqlFormatter - TOP function formatting', () => {
+      it('should format TOP count(1) correctly', () => {
+        const linqResult = parser.parse('FROM users SELECT TOP count(1) name');
+        const tsqlQuery = converter.convert(linqResult.result);
+        const sql = formatter.format(tsqlQuery);
+        
+        expect(sql).toContain('SELECT TOP COUNT(1) name');
+        expect(sql).toContain('FROM users');
+      });
+      
+      it('should format TOP sum(5) correctly', () => {
+        const linqResult = parser.parse('FROM products SELECT TOP sum(5) id, name');
+        const tsqlQuery = converter.convert(linqResult.result);
+        const sql = formatter.format(tsqlQuery);
+        
+        expect(sql).toContain('SELECT TOP SUM(5) id, name');
+      });
+      
+      it('should format TOP count(1) with DISTINCT', () => {
+        const linqResult = parser.parse('FROM users SELECT TOP count(1) DISTINCT category');
+        const tsqlQuery = converter.convert(linqResult.result);
+        const sql = formatter.format(tsqlQuery);
+        
+        expect(sql).toContain('SELECT TOP COUNT(1) DISTINCT category');
+      });
+      
+      it('should format complex query with TOP function', () => {
+        const linqResult = parser.parse(`
+          FROM users u
+          JOIN orders o ON u.id = o.user_id
+          WHERE o.status = 1
+          ORDER BY o.created_at DESC
+          SELECT TOP max(20) u.name, o.total
+        `);
+        const tsqlQuery = converter.convert(linqResult.result);
+        const sql = formatter.format(tsqlQuery);
+        
+        expect(sql).toContain('SELECT TOP MAX(20) u.name, o.total');
+        expect(sql).toContain('FROM users u');
+        expect(sql).toContain('INNER JOIN orders o');
+      });
+      
+      it('should still format direct number TOP correctly', () => {
+        const linqResult = parser.parse('FROM users SELECT TOP 10 name');
+        const tsqlQuery = converter.convert(linqResult.result);
+        const sql = formatter.format(tsqlQuery);
+        
+        expect(sql).toContain('SELECT TOP 10 name');
+      });
+    });
+    
+    describe('Integration - TOP function end-to-end', () => {
+      const linqToSql = (linq: string) => {
+        const parseResult = parser.parse(linq);
+        if (parseResult.errors.length > 0) {
+          return { sql: '', errors: parseResult.errors };
+        }
+        const tsqlQuery = converter.convert(parseResult.result);
+        const sql = formatter.format(tsqlQuery);
+        return { sql, errors: [] };
+      };
+      
+      it('should handle TOP count(1) end-to-end', () => {
+        const { sql, errors } = linqToSql('FROM users SELECT TOP count(1) name, email');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('SELECT TOP COUNT(1) name, email');
+        expect(sql).toContain('FROM users');
+      });
+      
+      it('should handle TOP sum(10) with complex query', () => {
+        const { sql, errors } = linqToSql('FROM users u JOIN orders o ON u.id = o.user_id WHERE u.active = 1 ORDER BY o.total DESC SELECT TOP sum(10) u.name, o.total');
+        
+        expect(errors).toHaveLength(0);
+        expect(sql).toContain('SELECT TOP SUM(10) u.name, o.total');
+        expect(sql).toContain('WHERE u.active = 1');
+        expect(sql).toContain('ORDER BY o.total DESC');
+      });
+      
+      it('should handle mixed TOP formats in same system', () => {
+        const result1 = linqToSql('FROM users SELECT TOP 5 name');
+        const result2 = linqToSql('FROM users SELECT TOP count(5) name');
+        
+        expect(result1.errors).toHaveLength(0);
+        expect(result2.errors).toHaveLength(0);
+        expect(result1.sql).toContain('SELECT TOP 5 name');
+        expect(result2.sql).toContain('SELECT TOP COUNT(5) name');
+      });
     });
   });
 });

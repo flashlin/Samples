@@ -13,7 +13,7 @@ export class LinqSelectExpression extends BaseExpression {
   constructor(
     public readonly items: LinqSelectItem[],
     public readonly isDistinct: boolean = false,
-    public readonly topCount?: number
+    public readonly topCount?: number | Expression
   ) {
     super(ExpressionType.LinqSelect);
   }
