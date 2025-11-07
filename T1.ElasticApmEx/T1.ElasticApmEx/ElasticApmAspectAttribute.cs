@@ -55,7 +55,6 @@ public class ElasticApmAspectAttribute : Attribute
         var stopwatch = Stopwatch.StartNew();
         try
         {
-            // 儲存參數資訊
             if (args.Any())
             {
                 transaction.SetLabel("args", JsonSerializer.Serialize(args));
@@ -64,7 +63,8 @@ public class ElasticApmAspectAttribute : Attribute
             var result = method(args);
             if (result is Task task)
             {
-                return WrapAsyncTask(task, transaction, stopwatch);
+                dynamic dynamicTask = task;
+                return WrapAsyncTask(dynamicTask, transaction, stopwatch);
             }
 
             stopwatch.Stop();
@@ -95,7 +95,8 @@ public class ElasticApmAspectAttribute : Attribute
             var result = method(args);
             if (result is Task task)
             {
-                return WrapAsyncTask(task, span, stopwatch);
+                dynamic dynamicTask = task;
+                return WrapAsyncTask(dynamicTask, span, stopwatch);
             }
             stopwatch.Stop();
             span.SetLabel("duration_ms", stopwatch.ElapsedMilliseconds.ToString());
