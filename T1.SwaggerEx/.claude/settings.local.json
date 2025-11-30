@@ -4,7 +4,8 @@
       "Bash(dotnet new:*)",
       "Bash(dotnet add:*)",
       "mcp__serena__list_dir",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
