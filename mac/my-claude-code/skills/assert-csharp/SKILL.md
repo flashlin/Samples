@@ -9,7 +9,7 @@ tags: [csharp, testing, nunit, fluent-assertions]
 ## 核心原則
 
 1. **測試框架：** 使用 NUnit
-2. **斷言庫：** 使用 FluentAssertions
+2. **斷言庫：** 使用 FluentAssertions 6.12.0
 3. **斷言方式：** 使用 `Should().BeEquivalentTo()` 進行結果驗證
 4. **測試模式：** 嚴格遵守 Arrange-Act-Assert (AAA) 模式
 
