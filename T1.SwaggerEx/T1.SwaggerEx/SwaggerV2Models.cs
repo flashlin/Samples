@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace CodeBoyLib.Models.SwaggerV2
+namespace T1.SwaggerEx.Models.SwaggerV2
 {
     /// <summary>
     /// Root Swagger 2.0 document

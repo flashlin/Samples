@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace CodeBoyLib.Models
+namespace T1.SwaggerEx.Models
 {
     // Represents a single parameter for an endpoint
     public class EndpointParameter

@@ -1,9 +1,9 @@
-using CodeBoyLib.Models;
+using T1.SwaggerEx.Models;
 using FluentAssertions;
 using System.Linq;
 using NUnit.Framework;
 
-namespace CodeBoyLibTests
+namespace T1.SwaggerExTests
 {
     [TestFixture]
     public class SwaggerUiParserTest

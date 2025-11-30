@@ -1,5 +1,5 @@
 using HtmlAgilityPack;
-using CodeBoyLib.Models;
+using T1.SwaggerEx.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace CodeBoyLib.Services
+namespace T1.SwaggerEx.Services
 {
     /// <summary>
     /// 新版 SwaggerUiParser，使用強型別反序列化取代動態 JSON 解析

@@ -1,8 +1,8 @@
-using CodeBoyLib.Models;
-using CodeBoyLib.Services;
+using T1.SwaggerEx.Models;
+using T1.SwaggerEx.Services;
 using System.Reflection;
 
-namespace CodeBoyLibTests
+namespace T1.SwaggerExTests
 {
     public static class TestHelper
     {
@@ -22,7 +22,7 @@ namespace CodeBoyLibTests
 
         public static SwaggerApiInfo ParseSwaggerFromEmbeddedResource(string fileName)
         {
-            var jsonContent = LoadEmbeddedResource($"CodeBoyLibTests.DataFiles.{fileName}");
+            var jsonContent = LoadEmbeddedResource($"T1.SwaggerExTests.DataFiles.{fileName}");
             var parser = new SwaggerUiParser();
             return parser.ParseFromJson(jsonContent);
         }

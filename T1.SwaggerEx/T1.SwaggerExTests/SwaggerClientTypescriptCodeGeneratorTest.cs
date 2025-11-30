@@ -1,8 +1,8 @@
-using CodeBoyLib.Services;
+using T1.SwaggerEx.Services;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace CodeBoyLibTests
+namespace T1.SwaggerExTests
 {
     [TestFixture]
     public class SwaggerClientTypescriptCodeGeneratorTest

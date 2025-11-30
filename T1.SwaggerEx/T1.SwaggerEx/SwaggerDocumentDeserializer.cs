@@ -1,12 +1,12 @@
-using CodeBoyLib.Models;
-using CodeBoyLib.Models.SwaggerV2;
-using CodeBoyLib.Models.OpenApiV3;
+using T1.SwaggerEx.Models;
+using T1.SwaggerEx.Models.SwaggerV2;
+using T1.SwaggerEx.Models.OpenApiV3;
 using System;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace CodeBoyLib.Services
+namespace T1.SwaggerEx.Services
 {
     /// <summary>
     /// 智能反序列化器，自動偵測並解析 Swagger 2.0 或 OpenAPI 3.0 文檔

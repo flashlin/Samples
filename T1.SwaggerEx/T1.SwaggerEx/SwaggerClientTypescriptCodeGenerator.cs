@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CodeBoyLib.Models;
+using T1.SwaggerEx.Models;
 using T1.Standard.IO;
 
-namespace CodeBoyLib.Services
+namespace T1.SwaggerEx.Services
 {
     /// <summary>
     /// Service for generating TypeScript API client code from Swagger/OpenAPI specifications

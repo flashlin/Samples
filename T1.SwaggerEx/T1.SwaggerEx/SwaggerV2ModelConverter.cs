@@ -1,10 +1,10 @@
-using CodeBoyLib.Models;
-using CodeBoyLib.Models.SwaggerV2;
+using T1.SwaggerEx.Models;
+using T1.SwaggerEx.Models.SwaggerV2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CodeBoyLib.Services
+namespace T1.SwaggerEx.Services
 {
     /// <summary>
     /// 專門負責將 Swagger 2.0 模型轉換為 SwaggerApiInfo

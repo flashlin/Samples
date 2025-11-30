@@ -1,10 +1,10 @@
-using CodeBoyLib.Models;
-using CodeBoyLib.Models.OpenApiV3;
+using T1.SwaggerEx.Models;
+using T1.SwaggerEx.Models.OpenApiV3;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CodeBoyLib.Services
+namespace T1.SwaggerEx.Services
 {
     /// <summary>
     /// 專門負責將 OpenAPI 3.0 模型轉換為 SwaggerApiInfo

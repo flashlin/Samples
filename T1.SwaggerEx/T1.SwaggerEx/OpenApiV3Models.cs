@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace CodeBoyLib.Models.OpenApiV3
+namespace T1.SwaggerEx.Models.OpenApiV3
 {
     /// <summary>
     /// Root OpenAPI 3.0 document
