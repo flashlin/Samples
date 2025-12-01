@@ -4,7 +4,9 @@
       "Bash(npm run build:*)",
       "Bash(node debug-test.js:*)",
       "mcp__serena__get_symbols_overview",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "mcp__serena__find_symbol",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []
