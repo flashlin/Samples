@@ -18,6 +18,7 @@ export enum ExpressionType {
   Binary = 'Binary',
   Unary = 'Unary',
   Function = 'Function',
+  Array = 'Array',
   
   // LINQ Query Expressions
   LinqQuery = 'LinqQuery',

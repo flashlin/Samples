@@ -14,6 +14,7 @@ import type { LiteralExpression } from '../expressions/LiteralExpression';
 import type { BinaryExpression } from '../expressions/BinaryExpression';
 import type { UnaryExpression } from '../expressions/UnaryExpression';
 import type { FunctionExpression } from '../expressions/FunctionExpression';
+import type { ArrayExpression } from '../expressions/ArrayExpression';
 
 // LINQ expressions
 import type { LinqQueryExpression } from '../linqExpressions/LinqQueryExpression';
@@ -47,6 +48,7 @@ export interface ExpressionVisitor<T> {
   visitBinary(expr: BinaryExpression): T;
   visitUnary(expr: UnaryExpression): T;
   visitFunction(expr: FunctionExpression): T;
+  visitArray(expr: ArrayExpression): T;
   
   // LINQ Query Expressions
   visitLinqQuery(expr: LinqQueryExpression): T;

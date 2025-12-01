@@ -24,6 +24,7 @@ import { LiteralExpression } from '../expressions/LiteralExpression';
 import { BinaryExpression } from '../expressions/BinaryExpression';
 import { UnaryExpression } from '../expressions/UnaryExpression';
 import { FunctionExpression } from '../expressions/FunctionExpression';
+import { ArrayExpression } from '../expressions/ArrayExpression';
 
 // LINQ Parser - Recursive Descent Parser with Error Recovery
 export class LinqParser {
@@ -401,7 +402,8 @@ export class LinqParser {
       } else if (this.match(TokenType.LIKE)) {
         expr = new BinaryExpression(expr, BinaryOperator.Like, this.parseAdditive());
       } else if (this.match(TokenType.IN)) {
-        expr = new BinaryExpression(expr, BinaryOperator.In, this.parseAdditive());
+        const arrayExpr = this.parseInArray();
+        expr = new BinaryExpression(expr, BinaryOperator.In, arrayExpr);
       } else if (this.match(TokenType.IS)) {
         if (this.match(TokenType.NOT)) {
           if (this.match(TokenType.NULL)) {
@@ -625,7 +627,28 @@ export class LinqParser {
     this.addError(`Unexpected token: ${this.peek().value}`);
     return new LiteralExpression(null, 'null'); // Error placeholder
   }
-  
+
+  private parseInArray(): Expression {
+    if (!this.match(TokenType.LEFT_PAREN)) {
+      this.addError('Expected ( after IN');
+      return new ArrayExpression([]);
+    }
+
+    const elements: Expression[] = [];
+
+    if (!this.check(TokenType.RIGHT_PAREN)) {
+      do {
+        elements.push(this.parseAdditive());
+      } while (this.match(TokenType.COMMA));
+    }
+
+    if (!this.match(TokenType.RIGHT_PAREN)) {
+      this.addError('Expected closing parenthesis');
+    }
+
+    return new ArrayExpression(elements);
+  }
+
   // Helper methods
   private match(...types: TokenType[]): boolean {
     for (const type of types) {

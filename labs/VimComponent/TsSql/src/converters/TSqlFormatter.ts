@@ -17,6 +17,7 @@ import { LiteralExpression } from '../expressions/LiteralExpression';
 import { BinaryExpression } from '../expressions/BinaryExpression';
 import { UnaryExpression } from '../expressions/UnaryExpression';
 import { FunctionExpression } from '../expressions/FunctionExpression';
+import { ArrayExpression } from '../expressions/ArrayExpression';
 
 // LINQ expressions (not formatted, but need to handle in visitor)
 import { LinqQueryExpression } from '../linqExpressions/LinqQueryExpression';
@@ -196,7 +197,12 @@ export class TSqlFormatter implements ExpressionVisitor<string> {
     const funcStr = `${expr.functionName.toUpperCase()}(${args})`;
     return expr.alias ? `${funcStr} AS ${expr.alias}` : funcStr;
   }
-  
+
+  visitArray(expr: ArrayExpression): string {
+    const elements = expr.elements.map(e => e.accept(this)).join(', ');
+    return `(${elements})`;
+  }
+
   // Visit DROP TABLE Expression
   visitDropTable(expr: DropTableExpression): string {
     return `DROP TABLE ${expr.tableName}`;

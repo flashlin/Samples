@@ -217,11 +217,23 @@ describe('LinqParser', () => {
   
   it('should parse WHERE with IS NOT NULL in complex conditions', () => {
     const result = parser.parse('FROM users WHERE status = 1 OR d.field IS NOT NULL SELECT name');
-    
+
     expect(result.errors).toHaveLength(0);
     expect(result.result.wheres).toHaveLength(1);
   });
-  
+
+  it('should parse WHERE with IN operator', () => {
+    const result = parser.parse('FROM user WHERE gameCode IN (1,2,3) SELECT name');
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.result.from).toBeDefined();
+    expect(result.result.from?.tableName).toBe('user');
+    expect(result.result.wheres).toHaveLength(1);
+    expect(result.result.wheres[0].condition).toBeDefined();
+    expect(result.result.select).toBeDefined();
+    expect(result.result.select?.items).toHaveLength(1);
+  });
+
   describe('DROP TABLE Statement Parsing', () => {
     it('should parse DROP TABLE users', () => {
       const result = parser.parse('DROP TABLE users');

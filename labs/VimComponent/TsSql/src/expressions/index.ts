@@ -4,6 +4,7 @@ export * from './LiteralExpression';
 export * from './BinaryExpression';
 export * from './UnaryExpression';
 export * from './FunctionExpression';
+export * from './ArrayExpression';
 export * from './FromExpression';
 export * from './JoinExpression';
 export * from './WhereExpression';
