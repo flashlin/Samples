@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { LinqParser } from '../src/parser/LinqParser';
 import { ExpressionType, UnaryOperator } from '../src/types/ExpressionType';
 import { UnaryExpression } from '../src/expressions/UnaryExpression';
+import { LinqQueryExpression } from '../src/linqExpressions/LinqQueryExpression';
 
 describe('LinqParser', () => {
   const parser = new LinqParser();
@@ -226,12 +227,14 @@ describe('LinqParser', () => {
     const result = parser.parse('FROM user WHERE gameCode IN (1,2,3) SELECT name');
 
     expect(result.errors).toHaveLength(0);
-    expect(result.result.from).toBeDefined();
-    expect(result.result.from?.tableName).toBe('user');
-    expect(result.result.wheres).toHaveLength(1);
-    expect(result.result.wheres[0].condition).toBeDefined();
-    expect(result.result.select).toBeDefined();
-    expect(result.result.select?.items).toHaveLength(1);
+
+    const query = result.result as LinqQueryExpression;
+    expect(query.from).toBeDefined();
+    expect(query.from?.tableName).toBe('user');
+    expect(query.wheres).toHaveLength(1);
+    expect(query.wheres[0].condition).toBeDefined();
+    expect(query.select).toBeDefined();
+    expect(query.select?.items).toHaveLength(1);
   });
 
   describe('DROP TABLE Statement Parsing', () => {
