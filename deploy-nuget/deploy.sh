@@ -37,12 +37,24 @@ fi
 echo "Selected project: $selectedProjectName"
 
 # Change to the selected project directory
-if [ ! -d "../$selectedProjectName" ]; then
-    echo "Error: Directory ../$selectedProjectName does not exist."
+determine_project_path() {
+    local project_name=$1
+
+    if [ "$project_name" = "T1.Standard" ]; then
+        echo "../../T1.Standard/T1.Standard"
+    else
+        echo "../$project_name/$project_name"
+    fi
+}
+
+project_path=$(determine_project_path "$selectedProjectName")
+
+if [ ! -d "$project_path" ]; then
+    echo "Error: Directory $project_path does not exist."
     exit 1
 fi
 
-cd "../$selectedProjectName/$selectedProjectName"
+cd "$project_path"
 echo "Changed to directory: $(pwd)"
 
 # Function to publish to nuget
