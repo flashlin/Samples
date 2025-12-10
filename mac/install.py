@@ -43,7 +43,7 @@ ld() {
     if [ ${#dirs[@]} -eq 0 ]; then
       echo "\033[37m當前目錄下沒有子目錄\033[0m"  # 使用白色顯示
     else
-      ls -d --color=auto */
+      LS_COLORS='di=01;37' ls -d */
     fi
   else
     pattern="$*"
@@ -51,7 +51,7 @@ ld() {
     if [ ${#dirs[@]} -eq 0 ]; then
       echo "\033[37m當前目錄下沒有子目錄\033[0m"  # 使用白色顯示
     else
-      ls -d */ | grep --color=auto -E "$pattern"
+      LS_COLORS='di=01;37' ls -d */ | grep --color=auto -E "$pattern"
     fi
   fi
   unsetopt NULL_GLOB  # 恢復原始設定
