@@ -19,7 +19,11 @@ public static class SqlExpressionBuilder
     {
         return new SelectStatement
         {
-            FromSources = [new SqlTableSource { TableName = tableName }]
+            FromSources = [new SqlTableSource 
+            { 
+                TableName = tableName,
+                Withs = [new SqlHint { Name = "NOLOCK" }]
+            }]
         };
     }
 }

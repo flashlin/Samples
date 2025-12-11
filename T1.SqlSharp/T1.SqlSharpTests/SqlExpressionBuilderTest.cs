@@ -39,7 +39,7 @@ public class SqlExpressionBuilderTest
                     Alias = "Users_Birth"
                 }
             ],
-            FromSources = [new SqlTableSource { TableName = "[dbo].[Users]" }]
+            FromSources = [new SqlTableSource { TableName = "[dbo].[Users]", Withs = [new SqlHint { Name = "NOLOCK" }] }]
         });
     }
 
@@ -76,7 +76,7 @@ public class SqlExpressionBuilderTest
                     Alias = "Users_Birth"
                 }
             ],
-            FromSources = [new SqlTableSource { TableName = "[dbo].[Users]" }],
+            FromSources = [new SqlTableSource { TableName = "[dbo].[Users]", Withs = [new SqlHint { Name = "NOLOCK" }] }],
             Where = new SqlConditionExpression
             {
                 Left = new SqlColumnExpression
@@ -110,7 +110,7 @@ public class SqlExpressionBuilderTest
 
         var sql = result.ToSql();
 
-        var expectedSql = "SELECT\n\t[dbo].[Users].[Id] AS Users_Id,\n\t[dbo].[Users].[Name] AS Users_Name,\n\t[dbo].[Users].[Birth] AS Users_Birth\nFROM \n\t[dbo].[Users]\nWHERE \n\t[dbo].[Users].[Name] = @p0\n";
+        var expectedSql = "SELECT\n\t[dbo].[Users].[Id] AS Users_Id,\n\t[dbo].[Users].[Name] AS Users_Name,\n\t[dbo].[Users].[Birth] AS Users_Birth\nFROM \n\t[dbo].[Users] WITH(NOLOCK)\nWHERE \n\t[dbo].[Users].[Name] = @p0\n";
 
         sql.Should().Be(expectedSql);
     }
@@ -144,7 +144,7 @@ public class SqlExpressionBuilderTest
                     Alias = "Users_Name"
                 }
             ],
-            FromSources = [new SqlTableSource { TableName = "[dbo].[Users]" }]
+            FromSources = [new SqlTableSource { TableName = "[dbo].[Users]", Withs = [new SqlHint { Name = "NOLOCK" }] }]
         });
     }
 
@@ -163,7 +163,7 @@ public class SqlExpressionBuilderTest
 
         var sql = result.ToSql();
 
-        var expectedSql = "SELECT DISTINCT \n\t[dbo].[Users].[Name] AS Users_Name\nFROM \n\t[dbo].[Users]\n";
+        var expectedSql = "SELECT DISTINCT \n\t[dbo].[Users].[Name] AS Users_Name\nFROM \n\t[dbo].[Users] WITH(NOLOCK)\n";
 
         sql.Should().Be(expectedSql);
     }
@@ -202,7 +202,7 @@ public class SqlExpressionBuilderTest
                     Alias = "Users_Birth"
                 }
             ],
-            FromSources = [new SqlTableSource { TableName = "[dbo].[Users]" }],
+            FromSources = [new SqlTableSource { TableName = "[dbo].[Users]", Withs = [new SqlHint { Name = "NOLOCK" }] }],
             Where = new SqlConditionExpression
             {
                 Left = new SqlColumnExpression
@@ -245,7 +245,7 @@ public class SqlExpressionBuilderTest
 
         var sql = result.ToSql();
 
-        var expectedSql = "SELECT\nTOP 1\n\t[dbo].[Users].[Id] AS Users_Id,\n\t[dbo].[Users].[Name] AS Users_Name,\n\t[dbo].[Users].[Birth] AS Users_Birth\nFROM \n\t[dbo].[Users]\nWHERE \n\t[dbo].[Users].[Id] = @p0\n";
+        var expectedSql = "SELECT\nTOP 1\n\t[dbo].[Users].[Id] AS Users_Id,\n\t[dbo].[Users].[Name] AS Users_Name,\n\t[dbo].[Users].[Birth] AS Users_Birth\nFROM \n\t[dbo].[Users] WITH(NOLOCK)\nWHERE \n\t[dbo].[Users].[Id] = @p0\n";
 
         sql.Should().Be(expectedSql);
     }
