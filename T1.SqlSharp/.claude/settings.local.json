@@ -3,7 +3,9 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(find:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Bash(ls:*)",
+      "mcp__serena__find_file"
     ]
   }
 }
