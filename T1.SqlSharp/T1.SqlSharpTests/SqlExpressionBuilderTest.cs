@@ -17,7 +17,7 @@ public class SqlExpressionBuilderTest
 
         using var db = new TestDbContext(options);
 
-        var result = SqlExpressionBuilder.From(db.Users).Select();
+        var result = SqlExpressionBuilder.From(db.Users).Build();
 
         result.ShouldBe(new SelectStatement
         {
@@ -54,7 +54,7 @@ public class SqlExpressionBuilderTest
 
         var result = SqlExpressionBuilder.From(db.Users)
             .Where(u => u.Name == userName)
-            .Select();
+            .Build();
 
         result.ShouldBe(new SelectStatement
         {
@@ -106,11 +106,64 @@ public class SqlExpressionBuilderTest
 
         var result = SqlExpressionBuilder.From(db.Users)
             .Where(u => u.Name == userName)
-            .Select();
+            .Build();
 
         var sql = result.ToSql();
 
         var expectedSql = "SELECT\n\t[dbo].[Users].[Id] AS Users_Id,\n\t[dbo].[Users].[Name] AS Users_Name,\n\t[dbo].[Users].[Birth] AS Users_Birth\nFROM \n\t[dbo].[Users]\nWHERE \n\t[dbo].[Users].[Name] = @p0\n";
+
+        sql.Should().Be(expectedSql);
+    }
+
+    [Test]
+    public void Select_SingleColumn_Distinct_Should_Generate_Correct_SelectStatement()
+    {
+        var options = new DbContextOptionsBuilder<TestDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestDb_Distinct")
+            .Options;
+        using var db = new TestDbContext(options);
+
+        var result = SqlExpressionBuilder.From(db.Users)
+            .Select(u => u.Name)
+            .Distinct()
+            .Build();
+
+        result.ShouldBe(new SelectStatement
+        {
+            SelectType = SelectType.Distinct,
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlColumnExpression
+                    {
+                        Schema = "dbo",
+                        TableName = "Users",
+                        ColumnName = "Name"
+                    },
+                    Alias = "Users_Name"
+                }
+            ],
+            FromSources = [new SqlTableSource { TableName = "[dbo].[Users]" }]
+        });
+    }
+
+    [Test]
+    public void Select_SingleColumn_Distinct_Should_Generate_Correct_SQL_String()
+    {
+        var options = new DbContextOptionsBuilder<TestDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestDb_Distinct_Sql")
+            .Options;
+        using var db = new TestDbContext(options);
+
+        var result = SqlExpressionBuilder.From(db.Users)
+            .Select(u => u.Name)
+            .Distinct()
+            .Build();
+
+        var sql = result.ToSql();
+
+        var expectedSql = "SELECT DISTINCT \n\t[dbo].[Users].[Name] AS Users_Name\nFROM \n\t[dbo].[Users]\n";
 
         sql.Should().Be(expectedSql);
     }

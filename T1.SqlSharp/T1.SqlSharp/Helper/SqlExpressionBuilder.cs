@@ -65,13 +65,61 @@ public class SqlExpressionBuilder<TEntity> where TEntity : class
         return this;
     }
 
-    public SelectStatement Select()
+    public SqlExpressionBuilder<TEntity> Select()
+    {
+        if (_selectStatement.Columns.Count == 0)
+        {
+            PopulateAllColumns();
+        }
+        return this;
+    }
+
+    public SqlExpressionBuilder<TEntity> Select<TProperty>(Expression<Func<TEntity, TProperty>> selector)
+    {
+        _selectStatement.Columns.Clear();
+
+        var propertyName = ExtractPropertyName(selector);
+
+        var columnExpression = new SqlColumnExpression
+        {
+            Schema = _context.Schema,
+            TableName = _context.TableName,
+            ColumnName = propertyName
+        };
+
+        var alias = $"{_context.TableName}_{propertyName}";
+
+        _selectStatement.Columns.Add(new SelectColumn
+        {
+            Field = columnExpression,
+            Alias = alias
+        });
+
+        return this;
+    }
+
+    public SqlExpressionBuilder<TEntity> Distinct()
+    {
+        _selectStatement.SelectType = SelectType.Distinct;
+        return this;
+    }
+
+    public SelectStatement Build()
     {
         if (_selectStatement.Columns.Count == 0)
         {
             PopulateAllColumns();
         }
         return _selectStatement;
+    }
+
+    private string ExtractPropertyName<TProperty>(Expression<Func<TEntity, TProperty>> selector)
+    {
+        if (selector.Body is MemberExpression memberExpression)
+        {
+            return memberExpression.Member.Name;
+        }
+        throw new ArgumentException("Selector must be a property expression");
     }
 
     private void PopulateAllColumns()
