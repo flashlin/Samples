@@ -1,27 +1,23 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using T1.SqlSharp.Expressions;
 
 namespace T1.SqlSharp.Helper;
 
-public class SqlExpressionBuilder
+public static class SqlExpressionBuilder
 {
-    private readonly SelectStatement _selectStatement;
-
-    private SqlExpressionBuilder(SelectStatement selectStatement)
-    {
-        _selectStatement = selectStatement;
-    }
-
-    public static SqlExpressionBuilder From<TEntity>(DbSet<TEntity> dbSet) where TEntity : class
+    public static SqlExpressionBuilder<TEntity> From<TEntity>(DbSet<TEntity> dbSet) where TEntity : class
     {
         var tableName = GetTableName(dbSet);
         var selectStatement = CreateSelectStatement(tableName);
-        return new SqlExpressionBuilder(selectStatement);
-    }
 
-    public SelectStatement Select()
-    {
-        return _selectStatement;
+        var context = new SqlExpressionBuilderContext
+        {
+            Schema = dbSet.EntityType.GetSchema() ?? string.Empty,
+            TableName = dbSet.EntityType.GetTableName() ?? string.Empty
+        };
+
+        return new SqlExpressionBuilder<TEntity>(selectStatement, context);
     }
 
     private static string GetTableName<TEntity>(DbSet<TEntity> dbSet) where TEntity : class
@@ -47,5 +43,30 @@ public class SqlExpressionBuilder
         {
             FromSources = [new SqlTableSource { TableName = tableName }]
         };
+    }
+}
+
+public class SqlExpressionBuilder<TEntity> where TEntity : class
+{
+    private readonly SelectStatement _selectStatement;
+    private readonly SqlExpressionBuilderContext _context;
+
+    internal SqlExpressionBuilder(SelectStatement selectStatement, SqlExpressionBuilderContext context)
+    {
+        _selectStatement = selectStatement;
+        _context = context;
+    }
+
+    public SqlExpressionBuilder<TEntity> Where(Expression<Func<TEntity, bool>> predicate)
+    {
+        var visitor = new ExpressionTreeVisitor(_context);
+        var whereExpression = visitor.Visit(predicate.Body);
+        _selectStatement.Where = whereExpression;
+        return this;
+    }
+
+    public SelectStatement Select()
+    {
+        return _selectStatement;
     }
 }

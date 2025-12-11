@@ -23,4 +23,38 @@ public class SqlExpressionBuilderTest
             FromSources = [new SqlTableSource { TableName = "[dbo].[Users]" }]
         });
     }
+
+    [Test]
+    public void Where_SimpleEquality_Should_Generate_Correct_Where_Clause()
+    {
+        var options = new DbContextOptionsBuilder<TestDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestDb")
+            .Options;
+        using var db = new TestDbContext(options);
+        var userName = "John";
+
+        var result = SqlExpressionBuilder.From(db.Users)
+            .Where(u => u.Name == userName)
+            .Select();
+
+        result.ShouldBe(new SelectStatement
+        {
+            FromSources = [new SqlTableSource { TableName = "[dbo].[Users]" }],
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlColumnExpression
+                {
+                    Schema = "dbo",
+                    TableName = "Users",
+                    ColumnName = "Name"
+                },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlParameter
+                {
+                    ParameterName = "@p0",
+                    Value = "John"
+                }
+            }
+        });
+    }
 }
