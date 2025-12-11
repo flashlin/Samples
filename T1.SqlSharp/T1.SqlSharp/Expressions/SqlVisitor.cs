@@ -410,4 +410,9 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
     }
+
+    public virtual void Visit_UpdateStatement(SqlUpdateStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
 }
