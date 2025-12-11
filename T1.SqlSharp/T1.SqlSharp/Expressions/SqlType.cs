@@ -64,4 +64,5 @@ public enum SqlType
     NotExpression,
     ExistsExpression,
     ChangeTable,
+    InsertStatement,
 }

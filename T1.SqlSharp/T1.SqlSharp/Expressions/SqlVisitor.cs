@@ -405,4 +405,9 @@ public class SqlVisitor
     public virtual void Visit_ChangeTableVersion(SqlChangeTableVersion expr)
     {
     }
+
+    public virtual void Visit_InsertStatement(SqlInsertStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
 }
