@@ -67,6 +67,33 @@ public class SqlExpressionBuilder<TEntity> where TEntity : class
 
     public SelectStatement Select()
     {
+        if (_selectStatement.Columns.Count == 0)
+        {
+            PopulateAllColumns();
+        }
         return _selectStatement;
+    }
+
+    private void PopulateAllColumns()
+    {
+        var entityType = typeof(TEntity);
+
+        foreach (var property in entityType.GetProperties())
+        {
+            var columnExpression = new SqlColumnExpression
+            {
+                Schema = _context.Schema,
+                TableName = _context.TableName,
+                ColumnName = property.Name
+            };
+
+            var alias = $"{_context.TableName}_{property.Name}";
+
+            _selectStatement.Columns.Add(new SelectColumn
+            {
+                Field = columnExpression,
+                Alias = alias
+            });
+        }
     }
 }
