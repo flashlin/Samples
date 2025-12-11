@@ -104,6 +104,19 @@ public class SqlExpressionBuilder<TEntity> where TEntity : class
         return this;
     }
 
+    public SqlExpressionBuilder<TEntity> Take(int count)
+    {
+        _selectStatement.Top = new SqlTopClause
+        {
+            Expression = new SqlValue
+            {
+                SqlType = SqlType.IntValue,
+                Value = count.ToString()
+            }
+        };
+        return this;
+    }
+
     public SelectStatement Build()
     {
         if (_selectStatement.Columns.Count == 0)

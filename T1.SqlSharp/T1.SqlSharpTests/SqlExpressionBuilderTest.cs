@@ -167,4 +167,86 @@ public class SqlExpressionBuilderTest
 
         sql.Should().Be(expectedSql);
     }
+
+    [Test]
+    public void Where_With_Take_Should_Generate_Correct_SelectStatement()
+    {
+        var options = new DbContextOptionsBuilder<TestDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestDb_Take")
+            .Options;
+        using var db = new TestDbContext(options);
+        var id = 1;
+
+        var result = SqlExpressionBuilder.From(db.Users)
+            .Where(u => u.Id == id)
+            .Take(1)
+            .Build();
+
+        result.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlColumnExpression { Schema = "dbo", TableName = "Users", ColumnName = "Id" },
+                    Alias = "Users_Id"
+                },
+                new SelectColumn
+                {
+                    Field = new SqlColumnExpression { Schema = "dbo", TableName = "Users", ColumnName = "Name" },
+                    Alias = "Users_Name"
+                },
+                new SelectColumn
+                {
+                    Field = new SqlColumnExpression { Schema = "dbo", TableName = "Users", ColumnName = "Birth" },
+                    Alias = "Users_Birth"
+                }
+            ],
+            FromSources = [new SqlTableSource { TableName = "[dbo].[Users]" }],
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlColumnExpression
+                {
+                    Schema = "dbo",
+                    TableName = "Users",
+                    ColumnName = "Id"
+                },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlParameter
+                {
+                    ParameterName = "@p0",
+                    Value = 1
+                }
+            },
+            Top = new SqlTopClause
+            {
+                Expression = new SqlValue
+                {
+                    SqlType = SqlType.IntValue,
+                    Value = "1"
+                }
+            }
+        });
+    }
+
+    [Test]
+    public void Where_With_Take_Should_Generate_Correct_SQL_String()
+    {
+        var options = new DbContextOptionsBuilder<TestDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestDb_Take_Sql")
+            .Options;
+        using var db = new TestDbContext(options);
+        var id = 1;
+
+        var result = SqlExpressionBuilder.From(db.Users)
+            .Where(u => u.Id == id)
+            .Take(1)
+            .Build();
+
+        var sql = result.ToSql();
+
+        var expectedSql = "SELECT\nTOP 1\n\t[dbo].[Users].[Id] AS Users_Id,\n\t[dbo].[Users].[Name] AS Users_Name,\n\t[dbo].[Users].[Birth] AS Users_Birth\nFROM \n\t[dbo].[Users]\nWHERE \n\t[dbo].[Users].[Id] = @p0\n";
+
+        sql.Should().Be(expectedSql);
+    }
 }
