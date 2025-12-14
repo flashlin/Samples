@@ -37,24 +37,30 @@ load-nvmrc
 
 # 目錄列表指令
 ld() {
-  setopt NULL_GLOB  # 設定空匹配返回空而不是錯誤
-  if [ $# -eq 0 ]; then
-    dirs=(*/)
-    if [ ${#dirs[@]} -eq 0 ]; then
-      echo "\033[37m當前目錄下沒有子目錄\033[0m"  # 使用白色顯示
-    else
-      LS_COLORS='di=01;37' ls -d */
-    fi
-  else
+  setopt NULL_GLOB
+  local pattern=""
+  if [ $# -gt 0 ]; then
     pattern="$*"
-    dirs=(*/)
-    if [ ${#dirs[@]} -eq 0 ]; then
-      echo "\033[37m當前目錄下沒有子目錄\033[0m"  # 使用白色顯示
-    else
-      LS_COLORS='di=01;37' ls -d */ | grep --color=auto -E "$pattern"
-    fi
   fi
-  unsetopt NULL_GLOB  # 恢復原始設定
+
+  dirs=(*/)
+  if [ ${#dirs[@]} -eq 0 ]; then
+    echo "\\033[37m當前目錄下沒有子目錄\\033[0m"
+    unsetopt NULL_GLOB
+    return
+  fi
+
+  for dir in */; do
+    if [ -n "$pattern" ] && ! echo "$dir" | grep -qE "$pattern"; then
+      continue
+    fi
+
+    local mtime=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$dir")
+    local size=$(du -sh "$dir" 2>/dev/null | cut -f1)
+    printf "\\033[01;37m%-40s\\033[0m %s  %s\\n" "$dir" "$mtime" "$size"
+  done
+
+  unsetopt NULL_GLOB
 }
 
 # Rider 快速開啟指令
@@ -71,8 +77,8 @@ py() {
 
 # 複製目前目錄路徑到剪貼簿
 cpwd() {
-  pwd | tr -d '\n' | pbcopy
-  echo "\033[32m已將目前目錄路徑複製到剪貼簿\033[0m"
+  pwd | tr -d '\\n' | pbcopy
+  echo "\\033[32m已將目前目錄路徑複製到剪貼簿\\033[0m"
 }
 
 # 列出正在監聽的 TCP 連接埠
@@ -81,7 +87,7 @@ port() {
 }
 
 
-PROMPT=$'%F{cyan}%~%f\n%F{green}%#%f '
+PROMPT=$'%F{cyan}%~%f\\n%F{green}%#%f '
 # ===== 自定義函數區塊結束 =====
 '''
 
