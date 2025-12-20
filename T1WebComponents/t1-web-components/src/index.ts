@@ -1,10 +1,11 @@
 import type { App } from 'vue'
 import AutoComplete from './components/AutoComplete.vue'
 import DropDownList from './components/DropDownList.vue'
+import JsonEditor from './components/JsonEditor.vue'
 import { highlightText, normalizeText, splitIntoWords } from './components/autoCompleteUtils'
 
 // 個別匯出元件
-export { AutoComplete, DropDownList }
+export { AutoComplete, DropDownList, JsonEditor }
 // 匯出工具函式 (選用)
 export { highlightText, normalizeText, splitIntoWords }
 
@@ -17,5 +18,6 @@ export default {
     install: (app: App) => {
         app.component('AutoComplete', AutoComplete)
         app.component('DropDownList', DropDownList)
+        app.component('JsonEditor', JsonEditor)
     }
 }

@@ -50,6 +50,28 @@
         </div>
       </section>
 
+      <!-- JsonEditor 展示 -->
+      <section class="p-6 bg-gray-800/50 rounded-xl border border-gray-700 shadow-lg">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-2">
+          <span class="w-2 h-6 bg-purple-500 rounded-full"></span>
+          JsonEditor
+        </h2>
+        <p class="text-sm text-gray-400 mb-6">動態陣列編輯器，支援 schema 驗證與完整的 CRUD 操作。</p>
+
+        <JsonEditor
+          v-model="userList"
+          :schema="userSchema"
+        />
+
+        <div class="mt-6 p-4 bg-gray-900 rounded-md border border-gray-700">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-xs font-medium text-gray-500 uppercase">Current JSON Data</h3>
+            <span class="text-xs text-gray-500">{{ userList.length }} item(s)</span>
+          </div>
+          <pre class="text-xs font-mono text-purple-400 overflow-x-auto whitespace-pre-wrap">{{ JSON.stringify(userList, null, 2) }}</pre>
+        </div>
+      </section>
+
       <section class="p-6 bg-blue-900/20 rounded-xl border border-blue-800/50">
         <h3 class="text-lg font-semibold text-blue-300 mb-2">搜尋提示 (Camel Search)</h3>
         <ul class="text-sm text-gray-300 list-disc list-inside space-y-1">
@@ -66,6 +88,7 @@
 import { ref } from 'vue'
 import DropDownList from './components/DropDownList.vue'
 import AutoComplete from './components/AutoComplete.vue'
+import JsonEditor from './components/JsonEditor.vue'
 
 // DropDownList 資料
 const dropDownValue = ref('')
@@ -89,6 +112,19 @@ const autoCompleteOptions = [
   'NuxtJsApp',
   'TailwindAesthetics',
   'ModernDesign'
+]
+
+// JsonEditor 資料
+const userList = ref([
+  { id: 1, name: 'John Doe', birth: '1990-01-01' },
+  { id: 2, name: 'Jane Smith', birth: '1995-05-15' },
+  { id: 3, name: 'Bob Johnson', birth: '1988-03-20' }
+])
+
+const userSchema = [
+  { key: 'id', label: 'ID', type: 'number' as const },
+  { key: 'name', label: 'Full Name', type: 'string' as const },
+  { key: 'birth', label: 'Birth Date', type: 'date' as const }
 ]
 </script>
 
