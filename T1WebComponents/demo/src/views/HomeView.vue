@@ -39,6 +39,23 @@
         </div>
       </section>
 
+      <!-- JsonEditor Demo -->
+      <section class="p-6 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+        <h2 class="text-xl font-semibold text-purple-300 mb-4">JsonEditor</h2>
+        <p class="text-sm text-gray-400 mb-6">Dynamic array editor with enforced schema and CRUD operations.</p>
+        
+        <JsonEditor
+          v-model="userList"
+          :schema="userSchema"
+          @change="onJsonChange"
+        />
+        
+        <div class="mt-6 p-4 bg-gray-900 rounded border border-gray-700">
+          <h3 class="text-xs font-medium text-gray-500 uppercase mb-2">Current JSON Data</h3>
+          <pre class="text-xs font-mono text-purple-400 overflow-x-auto">{{ JSON.stringify(userList, null, 2) }}</pre>
+        </div>
+      </section>
+
       <div class="p-6 bg-gray-800/50 rounded-lg italic text-gray-400 text-center">
         Try "p" to find Pnpm, ViteBuildTool, or "v" to find Vue.js etc (Camel Search enabled).
       </div>
@@ -69,4 +86,20 @@ const searchOptions = [
   'TypeScriptIntegration',
   'PiniaState'
 ]
+
+// JsonEditor Demo
+const userList = ref([
+  { id: 1, name: 'John Doe', birth: '1990-01-01' },
+  { id: 2, name: 'Jane Smith', birth: '1995-05-15' }
+])
+
+const userSchema = [
+  { key: 'id', label: 'ID', type: 'number' },
+  { key: 'name', label: 'Full Name', type: 'string' },
+  { key: 'birth', label: 'Birth Date', type: 'date' }
+]
+
+const onJsonChange = (data: any) => {
+  console.log('JSON Data Changed:', data)
+}
 </script>
