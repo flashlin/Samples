@@ -1,28 +1,53 @@
 {
   "name": "t1-web-components",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "High-quality dark mode component library built with Vue 3 + TypeScript + Tailwind 3",
+  "type": "module",
+  "main": "./dist/t1-web-components.umd.js",
+  "module": "./dist/t1-web-components.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/t1-web-components.es.js",
+      "require": "./dist/t1-web-components.umd.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
     "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "vue",
+    "tailwind",
+    "components",
+    "dark-mode",
+    "autocomplete",
+    "dropdown"
+  ],
+  "author": "mrbrain <MrBrain.Elegance@gmail.com>",
+  "license": "MIT",
   "packageManager": "pnpm@10.25.0",
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/typography": "^0.5.19",
+    "@types/node": "^25.0.3",
     "@vitejs/plugin-vue": "^6.0.3",
     "autoprefixer": "^10.4.23",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
     "vite": "^7.3.0",
+    "vite-plugin-dts": "^4.5.4",
     "vue": "^3.5.26",
     "vue-tsc": "^3.1.8"
   }
