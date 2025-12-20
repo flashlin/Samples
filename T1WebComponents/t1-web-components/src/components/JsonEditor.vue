@@ -48,10 +48,13 @@
               </span>
             </td>
             <td class="px-6 py-4 text-right whitespace-nowrap space-x-2">
-              <button @click="openEditModal(item, index)" class="text-blue-400 hover:text-blue-300 transition-colors">
+              <button @click="openInsertModal(item)" class="text-green-400 hover:text-green-300 transition-colors">
+                Add Before
+              </button>
+              <button @click="openEditModal(item)" class="text-blue-400 hover:text-blue-300 transition-colors">
                 Edit
               </button>
-              <button @click="deleteItem(index)" class="text-red-400 hover:text-red-300 transition-colors">
+              <button @click="deleteItem(item)" class="text-red-400 hover:text-red-300 transition-colors">
                 Delete
               </button>
             </td>
@@ -70,7 +73,7 @@
       <div class="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
         <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-800/30">
           <h3 class="text-lg font-semibold text-white">
-            {{ editingIndex === -1 ? 'Add New Item' : 'Edit Item' }}
+            {{ editingIndex !== -1 ? 'Edit Item' : (insertIndex !== -1 ? 'Add Item Before' : 'Add New Item') }}
           </h3>
           <button @click="closeModal" class="text-gray-500 hover:text-white transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -143,6 +146,7 @@ const emit = defineEmits(['update:modelValue', 'change'])
 const searchQuery = ref('')
 const isModalOpen = ref(false)
 const editingIndex = ref(-1)
+const insertIndex = ref(-1)
 const tempItem = ref<any>({})
 
 const filteredList = computed(() => {
@@ -162,16 +166,29 @@ const formatValue = (val: any) => {
 
 const openAddModal = () => {
   editingIndex.value = -1
+  insertIndex.value = -1
+  initializeTempItem()
+  isModalOpen.value = true
+}
+
+const openInsertModal = (item: any) => {
+  editingIndex.value = -1
+  insertIndex.value = props.modelValue.indexOf(item)
+  initializeTempItem()
+  isModalOpen.value = true
+}
+
+const initializeTempItem = () => {
   const newItem: any = {}
   props.schema.forEach(field => {
     newItem[field.key] = field.type === 'number' ? 0 : ''
   })
   tempItem.value = newItem
-  isModalOpen.value = true
 }
 
-const openEditModal = (item: any, index: number) => {
+const openEditModal = (item: any) => {
   editingIndex.value = props.modelValue.indexOf(item)
+  insertIndex.value = -1
   tempItem.value = JSON.parse(JSON.stringify(item))
   isModalOpen.value = true
 }
@@ -179,29 +196,36 @@ const openEditModal = (item: any, index: number) => {
 const closeModal = () => {
   isModalOpen.value = false
   tempItem.value = {}
+  editingIndex.value = -1
+  insertIndex.value = -1
 }
 
 const saveItem = () => {
   const newList = [...props.modelValue]
-  if (editingIndex.value === -1) {
-    newList.push({ ...tempItem.value })
-  } else {
+  if (editingIndex.value !== -1) {
     newList[editingIndex.value] = { ...tempItem.value }
+  } else if (insertIndex.value !== -1) {
+    newList.splice(insertIndex.value, 0, { ...tempItem.value })
+  } else {
+    newList.push({ ...tempItem.value })
   }
   
-  emit('update:modelValue', newList)
-  emit('change', newList)
+  updateValue(newList)
   closeModal()
 }
 
-const deleteItem = (index: number) => {
-  const actualIndex = props.modelValue.indexOf(filteredList.value[index])
+const deleteItem = (item: any) => {
+  const actualIndex = props.modelValue.indexOf(item)
   if (actualIndex > -1 && confirm('Are you sure you want to delete this item?')) {
     const newList = [...props.modelValue]
     newList.splice(actualIndex, 1)
-    emit('update:modelValue', newList)
-    emit('change', newList)
+    updateValue(newList)
   }
+}
+
+const updateValue = (newList: any[]) => {
+  emit('update:modelValue', newList)
+  emit('change', newList)
 }
 </script>
 
