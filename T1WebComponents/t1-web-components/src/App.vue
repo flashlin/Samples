@@ -50,11 +50,11 @@
         </div>
       </section>
 
-      <!-- JsonEditor 展示 -->
+      <!-- JsonEditor 展示 (Array) -->
       <section class="p-6 bg-gray-800/50 rounded-xl border border-gray-700 shadow-lg">
         <h2 class="text-xl font-bold flex items-center gap-2 mb-2">
           <span class="w-2 h-6 bg-purple-500 rounded-full"></span>
-          JsonEditor
+          JsonEditor (Array Mode)
         </h2>
         <p class="text-sm text-gray-400 mb-6">動態陣列編輯器，支援 schema 驗證與完整的 CRUD 操作。</p>
 
@@ -65,10 +65,31 @@
 
         <div class="mt-6 p-4 bg-gray-900 rounded-md border border-gray-700">
           <div class="flex justify-between items-center mb-2">
-            <h3 class="text-xs font-medium text-gray-500 uppercase">Current JSON Data</h3>
+            <h3 class="text-xs font-medium text-gray-500 uppercase">Current JSON Array</h3>
             <span class="text-xs text-gray-500">{{ userList.length }} item(s)</span>
           </div>
           <pre class="text-xs font-mono text-purple-400 overflow-x-auto whitespace-pre-wrap">{{ JSON.stringify(userList, null, 2) }}</pre>
+        </div>
+      </section>
+
+      <!-- JsonEditor 展示 (Object) -->
+      <section class="p-6 bg-gray-800/50 rounded-xl border border-gray-700 shadow-lg border-l-4 border-l-orange-500">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-2">
+          <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
+          JsonEditor (Object Mode)
+        </h2>
+        <p class="text-sm text-gray-400 mb-6">單一物件編輯器，自動切換為表單佈局，支援即時同步。</p>
+
+        <JsonEditor
+          v-model="singleUser"
+          :schema="singleUserSchema"
+        />
+
+        <div class="mt-6 p-4 bg-gray-900 rounded-md border border-gray-700">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-xs font-medium text-gray-500 uppercase">Current JSON Object</h3>
+          </div>
+          <pre class="text-xs font-mono text-orange-400 overflow-x-auto whitespace-pre-wrap">{{ JSON.stringify(singleUser, null, 2) }}</pre>
         </div>
       </section>
 
@@ -125,6 +146,19 @@ const userSchema = [
   { key: 'id', label: 'ID', type: 'number' as const },
   { key: 'name', label: 'Full Name', type: 'string' as const },
   { key: 'birth', label: 'Birth Date', type: 'date' as const }
+]
+
+// JsonEditor 單一物件資料
+const singleUser = ref({
+  id: '',
+  name: '',
+  birth: ''
+})
+
+const singleUserSchema = [
+  { key: 'id', label: 'User ID', type: 'string' as const },
+  { key: 'name', label: 'Name', type: 'string' as const },
+  { key: 'birth', label: 'Birth', type: 'date' as const }
 ]
 </script>
 

@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col w-full bg-gray-900 border border-gray-700 rounded-lg overflow-hidden shadow-xl text-gray-200">
-    <!-- Header with Search and Add -->
-    <div class="flex flex-col sm:flex-row p-4 gap-4 bg-gray-800/50 border-b border-gray-700 items-center justify-between">
+    <!-- Header with Search and Add (Array Mode Only) -->
+    <div v-if="isArray" class="flex flex-col sm:flex-row p-4 gap-4 bg-gray-800/50 border-b border-gray-700 items-center justify-between">
       <div class="relative w-full sm:max-w-xs">
         <input
           v-model="searchQuery"
@@ -38,8 +38,8 @@
       </div>
     </div>
 
-    <!-- Table Body -->
-    <div class="overflow-x-auto">
+    <!-- Table Body (Array Mode) -->
+    <div v-if="isArray" class="overflow-x-auto">
       <table class="w-full text-left text-sm border-collapse">
         <thead class="bg-gray-800 text-gray-400 font-medium uppercase tracking-wider border-b border-gray-700">
           <tr>
@@ -78,6 +78,39 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Form Mode (Object Mode) -->
+    <div v-else class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div v-for="field in schema" :key="field.key" class="space-y-1">
+        <label :for="'form-' + field.key" class="block text-xs font-medium text-gray-400 uppercase tracking-wider">
+          {{ field.label || field.key }}
+        </label>
+        <input
+          v-if="field.type === 'string'"
+          :id="'form-' + field.key"
+          v-model="modelValue[field.key]"
+          @input="onObjectInput"
+          class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm"
+          type="text"
+        />
+        <input
+          v-else-if="field.type === 'number'"
+          :id="'form-' + field.key"
+          v-model.number="modelValue[field.key]"
+          @input="onObjectInput"
+          class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm"
+          type="number"
+        />
+        <input
+          v-else-if="field.type === 'date'"
+          :id="'form-' + field.key"
+          v-model="modelValue[field.key]"
+          @input="onObjectInput"
+          class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm color-scheme-dark"
+          type="date"
+        />
+      </div>
     </div>
 
     <!-- Modal for Add/Edit -->
@@ -149,11 +182,13 @@ export interface JsonSchemaField {
 }
 
 const props = defineProps<{
-  modelValue: any[]
+  modelValue: any
   schema: JsonSchemaField[]
 }>()
 
 const emit = defineEmits(['update:modelValue', 'change'])
+
+const isArray = computed(() => Array.isArray(props.modelValue))
 
 const searchQuery = ref('')
 const isModalOpen = ref(false)
@@ -162,9 +197,10 @@ const insertIndex = ref(-1)
 const tempItem = ref<any>({})
 
 const filteredList = computed(() => {
+  if (!isArray.value) return []
   if (!searchQuery.value) return props.modelValue
   const q = searchQuery.value.toLowerCase()
-  return props.modelValue.filter(item => {
+  return props.modelValue.filter((item: any) => {
     return Object.values(item).some(val => 
       String(val).toLowerCase().includes(q)
     )
@@ -239,6 +275,11 @@ const deleteAll = () => {
   if (confirm('Are you sure you want to delete ALL items? This action cannot be undone.')) {
     updateValue([])
   }
+}
+
+const onObjectInput = () => {
+  emit('update:modelValue', { ...props.modelValue })
+  emit('change', { ...props.modelValue })
 }
 
 const updateValue = (newList: any[]) => {
