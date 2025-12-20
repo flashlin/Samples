@@ -1,0 +1,14 @@
+# NPM Ignore File
+.gitignore
+.npmignore
+.gemini/
+brain/
+node_modules/
+src/
+public/
+*.config.js
+*.config.ts
+tsconfig*.json
+vite-env.d.ts
+README.md (if you want to include it, remove this line)
+LICENSE (if you want to include it, remove this line)
