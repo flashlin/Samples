@@ -24,7 +24,7 @@ fi
 
 # 3. 發佈到 NPM
 echo "🚀 Publishing to NPM..."
-pnpm publish --access public
+pnpm publish --access public --no-git-checks
 
 if [ $? -eq 0 ]; then
   echo "✅ Successfully published t1-web-components!"
