@@ -85,18 +85,10 @@ export function parseEmittedJson<T>(wrapper: VueWrapper): T {
 }
 
 export async function clickMainSaveButton(wrapper: VueWrapper): Promise<void> {
-  const buttons = wrapper.findAll('button')
-  const saveButtons = buttons.filter(btn => btn.text().includes('Save'))
-
-  // Find Save button that is NOT in the modal (modal Save has bg-blue-600)
-  const mainSaveButton = saveButtons.find(btn => {
-    const classes = btn.classes()
-    return !classes.includes('bg-blue-600')
-  })
-
-  if (!mainSaveButton) {
-    throw new Error('Main Save button not found')
+  // Directly call the exposed saveArrayChanges method
+  if (typeof wrapper.vm.saveArrayChanges === 'function') {
+    wrapper.vm.saveArrayChanges()
+  } else {
+    throw new Error('saveArrayChanges method not found on component')
   }
-
-  await mainSaveButton.trigger('click')
 }

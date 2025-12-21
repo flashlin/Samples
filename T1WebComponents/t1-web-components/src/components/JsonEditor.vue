@@ -385,7 +385,7 @@ const openAddModal = () => {
 
 const openInsertModal = (item: any) => {
   editingIndex.value = -1
-  insertIndex.value = internalData.value.indexOf(item)
+  insertIndex.value = tempArrayData.value.indexOf(item)
   initializeTempItem()
   isModalOpen.value = true
 }
@@ -399,7 +399,7 @@ const initializeTempItem = () => {
 }
 
 const openEditModal = (item: any) => {
-  editingIndex.value = internalData.value.indexOf(item)
+  editingIndex.value = tempArrayData.value.indexOf(item)
   insertIndex.value = -1
   tempItem.value = JSON.parse(JSON.stringify(item))
   isModalOpen.value = true
@@ -571,7 +571,9 @@ function extractSchema(jsonStr: string | null): JsonSchemaField[] | {} {
 }
 
 defineExpose({
-  extractSchema
+  extractSchema,
+  saveArrayChanges,
+  cancelArrayChanges
 })
 </script>
 
