@@ -88,3 +88,4 @@ tools/CodeBoy/Generated
 T1.GrpcProtoGenerator/DemoServerTest/Generated
 T1.EfCodeFirstGenerator/Example/Generated
 T1.EfCodeFirstGenerateCli/Example/Generated
+T1WebComponents/t1-web-components/coverage
