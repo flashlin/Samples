@@ -426,6 +426,87 @@ const cancelObjectChanges = () => {
   tempObjectData.value = JSON.parse(JSON.stringify(internalData.value))
   hasUnsavedChanges.value = false
 }
+
+function inferFieldType(value: any): 'string' | 'number' | 'date' {
+  if (typeof value === 'number') return 'number'
+
+  if (typeof value === 'string') {
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?)?$/
+    if (isoDateRegex.test(value)) {
+      const date = new Date(value)
+      if (!isNaN(date.getTime())) return 'date'
+    }
+  }
+
+  return 'string'
+}
+
+function extractSchema(jsonStr: string | null): JsonSchemaField[] | {} {
+  if (!jsonStr || jsonStr.trim() === '') return {}
+
+  let data: any
+  try {
+    data = JSON.parse(jsonStr)
+  } catch {
+    return {}
+  }
+
+  if (Array.isArray(data)) {
+    if (data.length === 0) return []
+
+    const allKeys = new Set<string>()
+    const typeCountMap = new Map<string, Map<'string' | 'number' | 'date', number>>()
+
+    data.forEach((item) => {
+      if (typeof item === 'object' && item !== null) {
+        Object.keys(item).forEach((key) => {
+          allKeys.add(key)
+
+          const value = item[key]
+          if (value !== undefined && value !== null) {
+            const type = inferFieldType(value)
+
+            if (!typeCountMap.has(key)) {
+              typeCountMap.set(key, new Map())
+            }
+            const counts = typeCountMap.get(key)!
+            counts.set(type, (counts.get(type) || 0) + 1)
+          }
+        })
+      }
+    })
+
+    return Array.from(allKeys).map((key) => {
+      const counts = typeCountMap.get(key)
+      let finalType: 'string' | 'number' | 'date' = 'string'
+
+      if (counts) {
+        let maxCount = 0
+        counts.forEach((count, type) => {
+          if (count > maxCount) {
+            maxCount = count
+            finalType = type
+          }
+        })
+      }
+
+      return { key, type: finalType }
+    })
+  }
+
+  if (typeof data === 'object' && data !== null) {
+    return Object.keys(data).map((key) => ({
+      key,
+      type: inferFieldType(data[key])
+    }))
+  }
+
+  return {}
+}
+
+defineExpose({
+  extractSchema
+})
 </script>
 
 <style scoped>
