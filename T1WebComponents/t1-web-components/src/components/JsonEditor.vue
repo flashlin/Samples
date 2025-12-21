@@ -54,7 +54,7 @@
       <table class="w-full text-left text-sm border-collapse">
         <thead class="bg-gray-800 text-gray-400 font-medium uppercase tracking-wider border-b border-gray-700">
           <tr>
-            <th v-for="field in schema" :key="field.key" class="px-6 py-3">
+            <th v-for="field in effectiveSchema" :key="field.key" class="px-6 py-3">
               {{ field.label || field.key }}
             </th>
             <th class="px-6 py-3 text-right">Actions</th>
@@ -62,7 +62,7 @@
         </thead>
         <tbody class="divide-y divide-gray-800">
           <tr v-for="(item, index) in filteredList" :key="index" class="hover:bg-gray-800/30 transition-colors">
-            <td v-for="field in schema" :key="field.key" class="px-6 py-4 whitespace-nowrap">
+            <td v-for="field in effectiveSchema" :key="field.key" class="px-6 py-4 whitespace-nowrap">
               <span v-if="field.type === 'date'" class="text-gray-300">
                 {{ formatValue(item[field.key]) }}
               </span>
@@ -83,7 +83,7 @@
             </td>
           </tr>
           <tr v-if="filteredList.length === 0">
-            <td :colspan="schema.length + 1" class="px-6 py-12 text-center text-gray-500 italic">
+            <td :colspan="effectiveSchema.length + 1" class="px-6 py-12 text-center text-gray-500 italic">
               No matching items found.
             </td>
           </tr>
@@ -104,7 +104,7 @@
       <!-- Form Fields -->
       <div v-else>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div v-for="field in schema" :key="field.key" class="space-y-1">
+          <div v-for="field in effectiveSchema" :key="field.key" class="space-y-1">
             <label :for="'form-' + field.key" class="block text-xs font-medium text-gray-400 uppercase tracking-wider">
               {{ field.label || field.key }}
             </label>
@@ -174,9 +174,9 @@
             </svg>
           </button>
         </div>
-        
+
         <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-          <div v-for="field in schema" :key="field.key" class="space-y-1">
+          <div v-for="field in effectiveSchema" :key="field.key" class="space-y-1">
             <label :for="field.key" class="block text-xs font-medium text-gray-400 uppercase tracking-wider">
               {{ field.label || field.key }}
             </label>
@@ -232,11 +232,12 @@ export interface JsonSchemaField {
 const props = withDefaults(
   defineProps<{
     modelValue: string | null
-    schema: JsonSchemaField[]
+    schema: JsonSchemaField[] | null
     compact?: boolean
   }>(),
   {
-    compact: false
+    compact: false,
+    schema: null
   }
 )
 
@@ -250,6 +251,21 @@ const internalData = ref<any>(null)
 const tempObjectData = ref<any>(null)
 const errorMessage = ref<string>('')
 const hasUnsavedChanges = ref<boolean>(false)
+
+const effectiveSchema = computed(() => {
+  if (props.schema && props.schema.length > 0) {
+    return props.schema
+  }
+
+  if (props.modelValue) {
+    const extracted = extractSchema(props.modelValue)
+    if (Array.isArray(extracted)) {
+      return extracted
+    }
+  }
+
+  return []
+})
 
 const initializeData = () => {
   if (!props.modelValue || props.modelValue.trim() === '') {
@@ -279,7 +295,7 @@ const isArray = computed(() => {
 
 const initializeObjectFromSchema = () => {
   const obj: any = {}
-  props.schema.forEach(field => {
+  effectiveSchema.value.forEach(field => {
     obj[field.key] = field.type === 'number' ? 0 : ''
   })
   return obj
@@ -341,7 +357,7 @@ const openInsertModal = (item: any) => {
 
 const initializeTempItem = () => {
   const newItem: any = {}
-  props.schema.forEach(field => {
+  effectiveSchema.value.forEach(field => {
     newItem[field.key] = field.type === 'number' ? 0 : ''
   })
   tempItem.value = newItem

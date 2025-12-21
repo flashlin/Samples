@@ -80,11 +80,13 @@
           <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
           JsonEditor (Object Mode)
         </h2>
-        <p class="text-sm text-gray-400 mb-6">單一物件編輯器，自動切換為表單佈局。需按 Save 才會更新 modelValue，使用壓縮格式輸出。</p>
+        <p class="text-sm text-gray-400 mb-6">
+          單一物件編輯器，自動切換為表單佈局。需按 Save 才會更新 modelValue，
+          <span class="text-orange-300 font-semibold">schema 自動從 JSON 推斷（extractSchema）</span>。
+        </p>
 
         <JsonEditor
           v-model="singleUserJson"
-          :schema="singleUserSchema"
           :compact="true"
           @error="handleJsonError"
         />
@@ -154,13 +156,7 @@ const userSchema = [
 ]
 
 // JsonEditor 單一物件資料 (JSON 字串格式)
-const singleUserJson = ref<string>('')
-
-const singleUserSchema = [
-  { key: 'id', label: 'User ID', type: 'string' as const },
-  { key: 'name', label: 'Name', type: 'string' as const },
-  { key: 'birth', label: 'Birth', type: 'date' as const }
-]
+const singleUserJson = ref<string>(`{"cid":123,"name":"flash","birth":"2005-11-01T12:00:00-04:00"}`)
 
 // Error handler
 const handleJsonError = (message: string) => {
