@@ -177,7 +177,7 @@ describe('JsonEditor - Common Functionality', () => {
       await nextTick()
 
       expect(wrapper.find('table').exists()).toBe(true)
-      expect(wrapper.text()).not.toContain('Save')
+      // Array Mode now also has Save/Cancel buttons
     })
 
     it('should update when compact prop changes', async () => {

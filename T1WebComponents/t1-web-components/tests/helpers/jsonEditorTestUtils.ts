@@ -1,4 +1,5 @@
 import { mount, VueWrapper } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import JsonEditor from '@/components/JsonEditor.vue'
 import type { JsonSchemaField } from '@/components/JsonEditor.vue'
 
@@ -84,10 +85,30 @@ export function parseEmittedJson<T>(wrapper: VueWrapper): T {
   return JSON.parse(value)
 }
 
+export async function clickModalSaveButton(wrapper: VueWrapper): Promise<void> {
+  // Find the modal Save button (has bg-blue-600 class)
+  const buttons = wrapper.findAll('button')
+  const modalSaveButton = buttons.find(btn => {
+    const text = btn.text()
+    const classes = btn.classes()
+    return text.includes('Save') && classes.includes('bg-blue-600')
+  })
+
+  if (!modalSaveButton) {
+    throw new Error('Modal Save button not found')
+  }
+
+  await modalSaveButton.trigger('click')
+}
+
 export async function clickMainSaveButton(wrapper: VueWrapper): Promise<void> {
+  // Wait for any pending reactive updates before saving
+  await nextTick()
+
   // Directly call the exposed saveArrayChanges method
   if (typeof wrapper.vm.saveArrayChanges === 'function') {
     wrapper.vm.saveArrayChanges()
+    await nextTick()
   } else {
     throw new Error('saveArrayChanges method not found on component')
   }

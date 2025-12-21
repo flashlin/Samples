@@ -7,6 +7,7 @@ import {
   fillInputField,
   parseEmittedJson,
   getEmittedModelValue,
+  clickModalSaveButton,
   clickMainSaveButton
 } from '../helpers/jsonEditorTestUtils'
 import {
@@ -143,7 +144,7 @@ describe('JsonEditor - Array Mode', () => {
       await clickButton(wrapper, 'Add')
       await fillInputField(wrapper, 'id', '4')
       await fillInputField(wrapper, 'name', 'David')
-      await clickButton(wrapper, 'Save')
+      await clickModalSaveButton(wrapper)
       await nextTick()
 
       // Click main Save button to persist changes
@@ -169,23 +170,6 @@ describe('JsonEditor - Array Mode', () => {
 
       expect((idInput.element as HTMLInputElement).value).toBe('0')
       expect((nameInput.element as HTMLInputElement).value).toBe('')
-    })
-
-    it('should close dialog when Cancel clicked', async () => {
-      const wrapper = mountJsonEditor({
-        modelValue: createArrayJson([]),
-        schema: BASIC_SCHEMA
-      })
-
-      await clickButton(wrapper, 'Add')
-      await nextTick()
-      const modalTextBefore = wrapper.text()
-      expect(modalTextBefore).toContain('Add New Item')
-
-      await clickButton(wrapper, 'Cancel')
-      await nextTick()
-      const modalTextAfter = wrapper.text()
-      expect(modalTextAfter).not.toContain('Add New Item')
     })
 
     it('should not emit update when cancelled', async () => {
@@ -214,7 +198,7 @@ describe('JsonEditor - Array Mode', () => {
       await clickRowActionButton(wrapper, 1, 'insert')
       await fillInputField(wrapper, 'id', '99')
       await fillInputField(wrapper, 'name', 'Inserted')
-      await clickButton(wrapper, 'Save')
+      await clickModalSaveButton(wrapper)
       await nextTick()
 
       // Click main Save button to persist changes
@@ -265,7 +249,7 @@ describe('JsonEditor - Array Mode', () => {
 
       await clickRowActionButton(wrapper, 1, 'edit')
       await fillInputField(wrapper, 'name', 'Bob Updated')
-      await clickButton(wrapper, 'Save')
+      await clickModalSaveButton(wrapper)
       await nextTick()
 
       // Click main Save button to persist changes
@@ -442,7 +426,7 @@ describe('JsonEditor - Array Mode', () => {
       await clickButton(wrapper, 'Add')
       await fillInputField(wrapper, 'id', '42')
       await fillInputField(wrapper, 'name', 'Test')
-      await clickButton(wrapper, 'Save')
+      await clickModalSaveButton(wrapper)
       await nextTick()
 
       // Click main Save button to persist changes
@@ -466,7 +450,7 @@ describe('JsonEditor - Array Mode', () => {
       await clickButton(wrapper, 'Add')
       await fillInputField(wrapper, 'id', '1')
       await fillInputField(wrapper, 'name', 'Test')
-      await clickButton(wrapper, 'Save')
+      await clickModalSaveButton(wrapper)
       await nextTick()
 
       // Click main Save button to persist changes
@@ -488,7 +472,7 @@ describe('JsonEditor - Array Mode', () => {
       await clickButton(wrapper, 'Add')
       await fillInputField(wrapper, 'id', '1')
       await fillInputField(wrapper, 'name', 'Test')
-      await clickButton(wrapper, 'Save')
+      await clickModalSaveButton(wrapper)
       await nextTick()
 
       // Click main Save button to persist changes

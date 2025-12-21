@@ -5,7 +5,9 @@ import {
   clickButton,
   fillInputField,
   getEmittedModelValue,
-  clickRowActionButton
+  clickRowActionButton,
+  clickModalSaveButton,
+  clickMainSaveButton
 } from '../helpers/jsonEditorTestUtils'
 import { BASIC_SCHEMA, createArrayJson, createObjectJson } from '../helpers/mockData'
 
@@ -261,7 +263,10 @@ describe('JsonEditor - Edge Cases', () => {
       await clickButton(wrapper, 'Add')
       await fillInputField(wrapper, 'id', '1')
       await fillInputField(wrapper, 'name', 'First')
-      await clickButton(wrapper, 'Save')
+      await clickModalSaveButton(wrapper)
+      await nextTick()
+
+      await clickMainSaveButton(wrapper)
       await nextTick()
 
       const emitted = getEmittedModelValue(wrapper)
@@ -278,6 +283,9 @@ describe('JsonEditor - Edge Cases', () => {
       })
 
       await clickRowActionButton(wrapper, 0, 'delete')
+      await nextTick()
+
+      await clickMainSaveButton(wrapper)
       await nextTick()
 
       const emitted = getEmittedModelValue(wrapper)
@@ -313,7 +321,10 @@ describe('JsonEditor - Edge Cases', () => {
       await clickRowActionButton(wrapper, 0, 'insert')
       await fillInputField(wrapper, 'id', '0')
       await fillInputField(wrapper, 'name', 'New First')
-      await clickButton(wrapper, 'Save')
+      await clickModalSaveButton(wrapper)
+      await nextTick()
+
+      await clickMainSaveButton(wrapper)
       await nextTick()
 
       const emitted = getEmittedModelValue(wrapper)
