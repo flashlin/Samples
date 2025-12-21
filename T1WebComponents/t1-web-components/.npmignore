@@ -10,5 +10,6 @@ public/
 *.config.ts
 tsconfig*.json
 vite-env.d.ts
+CLAUDE.md
 README.md (if you want to include it, remove this line)
 LICENSE (if you want to include it, remove this line)
