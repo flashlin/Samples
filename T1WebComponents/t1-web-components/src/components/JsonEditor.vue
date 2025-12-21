@@ -259,7 +259,7 @@ export interface JsonSchemaField {
 const props = withDefaults(
   defineProps<{
     modelValue: string | null
-    schema: JsonSchemaField[] | null
+    schema?: JsonSchemaField[] | null
     compact?: boolean
   }>(),
   {
