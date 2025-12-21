@@ -56,19 +56,21 @@
           <span class="w-2 h-6 bg-purple-500 rounded-full"></span>
           JsonEditor (Array Mode)
         </h2>
-        <p class="text-sm text-gray-400 mb-6">動態陣列編輯器，支援 schema 驗證與完整的 CRUD 操作。</p>
+        <p class="text-sm text-gray-400 mb-6">動態陣列編輯器，支援 schema 驗證與完整的 CRUD 操作。使用 JSON 字串格式，支援格式化輸出。</p>
 
         <JsonEditor
-          v-model="userList"
+          v-model="userListJson"
           :schema="userSchema"
+          :compact="false"
+          @error="handleJsonError"
         />
 
         <div class="mt-6 p-4 bg-gray-900 rounded-md border border-gray-700">
           <div class="flex justify-between items-center mb-2">
-            <h3 class="text-xs font-medium text-gray-500 uppercase">Current JSON Array</h3>
-            <span class="text-xs text-gray-500">{{ userList.length }} item(s)</span>
+            <h3 class="text-xs font-medium text-gray-500 uppercase">Current JSON String</h3>
+            <span class="text-xs text-gray-500">{{ userListJson.length }} chars</span>
           </div>
-          <pre class="text-xs font-mono text-purple-400 overflow-x-auto whitespace-pre-wrap">{{ JSON.stringify(userList, null, 2) }}</pre>
+          <pre class="text-xs font-mono text-purple-400 overflow-x-auto whitespace-pre-wrap">{{ userListJson }}</pre>
         </div>
       </section>
 
@@ -78,18 +80,21 @@
           <span class="w-2 h-6 bg-orange-500 rounded-full"></span>
           JsonEditor (Object Mode)
         </h2>
-        <p class="text-sm text-gray-400 mb-6">單一物件編輯器，自動切換為表單佈局，支援即時同步。</p>
+        <p class="text-sm text-gray-400 mb-6">單一物件編輯器，自動切換為表單佈局。需按 Save 才會更新 modelValue，使用壓縮格式輸出。</p>
 
         <JsonEditor
-          v-model="singleUser"
+          v-model="singleUserJson"
           :schema="singleUserSchema"
+          :compact="true"
+          @error="handleJsonError"
         />
 
         <div class="mt-6 p-4 bg-gray-900 rounded-md border border-gray-700">
           <div class="flex justify-between items-center mb-2">
-            <h3 class="text-xs font-medium text-gray-500 uppercase">Current JSON Object</h3>
+            <h3 class="text-xs font-medium text-gray-500 uppercase">Current JSON String (Compact)</h3>
+            <span class="text-xs text-gray-500">{{ singleUserJson.length }} chars</span>
           </div>
-          <pre class="text-xs font-mono text-orange-400 overflow-x-auto whitespace-pre-wrap">{{ JSON.stringify(singleUser, null, 2) }}</pre>
+          <pre class="text-xs font-mono text-orange-400 overflow-x-auto whitespace-pre-wrap">{{ singleUserJson }}</pre>
         </div>
       </section>
 
@@ -135,12 +140,12 @@ const autoCompleteOptions = [
   'ModernDesign'
 ]
 
-// JsonEditor 資料
-const userList = ref([
-  { id: 1, name: 'John Doe', birth: '1990-01-01' },
-  { id: 2, name: 'Jane Smith', birth: '1995-05-15' },
-  { id: 3, name: 'Bob Johnson', birth: '1988-03-20' }
-])
+// JsonEditor 資料 (JSON 字串格式)
+const userListJson = ref<string>(`[
+  {"id": 1, "name": "John Doe", "birth": "1990-01-01"},
+  {"id": 2, "name": "Jane Smith", "birth": "1995-05-15"},
+  {"id": 3, "name": "Bob Johnson", "birth": "1988-03-20"}
+]`)
 
 const userSchema = [
   { key: 'id', label: 'ID', type: 'number' as const },
@@ -148,18 +153,19 @@ const userSchema = [
   { key: 'birth', label: 'Birth Date', type: 'date' as const }
 ]
 
-// JsonEditor 單一物件資料
-const singleUser = ref({
-  id: '',
-  name: '',
-  birth: ''
-})
+// JsonEditor 單一物件資料 (JSON 字串格式)
+const singleUserJson = ref<string>('')
 
 const singleUserSchema = [
   { key: 'id', label: 'User ID', type: 'string' as const },
   { key: 'name', label: 'Name', type: 'string' as const },
   { key: 'birth', label: 'Birth', type: 'date' as const }
 ]
+
+// Error handler
+const handleJsonError = (message: string) => {
+  console.error('JSON Editor Error:', message)
+}
 </script>
 
 <style>

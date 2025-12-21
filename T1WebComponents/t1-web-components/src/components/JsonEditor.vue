@@ -1,5 +1,16 @@
 <template>
   <div class="flex flex-col w-full bg-gray-900 border border-gray-700 rounded-lg overflow-hidden shadow-xl text-gray-200">
+    <!-- Error Message -->
+    <div
+      v-if="errorMessage"
+      class="m-4 p-3 bg-red-900/20 border border-red-700 rounded-md text-red-400 text-sm"
+    >
+      {{ errorMessage }}
+      <div class="mt-2 p-2 bg-gray-900 rounded font-mono text-xs overflow-x-auto">
+        {{ modelValue }}
+      </div>
+    </div>
+
     <!-- Header with Search and Add (Array Mode Only) -->
     <div v-if="isArray" class="flex flex-col sm:flex-row p-4 gap-4 bg-gray-800/50 border-b border-gray-700 items-center justify-between">
       <div class="relative w-full sm:max-w-xs">
@@ -17,7 +28,7 @@
       </div>
       <div class="flex items-center gap-2">
         <button
-          v-if="modelValue.length > 0"
+          v-if="internalData && internalData.length > 0"
           @click="deleteAll"
           class="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-900/50 rounded-md text-sm font-medium transition-all"
         >
@@ -81,35 +92,72 @@
     </div>
 
     <!-- Form Mode (Object Mode) -->
-    <div v-else class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <div v-for="field in schema" :key="field.key" class="space-y-1">
-        <label :for="'form-' + field.key" class="block text-xs font-medium text-gray-400 uppercase tracking-wider">
-          {{ field.label || field.key }}
-        </label>
-        <input
-          v-if="field.type === 'string'"
-          :id="'form-' + field.key"
-          v-model="modelValue[field.key]"
-          @input="onObjectInput"
-          class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm"
-          type="text"
-        />
-        <input
-          v-else-if="field.type === 'number'"
-          :id="'form-' + field.key"
-          v-model.number="modelValue[field.key]"
-          @input="onObjectInput"
-          class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm"
-          type="number"
-        />
-        <input
-          v-else-if="field.type === 'date'"
-          :id="'form-' + field.key"
-          v-model="modelValue[field.key]"
-          @input="onObjectInput"
-          class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm color-scheme-dark"
-          type="date"
-        />
+    <div v-else class="p-6">
+      <!-- Empty State -->
+      <div
+        v-if="!tempObjectData"
+        class="p-8 text-center text-gray-500"
+      >
+        No data. Please provide a valid JSON object.
+      </div>
+
+      <!-- Form Fields -->
+      <div v-else>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div v-for="field in schema" :key="field.key" class="space-y-1">
+            <label :for="'form-' + field.key" class="block text-xs font-medium text-gray-400 uppercase tracking-wider">
+              {{ field.label || field.key }}
+            </label>
+            <input
+              v-if="field.type === 'string'"
+              :id="'form-' + field.key"
+              v-model="tempObjectData[field.key]"
+              @input="onObjectChange"
+              class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm"
+              type="text"
+            />
+            <input
+              v-else-if="field.type === 'number'"
+              :id="'form-' + field.key"
+              v-model.number="tempObjectData[field.key]"
+              @input="onObjectChange"
+              class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm"
+              type="number"
+            />
+            <input
+              v-else-if="field.type === 'date'"
+              :id="'form-' + field.key"
+              v-model="tempObjectData[field.key]"
+              @input="onObjectChange"
+              class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm color-scheme-dark"
+              type="date"
+            />
+          </div>
+        </div>
+
+        <!-- Save/Cancel Buttons -->
+        <div class="mt-6 flex items-center gap-3 justify-end">
+          <button
+            @click="cancelObjectChanges"
+            :disabled="!hasUnsavedChanges"
+            class="px-4 py-2 rounded-md border transition-colors"
+            :class="hasUnsavedChanges
+              ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
+              : 'border-gray-700 text-gray-600 cursor-not-allowed'"
+          >
+            Cancel
+          </button>
+          <button
+            @click="saveObjectChanges"
+            :disabled="!hasUnsavedChanges"
+            class="px-4 py-2 rounded-md font-medium transition-colors"
+            :class="hasUnsavedChanges
+              ? 'bg-orange-500 text-white hover:bg-orange-600'
+              : 'bg-gray-700 text-gray-500 cursor-not-allowed'"
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
 
@@ -181,14 +229,78 @@ export interface JsonSchemaField {
   type: 'string' | 'number' | 'date'
 }
 
-const props = defineProps<{
-  modelValue: any
-  schema: JsonSchemaField[]
+const props = withDefaults(
+  defineProps<{
+    modelValue: string | null
+    schema: JsonSchemaField[]
+    compact?: boolean
+  }>(),
+  {
+    compact: false
+  }
+)
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string]
+  'change': [value: string]
+  'error': [message: string]
 }>()
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const internalData = ref<any>(null)
+const tempObjectData = ref<any>(null)
+const errorMessage = ref<string>('')
+const hasUnsavedChanges = ref<boolean>(false)
 
-const isArray = computed(() => Array.isArray(props.modelValue))
+const initializeData = () => {
+  if (!props.modelValue || props.modelValue.trim() === '') {
+    if (props.modelValue?.trim().startsWith('[')) {
+      return []
+    }
+    return null
+  }
+
+  try {
+    errorMessage.value = ''
+    return JSON.parse(props.modelValue)
+  } catch (error: any) {
+    errorMessage.value = `Invalid JSON: ${error.message}`
+    emit('error', `JSON parse failed: ${error.message}`)
+    return null
+  }
+}
+
+const isArray = computed(() => {
+  if (!props.modelValue || props.modelValue.trim() === '') {
+    return false
+  }
+  const trimmed = props.modelValue.trim()
+  return trimmed.startsWith('[')
+})
+
+const initializeObjectFromSchema = () => {
+  const obj: any = {}
+  props.schema.forEach(field => {
+    obj[field.key] = field.type === 'number' ? 0 : ''
+  })
+  return obj
+}
+
+watch(
+  () => props.modelValue,
+  () => {
+    internalData.value = initializeData()
+
+    if (!isArray.value) {
+      if (internalData.value) {
+        tempObjectData.value = JSON.parse(JSON.stringify(internalData.value))
+      } else {
+        tempObjectData.value = initializeObjectFromSchema()
+      }
+      hasUnsavedChanges.value = false
+    }
+  },
+  { immediate: true }
+)
 
 const searchQuery = ref('')
 const isModalOpen = ref(false)
@@ -197,11 +309,12 @@ const insertIndex = ref(-1)
 const tempItem = ref<any>({})
 
 const filteredList = computed(() => {
-  if (!isArray.value) return []
-  if (!searchQuery.value) return props.modelValue
+  if (!isArray.value || !internalData.value) return []
+  if (!searchQuery.value) return internalData.value
+
   const q = searchQuery.value.toLowerCase()
-  return props.modelValue.filter((item: any) => {
-    return Object.values(item).some(val => 
+  return internalData.value.filter((item: any) => {
+    return Object.values(item).some(val =>
       String(val).toLowerCase().includes(q)
     )
   })
@@ -221,7 +334,7 @@ const openAddModal = () => {
 
 const openInsertModal = (item: any) => {
   editingIndex.value = -1
-  insertIndex.value = props.modelValue.indexOf(item)
+  insertIndex.value = internalData.value.indexOf(item)
   initializeTempItem()
   isModalOpen.value = true
 }
@@ -235,7 +348,7 @@ const initializeTempItem = () => {
 }
 
 const openEditModal = (item: any) => {
-  editingIndex.value = props.modelValue.indexOf(item)
+  editingIndex.value = internalData.value.indexOf(item)
   insertIndex.value = -1
   tempItem.value = JSON.parse(JSON.stringify(item))
   isModalOpen.value = true
@@ -249,7 +362,7 @@ const closeModal = () => {
 }
 
 const saveItem = () => {
-  const newList = [...props.modelValue]
+  const newList = [...internalData.value]
   if (editingIndex.value !== -1) {
     newList[editingIndex.value] = { ...tempItem.value }
   } else if (insertIndex.value !== -1) {
@@ -257,34 +370,61 @@ const saveItem = () => {
   } else {
     newList.push({ ...tempItem.value })
   }
-  
-  updateValue(newList)
+
+  internalData.value = newList
+  serializeAndEmit(newList)
   closeModal()
 }
 
 const deleteItem = (item: any) => {
-  const actualIndex = props.modelValue.indexOf(item)
+  const actualIndex = internalData.value.indexOf(item)
   if (actualIndex > -1 && confirm('Are you sure you want to delete this item?')) {
-    const newList = [...props.modelValue]
+    const newList = [...internalData.value]
     newList.splice(actualIndex, 1)
-    updateValue(newList)
+    internalData.value = newList
+    serializeAndEmit(newList)
   }
 }
 
 const deleteAll = () => {
   if (confirm('Are you sure you want to delete ALL items? This action cannot be undone.')) {
-    updateValue([])
+    internalData.value = []
+    serializeAndEmit([])
   }
 }
 
-const onObjectInput = () => {
-  emit('update:modelValue', { ...props.modelValue })
-  emit('change', { ...props.modelValue })
+const serializeAndEmit = (data: any) => {
+  try {
+    const jsonString = props.compact
+      ? JSON.stringify(data)
+      : JSON.stringify(data, null, 2)
+
+    errorMessage.value = ''
+    emit('update:modelValue', jsonString)
+    emit('change', jsonString)
+  } catch (error: any) {
+    errorMessage.value = `Serialize failed: ${error.message}`
+    emit('error', `JSON stringify failed: ${error.message}`)
+  }
 }
 
-const updateValue = (newList: any[]) => {
-  emit('update:modelValue', newList)
-  emit('change', newList)
+const onObjectChange = () => {
+  hasUnsavedChanges.value = true
+}
+
+const saveObjectChanges = () => {
+  if (!tempObjectData.value) return
+
+  internalData.value = JSON.parse(JSON.stringify(tempObjectData.value))
+  serializeAndEmit(internalData.value)
+  hasUnsavedChanges.value = false
+}
+
+const cancelObjectChanges = () => {
+  if (!internalData.value) return
+
+  tempObjectData.value = JSON.parse(JSON.stringify(internalData.value))
+  hasUnsavedChanges.value = false
 }
 </script>
 
