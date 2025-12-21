@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm test:run:*)",
+      "Bash(pnpm test:coverage:*)"
     ]
   }
 }
