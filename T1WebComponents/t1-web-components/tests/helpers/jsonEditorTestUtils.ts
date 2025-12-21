@@ -83,3 +83,20 @@ export function parseEmittedJson<T>(wrapper: VueWrapper): T {
   if (!value) throw new Error('No modelValue emitted')
   return JSON.parse(value)
 }
+
+export async function clickMainSaveButton(wrapper: VueWrapper): Promise<void> {
+  const buttons = wrapper.findAll('button')
+  const saveButtons = buttons.filter(btn => btn.text().includes('Save'))
+
+  // Find Save button that is NOT in the modal (modal Save has bg-blue-600)
+  const mainSaveButton = saveButtons.find(btn => {
+    const classes = btn.classes()
+    return !classes.includes('bg-blue-600')
+  })
+
+  if (!mainSaveButton) {
+    throw new Error('Main Save button not found')
+  }
+
+  await mainSaveButton.trigger('click')
+}

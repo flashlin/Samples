@@ -12,39 +12,66 @@
     </div>
 
     <!-- Header with Search and Add (Array Mode Only) -->
-    <div v-if="isArray" class="flex flex-col sm:flex-row p-4 gap-4 bg-gray-800/50 border-b border-gray-700 items-center justify-between">
-      <div class="relative w-full sm:max-w-xs">
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search items..."
-          class="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
-        />
-        <span class="absolute left-3 top-2.5 text-gray-500">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </span>
+    <div v-if="isArray" class="bg-gray-800/50 border-b border-gray-700">
+      <!-- Search and Add -->
+      <div class="flex flex-col sm:flex-row p-4 gap-4 items-center justify-between">
+        <div class="relative w-full sm:max-w-xs">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search items..."
+            class="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+          />
+          <span class="absolute left-3 top-2.5 text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            v-if="tempArrayData && tempArrayData.length > 0"
+            @click="deleteAll"
+            class="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-900/50 rounded-md text-sm font-medium transition-all"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete All
+          </button>
+          <button
+            @click="openAddModal"
+            class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors shadow-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Item
+          </button>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
+
+      <!-- Save/Cancel Buttons -->
+      <div class="px-4 pb-4 flex items-center gap-3 justify-end">
         <button
-          v-if="internalData && internalData.length > 0"
-          @click="deleteAll"
-          class="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-900/50 rounded-md text-sm font-medium transition-all"
+          @click="cancelArrayChanges"
+          :disabled="!hasUnsavedChanges"
+          class="px-4 py-2 rounded-md border transition-colors"
+          :class="hasUnsavedChanges
+            ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
+            : 'border-gray-700 text-gray-600 cursor-not-allowed'"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-          Delete All
+          Cancel
         </button>
         <button
-          @click="openAddModal"
-          class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors shadow-sm"
+          @click="saveArrayChanges"
+          :disabled="!hasUnsavedChanges"
+          class="px-4 py-2 rounded-md font-medium transition-colors"
+          :class="hasUnsavedChanges
+            ? 'bg-purple-500 text-white hover:bg-purple-600'
+            : 'bg-gray-700 text-gray-500 cursor-not-allowed'"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Add Item
+          Save
         </button>
       </div>
     </div>
@@ -248,6 +275,7 @@ const emit = defineEmits<{
 }>()
 
 const internalData = ref<any>(null)
+const tempArrayData = ref<any[]>([])
 const tempObjectData = ref<any>(null)
 const errorMessage = ref<string>('')
 const hasUnsavedChanges = ref<boolean>(false)
@@ -306,7 +334,14 @@ watch(
   () => {
     internalData.value = initializeData()
 
-    if (!isArray.value) {
+    if (isArray.value) {
+      if (Array.isArray(internalData.value)) {
+        tempArrayData.value = JSON.parse(JSON.stringify(internalData.value))
+      } else {
+        tempArrayData.value = []
+      }
+      hasUnsavedChanges.value = false
+    } else {
       if (internalData.value) {
         tempObjectData.value = JSON.parse(JSON.stringify(internalData.value))
       } else {
@@ -325,11 +360,11 @@ const insertIndex = ref(-1)
 const tempItem = ref<any>({})
 
 const filteredList = computed(() => {
-  if (!isArray.value || !internalData.value) return []
-  if (!searchQuery.value) return internalData.value
+  if (!isArray.value || !tempArrayData.value) return []
+  if (!searchQuery.value) return tempArrayData.value
 
   const q = searchQuery.value.toLowerCase()
-  return internalData.value.filter((item: any) => {
+  return tempArrayData.value.filter((item: any) => {
     return Object.values(item).some(val =>
       String(val).toLowerCase().includes(q)
     )
@@ -378,7 +413,7 @@ const closeModal = () => {
 }
 
 const saveItem = () => {
-  const newList = [...internalData.value]
+  const newList = [...tempArrayData.value]
   if (editingIndex.value !== -1) {
     newList[editingIndex.value] = { ...tempItem.value }
   } else if (insertIndex.value !== -1) {
@@ -387,25 +422,25 @@ const saveItem = () => {
     newList.push({ ...tempItem.value })
   }
 
-  internalData.value = newList
-  serializeAndEmit(newList)
+  tempArrayData.value = newList
+  hasUnsavedChanges.value = true
   closeModal()
 }
 
 const deleteItem = (item: any) => {
-  const actualIndex = internalData.value.indexOf(item)
+  const actualIndex = tempArrayData.value.indexOf(item)
   if (actualIndex > -1 && confirm('Are you sure you want to delete this item?')) {
-    const newList = [...internalData.value]
+    const newList = [...tempArrayData.value]
     newList.splice(actualIndex, 1)
-    internalData.value = newList
-    serializeAndEmit(newList)
+    tempArrayData.value = newList
+    hasUnsavedChanges.value = true
   }
 }
 
 const deleteAll = () => {
   if (confirm('Are you sure you want to delete ALL items? This action cannot be undone.')) {
-    internalData.value = []
-    serializeAndEmit([])
+    tempArrayData.value = []
+    hasUnsavedChanges.value = true
   }
 }
 
@@ -440,6 +475,21 @@ const cancelObjectChanges = () => {
   if (!internalData.value) return
 
   tempObjectData.value = JSON.parse(JSON.stringify(internalData.value))
+  hasUnsavedChanges.value = false
+}
+
+const saveArrayChanges = () => {
+  if (!tempArrayData.value) return
+
+  internalData.value = JSON.parse(JSON.stringify(tempArrayData.value))
+  serializeAndEmit(internalData.value)
+  hasUnsavedChanges.value = false
+}
+
+const cancelArrayChanges = () => {
+  if (!internalData.value) return
+
+  tempArrayData.value = JSON.parse(JSON.stringify(internalData.value))
   hasUnsavedChanges.value = false
 }
 

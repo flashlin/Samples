@@ -6,7 +6,8 @@ import {
   clickRowActionButton,
   fillInputField,
   parseEmittedJson,
-  getEmittedModelValue
+  getEmittedModelValue,
+  clickMainSaveButton
 } from '../helpers/jsonEditorTestUtils'
 import {
   BASIC_SCHEMA,
@@ -145,6 +146,10 @@ describe('JsonEditor - Array Mode', () => {
       await clickButton(wrapper, 'Save')
       await nextTick()
 
+      // Click main Save button to persist changes
+      await clickMainSaveButton(wrapper)
+      await nextTick()
+
       const result = parseEmittedJson<any[]>(wrapper)
       expect(result).toHaveLength(4)
       expect(result[3]).toEqual({ id: 4, name: 'David' })
@@ -212,6 +217,10 @@ describe('JsonEditor - Array Mode', () => {
       await clickButton(wrapper, 'Save')
       await nextTick()
 
+      // Click main Save button to persist changes
+      await clickMainSaveButton(wrapper)
+      await nextTick()
+
       const result = parseEmittedJson<any[]>(wrapper)
       expect(result).toHaveLength(4)
       expect(result[1]).toEqual({ id: 99, name: 'Inserted' })
@@ -259,6 +268,10 @@ describe('JsonEditor - Array Mode', () => {
       await clickButton(wrapper, 'Save')
       await nextTick()
 
+      // Click main Save button to persist changes
+      await clickMainSaveButton(wrapper)
+      await nextTick()
+
       const result = parseEmittedJson<any[]>(wrapper)
       expect(result[1]).toEqual({ id: 2, name: 'Bob Updated' })
     })
@@ -289,6 +302,10 @@ describe('JsonEditor - Array Mode', () => {
       })
 
       await clickRowActionButton(wrapper, 1, 'delete')
+      await nextTick()
+
+      // Click main Save button to persist changes
+      await clickMainSaveButton(wrapper)
       await nextTick()
 
       const result = parseEmittedJson<any[]>(wrapper)
@@ -338,6 +355,10 @@ describe('JsonEditor - Array Mode', () => {
       })
 
       await clickButton(wrapper, 'Delete All')
+      await nextTick()
+
+      // Click main Save button to persist changes
+      await clickMainSaveButton(wrapper)
       await nextTick()
 
       const result = parseEmittedJson<any[]>(wrapper)
@@ -424,6 +445,10 @@ describe('JsonEditor - Array Mode', () => {
       await clickButton(wrapper, 'Save')
       await nextTick()
 
+      // Click main Save button to persist changes
+      await clickMainSaveButton(wrapper)
+      await nextTick()
+
       const result = parseEmittedJson<any[]>(wrapper)
       expect(result[0].id).toBe(42)
       expect(typeof result[0].id).toBe('number')
@@ -444,6 +469,10 @@ describe('JsonEditor - Array Mode', () => {
       await clickButton(wrapper, 'Save')
       await nextTick()
 
+      // Click main Save button to persist changes
+      await clickMainSaveButton(wrapper)
+      await nextTick()
+
       const emittedValue = getEmittedModelValue(wrapper)
       expect(emittedValue).not.toContain('\n')
       expect(emittedValue).not.toContain('  ')
@@ -460,6 +489,10 @@ describe('JsonEditor - Array Mode', () => {
       await fillInputField(wrapper, 'id', '1')
       await fillInputField(wrapper, 'name', 'Test')
       await clickButton(wrapper, 'Save')
+      await nextTick()
+
+      // Click main Save button to persist changes
+      await clickMainSaveButton(wrapper)
       await nextTick()
 
       const emittedValue = getEmittedModelValue(wrapper)
