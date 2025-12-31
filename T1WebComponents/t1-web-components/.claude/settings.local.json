@@ -1,4 +1,7 @@
 {
+  "sandbox": {
+    "enabled": true
+  },
   "permissions": {
     "allow": [
       "Bash(ls:*)",
