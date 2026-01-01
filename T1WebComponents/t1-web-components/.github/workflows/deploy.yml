@@ -1,0 +1,50 @@
+name: Deploy Demo to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'T1WebComponents/t1-web-components/**'
+      - '!T1WebComponents/t1-web-components/README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: T1WebComponents/t1-web-components
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.25.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: T1WebComponents/t1-web-components/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Demo
+        run: pnpm build:demo
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: T1WebComponents/t1-web-components/dist-demo
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
