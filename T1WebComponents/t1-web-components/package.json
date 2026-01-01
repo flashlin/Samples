@@ -16,6 +16,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "provenance": true
+  },
   "scripts": {
     "dev": "vite",
     "build": "pnpm build:lib && pnpm build:demo",
