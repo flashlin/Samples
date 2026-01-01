@@ -18,8 +18,11 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
+    "build": "pnpm build:lib && pnpm build:demo",
+    "build:lib": "vue-tsc -p ./tsconfig.lib.json && vite build --config vite.config.lib.ts",
+    "build:demo": "vue-tsc -p ./tsconfig.demo.json && vite build --config vite.config.ts",
     "preview": "vite preview",
+    "preview:demo": "vite preview --outDir dist-demo",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",

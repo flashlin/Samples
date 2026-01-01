@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src/lib",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "baseUrl": ".",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "paths": {
+      "@/*": ["src/lib/*"]
+    }
+  },
+  "include": [
+    "src/lib/**/*.ts",
+    "src/lib/**/*.d.ts",
+    "src/lib/**/*.tsx",
+    "src/lib/**/*.vue"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-demo",
+    "demo",
+    "tests"
+  ]
+}

@@ -114,9 +114,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import DropDownList from './components/DropDownList.vue'
-import AutoComplete from './components/AutoComplete.vue'
-import JsonEditor from './components/JsonEditor.vue'
+import DropDownList from '@lib/components/DropDownList.vue'
+import AutoComplete from '@lib/components/AutoComplete.vue'
+import JsonEditor from '@lib/components/JsonEditor.vue'
 
 // DropDownList 資料
 const dropDownValue = ref('')

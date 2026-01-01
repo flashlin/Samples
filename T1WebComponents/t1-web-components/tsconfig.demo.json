@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "tsBuildInfoFile": "./demo/.tsbuildinfo",
+    "paths": {
+      "@lib/*": ["src/lib/*"],
+      "@/*": ["demo/*"]
+    }
+  },
+  "include": [
+    "demo/**/*.ts",
+    "demo/**/*.d.ts",
+    "demo/**/*.tsx",
+    "demo/**/*.vue"
+  ],
+  "references": [
+    { "path": "./tsconfig.lib.json" }
+  ]
+}

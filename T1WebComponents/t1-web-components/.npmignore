@@ -1,15 +1,32 @@
-# NPM Ignore File
-.gitignore
-.npmignore
+# 開發檔案
+demo/
+tests/
+node_modules/
+.claude/
 .gemini/
 brain/
-node_modules/
-src/
-public/
+
+# 建置配置
 *.config.js
 *.config.ts
+*.config.cjs
 tsconfig*.json
 vite-env.d.ts
+
+# 文件
 CLAUDE.md
-README.md (if you want to include it, remove this line)
-LICENSE (if you want to include it, remove this line)
+README.md
+LICENSE
+
+# Git
+.gitignore
+.git/
+
+# 原始碼
+src/
+
+# Demo 建置輸出
+dist-demo/
+
+# 測試相關
+coverage/

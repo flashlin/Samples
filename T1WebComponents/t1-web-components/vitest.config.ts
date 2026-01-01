@@ -10,8 +10,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/components/**/*.vue', 'src/components/**/*.ts'],
-      exclude: ['src/App.vue', 'src/main.ts'],
+      include: ['src/lib/components/**/*.vue', 'src/lib/components/**/*.ts'],
       all: true,
       lines: 80,
       functions: 80,
@@ -22,7 +21,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src/lib', import.meta.url)),
+      '@lib': fileURLToPath(new URL('./src/lib', import.meta.url))
     }
   }
 })
