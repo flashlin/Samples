@@ -6,17 +6,6 @@ expandPath() {
     echo "$path"
 }
 
-if ! command -v jq &> /dev/null; then
-    echo "錯誤: 找不到 jq 指令"
-    echo "請先安裝 jq: brew install jq"
-    exit 1
-fi
-
-if ! command -v fzf &> /dev/null; then
-    echo "錯誤: 找不到 fzf 指令"
-    echo "請先安裝 fzf: brew install fzf"
-    exit 1
-fi
 
 configs=(
     "host-prod-gke.yaml"
