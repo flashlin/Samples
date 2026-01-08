@@ -50,11 +50,25 @@ if [ -z "$newKey" ]; then
     exit 1
 fi
 
-read -p "請輸入要新增的 value: " newValue
+read -p "請輸入要新增的 value (或 file:// 開頭讀取檔案): " newValue
 
 if [ -z "$newValue" ]; then
     echo "未輸入 value"
     exit 1
+fi
+
+# 如果 value 是 file:// 開頭，讀取檔案內容
+if [[ "$newValue" == file://* ]]; then
+    filePath="${newValue#file://}"
+    filePath=$(expandPath "$filePath")
+    
+    if [ ! -f "$filePath" ]; then
+        echo "錯誤: 檔案 '$filePath' 不存在"
+        exit 1
+    fi
+    
+    newValue=$(cat "$filePath")
+    echo "已從檔案讀取內容"
 fi
 
 # 檢查 key 是否已存在
