@@ -25,7 +25,26 @@ fi
 
 configPath=$(expandPath "~/Downloads/$selectedConfig")
 
-echo "正在讀取 akis-secret..."
-kubectl get secret akis-secret -n b2c -o jsonpath='{.data}' \
+echo "正在列出 b2c namespace 的 secrets..."
+secrets=$(kubectl get secrets --kubeconfig="$configPath" -n=b2c -o jsonpath='{.items[*].metadata.name}')
+
+if [ -z "$secrets" ]; then
+    echo "找不到任何 secrets"
+    exit 1
+fi
+
+secretArray=($secrets)
+echo "找到 ${#secretArray[@]} 個 secrets"
+
+selectedSecret=$(printf '%s\n' "${secretArray[@]}" | fzf --prompt="選擇 Secret > " --height=40% --layout=reverse --border)
+
+if [ -z "$selectedSecret" ]; then
+    echo "未選擇任何 secret"
+    exit 1
+fi
+
+echo ""
+echo "=== Secret: $selectedSecret ==="
+kubectl get secret "$selectedSecret" -n b2c -o jsonpath='{.data}' \
     --kubeconfig="$configPath" \
     | jq 'map_values(@base64d)'
