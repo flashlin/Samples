@@ -81,7 +81,8 @@ echo "Pod 名稱: $podName"
 echo "目前 Image: $currentImage"
 
 # 檢查備份檔案是否存在
-backupFile="$BACKUP_DIR/${podName}.txt"
+serviceName=$(echo "$podName" | sed 's/-[^-]*-[^-]*$//')
+backupFile="$BACKUP_DIR/${serviceName}.txt"
 
 if [ ! -f "$backupFile" ]; then
     echo ""
