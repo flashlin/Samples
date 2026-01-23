@@ -84,7 +84,8 @@ echo "Image 來源: $podImage"
 mkdir -p "$BACKUP_DIR"
 
 # 備份檔案路徑
-backupFile="$BACKUP_DIR/${podName}.txt"
+serviceName=$(echo "$podName" | sed 's/-[^-]*-[^-]*$//')
+backupFile="$BACKUP_DIR/${serviceName}.txt"
 
 # 寫入備份檔案
 echo "$podImage" > "$backupFile"
