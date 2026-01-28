@@ -81,6 +81,25 @@ cpwd() {
   echo "\\033[32m已將目前目錄路徑複製到剪貼簿\\033[0m"
 }
 
+ppwd() {
+  local src_path=$(pbpaste)
+
+  if [ -z "$src_path" ]; then
+    echo "\\033[31mClipboard is empty\\033[0m"
+    return 1
+  fi
+
+  if [ ! -d "$src_path" ]; then
+    echo "\\033[31mPath does not exist or is not a directory: $src_path\\033[0m"
+    return 1
+  fi
+
+  local dir_name=$(basename "$src_path")
+
+  cp -R "$src_path" "./$dir_name"
+  echo "\\033[32mCopied $src_path to $(pwd)/$dir_name\\033[0m"
+}
+
 # 列出正在監聽的 TCP 連接埠
 port() {
   sudo lsof -nP -iTCP -sTCP:LISTEN
