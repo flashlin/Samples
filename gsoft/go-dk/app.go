@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -26,6 +27,7 @@ type AppState struct {
 	SelectedRow int
 	Mode        InputMode
 	FilterText  string
+	Highlighted map[int]bool
 
 	Table      *tview.Table
 	ListFlex   *tview.Flex
@@ -41,10 +43,11 @@ type AppState struct {
 
 func NewApp(docker *DockerClient) *AppState {
 	app := &AppState{
-		App:    tview.NewApplication(),
-		Pages:  tview.NewPages(),
-		Docker: docker,
-		Mode:   ModeNormal,
+		App:         tview.NewApplication(),
+		Pages:       tview.NewPages(),
+		Docker:      docker,
+		Mode:        ModeNormal,
+		Highlighted: make(map[int]bool),
 	}
 
 	app.buildListView()
@@ -103,6 +106,42 @@ func (a *AppState) selectedContainer() *ContainerInfo {
 	return &a.Containers[idx]
 }
 
+func (a *AppState) toggleHighlight() {
+	if a.SelectedRow < 0 || a.SelectedRow >= len(a.FilteredIdx) {
+		return
+	}
+	idx := a.FilteredIdx[a.SelectedRow]
+	if a.Highlighted[idx] {
+		delete(a.Highlighted, idx)
+	} else {
+		a.Highlighted[idx] = true
+	}
+	a.renderTable()
+}
+
+func (a *AppState) clearHighlights() {
+	a.Highlighted = make(map[int]bool)
+	a.renderTable()
+}
+
+func (a *AppState) highlightedContainers() []*ContainerInfo {
+	if len(a.Highlighted) == 0 {
+		c := a.selectedContainer()
+		if c == nil {
+			return nil
+		}
+		return []*ContainerInfo{c}
+	}
+
+	var result []*ContainerInfo
+	for idx := range a.Highlighted {
+		if idx >= 0 && idx < len(a.Containers) {
+			result = append(result, &a.Containers[idx])
+		}
+	}
+	return result
+}
+
 func (a *AppState) showInput(prefix string) {
 	a.InputField.SetLabel(prefix)
 	a.InputField.SetText("")
@@ -121,7 +160,7 @@ func (a *AppState) setStatus(msg string) {
 }
 
 func (a *AppState) clearStatus() {
-	a.StatusBar.SetText(" q:quit  /:filter  ::command")
+	a.StatusBar.SetText(" q:quit  /:filter  ::command  SPACE:select")
 }
 
 func (a *AppState) switchToLog(c *ContainerInfo) {
@@ -162,46 +201,68 @@ func (a *AppState) switchToList() {
 }
 
 func (a *AppState) executeCommand(cmd string) {
-	c := a.selectedContainer()
-	if c == nil && cmd != "q" {
+	if cmd == "q" {
+		a.App.Stop()
+		return
+	}
+
+	targets := a.highlightedContainers()
+	if len(targets) == 0 {
 		a.setStatus("No container selected")
 		return
 	}
 
 	switch cmd {
-	case "q":
-		a.App.Stop()
 	case "log":
-		a.switchToLog(c)
+		a.switchToLog(targets[0])
 	case "stop":
-		a.executeContainerAction(c, "Stopping", a.Docker.StopContainer)
+		a.executeBatchAction(targets, "Stopping", a.Docker.StopContainer)
 	case "start":
-		a.executeContainerAction(c, "Starting", a.Docker.StartContainer)
+		a.executeBatchAction(targets, "Starting", a.Docker.StartContainer)
 	case "restart":
-		a.executeContainerAction(c, "Restarting", a.Docker.RestartContainer)
+		a.executeBatchAction(targets, "Restarting", a.Docker.RestartContainer)
 	case "rm":
-		a.executeContainerAction(c, "Removing", a.Docker.RemoveContainer)
+		a.executeBatchAction(targets, "Removing", a.Docker.RemoveContainer)
 	case "bash":
-		a.execBash(c)
+		a.execBash(targets[0])
 	default:
 		a.setStatus("Unknown command: " + cmd)
 	}
 }
 
-func (a *AppState) executeContainerAction(c *ContainerInfo, action string, fn func(string) error) {
-	a.setStatus(action + " " + c.Name + "...")
+func (a *AppState) executeBatchAction(targets []*ContainerInfo, action string, fn func(string) error) {
+	names := a.formatContainerNames(targets)
+	a.setStatus(action + " " + names + "...")
+
 	go func() {
-		id := c.ID
-		err := fn(id)
+		var errors []string
+		for _, c := range targets {
+			if err := fn(c.ID); err != nil {
+				errors = append(errors, c.Name+": "+err.Error())
+			}
+		}
+
 		a.App.QueueUpdateDraw(func() {
-			if err != nil {
-				a.setStatus("Error: " + err.Error())
+			if len(errors) > 0 {
+				a.setStatus("Error: " + strings.Join(errors, "; "))
 				return
 			}
+			a.clearHighlights()
 			_ = a.refreshContainers()
 			a.clearStatus()
 		})
 	}()
+}
+
+func (a *AppState) formatContainerNames(targets []*ContainerInfo) string {
+	if len(targets) == 1 {
+		return targets[0].Name
+	}
+	names := make([]string, len(targets))
+	for i, c := range targets {
+		names[i] = c.Name
+	}
+	return fmt.Sprintf("%d containers", len(names))
 }
 
 func (a *AppState) execBash(c *ContainerInfo) {
@@ -232,12 +293,17 @@ func (a *AppState) renderTable() {
 			color = tcell.ColorGreen
 		}
 
+		highlighted := a.Highlighted[idx]
+
 		cells := []string{c.ShortID(), truncateText(c.Name, 50), c.Ports, c.Status}
 		for col, text := range cells {
 			cell := tview.NewTableCell(text).
 				SetTextColor(color).
 				SetMaxWidth(maxWidthForColumn(col)).
 				SetExpansion(expansionForColumn(col))
+			if highlighted {
+				cell.SetBackgroundColor(tcell.ColorDarkGoldenrod)
+			}
 			a.Table.SetCell(row+1, col, cell)
 		}
 	}

@@ -43,10 +43,15 @@ func (a *AppState) setupTableInput() {
 		case 'q':
 			a.App.Stop()
 			return nil
+		case ' ':
+			a.toggleHighlight()
+			a.moveSelectionDown()
+			return nil
 		}
 
 		switch event.Key() {
 		case tcell.KeyEscape:
+			a.clearHighlights()
 			a.resetFilter()
 			return nil
 		}
@@ -59,6 +64,13 @@ func (a *AppState) setupTableInput() {
 			a.SelectedRow = row - 1
 		}
 	})
+}
+
+func (a *AppState) moveSelectionDown() {
+	if a.SelectedRow < len(a.FilteredIdx)-1 {
+		a.SelectedRow++
+		a.Table.Select(a.SelectedRow+1, 0)
+	}
 }
 
 func (a *AppState) enterFilterMode() {
