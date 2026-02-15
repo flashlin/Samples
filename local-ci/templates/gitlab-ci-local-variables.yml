@@ -1,0 +1,19 @@
+---
+# Project-level variables for gitlab-ci-local
+# Copy this file to your project root as .gitlab-ci-local-variables.yml
+# and customize the values.
+#
+# Usage:
+#   cp ../local-ci/templates/gitlab-ci-local-variables.yml .gitlab-ci-local-variables.yml
+#
+# These variables override the ones defined in .gitlab-ci.yml
+
+# Example for b2c-support-agent:
+# DEPARTMENT: twdc
+# NAMESPACE: twdc
+
+# Example for support-agent:
+# DEPARTMENT: rmdv-direct
+# GENKIT_BACKEND_IMAGE: genkit-backend
+# SLACK_BOLT_FRONTEND_IMAGE: slack-bolt-frontend
+# IMAGE_TAG: local

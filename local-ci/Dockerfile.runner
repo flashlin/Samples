@@ -1,0 +1,2 @@
+FROM alpine:latest
+RUN apk add --no-cache kubectl kustomize gettext bash curl
