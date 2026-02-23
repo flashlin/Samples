@@ -140,6 +140,7 @@ export interface ILLMSession {
   embedBatch(texts: string[]): Promise<(EmbeddingResult | null)[]>;
   expandQuery(query: string, options?: { context?: string; includeLexical?: boolean }): Promise<Queryable[]>;
   rerank(query: string, documents: RerankDocument[], options?: RerankOptions): Promise<RerankResult>;
+  findRelevantRange(query: string, numberedText: string): Promise<{ start: number; end: number } | null>;
   /** Whether this session is still valid (not released or aborted) */
   readonly isValid: boolean;
   /** Abort signal for this session (aborts on release or maxDuration) */
@@ -313,6 +314,8 @@ export interface LLM {
    * Returns list of documents with relevance scores (higher = more relevant)
    */
   rerank(query: string, documents: RerankDocument[], options?: RerankOptions): Promise<RerankResult>;
+
+  findRelevantRange(query: string, numberedText: string): Promise<{ start: number; end: number } | null>;
 
   /**
    * Dispose of resources
@@ -1016,6 +1019,79 @@ export class LlamaCpp implements LLM {
     }
   }
 
+  async findRelevantRange(query: string, numberedText: string): Promise<{ start: number; end: number } | null> {
+    this.touchActivity();
+
+    const llama = await this.ensureLlama();
+    await this.ensureGenerateModel();
+
+    const grammar = await llama.createGrammar({
+      grammar: `root ::= "start: " [0-9]+ "\\n" "end: " [0-9]+ "\\n"`
+    });
+
+    const prompt = `/no_think Find the continuous relevant section for the query. Output start and end line numbers that capture the complete, semantically coherent passage.
+
+Example 1:
+Query: "how to install python"
+Text:
+1: # Getting Started
+2: ## Installation
+3: Download Python from python.org.
+4: Run the installer and follow the prompts.
+5: Verify with \`python --version\`.
+6:
+7: ## Configuration
+8: Set up your PATH variable.
+start: 1
+end: 5
+
+Example 2:
+Query: "database connection pooling"
+Text:
+1: The server uses HTTP/2.
+2: Load balancing distributes traffic.
+3: ## Database
+4: Connection pooling reduces overhead.
+5: Set pool size to match CPU cores.
+6: Monitor active connections.
+7: ## Caching
+8: Redis caches frequent queries.
+start: 3
+end: 6
+
+Query: "${query}"
+Text:
+${numberedText}`;
+
+    const genContext = await this.generateModel!.createContext();
+    const sequence = genContext.getSequence();
+    const session = new LlamaChatSession({ contextSequence: sequence });
+
+    try {
+      const result = await session.prompt(prompt, {
+        grammar,
+        maxTokens: 30,
+        temperature: 0.3,
+        topK: 20,
+        topP: 0.8,
+      });
+
+      const startMatch = result.match(/start:\s*(\d+)/);
+      const endMatch = result.match(/end:\s*(\d+)/);
+      if (!startMatch || !endMatch) return null;
+
+      const start = parseInt(startMatch[1]!, 10);
+      const end = parseInt(endMatch[1]!, 10);
+      if (isNaN(start) || isNaN(end) || start < 1 || end < start) return null;
+
+      return { start, end };
+    } catch {
+      return null;
+    } finally {
+      await genContext.dispose();
+    }
+  }
+
   async rerank(
     query: string,
     documents: RerankDocument[],
@@ -1301,6 +1377,10 @@ class LLMSession implements ILLMSession {
     options?: { context?: string; includeLexical?: boolean }
   ): Promise<Queryable[]> {
     return this.withOperation(() => this.manager.getLlamaCpp().expandQuery(query, options));
+  }
+
+  async findRelevantRange(query: string, numberedText: string): Promise<{ start: number; end: number } | null> {
+    return this.withOperation(() => this.manager.getLlamaCpp().findRelevantRange(query, numberedText));
   }
 
   async rerank(

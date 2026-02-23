@@ -18,6 +18,8 @@ import { z } from "zod";
 import {
   createStore,
   extractSnippet,
+  extractLargeSnippet,
+  extractSemanticSnippet,
   addLineNumbers,
   hybridQuery,
   vectorSearchQuery,
@@ -25,7 +27,7 @@ import {
 } from "./store.js";
 import type { Store } from "./store.js";
 import { getCollection, getGlobalContext } from "./collections.js";
-import { disposeDefaultLlamaCpp } from "./llm.js";
+import { disposeDefaultLlamaCpp, withLLMSession } from "./llm.js";
 
 // =============================================================================
 // Types for structured content
@@ -342,6 +344,47 @@ function createMcpServer(store: Store): McpServer {
           snippet: addLineNumbers(snippet, line),
         };
       });
+
+      return {
+        content: [{ type: "text", text: formatSearchSummary(filtered, query) }],
+        structuredContent: { results: filtered },
+      };
+    }
+  );
+
+  // ---------------------------------------------------------------------------
+  // Tool: qmd_deep_search_large (Deep search with larger snippet output)
+  // ---------------------------------------------------------------------------
+
+  server.registerTool(
+    "deep_search_large",
+    {
+      title: "Deep Search Large",
+      description: "Deep search that returns significantly larger contiguous content snippets containing the answer.",
+      annotations: { readOnlyHint: true, openWorldHint: false },
+      inputSchema: {
+        query: z.string().describe("Natural language query - describe what you're looking for"),
+        limit: z.number().optional().default(10).describe("Maximum number of results (default: 10)"),
+        minScore: z.number().optional().default(0).describe("Minimum relevance score 0-1 (default: 0)"),
+        collection: z.string().optional().describe("Filter to a specific collection by name"),
+      },
+    },
+    async ({ query, limit, minScore, collection }) => {
+      const results = await hybridQuery(store, query, { collection, limit, minScore });
+
+      const filtered: SearchResultItem[] = await withLLMSession(async (session) => {
+        return Promise.all(results.map(async (r) => {
+          const { line, snippet } = await extractSemanticSnippet(r.body, query, session, r.bestChunkPos);
+          return {
+            docid: `#${r.docid}`,
+            file: r.displayPath,
+            title: r.title,
+            score: Math.round(r.score * 100) / 100,
+            context: r.context,
+            snippet: addLineNumbers(snippet, line),
+          };
+        }));
+      }, { name: 'deep_search_large_snippets' });
 
       return {
         content: [{ type: "text", text: formatSearchSummary(filtered, query) }],
@@ -687,6 +730,17 @@ export async function startMcpHttpServer(port: number, options?: { quiet?: boole
                 const { line, snippet } = extractSnippet(r.bestChunk, toolArgs.query, 300);
                 return { docid: `#${r.docid}`, file: r.displayPath, title: r.title, score: Math.round(r.score * 100) / 100, context: r.context, snippet: addLineNumbers(snippet, line) };
               });
+              callResult = { content: [{ type: "text", text: formatSearchSummary(filtered, toolArgs.query) }], structuredContent: { results: filtered } };
+            } else if (toolName === "deep_search_large") {
+              const results = await hybridQuery(store, toolArgs.query, {
+                collection: toolArgs.collection, limit: toolArgs.limit, minScore: toolArgs.minScore
+              });
+              const filtered = await withLLMSession(async (session) => {
+                return Promise.all(results.map(async (r) => {
+                  const { line, snippet } = await extractSemanticSnippet(r.body, toolArgs.query, session, r.bestChunkPos);
+                  return { docid: `#${r.docid}`, file: r.displayPath, title: r.title, score: Math.round(r.score * 100) / 100, context: r.context, snippet: addLineNumbers(snippet, line) };
+                }));
+              }, { name: 'deep_search_large_snippets' });
               callResult = { content: [{ type: "text", text: formatSearchSummary(filtered, toolArgs.query) }], structuredContent: { results: filtered } };
             } else if (toolName === "get") {
               // Skipping get implementation details here for brevity since we only test search right now, 

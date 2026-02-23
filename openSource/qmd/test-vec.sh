@@ -28,7 +28,7 @@ curl -s -X POST http://127.0.0.1:8181/mcp \
     "id": 2,
     "method": "tools/call",
     "params": {
-      "name": "deep_search",
+      "name": "deep_search_large",
       "arguments": {
         "query": "如何安裝 Member GRPC SDK? C# 程式碼如何寫?"
       }

@@ -2,6 +2,9 @@ FROM node:22-bookworm
 
 WORKDIR /app
 
+# Install build dependencies for llama.cpp compilation
+RUN apt-get update && apt-get install -y cmake build-essential python3 && rm -rf /var/lib/apt/lists/*
+
 # Install tsx and bun globally
 RUN npm install -g tsx bun
 

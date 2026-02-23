@@ -259,7 +259,7 @@ export function homedir(): string {
  */
 export function isAbsolutePath(path: string): boolean {
   if (!path) return false;
-  
+
   // Unix absolute path
   if (path.startsWith('/')) {
     // Check if it's a Git Bash style path like /c/ or /c/Users (C-Z only, not A or B)
@@ -273,12 +273,12 @@ export function isAbsolutePath(path: string): boolean {
     // Any other path starting with / is Unix absolute
     return true;
   }
-  
+
   // Windows native path: C:\ or C:/ (any letter A-Z)
   if (path.length >= 2 && /[a-zA-Z]/.test(path[0]!) && path[1] === ':') {
     return true;
   }
-  
+
   return false;
 }
 
@@ -300,25 +300,25 @@ export function getRelativePathFromPrefix(path: string, prefix: string): string 
   if (!prefix) {
     return null;
   }
-  
+
   const normalizedPath = normalizePathSeparators(path);
   const normalizedPrefix = normalizePathSeparators(prefix);
-  
+
   // Ensure prefix ends with / for proper matching
-  const prefixWithSlash = !normalizedPrefix.endsWith('/') 
-    ? normalizedPrefix + '/' 
+  const prefixWithSlash = !normalizedPrefix.endsWith('/')
+    ? normalizedPrefix + '/'
     : normalizedPrefix;
-  
+
   // Exact match
   if (normalizedPath === normalizedPrefix) {
     return '';
   }
-  
+
   // Check if path starts with prefix
   if (normalizedPath.startsWith(prefixWithSlash)) {
     return normalizedPath.slice(prefixWithSlash.length);
   }
-  
+
   return null;
 }
 
@@ -326,18 +326,18 @@ export function resolve(...paths: string[]): string {
   if (paths.length === 0) {
     throw new Error("resolve: at least one path segment is required");
   }
-  
+
   // Normalize all paths to use forward slashes
   const normalizedPaths = paths.map(normalizePathSeparators);
-  
+
   let result = '';
   let windowsDrive = '';
-  
+
   // Check if first path is absolute
   const firstPath = normalizedPaths[0]!;
   if (isAbsolutePath(firstPath)) {
     result = firstPath;
-    
+
     // Extract Windows drive letter if present
     if (firstPath.length >= 2 && /[a-zA-Z]/.test(firstPath[0]!) && firstPath[1] === ':') {
       windowsDrive = firstPath.slice(0, 2);
@@ -353,7 +353,7 @@ export function resolve(...paths: string[]): string {
   } else {
     // Start with PWD or cwd, then append the first relative path
     const pwd = normalizePathSeparators(process.env.PWD || process.cwd());
-    
+
     // Extract Windows drive from PWD if present
     if (pwd.length >= 2 && /[a-zA-Z]/.test(pwd[0]!) && pwd[1] === ':') {
       windowsDrive = pwd.slice(0, 2);
@@ -362,14 +362,14 @@ export function resolve(...paths: string[]): string {
       result = pwd + '/' + firstPath;
     }
   }
-  
+
   // Process remaining paths
   for (let i = 1; i < normalizedPaths.length; i++) {
     const p = normalizedPaths[i]!;
     if (isAbsolutePath(p)) {
       // Absolute path replaces everything
       result = p;
-      
+
       // Update Windows drive if present
       if (p.length >= 2 && /[a-zA-Z]/.test(p[0]!) && p[1] === ':') {
         windowsDrive = p.slice(0, 2);
@@ -391,7 +391,7 @@ export function resolve(...paths: string[]): string {
       result = result + '/' + p;
     }
   }
-  
+
   // Normalize . and .. components
   const parts = result.split('/').filter(Boolean);
   const normalized: string[] = [];
@@ -402,15 +402,15 @@ export function resolve(...paths: string[]): string {
       normalized.push(part);
     }
   }
-  
+
   // Build final path
   const finalPath = '/' + normalized.join('/');
-  
+
   // Prepend Windows drive if present
   if (windowsDrive) {
     return windowsDrive + finalPath;
   }
-  
+
   return finalPath;
 }
 
@@ -1503,7 +1503,7 @@ export function normalizeDocid(docid: string): string {
 
   // Strip surrounding quotes (single or double)
   if ((normalized.startsWith('"') && normalized.endsWith('"')) ||
-      (normalized.startsWith("'") && normalized.endsWith("'"))) {
+    (normalized.startsWith("'") && normalized.endsWith("'"))) {
     normalized = normalized.slice(1, -1);
   }
 
@@ -2731,6 +2731,118 @@ export function extractSnippet(body: string, query: string, maxLen = 500, chunkP
     linesAfter,
     snippetLines: snippetLineCount,
   };
+}
+
+export function extractLargeSnippet(body: string, query: string, chunkPos?: number, chunkLen?: number): SnippetResult {
+  const totalLines = body.split('\n').length;
+  let searchBody = body;
+  let lineOffset = 0;
+
+  if (chunkPos && chunkPos > 0) {
+    const searchLen = chunkLen || CHUNK_SIZE_CHARS;
+    const contextStart = Math.max(0, chunkPos - 100);
+    const contextEnd = Math.min(body.length, chunkPos + searchLen + 100);
+    searchBody = body.slice(contextStart, contextEnd);
+    if (contextStart > 0) {
+      lineOffset = body.slice(0, contextStart).split('\n').length - 1;
+    }
+  }
+
+  const lines = searchBody.split('\n');
+  const queryTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+  let bestLine = 0, bestScore = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const lineLower = (lines[i] ?? "").toLowerCase();
+    let score = 0;
+    for (const term of queryTerms) {
+      if (lineLower.includes(term)) score++;
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestLine = i;
+    }
+  }
+
+  const start = Math.max(0, bestLine - 10);
+  const end = Math.min(lines.length, bestLine + 50);
+  const snippetLines = lines.slice(start, end);
+  let snippetText = snippetLines.join('\n');
+
+  if (chunkPos && chunkPos > 0 && snippetText.trim().length === 0) {
+    return extractLargeSnippet(body, query, undefined);
+  }
+
+  const maxLen = 4000;
+  if (snippetText.length > maxLen) snippetText = snippetText.substring(0, maxLen - 3) + "...";
+
+  const absoluteStart = lineOffset + start + 1; // 1-indexed
+  const snippetLineCount = snippetLines.length;
+  const linesBefore = absoluteStart - 1;
+  const linesAfter = totalLines - (absoluteStart + snippetLineCount - 1);
+
+  const header = `@@ -${absoluteStart},${snippetLineCount} @@ (${linesBefore} before, ${linesAfter} after)`;
+  const snippet = `${header}\n${snippetText}`;
+
+  return {
+    line: lineOffset + bestLine + 1,
+    snippet,
+    linesBefore,
+    linesAfter,
+    snippetLines: snippetLineCount,
+  };
+}
+
+export async function extractSemanticSnippet(
+  body: string,
+  query: string,
+  session: ILLMSession,
+  chunkPos?: number,
+  chunkLen?: number
+): Promise<SnippetResult> {
+  try {
+    const totalLines = body.split('\n').length;
+    const windowChars = 4800;
+    const halfWindow = Math.floor(windowChars / 2);
+
+    const center = chunkPos && chunkPos > 0 ? chunkPos : Math.floor(body.length / 2);
+    const winStart = Math.max(0, center - halfWindow);
+    const winEnd = Math.min(body.length, center + halfWindow);
+    const windowText = body.slice(winStart, winEnd);
+    const windowLineOffset = winStart > 0 ? body.slice(0, winStart).split('\n').length - 1 : 0;
+
+    const windowLines = windowText.split('\n');
+    const numberedText = windowLines.map((line, i) => `${i + 1}: ${line}`).join('\n');
+
+    const range = await session.findRelevantRange(query, numberedText);
+    if (!range) return extractLargeSnippet(body, query, chunkPos, chunkLen);
+
+    const { start, end } = range;
+    if (start < 1 || end > windowLines.length || start > end) {
+      return extractLargeSnippet(body, query, chunkPos, chunkLen);
+    }
+
+    const snippetLines = windowLines.slice(start - 1, end);
+    const snippetText = snippetLines.join('\n');
+
+    if (snippetText.trim().length === 0) {
+      return extractLargeSnippet(body, query, chunkPos, chunkLen);
+    }
+
+    const absoluteStart = windowLineOffset + start;
+    const snippetLineCount = snippetLines.length;
+    const linesBefore = absoluteStart - 1;
+    const linesAfter = totalLines - (absoluteStart + snippetLineCount - 1);
+
+    const header = `@@ -${absoluteStart},${snippetLineCount} @@ (${linesBefore} before, ${linesAfter} after)`;
+    const snippet = `${header}\n${snippetText}`;
+
+    const bestLine = windowLineOffset + start;
+
+    return { line: bestLine, snippet, linesBefore, linesAfter, snippetLines: snippetLineCount };
+  } catch {
+    return extractLargeSnippet(body, query, chunkPos, chunkLen);
+  }
 }
 
 // =============================================================================
