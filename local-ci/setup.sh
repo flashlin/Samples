@@ -72,6 +72,22 @@ ensure_namespaces() {
     done
 }
 
+CNPG_VERSION="1.25.1"
+CNPG_MANIFEST="https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.25/releases/cnpg-${CNPG_VERSION}.yaml"
+
+install_cnpg_operator() {
+    if kubectl get deployment cnpg-controller-manager -n cnpg-system &>/dev/null; then
+        print_status "CNPG operator already installed"
+        return 0
+    fi
+
+    echo "Installing CNPG operator v${CNPG_VERSION}..."
+    kubectl apply --server-side -f "$CNPG_MANIFEST"
+    echo "Waiting for CNPG controller to be ready..."
+    kubectl rollout status deployment/cnpg-controller-manager -n cnpg-system --timeout=120s
+    print_status "CNPG operator installed and ready"
+}
+
 create_global_variables_dir() {
     local global_dir="$HOME/.gitlab-ci-local"
     if [ ! -d "$global_dir" ]; then
@@ -94,6 +110,7 @@ check_docker
 build_runner_image
 check_kubectl
 ensure_namespaces
+install_cnpg_operator
 create_global_variables_dir
 
 print_header "Setup Complete"

@@ -108,6 +108,19 @@ check_prerequisites() {
     check_kubernetes
 }
 
+prompt_clear_cache() {
+    local cache_dir="${PROJECT_DIR}/.gitlab-ci-local"
+    if [ ! -d "$cache_dir" ]; then
+        return
+    fi
+
+    read -rp "Clear .gitlab-ci-local cache? (N/y): " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        rm -rf "$cache_dir"
+        print_status "Cache directory removed: ${cache_dir}"
+    fi
+}
+
 resolve_variables_file() {
     if [ -n "$VARIABLES_FILE" ]; then
         if [ ! -f "$VARIABLES_FILE" ]; then
@@ -348,6 +361,7 @@ main() {
     echo -e "Project: ${CYAN}${PROJECT_DIR}${NC}"
 
     check_prerequisites
+    prompt_clear_cache
 
     if $LIST_ONLY; then
         list_jobs
