@@ -1,0 +1,19 @@
+[project]
+name = "extract-html"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.14.3",
+    "lxml>=6.0.2",
+    "markdownify>=1.2.2",
+    "requests>=2.32.5",
+    "textual>=8.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["extract_html*"]
+
+[project.scripts]
+extract-html = "extract_html.app:main"
