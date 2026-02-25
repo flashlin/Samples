@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "WebFetch(domain:deepwiki.com)",
-      "Bash(gitlab-ci-local:*)",
-      "Bash(sh ./local-ci-deploy.sh -p ../b2c-support-agent)"
-    ]
-  }
-}
