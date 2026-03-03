@@ -1,0 +1,20 @@
+# Directories matching these regex patterns will be skipped
+
+# macOS bundles
+\.(app|framework|bundle|plugin|kext|pptheme|lproj)$
+
+# Development
+node_modules$
+\.git$
+\.venv$
+__pycache__$
+
+# System
+Library/Caches$
+\.Trash$
+
+\.cache$
+\.bun$
+\.antigravity$
+\.local$
+Users/flash$
