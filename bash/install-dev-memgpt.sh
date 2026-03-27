@@ -4,4 +4,4 @@ conda create -n memgpt python=3.11.5
 conda activate memgpt
 
 pip install openai
-pip install pyautogen pymemgpt
+pip install ag2 pymemgpt
