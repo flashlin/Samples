@@ -1,1 +1,1 @@
-cd src && go build -o ../go-paste . && cd .. && ./paste "$@"
+cd src && go build -o ../go-paste . && cd .. && ./go-paste "$@"
