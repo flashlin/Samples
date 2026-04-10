@@ -100,6 +100,29 @@
         </div>
       </section>
 
+      <!-- JsonEditor 展示 (Array - Domain Config) -->
+      <section class="p-6 bg-gray-800/50 rounded-xl border border-gray-700 shadow-lg">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-2">
+          <span class="w-2 h-6 bg-teal-500 rounded-full"></span>
+          JsonEditor (Array Mode - Domain Config)
+        </h2>
+        <p class="text-sm text-gray-400 mb-6">Domain configuration per country with array fields. Schema auto-extracted from JSON data.</p>
+
+        <JsonEditor
+          v-model="domainConfigJson"
+          :compact="false"
+          @error="handleJsonError"
+        />
+
+        <div class="mt-6 p-4 bg-gray-900 rounded-md border border-gray-700">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-xs font-medium text-gray-500 uppercase">Current JSON String</h3>
+            <span class="text-xs text-gray-500">{{ domainConfigJson.length }} chars</span>
+          </div>
+          <pre class="text-xs font-mono text-teal-400 overflow-x-auto whitespace-pre-wrap">{{ domainConfigJson }}</pre>
+        </div>
+      </section>
+
       <section class="p-6 bg-blue-900/20 rounded-xl border border-blue-800/50">
         <h3 class="text-lg font-semibold text-blue-300 mb-2">搜尋提示 (Camel Search)</h3>
         <ul class="text-sm text-gray-300 list-disc list-inside space-y-1">
@@ -157,6 +180,15 @@ const userSchema = [
 
 // JsonEditor 單一物件資料 (JSON 字串格式)
 const singleUserJson = ref<string>(`{"cid":123,"name":"flash","birth":"2005-11-01T12:00:00-04:00"}`)
+
+// JsonEditor Domain Config 資料 (JSON 字串格式)
+const domainConfigJson = ref<string>(`[
+  {"Country":"Others","SbobetDomains":["beer789.com","elangjawa.com"],"SbotopDomains":["nhacaisbo.com","pedagangbola.com"]},
+  {"Country":"ID","SbobetDomains":["wiskeybear.com","elangjawa.com"],"SbotopDomains":["sepakliga.com","yoneball.com"]},
+  {"Country":"VN","SbobetDomains":["beer789.com","c81688.com"],"SbotopDomains":["sepakliga.com","sbo-viet.com"]},
+  {"Country":"TH","SbobetDomains":["beer789.com","c81688.com"],"SbotopDomains":["sepakliga.com","yoneball.com"]},
+  {"Country":"MY","SbobetDomains":["beer789.com","c81688.com"],"SbotopDomains":["sepakliga.com","yoneball.com"]}
+]`)
 
 // Error handler
 const handleJsonError = (message: string) => {
