@@ -65,7 +65,7 @@ JsonEditor 支援兩種模式，根據輸入的 JSON 字串自動判斷：
 interface JsonSchemaField {
   key: string                          // 欄位鍵名
   label?: string                       // 顯示標籤（可選）
-  type: 'string' | 'number' | 'date'  // 欄位類型
+  type: 'string' | 'number' | 'date' | 'array'  // 欄位類型
 }
 ```
 

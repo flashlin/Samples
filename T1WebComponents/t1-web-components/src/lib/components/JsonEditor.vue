@@ -89,9 +89,18 @@
         </thead>
         <tbody class="divide-y divide-gray-800">
           <tr v-for="(item, index) in filteredList" :key="index" class="hover:bg-gray-800/30 transition-colors">
-            <td v-for="field in effectiveSchema" :key="field.key" class="px-6 py-4 whitespace-nowrap">
+            <td v-for="field in effectiveSchema" :key="field.key" class="px-6 py-4" :class="{ 'whitespace-nowrap': field.type !== 'array' }">
               <span v-if="field.type === 'date'" class="text-gray-300">
                 {{ formatValue(item[field.key]) }}
+              </span>
+              <span v-else-if="field.type === 'array'" class="flex flex-wrap gap-1">
+                <span
+                  v-for="(tag, tagIndex) in (Array.isArray(item[field.key]) ? item[field.key] : [])"
+                  :key="tagIndex"
+                  class="inline-block bg-gray-700 text-gray-200 text-xs px-2 py-0.5 rounded"
+                >
+                  {{ tag }}
+                </span>
               </span>
               <span v-else class="text-gray-300">
                 {{ item[field.key] }}
@@ -159,6 +168,15 @@
               class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm color-scheme-dark"
               type="date"
             />
+            <textarea
+              v-else-if="field.type === 'array'"
+              :id="'form-' + field.key"
+              :value="arrayToTextareaValue(tempObjectData[field.key])"
+              @input="tempObjectData[field.key] = textareaValueToArray(($event.target as HTMLTextAreaElement).value); onObjectChange()"
+              rows="4"
+              class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm font-mono"
+              placeholder="One item per line"
+            ></textarea>
           </div>
         </div>
 
@@ -228,6 +246,15 @@
               class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm color-scheme-dark"
               type="date"
             />
+            <textarea
+              v-else-if="field.type === 'array'"
+              :id="field.key"
+              :value="arrayToTextareaValue(tempItem[field.key])"
+              @input="tempItem[field.key] = textareaValueToArray(($event.target as HTMLTextAreaElement).value)"
+              rows="4"
+              class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 text-white text-sm font-mono"
+              placeholder="One item per line"
+            ></textarea>
           </div>
         </div>
 
@@ -253,7 +280,7 @@ import { ref, computed, watch } from 'vue'
 export interface JsonSchemaField {
   key: string
   label?: string
-  type: 'string' | 'number' | 'date'
+  type: 'string' | 'number' | 'date' | 'array'
 }
 
 const props = withDefaults(
@@ -324,7 +351,13 @@ const isArray = computed(() => {
 const initializeObjectFromSchema = () => {
   const obj: any = {}
   effectiveSchema.value.forEach(field => {
-    obj[field.key] = field.type === 'number' ? 0 : ''
+    if (field.type === 'number') {
+      obj[field.key] = 0
+    } else if (field.type === 'array') {
+      obj[field.key] = []
+    } else {
+      obj[field.key] = ''
+    }
   })
   return obj
 }
@@ -365,9 +398,12 @@ const filteredList = computed(() => {
 
   const q = searchQuery.value.toLowerCase()
   return tempArrayData.value.filter((item: any) => {
-    return Object.values(item).some(val =>
-      String(val).toLowerCase().includes(q)
-    )
+    return Object.values(item).some(val => {
+      if (Array.isArray(val)) {
+        return val.some(element => String(element).toLowerCase().includes(q))
+      }
+      return String(val).toLowerCase().includes(q)
+    })
   })
 })
 
@@ -393,7 +429,13 @@ const openInsertModal = (item: any) => {
 const initializeTempItem = () => {
   const newItem: any = {}
   effectiveSchema.value.forEach(field => {
-    newItem[field.key] = field.type === 'number' ? 0 : ''
+    if (field.type === 'number') {
+      newItem[field.key] = 0
+    } else if (field.type === 'array') {
+      newItem[field.key] = []
+    } else {
+      newItem[field.key] = ''
+    }
   })
   tempItem.value = newItem
 }
@@ -493,7 +535,8 @@ const cancelArrayChanges = () => {
   hasUnsavedChanges.value = false
 }
 
-function inferFieldType(value: any): 'string' | 'number' | 'date' {
+function inferFieldType(value: any): 'string' | 'number' | 'date' | 'array' {
+  if (Array.isArray(value)) return 'array'
   if (typeof value === 'number') return 'number'
 
   if (typeof value === 'string') {
@@ -505,6 +548,16 @@ function inferFieldType(value: any): 'string' | 'number' | 'date' {
   }
 
   return 'string'
+}
+
+function arrayToTextareaValue(arr: any): string {
+  if (!Array.isArray(arr)) return String(arr ?? '')
+  return arr.join('\n')
+}
+
+function textareaValueToArray(text: string): string[] {
+  if (!text || text.trim() === '') return []
+  return text.split('\n').map(line => line.trim()).filter(line => line !== '')
 }
 
 function extractSchema(jsonStr: string | null): JsonSchemaField[] | {} {
@@ -521,7 +574,7 @@ function extractSchema(jsonStr: string | null): JsonSchemaField[] | {} {
     if (data.length === 0) return []
 
     const allKeys = new Set<string>()
-    const typeCountMap = new Map<string, Map<'string' | 'number' | 'date', number>>()
+    const typeCountMap = new Map<string, Map<'string' | 'number' | 'date' | 'array', number>>()
 
     data.forEach((item) => {
       if (typeof item === 'object' && item !== null) {
@@ -544,7 +597,7 @@ function extractSchema(jsonStr: string | null): JsonSchemaField[] | {} {
 
     return Array.from(allKeys).map((key) => {
       const counts = typeCountMap.get(key)
-      let finalType: 'string' | 'number' | 'date' = 'string'
+      let finalType: 'string' | 'number' | 'date' | 'array' = 'string'
 
       if (counts) {
         let maxCount = 0

@@ -24,18 +24,23 @@ export async function fillInputField(
   fieldKey: string,
   value: string
 ): Promise<void> {
-  const input = wrapper.find(`input#${fieldKey}`)
-  if (!input.exists()) {
-    const formInput = wrapper.find(`input#form-${fieldKey}`)
-    if (formInput.exists()) {
-      await formInput.setValue(value)
-      await formInput.trigger('input')
+  const selectors = [
+    `input#${fieldKey}`,
+    `textarea#${fieldKey}`,
+    `input#form-${fieldKey}`,
+    `textarea#form-${fieldKey}`
+  ]
+
+  for (const selector of selectors) {
+    const el = wrapper.find(selector)
+    if (el.exists()) {
+      await el.setValue(value)
+      await el.trigger('input')
       return
     }
-    throw new Error(`Input field "${fieldKey}" not found`)
   }
-  await input.setValue(value)
-  await input.trigger('input')
+
+  throw new Error(`Input field "${fieldKey}" not found`)
 }
 
 export async function clickButton(

@@ -42,3 +42,22 @@ export const SAMPLE_OBJECT_DATA = {
   name: 'Test User',
   createdAt: '2025-01-15'
 }
+
+export const ARRAY_FIELD_SCHEMA: JsonSchemaField[] = [
+  { key: 'Country', label: 'Country', type: 'string' as const },
+  { key: 'SbobetDomains', label: 'Sbobet Domains', type: 'array' as const },
+  { key: 'SbotopDomains', label: 'Sbotop Domains', type: 'array' as const }
+]
+
+export const SAMPLE_DOMAIN_DATA = [
+  {
+    Country: 'Others',
+    SbobetDomains: ['beer789.com', 'elangjawa.com'],
+    SbotopDomains: ['nhacaisbo.com', 'pedagangbola.com']
+  },
+  {
+    Country: 'ID',
+    SbobetDomains: ['wiskeybear.com', 'elangjawa.com'],
+    SbotopDomains: ['sepakliga.com', 'yoneball.com']
+  }
+]
