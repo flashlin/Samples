@@ -5,6 +5,8 @@ from pathlib import Path
 templates_content = '''
 # ===== 自定義函數區塊開始 =====
 
+alias cc='/Users/flash/vdisk/github/qa-pair/my-tools/claude-code/cc.sh'
+
 # dk alias - 執行自定義 dk 腳本
 alias dk='/Users/flash/vdisk/github/Samples/gsoft/dk'
 alias ff='/Users/flash/vdisk/github/Samples/gsoft/ff'
