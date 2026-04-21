@@ -8,6 +8,14 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"golang.org/x/term"
+)
+
+const (
+	gray      = "\033[90m"
+	reset     = "\033[0m"
+	eraseLine = "\033[2K\r"
 )
 
 type sortMode int
@@ -25,6 +33,12 @@ type dirEntry struct {
 }
 
 func main() {
+	if len(os.Args) == 1 {
+		entries := findMatches(".", "")
+		sortEntries(entries, sortByTime)
+		printEntries(entries)
+		return
+	}
 	pattern, mode, ok := parseArgs(os.Args[1:])
 	if !ok {
 		printUsage()
@@ -59,7 +73,7 @@ func parseArgs(args []string) (string, sortMode, bool) {
 		}
 	}
 	if !patternSet {
-		return "", mode, false
+		pattern = ""
 	}
 	return pattern, mode, true
 }
@@ -83,6 +97,7 @@ func findMatches(root, pattern string) []dirEntry {
 		if !d.IsDir() {
 			return nil
 		}
+		showProgress(path)
 		if path == root {
 			return nil
 		}
@@ -100,7 +115,34 @@ func findMatches(root, pattern string) []dirEntry {
 		})
 		return nil
 	})
+	clearProgress()
 	return results
+}
+
+func showProgress(path string) {
+	if !term.IsTerminal(int(os.Stderr.Fd())) {
+		return
+	}
+	fmt.Fprintf(os.Stderr, "%s%s%s%s", eraseLine, gray, truncateToTermWidth(path), reset)
+}
+
+func clearProgress() {
+	if !term.IsTerminal(int(os.Stderr.Fd())) {
+		return
+	}
+	fmt.Fprint(os.Stderr, eraseLine)
+}
+
+func truncateToTermWidth(s string) string {
+	width, _, err := term.GetSize(int(os.Stderr.Fd()))
+	if err != nil || width <= 0 {
+		width = 80
+	}
+	maxLen := width - 1
+	if len(s) > maxLen {
+		return "..." + s[len(s)-(maxLen-3):]
+	}
+	return s
 }
 
 func dirSize(root string) int64 {
