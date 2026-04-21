@@ -11,6 +11,7 @@ alias cc='/Users/flash/vdisk/github/qa-pair/my-tools/claude-code/cc.sh'
 alias dk='/Users/flash/vdisk/github/Samples/gsoft/dk'
 alias ff='/Users/flash/vdisk/github/Samples/gsoft/ff'
 alias lf='/Users/flash/vdisk/github/Samples/gsoft/lf'
+alias ld='/Users/flash/vdisk/github/Samples/gsoft/outputs/ld'
 
 # nvm 自動切換版本
 autoload -U add-zsh-hook
@@ -36,34 +37,6 @@ load-nvmrc() {
 
 add-zsh-hook chpwd load-nvmrc
 load-nvmrc
-
-# 目錄列表指令
-ld() {
-  setopt NULL_GLOB
-  local pattern=""
-  if [ $# -gt 0 ]; then
-    pattern="$*"
-  fi
-
-  dirs=(*/)
-  if [ ${#dirs[@]} -eq 0 ]; then
-    echo "\\033[37m當前目錄下沒有子目錄\\033[0m"
-    unsetopt NULL_GLOB
-    return
-  fi
-
-  for dir in */; do
-    if [ -n "$pattern" ] && ! echo "$dir" | grep -qE "$pattern"; then
-      continue
-    fi
-
-    local mtime=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$dir")
-    local size=$(du -sh "$dir" 2>/dev/null | cut -f1)
-    printf "\\033[01;37m%-40s\\033[0m %s  %s\\n" "$dir" "$mtime" "$size"
-  done
-
-  unsetopt NULL_GLOB
-}
 
 # Rider 快速開啟指令
 ro() { open -a "Rider" "${1:-.}"; }
