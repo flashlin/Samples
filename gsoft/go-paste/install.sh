@@ -2,7 +2,7 @@
 
 set -e
 
-ALIAS_LINE='alias paste=/Users/flash/vdisk/github/Samples/gsoft/go-paste/go-paste'
+ALIAS_LINE='alias paste=/Users/flash/vdisk/github/Samples/gsoft/outputs/go-paste'
 
 detect_shell_rc() {
     case "$(basename "$SHELL")" in
