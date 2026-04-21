@@ -34,7 +34,7 @@ type dirEntry struct {
 
 func main() {
 	if len(os.Args) == 1 {
-		entries := findMatches(".", "")
+		entries := listTopLevel(".")
 		sortEntries(entries, sortByTime)
 		printEntries(entries)
 		return
@@ -86,6 +86,31 @@ func printUsage() {
 	fmt.Println("  -d        Sort by modification time (newest first)")
 	fmt.Println("  -s        Sort by disk size (largest first)")
 	fmt.Println("  (default) Sort by mtime desc, then path length desc")
+}
+
+func listTopLevel(root string) []dirEntry {
+	items, err := os.ReadDir(root)
+	if err != nil {
+		return nil
+	}
+	var results []dirEntry
+	for _, d := range items {
+		if !d.IsDir() {
+			continue
+		}
+		showProgress(d.Name())
+		info, err := d.Info()
+		if err != nil {
+			continue
+		}
+		results = append(results, dirEntry{
+			path:    d.Name(),
+			modTime: info.ModTime(),
+			size:    dirSize(d.Name()),
+		})
+	}
+	clearProgress()
+	return results
 }
 
 func findMatches(root, pattern string) []dirEntry {
