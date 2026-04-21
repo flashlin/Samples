@@ -1,1 +1,1 @@
-cd src && go build -o ../fd . && cd .. && ./fd "$@"
+mkdir -p ../outputs && cd src && go build -o ../../outputs/fd . && cd .. && ../outputs/fd "$@"
