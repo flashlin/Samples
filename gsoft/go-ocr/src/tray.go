@@ -1,12 +1,16 @@
 package main
 
 import (
+	_ "embed"
 	"errors"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 )
+
+//go:embed icon.png
+var iconPNG []byte
 
 func SetupTray(a fyne.App, onOpenSettings func()) error {
 	desk, ok := a.(desktop.App)
@@ -23,5 +27,8 @@ func SetupTray(a fyne.App, onOpenSettings func()) error {
 }
 
 func trayIcon() fyne.Resource {
+	if len(iconPNG) > 0 {
+		return fyne.NewStaticResource("icon.png", iconPNG)
+	}
 	return theme.DocumentIcon()
 }
