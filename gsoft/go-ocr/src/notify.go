@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 )
@@ -12,7 +13,14 @@ func Notify(title, body string) {
 		escapeAppleScript(body),
 		escapeAppleScript(title),
 	)
-	exec.Command("osascript", "-e", script).Run()
+	cmd := exec.Command("osascript", "-e", script)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("Notify failed: %v output=%q title=%q body=%q",
+			err, string(output), title, body)
+		return
+	}
+	log.Printf("Notify sent: title=%q body=%q", title, truncate(body, 80))
 }
 
 func escapeAppleScript(s string) string {
