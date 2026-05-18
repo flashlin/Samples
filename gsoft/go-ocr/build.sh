@@ -120,10 +120,17 @@ cat > "$CONTENTS/Info.plist" <<EOF
 EOF
 
 #------------------------------------------------------------------------------
-# Step 5: ad-hoc codesign
+# Step 5: codesign (prefer stable self-signed cert if installed)
 #------------------------------------------------------------------------------
-echo "==> Ad-hoc codesigning"
-codesign --force --deep --sign - "$APP_PATH" 2>&1 | sed 's/^/    /'
+CERT_NAME="go-ocr-codesign"
+if security find-identity -p codesigning 2>/dev/null | grep -q "$CERT_NAME"; then
+    echo "==> Codesigning with stable identity '$CERT_NAME' (TCC perms persist)"
+    codesign --force --deep --sign "$CERT_NAME" "$APP_PATH" 2>&1 | sed 's/^/    /'
+else
+    echo "==> Ad-hoc codesigning (TCC perms reset on every rebuild)"
+    echo "    Run ./setup-cert.sh once for a stable identity."
+    codesign --force --deep --sign - "$APP_PATH" 2>&1 | sed 's/^/    /'
+fi
 
 #------------------------------------------------------------------------------
 # Step 6: report
