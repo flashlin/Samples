@@ -50,6 +50,8 @@ func RunScreenshotOCR() {
 		return
 	}
 	log.Printf("RunScreenshotOCR: got %d bytes from %s", len(data), path)
+	WriteClipboardImage(data)
+	log.Printf("RunScreenshotOCR: image written to clipboard")
 	runOCRAndNotify(data)
 }
 

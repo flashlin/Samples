@@ -23,3 +23,7 @@ func ReadClipboardImage() ([]byte, error) {
 func WriteClipboardText(s string) {
 	clipboard.Write(clipboard.FmtText, []byte(s))
 }
+
+func WriteClipboardImage(png []byte) {
+	clipboard.Write(clipboard.FmtImage, png)
+}
