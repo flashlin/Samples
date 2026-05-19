@@ -50,7 +50,7 @@ mkdir -p "$BUILD_DIR"
 (
     cd "$SRC_DIR"
     CGO_ENABLED=1 go build \
-        -ldflags "-s -w -X main.version=$VERSION" \
+        -ldflags "-s -w -X main.version=$VERSION -extldflags=-Wl,-no_warn_duplicate_libraries" \
         -o "$BIN_PATH" \
         .
 )
