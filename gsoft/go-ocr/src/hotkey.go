@@ -92,14 +92,23 @@ func ParseHotkey(s string) (HotkeyBinding, error) {
 type HotkeyManager struct {
 	screenshot   *hotkey.Hotkey
 	clipboard    *hotkey.Hotkey
+	translate    *hotkey.Hotkey
 	onScreenshot func()
 	onClipboard  func()
+	onTranslate  func()
 }
 
-func NewHotkeyManager(onScreenshot, onClipboard func()) *HotkeyManager {
+type HotkeyCallbacks struct {
+	OnScreenshot func()
+	OnClipboard  func()
+	OnTranslate  func()
+}
+
+func NewHotkeyManager(cb HotkeyCallbacks) *HotkeyManager {
 	return &HotkeyManager{
-		onScreenshot: onScreenshot,
-		onClipboard:  onClipboard,
+		onScreenshot: cb.OnScreenshot,
+		onClipboard:  cb.OnClipboard,
+		onTranslate:  cb.OnTranslate,
 	}
 }
 
@@ -114,6 +123,10 @@ func (m *HotkeyManager) RegisterAll(cfg *Config) error {
 	if err != nil {
 		return fmt.Errorf("clipboard hotkey: %w", err)
 	}
+	translate, err := ParseHotkey(cfg.TranslateHotkey)
+	if err != nil {
+		return fmt.Errorf("translate hotkey: %w", err)
+	}
 
 	m.screenshot, err = bindHotkey(screenshot, m.onScreenshot)
 	if err != nil {
@@ -122,6 +135,10 @@ func (m *HotkeyManager) RegisterAll(cfg *Config) error {
 	m.clipboard, err = bindHotkey(clip, m.onClipboard)
 	if err != nil {
 		return fmt.Errorf("register clipboard hotkey: %w", err)
+	}
+	m.translate, err = bindHotkey(translate, m.onTranslate)
+	if err != nil {
+		return fmt.Errorf("register translate hotkey: %w", err)
 	}
 	return nil
 }
@@ -149,6 +166,10 @@ func (m *HotkeyManager) Unregister() {
 	if m.clipboard != nil {
 		m.clipboard.Unregister()
 		m.clipboard = nil
+	}
+	if m.translate != nil {
+		m.translate.Unregister()
+		m.translate = nil
 	}
 }
 

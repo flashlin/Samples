@@ -23,12 +23,16 @@ func main() {
 	a := app.NewWithID("com.flash.go-ocr")
 	a.SetIcon(trayIcon())
 
-	hotkeys := NewHotkeyManager(RunScreenshotOCR, RunClipboardOCR)
+	hotkeys := NewHotkeyManager(HotkeyCallbacks{
+		OnScreenshot: RunScreenshotOCR,
+		OnClipboard:  RunClipboardOCR,
+		OnTranslate:  RunClipboardTranslate,
+	})
 	a.Lifecycle().SetOnStarted(func() {
 		log.Printf("Fyne lifecycle started, registering hotkeys")
 		registerHotkeysOrNotify(hotkeys, cfg)
-		log.Printf("hotkey registration finished (screenshot=%s, clipboard=%s)",
-			cfg.ScreenshotHotkey, cfg.ClipboardOCRHotkey)
+		log.Printf("hotkey registration finished (screenshot=%s, clipboard=%s, translate=%s)",
+			cfg.ScreenshotHotkey, cfg.ClipboardOCRHotkey, cfg.TranslateHotkey)
 	})
 
 	if err := SetupTray(a, openSettingsHandler(a, hotkeys)); err != nil {

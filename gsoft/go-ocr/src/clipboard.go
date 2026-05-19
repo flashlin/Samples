@@ -20,6 +20,11 @@ func ReadClipboardImage() ([]byte, error) {
 	return data, nil
 }
 
+func ReadClipboardText() string {
+	data := clipboard.Read(clipboard.FmtText)
+	return string(data)
+}
+
 func WriteClipboardText(s string) {
 	clipboard.Write(clipboard.FmtText, []byte(s))
 }

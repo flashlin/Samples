@@ -16,8 +16,9 @@ type OCRRequest struct {
 }
 
 type chatRequest struct {
-	Model    string        `json:"model"`
-	Messages []chatMessage `json:"messages"`
+	Model     string        `json:"model"`
+	Messages  []chatMessage `json:"messages"`
+	KeepAlive *int          `json:"keep_alive,omitempty"`
 }
 
 type chatMessage struct {
@@ -78,7 +79,7 @@ func buildOCRPayload(req OCRRequest) ([]byte, error) {
 }
 
 func postOCR(endpoint string, payload []byte) ([]byte, error) {
-	client := &http.Client{Timeout: 120 * time.Second}
+	client := &http.Client{Timeout: 300 * time.Second}
 	req, err := http.NewRequest("POST", endpoint, bytes.NewReader(payload))
 	if err != nil {
 		return nil, err

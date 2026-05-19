@@ -4,13 +4,27 @@ import (
 	"errors"
 	"log"
 	"os"
+	"strings"
 	"sync"
 )
 
 var (
 	currentConfig    *Config
 	currentConfigMu  sync.RWMutex
+	inFlightMu       sync.Mutex
 )
+
+func tryAcquireInFlight() bool {
+	return inFlightMu.TryLock()
+}
+
+func releaseInFlight() {
+	inFlightMu.Unlock()
+}
+
+func notifyBusy() {
+	Notify("go-ocr", "Busy, please wait for current request to finish")
+}
 
 func SetCurrentConfig(cfg *Config) {
 	currentConfigMu.Lock()
@@ -25,6 +39,12 @@ func GetCurrentConfig() *Config {
 }
 
 func RunScreenshotOCR() {
+	if !tryAcquireInFlight() {
+		log.Printf("RunScreenshotOCR: busy, skipping")
+		notifyBusy()
+		return
+	}
+	defer releaseInFlight()
 	log.Printf("RunScreenshotOCR: capturing region")
 	path, err := CaptureRegion()
 	if errors.Is(err, ErrScreenshotCancelled) {
@@ -57,6 +77,12 @@ func RunScreenshotOCR() {
 }
 
 func RunClipboardOCR() {
+	if !tryAcquireInFlight() {
+		log.Printf("RunClipboardOCR: busy, skipping")
+		notifyBusy()
+		return
+	}
+	defer releaseInFlight()
 	log.Printf("RunClipboardOCR: reading clipboard image")
 	data, err := ReadClipboardImage()
 	if err != nil {
@@ -66,6 +92,59 @@ func RunClipboardOCR() {
 	}
 	log.Printf("RunClipboardOCR: got %d bytes", len(data))
 	runOCRAndNotify(data)
+}
+
+func RunClipboardTranslate() {
+	if !tryAcquireInFlight() {
+		log.Printf("RunClipboardTranslate: busy, skipping")
+		notifyBusy()
+		return
+	}
+	defer releaseInFlight()
+	Notify("go-ocr", "Starting translation...")
+	text, err := resolveTranslateSourceText()
+	if err != nil {
+		log.Printf("RunClipboardTranslate: no source: %v", err)
+		Notify("Translate Failed", "No image or text in clipboard")
+		return
+	}
+	runTranslateAndNotify(text)
+}
+
+func resolveTranslateSourceText() (string, error) {
+	if text := strings.TrimSpace(ReadClipboardText()); text != "" {
+		log.Printf("RunClipboardTranslate: using clipboard text (%d chars)", len(text))
+		return text, nil
+	}
+	log.Printf("RunClipboardTranslate: no text, trying image")
+	data, err := ReadClipboardImage()
+	if err != nil {
+		return "", err
+	}
+	log.Printf("RunClipboardTranslate: got %d image bytes, running OCR", len(data))
+	cfg := GetCurrentConfig()
+	ocrText, err := RunOCR(OCRRequest{Config: cfg, PNG: data})
+	if err != nil {
+		notifyFailure("OCR Failed", err)
+		return "", err
+	}
+	WriteClipboardText(ocrText)
+	Notify("go-ocr", "OCR done, translating...")
+	return ocrText, nil
+}
+
+func runTranslateAndNotify(source string) {
+	cfg := GetCurrentConfig()
+	log.Printf("Translate: POST %s model=%s chars=%d", cfg.OCREndpoint, cfg.TranslateModel, len(source))
+	translated, err := RunTranslate(cfg, source)
+	if err != nil {
+		log.Printf("Translate: failed: %v", err)
+		notifyFailure("Translate Failed", err)
+		return
+	}
+	log.Printf("Translate: got %d chars", len(translated))
+	WriteClipboardText(translated)
+	Notify("Translate Success", firstLine(translated))
 }
 
 func runOCRAndNotify(png []byte) {

@@ -31,26 +31,38 @@ func OpenSettingsWindow(deps SettingsWindowDeps) {
 }
 
 type settingsFields struct {
-	endpoint  *widget.Entry
-	model     *widget.Entry
-	prompt    *widget.Entry
-	screenHK  *widget.Entry
-	clipHK    *widget.Entry
+	endpoint        *widget.Entry
+	model           *widget.Entry
+	prompt          *widget.Entry
+	translateModel  *widget.Entry
+	translatePrompt *widget.Entry
+	screenHK        *widget.Entry
+	clipHK          *widget.Entry
+	translateHK     *widget.Entry
 }
 
 func newSettingsFields(cfg *Config) *settingsFields {
-	prompt := widget.NewMultiLineEntry()
-	prompt.SetText(cfg.OCRPrompt)
-	prompt.Wrapping = fyne.TextWrapWord
-	prompt.SetMinRowsVisible(4)
+	prompt := newMultiLineEntry(cfg.OCRPrompt)
+	translatePrompt := newMultiLineEntry(cfg.TranslatePrompt)
 
 	return &settingsFields{
-		endpoint: entryWithValue(cfg.OCREndpoint),
-		model:    entryWithValue(cfg.OCRModel),
-		prompt:   prompt,
-		screenHK: entryWithValue(cfg.ScreenshotHotkey),
-		clipHK:   entryWithValue(cfg.ClipboardOCRHotkey),
+		endpoint:        entryWithValue(cfg.OCREndpoint),
+		model:           entryWithValue(cfg.OCRModel),
+		prompt:          prompt,
+		translateModel:  entryWithValue(cfg.TranslateModel),
+		translatePrompt: translatePrompt,
+		screenHK:        entryWithValue(cfg.ScreenshotHotkey),
+		clipHK:          entryWithValue(cfg.ClipboardOCRHotkey),
+		translateHK:     entryWithValue(cfg.TranslateHotkey),
 	}
+}
+
+func newMultiLineEntry(value string) *widget.Entry {
+	e := widget.NewMultiLineEntry()
+	e.SetText(value)
+	e.Wrapping = fyne.TextWrapWord
+	e.SetMinRowsVisible(4)
+	return e
 }
 
 func entryWithValue(value string) *widget.Entry {
@@ -61,6 +73,7 @@ func entryWithValue(value string) *widget.Entry {
 
 func buildSettingsForm(f *settingsFields) fyne.CanvasObject {
 	hkHint := "Format: modifier(s) + key, e.g. shift+cmd+t, ctrl+cmd+t"
+	tpHint := "Use {target_lang} placeholder; replaced with English or Traditional Chinese (zh-TW)"
 	return container.NewVBox(
 		widget.NewLabel("OCR Endpoint"),
 		f.endpoint,
@@ -68,10 +81,17 @@ func buildSettingsForm(f *settingsFields) fyne.CanvasObject {
 		f.model,
 		widget.NewLabel("OCR Prompt"),
 		f.prompt,
+		widget.NewLabel("Translate Model"),
+		f.translateModel,
+		widget.NewLabel("Translate Prompt"),
+		f.translatePrompt,
+		widget.NewLabelWithStyle(tpHint, fyne.TextAlignLeading, fyne.TextStyle{Italic: true}),
 		widget.NewLabel("Screenshot Hotkey"),
 		f.screenHK,
 		widget.NewLabel("Clipboard OCR Hotkey"),
 		f.clipHK,
+		widget.NewLabel("Translate Hotkey"),
+		f.translateHK,
 		widget.NewLabelWithStyle(hkHint, fyne.TextAlignLeading, fyne.TextStyle{Italic: true}),
 	)
 }
@@ -88,8 +108,11 @@ func resetToDefaults(f *settingsFields) {
 	f.endpoint.SetText(def.OCREndpoint)
 	f.model.SetText(def.OCRModel)
 	f.prompt.SetText(def.OCRPrompt)
+	f.translateModel.SetText(def.TranslateModel)
+	f.translatePrompt.SetText(def.TranslatePrompt)
 	f.screenHK.SetText(def.ScreenshotHotkey)
 	f.clipHK.SetText(def.ClipboardOCRHotkey)
+	f.translateHK.SetText(def.TranslateHotkey)
 }
 
 func trySave(win fyne.Window, f *settingsFields, deps SettingsWindowDeps) {
@@ -97,8 +120,11 @@ func trySave(win fyne.Window, f *settingsFields, deps SettingsWindowDeps) {
 		OCREndpoint:        f.endpoint.Text,
 		OCRModel:           f.model.Text,
 		OCRPrompt:          f.prompt.Text,
+		TranslateModel:     f.translateModel.Text,
+		TranslatePrompt:    f.translatePrompt.Text,
 		ScreenshotHotkey:   f.screenHK.Text,
 		ClipboardOCRHotkey: f.clipHK.Text,
+		TranslateHotkey:    f.translateHK.Text,
 	}
 	if err := validateConfig(newCfg); err != nil {
 		dialog.ShowError(err, win)
@@ -117,6 +143,9 @@ func validateConfig(cfg *Config) error {
 		return err
 	}
 	if _, err := ParseHotkey(cfg.ClipboardOCRHotkey); err != nil {
+		return err
+	}
+	if _, err := ParseHotkey(cfg.TranslateHotkey); err != nil {
 		return err
 	}
 	return nil

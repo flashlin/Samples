@@ -11,8 +11,11 @@ type Config struct {
 	OCREndpoint        string `json:"ocr_endpoint"`
 	OCRModel           string `json:"ocr_model"`
 	OCRPrompt          string `json:"ocr_prompt"`
+	TranslateModel     string `json:"translate_model"`
+	TranslatePrompt    string `json:"translate_prompt"`
 	ScreenshotHotkey   string `json:"screenshot_hotkey"`
 	ClipboardOCRHotkey string `json:"clipboard_ocr_hotkey"`
+	TranslateHotkey    string `json:"translate_hotkey"`
 }
 
 func DefaultConfig() Config {
@@ -20,8 +23,11 @@ func DefaultConfig() Config {
 		OCREndpoint:        "http://127.0.0.1:11434/v1/chat/completions",
 		OCRModel:           "English-Document-OCR-Qwen3.5-0.8B",
 		OCRPrompt:          "Extract all visible text from this document image and return only the transcription in reading order using a markdown-first format. Use HTML only for tables. Use LaTeX only for formulas.",
+		TranslateModel:     "sun_leaf/HY-MT:1.8b",
+		TranslatePrompt:    "Translate the following text to {target_lang}. Output ONLY the translation, with no explanation, no quotes, no markdown, no language label.",
 		ScreenshotHotkey:   "shift+cmd+t",
 		ClipboardOCRHotkey: "ctrl+cmd+t",
+		TranslateHotkey:    "shift+cmd+r",
 	}
 }
 
@@ -82,5 +88,14 @@ func applyConfigDefaults(cfg *Config) {
 	}
 	if cfg.ClipboardOCRHotkey == "" {
 		cfg.ClipboardOCRHotkey = def.ClipboardOCRHotkey
+	}
+	if cfg.TranslateModel == "" {
+		cfg.TranslateModel = def.TranslateModel
+	}
+	if cfg.TranslatePrompt == "" {
+		cfg.TranslatePrompt = def.TranslatePrompt
+	}
+	if cfg.TranslateHotkey == "" {
+		cfg.TranslateHotkey = def.TranslateHotkey
 	}
 }
