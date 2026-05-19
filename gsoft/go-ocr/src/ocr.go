@@ -61,6 +61,7 @@ func RunOCR(req OCRRequest) (string, error) {
 
 func buildOCRPayload(req OCRRequest) ([]byte, error) {
 	encoded := base64.StdEncoding.EncodeToString(req.PNG)
+	keepAliveForever := -1
 	payload := chatRequest{
 		Model: req.Config.OCRModel,
 		Messages: []chatMessage{
@@ -74,6 +75,7 @@ func buildOCRPayload(req OCRRequest) ([]byte, error) {
 				},
 			},
 		},
+		KeepAlive: &keepAliveForever,
 	}
 	return json.Marshal(payload)
 }
