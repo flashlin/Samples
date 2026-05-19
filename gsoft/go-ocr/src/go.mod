@@ -6,6 +6,7 @@ require (
 	fyne.io/fyne/v2 v2.5.2
 	golang.design/x/clipboard v0.7.0
 	golang.design/x/hotkey v0.4.1
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
 require (

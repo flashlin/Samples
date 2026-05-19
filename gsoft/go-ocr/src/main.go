@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var version = "dev"
@@ -44,12 +45,12 @@ func setupFileLogging() {
 	}
 	logDir := filepath.Join(home, "Library", "Logs")
 	os.MkdirAll(logDir, 0o755)
-	f, err := os.OpenFile(filepath.Join(logDir, "go-ocr.log"),
-		os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
-	if err != nil {
-		return
-	}
-	log.SetOutput(f)
+	log.SetOutput(&lumberjack.Logger{
+		Filename:   filepath.Join(logDir, "go-ocr.log"),
+		MaxSize:    100,
+		MaxBackups: 3,
+		Compress:   true,
+	})
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 }
 
