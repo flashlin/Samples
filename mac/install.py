@@ -6,6 +6,7 @@ templates_content = '''
 # ===== 自定義函數區塊開始 =====
 
 alias cc='/Users/flash/vdisk/github/qa-pair/my-tools/claude-code/cc.sh'
+alias co='/Users/flash/vdisk/github/qa-pair/my-tools/claude-code/my-codex/co.sh'
 
 # dk alias - 執行自定義 dk 腳本
 alias dk='/Users/flash/vdisk/github/Samples/gsoft/dk'
