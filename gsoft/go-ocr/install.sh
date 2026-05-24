@@ -5,9 +5,9 @@ set -euo pipefail
 # go-ocr install script
 #
 # Usage:
-#   ./install.sh              build + install to /Applications
-#   ./install.sh --autostart  also register LaunchAgent (start at login)
-#   ./install.sh --uninstall  remove from /Applications and LaunchAgent
+#   ./install.sh                 build + install + register LaunchAgent (default)
+#   ./install.sh --no-autostart  build + install only, skip LaunchAgent
+#   ./install.sh --uninstall     remove from /Applications and LaunchAgent
 #==============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,12 +20,13 @@ INSTALL_DEST="/Applications/${APP_NAME}.app"
 LAUNCH_AGENT_DIR="$HOME/Library/LaunchAgents"
 LAUNCH_AGENT_PLIST="$LAUNCH_AGENT_DIR/${BUNDLE_ID}.plist"
 
-MODE="install"
+MODE="autostart"
 if [[ $# -gt 0 ]]; then
     case "$1" in
-        --autostart)  MODE="autostart" ;;
-        --uninstall)  MODE="uninstall" ;;
-        *) echo "Usage: $0 [--autostart | --uninstall]" >&2; exit 1 ;;
+        --autostart)     MODE="autostart" ;;
+        --no-autostart)  MODE="install" ;;
+        --uninstall)     MODE="uninstall" ;;
+        *) echo "Usage: $0 [--no-autostart | --uninstall]" >&2; exit 1 ;;
     esac
 fi
 
@@ -110,7 +111,8 @@ case "$MODE" in
         echo "==> Launching"
         open "$INSTALL_DEST"
         echo ""
-        echo "Done. To also start at login: ./install.sh --autostart"
-        echo "      To uninstall:           ./install.sh --uninstall"
+        echo "Done. Installed without autostart."
+        echo "      To enable autostart: ./install.sh"
+        echo "      To uninstall:        ./install.sh --uninstall"
         ;;
 esac
