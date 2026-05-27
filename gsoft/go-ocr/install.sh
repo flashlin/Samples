@@ -67,6 +67,12 @@ install_app() {
 
 #------------------------------------------------------------------------------
 register_autostart() {
+    if [[ -f "$LAUNCH_AGENT_PLIST" ]] && launchctl list 2>/dev/null | grep -q "^[0-9-]*[[:space:]][0-9-]*[[:space:]]${BUNDLE_ID}$"; then
+        echo "==> LaunchAgent already exists, skip"
+        echo "    $LAUNCH_AGENT_PLIST"
+        return
+    fi
+
     mkdir -p "$LAUNCH_AGENT_DIR"
     cat > "$LAUNCH_AGENT_PLIST" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
