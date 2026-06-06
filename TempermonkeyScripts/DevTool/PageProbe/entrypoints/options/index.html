@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PageProbe Settings</title>
+    <style>
+      .status-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #9e9e9e;
+      }
+      .status-dot.connected {
+        background: #2e7d32;
+      }
+      .status-dot.connecting {
+        background: #f9a825;
+      }
+      .status-dot.disconnected {
+        background: #c62828;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>PageProbe Settings</h1>
+      <form id="connection-form">
+        <label for="gateway-url">Gateway URL</label>
+        <input
+          id="gateway-url"
+          name="gateway-url"
+          type="url"
+          required
+          spellcheck="false"
+        />
+
+        <label for="token">Token</label>
+        <input
+          id="token"
+          name="token"
+          type="password"
+          required
+          autocomplete="off"
+          spellcheck="false"
+        />
+
+        <label for="allowed-origins">Allowed origins (one per line, only these are accessible to the LLM)</label>
+        <textarea
+          id="allowed-origins"
+          name="allowed-origins"
+          required
+          spellcheck="false"
+          placeholder="https://example.com"
+        ></textarea>
+
+        <label>
+          <input id="debug-evaluate-enabled" type="checkbox" />
+          Enable debug evaluation
+        </label>
+
+        <div>
+          <button type="submit">Save</button>
+        </div>
+      </form>
+
+      <section aria-labelledby="connection-status-label">
+        <h2 id="connection-status-label">Connection status</h2>
+        <div class="status-row">
+          <span id="status-dot" class="status-dot"></span>
+          <output id="connection-status" aria-live="polite">Loading...</output>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

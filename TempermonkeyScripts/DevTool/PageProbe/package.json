@@ -1,0 +1,19 @@
+{
+  "name": "@page-probe/extension",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "wxt build",
+    "type-check": "tsc --noEmit",
+    "test": "bun test",
+    "dev": "wxt"
+  },
+  "dependencies": {
+    "@page-probe/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.43",
+    "wxt": "^0.20.0"
+  }
+}
