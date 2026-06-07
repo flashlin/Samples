@@ -1,7 +1,0 @@
-node_modules/
-dist/
-coverage/
-.wxt/
-.output/
-PageProbeGateway/.data/
-PageProbe/.env.local
