@@ -185,6 +185,33 @@ agent-browser 原始碼佐證:`cli/src/native/snapshot.rs` 用 `Accessibility.ge
 - ref 綁 `snapshotId`,導航後失效。
 - `browser_snapshot` 的 `includeIframes` / `includeCursorInteractive` 已在 schema 保留,但 service 端尚未實作。
 
+## 隱藏 Chrome 的 debugger 橫幅
+
+PageProbe 透過 `chrome.debugger` API attach 分頁,Chrome 會強制顯示
+「**"PageProbe" 已開始為這個瀏覽器偵錯**」的黃色橫幅。這是 Chrome 的安全設計,
+**擴充端無法用程式碼移除**,只能用啟動旗標 `--silent-debugger-extension-api` 隱藏。
+
+macOS:
+
+```bash
+# 1. 先完全退出 Chrome(Cmd+Q,不是只關視窗,否則旗標不生效)
+# 2. 用旗標啟動(沿用既有 profile)
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --silent-debugger-extension-api
+```
+
+省事可加 alias 到 `~/.zshrc`:
+
+```bash
+alias chrome-quiet='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --silent-debugger-extension-api'
+```
+
+注意:
+
+- 旗標對**所有**使用 debugger API 的擴充生效,等同主動同意信任它們 —— 自用工具沒問題,
+  勿在不信任的擴充環境長期掛此旗標。
+- 每次啟動都要帶旗標才有效。
+- 不影響任何功能,只隱藏橫幅。
+
 ## 直接用 curl 測 gateway
 
 ```bash
