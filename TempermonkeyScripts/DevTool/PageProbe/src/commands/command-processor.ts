@@ -26,6 +26,9 @@ export class CommandProcessor {
       if (tabId !== undefined) {
         await this.permissionService.assertTabAllowed(tabId)
       }
+      if (command.method === "page.navigate") {
+        await this.permissionService.assertOriginAllowed(readNavigateTargetOrigin(command.params))
+      }
       const handler = this.handlerRegistry.require(command.method)
       const result = await handler(command.params as never, command.clientId)
       return {
@@ -50,6 +53,13 @@ export class CommandProcessor {
       }
     }
   }
+}
+
+function readNavigateTargetOrigin(params: unknown): string {
+  if (typeof params === "object" && params !== null && "url" in params && typeof params.url === "string") {
+    return new URL(params.url).origin
+  }
+  throw new BrowserProtocolError("INVALID_PARAMS", "Navigation requires a target url")
 }
 
 function readTabId(params: unknown): number | undefined {

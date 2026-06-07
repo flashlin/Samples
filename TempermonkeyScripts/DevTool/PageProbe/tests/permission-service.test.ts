@@ -66,6 +66,33 @@ describe("PermissionService", () => {
       code: "UNSUPPORTED_PAGE"
     })
   })
+
+  it("allows a navigation target origin in the allowlist", async () => {
+    installChromeMock(true)
+    const service = new PermissionService(createConfigStore(["https://example.com"]))
+
+    await expect(service.assertOriginAllowed("https://example.com")).resolves.toBeUndefined()
+  })
+
+  it("rejects a navigation target origin missing from the allowlist", async () => {
+    installChromeMock(true)
+    const service = new PermissionService(createConfigStore(["https://example.com"]))
+
+    await expect(service.assertOriginAllowed("https://evil.example")).rejects.toMatchObject({
+      code: "PERMISSION_DENIED",
+      message: "Origin is not in the runtime allowlist: https://evil.example"
+    })
+  })
+
+  it("rejects a navigation target when Chrome host permission is missing", async () => {
+    installChromeMock(false)
+    const service = new PermissionService(createConfigStore(["https://example.com"]))
+
+    await expect(service.assertOriginAllowed("https://example.com")).rejects.toMatchObject({
+      code: "PERMISSION_DENIED",
+      message: "Website access is required for https://example.com/*"
+    })
+  })
 })
 
 function createConfigStore(

@@ -40,6 +40,19 @@ export class PageService {
     return { html: html.slice(0, maxBytes), truncated: true }
   }
 
+  async navigate(tabId: number, url: string) {
+    await this.sessionManager.require(tabId)
+    await this.cdpClient.send(this.sessionManager.target(tabId), "Page.navigate", { url })
+    return { success: true as const }
+  }
+
+  async reload(tabId: number, ignoreCache?: boolean) {
+    await this.sessionManager.require(tabId)
+    const params = ignoreCache === undefined ? {} : { ignoreCache }
+    await this.cdpClient.send(this.sessionManager.target(tabId), "Page.reload", params)
+    return { success: true as const }
+  }
+
   private async evaluateString(tabId: number, expression: string): Promise<string> {
     await this.sessionManager.require(tabId)
     const response = await this.cdpClient.send<EvaluateResponse>(

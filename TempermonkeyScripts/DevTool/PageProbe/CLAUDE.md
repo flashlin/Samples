@@ -4,8 +4,9 @@ MV3 擴充,透過 CDP 操作使用者**既有的分頁**;LLM 經 PageProbeGatewa
 
 ## 操作工具時的原則
 
-- **沒有 navigate**:只能讀 / 操作已開啟的分頁。起手式一律先 `browser_list_tabs` 或
-  `browser_get_active_tab` 取得當下 `tabId`(動態配發,不可寫死)。
+- **不開新分頁**:可用 `browser_navigate` / `browser_reload` 在既有分頁內導航,但不會自己開新分頁、
+  無 back/forward。起手式一律先 `browser_list_tabs` 或 `browser_get_active_tab` 取得當下 `tabId`
+  (動態配發,不可寫死)。`browser_navigate` 的目標 origin 也須在白名單。
 - **snapshot 優先**:要內容預設用 `browser_snapshot`(CDP accessibility tree,含 `@e1` refs,
   table 以 row/cell 角色呈現)。只在「純文字」用 `browser_get_page_text`、
   「要 href / 完整 HTML」用 `browser_get_page_html`。三者都吃 `selector`。

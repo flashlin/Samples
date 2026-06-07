@@ -5,6 +5,8 @@ export const browserMethods = [
   "page.getMetadata",
   "page.getText",
   "page.getHtml",
+  "page.navigate",
+  "page.reload",
   "element.click",
   "element.fill",
   "element.type",

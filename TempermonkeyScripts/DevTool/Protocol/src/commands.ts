@@ -35,6 +35,14 @@ export const pageHtmlParamsSchema = z.object({
   maxBytes: z.number().int().positive().max(5_000_000).optional(),
   sanitize: z.boolean().optional()
 })
+export const pageNavigateParamsSchema = z.object({
+  tabId: tabIdSchema,
+  url: z.url()
+})
+export const pageReloadParamsSchema = z.object({
+  tabId: tabIdSchema,
+  ignoreCache: z.boolean().optional()
+})
 export const elementClickParamsSchema = refTargetSchema
 export const elementFillParamsSchema = refTargetSchema.extend({ value: z.string() })
 export const elementTypeParamsSchema = refTargetSchema.extend({ text: z.string() })
@@ -67,6 +75,8 @@ export const browserCommandParamSchemas = {
   "page.getMetadata": pageMetadataParamsSchema,
   "page.getText": pageTextParamsSchema,
   "page.getHtml": pageHtmlParamsSchema,
+  "page.navigate": pageNavigateParamsSchema,
+  "page.reload": pageReloadParamsSchema,
   "element.click": elementClickParamsSchema,
   "element.fill": elementFillParamsSchema,
   "element.type": elementTypeParamsSchema,

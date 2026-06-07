@@ -100,6 +100,27 @@ describe("registerBrowserTools", () => {
         value: "PageProbe",
         type: "string"
       }
+    },
+    {
+      tool: "browser_navigate",
+      method: "page.navigate",
+      params: {
+        tabId: 7,
+        url: "https://example.com/"
+      },
+      result: {
+        success: true
+      }
+    },
+    {
+      tool: "browser_reload",
+      method: "page.reload",
+      params: {
+        tabId: 7
+      },
+      result: {
+        success: true
+      }
     }
   ] as const)("maps $tool to $method and returns JSON text", async ({
     tool,
@@ -150,6 +171,8 @@ describe("registerBrowserTools", () => {
       "browser_get_page_metadata",
       "browser_get_page_text",
       "browser_get_page_html",
+      "browser_navigate",
+      "browser_reload",
       "browser_click",
       "browser_fill",
       "browser_type",

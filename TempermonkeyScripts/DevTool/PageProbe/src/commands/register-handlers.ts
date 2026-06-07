@@ -36,6 +36,14 @@ export function registerHandlers(registry: HandlerRegistry, services: HandlerSer
     const input = params as BrowserCommandParams["page.getHtml"]
     return services.page.getHtml(input.tabId, input.selector, input.maxBytes, input.sanitize)
   })
+  registry.register("page.navigate", (params) => {
+    const input = params as BrowserCommandParams["page.navigate"]
+    return services.page.navigate(input.tabId, input.url)
+  })
+  registry.register("page.reload", (params) => {
+    const input = params as BrowserCommandParams["page.reload"]
+    return services.page.reload(input.tabId, input.ignoreCache)
+  })
   registry.register("element.click", (params) => {
     return services.interaction.click(params as BrowserCommandParams["element.click"])
   })

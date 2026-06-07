@@ -91,6 +91,8 @@ export const browserCommandResultSchemas = {
   "page.getMetadata": pageMetadataSchema,
   "page.getText": textResultSchema,
   "page.getHtml": htmlResultSchema,
+  "page.navigate": actionResultSchema,
+  "page.reload": actionResultSchema,
   "element.click": actionResultSchema,
   "element.fill": actionResultSchema,
   "element.type": actionResultSchema,

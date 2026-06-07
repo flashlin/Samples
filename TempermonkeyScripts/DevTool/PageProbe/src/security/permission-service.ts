@@ -23,7 +23,11 @@ export class PermissionService {
       throw new BrowserProtocolError("UNSUPPORTED_PAGE", "This page cannot be controlled")
     }
 
-    const origin = new URL(tab.url).origin
+    await this.assertOriginAllowed(new URL(tab.url).origin)
+    return tab
+  }
+
+  async assertOriginAllowed(origin: string): Promise<void> {
     const config = await this.configStore.load()
     if (!config.allowedOrigins.includes(origin)) {
       throw new BrowserProtocolError("PERMISSION_DENIED", `Origin is not in the runtime allowlist: ${origin}`)
@@ -34,7 +38,6 @@ export class PermissionService {
     if (!allowed) {
       throw new BrowserProtocolError("PERMISSION_DENIED", `Website access is required for ${originPattern}`)
     }
-    return tab
   }
 }
 

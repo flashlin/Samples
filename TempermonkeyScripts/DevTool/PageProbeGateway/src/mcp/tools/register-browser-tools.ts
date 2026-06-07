@@ -12,6 +12,8 @@ import {
   networkStartCaptureParamsSchema,
   pageHtmlParamsSchema,
   pageMetadataParamsSchema,
+  pageNavigateParamsSchema,
+  pageReloadParamsSchema,
   pageTextParamsSchema,
   policyListAllowedOriginsParamsSchema,
   snapshotRequestSchema,
@@ -65,6 +67,18 @@ const browserToolDefinitions: BrowserToolDefinition[] = [
     description: "Get page HTML",
     method: "page.getHtml",
     inputSchema: pageHtmlParamsSchema
+  },
+  {
+    name: "browser_navigate",
+    description: "Navigate an existing tab to a URL (target origin must be in the runtime allowlist)",
+    method: "page.navigate",
+    inputSchema: pageNavigateParamsSchema
+  },
+  {
+    name: "browser_reload",
+    description: "Reload an existing tab",
+    method: "page.reload",
+    inputSchema: pageReloadParamsSchema
   },
   {
     name: "browser_click",
