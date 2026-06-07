@@ -43,6 +43,8 @@ export const pageReloadParamsSchema = z.object({
   tabId: tabIdSchema,
   ignoreCache: z.boolean().optional()
 })
+export const pageGoBackParamsSchema = z.object({ tabId: tabIdSchema })
+export const pageGoForwardParamsSchema = z.object({ tabId: tabIdSchema })
 export const elementClickParamsSchema = refTargetSchema
 export const elementFillParamsSchema = refTargetSchema.extend({ value: z.string() })
 export const elementTypeParamsSchema = refTargetSchema.extend({ text: z.string() })
@@ -77,6 +79,8 @@ export const browserCommandParamSchemas = {
   "page.getHtml": pageHtmlParamsSchema,
   "page.navigate": pageNavigateParamsSchema,
   "page.reload": pageReloadParamsSchema,
+  "page.goBack": pageGoBackParamsSchema,
+  "page.goForward": pageGoForwardParamsSchema,
   "element.click": elementClickParamsSchema,
   "element.fill": elementFillParamsSchema,
   "element.type": elementTypeParamsSchema,

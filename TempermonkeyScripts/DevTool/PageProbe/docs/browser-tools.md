@@ -4,8 +4,9 @@ PageProbe 是 MV3 擴充,透過 Chrome DevTools Protocol (CDP) 操作**使用者
 LLM 經由 PageProbeGateway 的 MCP 介面呼叫這些工具。
 
 > 重點認知:PageProbe **不自己啟動 / 管理瀏覽器、不開新分頁**,只附著在使用者既有的 Chrome。
-> 可用 `browser_navigate` / `browser_reload` 在**既有分頁**內導航,但 `browser_navigate` 的
-> 目標 origin 必須在白名單(見「權限模型」)。任何操作的起手式都是先 `browser_list_tabs` 或
+> 可用 `browser_navigate` / `browser_reload` / `browser_go_back` / `browser_go_forward` 在**既有分頁**
+> 內導航,但 `browser_navigate` 的目標 origin 必須在白名單(見「權限模型」)。
+> 任何操作的起手式都是先 `browser_list_tabs` 或
 > `browser_get_active_tab` 取得當下的 `tabId`(`tabId` 來自 Chrome `chrome.tabs` API,
 > 動態配發,關掉重開會變,不能寫死)。
 
@@ -65,8 +66,11 @@ Chrome 既有分頁
 
 **導航的雙重檢查**(同一份白名單,不是兩份):`browser_navigate` 除了分頁**當前 origin**
 要在白名單(操作既有分頁的前提),**目標 URL 的 origin** 也必須在白名單 —— 否則能把已授權
-分頁導去任意網站。同站導航時兩者相同;跨站導航時目標 origin 會被獨立把關。`browser_reload`
-不換 URL,只走當前 origin 檢查。
+分頁導去任意網站。同站導航時兩者相同;跨站導航時目標 origin 會被獨立把關。
+
+`browser_reload` / `browser_go_back` / `browser_go_forward` **不接受 LLM 指定的 URL** —— reload
+不換頁,back/forward 只在使用者既有瀏覽歷史內移動(目標必然是使用者自己造訪過的頁面,非 LLM
+指定)—— 因此只走當前分頁 origin 檢查,不額外驗目標。
 
 ## 取內容的三種方式 —— 怎麼選
 
@@ -120,7 +124,7 @@ UMAX 16GB DDR5-4800\t$1,039\t$4,750\t暴漲約 4.5 倍
 
 保留 `<table><tr><td>` 完整結構與屬性(含 `colspan`、連結 href),需要精準還原時用。
 
-## 工具清單(19 個)
+## 工具清單(21 個)
 
 > **精確參數 / 預設值 / 上限以 `Protocol/src/commands.ts` 的 Zod schema 為單一真相來源**,
 > 此處不重列以免過時。透過 MCP 呼叫時,`tools/list` 回應本來就帶每個工具的 `inputSchema`。
@@ -139,6 +143,8 @@ UMAX 16GB DDR5-4800\t$1,039\t$4,750\t暴漲約 4.5 倍
 **導航**(在既有分頁內,不開新分頁)
 - `browser_navigate` — 將既有分頁導向新 URL(CDP `Page.navigate`);**目標 origin 也須在白名單**
 - `browser_reload` — 重新整理分頁(CDP `Page.reload`,可帶 `ignoreCache`)
+- `browser_go_back` — 在分頁瀏覽歷史中後退(`history.back()`)
+- `browser_go_forward` — 在分頁瀏覽歷史中前進(`history.forward()`)
 
 **互動**(需先 snapshot 取得 ref;ref 綁 `snapshotId`,導航後失效)
 - `browser_click` / `browser_fill` / `browser_type` / `browser_get_element_text`
@@ -165,15 +171,15 @@ UMAX 16GB DDR5-4800\t$1,039\t$4,750\t暴漲約 4.5 倍
 | `click @ref` | `browser_click` | CDP backendNodeId |
 | `open` / `goto` / `navigate <url>` | `browser_navigate` | CDP `Page.navigate` |
 | `reload` | `browser_reload` | CDP `Page.reload` |
-| `back` / `forward` | (未提供) | agent-browser 用 `history.back/forward` |
+| `back` / `forward` | `browser_go_back` / `browser_go_forward` | `history.back()` / `history.forward()` |
 
 agent-browser 原始碼佐證:`cli/src/native/snapshot.rs` 用 `Accessibility.getFullAXTree`;
 `cli/src/native/element.rs` 的 `get text` 是 `this.innerText || this.textContent`。
 
 ## 已知限制
 
-- **不開新分頁、無前進 / 後退**:可在既有分頁 `browser_navigate` / `browser_reload`,
-  但不會自己開新分頁,也未提供 back / forward。
+- **不開新分頁**:可在既有分頁 `browser_navigate` / `browser_reload` / `browser_go_back` /
+  `browser_go_forward`,但不會自己開新分頁。
 - **白名單**:origin 不在執行期白名單會 `PERMISSION_DENIED`;`browser_navigate` 連目標 origin 也要過白名單。
 - `innerText` **不含**:連結 href、圖片 alt、`display:none` 隱藏元素、跨 iframe 內容、尚未 lazy-load 的區塊。
 - ref 綁 `snapshotId`,導航後失效。

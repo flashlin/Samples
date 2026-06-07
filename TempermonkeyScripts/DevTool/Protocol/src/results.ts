@@ -93,6 +93,8 @@ export const browserCommandResultSchemas = {
   "page.getHtml": htmlResultSchema,
   "page.navigate": actionResultSchema,
   "page.reload": actionResultSchema,
+  "page.goBack": actionResultSchema,
+  "page.goForward": actionResultSchema,
   "element.click": actionResultSchema,
   "element.fill": actionResultSchema,
   "element.type": actionResultSchema,

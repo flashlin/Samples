@@ -10,6 +10,8 @@ import {
   networkGetResponseBodyParamsSchema,
   networkListRequestsParamsSchema,
   networkStartCaptureParamsSchema,
+  pageGoBackParamsSchema,
+  pageGoForwardParamsSchema,
   pageHtmlParamsSchema,
   pageMetadataParamsSchema,
   pageNavigateParamsSchema,
@@ -79,6 +81,18 @@ const browserToolDefinitions: BrowserToolDefinition[] = [
     description: "Reload an existing tab",
     method: "page.reload",
     inputSchema: pageReloadParamsSchema
+  },
+  {
+    name: "browser_go_back",
+    description: "Go back in an existing tab's session history",
+    method: "page.goBack",
+    inputSchema: pageGoBackParamsSchema
+  },
+  {
+    name: "browser_go_forward",
+    description: "Go forward in an existing tab's session history",
+    method: "page.goForward",
+    inputSchema: pageGoForwardParamsSchema
   },
   {
     name: "browser_click",

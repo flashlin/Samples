@@ -55,12 +55,14 @@ describe("MCP session lifecycle", () => {
     }, sessionId!))
     const toolsMessage = await readSseData(toolsResponse)
     const tools = readTools(toolsMessage)
-    expect(tools).toHaveLength(19)
+    expect(tools).toHaveLength(21)
     expect(tools.map(({ name }) => name)).toContain("browser_snapshot")
     expect(tools.map(({ name }) => name)).toContain("browser_evaluate")
     expect(tools.map(({ name }) => name)).toContain("browser_list_allowed_origins")
     expect(tools.map(({ name }) => name)).toContain("browser_navigate")
     expect(tools.map(({ name }) => name)).toContain("browser_reload")
+    expect(tools.map(({ name }) => name)).toContain("browser_go_back")
+    expect(tools.map(({ name }) => name)).toContain("browser_go_forward")
 
     const deleteResponse = await store.handle(new Request("http://127.0.0.1:17890/mcp", {
       method: "DELETE",

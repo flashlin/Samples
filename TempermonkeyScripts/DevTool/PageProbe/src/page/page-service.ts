@@ -53,6 +53,20 @@ export class PageService {
     return { success: true as const }
   }
 
+  async goBack(tabId: number) {
+    return this.runHistoryNavigation(tabId, "history.back()")
+  }
+
+  async goForward(tabId: number) {
+    return this.runHistoryNavigation(tabId, "history.forward()")
+  }
+
+  private async runHistoryNavigation(tabId: number, expression: string) {
+    await this.sessionManager.require(tabId)
+    await this.cdpClient.send(this.sessionManager.target(tabId), "Runtime.evaluate", { expression })
+    return { success: true as const }
+  }
+
   private async evaluateString(tabId: number, expression: string): Promise<string> {
     await this.sessionManager.require(tabId)
     const response = await this.cdpClient.send<EvaluateResponse>(

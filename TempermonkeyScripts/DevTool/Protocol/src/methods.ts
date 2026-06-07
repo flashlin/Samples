@@ -7,6 +7,8 @@ export const browserMethods = [
   "page.getHtml",
   "page.navigate",
   "page.reload",
+  "page.goBack",
+  "page.goForward",
   "element.click",
   "element.fill",
   "element.type",

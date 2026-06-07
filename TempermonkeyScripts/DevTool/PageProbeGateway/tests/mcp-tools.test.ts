@@ -121,6 +121,26 @@ describe("registerBrowserTools", () => {
       result: {
         success: true
       }
+    },
+    {
+      tool: "browser_go_back",
+      method: "page.goBack",
+      params: {
+        tabId: 7
+      },
+      result: {
+        success: true
+      }
+    },
+    {
+      tool: "browser_go_forward",
+      method: "page.goForward",
+      params: {
+        tabId: 7
+      },
+      result: {
+        success: true
+      }
     }
   ] as const)("maps $tool to $method and returns JSON text", async ({
     tool,
@@ -173,6 +193,8 @@ describe("registerBrowserTools", () => {
       "browser_get_page_html",
       "browser_navigate",
       "browser_reload",
+      "browser_go_back",
+      "browser_go_forward",
       "browser_click",
       "browser_fill",
       "browser_type",

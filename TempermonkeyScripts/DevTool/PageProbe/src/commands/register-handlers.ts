@@ -44,6 +44,14 @@ export function registerHandlers(registry: HandlerRegistry, services: HandlerSer
     const input = params as BrowserCommandParams["page.reload"]
     return services.page.reload(input.tabId, input.ignoreCache)
   })
+  registry.register("page.goBack", (params) => {
+    const input = params as BrowserCommandParams["page.goBack"]
+    return services.page.goBack(input.tabId)
+  })
+  registry.register("page.goForward", (params) => {
+    const input = params as BrowserCommandParams["page.goForward"]
+    return services.page.goForward(input.tabId)
+  })
   registry.register("element.click", (params) => {
     return services.interaction.click(params as BrowserCommandParams["element.click"])
   })

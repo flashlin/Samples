@@ -57,4 +57,28 @@ describe("PageService navigation", () => {
       { target: { tabId: 7 }, method: "Page.reload", params: { ignoreCache: true } }
     ])
   })
+
+  it("goes back through session history", async () => {
+    const { service, calls, required } = createService()
+
+    const result = await service.goBack(7)
+
+    expect(required).toEqual([7])
+    expect(calls).toEqual([
+      { target: { tabId: 7 }, method: "Runtime.evaluate", params: { expression: "history.back()" } }
+    ])
+    expect(result).toEqual({ success: true })
+  })
+
+  it("goes forward through session history", async () => {
+    const { service, calls, required } = createService()
+
+    const result = await service.goForward(7)
+
+    expect(required).toEqual([7])
+    expect(calls).toEqual([
+      { target: { tabId: 7 }, method: "Runtime.evaluate", params: { expression: "history.forward()" } }
+    ])
+    expect(result).toEqual({ success: true })
+  })
 })
