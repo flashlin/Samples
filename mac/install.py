@@ -1,12 +1,12 @@
 import os
-from pathlib import Path
 
 # 所有模板內容
-templates_content = '''
+templates_content = """
 # ===== 自定義函數區塊開始 =====
 
 alias cc='/Users/flash/vdisk/github/qa-pair/my-tools/claude-code/cc.sh'
 alias co='/Users/flash/vdisk/github/qa-pair/my-tools/claude-code/my-codex/co.sh'
+alias fcodex='/Users/flash/vdisk/github/qa-pair/my-tools/claude-code/my-codex/codex-start.sh'
 alias codex-mini='codex -m gpt-5.4-mini'
 
 # dk alias - 執行自定義 dk 腳本
@@ -42,6 +42,32 @@ load-nvmrc
 
 # Rider 快速開啟指令
 ro() { open -a "Rider" "${1:-.}"; }
+
+# zed: 已開啟的專案聚焦既有視窗，未開啟的開新視窗（避免取代其他視窗）
+zed() {
+  if [ "$#" -ne 1 ] || [ "${1#-}" != "$1" ]; then
+    command zed "$@"
+    return
+  fi
+
+  local target
+  target="$(cd "$1" 2>/dev/null && pwd)" || { command zed "$@"; return; }
+
+  local db="$HOME/Library/Application Support/Zed/db/0-stable/db.sqlite"
+  if [ ! -f "$db" ]; then
+    command zed -n "$target"
+    return
+  fi
+
+  local open_paths
+  open_paths="$(sqlite3 -readonly "$db" "SELECT paths FROM workspaces WHERE session_id=(SELECT session_id FROM workspaces WHERE session_id IS NOT NULL ORDER BY timestamp DESC LIMIT 1);" 2>/dev/null)"
+
+  if printf '%s\\n' "$open_paths" | grep -Fxq "$target"; then
+    command zed "$target"
+  else
+    command zed -n "$target"
+  fi
+}
 
 # Python 快速執行指令
 py() {
@@ -85,10 +111,10 @@ port() {
 
 PROMPT=$'%F{cyan}%~%f\\n%F{green}%#%f '
 # ===== 自定義函數區塊結束 =====
-'''
+"""
 
 # 取得 .zshrc 的完整路徑
-zshrc_path = os.path.expanduser('~/.zshrc')
+zshrc_path = os.path.expanduser("~/.zshrc")
 
 # 檢查檔案是否存在
 if not os.path.exists(zshrc_path):
@@ -96,7 +122,7 @@ if not os.path.exists(zshrc_path):
     exit(1)
 
 # 讀取現有的內容
-with open(zshrc_path, 'r', encoding='utf-8') as file:
+with open(zshrc_path, "r", encoding="utf-8") as file:
     current_content = file.read()
 
 # 定義區塊的起始和結束標記
@@ -112,13 +138,13 @@ if start_marker in current_content and end_marker in current_content:
     # 移除舊的區塊
     new_content = current_content[:start_pos] + current_content[end_pos:]
     # 在檔案末尾添加新的區塊
-    with open(zshrc_path, 'w', encoding='utf-8') as file:
+    with open(zshrc_path, "w", encoding="utf-8") as file:
         file.write(new_content + templates_content)
     print("已更新函數區塊")
 else:
     print("未找到函數區塊，正在添加...")
     # 在檔案末尾添加新的區塊
-    with open(zshrc_path, 'a', encoding='utf-8') as file:
+    with open(zshrc_path, "a", encoding="utf-8") as file:
         file.write(templates_content)
     print("已添加函數區塊")
 
