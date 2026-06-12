@@ -7,7 +7,7 @@ templates_content = """
 alias cc='/Users/flash/vdisk/github/qa-pair/my-tools/claude-code/cc.sh'
 alias co='/Users/flash/vdisk/github/qa-pair/my-tools/claude-code/my-codex/co.sh'
 alias fcodex='/Users/flash/vdisk/github/qa-pair/my-tools/claude-code/my-codex/codex-start.sh'
-alias codex-m='codex -m gpt-5.5 -c model_reasoning_effort=medium'
+alias codex-m='codex -m gpt-5.3-codex-spark -c model_reasoning_effort=high'
 
 # dk alias - 執行自定義 dk 腳本
 alias dk='/Users/flash/vdisk/github/Samples/gsoft/dk'
