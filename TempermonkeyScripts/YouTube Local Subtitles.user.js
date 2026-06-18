@@ -34,7 +34,7 @@
             { suffix: '.en', label: 'en' }
         ],
         fontSize: 22,
-        bottomOffset: 80,
+        bottomOffset: 36,
         urlPollIntervalMs: 1000
     };
 
@@ -163,52 +163,103 @@
     }
 
     function buildButtonLabel(active) {
-        const base = active ? '關閉字幕' : '本地字幕';
-        return state.loadedLanguage ? `${base} (${state.loadedLanguage})` : base;
+        const action = active ? 'Disable local subtitles' : 'Enable local subtitles';
+        return state.loadedLanguage ? `${action} (${state.loadedLanguage})` : action;
+    }
+
+    function buildButtonIcon(active) {
+        const svgNamespace = 'http://www.w3.org/2000/svg';
+        const opacity = active ? '1' : '0.72';
+        const svg = document.createElementNS(svgNamespace, 'svg');
+        setSvgAttributes(svg, {
+            width: '20',
+            height: '20',
+            viewBox: '0 0 24 24',
+            'aria-hidden': 'true',
+            focusable: 'false'
+        });
+        svg.style.display = 'block';
+
+        const rect = document.createElementNS(svgNamespace, 'rect');
+        setSvgAttributes(rect, {
+            x: '3',
+            y: '5',
+            width: '18',
+            height: '14',
+            rx: '2.5',
+            fill: 'none',
+            stroke: 'currentColor',
+            'stroke-width': '2'
+        });
+
+        const path = document.createElementNS(svgNamespace, 'path');
+        setSvgAttributes(path, {
+            d: 'M7 10h3M14 10h3M7 14h5M14 14h3',
+            stroke: 'currentColor',
+            'stroke-width': '2',
+            'stroke-linecap': 'round',
+            opacity
+        });
+
+        svg.appendChild(rect);
+        svg.appendChild(path);
+        return svg;
+    }
+
+    function setSvgAttributes(element, attributes) {
+        Object.entries(attributes).forEach(([name, value]) => {
+            element.setAttribute(name, value);
+        });
     }
 
     function showButton() {
         const btn = document.createElement('button');
         btn.className = '__local_srt_button';
-        btn.textContent = buildButtonLabel(false);
+        btn.appendChild(buildButtonIcon(false));
+        btn.title = buildButtonLabel(false);
+        btn.setAttribute('aria-label', buildButtonLabel(false));
         Object.assign(btn.style, {
             position: 'fixed',
             top: '70px',
             right: '20px',
             zIndex: '2147483647',
-            padding: '8px 14px',
+            width: '36px',
+            height: '36px',
+            padding: '0',
             background: 'rgba(33, 150, 243, 0.95)',
             color: '#fff',
             border: 'none',
-            borderRadius: '6px',
-            fontSize: '14px',
-            fontWeight: 'bold',
+            borderRadius: '50%',
             cursor: 'pointer',
             boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-            fontFamily: '-apple-system, "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center'
         });
         btn.addEventListener('click', toggleSubtitles);
         document.body.appendChild(btn);
         state.buttonEl = btn;
-        log('button rendered, label=', btn.textContent);
+        log('button rendered, label=', btn.title);
     }
 
     function toggleSubtitles() {
         if (state.active) {
             stopSubtitles();
-            applyButtonStyle({ background: 'rgba(33, 150, 243, 0.95)', text: buildButtonLabel(false) });
+            applyButtonStyle({ background: 'rgba(33, 150, 243, 0.95)', active: false });
         } else {
             startSubtitles();
             if (state.active) {
-                applyButtonStyle({ background: 'rgba(244, 67, 54, 0.95)', text: buildButtonLabel(true) });
+                applyButtonStyle({ background: 'rgba(244, 67, 54, 0.95)', active: true });
             }
         }
     }
 
-    function applyButtonStyle({ background, text }) {
+    function applyButtonStyle({ background, active }) {
         if (!state.buttonEl) return;
         state.buttonEl.style.background = background;
-        state.buttonEl.textContent = text;
+        state.buttonEl.replaceChildren(buildButtonIcon(active));
+        state.buttonEl.title = buildButtonLabel(active);
+        state.buttonEl.setAttribute('aria-label', buildButtonLabel(active));
     }
 
     function startSubtitles() {
@@ -252,7 +303,7 @@
             maxWidth: '80%',
             padding: '6px 14px',
             background: 'rgba(0, 0, 0, 0.75)',
-            color: '#fff',
+            color: '#ffeb3b',
             fontSize: config.fontSize + 'px',
             fontFamily: '-apple-system, "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif',
             textAlign: 'center',
