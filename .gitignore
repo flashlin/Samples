@@ -92,3 +92,4 @@ T1WebComponents/t1-web-components/coverage
 mac/env.ini
 .claude
 gsoft/go-ocr/build
+.pnpm-store/
