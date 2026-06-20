@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using T1.SqlSharp.Expressions;
 using System.Linq;
 
@@ -2469,7 +2470,7 @@ public class SqlParser
         return NoneResult<SqlAliasExpr>();
     }
 
-    private bool TryCast<T>(ISqlExpression expr, SqlType sqlType, out T result)
+    private bool TryCast<T>(ISqlExpression expr, SqlType sqlType, [MaybeNullWhen(false)] out T result)
         where T : ISqlExpression
     {
         if (expr.SqlType == sqlType)

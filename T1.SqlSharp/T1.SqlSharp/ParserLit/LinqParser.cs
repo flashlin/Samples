@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using T1.SqlSharp.Expressions;
 
 namespace T1.SqlSharp.ParserLit;
@@ -25,13 +26,13 @@ public class LinqParser
         // parse additional from clauses (for DefaultIfEmpty)
         var additionalFroms = ParseAdditionalFroms();
         // parse where
-        LinqWhereExpr whereExpr = null;
+        LinqWhereExpr? whereExpr = null;
         if (TryParseWhere(out var where))
         {
             whereExpr = new LinqWhereExpr { Condition = where };
         }
         // parse orderby
-        LinqOrderByExpr orderByExpr = null;
+        LinqOrderByExpr? orderByExpr = null;
         if (TryParseOrderBy(out var orderBy))
         {
             orderByExpr = orderBy;
@@ -58,7 +59,7 @@ public class LinqParser
             };
     }
 
-    private List<LinqJoinExpr> ParseJoins()
+    private List<LinqJoinExpr>? ParseJoins()
     {
         var joins = new List<LinqJoinExpr>();
         while (true)
@@ -89,7 +90,7 @@ public class LinqParser
             };
             
                 // Check for 'into' keyword
-                string intoGroup = null;
+                string? intoGroup = null;
                 string joinType = "join";
                 _text.SkipWhitespace();
                 if (_text.TryKeywordIgnoreCase("into", out _))
@@ -114,7 +115,7 @@ public class LinqParser
         return joins.Count > 0 ? joins : null;
     }
 
-    private List<LinqFromExpr> ParseAdditionalFroms()
+    private List<LinqFromExpr>? ParseAdditionalFroms()
     {
         var additionalFroms = new List<LinqFromExpr>();
         while (true)
@@ -147,7 +148,7 @@ public class LinqParser
         return additionalFroms.Count > 0 ? additionalFroms : null;
     }
 
-    private (string Source, bool IsDefaultIfEmpty) ParseFromSource()
+    private (string? Source, bool IsDefaultIfEmpty) ParseFromSource()
     {
         var identifierResult = ParseIdentifier();
         if (identifierResult.HasError) return (null, false);
@@ -172,7 +173,7 @@ public class LinqParser
         return (source, isDefaultIfEmpty);
     }
 
-    private ILinqExpression ParseSelectExpression()
+    private ILinqExpression? ParseSelectExpression()
     {
         _text.SkipWhitespace();
         
@@ -194,7 +195,7 @@ public class LinqParser
         }
     }
 
-    private LinqSelectNewExpr ParseSelectNewExpression()
+    private LinqSelectNewExpr? ParseSelectNewExpression()
     {
         _text.SkipWhitespace();
         if (!_text.TryMatch("{", out _)) return null;
@@ -330,7 +331,7 @@ public class LinqParser
         return new LinqValue { Value = valueText };
     }
 
-    private bool TryParseWhere(out ILinqExpression where)
+    private bool TryParseWhere([NotNullWhen(true)] out ILinqExpression? where)
     {
         where = null;
         _text.SkipWhitespace();
@@ -345,7 +346,7 @@ public class LinqParser
         return where != null;
     }
 
-    private bool TryParseOrderBy(out LinqOrderByExpr orderBy)
+    private bool TryParseOrderBy([NotNullWhen(true)] out LinqOrderByExpr? orderBy)
     {
         orderBy = null;
         _text.SkipWhitespace();
@@ -378,7 +379,7 @@ public class LinqParser
         return true;
     }
 
-    private LinqOrderByFieldExpr ParseOrderByField()
+    private LinqOrderByFieldExpr? ParseOrderByField()
     {
         var field = ParseLinqFieldExpr();
         if (field == null) return null;
@@ -399,7 +400,7 @@ public class LinqParser
         };
     }
 
-    private ILinqExpression ParseConditionExpr()
+    private ILinqExpression? ParseConditionExpr()
     {
         var left = ParseSingleCondition();
         if (left == null) return null;
@@ -433,7 +434,7 @@ public class LinqParser
         return left;
     }
 
-    private ILinqExpression ParseSingleCondition()
+    private ILinqExpression? ParseSingleCondition()
     {
         var left = ParseLinqFieldExpr();
         if (left == null) return null;
@@ -451,7 +452,7 @@ public class LinqParser
         };
     }
 
-    private LinqFieldExpr ParseLinqFieldExpr()
+    private LinqFieldExpr? ParseLinqFieldExpr()
     {
         _text.SkipWhitespace();
         var id1 = _text.ReadIdentifier();
@@ -483,7 +484,7 @@ public class LinqParser
         return null;
     }
 
-    private LinqValue ParseLinqValue()
+    private LinqValue? ParseLinqValue()
     {
         _text.SkipWhitespace();
         var num = _text.ReadInt();
