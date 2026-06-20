@@ -2,7 +2,7 @@ namespace T1.SqlSharp.Expressions;
 
 public class LinqExpr
 {
-    public LinqFromExpr From { get; set; }
+    public required LinqFromExpr From { get; set; }
     public LinqWhereExpr? Where { get; set; }
     public LinqOrderByExpr? OrderBy { get; set; }
     public List<LinqJoinExpr>? Joins { get; set; }
@@ -12,8 +12,8 @@ public class LinqExpr
 
 public class LinqFromExpr
 {
-    public ILinqExpression Source { get; set; }
-    public string AliasName { get; set; }
+    public required ILinqExpression Source { get; set; }
+    public string AliasName { get; set; } = string.Empty;
     public override bool Equals(object? obj)
     {
         if (obj is not LinqFromExpr other) return false;
@@ -24,7 +24,7 @@ public class LinqFromExpr
 
 public class LinqSourceExpr : ILinqExpression
 {
-    public string TableName { get; set; }
+    public string TableName { get; set; } = string.Empty;
     public override bool Equals(object? obj)
     {
         if (obj is not LinqSourceExpr other) return false;
@@ -35,7 +35,7 @@ public class LinqSourceExpr : ILinqExpression
 
 public class LinqDefaultIfEmptyExpr : ILinqExpression
 {
-    public string SourceName { get; set; }
+    public string SourceName { get; set; } = string.Empty;
     public override bool Equals(object? obj)
     {
         if (obj is not LinqDefaultIfEmptyExpr other) return false;
@@ -46,7 +46,7 @@ public class LinqDefaultIfEmptyExpr : ILinqExpression
 
 public class LinqSelectAllExpr : ILinqExpression
 {
-    public string AliasName { get; set; }
+    public string AliasName { get; set; } = string.Empty;
     public override bool Equals(object? obj)
     {
         if (obj is not LinqSelectAllExpr other) return false;
@@ -57,7 +57,7 @@ public class LinqSelectAllExpr : ILinqExpression
 
 public class LinqWhereExpr
 {
-    public ILinqExpression Condition { get; set; }
+    public required ILinqExpression Condition { get; set; }
     public override bool Equals(object? obj)
     {
         if (obj is not LinqWhereExpr other) return false;
@@ -74,9 +74,9 @@ public interface ILinqExpression
 
 public class LinqConditionExpression : ILinqExpression
 {
-    public ILinqExpression Left { get; set; }
+    public required ILinqExpression Left { get; set; }
     public ComparisonOperator ComparisonOperator { get; set; }
-    public ILinqExpression Right { get; set; }
+    public required ILinqExpression Right { get; set; }
     public LogicalOperator? LogicalOperator { get; set; }
     public override bool Equals(object? obj)
     {
@@ -126,7 +126,7 @@ public class LinqOrderByExpr : ILinqExpression
 
 public class LinqOrderByFieldExpr : ILinqExpression
 {
-    public LinqFieldExpr Field { get; set; }
+    public required LinqFieldExpr Field { get; set; }
     public bool IsDescending { get; set; }
     public override bool Equals(object? obj)
     {
@@ -139,9 +139,9 @@ public class LinqOrderByFieldExpr : ILinqExpression
 public class LinqJoinExpr : ILinqExpression
 {
     public string JoinType { get; set; } = "join";
-    public string AliasName { get; set; }
-    public ILinqExpression Source { get; set; }
-    public LinqConditionExpression On { get; set; }
+    public string AliasName { get; set; } = string.Empty;
+    public required ILinqExpression Source { get; set; }
+    public required LinqConditionExpression On { get; set; }
     public string? Into { get; set; }
     public override bool Equals(object? obj)
     {
@@ -157,7 +157,7 @@ public class LinqJoinExpr : ILinqExpression
 
 public class LinqSelectNewExpr : ILinqExpression
 {
-    public List<LinqSelectFieldExpr> Fields { get; set; }
+    public List<LinqSelectFieldExpr> Fields { get; set; } = new();
     public override bool Equals(object? obj)
     {
         if (obj is not LinqSelectNewExpr other) return false;
@@ -168,8 +168,8 @@ public class LinqSelectNewExpr : ILinqExpression
 
 public class LinqSelectFieldExpr : ILinqExpression
 {
-    public string Name { get; set; }
-    public ILinqExpression Value { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public required ILinqExpression Value { get; set; }
     public override bool Equals(object? obj)
     {
         if (obj is not LinqSelectFieldExpr other) return false;

@@ -548,7 +548,7 @@ public class LinqParser
 
     private class LinqToken
     {
-        public string Value { get; set; }
-        public TextSpan Span { get; set; }
+        public string Value { get; set; } = string.Empty;
+        public TextSpan Span { get; set; } = new();
     }
 } 
