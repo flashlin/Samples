@@ -12,6 +12,8 @@ public class SqlOrderByClause : ISqlExpression
     }
 
     public List<SqlOrderColumn> Columns { get; set; } = [];
+    public ISqlExpression? Offset { get; set; }
+    public ISqlExpression? Fetch { get; set; }
 
     public string ToSql()
     {
@@ -28,6 +30,21 @@ public class SqlOrderByClause : ISqlExpression
             sql.WriteLine();
         }
         sql.Indent--;
+        WriteOffsetFetchSql(sql);
         return sql.ToString();
+    }
+
+    private void WriteOffsetFetchSql(IndentStringBuilder sql)
+    {
+        if (Offset == null)
+        {
+            return;
+        }
+
+        sql.WriteLine($"OFFSET {Offset.ToSql()} ROWS");
+        if (Fetch != null)
+        {
+            sql.WriteLine($"FETCH NEXT {Fetch.ToSql()} ROWS ONLY");
+        }
     }
 }

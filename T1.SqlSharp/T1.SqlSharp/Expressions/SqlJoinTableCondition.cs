@@ -13,15 +13,29 @@ public class SqlJoinTableCondition : ISqlExpression
 
     public JoinType JoinType { get; set; } = JoinType.Inner;
     public required ITableSource JoinedTable { get; set; }
-    public required ISqlExpression OnCondition { get; set; }
+    public ISqlExpression? OnCondition { get; set; }
     public string ToSql()
     {
         var sql = new IndentStringBuilder();
-        sql.Write(JoinType.ToString().ToUpper());
-        sql.Write(" JOIN ");
+        sql.Write(GetJoinKeyword());
+        sql.Write(" ");
         sql.Write(JoinedTable.ToSql());
-        sql.Write(" ON ");
-        sql.Write(OnCondition.ToSql());
+        if (OnCondition != null)
+        {
+            sql.Write(" ON ");
+            sql.Write(OnCondition.ToSql());
+        }
         return sql.ToString();
+    }
+
+    private string GetJoinKeyword()
+    {
+        return JoinType switch
+        {
+            JoinType.Cross => "CROSS JOIN",
+            JoinType.CrossApply => "CROSS APPLY",
+            JoinType.OuterApply => "OUTER APPLY",
+            _ => $"{JoinType.ToString().ToUpper()} JOIN"
+        };
     }
 }

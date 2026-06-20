@@ -5,5 +5,8 @@ public enum JoinType
     Inner,
     Left,
     Right,
-    Full
+    Full,
+    Cross,
+    CrossApply,
+    OuterApply
 }

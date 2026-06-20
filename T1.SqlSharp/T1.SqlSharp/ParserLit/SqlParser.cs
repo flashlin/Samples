@@ -10,7 +10,7 @@ public class SqlParser
     private static readonly string[] ReservedWords =
     [
         "FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH",
-        "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS"
+        "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING"
     ];
 
     private static string[] DataTypes =
@@ -798,6 +798,11 @@ public class SqlParser
             selectStatement.GroupBy = groupByClause.Result;
         }
 
+        if (Try(ParseHavingClause, out var havingClause))
+        {
+            selectStatement.Having = havingClause.Result;
+        }
+
         var orderByClause = ParseOrderByClause();
         if (orderByClause.HasError)
         {
@@ -811,11 +816,6 @@ public class SqlParser
             selectStatement.ForXml = forXmlClause.ResultValue;
         }
 
-        if (Try(ParseHavingClause, out var havingClause))
-        {
-            selectStatement.Having = havingClause.Result;
-        }
-        
         if (Try(ParseUnionSelectClauseList, out var unionSelectClauseList))
         {
             selectStatement.Unions = unionSelectClauseList.ResultValue;
@@ -2111,7 +2111,54 @@ public class SqlParser
             return tableSource;
         }
 
+        if (TryKeywords(["FULL", "OUTER", "JOIN"], out var fullOuterJoinStartSpan))
+        {
+            var tableSource = Parse_JoinTableSourceOn().ResultValue;
+            tableSource.JoinType = JoinType.Full;
+            tableSource.Span = _text.CreateSpan(fullOuterJoinStartSpan);
+            return tableSource;
+        }
+
+        if (TryKeywords(["FULL", "JOIN"], out var fullJoinStartSpan))
+        {
+            var tableSource = Parse_JoinTableSourceOn().ResultValue;
+            tableSource.JoinType = JoinType.Full;
+            tableSource.Span = _text.CreateSpan(fullJoinStartSpan);
+            return tableSource;
+        }
+
+        if (TryKeywords(["CROSS", "JOIN"], out var crossJoinStartSpan))
+        {
+            return Parse_JoinTableSourceWithoutOn(JoinType.Cross, crossJoinStartSpan);
+        }
+
+        if (TryKeywords(["CROSS", "APPLY"], out var crossApplyStartSpan))
+        {
+            return Parse_JoinTableSourceWithoutOn(JoinType.CrossApply, crossApplyStartSpan);
+        }
+
+        if (TryKeywords(["OUTER", "APPLY"], out var outerApplyStartSpan))
+        {
+            return Parse_JoinTableSourceWithoutOn(JoinType.OuterApply, outerApplyStartSpan);
+        }
+
         return NoneResult<SqlJoinTableCondition>();
+    }
+
+    private ParseResult<SqlJoinTableCondition> Parse_JoinTableSourceWithoutOn(JoinType joinType, TextSpan startSpan)
+    {
+        if (!Try(Parse_TableSourceWithHints, out var tableSource))
+        {
+            return CreateParseError("Expected table source");
+        }
+
+        return new SqlJoinTableCondition
+        {
+            Span = _text.CreateSpan(startSpan),
+            JoinType = joinType,
+            JoinedTable = tableSource.ResultValue,
+            OnCondition = null
+        };
     }
 
     private ParseResult<SqlJoinTableCondition> Parse_JoinTableSourceOn()
@@ -3115,11 +3162,74 @@ public class SqlParser
             return orderByColumns.Error;
         }
 
-        return new SqlOrderByClause
+        var orderByClause = new SqlOrderByClause
         {
             Span = _text.CreateSpan(startSpan),
             Columns = orderByColumns.ResultValue
         };
+
+        var offsetFetch = Parse_OffsetFetchClause(orderByClause);
+        if (offsetFetch.HasError)
+        {
+            return offsetFetch.Error;
+        }
+
+        return orderByClause;
+    }
+
+    private ParseResult<SqlOrderByClause> Parse_OffsetFetchClause(SqlOrderByClause orderByClause)
+    {
+        if (!TryKeyword("OFFSET", out _))
+        {
+            return CreateParseResult(orderByClause);
+        }
+
+        var offset = ParseArithmeticExpr();
+        if (offset.HasError)
+        {
+            return offset.Error;
+        }
+
+        if (!TryRowKeyword())
+        {
+            return CreateParseError("Expected ROW or ROWS");
+        }
+
+        orderByClause.Offset = offset.ResultValue;
+
+        if (!TryKeyword("FETCH", out _))
+        {
+            return CreateParseResult(orderByClause);
+        }
+
+        if (!TryKeyword("NEXT", out _) && !TryKeyword("FIRST", out _))
+        {
+            return CreateParseError("Expected NEXT or FIRST");
+        }
+
+        var fetch = ParseArithmeticExpr();
+        if (fetch.HasError)
+        {
+            return fetch.Error;
+        }
+
+        if (!TryRowKeyword())
+        {
+            return CreateParseError("Expected ROW or ROWS");
+        }
+
+        if (!TryKeyword("ONLY", out _))
+        {
+            return CreateParseError("Expected ONLY");
+        }
+
+        orderByClause.Fetch = fetch.ResultValue;
+        return CreateParseResult(orderByClause);
+    }
+
+    private bool TryRowKeyword()
+    {
+        return TryKeyword("ROWS", out _) || TryKeyword("ROW", out _);
     }
 
     private ParseResult<SqlParameterValue> ParseParameterAssignValue()
