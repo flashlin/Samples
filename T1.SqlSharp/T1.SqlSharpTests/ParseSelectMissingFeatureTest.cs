@@ -51,6 +51,41 @@ public class ParseSelectMissingFeatureTest
     }
 
     [Test]
+    public void Having_directly_after_table_should_not_be_consumed_as_alias()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM customer
+                   HAVING COUNT(1) = 2
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            Having = new SqlHavingClause
+            {
+                Condition = new SqlConditionExpression
+                {
+                    Left = new SqlFunctionExpression
+                    {
+                        FunctionName = "COUNT",
+                        Parameters = [new SqlValue { SqlType = SqlType.IntValue, Value = "1" }]
+                    },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "2" }
+                }
+            }
+        });
+    }
+
+    [Test]
     public void Order_by_offset_fetch()
     {
         var sql = $"""
