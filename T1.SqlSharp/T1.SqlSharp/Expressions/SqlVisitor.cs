@@ -261,7 +261,20 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
         expr.JoinedTable.Accept(this);
-        expr.OnCondition.Accept(this);
+        expr.OnCondition?.Accept(this);
+    }
+
+    public virtual void Visit_CommonTableExpression(SqlCommonTableExpression expr)
+    {
+        AddSqlExpression(expr);
+        expr.Query.Accept(this);
+    }
+
+    public virtual void Visit_WithCte(SqlWithCte expr)
+    {
+        AddSqlExpression(expr);
+        expr.CommonTableExpressions.ForEach(x => x.Accept(this));
+        expr.Statement.Accept(this);
     }
 
     public virtual void Visit_NegativeValue(SqlNegativeValue expr)

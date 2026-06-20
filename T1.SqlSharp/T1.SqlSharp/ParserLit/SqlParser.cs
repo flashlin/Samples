@@ -10,7 +10,7 @@ public class SqlParser
     private static readonly string[] ReservedWords =
     [
         "FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH",
-        "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING"
+        "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING", "INTERSECT", "EXCEPT"
     ];
 
     private static string[] DataTypes =
@@ -62,6 +62,11 @@ public class SqlParser
 
     public ParseResult<ISqlExpression> Parse()
     {
+        if (Try(ParseWithCteStatement, out var withCteStatement))
+        {
+            return withCteStatement.Result;
+        }
+
         if (Try(ParseCreateTableStatement, out var createTableStatement))
         {
             return createTableStatement.Result;
@@ -725,6 +730,93 @@ public class SqlParser
         });
     }
 
+    public ParseResult<SqlWithCte> ParseWithCteStatement()
+    {
+        if (!TryKeyword("WITH", out var startSpan))
+        {
+            return NoneResult<SqlWithCte>();
+        }
+
+        var commonTableExpressions = ParseWithComma(Parse_CommonTableExpression);
+        if (commonTableExpressions.HasError)
+        {
+            return commonTableExpressions.Error;
+        }
+
+        if (commonTableExpressions.Result == null || commonTableExpressions.ResultValue.Count == 0)
+        {
+            return CreateParseError("Expected common table expression");
+        }
+
+        var statement = ParseSelectStatement();
+        if (statement.HasError)
+        {
+            return statement.Error;
+        }
+
+        return new SqlWithCte
+        {
+            Span = _text.CreateSpan(startSpan),
+            CommonTableExpressions = commonTableExpressions.ResultValue,
+            Statement = statement.ResultValue
+        };
+    }
+
+    private ParseResult<SqlCommonTableExpression> Parse_CommonTableExpression()
+    {
+        var startPosition = _text.Position;
+        if (!Try(Parse_SqlIdentifier, out var name))
+        {
+            return NoneResult<SqlCommonTableExpression>();
+        }
+
+        var columnNames = new List<string>();
+        if (IsPeekMatch("("))
+        {
+            _text.MatchSymbol("(");
+            var columns = ParseWithComma(Parse_SqlIdentifier);
+            if (columns.HasError)
+            {
+                return columns.Error;
+            }
+
+            columnNames = columns.ResultValue.Select(column => column.FieldName).ToList();
+            if (!TryMatch(")", out _))
+            {
+                return CreateParseError("Expected )");
+            }
+        }
+
+        if (!TryKeyword("AS", out _))
+        {
+            return CreateParseError("Expected AS");
+        }
+
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var query = ParseSelectStatement();
+        if (query.HasError)
+        {
+            return query.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return new SqlCommonTableExpression
+        {
+            Span = _text.CreateSpan(startPosition),
+            Name = name.ResultValue.FieldName,
+            ColumnNames = columnNames,
+            Query = query.ResultValue
+        };
+    }
+
     public ParseResult<SelectStatement> ParseSelectStatement()
     {
         if (!TryKeyword("SELECT", out var startSpan))
@@ -1143,18 +1235,27 @@ public class SqlParser
 
     private ParseResult<SqlUnionSelect> Parse_UnionSelect()
     {
-        var isAll = false;
-        var startSpan = new TextSpan();
-        if (!TryKeywords(["UNION", "ALL"], out startSpan))
+        TextSpan startSpan;
+        SqlSetOperator setOperator;
+        if (TryKeywords(["UNION", "ALL"], out startSpan))
         {
-            if (!TryKeyword("UNION", out startSpan))
-            {
-                return NoneResult<SqlUnionSelect>();
-            }
+            setOperator = SqlSetOperator.UnionAll;
+        }
+        else if (TryKeyword("UNION", out startSpan))
+        {
+            setOperator = SqlSetOperator.Union;
+        }
+        else if (TryKeyword("INTERSECT", out startSpan))
+        {
+            setOperator = SqlSetOperator.Intersect;
+        }
+        else if (TryKeyword("EXCEPT", out startSpan))
+        {
+            setOperator = SqlSetOperator.Except;
         }
         else
         {
-            isAll = true;
+            return NoneResult<SqlUnionSelect>();
         }
 
         var select = ParseGroupOr(ParseSelectStatement);
@@ -1166,7 +1267,7 @@ public class SqlParser
         return new SqlUnionSelect
         {
             Span = _text.CreateSpan(startSpan),
-            IsAll = isAll,
+            Operator = setOperator,
             SelectStatement = select.ResultValue,
         };
     }

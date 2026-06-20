@@ -8,7 +8,6 @@
         <Title>SqlSharp</Title>
         <Authors>Mr.Brain</Authors>
         <Description>Parse TSQL</Description>
-        <PackageLicense>https://opensource.org/licenses/MIT</PackageLicense>
         <PackageTags>T1</PackageTags>
         <Version>1.0.9</Version>
         <PackageReleaseNotes>add support create table row unique difinition</PackageReleaseNotes>

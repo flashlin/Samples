@@ -11,18 +11,26 @@ public class SqlUnionSelect : ISqlExpression
         visitor.Visit_UnionSelect(this);
     }
 
-    public bool IsAll { get; set; } = false;
+    public SqlSetOperator Operator { get; set; } = SqlSetOperator.Union;
+    public bool IsAll => Operator == SqlSetOperator.UnionAll;
     public required ISqlExpression SelectStatement { get; set; }
 
     public string ToSql()
     {
         var sql = new IndentStringBuilder();
-        sql.Write("UNION ");
-        if (IsAll)
-        {
-            sql.Write("ALL ");
-        }
+        sql.Write($"{GetOperatorKeyword()} ");
         sql.Write(SelectStatement.ToSql());
         return sql.ToString();
+    }
+
+    private string GetOperatorKeyword()
+    {
+        return Operator switch
+        {
+            SqlSetOperator.UnionAll => "UNION ALL",
+            SqlSetOperator.Intersect => "INTERSECT",
+            SqlSetOperator.Except => "EXCEPT",
+            _ => "UNION"
+        };
     }
 }

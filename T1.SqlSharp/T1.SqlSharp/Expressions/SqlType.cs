@@ -66,4 +66,6 @@ public enum SqlType
     ChangeTable,
     InsertStatement,
     UpdateStatement,
+    CommonTableExpression,
+    WithCte,
 }

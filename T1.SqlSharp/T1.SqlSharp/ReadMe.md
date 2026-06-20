@@ -1,6 +1,6 @@
 ## License
 
-This project is licensed under the terms of the [GNU General Public License v3.0](LICENSE).
+This project is licensed under the terms of the [GNU General Public License v3.0](LICENSE.md).
 
 You can redistribute it and/or modify it under the terms of the GPL-3.0 license. For more details, see the [official website](https://www.gnu.org/licenses/gpl-3.0.html).
 
