@@ -11,19 +11,31 @@ public class SqlGroupByClause : ISqlExpression
         visitor.Visit_GroupByClause(this);
     }
 
+    public GroupingType GroupingType { get; set; } = GroupingType.Simple;
     public List<ISqlExpression> Columns { get; set; } = [];
+    public List<SqlGroupingSet> GroupingSets { get; set; } = [];
+
     public string ToSql()
     {
         var sql = new IndentStringBuilder();
         sql.Write("GROUP BY ");
-        foreach (var column in Columns.Select((value, index) => new { value, index }))
-        {
-            sql.Write(column.value.ToSql());
-            if (column.index < Columns.Count - 1)
-            {
-                sql.Write(", ");
-            }
-        }
+        sql.Write(GroupingBodyToSql());
         return sql.ToString();
+    }
+
+    private string GroupingBodyToSql()
+    {
+        return GroupingType switch
+        {
+            GroupingType.Rollup => $"ROLLUP ({ColumnsToSql()})",
+            GroupingType.Cube => $"CUBE ({ColumnsToSql()})",
+            GroupingType.GroupingSets => $"GROUPING SETS ({string.Join(", ", GroupingSets.Select(set => set.ToSql()))})",
+            _ => ColumnsToSql()
+        };
+    }
+
+    private string ColumnsToSql()
+    {
+        return string.Join(", ", Columns.Select(column => column.ToSql()));
     }
 }

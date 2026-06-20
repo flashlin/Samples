@@ -68,4 +68,5 @@ public enum SqlType
     UpdateStatement,
     CommonTableExpression,
     WithCte,
+    GroupingSet,
 }

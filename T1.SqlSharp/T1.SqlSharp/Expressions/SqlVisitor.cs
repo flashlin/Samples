@@ -241,6 +241,13 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
         expr.Columns.ForEach(x=>x.Accept(this));
+        expr.GroupingSets.ForEach(x=>x.Accept(this));
+    }
+
+    public virtual void Visit_GroupingSet(SqlGroupingSet expr)
+    {
+        AddSqlExpression(expr);
+        expr.Columns.ForEach(x=>x.Accept(this));
     }
 
     public virtual void Visit_HavingClause(SqlHavingClause expr)

@@ -50,7 +50,7 @@
 - [x] 逗號分隔多來源（舊式 cross join）
 - [x] `WHERE`（AND / OR / NOT、比較、LIKE、IN、BETWEEN、IS [NOT] NULL、EXISTS）
 - [x] `GROUP BY`（運算式清單）
-- [ ] `GROUP BY ROLLUP / CUBE / GROUPING SETS` / `GROUP BY ALL`
+- [~] `GROUP BY ROLLUP / CUBE / GROUPING SETS`（已支援）；`GROUP BY ALL`（未支援）
 - [x] `HAVING`
 - [x] `ORDER BY`（`ASC` / `DESC`）
 - [x] `OFFSET n ROWS [FETCH NEXT m ROWS ONLY]`
@@ -152,12 +152,11 @@
 
 ## 維護建議優先序（未完成項目）
 
-1. 🟡 `GROUP BY ROLLUP / CUBE / GROUPING SETS`（報表彙總）
-2. 🟡 `FOR JSON`（API 場景）
-3. 🟡 視窗框架 `ROWS / RANGE BETWEEN`
-4. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
-5. 🟢 `CHECK` 約束、`COLLATE`、`OPTION` query hint、`WITHIN GROUP`
+1. 🟡 `FOR JSON`（API 場景）
+2. 🟡 視窗框架 `ROWS / RANGE BETWEEN`
+3. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
+4. 🟢 `GROUP BY ALL`、`CHECK` 約束、`COLLATE`、`OPTION` query hint、`WITHIN GROUP`
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。

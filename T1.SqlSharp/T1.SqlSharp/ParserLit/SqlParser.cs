@@ -187,6 +187,21 @@ public class SqlParser
             return NoneResult<SqlGroupByClause>();
         }
 
+        if (TryKeyword("ROLLUP", out _))
+        {
+            return Parse_GroupByGroupingFunction(GroupingType.Rollup, startSpan);
+        }
+
+        if (TryKeyword("CUBE", out _))
+        {
+            return Parse_GroupByGroupingFunction(GroupingType.Cube, startSpan);
+        }
+
+        if (TryKeywords(["GROUPING", "SETS"], out _))
+        {
+            return Parse_GroupByGroupingSets(startSpan);
+        }
+
         var groupByColumns = ParseWithComma(ParseArithmeticExpr);
         if (groupByColumns.HasError)
         {
@@ -198,6 +213,105 @@ public class SqlParser
             Span = _text.CreateSpan(startSpan),
             Columns = groupByColumns.ResultValue
         };
+    }
+
+    private ParseResult<SqlGroupByClause> Parse_GroupByGroupingFunction(GroupingType groupingType, TextSpan startSpan)
+    {
+        var columns = Parse_ParenthesizedColumns();
+        if (columns.HasError)
+        {
+            return columns.Error;
+        }
+
+        return new SqlGroupByClause
+        {
+            Span = _text.CreateSpan(startSpan),
+            GroupingType = groupingType,
+            Columns = columns.ResultValue
+        };
+    }
+
+    private ParseResult<SqlGroupByClause> Parse_GroupByGroupingSets(TextSpan startSpan)
+    {
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var sets = ParseWithComma(Parse_GroupingSet);
+        if (sets.HasError)
+        {
+            return sets.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return new SqlGroupByClause
+        {
+            Span = _text.CreateSpan(startSpan),
+            GroupingType = GroupingType.GroupingSets,
+            GroupingSets = sets.ResultValue
+        };
+    }
+
+    private ParseResult<SqlGroupingSet> Parse_GroupingSet()
+    {
+        var startPosition = _text.Position;
+        if (TryMatch("(", out _))
+        {
+            var columns = ParseWithComma(ParseArithmeticExpr);
+            if (columns.HasError)
+            {
+                return columns.Error;
+            }
+
+            if (!TryMatch(")", out _))
+            {
+                return CreateParseError("Expected )");
+            }
+
+            return new SqlGroupingSet
+            {
+                Span = _text.CreateSpan(startPosition),
+                Columns = columns.ResultValue
+            };
+        }
+
+        var singleColumn = ParseArithmeticExpr();
+        if (singleColumn.HasError)
+        {
+            return singleColumn.Error;
+        }
+
+        return new SqlGroupingSet
+        {
+            Span = _text.CreateSpan(startPosition),
+            Columns = [singleColumn.ResultValue]
+        };
+    }
+
+    private ParseResult<List<ISqlExpression>> Parse_ParenthesizedColumns()
+    {
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var columns = ParseWithComma(ParseArithmeticExpr);
+        if (columns.HasError)
+        {
+            return columns.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return columns;
     }
 
     public ParseResult<SqlTopClause> Parse_TopClause()
