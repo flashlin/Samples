@@ -14,6 +14,7 @@ public class SelectStatement : ISqlExpression
     public SelectType SelectType { get; set; } = SelectType.None; 
     public SqlTopClause? Top { get; set; }
     public List<ISelectColumnExpression> Columns { get; set; } = [];
+    public string? Into { get; set; }
     public List<ISqlExpression> FromSources { get; set; } = [];
     public ISqlForXmlClause? ForXml { get; set; }
     public ISqlExpression? Where { get; set; }
@@ -47,6 +48,10 @@ public class SelectStatement : ISqlExpression
             sql.WriteLine();
         }
         sql.Indent--;
+        if (!string.IsNullOrEmpty(Into))
+        {
+            sql.WriteLine($"INTO {Into}");
+        }
         if (FromSources.Count > 0)
         {
             sql.WriteLine("FROM ");

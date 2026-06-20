@@ -854,6 +854,16 @@ public class SqlParser
 
         selectStatement.Columns = columns.ResultValue;
 
+        if (TryKeyword("INTO", out _))
+        {
+            if (!Try(Parse_SqlIdentifier, out var intoTable))
+            {
+                return CreateParseError("Expected table name after INTO");
+            }
+
+            selectStatement.Into = intoTable.ResultValue.FieldName;
+        }
+
         if (TryKeyword("FROM", out _))
         {
             var tableSources = Parse_FromSources();
@@ -2411,7 +2421,7 @@ public class SqlParser
                 }
             }
 
-            if (!IsPeekKeywords("FROM") && Try(ParseAliasExpr, out var alias))
+            if (!IsPeekKeywords("FROM") && !IsPeekKeywords("INTO") && Try(ParseAliasExpr, out var alias))
             {
                 columnExpr.Alias = alias.ResultValue.Name;
             }

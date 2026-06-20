@@ -86,6 +86,53 @@ public class ParseSelectMissingFeatureTest
     }
 
     [Test]
+    public void Select_into_table()
+    {
+        var sql = $"""
+                   SELECT id, name
+                   INTO newtable
+                   FROM customer
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } },
+                new SelectColumn { Field = new SqlFieldExpr { FieldName = "name" } }
+            ],
+            Into = "newtable",
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+
+    [Test]
+    public void Select_into_temp_table()
+    {
+        var sql = $"""
+                   SELECT id
+                   INTO #temp
+                   FROM customer
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }
+            ],
+            Into = "#temp",
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+
+    [Test]
     public void Order_by_offset_fetch()
     {
         var sql = $"""

@@ -59,7 +59,7 @@
 - [x] `PIVOT` / `UNPIVOT`
 - [~] `FOR XML`（支援 `PATH`、`AUTO`、`ROOT`；未支援 `RAW`、`EXPLICIT`）
 - [ ] `FOR JSON`
-- [ ] `SELECT ... INTO new_table`
+- [x] `SELECT ... INTO new_table`（含暫存表 `#temp`）
 - [ ] `OPTION (query hint)`（如 `OPTION(RECOMPILE / MAXDOP n)`）
 - [ ] `TABLESAMPLE`
 - [ ] UNION 後套用於整體結果的 top-level `ORDER BY`（目前會被內層 select 吃掉）
@@ -152,11 +152,12 @@
 
 ## 維護建議優先序（未完成項目）
 
-1. 🟡 `SELECT ... INTO`（暫存表常用）
-2. 🟡 `GROUP BY ROLLUP / CUBE / GROUPING SETS`（報表彙總）
-3. 🟡 `FOR JSON`（API 場景）
-4. 🟡 視窗框架 `ROWS / RANGE BETWEEN`
-5. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
-6. 🟢 `CHECK` 約束、`COLLATE`、`OPTION` query hint、`WITHIN GROUP`
+1. 🟡 `GROUP BY ROLLUP / CUBE / GROUPING SETS`（報表彙總）
+2. 🟡 `FOR JSON`（API 場景）
+3. 🟡 視窗框架 `ROWS / RANGE BETWEEN`
+4. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
+5. 🟢 `CHECK` 約束、`COLLATE`、`OPTION` query hint、`WITHIN GROUP`
+
+✅ 已完成：`SELECT ... INTO`（2026-06-20）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。
