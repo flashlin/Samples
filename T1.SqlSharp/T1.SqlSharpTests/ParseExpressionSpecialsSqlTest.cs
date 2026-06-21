@@ -20,6 +20,22 @@ public class ParseExpressionSpecialsSqlTest
     }
 
     [Test]
+    public void Json_object_with_colon_pairs()
+    {
+        var sql = "SELECT JSON_OBJECT('k': 'v', 'k2': 1)";
+        var rc = sql.ParseSql();
+        var result = rc.ResultValue as SelectStatement;
+        Assert.That(result, Is.Not.Null);
+        var fn = result!.Columns[0].Field as SqlFunctionExpression;
+        Assert.That(fn, Is.Not.Null);
+        Assert.That(fn!.FunctionName, Is.EqualTo("JSON_OBJECT"));
+        Assert.That(fn.Parameters.Count, Is.EqualTo(2));
+        var firstPair = fn.Parameters[0] as SqlAssignExpr;
+        Assert.That(firstPair, Is.Not.Null);
+        Assert.That(firstPair!.Operator, Is.EqualTo(":"));
+    }
+
+    [Test]
     public void Partition_function_expression()
     {
         var sql = "SELECT $PARTITION.RangePF(OrderDate) AS p FROM Orders";

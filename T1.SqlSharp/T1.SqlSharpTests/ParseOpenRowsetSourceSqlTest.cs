@@ -34,6 +34,16 @@ public class ParseOpenRowsetSourceSqlTest
     }
 
     [Test]
+    public void Select_from_openrowset_bulk()
+    {
+        var sql = "SELECT * FROM OPENROWSET(BULK 'f.txt', SINGLE_CLOB) AS x";
+        Assert.DoesNotThrow(() => sql.ParseSql());
+        var result = sql.ParseSql().ResultValue as SelectStatement;
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.FromSources.Count, Is.EqualTo(1));
+    }
+
+    [Test]
     public void Select_from_openquery()
     {
         var sql = "SELECT * FROM OPENQUERY(LinkedSrv, 'SELECT 1')";

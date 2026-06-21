@@ -29,6 +29,31 @@ public class ParseExecSqlTest
     }
 
     [Test]
+    public void Exec_dynamic_sql_at_linked_server()
+    {
+        var sql = "EXEC ('SELECT 1') AT LinkedSrv";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlExecStatement
+        {
+            DynamicSql = new SqlValue { SqlType = SqlType.String, Value = "'SELECT 1'" },
+            AtLinkedServer = "LinkedSrv"
+        });
+    }
+
+    [Test]
+    public void Exec_with_return_variable()
+    {
+        var sql = "EXEC @ret = dbo.usp_DoWork 1";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlExecStatement
+        {
+            ReturnVariable = "@ret",
+            ProcedureName = "dbo.usp_DoWork",
+            Arguments = [new SqlValue { SqlType = SqlType.IntValue, Value = "1" }]
+        });
+    }
+
+    [Test]
     public void Exec_proc_with_args()
     {
         var sql = "EXEC GetUser 1, 'admin'";

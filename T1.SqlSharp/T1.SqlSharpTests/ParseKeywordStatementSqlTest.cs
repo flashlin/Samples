@@ -23,6 +23,22 @@ public class ParseKeywordStatementSqlTest
     }
 
     [Test]
+    public void Checkpoint_with_duration()
+    {
+        var sql = "CHECKPOINT 5";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlKeywordStatement { Keyword = "CHECKPOINT", Argument = "5" });
+    }
+
+    [Test]
+    public void Reconfigure_with_override()
+    {
+        var sql = "RECONFIGURE WITH OVERRIDE";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlKeywordStatement { Keyword = "RECONFIGURE", Argument = "WITH OVERRIDE" });
+    }
+
+    [Test]
     public void Revert()
     {
         var sql = "REVERT";

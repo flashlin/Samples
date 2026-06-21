@@ -955,4 +955,79 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
     }
+
+    public virtual void Visit_ToggleTriggerStatement(SqlToggleTriggerStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterTableRebuild(SqlAlterTableRebuild expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterTableSet(SqlAlterTableSet expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterTableSwitch(SqlAlterTableSwitch expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterAuthorizationStatement(SqlAlterAuthorizationStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateCertificateStatement(SqlCreateCertificateStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateMasterKeyStatement(SqlCreateMasterKeyStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_SetUserStatement(SqlSetUserStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateFulltextCatalogStatement(SqlCreateFulltextCatalogStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateFulltextStoplistStatement(SqlCreateFulltextStoplistStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateSymmetricKeyStatement(SqlCreateSymmetricKeyStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_SymmetricKeyStatement(SqlSymmetricKeyStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterFulltextIndexStatement(SqlAlterFulltextIndexStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterServerConfigurationStatement(SqlAlterServerConfigurationStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_XmlNamespacesStatement(SqlXmlNamespacesStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
 }

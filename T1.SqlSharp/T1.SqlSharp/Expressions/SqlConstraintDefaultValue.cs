@@ -11,9 +11,11 @@ public class SqlConstraintDefaultValue : ISqlConstraint
 
     public string ConstraintName { get; set; } = string.Empty;
     public string DefaultValue { get; set; } = string.Empty;
+    public string ForColumn { get; set; } = string.Empty;
 
     public string ToSql()
     {
-        return $"DEFAULT {DefaultValue}";
+        var forClause = string.IsNullOrEmpty(ForColumn) ? string.Empty : $" FOR {ForColumn}";
+        return $"DEFAULT {DefaultValue}{forClause}";
     }
 }

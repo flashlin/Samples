@@ -23,6 +23,56 @@ public class ParseCreateIndexSqlTest
     }
 
     [Test]
+    public void Create_spatial_index()
+    {
+        var sql = "CREATE SPATIAL INDEX sidx ON Locations (GeoCol)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateIndexStatement
+        {
+            IsSpatial = true,
+            IndexName = "sidx",
+            TableName = "Locations",
+            Columns =
+            [
+                new SqlConstraintColumn { ColumnName = "GeoCol", Order = "" }
+            ]
+        });
+    }
+
+    [Test]
+    public void Create_clustered_columnstore_index()
+    {
+        var sql = "CREATE CLUSTERED COLUMNSTORE INDEX cci ON Orders";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateIndexStatement
+        {
+            IsColumnstore = true,
+            Clustered = "CLUSTERED",
+            IndexName = "cci",
+            TableName = "Orders"
+        });
+    }
+
+    [Test]
+    public void Create_nonclustered_columnstore_index_with_columns()
+    {
+        var sql = "CREATE NONCLUSTERED COLUMNSTORE INDEX ncci ON Orders (OrderId, Amount)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateIndexStatement
+        {
+            IsColumnstore = true,
+            Clustered = "NONCLUSTERED",
+            IndexName = "ncci",
+            TableName = "Orders",
+            Columns =
+            [
+                new SqlConstraintColumn { ColumnName = "OrderId", Order = "" },
+                new SqlConstraintColumn { ColumnName = "Amount", Order = "" }
+            ]
+        });
+    }
+
+    [Test]
     public void Create_unique_nonclustered_index_with_order()
     {
         var sql = "CREATE UNIQUE NONCLUSTERED INDEX ix ON Customer (Name ASC, Age DESC)";

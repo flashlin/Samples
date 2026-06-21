@@ -68,6 +68,11 @@ public class SqlParser
         {
         }
 
+        if (Try(ParseXmlNamespacesStatement, out var xmlNamespacesStatement))
+        {
+            return xmlNamespacesStatement.Result;
+        }
+
         if (Try(ParseWithCteStatement, out var withCteStatement))
         {
             return withCteStatement.Result;
@@ -148,6 +153,36 @@ public class SqlParser
             return createXmlSchemaCollectionStatement.Result;
         }
 
+        if (Try(ParseCreateCertificateStatement, out var createCertificateStatement))
+        {
+            return createCertificateStatement.Result;
+        }
+
+        if (Try(ParseCreateMasterKeyStatement, out var createMasterKeyStatement))
+        {
+            return createMasterKeyStatement.Result;
+        }
+
+        if (Try(ParseSetUserStatement, out var setUserStatement))
+        {
+            return setUserStatement.Result;
+        }
+
+        if (Try(ParseCreateFulltextCatalogStatement, out var createFulltextCatalogStatement))
+        {
+            return createFulltextCatalogStatement.Result;
+        }
+
+        if (Try(ParseCreateFulltextStoplistStatement, out var createFulltextStoplistStatement))
+        {
+            return createFulltextStoplistStatement.Result;
+        }
+
+        if (Try(ParseCreateSymmetricKeyStatement, out var createSymmetricKeyStatement))
+        {
+            return createSymmetricKeyStatement.Result;
+        }
+
         if (Try(() => ParseSelectStatement(), out var selectStatement))
         {
             return selectStatement.Result;
@@ -203,6 +238,16 @@ public class SqlParser
             return alterSequenceStatement.Result;
         }
 
+        if (Try(ParseAlterFulltextIndexStatement, out var alterFulltextIndexStatement))
+        {
+            return alterFulltextIndexStatement.Result;
+        }
+
+        if (Try(ParseAlterServerConfigurationStatement, out var alterServerConfigurationStatement))
+        {
+            return alterServerConfigurationStatement.Result;
+        }
+
         if (Try(ParseAlterDatabaseStatement, out var alterDatabaseStatement))
         {
             return alterDatabaseStatement.Result;
@@ -211,6 +256,11 @@ public class SqlParser
         if (Try(ParseAlterSchemaStatement, out var alterSchemaStatement))
         {
             return alterSchemaStatement.Result;
+        }
+
+        if (Try(ParseAlterAuthorizationStatement, out var alterAuthorizationStatement))
+        {
+            return alterAuthorizationStatement.Result;
         }
 
         if (Try(ParseAlterRoleStatement, out var alterRoleStatement))
@@ -288,6 +338,11 @@ public class SqlParser
             return loopControlStatement.Result;
         }
 
+        if (Try(ParseSymmetricKeyStatement, out var symmetricKeyStatement))
+        {
+            return symmetricKeyStatement.Result;
+        }
+
         if (Try(ParseCursorOperationStatement, out var cursorOperationStatement))
         {
             return cursorOperationStatement.Result;
@@ -331,6 +386,11 @@ public class SqlParser
         if (Try(ParseBackupRestoreStatement, out var backupRestoreStatement))
         {
             return backupRestoreStatement.Result;
+        }
+
+        if (Try(ParseToggleTriggerStatement, out var toggleTriggerStatement))
+        {
+            return toggleTriggerStatement.Result;
         }
 
         if (Try(ParseUseStatement, out var useStatement))
@@ -955,7 +1015,7 @@ public class SqlParser
 
             // 一開始就定義這些 關鍵字表示不是 column  
             if (IsAny(PeekKeywords("CONSTRAINT"), PeekKeywords("PRIMARY", "KEY"), PeekKeywords("UNIQUE"),
-                    PeekKeywords("FOREIGN", "KEY"), PeekKeywords("CHECK")))
+                    PeekKeywords("FOREIGN", "KEY"), PeekKeywords("CHECK"), PeekKeywords("PERIOD", "FOR")))
             {
                 break;
             }
@@ -998,16 +1058,44 @@ public class SqlParser
         }
 
         var tableName = _text.ReadSqlIdentifier();
-        if (!TryMatch("(", out var openParenthesis))
-        {
-            return CreateParseError("Expected (");
-        }
 
         var createTableStatement = new SqlCreateTableExpression()
         {
             Span = _text.CreateSpan(startSpan),
             TableName = tableName.Word,
         };
+
+        if (!IsPeekMatch("("))
+        {
+            if (IsPeekKeywords("WITH"))
+            {
+                var ctasOptions = Parse_ParenthesizedOptionList();
+                if (ctasOptions.HasError)
+                {
+                    return ctasOptions.Error;
+                }
+
+                createTableStatement.WithOptions = ctasOptions.ResultValue;
+            }
+
+            if (!TryKeyword("AS", out _))
+            {
+                return CreateParseError("Expected ( or AS in CREATE TABLE");
+            }
+
+            var asSelect = ParseSelectStatement();
+            if (asSelect.HasError)
+            {
+                return asSelect.Error;
+            }
+
+            createTableStatement.AsSelect = asSelect.ResultValue;
+            SkipStatementEnd();
+            createTableStatement.Span = _text.CreateSpan(startSpan);
+            return CreateParseResult(createTableStatement);
+        }
+
+        TryMatch("(", out var openParenthesis);
 
         while (!_text.IsEnd())
         {
@@ -1037,6 +1125,28 @@ public class SqlParser
                 continue;
             }
 
+            if (TryKeywords(["PERIOD", "FOR", "SYSTEM_TIME"], out _))
+            {
+                if (!TryMatch("(", out _))
+                {
+                    return CreateParseError("Expected ( after PERIOD FOR SYSTEM_TIME");
+                }
+
+                var periodColumns = ReadCommaSeparatedIdentifiers();
+                if (!TryMatch(")", out _))
+                {
+                    return CreateParseError("Expected ) after PERIOD columns");
+                }
+
+                createTableStatement.Period = string.Join(", ", periodColumns);
+                if (_text.PeekChar() == ',')
+                {
+                    _text.ReadChar();
+                }
+
+                continue;
+            }
+
             break;
         }
 
@@ -1045,10 +1155,70 @@ public class SqlParser
             return CreateParseError("ParseCreateTableStatement Expected )");
         }
 
+        var tableOptions = Parse_CreateTableOptions(createTableStatement);
+        if (tableOptions.HasError)
+        {
+            return tableOptions.Error;
+        }
+
         SkipStatementEnd();
 
         createTableStatement.Span = _text.CreateSpan(startSpan);
         return CreateParseResult(createTableStatement);
+    }
+
+    private ParseResult<bool> Parse_CreateTableOptions(SqlCreateTableExpression statement)
+    {
+        while (true)
+        {
+            if (TryKeyword("ON", out _))
+            {
+                statement.OnFileGroup = ReadFileGroupName();
+                continue;
+            }
+
+            if (TryKeyword("TEXTIMAGE_ON", out _))
+            {
+                statement.TextImageOn = ReadFileGroupName();
+                continue;
+            }
+
+            if (TryKeyword("FILESTREAM_ON", out _))
+            {
+                ReadFileGroupName();
+                continue;
+            }
+
+            if (IsPeekKeywords("WITH"))
+            {
+                var options = Parse_ParenthesizedOptionList();
+                if (options.HasError)
+                {
+                    return options.Error;
+                }
+
+                statement.WithOptions = options.ResultValue;
+                continue;
+            }
+
+            break;
+        }
+
+        return CreateParseResult(true);
+    }
+
+    private string ReadFileGroupName()
+    {
+        var name = Parse_SqlIdentifier();
+        var fileGroup = name.Result?.FieldName ?? ReadSqlIdentifier().Word;
+        if (TryMatch("(", out _))
+        {
+            var columns = ReadCommaSeparatedIdentifiers();
+            TryMatch(")", out _);
+            fileGroup += $" ({string.Join(", ", columns)})";
+        }
+
+        return fileGroup;
     }
 
     public ParseResult<SqlSpAddExtendedPropertyExpression> ParseExecSpAddExtendedProperty()
@@ -1160,6 +1330,61 @@ public class SqlParser
             OnDeleteAction = onDelete,
             OnUpdateAction = onUpdate,
             NotForReplication = notForReplication,
+        });
+    }
+
+    private ParseResult<SqlXmlNamespacesStatement> ParseXmlNamespacesStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("WITH", out var startSpan))
+        {
+            return NoneResult<SqlXmlNamespacesStatement>();
+        }
+
+        if (!TryKeyword("XMLNAMESPACES", out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlXmlNamespacesStatement>();
+        }
+
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected ( after XMLNAMESPACES");
+        }
+
+        var namespaces = new List<string>();
+        do
+        {
+            if (TryKeyword("DEFAULT", out _))
+            {
+                var uri = Try(ParseSqlQuotedString, out var defaultUri) ? defaultUri.ResultValue.ToSql() : string.Empty;
+                namespaces.Add($"DEFAULT {uri}");
+            }
+            else
+            {
+                var uri = Try(ParseSqlQuotedString, out var nsUri) ? nsUri.ResultValue.ToSql() : string.Empty;
+                TryKeyword("AS", out _);
+                var prefix = ReadSqlIdentifier().Word;
+                namespaces.Add($"{uri} AS {prefix}");
+            }
+        } while (TryMatch(",", out _));
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected ) to close XMLNAMESPACES");
+        }
+
+        var body = Parse_CteBodyStatement();
+        if (body.HasError)
+        {
+            return body.Error;
+        }
+
+        return CreateParseResult(new SqlXmlNamespacesStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Namespaces = namespaces,
+            Statement = body.Result
         });
     }
 
@@ -3002,6 +3227,11 @@ public class SqlParser
                 allTableSources.Add(tableSource);
             }
 
+            if (tableSourcesExpr.Count == 0)
+            {
+                return CreateParseError("Expected table source");
+            }
+
             return CreateParseResult(tableSourcesExpr[0]);
         });
         return allTableSources;
@@ -3044,6 +3274,38 @@ public class SqlParser
         return joinTableSources;
     }
 
+    private ParseResult<ISqlExpression> Parse_FunctionArgument()
+    {
+        if (TryKeyword("BULK", out _))
+        {
+            return ParseArithmeticExpr();
+        }
+
+        var expr = ParseArithmeticExpr();
+        if (expr.HasError)
+        {
+            return expr.Error;
+        }
+
+        if (TryMatch(":", out _))
+        {
+            var value = ParseArithmeticExpr();
+            if (value.HasError)
+            {
+                return value.Error;
+            }
+
+            return CreateParseResult<ISqlExpression>(new SqlAssignExpr
+            {
+                Left = expr.ResultValue,
+                Operator = ":",
+                Right = value.ResultValue
+            });
+        }
+
+        return expr;
+    }
+
     private ParseResult<SqlFunctionExpression> ParseFunctionCall()
     {
         var startPosition = _text.Position;
@@ -3051,7 +3313,7 @@ public class SqlParser
         {
             if (TryMatch("(", out var openParenthesis))
             {
-                var parameters = ParseWithComma(ParseArithmeticExpr);
+                var parameters = ParseWithComma(Parse_FunctionArgument);
                 if (!TryMatch(")", out _))
                 {
                     return CreateParseError("Expected )");
@@ -3642,6 +3904,20 @@ public class SqlParser
             return Parse_ExecDynamicSql(startSpan);
         }
 
+        var returnVariable = string.Empty;
+        var beforeReturnVariable = _text.Position;
+        var firstIdentifier = Parse_SqlIdentifier();
+        if (firstIdentifier.Result != null
+            && firstIdentifier.ResultValue.FieldName.StartsWith("@")
+            && TryMatch("=", out _))
+        {
+            returnVariable = firstIdentifier.ResultValue.FieldName;
+        }
+        else
+        {
+            _text.Position = beforeReturnVariable;
+        }
+
         var procedureName = Parse_SqlIdentifier();
         if (procedureName.Result == null)
         {
@@ -3664,6 +3940,7 @@ public class SqlParser
         {
             Span = _text.CreateSpan(startSpan),
             ProcedureName = procedureName.ResultValue.FieldName,
+            ReturnVariable = returnVariable,
             Arguments = arguments
         });
     }
@@ -3682,10 +3959,17 @@ public class SqlParser
             return CreateParseError("Expected ) after EXEC dynamic SQL");
         }
 
+        var atLinkedServer = string.Empty;
+        if (TryKeyword("AT", out _))
+        {
+            atLinkedServer = Parse_SqlIdentifier().Result?.FieldName ?? string.Empty;
+        }
+
         return CreateParseResult(new SqlExecStatement
         {
             Span = _text.CreateSpan(startSpan),
-            DynamicSql = dynamicSql.ResultValue
+            DynamicSql = dynamicSql.ResultValue,
+            AtLinkedServer = atLinkedServer
         });
     }
 
@@ -4076,6 +4360,7 @@ public class SqlParser
         }
 
         string action;
+        var options = new List<string>();
         if (TryKeyword("REBUILD", out _))
         {
             action = "REBUILD";
@@ -4088,9 +4373,20 @@ public class SqlParser
         {
             action = "DISABLE";
         }
+        else if (TryKeyword("SET", out _))
+        {
+            action = "SET";
+            var optionList = ReadParenthesizedAssignmentList();
+            if (optionList.HasError)
+            {
+                return optionList.Error;
+            }
+
+            options = optionList.ResultValue;
+        }
         else
         {
-            return CreateParseError("Expected REBUILD, REORGANIZE or DISABLE in ALTER INDEX");
+            return CreateParseError("Expected REBUILD, REORGANIZE, DISABLE or SET in ALTER INDEX");
         }
 
         return CreateParseResult(new SqlAlterIndexStatement
@@ -4098,7 +4394,55 @@ public class SqlParser
             Span = _text.CreateSpan(startSpan),
             IndexName = indexName,
             TableName = tableName.ResultValue.FieldName,
-            Action = action
+            Action = action,
+            Options = options
+        });
+    }
+
+    private ParseResult<SqlAlterAuthorizationStatement> ParseAlterAuthorizationStatement()
+    {
+        if (!TryKeywords(["ALTER", "AUTHORIZATION", "ON"], out var startSpan))
+        {
+            return NoneResult<SqlAlterAuthorizationStatement>();
+        }
+
+        var securable = Parse_SqlIdentifier();
+        if (securable.Result == null)
+        {
+            return CreateParseError("Expected securable after ALTER AUTHORIZATION ON");
+        }
+
+        var securableClass = string.Empty;
+        var objectName = securable.ResultValue.FieldName;
+        if (TryMatch("::", out _))
+        {
+            securableClass = objectName;
+            var target = Parse_SqlIdentifier();
+            if (target.Result == null)
+            {
+                return CreateParseError("Expected securable name after ::");
+            }
+
+            objectName = target.ResultValue.FieldName;
+        }
+
+        if (!TryKeyword("TO", out _))
+        {
+            return CreateParseError("Expected TO in ALTER AUTHORIZATION");
+        }
+
+        var principal = ReadSqlIdentifier().Word;
+        if (string.IsNullOrEmpty(principal))
+        {
+            return CreateParseError("Expected principal in ALTER AUTHORIZATION");
+        }
+
+        return CreateParseResult(new SqlAlterAuthorizationStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            SecurableClass = securableClass,
+            ObjectName = objectName,
+            Principal = principal
         });
     }
 
@@ -4715,6 +5059,385 @@ public class SqlParser
         });
     }
 
+    private ParseResult<SqlCreateFulltextCatalogStatement> ParseCreateFulltextCatalogStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<SqlCreateFulltextCatalogStatement>();
+        }
+
+        if (!TryKeywords(["FULLTEXT", "CATALOG"], out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlCreateFulltextCatalogStatement>();
+        }
+
+        var name = Parse_SqlIdentifier();
+        if (name.Result == null)
+        {
+            return CreateParseError("Expected fulltext catalog name");
+        }
+
+        var statement = new SqlCreateFulltextCatalogStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Name = name.ResultValue.FieldName
+        };
+
+        if (TryKeywords(["AS", "DEFAULT"], out _))
+        {
+            statement.IsDefault = true;
+        }
+
+        if (TryKeyword("AUTHORIZATION", out _))
+        {
+            statement.Authorization = ReadSqlIdentifier().Word;
+        }
+
+        return CreateParseResult(statement);
+    }
+
+    private ParseResult<SqlCreateFulltextStoplistStatement> ParseCreateFulltextStoplistStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<SqlCreateFulltextStoplistStatement>();
+        }
+
+        if (!TryKeywords(["FULLTEXT", "STOPLIST"], out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlCreateFulltextStoplistStatement>();
+        }
+
+        var name = Parse_SqlIdentifier();
+        if (name.Result == null)
+        {
+            return CreateParseError("Expected fulltext stoplist name");
+        }
+
+        var statement = new SqlCreateFulltextStoplistStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Name = name.ResultValue.FieldName
+        };
+
+        if (TryKeyword("FROM", out _))
+        {
+            if (TryKeywords(["SYSTEM", "STOPLIST"], out _))
+            {
+                statement.Source = "SYSTEM STOPLIST";
+            }
+            else
+            {
+                statement.Source = Parse_SqlIdentifier().Result?.FieldName ?? string.Empty;
+            }
+        }
+
+        return CreateParseResult(statement);
+    }
+
+    private ParseResult<SqlCreateSymmetricKeyStatement> ParseCreateSymmetricKeyStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<SqlCreateSymmetricKeyStatement>();
+        }
+
+        if (!TryKeywords(["SYMMETRIC", "KEY"], out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlCreateSymmetricKeyStatement>();
+        }
+
+        var name = Parse_SqlIdentifier();
+        if (name.Result == null)
+        {
+            return CreateParseError("Expected symmetric key name");
+        }
+
+        var options = new List<string>();
+        if (TryKeyword("WITH", out _))
+        {
+            options.AddRange(ReadAssignmentOptionList());
+        }
+
+        if (TryKeywords(["ENCRYPTION", "BY"], out _))
+        {
+            var clause = "ENCRYPTION BY " + ReadSqlIdentifier().Word;
+            if (TryMatch("=", out _))
+            {
+                clause += " = " + (ParseArithmetic_Primary().Result?.ToSql() ?? string.Empty);
+            }
+            else
+            {
+                var encryptor = Parse_SqlIdentifier();
+                if (encryptor.Result != null)
+                {
+                    clause += " " + encryptor.ResultValue.FieldName;
+                }
+            }
+
+            options.Add(clause);
+        }
+
+        return CreateParseResult(new SqlCreateSymmetricKeyStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Name = name.ResultValue.FieldName,
+            Options = options
+        });
+    }
+
+    private ParseResult<SqlSymmetricKeyStatement> ParseSymmetricKeyStatement()
+    {
+        var startPosition = _text.Position;
+        bool isOpen;
+        TextSpan startSpan;
+        if (TryKeyword("OPEN", out startSpan))
+        {
+            isOpen = true;
+        }
+        else if (TryKeyword("CLOSE", out startSpan))
+        {
+            isOpen = false;
+        }
+        else
+        {
+            return NoneResult<SqlSymmetricKeyStatement>();
+        }
+
+        if (TryKeywords(["ALL", "SYMMETRIC", "KEYS"], out _))
+        {
+            return CreateParseResult(new SqlSymmetricKeyStatement
+            {
+                Span = _text.CreateSpan(startSpan),
+                IsOpen = isOpen,
+                AllKeys = true
+            });
+        }
+
+        if (!TryKeywords(["SYMMETRIC", "KEY"], out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlSymmetricKeyStatement>();
+        }
+
+        var keyName = Parse_SqlIdentifier();
+        if (keyName.Result == null)
+        {
+            return CreateParseError("Expected symmetric key name");
+        }
+
+        var statement = new SqlSymmetricKeyStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            IsOpen = isOpen,
+            KeyName = keyName.ResultValue.FieldName
+        };
+
+        if (TryKeywords(["DECRYPTION", "BY"], out _))
+        {
+            var clause = ReadSqlIdentifier().Word;
+            if (TryMatch("=", out _))
+            {
+                clause += " = " + (ParseArithmetic_Primary().Result?.ToSql() ?? string.Empty);
+            }
+            else
+            {
+                var by = Parse_SqlIdentifier();
+                if (by.Result != null)
+                {
+                    clause += " " + by.ResultValue.FieldName;
+                }
+            }
+
+            statement.DecryptionBy = clause;
+        }
+
+        return CreateParseResult(statement);
+    }
+
+    private ParseResult<SqlAlterFulltextIndexStatement> ParseAlterFulltextIndexStatement()
+    {
+        if (!TryKeywords(["ALTER", "FULLTEXT", "INDEX"], out var startSpan))
+        {
+            return NoneResult<SqlAlterFulltextIndexStatement>();
+        }
+
+        if (!TryKeyword("ON", out _))
+        {
+            return CreateParseError("Expected ON in ALTER FULLTEXT INDEX");
+        }
+
+        var tableName = Parse_SqlIdentifier();
+        if (tableName.Result == null)
+        {
+            return CreateParseError("Expected table name in ALTER FULLTEXT INDEX");
+        }
+
+        var actionWords = new List<string>();
+        while (!_text.IsEnd() && !IsPeekMatch(";"))
+        {
+            var word = ReadSqlIdentifier().Word;
+            if (string.IsNullOrEmpty(word))
+            {
+                break;
+            }
+
+            actionWords.Add(word);
+        }
+
+        return CreateParseResult(new SqlAlterFulltextIndexStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            TableName = tableName.ResultValue.FieldName,
+            Action = string.Join(" ", actionWords)
+        });
+    }
+
+    private ParseResult<SqlAlterServerConfigurationStatement> ParseAlterServerConfigurationStatement()
+    {
+        if (!TryKeywords(["ALTER", "SERVER", "CONFIGURATION", "SET"], out var startSpan))
+        {
+            return NoneResult<SqlAlterServerConfigurationStatement>();
+        }
+
+        var settingTokens = new List<string>();
+        while (!_text.IsEnd() && !IsPeekMatch(";"))
+        {
+            if (TryMatch("=", out _))
+            {
+                settingTokens.Add("=");
+                continue;
+            }
+
+            var word = ReadSqlIdentifier().Word;
+            if (string.IsNullOrEmpty(word))
+            {
+                break;
+            }
+
+            settingTokens.Add(word);
+        }
+
+        return CreateParseResult(new SqlAlterServerConfigurationStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Setting = string.Join(" ", settingTokens)
+        });
+    }
+
+    private ParseResult<SqlCreateCertificateStatement> ParseCreateCertificateStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<SqlCreateCertificateStatement>();
+        }
+
+        if (!TryKeyword("CERTIFICATE", out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlCreateCertificateStatement>();
+        }
+
+        var name = Parse_SqlIdentifier();
+        if (name.Result == null)
+        {
+            return CreateParseError("Expected certificate name");
+        }
+
+        var statement = new SqlCreateCertificateStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Name = name.ResultValue.FieldName
+        };
+
+        if (TryKeyword("AUTHORIZATION", out _))
+        {
+            Parse_SqlIdentifier();
+        }
+
+        while (true)
+        {
+            if (TryKeywords(["FROM", "FILE"], out _))
+            {
+                TryMatch("=", out _);
+                statement.FromFile = ParseArithmetic_Primary().Result?.ToSql() ?? string.Empty;
+                continue;
+            }
+
+            if (TryKeywords(["ENCRYPTION", "BY", "PASSWORD"], out _))
+            {
+                TryMatch("=", out _);
+                statement.Password = ParseArithmetic_Primary().Result?.ToSql() ?? string.Empty;
+                continue;
+            }
+
+            if (TryKeyword("WITH", out _))
+            {
+                statement.Options = ReadAssignmentOptionList();
+                continue;
+            }
+
+            break;
+        }
+
+        return CreateParseResult(statement);
+    }
+
+    private ParseResult<SqlCreateMasterKeyStatement> ParseCreateMasterKeyStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<SqlCreateMasterKeyStatement>();
+        }
+
+        if (!TryKeywords(["MASTER", "KEY"], out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlCreateMasterKeyStatement>();
+        }
+
+        var password = string.Empty;
+        if (TryKeywords(["ENCRYPTION", "BY", "PASSWORD"], out _))
+        {
+            TryMatch("=", out _);
+            password = ParseArithmetic_Primary().Result?.ToSql() ?? string.Empty;
+        }
+
+        return CreateParseResult(new SqlCreateMasterKeyStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Password = password
+        });
+    }
+
+    private ParseResult<SqlSetUserStatement> ParseSetUserStatement()
+    {
+        if (!TryKeyword("SETUSER", out var startSpan))
+        {
+            return NoneResult<SqlSetUserStatement>();
+        }
+
+        var userName = string.Empty;
+        if (!_text.IsEnd() && !IsPeekMatch(";"))
+        {
+            userName = ParseArithmetic_Primary().Result?.ToSql() ?? string.Empty;
+        }
+
+        return CreateParseResult(new SqlSetUserStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            UserName = userName
+        });
+    }
+
     private ParseResult<SqlAlterSequenceStatement> ParseAlterSequenceStatement()
     {
         if (!TryKeywords(["ALTER", "SEQUENCE"], out var startSpan))
@@ -5013,6 +5736,16 @@ public class SqlParser
             return CreateParseError("Expected permission name");
         }
 
+        var columns = new List<string>();
+        if (TryMatch("(", out _))
+        {
+            columns = ReadCommaSeparatedIdentifiers();
+            if (!TryMatch(")", out _))
+            {
+                return CreateParseError("Expected ) after permission columns");
+            }
+        }
+
         var objectName = string.Empty;
         var securableClass = string.Empty;
         if (TryKeyword("ON", out _))
@@ -5057,6 +5790,7 @@ public class SqlParser
             Action = action,
             GrantOptionFor = grantOptionFor,
             Permissions = permissions,
+            Columns = columns,
             SecurableClass = securableClass,
             ObjectName = objectName,
             Principals = principals,
@@ -5306,6 +6040,58 @@ public class SqlParser
         } while (TryMatch(",", out _));
 
         return CreateParseResult(events);
+    }
+
+    private ParseResult<bool> Parse_ParenthesizedTableElements(
+        out List<SqlColumnDefinition> columns, out List<ISqlConstraint> constraints)
+    {
+        columns = [];
+        constraints = [];
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected ( for table definition");
+        }
+
+        do
+        {
+            if (IsTableConstraintStart())
+            {
+                var constraint = ParseTableConstraint();
+                if (constraint.HasError)
+                {
+                    return constraint.Error;
+                }
+
+                if (constraint.Result == null)
+                {
+                    return CreateParseError("Expected table constraint");
+                }
+
+                constraints.Add(constraint.ResultValue);
+            }
+            else
+            {
+                var column = ParseColumnDefinition();
+                if (column.HasError)
+                {
+                    return column.Error;
+                }
+
+                if (column.Result == null)
+                {
+                    return CreateParseError("Expected column definition");
+                }
+
+                columns.Add(column.ResultValue);
+            }
+        } while (TryMatch(",", out _));
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected ) after table definition");
+        }
+
+        return CreateParseResult(true);
     }
 
     private ParseResult<List<SqlColumnDefinition>> Parse_ParenthesizedColumnDefinitions()
@@ -5613,6 +6399,9 @@ public class SqlParser
             clustered = "NONCLUSTERED";
         }
 
+        var isColumnstore = TryKeyword("COLUMNSTORE", out _);
+        var isSpatial = TryKeyword("SPATIAL", out _);
+
         if (!TryKeyword("INDEX", out _))
         {
             _text.Position = startPosition;
@@ -5636,20 +6425,28 @@ public class SqlParser
             return CreateParseError("Expected table name after ON in CREATE INDEX");
         }
 
-        var columns = ParseColumnsAscDesc();
-        if (columns.HasError)
+        var indexColumns = new List<SqlConstraintColumn>();
+        if (IsPeekMatch("("))
         {
-            return columns.Error;
+            var columns = ParseColumnsAscDesc();
+            if (columns.HasError)
+            {
+                return columns.Error;
+            }
+
+            indexColumns = columns.ResultValue;
         }
 
         var createIndexStatement = new SqlCreateIndexStatement
         {
             Span = _text.CreateSpan(startSpan),
             IsUnique = isUnique,
+            IsColumnstore = isColumnstore,
+            IsSpatial = isSpatial,
             Clustered = clustered,
             IndexName = indexName.ResultValue.FieldName,
             TableName = tableName.ResultValue.FieldName,
-            Columns = columns.ResultValue
+            Columns = indexColumns
         };
 
         if (TryKeyword("INCLUDE", out _))
@@ -5910,7 +6707,112 @@ public class SqlParser
             return Parse_AlterTableToggleTrigger(enable: false);
         }
 
+        if (TryKeyword("REBUILD", out _))
+        {
+            var rebuild = new SqlAlterTableRebuild();
+            if (TryKeyword("PARTITION", out _))
+            {
+                TryMatch("=", out _);
+                ParseArithmetic_Primary();
+            }
+
+            if (IsPeekKeywords("WITH"))
+            {
+                var options = Parse_ParenthesizedOptionList();
+                if (options.HasError)
+                {
+                    return options.Error;
+                }
+
+                rebuild.Options = options.ResultValue;
+            }
+
+            return CreateParseResult<ISqlAlterTableAction>(rebuild);
+        }
+
+        if (TryKeyword("SET", out _))
+        {
+            var options = ReadParenthesizedAssignmentList();
+            if (options.HasError)
+            {
+                return options.Error;
+            }
+
+            return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableSet
+            {
+                Options = options.ResultValue
+            });
+        }
+
+        if (TryKeyword("SWITCH", out _))
+        {
+            var sourcePartition = string.Empty;
+            if (TryKeyword("PARTITION", out _))
+            {
+                sourcePartition = ParseArithmetic_Primary().Result?.ToSql() ?? string.Empty;
+            }
+
+            if (!TryKeyword("TO", out _))
+            {
+                return CreateParseError("Expected TO in ALTER TABLE SWITCH");
+            }
+
+            var targetTable = Parse_SqlIdentifier();
+            if (targetTable.Result == null)
+            {
+                return CreateParseError("Expected target table in ALTER TABLE SWITCH");
+            }
+
+            var targetPartition = string.Empty;
+            if (TryKeyword("PARTITION", out _))
+            {
+                targetPartition = ParseArithmetic_Primary().Result?.ToSql() ?? string.Empty;
+            }
+
+            return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableSwitch
+            {
+                SourcePartition = sourcePartition,
+                TargetTable = targetTable.ResultValue.FieldName,
+                TargetPartition = targetPartition
+            });
+        }
+
         return NoneResult<ISqlAlterTableAction>();
+    }
+
+    private ParseResult<List<string>> ReadParenthesizedAssignmentList()
+    {
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected ( for option list");
+        }
+
+        var options = new List<string>();
+        do
+        {
+            var key = ReadSqlIdentifier().Word;
+            if (string.IsNullOrEmpty(key))
+            {
+                break;
+            }
+
+            if (TryMatch("=", out _))
+            {
+                var value = ReadSqlIdentifier().Word;
+                options.Add($"{key} = {value}");
+            }
+            else
+            {
+                options.Add(key);
+            }
+        } while (TryMatch(",", out _));
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected ) to close option list");
+        }
+
+        return CreateParseResult(options);
     }
 
     private ParseResult<ISqlAlterTableAction> Parse_AlterTableCheckConstraint(bool check)
@@ -6986,10 +7888,10 @@ public class SqlParser
 
         if (string.Equals(dataType, "TABLE", StringComparison.OrdinalIgnoreCase) && IsPeekMatch("("))
         {
-            var tableColumns = Parse_ParenthesizedColumnDefinitions();
-            if (tableColumns.HasError)
+            var elements = Parse_ParenthesizedTableElements(out var tableColumns, out var tableConstraints);
+            if (elements.HasError)
             {
-                return tableColumns.Error;
+                return elements.Error;
             }
 
             return CreateParseResult(new SqlVariableDeclaration
@@ -6997,7 +7899,8 @@ public class SqlParser
                 Name = name.ResultValue.FieldName,
                 DataType = "TABLE",
                 IsTable = true,
-                TableColumns = tableColumns.ResultValue
+                TableColumns = tableColumns,
+                TableConstraints = tableConstraints
             });
         }
 
@@ -7182,10 +8085,21 @@ public class SqlParser
         {
             if (TryKeyword(keyword, out var startSpan))
             {
+                var argument = string.Empty;
+                if (string.Equals(keyword, "CHECKPOINT", StringComparison.OrdinalIgnoreCase) && Try(ParseNumberValue, out var checkpointArg))
+                {
+                    argument = checkpointArg.ResultValue.ToSql();
+                }
+                else if (string.Equals(keyword, "RECONFIGURE", StringComparison.OrdinalIgnoreCase) && TryKeywords(["WITH", "OVERRIDE"], out _))
+                {
+                    argument = "WITH OVERRIDE";
+                }
+
                 return CreateParseResult(new SqlKeywordStatement
                 {
                     Span = _text.CreateSpan(startSpan),
-                    Keyword = keyword
+                    Keyword = keyword,
+                    Argument = argument
                 });
             }
         }
@@ -7280,6 +8194,80 @@ public class SqlParser
         return CreateParseResult(statement);
     }
 
+    private ParseResult<SqlToggleTriggerStatement> ParseToggleTriggerStatement()
+    {
+        var startPosition = _text.Position;
+        bool enable;
+        TextSpan startSpan;
+        if (TryKeyword("ENABLE", out startSpan))
+        {
+            enable = true;
+        }
+        else if (TryKeyword("DISABLE", out startSpan))
+        {
+            enable = false;
+        }
+        else
+        {
+            return NoneResult<SqlToggleTriggerStatement>();
+        }
+
+        if (!TryKeyword("TRIGGER", out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlToggleTriggerStatement>();
+        }
+
+        List<string> triggerNames;
+        if (TryKeyword("ALL", out _))
+        {
+            triggerNames = ["ALL"];
+        }
+        else
+        {
+            var names = ParseWithComma(Parse_SqlIdentifier);
+            if (names.HasError)
+            {
+                return names.Error;
+            }
+
+            triggerNames = names.ResultValue.Select(name => name.FieldName).ToList();
+        }
+
+        if (!TryKeyword("ON", out _))
+        {
+            return CreateParseError("Expected ON in ENABLE/DISABLE TRIGGER");
+        }
+
+        string target;
+        if (TryKeywords(["ALL", "SERVER"], out _))
+        {
+            target = "ALL SERVER";
+        }
+        else if (TryKeyword("DATABASE", out _))
+        {
+            target = "DATABASE";
+        }
+        else
+        {
+            var targetName = Parse_SqlIdentifier();
+            if (targetName.Result == null)
+            {
+                return CreateParseError("Expected target after ON in ENABLE/DISABLE TRIGGER");
+            }
+
+            target = targetName.ResultValue.FieldName;
+        }
+
+        return CreateParseResult(new SqlToggleTriggerStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Enable = enable,
+            TriggerNames = triggerNames,
+            Target = target
+        });
+    }
+
     private ParseResult<SqlKillStatement> ParseKillStatement()
     {
         if (!TryKeyword("KILL", out var startSpan))
@@ -7327,15 +8315,29 @@ public class SqlParser
         {
             objectKind = "LOG";
         }
+        else if (TryKeyword("CERTIFICATE", out _))
+        {
+            objectKind = "CERTIFICATE";
+        }
+        else if (TryKeywords(["MASTER", "KEY"], out _))
+        {
+            objectKind = "MASTER KEY";
+        }
         else
         {
-            return CreateParseError("Expected DATABASE or LOG after BACKUP/RESTORE");
+            return CreateParseError("Expected DATABASE, LOG, CERTIFICATE or MASTER KEY after BACKUP/RESTORE");
         }
 
-        var name = Parse_SqlIdentifier();
-        if (name.Result == null)
+        var name = string.Empty;
+        if (!IsPeekKeywords("TO") && !IsPeekKeywords("FROM"))
         {
-            return CreateParseError("Expected database name in BACKUP/RESTORE");
+            var nameResult = Parse_SqlIdentifier();
+            if (nameResult.Result == null)
+            {
+                return CreateParseError("Expected object name in BACKUP/RESTORE");
+            }
+
+            name = nameResult.ResultValue.FieldName;
         }
 
         if (isBackup ? !TryKeyword("TO", out _) : !TryKeyword("FROM", out _))
@@ -7348,7 +8350,7 @@ public class SqlParser
             Span = _text.CreateSpan(startSpan),
             IsBackup = isBackup,
             ObjectKind = objectKind,
-            Name = name.ResultValue.FieldName,
+            Name = name,
             Devices = ReadAssignmentOptionList()
         };
 
@@ -8832,6 +9834,28 @@ public class SqlParser
         {
             checkExpr.Result.ConstraintName = constraintName;
             return checkExpr.Result;
+        }
+
+        if (TryKeyword("DEFAULT", out _))
+        {
+            var defaultValue = ParseArithmeticExpr();
+            if (defaultValue.HasError)
+            {
+                return defaultValue.Error;
+            }
+
+            var forColumn = string.Empty;
+            if (TryKeyword("FOR", out _))
+            {
+                forColumn = ReadSqlIdentifier().Word;
+            }
+
+            return new SqlConstraintDefaultValue
+            {
+                ConstraintName = constraintName,
+                DefaultValue = defaultValue.ResultValue.ToSql(),
+                ForColumn = forColumn
+            };
         }
 
         return NoneResult<ISqlConstraint>();

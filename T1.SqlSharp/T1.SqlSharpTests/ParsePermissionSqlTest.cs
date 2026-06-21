@@ -151,6 +151,21 @@ public class ParsePermissionSqlTest
     }
 
     [Test]
+    public void Grant_column_level()
+    {
+        var sql = "GRANT SELECT (col1, col2) ON dbo.Orders TO appuser";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlPermissionStatement
+        {
+            Action = SqlPermissionAction.Grant,
+            Permissions = ["SELECT"],
+            Columns = ["col1", "col2"],
+            ObjectName = "dbo.Orders",
+            Principals = ["appuser"]
+        });
+    }
+
+    [Test]
     public void Grant_mixed_single_and_multiword_permissions()
     {
         var sql = "GRANT SELECT, VIEW DEFINITION ON dbo.Orders TO appuser";

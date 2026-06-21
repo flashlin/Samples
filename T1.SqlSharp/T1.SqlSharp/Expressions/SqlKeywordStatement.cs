@@ -11,9 +11,10 @@ public class SqlKeywordStatement : ISqlExpression
     }
 
     public string Keyword { get; set; } = string.Empty;
+    public string Argument { get; set; } = string.Empty;
 
     public string ToSql()
     {
-        return Keyword;
+        return string.IsNullOrEmpty(Argument) ? Keyword : $"{Keyword} {Argument}";
     }
 }

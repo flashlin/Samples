@@ -74,6 +74,20 @@ public class ParseBackupRestoreKillSqlTest
     }
 
     [Test]
+    public void Backup_certificate_to_file()
+    {
+        var sql = "BACKUP CERTIFICATE MyCert TO FILE = 'C:\\cert.cer'";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlBackupRestoreStatement
+        {
+            IsBackup = true,
+            ObjectKind = "CERTIFICATE",
+            Name = "MyCert",
+            Devices = ["FILE = 'C:\\cert.cer'"]
+        });
+    }
+
+    [Test]
     public void Backup_log_to_disk()
     {
         var sql = "BACKUP LOG Sales TO DISK = 'C:\\sales.trn'";

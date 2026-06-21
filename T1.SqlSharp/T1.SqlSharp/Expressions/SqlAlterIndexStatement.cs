@@ -13,9 +13,11 @@ public class SqlAlterIndexStatement : ISqlExpression
     public string IndexName { get; set; } = string.Empty;
     public string TableName { get; set; } = string.Empty;
     public string Action { get; set; } = string.Empty;
+    public List<string> Options { get; set; } = [];
 
     public string ToSql()
     {
-        return $"ALTER INDEX {IndexName} ON {TableName} {Action}";
+        var options = Options.Count > 0 ? $" ({string.Join(", ", Options)})" : string.Empty;
+        return $"ALTER INDEX {IndexName} ON {TableName} {Action}{options}";
     }
 }

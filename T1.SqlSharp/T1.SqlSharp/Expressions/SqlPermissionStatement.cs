@@ -21,6 +21,7 @@ public class SqlPermissionStatement : ISqlExpression
 
     public SqlPermissionAction Action { get; set; }
     public List<string> Permissions { get; set; } = [];
+    public List<string> Columns { get; set; } = [];
     public string SecurableClass { get; set; } = string.Empty;
     public string ObjectName { get; set; } = string.Empty;
     public List<string> Principals { get; set; } = [];
@@ -40,6 +41,11 @@ public class SqlPermissionStatement : ISqlExpression
         }
 
         sql.Append(string.Join(", ", Permissions));
+        if (Columns.Count > 0)
+        {
+            sql.Append($" ({string.Join(", ", Columns)})");
+        }
+
         if (!string.IsNullOrEmpty(ObjectName))
         {
             var securable = string.IsNullOrEmpty(SecurableClass) ? ObjectName : $"{SecurableClass}::{ObjectName}";

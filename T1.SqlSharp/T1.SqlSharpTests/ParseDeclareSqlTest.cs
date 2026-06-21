@@ -151,4 +151,39 @@ public class ParseDeclareSqlTest
             ]
         });
     }
+
+    [Test]
+    public void Declare_table_variable_with_inline_constraint()
+    {
+        var sql = "DECLARE @t TABLE (Id INT, PRIMARY KEY (Id))";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDeclareStatement
+        {
+            Declarations =
+            [
+                new SqlVariableDeclaration
+                {
+                    Name = "@t",
+                    DataType = "TABLE",
+                    IsTable = true,
+                    TableColumns =
+                    [
+                        new SqlColumnDefinition { ColumnName = "Id", DataType = "INT" }
+                    ],
+                    TableConstraints =
+                    [
+                        new SqlConstraintPrimaryKeyOrUnique
+                        {
+                            ConstraintType = "PRIMARY KEY",
+                            Clustered = "",
+                            Columns =
+                            [
+                                new SqlConstraintColumn { ColumnName = "Id", Order = "" }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
+    }
 }

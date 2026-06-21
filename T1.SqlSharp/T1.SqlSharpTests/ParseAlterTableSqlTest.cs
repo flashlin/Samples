@@ -7,6 +7,79 @@ namespace T1.SqlSharpTests;
 public class ParseAlterTableSqlTest
 {
     [Test]
+    public void Alter_table_rebuild()
+    {
+        var sql = "ALTER TABLE Orders REBUILD";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Orders",
+            Action = new SqlAlterTableRebuild()
+        });
+    }
+
+    [Test]
+    public void Alter_table_rebuild_with_options()
+    {
+        var sql = "ALTER TABLE Orders REBUILD WITH (ONLINE = ON)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Orders",
+            Action = new SqlAlterTableRebuild { Options = ["ONLINE = ON"] }
+        });
+    }
+
+    [Test]
+    public void Alter_table_set_system_versioning()
+    {
+        var sql = "ALTER TABLE Orders SET (SYSTEM_VERSIONING = ON)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Orders",
+            Action = new SqlAlterTableSet { Options = ["SYSTEM_VERSIONING = ON"] }
+        });
+    }
+
+    [Test]
+    public void Alter_table_switch_partition()
+    {
+        var sql = "ALTER TABLE Orders SWITCH PARTITION 1 TO OrdersArchive PARTITION 1";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Orders",
+            Action = new SqlAlterTableSwitch
+            {
+                SourcePartition = "1",
+                TargetTable = "OrdersArchive",
+                TargetPartition = "1"
+            }
+        });
+    }
+
+    [Test]
+    public void Alter_table_add_named_default_constraint()
+    {
+        var sql = "ALTER TABLE Orders ADD CONSTRAINT df_Status DEFAULT 0 FOR Status";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Orders",
+            Action = new SqlAlterTableAddConstraint
+            {
+                Constraint = new SqlConstraintDefaultValue
+                {
+                    ConstraintName = "df_Status",
+                    DefaultValue = "0",
+                    ForColumn = "Status"
+                }
+            }
+        });
+    }
+
+    [Test]
     public void Alter_table_add_single_column()
     {
         var sql = "ALTER TABLE Users ADD Age INT";
