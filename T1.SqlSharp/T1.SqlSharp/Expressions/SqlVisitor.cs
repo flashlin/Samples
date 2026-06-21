@@ -526,6 +526,8 @@ public class SqlVisitor
     public virtual void Visit_InsertStatement(SqlInsertStatement expr)
     {
         AddSqlExpression(expr);
+        expr.ValuesRows.ForEach(row => row.ForEach(value => value.Accept(this)));
+        expr.SourceSelect?.Accept(this);
     }
 
     public virtual void Visit_UpdateStatement(SqlUpdateStatement expr)

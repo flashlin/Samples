@@ -3,7 +3,7 @@
 > 用途：追蹤 parser 目前支援哪些 T-SQL 語法，方便維護與規劃。
 > 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援、`[N/A]` 不適用 T-SQL（不實作）。
 > 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對）。
-> 入口：`SqlParser.Parse()` 只 dispatch 5 種頂層語句（WITH CTE / CREATE TABLE / SELECT / EXEC sp_addextendedproperty / SET）。
+> 入口：`SqlParser.Parse()` dispatch 6 種頂層語句（WITH CTE / CREATE TABLE / SELECT / INSERT / EXEC sp_addextendedproperty / SET）。
 
 ---
 
@@ -14,7 +14,7 @@
 - [x] `CREATE TABLE`
 - [x] `SET @var = value`（變數賦值）
 - [x] `EXEC sp_addextendedproperty ...`（僅此特定 SP）
-- [ ] `INSERT`（註：`SqlInsertExpressionBuilder` 可「產生」，但 parser 不能「解析」）
+- [~] `INSERT`（parser 可解析：`INSERT [INTO] t [(cols)] VALUES (..)[, (..)]`、多列、省略欄位/省略 INTO、`INSERT ... SELECT`、`DEFAULT VALUES`、VALUES 內任意運算式；additive 擴充 `SqlInsertStatement` 加 `ValuesRows`/`SourceSelect`/`IsDefaultValues`，builder 路徑不受影響。未做：`OUTPUT`、`INSERT ... EXEC`、`INSERT TOP (n)`、table hint）
 - [ ] `UPDATE`（同上，有 builder 無 parser）
 - [ ] `DELETE`
 - [ ] `MERGE`

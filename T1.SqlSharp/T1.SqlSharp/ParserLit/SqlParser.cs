@@ -79,6 +79,11 @@ public class SqlParser
             return selectStatement.Result;
         }
 
+        if (Try(ParseInsertStatement, out var insertStatement))
+        {
+            return insertStatement.Result;
+        }
+
         if (Try(ParseExecSpAddExtendedProperty, out var execSpAddExtendedProperty))
         {
             return execSpAddExtendedProperty.Result;
@@ -3113,6 +3118,87 @@ public class SqlParser
         }
 
         return NoneResult<SqlFieldExpr>();
+    }
+
+    private ParseResult<SqlInsertStatement> ParseInsertStatement()
+    {
+        if (!TryKeyword("INSERT", out var startSpan))
+        {
+            return NoneResult<SqlInsertStatement>();
+        }
+
+        TryKeyword("INTO", out _);
+
+        var tableName = Parse_SqlIdentifier();
+        if (tableName.Result == null)
+        {
+            return CreateParseError("Expected table name after INSERT");
+        }
+
+        var insertStatement = new SqlInsertStatement
+        {
+            TableName = tableName.ResultValue.FieldName
+        };
+
+        if (IsPeekMatch("("))
+        {
+            var columns = Parse_ParenthesizedColumns();
+            if (columns.HasError)
+            {
+                return columns.Error;
+            }
+
+            insertStatement.Columns = columns.ResultValue
+                .OfType<SqlFieldExpr>()
+                .Select(field => field.FieldName)
+                .ToList();
+        }
+
+        if (TryKeywords(["DEFAULT", "VALUES"], out _))
+        {
+            insertStatement.IsDefaultValues = true;
+            insertStatement.Span = _text.CreateSpan(startSpan);
+            return CreateParseResult(insertStatement);
+        }
+
+        if (TryKeyword("VALUES", out _))
+        {
+            var valuesRows = Parse_InsertValuesRows();
+            if (valuesRows.HasError)
+            {
+                return valuesRows.Error;
+            }
+
+            insertStatement.ValuesRows = valuesRows.ResultValue;
+            insertStatement.Span = _text.CreateSpan(startSpan);
+            return CreateParseResult(insertStatement);
+        }
+
+        if (Try(() => ParseSelectStatement(), out var sourceSelect))
+        {
+            insertStatement.SourceSelect = sourceSelect.ResultValue;
+            insertStatement.Span = _text.CreateSpan(startSpan);
+            return CreateParseResult(insertStatement);
+        }
+
+        return CreateParseError("Expected VALUES, SELECT or DEFAULT VALUES after INSERT");
+    }
+
+    private ParseResult<List<List<ISqlExpression>>> Parse_InsertValuesRows()
+    {
+        var rows = new List<List<ISqlExpression>>();
+        do
+        {
+            var row = Parse_ParenthesizedColumns();
+            if (row.HasError)
+            {
+                return row.Error;
+            }
+
+            rows.Add(row.ResultValue);
+        } while (TryMatch(",", out _));
+
+        return CreateParseResult(rows);
     }
 
     private ParseResult<SqlSetValueStatement> ParseSetValueStatement()

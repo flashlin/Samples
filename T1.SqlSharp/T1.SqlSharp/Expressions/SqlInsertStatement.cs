@@ -14,6 +14,9 @@ public class SqlInsertStatement : ISqlExpression
 
     public string TableName { get; set; } = string.Empty;
     public List<string> Columns { get; set; } = [];
+    public List<List<ISqlExpression>> ValuesRows { get; set; } = [];
+    public SelectStatement? SourceSelect { get; set; }
+    public bool IsDefaultValues { get; set; }
 
     public string ToSql()
     {
