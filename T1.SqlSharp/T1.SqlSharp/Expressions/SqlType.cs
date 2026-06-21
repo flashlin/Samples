@@ -114,4 +114,7 @@ public enum SqlType
     ThrowStatement,
     RaiseErrorStatement,
     LoopControlStatement,
+    CreateTriggerStatement,
+    UseStatement,
+    GoStatement,
 }

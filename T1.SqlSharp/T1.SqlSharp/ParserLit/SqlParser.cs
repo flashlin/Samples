@@ -94,6 +94,11 @@ public class SqlParser
             return createFunctionStatement.Result;
         }
 
+        if (Try(ParseCreateTriggerStatement, out var createTriggerStatement))
+        {
+            return createTriggerStatement.Result;
+        }
+
         if (Try(() => ParseSelectStatement(), out var selectStatement))
         {
             return selectStatement.Result;
@@ -197,6 +202,16 @@ public class SqlParser
         if (Try(ParseLoopControlStatement, out var loopControlStatement))
         {
             return loopControlStatement.Result;
+        }
+
+        if (Try(ParseUseStatement, out var useStatement))
+        {
+            return useStatement.Result;
+        }
+
+        if (Try(ParseGoStatement, out var goStatement))
+        {
+            return goStatement.Result;
         }
 
         if (Try(ParseSetValueStatement, out var setValueStatement))
@@ -3553,6 +3568,170 @@ public class SqlParser
         }
 
         return NoneResult<SqlLoopControlStatement>();
+    }
+
+    private ParseResult<SqlCreateTriggerStatement> ParseCreateTriggerStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<SqlCreateTriggerStatement>();
+        }
+
+        var isOrAlter = TryKeywords(["OR", "ALTER"], out _);
+
+        if (!TryKeyword("TRIGGER", out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlCreateTriggerStatement>();
+        }
+
+        var triggerName = Parse_SqlIdentifier();
+        if (triggerName.Result == null)
+        {
+            return CreateParseError("Expected trigger name after CREATE TRIGGER");
+        }
+
+        if (!TryKeyword("ON", out _))
+        {
+            return CreateParseError("Expected ON in CREATE TRIGGER");
+        }
+
+        var target = Parse_SqlIdentifier();
+        if (target.Result == null)
+        {
+            return CreateParseError("Expected target table after ON in CREATE TRIGGER");
+        }
+
+        var timing = ParseTriggerTiming();
+        if (timing.HasError)
+        {
+            return timing.Error;
+        }
+
+        var events = ParseTriggerEvents();
+        if (events.HasError)
+        {
+            return events.Error;
+        }
+
+        if (!TryKeyword("AS", out _))
+        {
+            return CreateParseError("Expected AS in CREATE TRIGGER");
+        }
+
+        var body = Parse();
+        if (body.HasError)
+        {
+            return body.Error;
+        }
+
+        return CreateParseResult(new SqlCreateTriggerStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            IsOrAlter = isOrAlter,
+            TriggerName = triggerName.ResultValue.FieldName,
+            TableName = target.ResultValue.FieldName,
+            Timing = timing.ResultValue,
+            Events = events.ResultValue,
+            Body = body.ResultValue
+        });
+    }
+
+    private ParseResult<SqlTriggerTiming> ParseTriggerTiming()
+    {
+        if (TryKeywords(["INSTEAD", "OF"], out _))
+        {
+            return CreateParseResult(SqlTriggerTiming.InsteadOf);
+        }
+
+        if (TryKeyword("AFTER", out _))
+        {
+            return CreateParseResult(SqlTriggerTiming.After);
+        }
+
+        if (TryKeyword("FOR", out _))
+        {
+            return CreateParseResult(SqlTriggerTiming.For);
+        }
+
+        return CreateParseError("Expected FOR, AFTER or INSTEAD OF in CREATE TRIGGER");
+    }
+
+    private ParseResult<List<SqlTriggerEvent>> ParseTriggerEvents()
+    {
+        var events = new List<SqlTriggerEvent>();
+        do
+        {
+            if (TryKeyword("INSERT", out _))
+            {
+                events.Add(SqlTriggerEvent.Insert);
+            }
+            else if (TryKeyword("UPDATE", out _))
+            {
+                events.Add(SqlTriggerEvent.Update);
+            }
+            else if (TryKeyword("DELETE", out _))
+            {
+                events.Add(SqlTriggerEvent.Delete);
+            }
+            else
+            {
+                return CreateParseError("Expected INSERT, UPDATE or DELETE trigger event");
+            }
+        } while (TryMatch(",", out _));
+
+        return CreateParseResult(events);
+    }
+
+    private ParseResult<SqlUseStatement> ParseUseStatement()
+    {
+        if (!TryKeyword("USE", out var startSpan))
+        {
+            return NoneResult<SqlUseStatement>();
+        }
+
+        var databaseName = Parse_SqlIdentifier();
+        if (databaseName.Result == null)
+        {
+            return CreateParseError("Expected database name after USE");
+        }
+
+        return CreateParseResult(new SqlUseStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            DatabaseName = databaseName.ResultValue.FieldName
+        });
+    }
+
+    private ParseResult<SqlGoStatement> ParseGoStatement()
+    {
+        if (!TryKeyword("GO", out var startSpan))
+        {
+            return NoneResult<SqlGoStatement>();
+        }
+
+        var goStatement = new SqlGoStatement
+        {
+            Span = _text.CreateSpan(startSpan)
+        };
+
+        if (!_text.IsEnd() && !IsPeekMatch(";"))
+        {
+            var savedPosition = _text.Position;
+            var value = ParseArithmeticExpr();
+            if (!value.HasError && value.Result is SqlValue { SqlType: SqlType.IntValue } intValue
+                && int.TryParse(intValue.Value, out var count))
+            {
+                goStatement.Count = count;
+            }
+            else
+            {
+                _text.Position = savedPosition;
+            }
+        }
+
+        return CreateParseResult(goStatement);
     }
 
     private ParseResult<SqlCreateFunctionStatement> ParseCreateFunctionStatement()

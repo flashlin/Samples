@@ -742,4 +742,20 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
     }
+
+    public virtual void Visit_CreateTriggerStatement(SqlCreateTriggerStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Body.Accept(this);
+    }
+
+    public virtual void Visit_UseStatement(SqlUseStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_GoStatement(SqlGoStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
 }

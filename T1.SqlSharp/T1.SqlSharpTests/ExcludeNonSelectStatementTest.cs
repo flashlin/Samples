@@ -9,7 +9,7 @@ public class ExcludeNonSelectStatementTest
     public void ExtractKnownStatements()
     {
         var sql = $"""
-                   use mydb
+                   dbcc checkdb
                    set name='123'
                    select 1
                    """;
