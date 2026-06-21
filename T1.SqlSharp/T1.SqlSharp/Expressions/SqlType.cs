@@ -101,4 +101,8 @@ public enum SqlType
     CreateViewStatement,
     CreateIndexStatement,
     ExecStatement,
+    DeclareStatement,
+    BlockStatement,
+    IfStatement,
+    WhileStatement,
 }

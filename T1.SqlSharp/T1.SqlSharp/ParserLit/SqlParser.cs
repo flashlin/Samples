@@ -134,6 +134,26 @@ public class SqlParser
             return execStatement.Result;
         }
 
+        if (Try(ParseDeclareStatement, out var declareStatement))
+        {
+            return declareStatement.Result;
+        }
+
+        if (Try(ParseBlockStatement, out var blockStatement))
+        {
+            return blockStatement.Result;
+        }
+
+        if (Try(ParseIfStatement, out var ifStatement))
+        {
+            return ifStatement.Result;
+        }
+
+        if (Try(ParseWhileStatement, out var whileStatement))
+        {
+            return whileStatement.Result;
+        }
+
         if (Try(ParseSetValueStatement, out var setValueStatement))
         {
             return setValueStatement.Result;
@@ -4244,6 +4264,189 @@ public class SqlParser
         }
 
         return ParseArithmeticExpr();
+    }
+
+    private ParseResult<SqlBlockStatement> ParseBlockStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("BEGIN", out var startSpan))
+        {
+            return NoneResult<SqlBlockStatement>();
+        }
+
+        if (IsPeekKeywords("TRY") || IsPeekKeywords("CATCH") || IsPeekKeywords("TRANSACTION")
+            || IsPeekKeywords("TRAN") || IsPeekKeywords("DISTRIBUTED"))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlBlockStatement>();
+        }
+
+        var statements = new List<ISqlExpression>();
+        while (!IsPeekKeywords("END") && !_text.IsEnd())
+        {
+            var statement = Parse();
+            if (statement.HasError)
+            {
+                return statement.Error;
+            }
+
+            statements.Add(statement.ResultValue);
+            TryMatch(";", out _);
+        }
+
+        if (!TryKeyword("END", out _))
+        {
+            return CreateParseError("Expected END to close BEGIN block");
+        }
+
+        return CreateParseResult(new SqlBlockStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Statements = statements
+        });
+    }
+
+    private ParseResult<SqlIfStatement> ParseIfStatement()
+    {
+        if (!TryKeyword("IF", out var startSpan))
+        {
+            return NoneResult<SqlIfStatement>();
+        }
+
+        var condition = Parse_WhereExpression();
+        if (condition.HasError)
+        {
+            return condition.Error;
+        }
+
+        if (condition.Result == null)
+        {
+            return CreateParseError("Expected condition after IF");
+        }
+
+        var thenStatement = Parse();
+        if (thenStatement.HasError)
+        {
+            return thenStatement.Error;
+        }
+
+        var ifStatement = new SqlIfStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Condition = condition.ResultValue,
+            Then = thenStatement.ResultValue
+        };
+
+        if (TryKeyword("ELSE", out _))
+        {
+            var elseStatement = Parse();
+            if (elseStatement.HasError)
+            {
+                return elseStatement.Error;
+            }
+
+            ifStatement.Else = elseStatement.ResultValue;
+        }
+
+        return CreateParseResult(ifStatement);
+    }
+
+    private ParseResult<SqlWhileStatement> ParseWhileStatement()
+    {
+        if (!TryKeyword("WHILE", out var startSpan))
+        {
+            return NoneResult<SqlWhileStatement>();
+        }
+
+        var condition = Parse_WhereExpression();
+        if (condition.HasError)
+        {
+            return condition.Error;
+        }
+
+        if (condition.Result == null)
+        {
+            return CreateParseError("Expected condition after WHILE");
+        }
+
+        var body = Parse();
+        if (body.HasError)
+        {
+            return body.Error;
+        }
+
+        return CreateParseResult(new SqlWhileStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Condition = condition.ResultValue,
+            Body = body.ResultValue
+        });
+    }
+
+    private ParseResult<SqlDeclareStatement> ParseDeclareStatement()
+    {
+        if (!TryKeyword("DECLARE", out var startSpan))
+        {
+            return NoneResult<SqlDeclareStatement>();
+        }
+
+        var declarations = ParseWithComma(Parse_VariableDeclaration);
+        if (declarations.HasError)
+        {
+            return declarations.Error;
+        }
+
+        if (declarations.Result == null || declarations.ResultValue.Count == 0)
+        {
+            return CreateParseError("Expected variable declaration after DECLARE");
+        }
+
+        return CreateParseResult(new SqlDeclareStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Declarations = declarations.ResultValue
+        });
+    }
+
+    private ParseResult<SqlVariableDeclaration> Parse_VariableDeclaration()
+    {
+        var name = Parse_SqlIdentifier();
+        if (name.Result == null)
+        {
+            return NoneResult<SqlVariableDeclaration>();
+        }
+
+        var dataType = ReadSqlIdentifier().Word;
+        if (string.IsNullOrEmpty(dataType))
+        {
+            return CreateParseError("Expected data type in DECLARE");
+        }
+
+        var dataSize = Parse_DataSize();
+        if (dataSize.HasError)
+        {
+            return dataSize.Error;
+        }
+
+        var declaration = new SqlVariableDeclaration
+        {
+            Name = name.ResultValue.FieldName,
+            DataType = dataType,
+            DataSize = dataSize.Result
+        };
+
+        if (TryMatch("=", out _))
+        {
+            var initialValue = ParseArithmeticExpr();
+            if (initialValue.HasError)
+            {
+                return initialValue.Error;
+            }
+
+            declaration.InitialValue = initialValue.ResultValue;
+        }
+
+        return CreateParseResult(declaration);
     }
 
     private ParseResult<SqlSetValueStatement> ParseSetValueStatement()

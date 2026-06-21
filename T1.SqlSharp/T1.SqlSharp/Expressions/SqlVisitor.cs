@@ -655,4 +655,31 @@ public class SqlVisitor
         AddSqlExpression(expr);
         expr.Arguments.ForEach(argument => argument.Accept(this));
     }
+
+    public virtual void Visit_DeclareStatement(SqlDeclareStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Declarations.ForEach(declaration => declaration.InitialValue?.Accept(this));
+    }
+
+    public virtual void Visit_BlockStatement(SqlBlockStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Statements.ForEach(statement => statement.Accept(this));
+    }
+
+    public virtual void Visit_IfStatement(SqlIfStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Condition.Accept(this);
+        expr.Then.Accept(this);
+        expr.Else?.Accept(this);
+    }
+
+    public virtual void Visit_WhileStatement(SqlWhileStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Condition.Accept(this);
+        expr.Body.Accept(this);
+    }
 }
