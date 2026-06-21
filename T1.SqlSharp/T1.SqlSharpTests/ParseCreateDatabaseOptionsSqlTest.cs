@@ -46,4 +46,28 @@ public class ParseCreateDatabaseOptionsSqlTest
             DataFiles = ["(NAME = s, FILENAME = 'c:\\s.mdf', SIZE = 10MB, MAXSIZE = 50MB, FILEGROWTH = 5MB)"]
         });
     }
+
+    [Test]
+    public void Create_database_with_containment()
+    {
+        var sql = "CREATE DATABASE Sales CONTAINMENT = PARTIAL";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateDatabaseStatement
+        {
+            DatabaseName = "Sales",
+            Containment = "PARTIAL"
+        });
+    }
+
+    [Test]
+    public void Create_database_with_options()
+    {
+        var sql = "CREATE DATABASE Sales WITH TRUSTWORTHY ON, DB_CHAINING OFF";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateDatabaseStatement
+        {
+            DatabaseName = "Sales",
+            Options = ["TRUSTWORTHY ON", "DB_CHAINING OFF"]
+        });
+    }
 }

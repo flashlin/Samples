@@ -6976,6 +6976,12 @@ public class SqlParser
                 DatabaseName = databaseName.ResultValue.FieldName
             };
 
+            if (TryKeyword("CONTAINMENT", out _))
+            {
+                TryMatch("=", out _);
+                databaseStatement.Containment = ReadSqlIdentifier().Word;
+            }
+
             if (TryKeyword("ON", out _))
             {
                 databaseStatement.OnPrimary = TryKeyword("PRIMARY", out _);
@@ -7002,6 +7008,11 @@ public class SqlParser
             if (TryKeyword("COLLATE", out _))
             {
                 databaseStatement.Collation = ReadSqlIdentifier().Word;
+            }
+
+            if (TryKeyword("WITH", out _))
+            {
+                databaseStatement.Options = ReadDatabaseWithOptions();
             }
 
             return CreateParseResult<ISqlExpression>(databaseStatement);
@@ -7044,6 +7055,39 @@ public class SqlParser
         } while (TryMatch(",", out _));
 
         return CreateParseResult(specs);
+    }
+
+    private List<string> ReadDatabaseWithOptions()
+    {
+        var options = new List<string>();
+        do
+        {
+            var key = ReadSqlIdentifier().Word;
+            if (string.IsNullOrEmpty(key))
+            {
+                break;
+            }
+
+            if (TryMatch("=", out _))
+            {
+                var value = ParseArithmetic_Primary().Result?.ToSql() ?? string.Empty;
+                options.Add($"{key} = {value}");
+            }
+            else if (TryKeyword("ON", out _))
+            {
+                options.Add($"{key} ON");
+            }
+            else if (TryKeyword("OFF", out _))
+            {
+                options.Add($"{key} OFF");
+            }
+            else
+            {
+                options.Add(key);
+            }
+        } while (TryMatch(",", out _));
+
+        return options;
     }
 
     private string ReadFileSpecValue()
@@ -8105,6 +8149,17 @@ public class SqlParser
 
         if (TryKeywords(["ALTER", "COLUMN"], out _))
         {
+            var optionForm = TryParseAlterColumnOption();
+            if (optionForm.HasError)
+            {
+                return optionForm.Error;
+            }
+
+            if (optionForm.Result != null)
+            {
+                return CreateParseResult(optionForm.ResultValue);
+            }
+
             var column = ParseColumnDefinition();
             if (column.HasError)
             {
@@ -8213,6 +8268,45 @@ public class SqlParser
         }
 
         return NoneResult<ISqlAlterTableAction>();
+    }
+
+    private ParseResult<ISqlAlterTableAction> TryParseAlterColumnOption()
+    {
+        var startPosition = _text.Position;
+        var columnName = Parse_SqlIdentifier();
+        if (columnName.Result == null)
+        {
+            _text.Position = startPosition;
+            return NoneResult<ISqlAlterTableAction>();
+        }
+
+        bool isAdd;
+        if (TryKeyword("ADD", out _))
+        {
+            isAdd = true;
+        }
+        else if (TryKeyword("DROP", out _))
+        {
+            isAdd = false;
+        }
+        else
+        {
+            _text.Position = startPosition;
+            return NoneResult<ISqlAlterTableAction>();
+        }
+
+        var option = ReadActionTokens();
+        if (string.IsNullOrEmpty(option))
+        {
+            return CreateParseError("Expected option after ALTER COLUMN ADD/DROP");
+        }
+
+        return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableColumnOption
+        {
+            ColumnName = columnName.ResultValue.FieldName,
+            IsAdd = isAdd,
+            Option = option
+        });
     }
 
     private ParseResult<List<string>> ReadParenthesizedAssignmentList()
@@ -9438,6 +9532,15 @@ public class SqlParser
             return NoneResult<SqlVariableDeclaration>();
         }
 
+        var beforeType = _text.Position;
+        var isoCursorOptions = ReadIsoCursorPrefix();
+        if (isoCursorOptions.Count > 0 && TryKeyword("CURSOR", out _))
+        {
+            return Parse_CursorDeclaration(name.ResultValue.FieldName, isoCursorOptions);
+        }
+
+        _text.Position = beforeType;
+
         var dataType = ReadSqlIdentifier().Word;
         if (string.IsNullOrEmpty(dataType))
         {
@@ -9515,7 +9618,30 @@ public class SqlParser
         return false;
     }
 
-    private ParseResult<SqlVariableDeclaration> Parse_CursorDeclaration(string name)
+    private List<string> ReadIsoCursorPrefix()
+    {
+        var options = new List<string>();
+        while (true)
+        {
+            if (TryKeyword("INSENSITIVE", out _))
+            {
+                options.Add("INSENSITIVE");
+                continue;
+            }
+
+            if (TryKeyword("SCROLL", out _))
+            {
+                options.Add("SCROLL");
+                continue;
+            }
+
+            break;
+        }
+
+        return options;
+    }
+
+    private ParseResult<SqlVariableDeclaration> Parse_CursorDeclaration(string name, List<string>? leadingOptions = null)
     {
         var declaration = new SqlVariableDeclaration
         {
@@ -9523,6 +9649,11 @@ public class SqlParser
             DataType = "CURSOR",
             IsCursor = true
         };
+
+        if (leadingOptions != null)
+        {
+            declaration.CursorOptions.AddRange(leadingOptions);
+        }
 
         while (TryMatchCursorOption(out var option))
         {

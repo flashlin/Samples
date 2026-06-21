@@ -637,6 +637,11 @@ public class SqlVisitor
         expr.Column.Accept(this);
     }
 
+    public virtual void Visit_AlterTableColumnOption(SqlAlterTableColumnOption expr)
+    {
+        AddSqlExpression(expr);
+    }
+
     public virtual void Visit_AlterTableToggleTrigger(SqlAlterTableToggleTrigger expr)
     {
         AddSqlExpression(expr);

@@ -186,6 +186,40 @@ public class ParseAlterTableSqlTest
     }
 
     [Test]
+    public void Alter_table_alter_column_add_rowguidcol()
+    {
+        var sql = "ALTER TABLE Users ALTER COLUMN Id ADD ROWGUIDCOL";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Users",
+            Action = new SqlAlterTableColumnOption
+            {
+                ColumnName = "Id",
+                IsAdd = true,
+                Option = "ROWGUIDCOL"
+            }
+        });
+    }
+
+    [Test]
+    public void Alter_table_alter_column_drop_not_for_replication()
+    {
+        var sql = "ALTER TABLE Users ALTER COLUMN Id DROP NOT FOR REPLICATION";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Users",
+            Action = new SqlAlterTableColumnOption
+            {
+                ColumnName = "Id",
+                IsAdd = false,
+                Option = "NOT FOR REPLICATION"
+            }
+        });
+    }
+
+    [Test]
     public void Alter_table_add_constraint_primary_key()
     {
         var sql = "ALTER TABLE Users ADD CONSTRAINT PK_Users PRIMARY KEY (Id)";

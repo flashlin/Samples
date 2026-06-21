@@ -98,6 +98,7 @@ public enum SqlType
     AlterTableDropColumn,
     AlterTableDropConstraint,
     AlterTableAlterColumn,
+    AlterTableColumnOption,
     AlterTableToggleTrigger,
     AlterTableCheckConstraint,
     AlterTableAddElements,

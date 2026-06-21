@@ -13,15 +13,22 @@ public class SqlCreateDatabaseStatement : ISqlExpression
     }
 
     public string DatabaseName { get; set; } = string.Empty;
+    public string Containment { get; set; } = string.Empty;
     public bool OnPrimary { get; set; }
     public List<string> DataFiles { get; set; } = [];
     public List<string> LogFiles { get; set; } = [];
     public string Collation { get; set; } = string.Empty;
+    public List<string> Options { get; set; } = [];
 
     public string ToSql()
     {
         var sql = new StringBuilder();
         sql.Append($"CREATE DATABASE {DatabaseName}");
+        if (!string.IsNullOrEmpty(Containment))
+        {
+            sql.Append($" CONTAINMENT = {Containment}");
+        }
+
         if (DataFiles.Count > 0)
         {
             sql.Append(OnPrimary ? " ON PRIMARY " : " ON ");
@@ -36,6 +43,11 @@ public class SqlCreateDatabaseStatement : ISqlExpression
         if (!string.IsNullOrEmpty(Collation))
         {
             sql.Append($" COLLATE {Collation}");
+        }
+
+        if (Options.Count > 0)
+        {
+            sql.Append($" WITH {string.Join(", ", Options)}");
         }
 
         return sql.ToString();

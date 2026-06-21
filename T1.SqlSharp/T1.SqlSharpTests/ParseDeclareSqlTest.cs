@@ -100,6 +100,31 @@ public class ParseDeclareSqlTest
     }
 
     [Test]
+    public void Declare_iso_insensitive_scroll_cursor()
+    {
+        var sql = "DECLARE curUsers INSENSITIVE SCROLL CURSOR FOR SELECT Id FROM Users";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDeclareStatement
+        {
+            Declarations =
+            [
+                new SqlVariableDeclaration
+                {
+                    Name = "curUsers",
+                    DataType = "CURSOR",
+                    IsCursor = true,
+                    CursorOptions = ["INSENSITIVE", "SCROLL"],
+                    CursorSource = new SelectStatement
+                    {
+                        Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "Id" } }],
+                        FromSources = [new SqlTableSource { TableName = "Users" }]
+                    }
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void Declare_cursor_for_select()
     {
         var sql = "DECLARE curUsers CURSOR FOR SELECT Id FROM Users";
