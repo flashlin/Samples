@@ -179,6 +179,32 @@ public class ParseUpdateSqlTest
     }
 
     [Test]
+    public void Update_set_compound_assignment()
+    {
+        var sql = "UPDATE Stock SET Qty += 5, Reserved -= 2";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlUpdateStatement
+        {
+            TableName = "Stock",
+            SetClauses =
+            [
+                new SqlAssignExpr
+                {
+                    Left = new SqlFieldExpr { FieldName = "Qty" },
+                    Operator = "+=",
+                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "5" }
+                },
+                new SqlAssignExpr
+                {
+                    Left = new SqlFieldExpr { FieldName = "Reserved" },
+                    Operator = "-=",
+                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "2" }
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void Update_set_from_join()
     {
         var sql = "UPDATE c SET c.Name = e.Name FROM customer c JOIN emp e ON c.id = e.id";

@@ -100,4 +100,5 @@ public enum SqlType
     AlterTableAlterColumn,
     CreateViewStatement,
     CreateIndexStatement,
+    ExecStatement,
 }

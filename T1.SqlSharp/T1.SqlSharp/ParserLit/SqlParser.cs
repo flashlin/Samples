@@ -977,6 +977,11 @@ public class SqlParser
             return CreateParseResult<ISqlExpression>(delete.ResultValue);
         }
 
+        if (Try(ParseMergeStatement, out var merge))
+        {
+            return CreateParseResult<ISqlExpression>(merge.ResultValue);
+        }
+
         return NoneResult<ISqlExpression>();
     }
 
@@ -3270,6 +3275,13 @@ public class SqlParser
             return CreateParseResult(insertStatement);
         }
 
+        if (Try(Parse_ExecStatement, out var execSource))
+        {
+            insertStatement.ExecSource = execSource.ResultValue;
+            insertStatement.Span = _text.CreateSpan(startSpan);
+            return CreateParseResult(insertStatement);
+        }
+
         if (Try(() => ParseSelectStatement(), out var sourceSelect))
         {
             insertStatement.SourceSelect = sourceSelect.ResultValue;
@@ -3277,7 +3289,40 @@ public class SqlParser
             return CreateParseResult(insertStatement);
         }
 
-        return CreateParseError("Expected VALUES, SELECT or DEFAULT VALUES after INSERT");
+        return CreateParseError("Expected VALUES, SELECT, EXEC or DEFAULT VALUES after INSERT");
+    }
+
+    private ParseResult<SqlExecStatement> Parse_ExecStatement()
+    {
+        if (!TryKeyword("EXECUTE", out var startSpan) && !TryKeyword("EXEC", out startSpan))
+        {
+            return NoneResult<SqlExecStatement>();
+        }
+
+        var procedureName = Parse_SqlIdentifier();
+        if (procedureName.Result == null)
+        {
+            return CreateParseError("Expected procedure name after EXEC");
+        }
+
+        var arguments = new List<ISqlExpression>();
+        if (!_text.IsEnd() && !IsPeekMatch(";"))
+        {
+            var parsedArguments = ParseWithComma(ParseArithmeticExpr);
+            if (parsedArguments.HasError)
+            {
+                return parsedArguments.Error;
+            }
+
+            arguments = parsedArguments.ResultValue;
+        }
+
+        return CreateParseResult(new SqlExecStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            ProcedureName = procedureName.ResultValue.FieldName,
+            Arguments = arguments
+        });
     }
 
     private ParseResult<SqlCreateIndexStatement> ParseCreateIndexStatement()
@@ -4010,9 +4055,10 @@ public class SqlParser
             return NoneResult<SqlAssignExpr>();
         }
 
-        if (!TryMatch("=", out _))
+        var assignOperator = Parse_AssignOperator();
+        if (assignOperator == null)
         {
-            return CreateParseError("Expected = in SET clause");
+            return CreateParseError("Expected assignment operator in SET clause");
         }
 
         var right = Parse_ValueOrDefault();
@@ -4024,8 +4070,29 @@ public class SqlParser
         return new SqlAssignExpr
         {
             Left = left.ResultValue,
+            Operator = assignOperator,
             Right = right.ResultValue
         };
+    }
+
+    private static readonly string[] CompoundAssignOperators = ["+=", "-=", "*=", "/=", "%=", "&=", "|=", "^="];
+
+    private string? Parse_AssignOperator()
+    {
+        foreach (var compound in CompoundAssignOperators)
+        {
+            if (TryMatch(compound, out _))
+            {
+                return compound;
+            }
+        }
+
+        if (TryMatch("=", out _))
+        {
+            return "=";
+        }
+
+        return null;
     }
 
     private ParseResult<SqlOutputClause> Parse_OutputClause()

@@ -533,6 +533,7 @@ public class SqlVisitor
         expr.Output?.Accept(this);
         expr.ValuesRows.ForEach(row => row.ForEach(value => value.Accept(this)));
         expr.SourceSelect?.Accept(this);
+        expr.ExecSource?.Accept(this);
     }
 
     public virtual void Visit_OutputClause(SqlOutputClause expr)
@@ -646,5 +647,11 @@ public class SqlVisitor
         AddSqlExpression(expr);
         expr.Columns.ForEach(column => column.Accept(this));
         expr.Where?.Accept(this);
+    }
+
+    public virtual void Visit_ExecStatement(SqlExecStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Arguments.ForEach(argument => argument.Accept(this));
     }
 }

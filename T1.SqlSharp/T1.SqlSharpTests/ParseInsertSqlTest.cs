@@ -243,6 +243,40 @@ public class ParseInsertSqlTest
     }
 
     [Test]
+    public void Insert_into_exec_no_args()
+    {
+        var sql = "INSERT INTO Logs (Msg) EXEC GetMessages";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlInsertStatement
+        {
+            TableName = "Logs",
+            Columns = ["Msg"],
+            ExecSource = new SqlExecStatement { ProcedureName = "GetMessages" }
+        });
+    }
+
+    [Test]
+    public void Insert_into_exec_with_args()
+    {
+        var sql = "INSERT INTO Logs EXEC GetMessages 1, 'x'";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlInsertStatement
+        {
+            TableName = "Logs",
+            Columns = [],
+            ExecSource = new SqlExecStatement
+            {
+                ProcedureName = "GetMessages",
+                Arguments =
+                [
+                    new SqlValue { SqlType = SqlType.IntValue, Value = "1" },
+                    new SqlValue { SqlType = SqlType.String, Value = "'x'" }
+                ]
+            }
+        });
+    }
+
+    [Test]
     public void Insert_into_with_expression_values()
     {
         var sql = "INSERT INTO Logs (CreatedAt, Note) VALUES (GETDATE(), NULL)";

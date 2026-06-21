@@ -103,4 +103,47 @@ public class ParseCteDmlTest
             }
         });
     }
+
+    [Test]
+    public void Cte_prefix_merge()
+    {
+        var sql = "WITH cte AS (SELECT id FROM src) "
+                  + "MERGE INTO dst AS t USING cte AS s ON t.id = s.id "
+                  + "WHEN MATCHED THEN DELETE";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlWithCte
+        {
+            CommonTableExpressions =
+            [
+                new SqlCommonTableExpression
+                {
+                    Name = "cte",
+                    Query = new SelectStatement
+                    {
+                        Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
+                        FromSources = [new SqlTableSource { TableName = "src" }]
+                    }
+                }
+            ],
+            Statement = new SqlMergeStatement
+            {
+                Target = new SqlTableSource { TableName = "dst", Alias = "t" },
+                Source = new SqlTableSource { TableName = "cte", Alias = "s" },
+                OnCondition = new SqlConditionExpression
+                {
+                    Left = new SqlFieldExpr { FieldName = "t.id" },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlFieldExpr { FieldName = "s.id" }
+                },
+                WhenClauses =
+                [
+                    new SqlMergeWhenClause
+                    {
+                        MatchType = MergeMatchType.Matched,
+                        Action = new SqlMergeDeleteAction()
+                    }
+                ]
+            }
+        });
+    }
 }

@@ -127,6 +127,33 @@ public class ParseMergeSqlTest
     }
 
     [Test]
+    public void Merge_not_matched_insert_default_values()
+    {
+        var sql = "MERGE INTO Target AS t USING Source AS s ON t.id = s.id "
+                  + "WHEN NOT MATCHED THEN INSERT DEFAULT VALUES";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlMergeStatement
+        {
+            Target = new SqlTableSource { TableName = "Target", Alias = "t" },
+            Source = new SqlTableSource { TableName = "Source", Alias = "s" },
+            OnCondition = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "t.id" },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlFieldExpr { FieldName = "s.id" }
+            },
+            WhenClauses =
+            [
+                new SqlMergeWhenClause
+                {
+                    MatchType = MergeMatchType.NotMatchedByTarget,
+                    Action = new SqlMergeInsertAction { IsDefaultValues = true }
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void Merge_when_matched_and_condition_then_delete()
     {
         var sql = "MERGE INTO Target AS t USING Source AS s ON t.id = s.id "

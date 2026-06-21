@@ -14,10 +14,10 @@
 - [x] `CREATE TABLE`
 - [x] `SET @var = value`（變數賦值）
 - [x] `EXEC sp_addextendedproperty ...`（僅此特定 SP）
-- [~] `INSERT`（parser 可解析大部分常用語法，細目見 §1.1。additive 擴充 `SqlInsertStatement`（`Top`/`Withs`/`ValuesRows`/`SourceSelect`/`IsDefaultValues`/`Output`），builder 路徑不受影響。僅剩 `INSERT ... EXEC`、CTE 前綴未做）
-- [~] `UPDATE`（parser 可解析：SET 多指派 / `t.col` / `DEFAULT` 值 / `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.2。僅剩複合指派 `+=`）
+- [~] `INSERT`（parser 可解析常用語法，細目見 §1.1：VALUES/多列/SELECT/EXEC/DEFAULT VALUES/TOP/hint/OUTPUT/DEFAULT 值/CTE 前綴。additive 擴充 `SqlInsertStatement`，builder 路徑不受影響。僅剩 `EXEC ('dynamic sql')`）
+- [x] `UPDATE`（parser 可解析：SET 多指派 / 複合指派 `+=` / `t.col` / `DEFAULT` 值 / `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.2）
 - [~] `DELETE`（parser 可解析：`[FROM] t` / 省略 FROM / 第二個 `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.3。已大致完整）
-- [~] `MERGE`（parser 可解析：`[INTO]` target/source（含 alias / 無 alias）、`ON`、`WHEN MATCHED`/`NOT MATCHED [BY TARGET]`/`NOT MATCHED BY SOURCE`、`AND` 過濾、UPDATE/DELETE/INSERT action、結尾 `;`，細目見 §1.4。剩 TOP/hint/OUTPUT/OPTION/CTE 前綴）
+- [~] `MERGE`（parser 可解析：target/source、`ON`、三種 WHEN、`AND` 過濾、UPDATE/DELETE/INSERT（含 DEFAULT VALUES）action、CTE 前綴、結尾 `;`，細目見 §1.4。剩 TOP/hint/OUTPUT/OPTION）
 - [~] `ALTER TABLE`（支援 ADD 欄位（多）/ ADD CONSTRAINT / DROP COLUMN（多）/ DROP CONSTRAINT（多）/ ALTER COLUMN，細目見 §1.5。剩 `WITH CHECK/NOCHECK`、`{ENABLE|DISABLE} TRIGGER`、ADD 混合欄位+約束）；其他 `ALTER VIEW/PROC/...` 未做
 - [~] `DROP ...`（支援 `DROP {TABLE|VIEW|PROCEDURE|FUNCTION|INDEX|TRIGGER|SCHEMA|DATABASE|SEQUENCE|TYPE} [IF EXISTS] name1[, ...]`，含 `DROP INDEX ix ON table`（`SqlDropStatement.OnTable`）；`SqlDropStatement` + `SqlDropObjectType` enum。未做舊式 `DROP INDEX table.idx`、多 `idx ON tbl` 對）
 - [x] `TRUNCATE TABLE`（`SqlTruncateTableStatement`）
@@ -51,7 +51,7 @@
 - [x] `VALUES` 列內 `DEFAULT` 關鍵字當值（如 `VALUES (1, DEFAULT)`；`SqlDefaultValue`，僅在 VALUES 列 `Parse_InsertRowValue` 解析，不影響全域 `ParseValue`）
 
 未支援（依價值排序）：
-- [ ] `INSERT INTO t EXEC proc` / `EXEC ('sql')`（rowset 來源）
+- [x] `INSERT INTO t [(cols)] EXEC proc [args]`（`SqlExecStatement` 掛 `SqlInsertStatement.ExecSource`，可重用於日後頂層 EXEC；未做 `EXEC ('dynamic sql')` 字串、具名參數 `@p = val`）
 - [x] CTE 前綴 `WITH cte AS (...) INSERT ...`（`ParseWithCteStatement` 改用 `Parse_CteBodyStatement` dispatch SELECT/INSERT/UPDATE/DELETE，見 `ParseCteDmlTest.cs`）
 
 ### 1.2 UPDATE 細目（已實作，見 `ParseUpdateSqlTest.cs`）
@@ -95,7 +95,7 @@
 - [x] `UPDATE TOP (n) [PERCENT] ...`
 - [x] 目標 table hint `WITH (...)`
 - [x] `OUTPUT col [INTO target]`（`inserted.`/`deleted.` 偽資料表）
-- [ ] 複合指派 `+= -= *= /=`（需新運算子，價值低）
+- [x] 複合指派 `+= -= *= /= %= &= |= ^=`（`SqlAssignExpr.Operator`，default `=`；`Parse_AssignOperator`）
 - [x] CTE 前綴 `WITH cte AS (...) UPDATE ...`（共用 `Parse_CteBodyStatement`）
 
 ### 1.3 DELETE 細目（已實作 MVP，見 `ParseDeleteSqlTest.cs`）
@@ -157,8 +157,8 @@
 **第二階段（可延後）**：
 - [ ] `MERGE TOP (n) [PERCENT]`
 - [ ] target table hint、`OUTPUT [$action]`、結尾 `OPTION (...)`
-- [ ] `INSERT DEFAULT VALUES` action（程式碼路徑已接 `Parse_MergeInsertAction`，待補測試）
-- [ ] CTE 前綴 `WITH cte AS (...) MERGE ...`（`Parse_CteBodyStatement` 加一條）
+- [x] `INSERT DEFAULT VALUES` action
+- [x] CTE 前綴 `WITH cte AS (...) MERGE ...`（`Parse_CteBodyStatement`）
 
 **實作雷點（已確認）**：
 1. **`USING` 必須入 `ReservedWords`**：否則無 alias 的 `MERGE Target USING ...` 會把 `USING` 當 target 的 bare alias 吃掉（`ON`/`WHEN`/`THEN` 因條件 / 運算式不解析 alias 而安全，故未加）。
@@ -308,9 +308,9 @@
 ## 維護建議優先序（未完成項目）
 
 1. 🟢 DDL（DROP/TRUNCATE/ALTER TABLE/CREATE VIEW/CREATE INDEX/DROP INDEX ON 已完成）：`CREATE PROCEDURE|FUNCTION|TRIGGER`、ALTER TABLE 第二階段（見 §1.5）
-2. 🟢 DML 收尾（小單點）：`INSERT ... EXEC`、UPDATE 複合指派 `+=`、MERGE 第二階段（TOP/hint/OUTPUT/OPTION/CTE 前綴，見 §1.4）
+2. 🟢 DML 收尾剩餘：MERGE 第二階段（TOP/hint/OUTPUT/OPTION，見 §1.4）、`EXEC ('dynamic sql')`、頂層一般 `EXEC proc`（可重用 `Parse_ExecStatement`/`SqlExecStatement`）
 3. 🟢 具名 `WINDOW` 子句的延伸：`OVER (existing_window ...)` 行內參照、定義間互相參照、RANK 路徑 bare `OVER name`（見 §4 註）
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）、`MERGE` 解析 MVP（INTO/USING/ON/三種 WHEN/AND/三種 action，2026-06-21）、`TRUNCATE TABLE` + `DROP`（多型別 + IF EXISTS + 多名稱，2026-06-21）、`ALTER TABLE`（ADD/DROP COLUMN、ADD/DROP CONSTRAINT、ALTER COLUMN，2026-06-21）、`CREATE VIEW`（OR ALTER / 欄位清單 / WITH CHECK OPTION，2026-06-21）、`CREATE INDEX`（UNIQUE/CLUSTERED/ASC-DESC/INCLUDE/filtered WHERE，2026-06-21）、`DROP INDEX ix ON table`（2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）、`MERGE` 解析 MVP（INTO/USING/ON/三種 WHEN/AND/三種 action，2026-06-21）、`TRUNCATE TABLE` + `DROP`（多型別 + IF EXISTS + 多名稱，2026-06-21）、`ALTER TABLE`（ADD/DROP COLUMN、ADD/DROP CONSTRAINT、ALTER COLUMN，2026-06-21）、`CREATE VIEW`（OR ALTER / 欄位清單 / WITH CHECK OPTION，2026-06-21）、`CREATE INDEX`（UNIQUE/CLUSTERED/ASC-DESC/INCLUDE/filtered WHERE，2026-06-21）、`DROP INDEX ix ON table`（2026-06-21）、DML 收尾（MERGE CTE 前綴 + DEFAULT VALUES、UPDATE 複合指派 `+=`、`INSERT ... EXEC`，2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。

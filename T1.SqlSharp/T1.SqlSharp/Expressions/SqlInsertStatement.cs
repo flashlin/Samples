@@ -18,6 +18,7 @@ public class SqlInsertStatement : ISqlExpression
     public List<string> Columns { get; set; } = [];
     public List<List<ISqlExpression>> ValuesRows { get; set; } = [];
     public SelectStatement? SourceSelect { get; set; }
+    public SqlExecStatement? ExecSource { get; set; }
     public bool IsDefaultValues { get; set; }
     public SqlOutputClause? Output { get; set; }
 

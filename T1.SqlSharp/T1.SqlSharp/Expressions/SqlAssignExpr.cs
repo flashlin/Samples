@@ -10,10 +10,11 @@ public class SqlAssignExpr : ISqlExpression
     }
 
     public required ISqlExpression Left { get; set; }
+    public string Operator { get; set; } = "=";
     public required ISqlExpression Right { get; set; }
 
     public string ToSql()
     {
-        return $"{Left.ToSql()} = {Right.ToSql()}";
+        return $"{Left.ToSql()} {Operator} {Right.ToSql()}";
     }
 }
