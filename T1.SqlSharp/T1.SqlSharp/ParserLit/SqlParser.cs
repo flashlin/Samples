@@ -12,6 +12,8 @@ public class SqlParser
     [
         "FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH",
         "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING", "INTERSECT", "EXCEPT", "OPTION",
+        "BEGIN", "END", "IF", "ELSE", "WHILE", "RETURN", "DECLARE", "EXEC", "EXECUTE", "SET", "DELETE",
+        "UPDATE", "INSERT", "MERGE", "TRUNCATE", "PRINT", "RAISERROR", "THROW", "BREAK", "CONTINUE",
         "TABLESAMPLE", "WINDOW", "USING"
     ];
 
@@ -7400,7 +7402,8 @@ public class SqlParser
     {
         if (TryKeywords(["EXECUTE", "AS"], out _))
         {
-            return $"EXECUTE AS {ReadSqlIdentifier().Word}";
+            var userName = Or(ParseSqlQuotedString, Parse_SqlIdentifierValue)();
+            return $"EXECUTE AS {userName.ResultValue.Value}";
         }
 
         if (TryKeywords(["RETURNS", "NULL", "ON", "NULL", "INPUT"], out _))
@@ -7921,7 +7924,7 @@ public class SqlParser
             return NoneResult<SqlProcedureParameter>();
         }
 
-        var dataType = ReadSqlIdentifier().Word;
+        var dataType = ReadOptionalAsDataType();
         var dataSize = Parse_DataSize();
         if (dataSize.HasError)
         {
@@ -9669,7 +9672,7 @@ public class SqlParser
 
         _text.Position = beforeType;
 
-        var dataType = ReadSqlIdentifier().Word;
+        var dataType = ReadOptionalAsDataType();
         if (string.IsNullOrEmpty(dataType))
         {
             return CreateParseError("Expected data type in DECLARE");
@@ -9723,6 +9726,12 @@ public class SqlParser
         }
 
         return CreateParseResult(declaration);
+    }
+
+    private string ReadOptionalAsDataType()
+    {
+        TryKeyword("AS", out _);
+        return ReadSqlIdentifier().Word;
     }
 
     private static readonly string[] CursorOptionKeywords =

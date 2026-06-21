@@ -33,7 +33,7 @@
   - parser 失敗是報告資料，程式仍回傳 exit code 0；來源路徑不存在才回傳 1。
 - `T1.SqlSharp.sln` 已掛入 `T1.SqlSharpE2eParser`。
 - `T1.SqlSharpE2eParser.csproj` 設定 `NuGetAudit=false`，避免離線環境因 vulnerability metadata 查詢產生 `NU1900` warning。
-- 真實 corpus 曾用舊版每檔 process 模式跑到 `16500 / 46106` 後手動停止；partial result 保留在 `T1.SqlSharpE2eParser/out/report.csv`，`summary.json` 顯示 `IsCompleted=false`。
+- 真實 corpus 已用 worker pool 完整跑完一次；結果在 `T1.SqlSharpE2eParser/out/`。
 
 ### 線三:CREATE PROCEDURE TVP READONLY — ✅ 已完成、尚未 commit
 
@@ -58,6 +58,35 @@ END
 - `Parse_ProcedureParameter()` 消費 optional `READONLY`
 - 單檔驗證原失敗檔現在 `StatementCount=4`、`SucceededStatements=4`、`FailedStatements=0`
 
+### 線四:report.csv 錯誤分析與 10 個 corpus regression — ✅ 已完成、尚未 commit
+
+已完成：
+
+- `T1.SqlSharpE2eParser` 新增 `--analyze-report [sourcePath] [outputPath]`。
+- 已由既有 `out/report.csv` 產出 `T1.SqlSharpE2eParser/out/error.csv` 與 `T1.SqlSharpE2eParser/out/error-summary.csv`。
+- `error.csv` 為每個失敗檔一列，包含分類、錯誤訊息、SQL file、offset、line、statement/context preview、suggested test name。
+- `error-summary.csv` 為分類彙總，方便挑下一批 TDD 目標。
+- 使用者後續要求不要繼續抓 `unknown statement` / 邊界分類，改採隨機抽樣 SQL 檔做 parser regression。
+- 新增 `T1.SqlSharpTests/ParseRealCorpusRegressionSqlTest.cs`，10 個測試皆把最小可重現 SQL 內容直接嵌入測試專案，不直接讀 `/Users/flash/titan/DbProjects`。
+- 修正 `SqlParser.cs`：
+  - procedure parameters 支援 `@param AS DataType`
+  - `DECLARE` 支援 `DECLARE @var AS DataType`
+  - `WITH EXECUTE AS 'user'` 支援 quoted principal
+  - 擴充 `ReservedWords`，避免 `WHILE` / `IF` / `BEGIN` / `END` / `DECLARE` / `RETURN` 等被前一個 `SELECT` 當 alias 吃掉。
+
+10 個 regression 測試來源/語法型態：
+
+- `AccountNotificationAPI_DeleteOldTelegramNotificationLog_21.10.sql`: `SELECT 1` 後接 `WHILE @@ROWCOUNT`
+- `Sch_Report_OnlineUserSB.sql`: `DECLARE @x AS INT = 0`
+- `m9_dotnet_csmaTotalByMemberx.sql`: procedure parameter `@x AS INT` 與 `AS SELECT`
+- `Admin_SB_Pluto_GetRisk1x2TS_6.6.sql`: procedure parameter `@tStamp AS TIMESTAMP`
+- `Admin_SB_EventMgmt_AddOddsForNewEvent_1.0.1.sql`: `SELECT @var = @@error` 後接 `IF`
+- `Pontus_SB_GetStartedTransaction_4.3.sql`: `IF EXISTS (...) BEGIN SELECT TOP 1 ... ORDER BY`
+- `PlutoReplication_RB_TruncateBuffer_RacingBet_14.05.sql`: `WITH EXECUTE AS 'plutoproxy'`
+- `AccountAPI_InsertSportsRiskControl_20.05.sql`: TVP `READONLY` + `INSERT ... SELECT ... FROM @tvp`
+- `BetGenius_DeleteFixture_1.0.0.sql`: procedure parameter `@fixtureId AS INT` + `DELETE`
+- `Aither_LC_Player_VerifyUser_14.02.sql`: `@retcode AS INT OUTPUT` + `RETURN @retcode`
+
 ---
 
 ## 驗證結果
@@ -66,7 +95,7 @@ END
 
 ```bash
 dotnet test --no-restore
-# 612 passed / 0 failed
+# 622 passed / 0 failed
 
 dotnet build T1.SqlSharp/T1.SqlSharp.csproj --no-restore
 # 0 warning / 0 error
@@ -78,6 +107,23 @@ dotnet build T1.SqlSharpE2eParser/T1.SqlSharpE2eParser.csproj --no-restore
 # 0 warning / 0 error
 ```
 
+這輪 corpus regression 紅燈/綠燈：
+
+```bash
+dotnet test T1.SqlSharpTests/T1.SqlSharpTests.csproj --no-restore --filter "FullyQualifiedName~ParseRealCorpusRegressionSqlTest"
+# 修改 parser 前: 10 failed / 0 passed
+# 修改 parser 後: 10 passed / 0 failed
+```
+
+錯誤分析檔產出：
+
+```bash
+dotnet run --project T1.SqlSharpE2eParser/T1.SqlSharpE2eParser.csproj --no-build --analyze-report /Users/flash/titan/DbProjects
+# Error report: T1.SqlSharpE2eParser/out/error.csv
+# Error summary: T1.SqlSharpE2eParser/out/error-summary.csv
+# error.csv lines: 23489 (header + 23488 failures)
+```
+
 小型臨時 corpus 也已驗證：
 
 ```bash
@@ -85,6 +131,29 @@ dotnet run --project T1.SqlSharpE2eParser/T1.SqlSharpE2eParser.csproj --no-build
 # Processed 2/2 | OK 1 | FAIL 1
 # JSON report: /private/tmp/t1-sqlsharp-e2e-out/report.json
 # CSV report: /private/tmp/t1-sqlsharp-e2e-out/report.csv
+```
+
+真實 corpus 完整掃描：
+
+```bash
+dotnet run --project T1.SqlSharpE2eParser/T1.SqlSharpE2eParser.csproj --no-build -- /Users/flash/titan/DbProjects
+# Processed 46106/46106 | OK 22618 | FAIL 23488
+# elapsed: 42.3966562 seconds
+# report.csv lines: 46107 (header + 46106 files)
+```
+
+`report.json` 摘要：
+
+```text
+TotalFiles: 46106
+SucceededFiles: 22618
+FailedFiles: 23488
+TotalStatements: 250043
+SucceededStatements: 226555
+FailedStatements: 23488
+Top ErrorBuckets:
+  Unknown statement: 23427
+  Result is null: 61
 ```
 
 TVP 原失敗檔驗證：
@@ -98,7 +167,7 @@ GitNexus：
 
 ```bash
 bun /Users/flash/.claude/skills/gitNexus/scripts/detect_changes.ts --repo /Users/flash/vdisk/github/Samples/T1.SqlSharp --scope unstaged --depth 2
-# changedSymbolCount=9 / totalUpstream=38
+# changedSymbolCount=6 / totalUpstream=16
 ```
 
 已知狀況：
@@ -120,10 +189,12 @@ git add \
   T1.SqlSharp/T1.SqlSharp/Expressions/SqlProcedureParameter.cs \
   T1.SqlSharp/T1.SqlSharp/ParserLit/SqlParser.cs \
   T1.SqlSharp/T1.SqlSharpTests/ParseCreateProcedureSqlTest.cs \
+  T1.SqlSharp/T1.SqlSharpTests/ParseRealCorpusRegressionSqlTest.cs \
   T1.SqlSharp/T1.SqlSharpTests/ExtractStatementResultsTest.cs \
   T1.SqlSharp/T1.SqlSharpE2eParser/T1.SqlSharpE2eParser.csproj \
   T1.SqlSharp/T1.SqlSharpE2eParser/Program.cs \
   T1.SqlSharp/T1.SqlSharpE2eParser/IncrementalScanReportWriter.cs \
+  T1.SqlSharp/T1.SqlSharpE2eParser/ReportErrorAnalyzer.cs \
   T1.SqlSharp/T1.SqlSharpE2eParser/SqlFileWorker.cs \
   T1.SqlSharp/T1.SqlSharpE2eParser/SqlCorpusScanner.cs \
   T1.SqlSharp/T1.SqlSharpE2eParser/ScanProgress.cs \
@@ -134,7 +205,7 @@ git add \
 建議 commit message：
 
 ```text
-Add SQL corpus scanner and TVP procedure parsing
+Add SQL corpus scanner and parser corpus regressions
 ```
 
 ---

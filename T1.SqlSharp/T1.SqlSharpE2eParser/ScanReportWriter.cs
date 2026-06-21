@@ -8,6 +8,8 @@ public static class ScanReportWriter
     public const string JsonFileName = "report.json";
     public const string CsvFileName = "report.csv";
     public const string SummaryFileName = "summary.json";
+    public const string ErrorCsvFileName = "error.csv";
+    public const string ErrorSummaryCsvFileName = "error-summary.csv";
     public const string CsvHeader = "FilePath,StatementCount,SucceededStatements,FailedStatements,FirstErrorOffset,FirstErrorMessage,ElapsedMs";
 
     public static void Write(ScanReport report, string outputPath)

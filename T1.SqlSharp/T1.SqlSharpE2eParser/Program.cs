@@ -7,6 +7,7 @@ public static class Program
     private const string DefaultSourcePath = "/Users/flash/titan/DbProjects";
     private const string ScanFileCommand = "--scan-file";
     private const string WorkerCommand = "--worker";
+    private const string AnalyzeReportCommand = "--analyze-report";
 
     public static int Main(string[] args)
     {
@@ -18,6 +19,11 @@ public static class Program
         if (args.Length > 0 && args[0] == WorkerCommand)
         {
             return RunWorker(args);
+        }
+
+        if (args.Length > 0 && args[0] == AnalyzeReportCommand)
+        {
+            return AnalyzeReport(args);
         }
 
         var sourcePath = args.Length > 0 ? args[0] : DefaultSourcePath;
@@ -35,6 +41,24 @@ public static class Program
 
         Console.WriteLine($"JSON report: {Path.Combine(outputPath, ScanReportWriter.JsonFileName)}");
         Console.WriteLine($"CSV report: {Path.Combine(outputPath, ScanReportWriter.CsvFileName)}");
+        return 0;
+    }
+
+    private static int AnalyzeReport(string[] args)
+    {
+        var sourcePath = args.Length > 1 ? args[1] : DefaultSourcePath;
+        var outputPath = args.Length > 2 ? args[2] : ResolveDefaultOutputPath();
+
+        if (!Directory.Exists(sourcePath))
+        {
+            Console.Error.WriteLine($"Source path not found: {sourcePath}");
+            return 1;
+        }
+
+        var analyzer = new ReportErrorAnalyzer();
+        var result = analyzer.Analyze(sourcePath, outputPath);
+        Console.WriteLine($"Error report: {result.ErrorCsvPath}");
+        Console.WriteLine($"Error summary: {result.ErrorSummaryCsvPath}");
         return 0;
     }
 
