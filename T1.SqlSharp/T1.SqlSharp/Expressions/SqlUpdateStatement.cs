@@ -19,6 +19,7 @@ public class SqlUpdateStatement : ISqlExpression
     public SqlOutputClause? Output { get; set; }
     public List<ISqlExpression> FromSources { get; set; } = [];
     public ISqlExpression? Where { get; set; }
+    public SqlOptionClause? Option { get; set; }
 
     public string ToSql()
     {
@@ -51,7 +52,11 @@ public class SqlUpdateStatement : ISqlExpression
             sql.Append($" WHERE {Where.ToSql()}");
         }
 
+        if (Option != null)
+        {
+            sql.Append($" {Option.ToSql()}");
+        }
+
         return sql.ToString();
     }
 }
-

@@ -13,8 +13,17 @@ public class SqlParser
         "FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH",
         "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING", "INTERSECT", "EXCEPT", "OPTION",
         "BEGIN", "END", "IF", "ELSE", "WHILE", "RETURN", "DECLARE", "EXEC", "EXECUTE", "SET", "DELETE",
-        "UPDATE", "INSERT", "MERGE", "TRUNCATE", "PRINT", "RAISERROR", "THROW", "BREAK", "CONTINUE",
+        "UPDATE", "INSERT", "MERGE", "TRUNCATE", "DROP", "PRINT", "RAISERROR", "THROW", "BREAK", "CONTINUE",
+        "OPEN", "FETCH", "CLOSE", "DEALLOCATE", "GO",
         "TABLESAMPLE", "WINDOW", "USING"
+    ];
+
+    private static readonly string[] StatementBoundaryKeywords =
+    [
+        "SELECT", "INSERT", "UPDATE", "DELETE", "MERGE", "TRUNCATE", "DROP", "CREATE", "ALTER",
+        "BEGIN", "END", "IF", "ELSE", "WHILE", "RETURN", "DECLARE", "EXEC", "EXECUTE", "SET",
+        "PRINT", "RAISERROR", "THROW", "BREAK", "CONTINUE", "OPEN", "FETCH", "CLOSE", "DEALLOCATE",
+        "GRANT", "DENY", "REVOKE", "GO"
     ];
 
     private static string[] DataTypes =
@@ -300,6 +309,16 @@ public class SqlParser
             return mergeStatement.Result;
         }
 
+        if (Try(ParseSetOptionStatement, out var setOptionStatement))
+        {
+            return setOptionStatement.Result;
+        }
+
+        if (Try(ParseSetValueStatement, out var setValueStatement))
+        {
+            return setValueStatement.Result;
+        }
+
         if (Try(ParseTruncateTableStatement, out var truncateStatement))
         {
             return truncateStatement.Result;
@@ -513,16 +532,6 @@ public class SqlParser
         if (Try(ParsePermissionStatement, out var permissionStatement))
         {
             return permissionStatement.Result;
-        }
-
-        if (Try(ParseSetOptionStatement, out var setOptionStatement))
-        {
-            return setOptionStatement.Result;
-        }
-
-        if (Try(ParseSetValueStatement, out var setValueStatement))
-        {
-            return setValueStatement.Result;
         }
 
         if (Try(ParseLabelStatement, out var labelStatement))
@@ -1057,6 +1066,12 @@ public class SqlParser
 
         if (TryKeyword("AS", out var asSpan))
         {
+            if (IsPeekStatementBoundaryKeyword())
+            {
+                _text.Position = asSpan.Offset;
+                return value;
+            }
+
             var dataType = Or<ISqlExpression>(
                 Parse_DataTypeWithSize,
                 ParseSqlQuotedString, Parse_SqlIdentifier)();
@@ -4156,7 +4171,7 @@ public class SqlParser
         }
 
         var arguments = new List<ISqlExpression>();
-        if (!_text.IsEnd() && !IsPeekMatch(";"))
+        if (!_text.IsEnd() && !IsPeekMatch(";") && !IsPeekStatementBoundaryKeyword())
         {
             var parsedArguments = ParseWithComma(Parse_ExecArgument);
             if (parsedArguments.HasError)
@@ -7924,7 +7939,7 @@ public class SqlParser
         var statements = new List<ISqlExpression>();
         while (!_text.IsEnd() && !IsPeekKeywords("GO"))
         {
-            var statement = Parse();
+            var statement = ParseProcedureBodyStatement();
             if (statement.HasError)
             {
                 return statement.Error;
@@ -7954,6 +7969,21 @@ public class SqlParser
             Statements = statements,
             IsImplicit = true
         });
+    }
+
+    private ParseResult<ISqlExpression> ParseProcedureBodyStatement()
+    {
+        if (Try(ParseSetOptionStatement, out var setOptionStatement))
+        {
+            return setOptionStatement.Result;
+        }
+
+        if (Try(ParseSetValueStatement, out var setValueStatement))
+        {
+            return setValueStatement.Result;
+        }
+
+        return Parse();
     }
 
     private ParseResult<SqlProcedureParameter> Parse_ProcedureParameter()
@@ -9214,6 +9244,14 @@ public class SqlParser
 
             updateStatement.Where = where.Result;
         }
+
+        var optionClause = ParseOptionClause();
+        if (optionClause.HasError)
+        {
+            return optionClause.Error;
+        }
+
+        updateStatement.Option = optionClause.Result;
 
         updateStatement.Span = _text.CreateSpan(startSpan);
         return CreateParseResult(updateStatement);
@@ -10501,6 +10539,11 @@ public class SqlParser
         }
 
         return false;
+    }
+
+    private bool IsPeekStatementBoundaryKeyword()
+    {
+        return IsAnyPeekKeyword(StatementBoundaryKeywords);
     }
 
     private ParseResult<ITableSource> Parse_TableSourceWithHints()

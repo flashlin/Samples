@@ -1,4 +1,5 @@
 using FluentAssertions;
+using T1.SqlSharp.Expressions;
 using T1.SqlSharp.ParserLit;
 
 namespace T1.SqlSharpTests;
@@ -12,8 +13,19 @@ public class ParseRealCorpusRegressionSqlTest
         var parser = new SqlParser(sql);
         var results = parser.ExtractStatementResults().ToList();
         results.Should().NotBeEmpty(sourceFile);
-        results.Should().OnlyContain(x => !x.HasError, sourceFile);
+        results.Should().OnlyContain(x => !x.HasError, $"{sourceFile}: {FormatErrors(sql, results)}");
         results.Should().OnlyContain(x => x.Result != null, sourceFile);
+    }
+
+    private static string FormatErrors(string sql, IReadOnlyList<ParseResult<ISqlExpression>> results)
+    {
+        var errors = results.Where(x => x.HasError).Select(x =>
+        {
+            var offset = Math.Clamp(x.Error.Offset, 0, sql.Length);
+            var preview = sql[offset..Math.Min(sql.Length, offset + 120)].ReplaceLineEndings(" ");
+            return $"{x.Error.Message} at {offset}: {preview}";
+        });
+        return string.Join(" | ", errors);
     }
 
     private static IEnumerable<TestCaseData> SqlCases()
@@ -362,6 +374,148 @@ public class ParseRealCorpusRegressionSqlTest
             OUTPUT inserted.transid, inserted.custid
             FROM bettrans b
             WHERE b.transid = @transid
+            """);
+
+        yield return Case(
+            "Leo_SB_Summary_GetTurnOverJoinNow_4.8.sql",
+            """
+            CREATE PROCEDURE [dbo].[Leo_SB_Summary_GetTurnOverJoinNow_4.8]
+                @type int
+            AS
+            BEGIN
+                IF @type = 0
+                BEGIN
+                    SELECT Date, Turnover, Winloss
+                    FROM #tmp_turonver_joinnow_monthly0
+                    DROP TABLE #tmp_turonver_joinnow_monthly0
+                END
+                ELSE IF @type = 1
+                BEGIN
+                    SET @type = 2
+                END
+            END
+            """);
+
+        yield return Case(
+            "Adm_Sch_LC_ClearReportSummary.sql",
+            """
+            CREATE PROCEDURE [dbo].[Adm_Sch_LC_ClearReportSummary]
+            AS
+            BEGIN
+                UPDATE livecasinodailysummary.dbo.DailySetup
+                SET minagentdaily = @minagentdaily,
+                    maxagentdaily = @maxagentdaily
+            END
+            """);
+
+        yield return Case(
+            "dotnet_getGroupOdds.sql",
+            """
+            CREATE FUNCTION [dbo].[dotnet_getGroupOdds](@ugroup varchar(10), @odds float)
+            RETURNS float
+            AS
+            BEGIN
+                DECLARE @godds float
+                IF @ugroup = 'hkb'
+                    SET @godds = @odds - 0.005
+                ELSE IF @ugroup = 'hkc'
+                    SET @godds = @odds - 0.01
+                RETURN @godds
+            END
+            """);
+
+        yield return Case(
+            "Admin_SB_NewBetType_UpdateOddsByLeague5050_5.9.sql",
+            """
+            CREATE PROCEDURE [dbo].[Admin_SB_NewBetType_UpdateOddsByLeague5050_5.9]
+            AS
+            BEGIN
+                UPDATE O WITH (ROWLOCK, UPDLOCK)
+                SET O.OddsSpreadA = @spreadA,
+                    O.odds1a = CASE WHEN O.hdp1 > O.hdp2 THEN dbo.dotnet_getMirrorOdds(O.odds2a, @spreadA) ELSE O.odds1a END
+                FROM Odds O
+            END
+            """);
+
+        yield return Case(
+            "Nike_SB_PlaceBet_AutobookieORLive_14.09.sql",
+            """
+            CREATE PROCEDURE [dbo].[Nike_SB_PlaceBet_AutobookieORLive_14.09]
+                @oddsId int,
+                @acceptBetterOdds bit = 0,
+                @odds float,
+                @actualRate float,
+                @stake int,
+                @custId int,
+                @username nvarchar(20),
+                @betdaqid bigint = null,
+                @betPage tinyint = null
+            AS
+                SET NOCOUNT ON
+                DECLARE @transid bigint, @ohdp1 float, @ohdp2 float
+            """);
+
+        yield return Case(
+            "Admin_SB_LiveMgmt_AcceptWaitingLiveMPSubBet_3.1.0.sql",
+            """
+            CREATE PROCEDURE [dbo].[Admin_SB_LiveMgmt_AcceptWaitingLiveMPSubBet_3.1.0]
+            AS
+            BEGIN
+                UPDATE bm
+                SET bm.[status] = 'running',
+                    bm.checktime = @checkTime
+                OUTPUT inserted.refno INTO @subBets
+                FROM bettransm bm
+                WHERE bm.transid IN (SELECT TransId FROM #TempTransIds WITH (NOLOCK))
+                OPTION (QUERYTRACEON 9481)
+                BREAK
+            END
+            """);
+
+        yield return Case(
+            "dotnet_routine_walkInMemberTopup_withInYear.sql",
+            """
+            CREATE PROCEDURE [dbo].[dotnet_routine_walkInMemberTopup_withInYear]
+            AS
+            BEGIN
+                INSERT statistics_raw(amount, [site], category)
+                EXEC [dbo].[dotnet_stats_walkinMemberTopup_withInYear]
+                DECLARE @dtNow datetime
+                SET @dtNow = GETDATE()
+            END
+            """);
+
+        yield return Case(
+            "AddCommonTriggerInSourceTable.sql",
+            """
+            DECLARE curTable CURSOR FOR
+            SELECT tableName
+            FROM @tables
+            OPEN curTable
+            FETCH NEXT FROM curTable INTO @tableName
+            """);
+
+        yield return Case(
+            "dotnet_athena_AAA_UpdateResourceGroupsAllowLoop_2.01.sql",
+            """
+            GRANT EXECUTE
+                ON OBJECT::[dbo].[dotnet_athena_AAA_UpdateResourceGroupsAllowLoop_2.01] TO [RoleAthena]
+                AS [dbo];
+            GO
+            """);
+
+        yield return Case(
+            "Leo_SB_Account_DeleteAgent_7.5.sql",
+            """
+            CREATE PROCEDURE [dbo].[Leo_SB_Account_DeleteAgent_7.5]
+                @custid AS int,
+                @roleid AS int,
+                @operator AS nvarchar(50) = '',
+                @delflag AS int = 0
+            AS
+                SET NOCOUNT ON
+                DECLARE @totalbalance AS float
+                SET @totalbalance = 0
             """);
     }
 
