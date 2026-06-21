@@ -8,4 +8,6 @@ public class SqlVariableDeclaration
     public ISqlExpression? InitialValue { get; set; }
     public bool IsTable { get; set; }
     public List<SqlColumnDefinition> TableColumns { get; set; } = [];
+    public bool IsCursor { get; set; }
+    public ISqlExpression? CursorSource { get; set; }
 }

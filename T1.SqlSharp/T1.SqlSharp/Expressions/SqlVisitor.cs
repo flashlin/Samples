@@ -687,6 +687,7 @@ public class SqlVisitor
         {
             declaration.InitialValue?.Accept(this);
             declaration.TableColumns.ForEach(column => column.Accept(this));
+            declaration.CursorSource?.Accept(this);
         });
     }
 

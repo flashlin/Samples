@@ -61,6 +61,44 @@ public class ParseDeclareSqlTest
     }
 
     [Test]
+    public void Declare_cursor_variable()
+    {
+        var sql = "DECLARE @c CURSOR";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDeclareStatement
+        {
+            Declarations =
+            [
+                new SqlVariableDeclaration { Name = "@c", DataType = "CURSOR", IsCursor = true }
+            ]
+        });
+    }
+
+    [Test]
+    public void Declare_cursor_for_select()
+    {
+        var sql = "DECLARE curUsers CURSOR FOR SELECT Id FROM Users";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDeclareStatement
+        {
+            Declarations =
+            [
+                new SqlVariableDeclaration
+                {
+                    Name = "curUsers",
+                    DataType = "CURSOR",
+                    IsCursor = true,
+                    CursorSource = new SelectStatement
+                    {
+                        Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "Id" } }],
+                        FromSources = [new SqlTableSource { TableName = "Users" }]
+                    }
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void Declare_table_variable()
     {
         var sql = "DECLARE @t TABLE (Id INT, Name VARCHAR(50))";

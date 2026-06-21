@@ -3779,7 +3779,33 @@ public class SqlParser
             return [];
         }
 
-        return ReadCommaSeparatedIdentifiers();
+        var options = new List<string>();
+        do
+        {
+            options.Add(Parse_WithOption());
+        } while (TryMatch(",", out _));
+
+        return options;
+    }
+
+    private string Parse_WithOption()
+    {
+        if (TryKeywords(["EXECUTE", "AS"], out _))
+        {
+            return $"EXECUTE AS {ReadSqlIdentifier().Word}";
+        }
+
+        if (TryKeywords(["RETURNS", "NULL", "ON", "NULL", "INPUT"], out _))
+        {
+            return "RETURNS NULL ON NULL INPUT";
+        }
+
+        if (TryKeywords(["CALLED", "ON", "NULL", "INPUT"], out _))
+        {
+            return "CALLED ON NULL INPUT";
+        }
+
+        return ReadSqlIdentifier().Word;
     }
 
     private bool TryDefinitionLead(out TextSpan startSpan, out bool isAlter, out bool isOrAlter)
@@ -5558,6 +5584,11 @@ public class SqlParser
             });
         }
 
+        if (string.Equals(dataType, "CURSOR", StringComparison.OrdinalIgnoreCase))
+        {
+            return Parse_CursorDeclaration(name.ResultValue.FieldName);
+        }
+
         var dataSize = Parse_DataSize();
         if (dataSize.HasError)
         {
@@ -5580,6 +5611,29 @@ public class SqlParser
             }
 
             declaration.InitialValue = initialValue.ResultValue;
+        }
+
+        return CreateParseResult(declaration);
+    }
+
+    private ParseResult<SqlVariableDeclaration> Parse_CursorDeclaration(string name)
+    {
+        var declaration = new SqlVariableDeclaration
+        {
+            Name = name,
+            DataType = "CURSOR",
+            IsCursor = true
+        };
+
+        if (TryKeyword("FOR", out _))
+        {
+            var source = ParseSelectStatement();
+            if (source.HasError)
+            {
+                return source.Error;
+            }
+
+            declaration.CursorSource = source.ResultValue;
         }
 
         return CreateParseResult(declaration);
