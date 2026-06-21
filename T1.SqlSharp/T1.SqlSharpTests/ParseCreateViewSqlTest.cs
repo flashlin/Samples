@@ -7,6 +7,37 @@ namespace T1.SqlSharpTests;
 public class ParseCreateViewSqlTest
 {
     [Test]
+    public void Create_view_with_cte_body()
+    {
+        var sql = "CREATE VIEW vw AS WITH c AS (SELECT Id FROM Users) SELECT Id FROM c";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateViewStatement
+        {
+            ViewName = "vw",
+            Query = new SqlWithCte
+            {
+                CommonTableExpressions =
+                [
+                    new SqlCommonTableExpression
+                    {
+                        Name = "c",
+                        Query = new SelectStatement
+                        {
+                            Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "Id" } }],
+                            FromSources = [new SqlTableSource { TableName = "Users" }]
+                        }
+                    }
+                ],
+                Statement = new SelectStatement
+                {
+                    Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "Id" } }],
+                    FromSources = [new SqlTableSource { TableName = "c" }]
+                }
+            }
+        });
+    }
+
+    [Test]
     public void Create_view_simple()
     {
         var sql = "CREATE VIEW vCustomer AS SELECT Id, Name FROM Customer";

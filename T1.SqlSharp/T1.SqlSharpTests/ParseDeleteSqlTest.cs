@@ -18,6 +18,29 @@ public class ParseDeleteSqlTest
     }
 
     [Test]
+    public void Delete_with_cte_prefix()
+    {
+        var sql = "WITH c AS (SELECT Id FROM Users) DELETE FROM c";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlWithCte
+        {
+            CommonTableExpressions =
+            [
+                new SqlCommonTableExpression
+                {
+                    Name = "c",
+                    Query = new SelectStatement
+                    {
+                        Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "Id" } }],
+                        FromSources = [new SqlTableSource { TableName = "Users" }]
+                    }
+                }
+            ],
+            Statement = new SqlDeleteStatement { TableName = "c" }
+        });
+    }
+
+    [Test]
     public void Delete_from_table_with_where()
     {
         var sql = "DELETE FROM Users WHERE Id = 1";

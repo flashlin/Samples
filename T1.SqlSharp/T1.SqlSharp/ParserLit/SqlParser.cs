@@ -8108,7 +8108,9 @@ public class SqlParser
             return CreateParseError("Expected AS in CREATE VIEW");
         }
 
-        var query = Parse_CteBodyStatement();
+        var query = IsPeekKeywords("WITH")
+            ? ParseWithCteStatement().To<ISqlExpression>()
+            : Parse_CteBodyStatement();
         if (query.HasError)
         {
             return query.Error;

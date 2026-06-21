@@ -20,8 +20,16 @@ public static class SqlInsertExpressionBuilder
         return new SqlInsertStatement
         {
             TableName = tableName,
-            Columns = columns
+            Columns = columns,
+            ValuesRows = [CreateParameterRow(columns.Count)]
         };
+    }
+
+    private static List<ISqlExpression> CreateParameterRow(int count)
+    {
+        return Enumerable.Range(0, count)
+            .Select(index => (ISqlExpression)new SqlParameter { ParameterName = $"@p{index}" })
+            .ToList();
     }
 }
 

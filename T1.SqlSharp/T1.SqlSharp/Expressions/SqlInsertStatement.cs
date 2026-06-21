@@ -25,12 +25,51 @@ public class SqlInsertStatement : ISqlExpression
     public string ToSql()
     {
         var sql = new StringBuilder();
-        sql.Append($"INSERT INTO {TableName} (");
-        sql.Append(string.Join(", ", Columns.Select(c => $"[{c}]")));
-        sql.Append(") VALUES (");
-        sql.Append(string.Join(", ", Columns.Select((_, i) => $"@p{i}")));
-        sql.Append(")");
+        sql.Append("INSERT");
+        if (Top != null)
+        {
+            sql.Append($" {Top.ToSql()}");
+        }
+
+        sql.Append($" INTO {TableName}");
+        if (Withs.Count > 0)
+        {
+            sql.Append($" WITH ({string.Join(", ", Withs.Select(hint => hint.ToSql()))})");
+        }
+
+        if (Columns.Count > 0)
+        {
+            sql.Append($" ({string.Join(", ", Columns.Select(column => $"[{column}]"))})");
+        }
+
+        if (Output != null)
+        {
+            sql.Append($" {Output.ToSql()}");
+        }
+
+        sql.Append(RenderBody());
         return sql.ToString();
+    }
+
+    private string RenderBody()
+    {
+        if (IsDefaultValues)
+        {
+            return " DEFAULT VALUES";
+        }
+
+        if (SourceSelect != null)
+        {
+            return $" {SourceSelect.ToSql()}";
+        }
+
+        if (ExecSource != null)
+        {
+            return $" {ExecSource.ToSql()}";
+        }
+
+        var rows = ValuesRows.Select(row => $"({string.Join(", ", row.Select(value => value.ToSql()))})");
+        return $" VALUES {string.Join(", ", rows)}";
     }
 }
 

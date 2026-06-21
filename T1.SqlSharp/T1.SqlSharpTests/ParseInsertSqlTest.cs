@@ -7,6 +7,41 @@ namespace T1.SqlSharpTests;
 public class ParseInsertSqlTest
 {
     [Test]
+    public void Insert_round_trip_values()
+    {
+        var sql = "INSERT INTO Users (Id, Name) VALUES (1, 'Alice')";
+        var rc = sql.ParseSql();
+        Assert.That(rc.ResultValue.ToSql(), Is.EqualTo("INSERT INTO Users ([Id], [Name]) VALUES (1, 'Alice')"));
+    }
+
+    [Test]
+    public void Insert_round_trip_multi_row()
+    {
+        var sql = "INSERT INTO Users (Id, Name) VALUES (1, 'A'), (2, 'B')";
+        var rc = sql.ParseSql();
+        Assert.That(rc.ResultValue.ToSql(), Is.EqualTo("INSERT INTO Users ([Id], [Name]) VALUES (1, 'A'), (2, 'B')"));
+    }
+
+    [Test]
+    public void Insert_round_trip_default_values()
+    {
+        var sql = "INSERT INTO Users DEFAULT VALUES";
+        var rc = sql.ParseSql();
+        Assert.That(rc.ResultValue.ToSql(), Is.EqualTo("INSERT INTO Users DEFAULT VALUES"));
+    }
+
+    [Test]
+    public void Insert_round_trip_select_is_faithful_not_parameterized()
+    {
+        var sql = "INSERT INTO Logs (Msg) SELECT Text FROM Users";
+        var rc = sql.ParseSql();
+        var result = rc.ResultValue.ToSql();
+        Assert.That(result, Does.StartWith("INSERT INTO Logs ([Msg]) "));
+        Assert.That(result, Does.Contain("SELECT"));
+        Assert.That(result, Does.Not.Contain("@p"));
+    }
+
+    [Test]
     public void Insert_into_with_columns_single_row()
     {
         var sql = "INSERT INTO Users (Id, Name) VALUES (1, 'Alice')";

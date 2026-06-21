@@ -259,6 +259,21 @@ public class ParseAlterTableSqlTest
     }
 
     [Test]
+    public void Alter_table_drop_constraint_multiple()
+    {
+        var sql = "ALTER TABLE Users DROP CONSTRAINT PK_Users, FK_Orders";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Users",
+            Action = new SqlAlterTableDropConstraint
+            {
+                ConstraintNames = ["PK_Users", "FK_Orders"]
+            }
+        });
+    }
+
+    [Test]
     public void Alter_table_enable_trigger_all()
     {
         var sql = "ALTER TABLE Users ENABLE TRIGGER ALL";

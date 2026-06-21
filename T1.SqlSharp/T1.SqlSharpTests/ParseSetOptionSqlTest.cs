@@ -47,6 +47,30 @@ public class ParseSetOptionSqlTest
     }
 
     [Test]
+    public void Set_lock_timeout_number()
+    {
+        var sql = "SET LOCK_TIMEOUT 1000";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlSetOptionStatement { Option = "LOCK_TIMEOUT", Value = "1000" });
+    }
+
+    [Test]
+    public void Set_transaction_isolation_level_snapshot()
+    {
+        var sql = "SET TRANSACTION ISOLATION LEVEL SNAPSHOT";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlSetOptionStatement { Option = "TRANSACTION ISOLATION LEVEL", Value = "SNAPSHOT" });
+    }
+
+    [Test]
+    public void Set_transaction_isolation_level_repeatable_read()
+    {
+        var sql = "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlSetOptionStatement { Option = "TRANSACTION ISOLATION LEVEL", Value = "REPEATABLE READ" });
+    }
+
+    [Test]
     public void Set_transaction_isolation_level_read_committed()
     {
         var sql = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED";

@@ -22,7 +22,15 @@ public class SqlInsertExpressionBuilderTest
         result.ShouldBe(new SqlInsertStatement
         {
             TableName = "[dbo].[Users]",
-            Columns = ["Id", "Name", "Birth"]
+            Columns = ["Id", "Name", "Birth"],
+            ValuesRows =
+            [
+                [
+                    new SqlParameter { ParameterName = "@p0" },
+                    new SqlParameter { ParameterName = "@p1" },
+                    new SqlParameter { ParameterName = "@p2" }
+                ]
+            ]
         });
     }
 

@@ -25,13 +25,12 @@ public class SqlUpdateExpressionBuilderTest
         result.ShouldBe(new SqlUpdateStatement
         {
             TableName = "[dbo].[Users]",
-            SetColumns =
+            SetClauses =
             [
-                new SqlSetColumn
+                new SqlAssignExpr
                 {
-                    ColumnName = "Name",
-                    ParameterName = "@p0",
-                    Value = "John"
+                    Left = new SqlFieldExpr { FieldName = "[Name]" },
+                    Right = new SqlParameter { ParameterName = "@p0", Value = "John" }
                 }
             ]
         });

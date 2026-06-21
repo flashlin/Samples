@@ -42,11 +42,10 @@ public class SqlUpdateExpressionBuilder<TEntity> where TEntity : class
         var columnName = ExtractPropertyName(selector);
         var parameterName = $"@p{_parameterIndex++}";
 
-        _updateStatement.SetColumns.Add(new SqlSetColumn
+        _updateStatement.SetClauses.Add(new SqlAssignExpr
         {
-            ColumnName = columnName,
-            ParameterName = parameterName,
-            Value = value
+            Left = new SqlFieldExpr { FieldName = $"[{columnName}]" },
+            Right = new SqlParameter { ParameterName = parameterName, Value = value }
         });
 
         return this;

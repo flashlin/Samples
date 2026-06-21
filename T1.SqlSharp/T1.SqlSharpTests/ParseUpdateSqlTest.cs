@@ -7,6 +7,22 @@ namespace T1.SqlSharpTests;
 public class ParseUpdateSqlTest
 {
     [Test]
+    public void Update_round_trip_single()
+    {
+        var sql = "UPDATE Users SET Name = 'John'";
+        var rc = sql.ParseSql();
+        Assert.That(rc.ResultValue.ToSql(), Is.EqualTo("UPDATE Users SET Name = 'John'"));
+    }
+
+    [Test]
+    public void Update_round_trip_where()
+    {
+        var sql = "UPDATE Users SET Age = 30 WHERE Id = 1";
+        var rc = sql.ParseSql();
+        Assert.That(rc.ResultValue.ToSql(), Is.EqualTo("UPDATE Users SET Age = 30 WHERE Id = 1"));
+    }
+
+    [Test]
     public void Update_set_single_column()
     {
         var sql = "UPDATE Users SET Name = 'John'";
