@@ -17,7 +17,7 @@
 - [~] `INSERT`（parser 可解析常用語法，細目見 §1.1：VALUES/多列/SELECT/EXEC/DEFAULT VALUES/TOP/hint/OUTPUT/DEFAULT 值/CTE 前綴。additive 擴充 `SqlInsertStatement`，builder 路徑不受影響。僅剩 `EXEC ('dynamic sql')`）
 - [x] `UPDATE`（parser 可解析：SET 多指派 / 複合指派 `+=` / `t.col` / `DEFAULT` 值 / `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.2）
 - [~] `DELETE`（parser 可解析：`[FROM] t` / 省略 FROM / 第二個 `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.3。已大致完整）
-- [~] `MERGE`（parser 可解析：target/source、`ON`、三種 WHEN、`AND` 過濾、UPDATE/DELETE/INSERT（含 DEFAULT VALUES）action、CTE 前綴、結尾 `;`，細目見 §1.4。剩 TOP/hint/OUTPUT/OPTION）
+- [x] `MERGE`（parser 可解析：TOP、target/source（含 hint）、`ON`、三種 WHEN、`AND` 過濾、UPDATE/DELETE/INSERT（含 DEFAULT VALUES）action、OUTPUT、OPTION、CTE 前綴、結尾 `;`，細目見 §1.4）
 - [~] `ALTER TABLE`（支援 ADD 欄位（多）/ ADD CONSTRAINT / DROP COLUMN（多）/ DROP CONSTRAINT（多）/ ALTER COLUMN，細目見 §1.5。剩 `WITH CHECK/NOCHECK`、`{ENABLE|DISABLE} TRIGGER`、ADD 混合欄位+約束）；其他 `ALTER VIEW/PROC/...` 未做
 - [~] `DROP ...`（支援 `DROP {TABLE|VIEW|PROCEDURE|FUNCTION|INDEX|TRIGGER|SCHEMA|DATABASE|SEQUENCE|TYPE} [IF EXISTS] name1[, ...]`，含 `DROP INDEX ix ON table`（`SqlDropStatement.OnTable`）；`SqlDropStatement` + `SqlDropObjectType` enum。未做舊式 `DROP INDEX table.idx`、多 `idx ON tbl` 對）
 - [x] `TRUNCATE TABLE`（`SqlTruncateTableStatement`）
@@ -154,11 +154,13 @@
 - [x] WHEN 的 `AND <condition>` 過濾（重用 `Parse_WhereExpression`，停在 `THEN`）
 - [x] 結尾 `;`（可省）
 - [x] 無 alias `MERGE Target USING Source ON ...`（靠 `USING` 入 `ReservedWords`）
-**第二階段（可延後）**：
-- [ ] `MERGE TOP (n) [PERCENT]`
-- [ ] target table hint、`OUTPUT [$action]`、結尾 `OPTION (...)`
+**第二階段**：
+- [x] `MERGE TOP (n) [PERCENT]`（重用 `Parse_TopClause`）
+- [x] target table hint（重用 `Parse_TableSourceWithHints` → `Target.Withs`；註：hint 須在 alias 前、無 alias，hint+alias 並用受 `Parse_TableSourceWithHints` 順序限制）
+- [x] `OUTPUT col [INTO]`（重用 `Parse_OutputClause`）、結尾 `OPTION (...)`（重用 `ParseOptionClause`）
 - [x] `INSERT DEFAULT VALUES` action
 - [x] CTE 前綴 `WITH cte AS (...) MERGE ...`（`Parse_CteBodyStatement`）
+- [ ] `OUTPUT $action`（pseudo-column，未特別處理）
 
 **實作雷點（已確認）**：
 1. **`USING` 必須入 `ReservedWords`**：否則無 alias 的 `MERGE Target USING ...` 會把 `USING` 當 target 的 bare alias 吃掉（`ON`/`WHEN`/`THEN` 因條件 / 運算式不解析 alias 而安全，故未加）。
@@ -308,9 +310,9 @@
 ## 維護建議優先序（未完成項目）
 
 1. 🟢 DDL（DROP/TRUNCATE/ALTER TABLE/CREATE VIEW/CREATE INDEX/DROP INDEX ON 已完成）：`CREATE PROCEDURE|FUNCTION|TRIGGER`、ALTER TABLE 第二階段（見 §1.5）
-2. 🟢 DML 收尾剩餘：MERGE 第二階段（TOP/hint/OUTPUT/OPTION，見 §1.4）、`EXEC ('dynamic sql')`、EXEC 具名參數 `@p = val`
+2. 🟢 DML 細項剩餘：`EXEC ('dynamic sql')`、EXEC 具名參數 `@p = val`、MERGE `OUTPUT $action`
 3. 🟢 具名 `WINDOW` 子句的延伸：`OVER (existing_window ...)` 行內參照、定義間互相參照、RANK 路徑 bare `OVER name`（見 §4 註）
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）、`MERGE` 解析 MVP（INTO/USING/ON/三種 WHEN/AND/三種 action，2026-06-21）、`TRUNCATE TABLE` + `DROP`（多型別 + IF EXISTS + 多名稱，2026-06-21）、`ALTER TABLE`（ADD/DROP COLUMN、ADD/DROP CONSTRAINT、ALTER COLUMN，2026-06-21）、`CREATE VIEW`（OR ALTER / 欄位清單 / WITH CHECK OPTION，2026-06-21）、`CREATE INDEX`（UNIQUE/CLUSTERED/ASC-DESC/INCLUDE/filtered WHERE，2026-06-21）、`DROP INDEX ix ON table`（2026-06-21）、DML 收尾（MERGE CTE 前綴 + DEFAULT VALUES、UPDATE 複合指派 `+=`、`INSERT ... EXEC`，2026-06-21）、頂層 `EXEC proc [args]`（2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）、`MERGE` 解析 MVP（INTO/USING/ON/三種 WHEN/AND/三種 action，2026-06-21）、`TRUNCATE TABLE` + `DROP`（多型別 + IF EXISTS + 多名稱，2026-06-21）、`ALTER TABLE`（ADD/DROP COLUMN、ADD/DROP CONSTRAINT、ALTER COLUMN，2026-06-21）、`CREATE VIEW`（OR ALTER / 欄位清單 / WITH CHECK OPTION，2026-06-21）、`CREATE INDEX`（UNIQUE/CLUSTERED/ASC-DESC/INCLUDE/filtered WHERE，2026-06-21）、`DROP INDEX ix ON table`（2026-06-21）、DML 收尾（MERGE CTE 前綴 + DEFAULT VALUES、UPDATE 複合指派 `+=`、`INSERT ... EXEC`，2026-06-21）、頂層 `EXEC proc [args]`（2026-06-21）、MERGE 第二階段（TOP/hint/OUTPUT/OPTION，2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。

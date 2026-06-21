@@ -566,6 +566,7 @@ public class SqlVisitor
         expr.Source.Accept(this);
         expr.OnCondition.Accept(this);
         expr.WhenClauses.ForEach(clause => clause.Accept(this));
+        expr.Output?.Accept(this);
     }
 
     public virtual void Visit_MergeWhenClause(SqlMergeWhenClause expr)

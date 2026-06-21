@@ -154,6 +154,92 @@ public class ParseMergeSqlTest
     }
 
     [Test]
+    public void Merge_top_n()
+    {
+        var sql = "MERGE TOP (10) INTO Target AS t USING Source AS s ON t.id = s.id "
+                  + "WHEN MATCHED THEN DELETE";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlMergeStatement
+        {
+            Top = new SqlTopClause
+            {
+                Expression = new SqlParenthesizedExpression
+                {
+                    Inner = new SqlValue { SqlType = SqlType.IntValue, Value = "10" }
+                }
+            },
+            Target = new SqlTableSource { TableName = "Target", Alias = "t" },
+            Source = new SqlTableSource { TableName = "Source", Alias = "s" },
+            OnCondition = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "t.id" },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlFieldExpr { FieldName = "s.id" }
+            },
+            WhenClauses =
+            [
+                new SqlMergeWhenClause { MatchType = MergeMatchType.Matched, Action = new SqlMergeDeleteAction() }
+            ]
+        });
+    }
+
+    [Test]
+    public void Merge_target_table_hint()
+    {
+        var sql = "MERGE INTO Target WITH (HOLDLOCK) USING Source ON Target.id = Source.id "
+                  + "WHEN MATCHED THEN DELETE";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlMergeStatement
+        {
+            Target = new SqlTableSource { TableName = "Target", Withs = [new SqlHint { Name = "HOLDLOCK" }] },
+            Source = new SqlTableSource { TableName = "Source" },
+            OnCondition = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "Target.id" },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlFieldExpr { FieldName = "Source.id" }
+            },
+            WhenClauses =
+            [
+                new SqlMergeWhenClause { MatchType = MergeMatchType.Matched, Action = new SqlMergeDeleteAction() }
+            ]
+        });
+    }
+
+    [Test]
+    public void Merge_with_output_and_option()
+    {
+        var sql = "MERGE INTO Target AS t USING Source AS s ON t.id = s.id "
+                  + "WHEN MATCHED THEN DELETE "
+                  + "OUTPUT deleted.id "
+                  + "OPTION (RECOMPILE)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlMergeStatement
+        {
+            Target = new SqlTableSource { TableName = "Target", Alias = "t" },
+            Source = new SqlTableSource { TableName = "Source", Alias = "s" },
+            OnCondition = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "t.id" },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlFieldExpr { FieldName = "s.id" }
+            },
+            WhenClauses =
+            [
+                new SqlMergeWhenClause { MatchType = MergeMatchType.Matched, Action = new SqlMergeDeleteAction() }
+            ],
+            Output = new SqlOutputClause
+            {
+                Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "deleted.id" } }]
+            },
+            Option = new SqlOptionClause
+            {
+                Hints = [new SqlQueryHint { Name = "RECOMPILE" }]
+            }
+        });
+    }
+
+    [Test]
     public void Merge_when_matched_and_condition_then_delete()
     {
         var sql = "MERGE INTO Target AS t USING Source AS s ON t.id = s.id "

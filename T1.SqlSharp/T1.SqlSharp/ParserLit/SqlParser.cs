@@ -3701,6 +3701,12 @@ public class SqlParser
             return NoneResult<SqlMergeStatement>();
         }
 
+        var topClause = Parse_TopClause();
+        if (topClause.HasError)
+        {
+            return topClause.Error;
+        }
+
         TryKeyword("INTO", out _);
 
         if (!Try(Parse_TableSourceWithHints, out var target))
@@ -3740,15 +3746,30 @@ public class SqlParser
             whenClauses.Add(whenClause.ResultValue);
         }
 
+        var outputClause = Parse_OutputClause();
+        if (outputClause.HasError)
+        {
+            return outputClause.Error;
+        }
+
+        var optionClause = ParseOptionClause();
+        if (optionClause.HasError)
+        {
+            return optionClause.Error;
+        }
+
         TryMatch(";", out _);
 
         return CreateParseResult(new SqlMergeStatement
         {
             Span = _text.CreateSpan(startSpan),
+            Top = topClause.Result,
             Target = target.ResultValue,
             Source = source.ResultValue,
             OnCondition = onCondition.ResultValue,
-            WhenClauses = whenClauses
+            WhenClauses = whenClauses,
+            Output = outputClause.Result,
+            Option = optionClause.Result
         });
     }
 
