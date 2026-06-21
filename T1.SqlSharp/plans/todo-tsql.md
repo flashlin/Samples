@@ -86,7 +86,9 @@
 - [x] `OVER (ORDER BY ...)`
 - [x] `OVER (PARTITION BY ... ORDER BY ...)`
 - [x] `RANK()` / `ROW_NUMBER()` / 等（一般函式 + `OVER`）
-- [x] 視窗框架 `ROWS / RANGE BETWEEN ... PRECEDING/FOLLOWING/CURRENT ROW/UNBOUNDED`（含單一 bound 與 BETWEEN 兩種形式）
+- [~] 視窗框架 `ROWS / RANGE BETWEEN ... PRECEDING/FOLLOWING/CURRENT ROW/UNBOUNDED`（含單一 bound 與 BETWEEN 兩種形式）
+  - 註：frame 只掛在「泛用值 + `OVER`」路徑（聚合視窗函式 `SUM()`/`AVG()` 等）。`RANK()`/`ROW_NUMBER()` 走 `ParseRankClause` 獨立路徑、未加 frame——但排名函式在 T-SQL 本就不允許 frame，故為刻意不做、非遺漏。
+- [ ] 視窗框架 `EXCLUDE` 選項（`EXCLUDE CURRENT ROW / GROUP / TIES / NO OTHERS`）
 - [ ] `WITHIN GROUP (...)`（`STRING_AGG`、`PERCENTILE_CONT/DISC`）
 - [ ] 具名 `WINDOW` 子句
 
