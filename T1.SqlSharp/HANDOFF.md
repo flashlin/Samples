@@ -58,7 +58,7 @@ END
 - `Parse_ProcedureParameter()` 消費 optional `READONLY`
 - 單檔驗證原失敗檔現在 `StatementCount=4`、`SucceededStatements=4`、`FailedStatements=0`
 
-### 線四:report.csv 錯誤分析與 10 個 corpus regression — ✅ 已完成、尚未 commit
+### 線四:report.csv 錯誤分析與 30 個 corpus regression — ✅ 已完成、尚未 commit
 
 已完成：
 
@@ -67,12 +67,21 @@ END
 - `error.csv` 為每個失敗檔一列，包含分類、錯誤訊息、SQL file、offset、line、statement/context preview、suggested test name。
 - `error-summary.csv` 為分類彙總，方便挑下一批 TDD 目標。
 - 使用者後續要求不要繼續抓 `unknown statement` / 邊界分類，改採隨機抽樣 SQL 檔做 parser regression。
-- 新增 `T1.SqlSharpTests/ParseRealCorpusRegressionSqlTest.cs`，10 個測試皆把最小可重現 SQL 內容直接嵌入測試專案，不直接讀 `/Users/flash/titan/DbProjects`。
+- 新增 `T1.SqlSharpTests/ParseRealCorpusRegressionSqlTest.cs`，30 個測試皆把最小可重現 SQL 內容直接嵌入測試專案，不直接讀 `/Users/flash/titan/DbProjects`。
+- regression 測試已改用 `SqlParser.ExtractStatementResults()` 驗證整段 SQL 中每個 statement，不只驗證第一個 statement。
 - 修正 `SqlParser.cs`：
   - procedure parameters 支援 `@param AS DataType`
   - `DECLARE` 支援 `DECLARE @var AS DataType`
   - `WITH EXECUTE AS 'user'` 支援 quoted principal
-  - 擴充 `ReservedWords`，避免 `WHILE` / `IF` / `BEGIN` / `END` / `DECLARE` / `RETURN` 等被前一個 `SELECT` 當 alias 吃掉。
+- 擴充 `ReservedWords`，避免 `WHILE` / `IF` / `BEGIN` / `END` / `DECLARE` / `RETURN` 等被前一個 `SELECT` 當 alias 吃掉。
+- `ALTER DATABASE ... ADD FILEGROUP <name>`
+- SQLCMD `:r <path>`
+- `CREATE INDEX ... WITH (...) ON [filegroup]`
+- `EXEC proc arg OUTPUT` positional output argument
+- `CREATE LOGIN ... WITH PASSWORD = ..., CHECK_POLICY = OFF`
+- `CREATE USER ... FOR LOGIN ... WITH DEFAULT_SCHEMA = ...`
+- `SET @cursor = CURSOR FOR SELECT ...`
+- `MERGE USING (SELECT ...) AS source (col1, col2)`
 
 10 個 regression 測試來源/語法型態：
 
@@ -87,6 +96,32 @@ END
 - `BetGenius_DeleteFixture_1.0.0.sql`: procedure parameter `@fixtureId AS INT` + `DELETE`
 - `Aither_LC_Player_VerifyUser_14.02.sql`: `@retcode AS INT OUTPUT` + `RETURN @retcode`
 
+第二輪 10 個 regression 測試來源/語法型態：
+
+- `GamesBetAll.sql`: `CREATE SYNONYM ... FOR [linked].[db].[schema].[table]`
+- `stmt201201.sql`: `ALTER DATABASE [$(DatabaseName)] ADD FILEGROUP [stmt201201]`
+- `Logins.sql`: `CREATE LOGIN ... WITH PASSWORD = ..., CHECK_POLICY = OFF`
+- `Local.PreDeployment.sql`: SQLCMD `:r ..\..\CommonFiles\Scripts\CommonPreDeployment.sql`
+- `AliasTag.sql`: `CREATE NONCLUSTERED INDEX ... WITH (...) ON [PRIMARY]`
+- `Leo_Transfer_SingleTransfer_14.02.sql`: positional `EXEC ... @ybal OUTPUT`
+- `DisplayNamePrefix.sql`: `EXEC sp_addextendedproperty ...`
+- `DeleteGroup.sql`: procedure body with `INSERT ... VALUES (...)`
+- `DailyStatement.sql`: repeated `GO`
+- `Report_Status.sql`: `EXEC sys.sp_addextendedproperty ...`
+
+第三輪隨機 10 個 regression 測試來源/語法型態：
+
+- `User.sql`: `CREATE USER ... FOR LOGIN ... WITH DEFAULT_SCHEMA = ...`
+- `Enum.sql`: `INSERT [table] ([cols]) VALUES (...)`
+- `Account_Upsert_TransferDailyStatement_20.07.sql`: `WAITFOR DELAY '00:00:00:003'`
+- `adm_check_dbspace.sql`: `DBCC UPDATEUSAGE(0)`
+- `Admin_SB_Settlement_Settle_Early_Sure_Win_Bets_1.1.0.sql`: temp table `CREATE TABLE #temp (...)`
+- `adm_sch_move_historylog_1.0.0.sql`: `ALTER PARTITION FUNCTION ... SPLIT RANGE (...)`
+- `psProductType.sql`: `CREATE PARTITION SCHEME ... TO (...)`
+- `adm_sch_AutoClaim.sql`: `SET @getData = CURSOR FOR SELECT ...`
+- `AccountGamesBetAPI_Merge_PlayerStatement_22.02.sql`: `MERGE ... USING (SELECT ...) AS source (cols)`
+- `Admin_SB_Settlement_Unvoid_UnSettled_14.08.sql`: `UPDATE alias SET ... OUTPUT ... FROM ...`
+
 ---
 
 ## 驗證結果
@@ -95,7 +130,7 @@ END
 
 ```bash
 dotnet test --no-restore
-# 622 passed / 0 failed
+# 642 passed / 0 failed
 
 dotnet build T1.SqlSharp/T1.SqlSharp.csproj --no-restore
 # 0 warning / 0 error
@@ -111,8 +146,9 @@ dotnet build T1.SqlSharpE2eParser/T1.SqlSharpE2eParser.csproj --no-restore
 
 ```bash
 dotnet test T1.SqlSharpTests/T1.SqlSharpTests.csproj --no-restore --filter "FullyQualifiedName~ParseRealCorpusRegressionSqlTest"
-# 修改 parser 前: 10 failed / 0 passed
-# 修改 parser 後: 10 passed / 0 failed
+# 目前: 30 passed / 0 failed
+# 第三輪新增 10 個隨機案例中，修正前實際紅燈: 3 failed / 27 passed
+# 第三輪修正後: 30 passed / 0 failed
 ```
 
 錯誤分析檔產出：
@@ -121,7 +157,7 @@ dotnet test T1.SqlSharpTests/T1.SqlSharpTests.csproj --no-restore --filter "Full
 dotnet run --project T1.SqlSharpE2eParser/T1.SqlSharpE2eParser.csproj --no-build --analyze-report /Users/flash/titan/DbProjects
 # Error report: T1.SqlSharpE2eParser/out/error.csv
 # Error summary: T1.SqlSharpE2eParser/out/error-summary.csv
-# error.csv lines: 23489 (header + 23488 failures)
+# error.csv lines: 20497 (header + 20496 failures)
 ```
 
 小型臨時 corpus 也已驗證：
@@ -137,23 +173,31 @@ dotnet run --project T1.SqlSharpE2eParser/T1.SqlSharpE2eParser.csproj --no-build
 
 ```bash
 dotnet run --project T1.SqlSharpE2eParser/T1.SqlSharpE2eParser.csproj --no-build -- /Users/flash/titan/DbProjects
-# Processed 46106/46106 | OK 22618 | FAIL 23488
-# elapsed: 42.3966562 seconds
+# Processed 46106/46106 | OK 25610 | FAIL 20496
+# elapsed: 49.2323065 seconds
 # report.csv lines: 46107 (header + 46106 files)
+```
+
+相較上一輪完整 scan：
+
+```text
+FailedFiles: 23488 -> 20496
+SucceededFiles: 22618 -> 25610
+FailedFiles reduced by: 2992
 ```
 
 `report.json` 摘要：
 
 ```text
 TotalFiles: 46106
-SucceededFiles: 22618
-FailedFiles: 23488
-TotalStatements: 250043
-SucceededStatements: 226555
-FailedStatements: 23488
+SucceededFiles: 25610
+FailedFiles: 20496
+TotalStatements: 290170
+SucceededStatements: 269674
+FailedStatements: 20496
 Top ErrorBuckets:
-  Unknown statement: 23427
-  Result is null: 61
+  Unknown statement: 20391
+  Result is null: 105
 ```
 
 TVP 原失敗檔驗證：
@@ -167,7 +211,7 @@ GitNexus：
 
 ```bash
 bun /Users/flash/.claude/skills/gitNexus/scripts/detect_changes.ts --repo /Users/flash/vdisk/github/Samples/T1.SqlSharp --scope unstaged --depth 2
-# changedSymbolCount=6 / totalUpstream=16
+# changedSymbolCount=25 / totalUpstream=96
 ```
 
 已知狀況：
@@ -186,7 +230,14 @@ git add \
   T1.SqlSharp/.gitignore \
   T1.SqlSharp/T1.SqlSharp.sln \
   T1.SqlSharp/T1.SqlSharp/Expressions/SqlCreateProcedureStatement.cs \
+  T1.SqlSharp/T1.SqlSharp/Expressions/SqlCreateIndexStatement.cs \
+  T1.SqlSharp/T1.SqlSharp/Expressions/SqlCreatePrincipalStatement.cs \
+  T1.SqlSharp/T1.SqlSharp/Expressions/SqlCursorDefinitionExpression.cs \
+  T1.SqlSharp/T1.SqlSharp/Expressions/SqlExecArgument.cs \
+  T1.SqlSharp/T1.SqlSharp/Expressions/SqlInnerTableSource.cs \
   T1.SqlSharp/T1.SqlSharp/Expressions/SqlProcedureParameter.cs \
+  T1.SqlSharp/T1.SqlSharp/Expressions/SqlType.cs \
+  T1.SqlSharp/T1.SqlSharp/Expressions/SqlVisitor.cs \
   T1.SqlSharp/T1.SqlSharp/ParserLit/SqlParser.cs \
   T1.SqlSharp/T1.SqlSharpTests/ParseCreateProcedureSqlTest.cs \
   T1.SqlSharp/T1.SqlSharpTests/ParseRealCorpusRegressionSqlTest.cs \

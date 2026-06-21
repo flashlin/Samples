@@ -6,7 +6,8 @@ public class SqlInnerTableSource : SqlTableSource
 {
     public new SqlType SqlType { get; } = SqlType.InnerTableSource;
     public required ISqlExpression Inner { get; set; }
-    
+    public List<string> ColumnAliases { get; set; } = [];
+
     public override string ToSql()
     {
         var sql = new IndentStringBuilder();
@@ -14,6 +15,10 @@ public class SqlInnerTableSource : SqlTableSource
         if (!string.IsNullOrEmpty(Alias))
         {
             sql.Write($" AS {Alias}");
+        }
+        if (ColumnAliases.Count > 0)
+        {
+            sql.Write($" ({string.Join(", ", ColumnAliases)})");
         }
         if (Withs.Count > 0)
         {

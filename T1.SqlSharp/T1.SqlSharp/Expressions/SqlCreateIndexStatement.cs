@@ -24,6 +24,7 @@ public class SqlCreateIndexStatement : ISqlExpression
     public List<string> IncludeColumns { get; set; } = [];
     public ISqlExpression? Where { get; set; }
     public List<string> Options { get; set; } = [];
+    public string FileGroup { get; set; } = string.Empty;
 
     public string ToSql()
     {
@@ -69,6 +70,10 @@ public class SqlCreateIndexStatement : ISqlExpression
         if (Options.Count > 0)
         {
             sql.Append($" WITH ({string.Join(", ", Options)})");
+        }
+        if (!string.IsNullOrEmpty(FileGroup))
+        {
+            sql.Append($" ON {FileGroup}");
         }
         return sql.ToString();
     }

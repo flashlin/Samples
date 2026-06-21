@@ -24,6 +24,7 @@ public class SqlCreatePrincipalStatement : ISqlExpression
     public string Authorization { get; set; } = string.Empty;
     public string ForLogin { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+    public List<string> Options { get; set; } = [];
 
     public string ToSql()
     {
@@ -42,6 +43,14 @@ public class SqlCreatePrincipalStatement : ISqlExpression
         if (!string.IsNullOrEmpty(Password))
         {
             sql.Append($" WITH PASSWORD = {Password}");
+            if (Options.Count > 0)
+            {
+                sql.Append($", {string.Join(", ", Options)}");
+            }
+        }
+        else if (Options.Count > 0)
+        {
+            sql.Append($" WITH {string.Join(", ", Options)}");
         }
 
         return sql.ToString();

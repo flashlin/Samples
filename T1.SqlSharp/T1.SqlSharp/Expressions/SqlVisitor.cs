@@ -451,6 +451,12 @@ public class SqlVisitor
         expr.Value.Accept(this);
     }
 
+    public virtual void Visit_CursorDefinitionExpression(SqlCursorDefinitionExpression expr)
+    {
+        AddSqlExpression(expr);
+        expr.Source.Accept(this);
+    }
+
     public virtual void Visit_AddExtendedProperty(SqlSpAddExtendedPropertyExpression expr)
     {
     }

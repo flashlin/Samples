@@ -192,4 +192,5 @@ public enum SqlType
     SignatureStatement,
     ConversationStatement,
     CreateObjectStatement,
+    CursorDefinitionExpression,
 }

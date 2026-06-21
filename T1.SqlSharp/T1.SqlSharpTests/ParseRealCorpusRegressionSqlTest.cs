@@ -1,5 +1,5 @@
 using FluentAssertions;
-using T1.SqlSharp.Extensions;
+using T1.SqlSharp.ParserLit;
 
 namespace T1.SqlSharpTests;
 
@@ -9,9 +9,11 @@ public class ParseRealCorpusRegressionSqlTest
     [TestCaseSource(nameof(SqlCases))]
     public void Parse_real_corpus_error_case(string sourceFile, string sql)
     {
-        var rc = sql.ParseSql();
-        rc.HasError.Should().BeFalse($"{sourceFile}: {rc.Error.Message}");
-        rc.Result.Should().NotBeNull(sourceFile);
+        var parser = new SqlParser(sql);
+        var results = parser.ExtractStatementResults().ToList();
+        results.Should().NotBeEmpty(sourceFile);
+        results.Should().OnlyContain(x => !x.HasError, sourceFile);
+        results.Should().OnlyContain(x => x.Result != null, sourceFile);
     }
 
     private static IEnumerable<TestCaseData> SqlCases()
@@ -174,6 +176,192 @@ public class ParseRealCorpusRegressionSqlTest
                 SELECT @retcode = 0
                 RETURN @retcode
             END
+            """);
+
+        yield return Case(
+            "GamesBetAll.sql",
+            """
+            CREATE SYNONYM [dbo].[GamesBetAll]
+            FOR [REMOTEREP13].[PlutoRepGM].[dbo].[GamesBet]
+            """);
+
+        yield return Case(
+            "stmt201201.sql",
+            """
+            ALTER DATABASE [$(DatabaseName)]
+            ADD FILEGROUP [stmt201201]
+            """);
+
+        yield return Case(
+            "Logins.sql",
+            """
+            CREATE LOGIN [L_Earth]
+            WITH PASSWORD = 'titan@2006',
+                CHECK_POLICY = OFF
+            """);
+
+        yield return Case(
+            "Local.PreDeployment.sql",
+            """
+            :r ..\..\CommonFiles\Scripts\CommonPreDeployment.sql
+            """);
+
+        yield return Case(
+            "AliasTag.sql",
+            """
+            CREATE NONCLUSTERED INDEX [IX_AliasTag_TagAliasId]
+            ON [dbo].[AliasTag] ([TagAliasId] ASC)
+            WITH (PAD_INDEX = OFF, ONLINE = ON, FILLFACTOR = 80)
+            ON [PRIMARY]
+            """);
+
+        yield return Case(
+            "Leo_Transfer_SingleTransfer_14.02.sql",
+            """
+            CREATE PROCEDURE [dbo].[Leo_Transfer_SingleTransfer_14.02]
+            AS
+            BEGIN
+                DECLARE @ybal AS DECIMAL(19, 6)
+                DECLARE @amt AS DECIMAL(19, 6) = 1
+                DECLARE @adjustedAmt AS DECIMAL(19, 6)
+                EXEC [dbo].[Leo_Account_GetYesterdayTotalBalance_5.4] @fcustid, @froleid, @ybal OUTPUT
+                IF ABS(@ybal + @amt) < 0.01
+                BEGIN
+                    SET @adjustedAmt = -(@ybal)
+                END
+            END
+            """);
+
+        yield return Case(
+            "DisplayNamePrefix.sql",
+            """
+            EXEC sp_addextendedproperty
+                @name = N'MS_Description',
+                @value = N'Identifier',
+                @level0type = N'SCHEMA',
+                @level0name = N'dbo',
+                @level1type = N'TABLE',
+                @level1name = N'DisplayNamePrefix',
+                @level2type = N'COLUMN',
+                @level2name = N'Id'
+            """);
+
+        yield return Case(
+            "DeleteGroup.sql",
+            """
+            CREATE PROCEDURE [dbo].[DeleteGroup]
+            AS
+            BEGIN
+                DECLARE @cre_by AS NVARCHAR(50) = N'root'
+                DECLARE @cre_on AS DATETIME = GETDATE()
+                INSERT INTO [dbo].[AuditLog]
+                VALUES ('ALL', '0', 'ALL', 'ALL', 'DELETE', @cre_by, @cre_on)
+            END
+            """);
+
+        yield return Case(
+            "DailyStatement.sql",
+            """
+            GO
+            GO
+            """);
+
+        yield return Case(
+            "Report_Status.sql",
+            """
+            EXEC sys.sp_addextendedproperty
+                @name = N'MS_Description',
+                @value = N'Report date',
+                @level0type = N'SCHEMA',
+                @level0name = N'dbo',
+                @level1type = N'TABLE',
+                @level1name = N'Report_Status',
+                @level2type = N'COLUMN',
+                @level2name = N'Date'
+            """);
+
+        yield return Case(
+            "User.sql",
+            """
+            CREATE USER [L_Earth]
+            FOR LOGIN [L_Earth]
+            WITH DEFAULT_SCHEMA = [dbo]
+            """);
+
+        yield return Case(
+            "Enum.sql",
+            """
+            INSERT [dbo].[Enum] ([Name], [Option])
+            VALUES (N'AgentsTransferSetting', N'Friday')
+            """);
+
+        yield return Case(
+            "Account_Upsert_TransferDailyStatement_20.07.sql",
+            """
+            WAITFOR DELAY '00:00:00:003'
+            """);
+
+        yield return Case(
+            "adm_check_dbspace.sql",
+            """
+            DBCC UPDATEUSAGE(0)
+            """);
+
+        yield return Case(
+            "Admin_SB_Settlement_Settle_Early_Sure_Win_Bets_1.1.0.sql",
+            """
+            CREATE TABLE #tempBetTrans
+            (
+                TransID bigint,
+                MatchResultId int
+            )
+            """);
+
+        yield return Case(
+            "adm_sch_move_historylog_1.0.0.sql",
+            """
+            ALTER PARTITION FUNCTION pf14Log1()
+            SPLIT RANGE (@nextdate)
+            """);
+
+        yield return Case(
+            "psProductType.sql",
+            """
+            CREATE PARTITION SCHEME [psProductType]
+            AS PARTITION [pfProductType]
+            TO ([PRIMARY], [PRIMARY], [PRIMARY])
+            """);
+
+        yield return Case(
+            "adm_sch_AutoClaim.sql",
+            """
+            SET @getData = CURSOR FOR
+            SELECT ID, CustID
+            FROM JoinNowPromotion WITH (NOLOCK)
+            """);
+
+        yield return Case(
+            "AccountGamesBetAPI_Merge_PlayerStatement_22.02.sql",
+            """
+            MERGE INTO PlayerStatement AS target
+            USING (SELECT @customerId, @playerWinLoss) AS source (custId, playerWinLoss)
+            ON target.custId = source.custId
+            WHEN MATCHED THEN
+                UPDATE SET playerWinLoss = source.playerWinLoss
+            WHEN NOT MATCHED THEN
+                INSERT (custId, playerWinLoss)
+                VALUES (source.custId, source.playerWinLoss)
+            """);
+
+        yield return Case(
+            "Admin_SB_Settlement_Unvoid_UnSettled_14.08.sql",
+            """
+            UPDATE b
+            SET Ruben = 0,
+                Status = 'running'
+            OUTPUT inserted.transid, inserted.custid
+            FROM bettrans b
+            WHERE b.transid = @transid
             """);
     }
 

@@ -465,6 +465,11 @@ public class SqlParser
             return gotoStatement.Result;
         }
 
+        if (Try(ParseSqlCmdStatement, out var sqlCmdStatement))
+        {
+            return sqlCmdStatement.Result;
+        }
+
         if (Try(ParseKeywordStatement, out var keywordStatement))
         {
             return keywordStatement.Result;
@@ -4224,7 +4229,23 @@ public class SqlParser
             _text.Position = startPosition;
         }
 
-        return ParseArithmeticExpr();
+        var positionalValue = ParseArithmeticExpr();
+        if (positionalValue.HasError)
+        {
+            return positionalValue.Error;
+        }
+
+        var isOutput = TryKeyword("OUTPUT", out _) || TryKeyword("OUT", out _);
+        if (isOutput)
+        {
+            return CreateParseResult<ISqlExpression>(new SqlExecArgument
+            {
+                Value = positionalValue.ResultValue,
+                IsOutput = true
+            });
+        }
+
+        return positionalValue;
     }
 
     private ParseResult<SqlReturnStatement> ParseReturnStatement()
@@ -4552,6 +4573,23 @@ public class SqlParser
         else if (TryKeywords(["MODIFY", "FILE"], out _))
         {
             fileAction = "MODIFY FILE";
+        }
+
+        if (TryKeyword("ADD", out _) && TryKeyword("FILEGROUP", out _))
+        {
+            var fileGroup = Parse_SqlIdentifier();
+            if (fileGroup.Result == null)
+            {
+                return CreateParseError("Expected filegroup name after ADD FILEGROUP");
+            }
+
+            return CreateParseResult(new SqlAlterDatabaseStatement
+            {
+                Span = _text.CreateSpan(startSpan),
+                DatabaseName = databaseName,
+                FileAction = "ADD FILEGROUP",
+                FileSpec = fileGroup.ResultValue.FieldName
+            });
         }
 
         if (!string.IsNullOrEmpty(fileAction))
@@ -4951,10 +4989,19 @@ public class SqlParser
             }
 
             statement.Password = password.ResultValue.ToSql();
+            if (TryMatch(",", out _))
+            {
+                statement.Options = ReadAssignmentOptionList();
+            }
         }
         else if (TryKeywords(["FROM", "WINDOWS"], out _))
         {
             statement.ForLogin = "WINDOWS";
+        }
+
+        if (TryKeyword("WITH", out _))
+        {
+            statement.Options = ReadAssignmentOptionList();
         }
 
         return CreateParseResult(statement);
@@ -8065,6 +8112,17 @@ public class SqlParser
             createIndexStatement.Options = options.ResultValue;
         }
 
+        if (TryKeyword("ON", out _))
+        {
+            var fileGroup = Parse_SqlIdentifier();
+            if (fileGroup.Result == null)
+            {
+                return CreateParseError("Expected filegroup after ON in CREATE INDEX");
+            }
+
+            createIndexStatement.FileGroup = fileGroup.ResultValue.FieldName;
+        }
+
         return CreateParseResult(createIndexStatement);
     }
 
@@ -9933,6 +9991,28 @@ public class SqlParser
         return NoneResult<SqlKeywordStatement>();
     }
 
+    private ParseResult<SqlKeywordStatement> ParseSqlCmdStatement()
+    {
+        if (!TryMatch(":", out var startSpan))
+        {
+            return NoneResult<SqlKeywordStatement>();
+        }
+
+        var command = ReadSqlIdentifier().Word;
+        if (string.IsNullOrEmpty(command))
+        {
+            return CreateParseError("Expected SQLCMD command after :");
+        }
+
+        var argument = _text.ReadUntil(c => c == '\n' || c == '\r').Word.Trim();
+        return CreateParseResult(new SqlKeywordStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Keyword = $":{command}",
+            Argument = argument
+        });
+    }
+
     private ParseResult<SqlDbccStatement> ParseDbccStatement()
     {
         if (!TryKeyword("DBCC", out var startSpan))
@@ -10289,13 +10369,45 @@ public class SqlParser
             return CreateParseError("Expected =");
         }
 
-        var value = ParseArithmeticExpr().ResultValue;
+        var value = Or<ISqlExpression>(Parse_CursorDefinitionExpression, ParseArithmeticExpr)().ResultValue;
         return new SqlSetValueStatement()
         {
             Span = _text.CreateSpan(startSpan),
             Name = name.ResultValue,
             Value = value
         };
+    }
+
+    private ParseResult<ISqlExpression> Parse_CursorDefinitionExpression()
+    {
+        if (!TryKeyword("CURSOR", out var startSpan))
+        {
+            return NoneResult<ISqlExpression>();
+        }
+
+        var options = new List<string>();
+        while (TryMatchCursorOption(out var option))
+        {
+            options.Add(option);
+        }
+
+        if (!TryKeyword("FOR", out _))
+        {
+            return CreateParseError("Expected FOR in cursor definition");
+        }
+
+        var source = ParseSelectStatement();
+        if (source.HasError)
+        {
+            return source.Error;
+        }
+
+        return CreateParseResult<ISqlExpression>(new SqlCursorDefinitionExpression
+        {
+            Span = _text.CreateSpan(startSpan),
+            Options = options,
+            Source = source.ResultValue
+        });
     }
 
     private ParseResult<SqlValue> Parse_SqlIdentifierValue()
@@ -10412,6 +10524,17 @@ public class SqlParser
         if (Try(ParseAliasExpr, out var aliasExpr))
         {
             tableSourceExpr.Alias = aliasExpr.ResultValue.Name;
+        }
+
+        if (tableSourceExpr is SqlInnerTableSource innerTableSource && IsPeekMatch("("))
+        {
+            var columns = Parse_ParenthesizedColumns();
+            if (columns.HasError)
+            {
+                return columns.Error;
+            }
+
+            innerTableSource.ColumnAliases = columns.ResultValue.OfType<SqlFieldExpr>().Select(field => field.FieldName).ToList();
         }
 
         if (tableSourceExpr is SqlTableSource baseTableSource && Try(Parse_TableSampleClause, out var tableSampleClause))

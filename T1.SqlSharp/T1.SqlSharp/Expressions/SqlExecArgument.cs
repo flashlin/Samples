@@ -16,7 +16,9 @@ public class SqlExecArgument : ISqlExpression
 
     public string ToSql()
     {
-        var sql = $"{ParameterName} = {Value.ToSql()}";
+        var sql = string.IsNullOrEmpty(ParameterName)
+            ? Value.ToSql()
+            : $"{ParameterName} = {Value.ToSql()}";
         return IsOutput ? $"{sql} OUTPUT" : sql;
     }
 }
