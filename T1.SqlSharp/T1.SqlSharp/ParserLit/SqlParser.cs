@@ -906,10 +906,15 @@ public class SqlParser
             return CreateParseError("Expected common table expression");
         }
 
-        var statement = ParseSelectStatement();
+        var statement = Parse_CteBodyStatement();
         if (statement.HasError)
         {
             return statement.Error;
+        }
+
+        if (statement.Result == null)
+        {
+            return CreateParseError("Expected SELECT, INSERT, UPDATE or DELETE after CTE");
         }
 
         return new SqlWithCte
@@ -918,6 +923,31 @@ public class SqlParser
             CommonTableExpressions = commonTableExpressions.ResultValue,
             Statement = statement.ResultValue
         };
+    }
+
+    private ParseResult<ISqlExpression> Parse_CteBodyStatement()
+    {
+        if (Try(() => ParseSelectStatement(), out var select))
+        {
+            return CreateParseResult<ISqlExpression>(select.ResultValue);
+        }
+
+        if (Try(ParseInsertStatement, out var insert))
+        {
+            return CreateParseResult<ISqlExpression>(insert.ResultValue);
+        }
+
+        if (Try(ParseUpdateStatement, out var update))
+        {
+            return CreateParseResult<ISqlExpression>(update.ResultValue);
+        }
+
+        if (Try(ParseDeleteStatement, out var delete))
+        {
+            return CreateParseResult<ISqlExpression>(delete.ResultValue);
+        }
+
+        return NoneResult<ISqlExpression>();
     }
 
     private ParseResult<SqlCommonTableExpression> Parse_CommonTableExpression()

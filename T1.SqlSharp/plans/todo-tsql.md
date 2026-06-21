@@ -10,13 +10,13 @@
 ## 1. 頂層語句 (Top-level statements)
 
 - [x] `SELECT`
-- [x] `WITH cte AS (...) SELECT ...`（CTE，支援多 CTE + 欄位清單）
+- [x] `WITH cte AS (...) {SELECT | INSERT | UPDATE | DELETE} ...`（CTE，支援多 CTE + 欄位清單；主體可為四種 DML，見 §1.1–1.3）
 - [x] `CREATE TABLE`
 - [x] `SET @var = value`（變數賦值）
 - [x] `EXEC sp_addextendedproperty ...`（僅此特定 SP）
 - [~] `INSERT`（parser 可解析大部分常用語法，細目見 §1.1。additive 擴充 `SqlInsertStatement`（`Top`/`Withs`/`ValuesRows`/`SourceSelect`/`IsDefaultValues`/`Output`），builder 路徑不受影響。僅剩 `INSERT ... EXEC`、CTE 前綴未做）
-- [~] `UPDATE`（parser 可解析：SET 多指派 / `t.col` / `DEFAULT` 值 / `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT`，細目見 §1.2。剩複合指派、CTE 前綴）
-- [~] `DELETE`（parser 可解析：`[FROM] t` / 省略 FROM / 第二個 `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT`，細目見 §1.3。剩 CTE 前綴）
+- [~] `UPDATE`（parser 可解析：SET 多指派 / `t.col` / `DEFAULT` 值 / `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.2。僅剩複合指派 `+=`）
+- [~] `DELETE`（parser 可解析：`[FROM] t` / 省略 FROM / 第二個 `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.3。已大致完整）
 - [ ] `MERGE`
 - [ ] `ALTER TABLE` / `ALTER ...`
 - [ ] `DROP ...`
@@ -50,7 +50,7 @@
 
 未支援（依價值排序）：
 - [ ] `INSERT INTO t EXEC proc` / `EXEC ('sql')`（rowset 來源）
-- [ ] CTE 前綴 `WITH cte AS (...) INSERT ...`（需擴充 `SqlWithCte.Statement` 接受 INSERT，目前只接 SELECT）
+- [x] CTE 前綴 `WITH cte AS (...) INSERT ...`（`ParseWithCteStatement` 改用 `Parse_CteBodyStatement` dispatch SELECT/INSERT/UPDATE/DELETE，見 `ParseCteDmlTest.cs`）
 
 ### 1.2 UPDATE 細目（已實作，見 `ParseUpdateSqlTest.cs`）
 
@@ -94,7 +94,7 @@
 - [x] 目標 table hint `WITH (...)`
 - [x] `OUTPUT col [INTO target]`（`inserted.`/`deleted.` 偽資料表）
 - [ ] 複合指派 `+= -= *= /=`（需新運算子，價值低）
-- [ ] CTE 前綴 `WITH cte AS (...) UPDATE ...`
+- [x] CTE 前綴 `WITH cte AS (...) UPDATE ...`（共用 `Parse_CteBodyStatement`）
 
 ### 1.3 DELETE 細目（已實作 MVP，見 `ParseDeleteSqlTest.cs`）
 
@@ -117,7 +117,7 @@
 **第二階段**：
 - [x] `DELETE TOP (n) [PERCENT] ...`
 - [x] 目標 table hint `WITH (...)`、`OUTPUT col [INTO]`（`deleted.`/`inserted.` 偽資料表）
-- [ ] CTE 前綴 `WITH cte AS (...) DELETE ...`
+- [x] CTE 前綴 `WITH cte AS (...) DELETE ...`（共用 `Parse_CteBodyStatement`）
 
 **共同雷點（UPDATE/DELETE 動手前先想）**：
 1. **ReservedWords**：`SET`、`FROM`、`WHERE`、`OUTPUT` 多為既有 / 位置順序消費，預期不需新增；
@@ -249,10 +249,10 @@
 
 ## 維護建議優先序（未完成項目）
 
-1. 🟢 DML 收尾：`INSERT ... EXEC`、CTE 前綴 `WITH cte AS (...) {INSERT|UPDATE|DELETE}`（共同需先擴充 `ParseWithCteStatement` 接受非 SELECT 主體）、UPDATE 複合指派 `+=`（見 §1.1/§1.2/§1.3）
+1. 🟢 DML 收尾（小單點）：`INSERT ... EXEC`、UPDATE 複合指派 `+=`（見 §1.1/§1.2）
 2. 🟢 `MERGE`（DML 最後一塊）
 3. 🟢 具名 `WINDOW` 子句的延伸：`OVER (existing_window ...)` 行內參照、定義間互相參照、RANK 路徑 bare `OVER name`（見 §4 註）
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。
