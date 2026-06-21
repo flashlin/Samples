@@ -126,7 +126,7 @@
 - [x] `UNIQUE`
 - [x] `FOREIGN KEY ... REFERENCES ...`
 - [x] `CONSTRAINT` 命名
-- [ ] `CHECK` 約束
+- [x] `CHECK` 約束（欄位層級與資料表層級、含 `CONSTRAINT` 命名）
 - [x] 欄位/資料表註解（透過獨立的 `sp_addextendedproperty` 語句）
 
 ---
@@ -155,8 +155,8 @@
 ## 維護建議優先序（未完成項目）
 
 1. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
-2. 🟢 `CHECK` 約束、`COLLATE`
+2. 🟢 `COLLATE`
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。

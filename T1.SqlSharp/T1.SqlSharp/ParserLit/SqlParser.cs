@@ -648,7 +648,7 @@ public class SqlParser
 
             // 一開始就定義這些 關鍵字表示不是 column  
             if (IsAny(PeekKeywords("CONSTRAINT"), PeekKeywords("PRIMARY", "KEY"), PeekKeywords("UNIQUE"),
-                    PeekKeywords("FOREIGN", "KEY")))
+                    PeekKeywords("FOREIGN", "KEY"), PeekKeywords("CHECK")))
             {
                 break;
             }
@@ -3217,6 +3217,12 @@ public class SqlParser
                 continue;
             }
 
+            if (Try(ParseCheckConstraint, out var checkConstraint))
+            {
+                sqlColumn.Constraints.Add(checkConstraint.ResultValue);
+                continue;
+            }
+
             if (Try(ParseIdentity, out var identityResult))
             {
                 if (identityResult.HasError)
@@ -4114,7 +4120,49 @@ public class SqlParser
             return tableForeignKeyExpr.Result;
         }
 
+        var checkExpr = ParseCheckConstraint();
+        if (checkExpr.HasError)
+        {
+            return checkExpr.Error;
+        }
+
+        if (checkExpr.Result != null)
+        {
+            checkExpr.Result.ConstraintName = constraintName;
+            return checkExpr.Result;
+        }
+
         return NoneResult<ISqlConstraint>();
+    }
+
+    private ParseResult<SqlConstraintCheck> ParseCheckConstraint()
+    {
+        if (!TryKeyword("CHECK", out var startSpan))
+        {
+            return NoneResult<SqlConstraintCheck>();
+        }
+
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected ( after CHECK");
+        }
+
+        var predicate = Parse_WhereExpression();
+        if (predicate.HasError)
+        {
+            return predicate.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return new SqlConstraintCheck
+        {
+            Span = _text.CreateSpan(startSpan),
+            Predicate = predicate.ResultValue
+        };
     }
 
     private ParseResult<SqlFieldExpr> ParseTableName()

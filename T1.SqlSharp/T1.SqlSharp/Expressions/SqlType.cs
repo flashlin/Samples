@@ -5,6 +5,7 @@ public enum SqlType
     CreateTable,
     ColumnDefinition,
     Constraint,
+    ConstraintCheck,
     ConstraintDefaultValue,
     ComputedColumn,
     DataTypeWithSize,

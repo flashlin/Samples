@@ -181,6 +181,12 @@ public class SqlVisitor
     {
     }
 
+    public virtual void Visit_ConstraintCheck(SqlConstraintCheck expr)
+    {
+        AddSqlExpression(expr);
+        expr.Predicate.Accept(this);
+    }
+
     public virtual void Visit_ConstraintDefaultValue(SqlConstraintDefaultValue expr)
     {
     }

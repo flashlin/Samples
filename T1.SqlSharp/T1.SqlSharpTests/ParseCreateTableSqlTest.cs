@@ -40,6 +40,78 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void ColumnLevel_Check_Constraint()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1 (
+                       age INT CHECK (age > 0)
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SqlCreateTableExpression()
+        {
+            TableName = "tb1",
+            Columns =
+            [
+                new SqlColumnDefinition
+                {
+                    ColumnName = "age",
+                    DataType = "INT",
+                    Constraints =
+                    [
+                        new SqlConstraintCheck
+                        {
+                            Predicate = new SqlConditionExpression
+                            {
+                                Left = new SqlFieldExpr { FieldName = "age" },
+                                ComparisonOperator = ComparisonOperator.GreaterThan,
+                                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "0" }
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+
+    [Test]
+    public void TableLevel_Named_Check_Constraint()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1 (
+                       age INT,
+                       CONSTRAINT ck_age CHECK (age >= 18)
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SqlCreateTableExpression()
+        {
+            TableName = "tb1",
+            Columns =
+            [
+                new SqlColumnDefinition
+                {
+                    ColumnName = "age",
+                    DataType = "INT"
+                }
+            ],
+            Constraints =
+            [
+                new SqlConstraintCheck
+                {
+                    ConstraintName = "ck_age",
+                    Predicate = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "age" },
+                        ComparisonOperator = ComparisonOperator.GreaterThanOrEqual,
+                        Right = new SqlValue { SqlType = SqlType.IntValue, Value = "18" }
+                    }
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void DefaultNegativeNumber()
     {
         var sql = $"""
