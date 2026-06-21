@@ -714,4 +714,32 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
     }
+
+    public virtual void Visit_PrintStatement(SqlPrintStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Value.Accept(this);
+    }
+
+    public virtual void Visit_ThrowStatement(SqlThrowStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.ErrorNumber?.Accept(this);
+        expr.Message?.Accept(this);
+        expr.State?.Accept(this);
+    }
+
+    public virtual void Visit_RaiseErrorStatement(SqlRaiseErrorStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Message.Accept(this);
+        expr.Severity.Accept(this);
+        expr.State.Accept(this);
+        expr.Arguments.ForEach(argument => argument.Accept(this));
+    }
+
+    public virtual void Visit_LoopControlStatement(SqlLoopControlStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
 }

@@ -179,6 +179,26 @@ public class SqlParser
             return returnStatement.Result;
         }
 
+        if (Try(ParsePrintStatement, out var printStatement))
+        {
+            return printStatement.Result;
+        }
+
+        if (Try(ParseThrowStatement, out var throwStatement))
+        {
+            return throwStatement.Result;
+        }
+
+        if (Try(ParseRaiseErrorStatement, out var raiseErrorStatement))
+        {
+            return raiseErrorStatement.Result;
+        }
+
+        if (Try(ParseLoopControlStatement, out var loopControlStatement))
+        {
+            return loopControlStatement.Result;
+        }
+
         if (Try(ParseSetValueStatement, out var setValueStatement))
         {
             return setValueStatement.Result;
@@ -3399,6 +3419,140 @@ public class SqlParser
         }
 
         return CreateParseResult(returnStatement);
+    }
+
+    private ParseResult<SqlPrintStatement> ParsePrintStatement()
+    {
+        if (!TryKeyword("PRINT", out var startSpan))
+        {
+            return NoneResult<SqlPrintStatement>();
+        }
+
+        var value = ParseArithmeticExpr();
+        if (value.HasError)
+        {
+            return value.Error;
+        }
+
+        if (value.Result == null)
+        {
+            return CreateParseError("Expected expression after PRINT");
+        }
+
+        return CreateParseResult(new SqlPrintStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Value = value.ResultValue
+        });
+    }
+
+    private ParseResult<SqlThrowStatement> ParseThrowStatement()
+    {
+        if (!TryKeyword("THROW", out var startSpan))
+        {
+            return NoneResult<SqlThrowStatement>();
+        }
+
+        var throwStatement = new SqlThrowStatement
+        {
+            Span = _text.CreateSpan(startSpan)
+        };
+
+        if (_text.IsEnd() || IsPeekMatch(";") || IsPeekKeywords("END"))
+        {
+            return CreateParseResult(throwStatement);
+        }
+
+        var arguments = ParseWithComma(ParseArithmeticExpr);
+        if (arguments.HasError)
+        {
+            return arguments.Error;
+        }
+
+        var values = arguments.ResultValue;
+        throwStatement.ErrorNumber = values.ElementAtOrDefault(0);
+        throwStatement.Message = values.ElementAtOrDefault(1);
+        throwStatement.State = values.ElementAtOrDefault(2);
+        return CreateParseResult(throwStatement);
+    }
+
+    private ParseResult<SqlRaiseErrorStatement> ParseRaiseErrorStatement()
+    {
+        if (!TryKeyword("RAISERROR", out var startSpan))
+        {
+            return NoneResult<SqlRaiseErrorStatement>();
+        }
+
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected ( after RAISERROR");
+        }
+
+        var arguments = ParseWithComma(ParseArithmeticExpr);
+        if (arguments.HasError)
+        {
+            return arguments.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected ) to close RAISERROR arguments");
+        }
+
+        var values = arguments.ResultValue;
+        if (values.Count < 3)
+        {
+            return CreateParseError("RAISERROR requires message, severity and state");
+        }
+
+        return CreateParseResult(new SqlRaiseErrorStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Message = values[0],
+            Severity = values[1],
+            State = values[2],
+            Arguments = values.Skip(3).ToList(),
+            Options = ParseRaiseErrorOptions()
+        });
+    }
+
+    private List<string> ParseRaiseErrorOptions()
+    {
+        var options = new List<string>();
+        if (!TryKeyword("WITH", out _))
+        {
+            return options;
+        }
+
+        do
+        {
+            options.Add(ReadSqlIdentifier().Word);
+        } while (TryMatch(",", out _));
+
+        return options;
+    }
+
+    private ParseResult<SqlLoopControlStatement> ParseLoopControlStatement()
+    {
+        if (TryKeyword("BREAK", out var breakSpan))
+        {
+            return CreateParseResult(new SqlLoopControlStatement
+            {
+                Span = _text.CreateSpan(breakSpan),
+                Action = SqlLoopControlAction.Break
+            });
+        }
+
+        if (TryKeyword("CONTINUE", out var continueSpan))
+        {
+            return CreateParseResult(new SqlLoopControlStatement
+            {
+                Span = _text.CreateSpan(continueSpan),
+                Action = SqlLoopControlAction.Continue
+            });
+        }
+
+        return NoneResult<SqlLoopControlStatement>();
     }
 
     private ParseResult<SqlCreateFunctionStatement> ParseCreateFunctionStatement()

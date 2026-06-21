@@ -19,7 +19,7 @@ parser 在 `T1.SqlSharp/ParserLit/SqlParser.cs` + `LinqParser.cs`。
 
 ## Current Progress（目前進度）
 
-測試狀態：**317 passed / 0 failed / 0 build warning**。工作區乾淨（HANDOFF.md 本身為 untracked，不需 commit）。
+測試狀態：**326 passed / 0 failed / 0 build warning**。工作區乾淨（HANDOFF.md 本身為 untracked，不需 commit）。
 
 本 session 已完成（皆 TDD + 已驗證綠燈 + 已 commit）：
 

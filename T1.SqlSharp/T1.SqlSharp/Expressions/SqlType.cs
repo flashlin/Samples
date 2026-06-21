@@ -110,4 +110,8 @@ public enum SqlType
     CreateFunctionStatement,
     TryCatchStatement,
     TransactionStatement,
+    PrintStatement,
+    ThrowStatement,
+    RaiseErrorStatement,
+    LoopControlStatement,
 }
