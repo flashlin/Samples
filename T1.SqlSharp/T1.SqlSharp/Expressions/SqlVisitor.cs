@@ -101,10 +101,34 @@ public class SqlVisitor
         {
             expr.Having.Accept(this);
         }
+        if(expr.Window != null)
+        {
+            expr.Window.Accept(this);
+        }
         if(expr.Option != null)
         {
             expr.Option.Accept(this);
         }
+    }
+
+    public virtual void Visit_WindowClause(SqlWindowClause expr)
+    {
+        AddSqlExpression(expr);
+        expr.Definitions.ForEach(x => x.Accept(this));
+    }
+
+    public virtual void Visit_WindowDefinition(SqlWindowDefinition expr)
+    {
+        AddSqlExpression(expr);
+        expr.PartitionBy.ForEach(x => x.Accept(this));
+        expr.OrderColumns.ForEach(x => x.Accept(this));
+        expr.Frame?.Accept(this);
+    }
+
+    public virtual void Visit_OverWindowName(SqlOverWindowName expr)
+    {
+        AddSqlExpression(expr);
+        expr.Field.Accept(this);
     }
 
     public virtual void Visit_OptionClause(SqlOptionClause expr)

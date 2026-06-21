@@ -23,6 +23,7 @@ public class SelectStatement : ISqlExpression
     public List<SqlUnionSelect> Unions { get; set; } = [];
     public SqlGroupByClause? GroupBy { get; set; }
     public SqlHavingClause? Having { get; set; }
+    public SqlWindowClause? Window { get; set; }
     public SqlOptionClause? Option { get; set; }
 
     public string ToSql()
@@ -98,6 +99,10 @@ public class SelectStatement : ISqlExpression
             sql.Write("HAVING ");
             sql.Write(Having.ToSql());
             sql.WriteLine();
+        }
+        if(Window!=null)
+        {
+            sql.WriteLine(Window.ToSql());
         }
         if(Option!=null)
         {

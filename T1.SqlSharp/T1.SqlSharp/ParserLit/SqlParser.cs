@@ -12,7 +12,7 @@ public class SqlParser
     [
         "FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH",
         "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING", "INTERSECT", "EXCEPT", "OPTION",
-        "TABLESAMPLE"
+        "TABLESAMPLE", "WINDOW"
     ];
 
     private static string[] DataTypes =
@@ -550,6 +550,12 @@ public class SqlParser
             value = overOrderByClause.ResultValue;
         }
 
+        if (Try(ParseOverWindowName, out var overWindowName))
+        {
+            overWindowName.ResultValue.Field = value.ResultValue;
+            value = overWindowName.ResultValue;
+        }
+
         if (TryKeyword("COLLATE", out var collateSpan))
         {
             value = new SqlCollateExpression
@@ -1040,6 +1046,11 @@ public class SqlParser
         if (Try(ParseHavingClause, out var havingClause))
         {
             selectStatement.Having = havingClause.Result;
+        }
+
+        if (Try(ParseWindowClause, out var windowClause))
+        {
+            selectStatement.Window = windowClause.Result;
         }
 
         if (!asSetOperand)
@@ -1770,6 +1781,7 @@ public class SqlParser
 
         if (!TryMatch("(", out _))
         {
+            _text.Position = startSpan.Offset;
             return NoneResult<SqlOverOrderByClause>();
         }
 
@@ -1864,6 +1876,92 @@ public class SqlParser
             Span = _text.CreateSpan(startSpan),
             Columns = columns.ResultValue
         });
+    }
+
+    private ParseResult<SqlWindowClause> ParseWindowClause()
+    {
+        if (!TryKeyword("WINDOW", out var startSpan))
+        {
+            return NoneResult<SqlWindowClause>();
+        }
+
+        var definitions = ParseWithComma(Parse_WindowDefinition);
+        if (definitions.HasError)
+        {
+            return definitions.Error;
+        }
+
+        return new SqlWindowClause
+        {
+            Span = _text.CreateSpan(startSpan),
+            Definitions = definitions.ResultValue
+        };
+    }
+
+    private ParseResult<SqlWindowDefinition> Parse_WindowDefinition()
+    {
+        if (!Try(Parse_SqlIdentifier, out var name))
+        {
+            return NoneResult<SqlWindowDefinition>();
+        }
+
+        if (!TryKeyword("AS", out _))
+        {
+            return CreateParseError("Expected AS");
+        }
+
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var partitionBy = ParsePartitionBy();
+        var orderBy = ParseOrderByClause();
+        SqlWindowFrameClause? frame = null;
+        if (Try(ParseWindowFrameClause, out var frameResult))
+        {
+            frame = frameResult.ResultValue;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return new SqlWindowDefinition
+        {
+            Span = name.ResultValue.Span,
+            Name = name.ResultValue.FieldName,
+            PartitionBy = partitionBy.Result?.Columns ?? [],
+            OrderColumns = orderBy.Result?.Columns ?? [],
+            Frame = frame
+        };
+    }
+
+    private ParseResult<SqlOverWindowName> ParseOverWindowName()
+    {
+        if (!TryKeyword("OVER", out var startSpan))
+        {
+            return NoneResult<SqlOverWindowName>();
+        }
+
+        if (IsPeekMatch("("))
+        {
+            _text.Position = startSpan.Offset;
+            return NoneResult<SqlOverWindowName>();
+        }
+
+        if (!Try(Parse_SqlIdentifier, out var windowName))
+        {
+            _text.Position = startSpan.Offset;
+            return NoneResult<SqlOverWindowName>();
+        }
+
+        return new SqlOverWindowName
+        {
+            Span = _text.CreateSpan(startSpan),
+            WindowName = windowName.ResultValue.FieldName
+        };
     }
 
     private ParseResult<SqlWindowFrameClause> ParseWindowFrameClause()

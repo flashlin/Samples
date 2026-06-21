@@ -296,6 +296,99 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void Named_window_clause_with_over_name()
+    {
+        var sql = $"""
+                   select sum(amount) over win
+                   from sales
+                   window win as (partition by region order by amount)
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlOverWindowName
+                    {
+                        Field = new SqlFunctionExpression
+                        {
+                            FunctionName = "sum",
+                            Parameters = [new SqlFieldExpr { FieldName = "amount" }]
+                        },
+                        WindowName = "win"
+                    }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "sales" }
+            ],
+            Window = new SqlWindowClause
+            {
+                Definitions =
+                [
+                    new SqlWindowDefinition
+                    {
+                        Name = "win",
+                        PartitionBy = [new SqlFieldExpr { FieldName = "region" }],
+                        OrderColumns =
+                        [
+                            new SqlOrderColumn { ColumnName = new SqlFieldExpr { FieldName = "amount" } }
+                        ]
+                    }
+                ]
+            }
+        });
+    }
+
+    [Test]
+    public void Named_window_clause_multiple_definitions()
+    {
+        var sql = $"""
+                   select id
+                   from customer
+                   window w1 as (partition by id), w2 as (order by name desc)
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            Window = new SqlWindowClause
+            {
+                Definitions =
+                [
+                    new SqlWindowDefinition
+                    {
+                        Name = "w1",
+                        PartitionBy = [new SqlFieldExpr { FieldName = "id" }]
+                    },
+                    new SqlWindowDefinition
+                    {
+                        Name = "w2",
+                        OrderColumns =
+                        [
+                            new SqlOrderColumn
+                            {
+                                ColumnName = new SqlFieldExpr { FieldName = "name" },
+                                Order = OrderType.Desc
+                            }
+                        ]
+                    }
+                ]
+            }
+        });
+    }
+
+    [Test]
     public void Select_field_add_equal_value()
     {
         var sql = $"""

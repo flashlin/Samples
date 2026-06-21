@@ -79,4 +79,7 @@ public enum SqlType
     GroupingSet,
     TableSampleClause,
     ForXmlModeClause,
+    WindowClause,
+    WindowDefinition,
+    OverWindowName,
 }
