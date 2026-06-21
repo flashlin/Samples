@@ -109,6 +109,11 @@ public class SqlParser
             return dropStatement.Result;
         }
 
+        if (Try(ParseAlterTableStatement, out var alterTableStatement))
+        {
+            return alterTableStatement.Result;
+        }
+
         if (Try(ParseExecSpAddExtendedProperty, out var execSpAddExtendedProperty))
         {
             return execSpAddExtendedProperty.Result;
@@ -3263,6 +3268,134 @@ public class SqlParser
         }
 
         return CreateParseError("Expected VALUES, SELECT or DEFAULT VALUES after INSERT");
+    }
+
+    private ParseResult<SqlAlterTableStatement> ParseAlterTableStatement()
+    {
+        if (!TryKeywords(["ALTER", "TABLE"], out var startSpan))
+        {
+            return NoneResult<SqlAlterTableStatement>();
+        }
+
+        var tableName = Parse_SqlIdentifier();
+        if (tableName.Result == null)
+        {
+            return CreateParseError("Expected table name after ALTER TABLE");
+        }
+
+        var action = Parse_AlterTableAction();
+        if (action.HasError)
+        {
+            return action.Error;
+        }
+
+        if (action.Result == null)
+        {
+            return CreateParseError("Expected ADD, DROP or ALTER COLUMN in ALTER TABLE");
+        }
+
+        return CreateParseResult(new SqlAlterTableStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            TableName = tableName.ResultValue.FieldName,
+            Action = action.ResultValue
+        });
+    }
+
+    private ParseResult<ISqlAlterTableAction> Parse_AlterTableAction()
+    {
+        if (TryKeyword("ADD", out _))
+        {
+            return Parse_AlterTableAddAction();
+        }
+
+        if (TryKeywords(["DROP", "COLUMN"], out _))
+        {
+            var columnNames = ParseWithComma(Parse_SqlIdentifier);
+            if (columnNames.HasError)
+            {
+                return columnNames.Error;
+            }
+
+            return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableDropColumn
+            {
+                ColumnNames = columnNames.ResultValue.Select(name => name.FieldName).ToList()
+            });
+        }
+
+        if (TryKeywords(["DROP", "CONSTRAINT"], out _))
+        {
+            var constraintNames = ParseWithComma(Parse_SqlIdentifier);
+            if (constraintNames.HasError)
+            {
+                return constraintNames.Error;
+            }
+
+            return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableDropConstraint
+            {
+                ConstraintNames = constraintNames.ResultValue.Select(name => name.FieldName).ToList()
+            });
+        }
+
+        if (TryKeywords(["ALTER", "COLUMN"], out _))
+        {
+            var column = ParseColumnDefinition();
+            if (column.HasError)
+            {
+                return column.Error;
+            }
+
+            if (column.Result == null)
+            {
+                return CreateParseError("Expected column definition after ALTER COLUMN");
+            }
+
+            return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableAlterColumn
+            {
+                Column = column.ResultValue
+            });
+        }
+
+        return NoneResult<ISqlAlterTableAction>();
+    }
+
+    private ParseResult<ISqlAlterTableAction> Parse_AlterTableAddAction()
+    {
+        if (IsPeekKeywords("CONSTRAINT") || IsPeekKeywords("PRIMARY") || IsPeekKeywords("UNIQUE")
+            || IsPeekKeywords("FOREIGN") || IsPeekKeywords("CHECK"))
+        {
+            var constraint = ParseTableConstraint();
+            if (constraint.HasError)
+            {
+                return constraint.Error;
+            }
+
+            if (constraint.Result == null)
+            {
+                return CreateParseError("Expected constraint after ADD");
+            }
+
+            return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableAddConstraint
+            {
+                Constraint = constraint.ResultValue
+            });
+        }
+
+        var columns = ParseWithComma(ParseColumnDefinition);
+        if (columns.HasError)
+        {
+            return columns.Error;
+        }
+
+        if (columns.Result == null || columns.ResultValue.Count == 0)
+        {
+            return CreateParseError("Expected column definition after ADD");
+        }
+
+        return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableAddColumns
+        {
+            Columns = columns.ResultValue
+        });
     }
 
     private ParseResult<SqlTruncateTableStatement> ParseTruncateTableStatement()

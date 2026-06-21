@@ -92,4 +92,10 @@ public enum SqlType
     MergeInsertAction,
     TruncateTableStatement,
     DropStatement,
+    AlterTableStatement,
+    AlterTableAddColumns,
+    AlterTableAddConstraint,
+    AlterTableDropColumn,
+    AlterTableDropConstraint,
+    AlterTableAlterColumn,
 }

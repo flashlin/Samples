@@ -600,4 +600,38 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
     }
+
+    public virtual void Visit_AlterTableStatement(SqlAlterTableStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Action.Accept(this);
+    }
+
+    public virtual void Visit_AlterTableAddColumns(SqlAlterTableAddColumns expr)
+    {
+        AddSqlExpression(expr);
+        expr.Columns.ForEach(column => column.Accept(this));
+    }
+
+    public virtual void Visit_AlterTableAddConstraint(SqlAlterTableAddConstraint expr)
+    {
+        AddSqlExpression(expr);
+        expr.Constraint.Accept(this);
+    }
+
+    public virtual void Visit_AlterTableDropColumn(SqlAlterTableDropColumn expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterTableDropConstraint(SqlAlterTableDropConstraint expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterTableAlterColumn(SqlAlterTableAlterColumn expr)
+    {
+        AddSqlExpression(expr);
+        expr.Column.Accept(this);
+    }
 }
