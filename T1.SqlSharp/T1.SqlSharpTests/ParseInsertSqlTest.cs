@@ -122,6 +122,127 @@ public class ParseInsertSqlTest
     }
 
     [Test]
+    public void Insert_top_n_into_select()
+    {
+        var sql = "INSERT TOP (10) INTO Logs (Msg) SELECT Name FROM Users";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlInsertStatement
+        {
+            Top = new SqlTopClause
+            {
+                Expression = new SqlParenthesizedExpression
+                {
+                    Inner = new SqlValue { SqlType = SqlType.IntValue, Value = "10" }
+                }
+            },
+            TableName = "Logs",
+            Columns = ["Msg"],
+            SourceSelect = new SelectStatement
+            {
+                Columns =
+                [
+                    new SelectColumn { Field = new SqlFieldExpr { FieldName = "Name" } }
+                ],
+                FromSources =
+                [
+                    new SqlTableSource { TableName = "Users" }
+                ]
+            }
+        });
+    }
+
+    [Test]
+    public void Insert_into_with_table_hint()
+    {
+        var sql = "INSERT INTO Users WITH (TABLOCK) (Id) VALUES (1)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlInsertStatement
+        {
+            TableName = "Users",
+            Withs = [new SqlHint { Name = "TABLOCK" }],
+            Columns = ["Id"],
+            ValuesRows =
+            [
+                [
+                    new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                ]
+            ]
+        });
+    }
+
+    [Test]
+    public void Insert_into_with_output_columns()
+    {
+        var sql = "INSERT INTO Users (Name) OUTPUT inserted.Id, inserted.Name VALUES ('Alice')";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlInsertStatement
+        {
+            TableName = "Users",
+            Columns = ["Name"],
+            Output = new SqlOutputClause
+            {
+                Columns =
+                [
+                    new SelectColumn { Field = new SqlFieldExpr { FieldName = "inserted.Id" } },
+                    new SelectColumn { Field = new SqlFieldExpr { FieldName = "inserted.Name" } }
+                ]
+            },
+            ValuesRows =
+            [
+                [
+                    new SqlValue { SqlType = SqlType.String, Value = "'Alice'" }
+                ]
+            ]
+        });
+    }
+
+    [Test]
+    public void Insert_into_with_output_into()
+    {
+        var sql = "INSERT INTO Users (Name) OUTPUT inserted.Id AS NewId INTO AuditLog (LogId) VALUES ('Alice')";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlInsertStatement
+        {
+            TableName = "Users",
+            Columns = ["Name"],
+            Output = new SqlOutputClause
+            {
+                Columns =
+                [
+                    new SelectColumn { Field = new SqlFieldExpr { FieldName = "inserted.Id" }, Alias = "NewId" }
+                ],
+                IntoTable = "AuditLog",
+                IntoColumns = ["LogId"]
+            },
+            ValuesRows =
+            [
+                [
+                    new SqlValue { SqlType = SqlType.String, Value = "'Alice'" }
+                ]
+            ]
+        });
+    }
+
+    [Test]
+    public void Insert_into_values_with_default_keyword()
+    {
+        var sql = "INSERT INTO Users (Id, CreatedAt) VALUES (1, DEFAULT)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlInsertStatement
+        {
+            TableName = "Users",
+            Columns = ["Id", "CreatedAt"],
+            ValuesRows =
+            [
+                [
+                    new SqlValue { SqlType = SqlType.IntValue, Value = "1" },
+                    new SqlDefaultValue()
+                ]
+            ]
+        });
+    }
+
+    [Test]
     public void Insert_into_with_expression_values()
     {
         var sql = "INSERT INTO Logs (CreatedAt, Note) VALUES (GETDATE(), NULL)";

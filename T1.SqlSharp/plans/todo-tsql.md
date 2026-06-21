@@ -14,7 +14,7 @@
 - [x] `CREATE TABLE`
 - [x] `SET @var = value`（變數賦值）
 - [x] `EXEC sp_addextendedproperty ...`（僅此特定 SP）
-- [~] `INSERT`（parser 可解析：`INSERT [INTO] t [(cols)] VALUES (..)[, (..)]`、多列、省略欄位/省略 INTO、`INSERT ... SELECT`、`DEFAULT VALUES`、VALUES 內任意運算式；additive 擴充 `SqlInsertStatement` 加 `ValuesRows`/`SourceSelect`/`IsDefaultValues`，builder 路徑不受影響。未做：`OUTPUT`、`INSERT ... EXEC`、`INSERT TOP (n)`、table hint）
+- [~] `INSERT`（parser 可解析大部分常用語法，細目見 §1.1。additive 擴充 `SqlInsertStatement`（`Top`/`Withs`/`ValuesRows`/`SourceSelect`/`IsDefaultValues`/`Output`），builder 路徑不受影響。僅剩 `INSERT ... EXEC`、CTE 前綴未做）
 - [ ] `UPDATE`（同上，有 builder 無 parser）
 - [ ] `DELETE`
 - [ ] `MERGE`
@@ -33,6 +33,24 @@
 - [ ] `GO`（批次分隔）
 - [ ] `GRANT / REVOKE / DENY`
 - [ ] `PRINT` / `RAISERROR` / `THROW`
+
+### 1.1 INSERT 細目（完整 T-SQL 文法對照）
+
+已支援（見 `ParseInsertSqlTest.cs`）：
+- [x] `INSERT [INTO] t [(col_list)] VALUES (...)`（單列）
+- [x] 多列 `VALUES (..), (..), (..)`
+- [x] 省略欄位清單 / 省略 `INTO`
+- [x] `INSERT INTO t [(cols)] SELECT ...`
+- [x] `INSERT INTO t DEFAULT VALUES`
+- [x] VALUES 內任意運算式（函式 / `NULL` / 算術 / CASE，走 `ParseArithmeticExpr`）
+- [x] `INSERT TOP (n) [PERCENT] ...`（重用 `Parse_TopClause`，掛 `SqlInsertStatement.Top`）
+- [x] `OUTPUT col [AS alias] [, ...] [INTO target [(cols)]]`（`SqlOutputClause` 掛 `Output`；欄位重用 `Parse_Column_Arithmetic` + AS-unwrap，刻意不解析 bare alias 以避開 VALUES 被當別名）
+- [x] 目標 table hint `INSERT INTO t WITH (TABLOCK [, ...]) ...`（抽共用 `Parse_WithTableHints`，與 FROM table hint 同源；掛 `SqlInsertStatement.Withs`）
+- [x] `VALUES` 列內 `DEFAULT` 關鍵字當值（如 `VALUES (1, DEFAULT)`；`SqlDefaultValue`，僅在 VALUES 列 `Parse_InsertRowValue` 解析，不影響全域 `ParseValue`）
+
+未支援（依價值排序）：
+- [ ] `INSERT INTO t EXEC proc` / `EXEC ('sql')`（rowset 來源）
+- [ ] CTE 前綴 `WITH cte AS (...) INSERT ...`（需擴充 `SqlWithCte.Statement` 接受 INSERT，目前只接 SELECT）
 
 ---
 

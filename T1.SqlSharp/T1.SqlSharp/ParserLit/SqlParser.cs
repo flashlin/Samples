@@ -3127,6 +3127,12 @@ public class SqlParser
             return NoneResult<SqlInsertStatement>();
         }
 
+        var topClause = Parse_TopClause();
+        if (topClause.HasError)
+        {
+            return topClause.Error;
+        }
+
         TryKeyword("INTO", out _);
 
         var tableName = Parse_SqlIdentifier();
@@ -3137,8 +3143,20 @@ public class SqlParser
 
         var insertStatement = new SqlInsertStatement
         {
+            Top = topClause.Result,
             TableName = tableName.ResultValue.FieldName
         };
+
+        var withHints = Parse_WithTableHints();
+        if (withHints.HasError)
+        {
+            return withHints.Error;
+        }
+
+        if (withHints.Result != null)
+        {
+            insertStatement.Withs = withHints.ResultValue;
+        }
 
         if (IsPeekMatch("("))
         {
@@ -3153,6 +3171,14 @@ public class SqlParser
                 .Select(field => field.FieldName)
                 .ToList();
         }
+
+        var outputClause = Parse_OutputClause();
+        if (outputClause.HasError)
+        {
+            return outputClause.Error;
+        }
+
+        insertStatement.Output = outputClause.Result;
 
         if (TryKeywords(["DEFAULT", "VALUES"], out _))
         {
@@ -3184,12 +3210,86 @@ public class SqlParser
         return CreateParseError("Expected VALUES, SELECT or DEFAULT VALUES after INSERT");
     }
 
+    private ParseResult<SqlOutputClause> Parse_OutputClause()
+    {
+        if (!TryKeyword("OUTPUT", out var startSpan))
+        {
+            return NoneResult<SqlOutputClause>();
+        }
+
+        var columns = ParseWithComma(Parse_OutputColumn);
+        if (columns.HasError)
+        {
+            return columns.Error;
+        }
+
+        var outputClause = new SqlOutputClause
+        {
+            Columns = columns.ResultValue.Cast<ISelectColumnExpression>().ToList()
+        };
+
+        if (TryKeyword("INTO", out _))
+        {
+            var intoTable = Parse_SqlIdentifier();
+            if (intoTable.Result == null)
+            {
+                return CreateParseError("Expected table name after OUTPUT INTO");
+            }
+
+            outputClause.IntoTable = intoTable.ResultValue.FieldName;
+
+            if (IsPeekMatch("("))
+            {
+                var intoColumns = Parse_ParenthesizedColumns();
+                if (intoColumns.HasError)
+                {
+                    return intoColumns.Error;
+                }
+
+                outputClause.IntoColumns = intoColumns.ResultValue
+                    .OfType<SqlFieldExpr>()
+                    .Select(field => field.FieldName)
+                    .ToList();
+            }
+        }
+
+        outputClause.Span = _text.CreateSpan(startSpan);
+        return CreateParseResult(outputClause);
+    }
+
+    private ParseResult<SelectColumn> Parse_OutputColumn()
+    {
+        var column = Parse_Column_Arithmetic();
+        if (column.HasError)
+        {
+            return column.Error;
+        }
+
+        if (column.Result == null)
+        {
+            return NoneResult<SelectColumn>();
+        }
+
+        var columnExpr = column.ResultValue;
+        if (TryCast<SqlAsExpr>(columnExpr.Field, SqlType.AsExpr, out var asExpr))
+        {
+            columnExpr = new SelectColumn
+            {
+                Span = asExpr.Span,
+                Field = asExpr.Instance,
+                Alias = asExpr.As.ToSql()
+            };
+        }
+
+        return CreateParseResult(columnExpr);
+    }
+
     private ParseResult<List<List<ISqlExpression>>> Parse_InsertValuesRows()
     {
         var rows = new List<List<ISqlExpression>>();
         do
         {
-            var row = Parse_ParenthesizedColumns();
+            var row = Parse_InsertValuesRow();
             if (row.HasError)
             {
                 return row.Error;
@@ -3199,6 +3299,40 @@ public class SqlParser
         } while (TryMatch(",", out _));
 
         return CreateParseResult(rows);
+    }
+
+    private ParseResult<List<ISqlExpression>> Parse_InsertValuesRow()
+    {
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var values = ParseWithComma(Parse_InsertRowValue);
+        if (values.HasError)
+        {
+            return values.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return values;
+    }
+
+    private ParseResult<ISqlExpression> Parse_InsertRowValue()
+    {
+        if (TryKeyword("DEFAULT", out var defaultSpan))
+        {
+            return new SqlDefaultValue
+            {
+                Span = defaultSpan
+            };
+        }
+
+        return ParseArithmeticExpr();
     }
 
     private ParseResult<SqlSetValueStatement> ParseSetValueStatement()
@@ -3340,40 +3474,58 @@ public class SqlParser
             baseTableSource.TableSample = tableSampleClause.ResultValue;
         }
 
-        if (TryKeyword("WITH", out _))
+        var withHints = Parse_WithTableHints();
+        if (withHints.HasError)
         {
-            if (!TryMatch("(", out _))
-            {
-                return CreateParseError("Expected (");
-            }
-            var tableHints = ParseWithComma<ISqlExpression>(() =>
-            {
-                var hintStartPosition = _text.Position;
-                if (Try(Parse_TableHintIndex, out var tableHintIndex))
-                {
-                    return tableHintIndex.ResultValue;
-                }
+            return withHints.Error;
+        }
 
-                var hint = ReadSqlIdentifier().Word;
-                return new SqlHint()
-                {
-                    Span = _text.CreateSpan(hintStartPosition),
-                    Name = hint
-                };
-            });
-            if (tableHints.HasError)
-            {
-                return tableHints.Error;
-            }
-
-            if (!TryMatch(")", out _))
-            {
-                return CreateParseError("Expected )");
-            }
-            tableSourceExpr.Withs = tableHints.ResultValue;
+        if (withHints.Result != null)
+        {
+            tableSourceExpr.Withs = withHints.ResultValue;
         }
 
         return CreateParseResult(tableSourceExpr);
+    }
+
+    private ParseResult<List<ISqlExpression>> Parse_WithTableHints()
+    {
+        if (!TryKeyword("WITH", out _))
+        {
+            return NoneResult<List<ISqlExpression>>();
+        }
+
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var tableHints = ParseWithComma<ISqlExpression>(() =>
+        {
+            var hintStartPosition = _text.Position;
+            if (Try(Parse_TableHintIndex, out var tableHintIndex))
+            {
+                return tableHintIndex.ResultValue;
+            }
+
+            var hint = ReadSqlIdentifier().Word;
+            return new SqlHint()
+            {
+                Span = _text.CreateSpan(hintStartPosition),
+                Name = hint
+            };
+        });
+        if (tableHints.HasError)
+        {
+            return tableHints.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return CreateParseResult(tableHints.ResultValue);
     }
 
     private ParseResult<SqlTableSampleClause> Parse_TableSampleClause()

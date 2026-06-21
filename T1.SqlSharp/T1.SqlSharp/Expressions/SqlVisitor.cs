@@ -374,6 +374,10 @@ public class SqlVisitor
     {
     }
 
+    public virtual void Visit_DefaultValue(SqlDefaultValue expr)
+    {
+    }
+
     public virtual void Visit_OrderByClause(SqlOrderByClause expr)
     {
         AddSqlExpression(expr);
@@ -526,8 +530,15 @@ public class SqlVisitor
     public virtual void Visit_InsertStatement(SqlInsertStatement expr)
     {
         AddSqlExpression(expr);
+        expr.Output?.Accept(this);
         expr.ValuesRows.ForEach(row => row.ForEach(value => value.Accept(this)));
         expr.SourceSelect?.Accept(this);
+    }
+
+    public virtual void Visit_OutputClause(SqlOutputClause expr)
+    {
+        AddSqlExpression(expr);
+        expr.Columns.ForEach(column => column.Accept(this));
     }
 
     public virtual void Visit_UpdateStatement(SqlUpdateStatement expr)

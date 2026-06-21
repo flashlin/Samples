@@ -82,4 +82,6 @@ public enum SqlType
     WindowClause,
     WindowDefinition,
     OverWindowName,
+    OutputClause,
+    DefaultValue,
 }

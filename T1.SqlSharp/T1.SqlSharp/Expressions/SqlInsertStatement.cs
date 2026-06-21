@@ -12,11 +12,14 @@ public class SqlInsertStatement : ISqlExpression
         visitor.Visit_InsertStatement(this);
     }
 
+    public SqlTopClause? Top { get; set; }
     public string TableName { get; set; } = string.Empty;
+    public List<ISqlExpression> Withs { get; set; } = [];
     public List<string> Columns { get; set; } = [];
     public List<List<ISqlExpression>> ValuesRows { get; set; } = [];
     public SelectStatement? SourceSelect { get; set; }
     public bool IsDefaultValues { get; set; }
+    public SqlOutputClause? Output { get; set; }
 
     public string ToSql()
     {
