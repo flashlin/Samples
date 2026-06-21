@@ -37,7 +37,25 @@ public class ParseCreateSequenceSqlTest
         {
             SequenceName = "s",
             StartWith = new SqlValue { SqlType = SqlType.IntValue, Value = "10" },
-            IncrementBy = new SqlValue { SqlType = SqlType.IntValue, Value = "5" }
+            IncrementBy = new SqlValue { SqlType = SqlType.IntValue, Value = "5" },
+            MinValue = new SqlValue { SqlType = SqlType.IntValue, Value = "1" },
+            MaxValue = new SqlValue { SqlType = SqlType.IntValue, Value = "100" },
+            IsNoCycle = true,
+            CacheSize = new SqlValue { SqlType = SqlType.IntValue, Value = "20" }
+        });
+    }
+
+    [Test]
+    public void Create_sequence_cycle_no_cache_no_minvalue()
+    {
+        var sql = "CREATE SEQUENCE s NO MINVALUE CYCLE NO CACHE";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateSequenceStatement
+        {
+            SequenceName = "s",
+            IsNoMinValue = true,
+            IsCycle = true,
+            IsNoCache = true
         });
     }
 }

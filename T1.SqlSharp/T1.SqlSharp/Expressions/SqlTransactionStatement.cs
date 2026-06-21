@@ -21,6 +21,8 @@ public class SqlTransactionStatement : ISqlExpression
     public SqlTransactionAction Action { get; set; }
     public string Name { get; set; } = string.Empty;
     public bool IsDistributed { get; set; }
+    public bool WithMark { get; set; }
+    public string MarkDescription { get; set; } = string.Empty;
 
     public string ToSql()
     {
@@ -32,6 +34,12 @@ public class SqlTransactionStatement : ISqlExpression
             SqlTransactionAction.Save => "SAVE TRANSACTION",
             _ => string.Empty
         };
-        return string.IsNullOrEmpty(Name) ? keyword : $"{keyword} {Name}";
+        var sql = string.IsNullOrEmpty(Name) ? keyword : $"{keyword} {Name}";
+        if (!WithMark)
+        {
+            return sql;
+        }
+
+        return string.IsNullOrEmpty(MarkDescription) ? $"{sql} WITH MARK" : $"{sql} WITH MARK {MarkDescription}";
     }
 }

@@ -2,7 +2,7 @@
 
 > 用途：追蹤 parser 目前支援哪些 T-SQL 語法，方便維護與規劃。
 > 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援、`[N/A]` 不適用 T-SQL（不實作）。
-> 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對；568 測試全綠）。
+> 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對；578 測試全綠）。
 > 入口：`SqlParser.Parse()` dispatch ~97 種頂層語句（WITH CTE / CREATE TABLE|VIEW|INDEX|PROCEDURE|FUNCTION|TRIGGER|SCHEMA|DATABASE / SELECT / INSERT / UPDATE / DELETE / MERGE / TRUNCATE / DROP / ALTER TABLE / EXEC sp_addextendedproperty / EXEC proc / DECLARE / BEGIN TRY…CATCH / TRANSACTION（BEGIN|COMMIT|ROLLBACK|SAVE）/ BEGIN…END / IF / WHILE / RETURN / PRINT / THROW / RAISERROR / BREAK / CONTINUE / OPEN|CLOSE|DEALLOCATE / FETCH / WAITFOR / USE / GO / GRANT|REVOKE|DENY / SET（變數賦值 + session 選項 ON/OFF/取值））。
 
 ---
@@ -30,16 +30,16 @@
 - [~] `CREATE PROCEDURE` / `ALTER PROCEDURE`（`{CREATE [OR ALTER]|ALTER} {PROCEDURE|PROC} name [([@p type [(size)] [= default] [OUTPUT]] , ...)] AS <body>`；AS 前 `WITH opt[, ...]`（ENCRYPTION/RECOMPILE…）入 `Options`；body 走 `Parse()`（單一語句／`BEGIN…END`）。含多字 `EXECUTE AS {CALLER|OWNER|SELF}`。`SqlCreateProcedureStatement`（`IsAlter` 旗標）+ `SqlProcedureParameter`。未做 `FOR REPLICATION`、無 BEGIN 的多裸語句 body）
 - [~] `CREATE FUNCTION` / `ALTER FUNCTION`（scalar：`RETURNS type[(size)] AS <body>`；inline TVF：`RETURNS TABLE AS RETURN (select)`；multi-statement TVF：`RETURNS @t TABLE (col defs) AS BEGIN…RETURN END`（`ReturnTableVariable`/`ReturnTableColumns`，欄位重用 `ParseColumnDefinition`）。AS 前 `WITH opt[, ...]`（SCHEMABINDING…）入 `Options`。`SqlCreateFunctionStatement`（`IsAlter` 旗標），body 走 `Parse()`、return clause 抽 `ParseFunctionReturnClause`。含多字選項 `RETURNS NULL ON NULL INPUT`/`CALLED ON NULL INPUT`）
 - [~] `CREATE TRIGGER` / `ALTER TRIGGER`（`SqlCreateTriggerStatement`（`IsAlter` 旗標）+ `SqlTriggerTiming`/`SqlTriggerEvent` enum；`{CREATE [OR ALTER]|ALTER} TRIGGER name ON target {FOR|AFTER|INSTEAD OF} {INSERT|UPDATE|DELETE}[, ...] AS <body>`；ON 後、timing 前 `WITH opt[, ...]`（ENCRYPTION…）入 `Options`；body 重用 `Parse()`。DDL/LOGON trigger：`ON {DATABASE|ALL SERVER}` + DDL 事件名（`DdlEvents` 字串清單，如 `CREATE_TABLE`/`LOGON`）已支援。未做 `FOR EACH ROW`）
-- [~] `CREATE SCHEMA`（`SqlCreateSchemaStatement`；`CREATE SCHEMA name [AUTHORIZATION owner]`。未做 inline 物件定義 / GRANT 子句）/ `CREATE DATABASE`（`SqlCreateDatabaseStatement`；`CREATE DATABASE name [ON [PRIMARY] (filespec)[, ...]] [LOG ON (filespec)[, ...]] [COLLATE x]`，filespec 走 `ReadFileSpecList` 收集 `(K = V[, ...])`。未做 `SIZE = 10MB` 帶單位值、FILEGROUP、`CONTAINMENT`/`WITH` 資料庫選項）
+- [~] `CREATE SCHEMA`（`SqlCreateSchemaStatement`；`CREATE SCHEMA name [AUTHORIZATION owner]`。未做 inline 物件定義 / GRANT 子句）/ `CREATE DATABASE`（`SqlCreateDatabaseStatement`；`CREATE DATABASE name [ON [PRIMARY] (filespec)[, ...]] [LOG ON (filespec)[, ...]] [COLLATE x]`，filespec 走 `ReadFileSpecList` 收集 `(K = V[, ...])`，值走 `ReadFileSpecValue` 支援帶單位 `SIZE = 10MB`/`FILEGROWTH = 5MB`（number + 緊接 unit 合併）。未做 FILEGROUP、`CONTAINMENT`/`WITH` 資料庫選項）
 - [~] `DECLARE`（`DECLARE @v type [(size)] [= value] [, ...]`；`@t TABLE (col defs [, table constraints])` 表變數（`IsTable`/`TableColumns`/`TableConstraints`，新 `Parse_ParenthesizedTableElements` 同時收欄位與 table 約束 PK/UNIQUE/CHECK/FK，`IsTableConstraintStart` 分流）；`{@c|name} CURSOR [opt...] [FOR <select>]` 游標（`IsCursor`/`CursorSource`/`CursorOptions`，`Parse_CursorDeclaration`，選項 LOCAL/GLOBAL/SCROLL/STATIC/KEYSET/DYNAMIC/FAST_FORWARD/READ_ONLY… 走 `TryMatchCursorOption`）；`SqlDeclareStatement` + `SqlVariableDeclaration`。未做表變數內 table 約束、ISO 式前置 `INSENSITIVE SCROLL CURSOR`）
 - [~] 游標操作 `OPEN` / `CLOSE` / `DEALLOCATE`（單一 `SqlCursorOperationStatement` + `SqlCursorOperation` enum）、`FETCH [NEXT|PRIOR|FIRST|LAST|ABSOLUTE n|RELATIVE n] [FROM] cur [INTO @v[, ...]]`（`SqlFetchStatement`）；`@@FETCH_STATUS` 等全域變數已可用於 WHILE 條件（見 §5）。未做 `GLOBAL` 游標
 - [x] `IF / ELSE`（`SqlIfStatement`；條件用 `Parse_WhereExpression`、then/else 各為單一語句，body 可為 `BEGIN...END`）
 - [x] `WHILE`（`SqlWhileStatement`；body 為單一語句／`BEGIN...END`）
 - [x] `BREAK` / `CONTINUE`（單一 `SqlLoopControlStatement` + `SqlLoopControlAction` enum；關鍵字語句）
 - [~] `BEGIN ... END`（`SqlBlockStatement`，以共用 `ParseStatementsUntil` 解析 body；`BEGIN TRY`/`BEGIN TRAN` 由各自 parser 在前處理）
-- [~] `RETURN [expr]`（`SqlReturnStatement`；值走 `ParseArithmeticExpr`，bare RETURN 在 `END`/`;`/EOF 前不取值。未做 `BREAK`/`CONTINUE`）
+- [x] `RETURN [expr]`（`SqlReturnStatement`；值走 `ParseArithmeticExpr`，bare RETURN 在 `END`/`;`/EOF 前不取值）；`BREAK`/`CONTINUE`（`SqlLoopControlStatement` + `SqlLoopControlAction` enum，`ParseLoopControlStatement`）
 - [x] `BEGIN TRY ... END TRY / BEGIN CATCH ... END CATCH`（`SqlTryCatchStatement`；try/catch body 共用 `ParseStatementsUntil("END","TRY")`/`("END","CATCH")`）
-- [~] `BEGIN / COMMIT / ROLLBACK / SAVE TRANSACTION`（`SqlTransactionStatement` + `SqlTransactionAction` 單類別 enum；`BEGIN|SAVE TRAN[SACTION]`、`COMMIT|ROLLBACK [TRAN|TRANSACTION|WORK]`、`BEGIN [DISTRIBUTED] TRAN[SACTION]`（`IsDistributed` 旗標）、選擇性交易名稱以 stop-set 擋後續語句關鍵字。未做 `@var` 名稱、`WITH MARK`）
+- [~] `BEGIN / COMMIT / ROLLBACK / SAVE TRANSACTION`（`SqlTransactionStatement` + `SqlTransactionAction` 單類別 enum；`BEGIN|SAVE TRAN[SACTION]`、`COMMIT|ROLLBACK [TRAN|TRANSACTION|WORK]`、`BEGIN [DISTRIBUTED] TRAN[SACTION]`（`IsDistributed` 旗標）、選擇性交易名稱（含 `@var`，stop-set 擋後續語句關鍵字）、`WITH MARK ['desc']`（`WithMark`/`MarkDescription`）。未做 `DELAYED_DURABILITY`）
 - [~] `EXEC`（一般預存程序）：`{EXEC|EXECUTE} proc [arg, ...]`；具名參數 `@p = val [OUTPUT]`（`SqlExecArgument`，positional 仍為裸運算式）；動態 SQL `EXEC ('sql' | @sql)`（`SqlExecStatement.DynamicSql`）；回傳值擷取 `EXEC @ret = proc args`（`ReturnVariable`，偵測 `@var =` 前綴，否則 reset 落回變數 EXEC）；`EXEC (...) AT linked_server`（`AtLinkedServer`）。`Parse_ExecStatement` → `SqlExecStatement`
 - [x] `USE <db>`（`SqlUseStatement`；`USE database_name`）
 - [x] `GO`（批次分隔）（`SqlGoStatement`；選擇性 `GO count`）
@@ -325,11 +325,11 @@
 ## 7.5 尚未涵蓋的語句 / 語法（候選，多為較少用）
 
 ### 其他 DDL（CREATE/ALTER 物件）
-- [~] `CREATE SEQUENCE`（`SqlCreateSequenceStatement`；name + `AS type` + `START WITH` + `INCREMENT BY`，`ParseSequenceClauses` clause loop 同時消費 MIN/MAX/CYCLE/CACHE 避免殘留）；`ALTER SEQUENCE name {RESTART [WITH n] | INCREMENT BY n | ...}`（`SqlAlterSequenceStatement`）。未做儲存 MIN/MAX/CYCLE/CACHE 值
+- [x] `CREATE SEQUENCE`（`SqlCreateSequenceStatement`；name + `AS type` + `START WITH` + `INCREMENT BY` + `[NO] MINVALUE`/`[NO] MAXVALUE`/`[NO] CYCLE`/`CACHE [n]`/`NO CACHE`，`ParseSequenceClauses` clause loop 逐子句儲存值（`MinValue`/`MaxValue`/`CacheSize`/`IsCycle`/`IsNoCycle`/`IsCache`/`IsNoCache`/`IsNoMinValue`/`IsNoMaxValue`）；`ALTER SEQUENCE name {RESTART [WITH n] | INCREMENT BY n | ...}`（`SqlAlterSequenceStatement`，clause 值仍僅消費））
 - [x] `CREATE TYPE`（`SqlCreateTypeStatement`；`CREATE TYPE name {FROM base[(size)] | AS TABLE (col defs)}`，表型別欄位重用 `Parse_ParenthesizedColumnDefinitions`。`DROP TYPE` 已在 enum）
 - [x] `CREATE SYNONYM name FOR target`（`SqlCreateSynonymStatement`）/ `DROP SYNONYM`（`SqlDropObjectType.Synonym`）
-- [~] `ALTER INDEX {ix|ALL} ON t {REBUILD | REORGANIZE | DISABLE | SET (opt = val[, ...])}`（`SqlAlterIndexStatement`，`SET` 選項走 `ReadParenthesizedAssignmentList`）。未做 `REBUILD WITH (...)`/`PARTITION` 選項
-- [~] `ALTER DATABASE name {SET setting [value] | ADD FILE (spec) | ADD LOG FILE (spec) | MODIFY FILE (spec)}`（`SqlAlterDatabaseStatement` + `FileAction`/`FileSpec`，filespec 重用 `ReadFileSpecList`）。未做多 token SET 值
+- [x] `ALTER INDEX {ix|ALL} ON t {REBUILD | REORGANIZE | DISABLE | SET (opt = val[, ...])}`（`SqlAlterIndexStatement`，`SET` 選項走 `ReadParenthesizedAssignmentList`；REBUILD/REORGANIZE 支援 `PARTITION = {n|ALL}`（`ReadOptionalIndexPartition` → `Partition`）與 `WITH (opt = val[, ...])`（`ReadOptionalIndexWithOptions`，ToSql 對非 SET 動作前綴 `WITH`））
+- [x] `ALTER DATABASE name {SET setting [value] | ADD FILE (spec) | ADD LOG FILE (spec) | MODIFY FILE (spec)}`（`SqlAlterDatabaseStatement` + `FileAction`/`FileSpec`，filespec 重用 `ReadFileSpecList`；SET 值走 `ReadActionTokens` 收完整剩餘 token，支援 `COMPATIBILITY_LEVEL = 150`、`SINGLE_USER WITH ROLLBACK IMMEDIATE` 等多 token 值）
 - [x] `ALTER SCHEMA name TRANSFER [OBJECT::]obj`（`SqlAlterSchemaStatement`）
 - [x] `ALTER AUTHORIZATION ON [class::]securable TO principal`（`SqlAlterAuthorizationStatement`，含 `OBJECT::`/`SCHEMA::` 等 class 前綴。未做 `TO SCHEMA OWNER`）
 - [x] `CREATE CERTIFICATE name [FROM FILE = 'x'] [ENCRYPTION BY PASSWORD = 'x'] [WITH opt = val[, ...]]`（`SqlCreateCertificateStatement`，clause loop）

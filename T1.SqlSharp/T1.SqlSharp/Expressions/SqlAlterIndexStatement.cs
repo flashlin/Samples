@@ -13,11 +13,14 @@ public class SqlAlterIndexStatement : ISqlExpression
     public string IndexName { get; set; } = string.Empty;
     public string TableName { get; set; } = string.Empty;
     public string Action { get; set; } = string.Empty;
+    public string Partition { get; set; } = string.Empty;
     public List<string> Options { get; set; } = [];
 
     public string ToSql()
     {
-        var options = Options.Count > 0 ? $" ({string.Join(", ", Options)})" : string.Empty;
-        return $"ALTER INDEX {IndexName} ON {TableName} {Action}{options}";
+        var partition = string.IsNullOrEmpty(Partition) ? string.Empty : $" PARTITION = {Partition}";
+        var optionsPrefix = string.Equals(Action, "SET", StringComparison.OrdinalIgnoreCase) ? string.Empty : "WITH ";
+        var options = Options.Count > 0 ? $" {optionsPrefix}({string.Join(", ", Options)})" : string.Empty;
+        return $"ALTER INDEX {IndexName} ON {TableName} {Action}{partition}{options}";
     }
 }

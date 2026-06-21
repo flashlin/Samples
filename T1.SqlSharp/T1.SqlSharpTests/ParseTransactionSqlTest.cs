@@ -61,4 +61,38 @@ public class ParseTransactionSqlTest
         var rc = sql.ParseSql();
         rc.ShouldBe(new SqlTransactionStatement { Action = SqlTransactionAction.Begin, IsDistributed = true });
     }
+
+    [Test]
+    public void Begin_transaction_with_mark_description()
+    {
+        var sql = "BEGIN TRANSACTION WITH MARK 'Daily backup'";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlTransactionStatement
+        {
+            Action = SqlTransactionAction.Begin,
+            WithMark = true,
+            MarkDescription = "'Daily backup'"
+        });
+    }
+
+    [Test]
+    public void Begin_named_transaction_with_mark()
+    {
+        var sql = "BEGIN TRAN MyTran WITH MARK";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlTransactionStatement
+        {
+            Action = SqlTransactionAction.Begin,
+            Name = "MyTran",
+            WithMark = true
+        });
+    }
+
+    [Test]
+    public void Begin_tran_with_variable_name()
+    {
+        var sql = "BEGIN TRAN @t";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlTransactionStatement { Action = SqlTransactionAction.Begin, Name = "@t" });
+    }
 }

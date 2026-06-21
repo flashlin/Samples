@@ -4505,11 +4505,7 @@ public class SqlParser
             return CreateParseError("Expected setting name after SET");
         }
 
-        var settingValue = string.Empty;
-        if (!_text.IsEnd() && !IsPeekMatch(";"))
-        {
-            settingValue = ReadSqlIdentifier().Word;
-        }
+        var settingValue = ReadActionTokens();
 
         return CreateParseResult(new SqlAlterDatabaseStatement
         {
@@ -4545,14 +4541,31 @@ public class SqlParser
         }
 
         string action;
+        var partition = string.Empty;
         var options = new List<string>();
         if (TryKeyword("REBUILD", out _))
         {
             action = "REBUILD";
+            partition = ReadOptionalIndexPartition();
+            var withOptions = ReadOptionalIndexWithOptions();
+            if (withOptions.HasError)
+            {
+                return withOptions.Error;
+            }
+
+            options = withOptions.ResultValue;
         }
         else if (TryKeyword("REORGANIZE", out _))
         {
             action = "REORGANIZE";
+            partition = ReadOptionalIndexPartition();
+            var withOptions = ReadOptionalIndexWithOptions();
+            if (withOptions.HasError)
+            {
+                return withOptions.Error;
+            }
+
+            options = withOptions.ResultValue;
         }
         else if (TryKeyword("DISABLE", out _))
         {
@@ -4580,8 +4593,35 @@ public class SqlParser
             IndexName = indexName,
             TableName = tableName.ResultValue.FieldName,
             Action = action,
+            Partition = partition,
             Options = options
         });
+    }
+
+    private string ReadOptionalIndexPartition()
+    {
+        if (!TryKeyword("PARTITION", out _))
+        {
+            return string.Empty;
+        }
+
+        TryMatch("=", out _);
+        if (TryKeyword("ALL", out _))
+        {
+            return "ALL";
+        }
+
+        return Try(ParseNumberValue, out var number) ? number.ResultValue.ToSql() : string.Empty;
+    }
+
+    private ParseResult<List<string>> ReadOptionalIndexWithOptions()
+    {
+        if (!TryKeyword("WITH", out _))
+        {
+            return CreateParseResult(new List<string>());
+        }
+
+        return ReadParenthesizedAssignmentList();
     }
 
     private ParseResult<SqlAlterAuthorizationStatement> ParseAlterAuthorizationStatement()
@@ -6746,16 +6786,71 @@ public class SqlParser
                 continue;
             }
 
-            if (TryKeywords(["MINVALUE"], out _) || TryKeywords(["MAXVALUE"], out _) || TryKeywords(["CACHE"], out _))
+            if (TryKeywords(["NO", "MINVALUE"], out _))
             {
-                ParseArithmeticExpr();
+                statement.IsNoMinValue = true;
                 continue;
             }
 
-            if (TryKeywords(["NO", "MINVALUE"], out _) || TryKeywords(["NO", "MAXVALUE"], out _)
-                || TryKeywords(["NO", "CYCLE"], out _) || TryKeywords(["NO", "CACHE"], out _)
-                || TryKeyword("CYCLE", out _))
+            if (TryKeywords(["NO", "MAXVALUE"], out _))
             {
+                statement.IsNoMaxValue = true;
+                continue;
+            }
+
+            if (TryKeywords(["NO", "CYCLE"], out _))
+            {
+                statement.IsNoCycle = true;
+                continue;
+            }
+
+            if (TryKeywords(["NO", "CACHE"], out _))
+            {
+                statement.IsNoCache = true;
+                continue;
+            }
+
+            if (TryKeyword("MINVALUE", out _))
+            {
+                var minValue = ParseArithmeticExpr();
+                if (minValue.HasError)
+                {
+                    return minValue.Error;
+                }
+
+                statement.MinValue = minValue.Result;
+                continue;
+            }
+
+            if (TryKeyword("MAXVALUE", out _))
+            {
+                var maxValue = ParseArithmeticExpr();
+                if (maxValue.HasError)
+                {
+                    return maxValue.Error;
+                }
+
+                statement.MaxValue = maxValue.Result;
+                continue;
+            }
+
+            if (TryKeyword("CYCLE", out _))
+            {
+                statement.IsCycle = true;
+                continue;
+            }
+
+            if (TryKeyword("CACHE", out _))
+            {
+                if (Try(ParseNumberValue, out var cacheSize))
+                {
+                    statement.CacheSize = cacheSize.Result;
+                }
+                else
+                {
+                    statement.IsCache = true;
+                }
+
                 continue;
             }
 
@@ -6866,13 +6961,7 @@ public class SqlParser
                 var key = ReadSqlIdentifier().Word;
                 if (TryMatch("=", out _))
                 {
-                    var value = ParseArithmeticExpr();
-                    if (value.HasError)
-                    {
-                        return value.Error;
-                    }
-
-                    parts.Add($"{key} = {value.ResultValue.ToSql()}");
+                    parts.Add($"{key} = {ReadFileSpecValue()}");
                 }
                 else
                 {
@@ -6889,6 +6978,22 @@ public class SqlParser
         } while (TryMatch(",", out _));
 
         return CreateParseResult(specs);
+    }
+
+    private string ReadFileSpecValue()
+    {
+        if (Try(ParseSqlQuotedString, out var quoted))
+        {
+            return quoted.ResultValue.ToSql();
+        }
+
+        if (Try(ParseNumberValue, out var number))
+        {
+            var unit = ReadSqlIdentifier().Word;
+            return string.IsNullOrEmpty(unit) ? number.ResultValue.ToSql() : $"{number.ResultValue.ToSql()}{unit}";
+        }
+
+        return ReadSqlIdentifier().Word;
     }
 
     private ParseResult<SqlPermissionStatement> ParsePermissionStatement()
@@ -9029,12 +9134,22 @@ public class SqlParser
 
     private ParseResult<SqlTransactionStatement> CreateTransactionStatement(SqlTransactionAction action, TextSpan startSpan, bool isDistributed = false)
     {
+        var name = ReadOptionalTransactionName();
+        var withMark = TryKeywords(["WITH", "MARK"], out _);
+        var markDescription = string.Empty;
+        if (withMark && Try(ParseSqlQuotedString, out var description))
+        {
+            markDescription = description.ResultValue.ToSql();
+        }
+
         return CreateParseResult(new SqlTransactionStatement
         {
             Span = _text.CreateSpan(startSpan),
             Action = action,
             IsDistributed = isDistributed,
-            Name = ReadOptionalTransactionName()
+            Name = name,
+            WithMark = withMark,
+            MarkDescription = markDescription
         });
     }
 

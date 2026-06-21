@@ -56,4 +56,30 @@ public class ParseAlterDatabaseSqlTest
             Setting = "SINGLE_USER"
         });
     }
+
+    [Test]
+    public void Alter_database_set_compatibility_level()
+    {
+        var sql = "ALTER DATABASE ShopDb SET COMPATIBILITY_LEVEL = 150";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterDatabaseStatement
+        {
+            DatabaseName = "ShopDb",
+            Setting = "COMPATIBILITY_LEVEL",
+            SettingValue = "= 150"
+        });
+    }
+
+    [Test]
+    public void Alter_database_set_single_user_with_rollback()
+    {
+        var sql = "ALTER DATABASE ShopDb SET SINGLE_USER WITH ROLLBACK IMMEDIATE";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterDatabaseStatement
+        {
+            DatabaseName = "ShopDb",
+            Setting = "SINGLE_USER",
+            SettingValue = "WITH ROLLBACK IMMEDIATE"
+        });
+    }
 }

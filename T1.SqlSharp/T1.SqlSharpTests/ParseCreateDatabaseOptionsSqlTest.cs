@@ -32,4 +32,18 @@ public class ParseCreateDatabaseOptionsSqlTest
             LogFiles = ["(NAME = Sales_log, FILENAME = 'C:\\sales.ldf')"]
         });
     }
+
+    [Test]
+    public void Create_database_with_size_units()
+    {
+        var sql = "CREATE DATABASE Sales ON PRIMARY " +
+                  "(NAME = s, FILENAME = 'c:\\s.mdf', SIZE = 10MB, MAXSIZE = 50MB, FILEGROWTH = 5MB)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateDatabaseStatement
+        {
+            DatabaseName = "Sales",
+            OnPrimary = true,
+            DataFiles = ["(NAME = s, FILENAME = 'c:\\s.mdf', SIZE = 10MB, MAXSIZE = 50MB, FILEGROWTH = 5MB)"]
+        });
+    }
 }

@@ -58,4 +58,46 @@ public class ParseAlterIndexSqlTest
             Action = "DISABLE"
         });
     }
+
+    [Test]
+    public void Alter_index_rebuild_with_options()
+    {
+        var sql = "ALTER INDEX IX ON dbo.t REBUILD WITH (ONLINE = ON, FILLFACTOR = 80)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterIndexStatement
+        {
+            IndexName = "IX",
+            TableName = "dbo.t",
+            Action = "REBUILD",
+            Options = ["ONLINE = ON", "FILLFACTOR = 80"]
+        });
+    }
+
+    [Test]
+    public void Alter_index_rebuild_partition()
+    {
+        var sql = "ALTER INDEX IX ON dbo.t REBUILD PARTITION = 3";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterIndexStatement
+        {
+            IndexName = "IX",
+            TableName = "dbo.t",
+            Action = "REBUILD",
+            Partition = "3"
+        });
+    }
+
+    [Test]
+    public void Alter_index_reorganize_with_options()
+    {
+        var sql = "ALTER INDEX IX ON dbo.t REORGANIZE WITH (LOB_COMPACTION = ON)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterIndexStatement
+        {
+            IndexName = "IX",
+            TableName = "dbo.t",
+            Action = "REORGANIZE",
+            Options = ["LOB_COMPACTION = ON"]
+        });
+    }
 }
