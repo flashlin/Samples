@@ -187,6 +187,12 @@ public class SqlVisitor
         expr.Predicate.Accept(this);
     }
 
+    public virtual void Visit_CollateExpression(SqlCollateExpression expr)
+    {
+        AddSqlExpression(expr);
+        expr.Expression.Accept(this);
+    }
+
     public virtual void Visit_ConstraintDefaultValue(SqlConstraintDefaultValue expr)
     {
     }

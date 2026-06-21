@@ -66,6 +66,7 @@ public enum SqlType
     WithinGroupClause,
     OptionClause,
     QueryHint,
+    CollateExpression,
     HavingClause,
     SetValueStatement,
     NotExpression,

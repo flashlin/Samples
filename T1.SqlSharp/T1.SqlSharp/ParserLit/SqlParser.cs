@@ -549,6 +549,16 @@ public class SqlParser
             value = overOrderByClause.ResultValue;
         }
 
+        if (TryKeyword("COLLATE", out var collateSpan))
+        {
+            value = new SqlCollateExpression
+            {
+                Span = _text.CreateSpan(collateSpan),
+                Expression = value.ResultValue,
+                Collation = ReadSqlIdentifier().Word
+            };
+        }
+
         if (TryKeyword("AS", out var asSpan))
         {
             var dataType = Or<ISqlExpression>(

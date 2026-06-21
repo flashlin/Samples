@@ -578,6 +578,61 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void Where_Collate_Expression()
+    {
+        var sql = $"""
+                   select id from customer
+                   where name COLLATE Latin1_General_BIN = 'abc'
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
+            FromSources = [new SqlTableSource { TableName = "customer" }],
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlCollateExpression
+                {
+                    Expression = new SqlFieldExpr { FieldName = "name" },
+                    Collation = "Latin1_General_BIN"
+                },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlValue { Value = "'abc'" }
+            }
+        });
+    }
+
+    [Test]
+    public void OrderBy_Collate_Expression()
+    {
+        var sql = $"""
+                   select id from customer
+                   order by name COLLATE Latin1_General_CI_AS DESC
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
+            FromSources = [new SqlTableSource { TableName = "customer" }],
+            OrderBy = new SqlOrderByClause
+            {
+                Columns =
+                [
+                    new SqlOrderColumn
+                    {
+                        ColumnName = new SqlCollateExpression
+                        {
+                            Expression = new SqlFieldExpr { FieldName = "name" },
+                            Collation = "Latin1_General_CI_AS"
+                        },
+                        Order = OrderType.Desc
+                    }
+                ]
+            }
+        });
+    }
+
+    [Test]
     public void Option_Recompile()
     {
         var sql = $"""
