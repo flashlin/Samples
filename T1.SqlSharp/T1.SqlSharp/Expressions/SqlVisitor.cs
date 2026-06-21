@@ -234,6 +234,12 @@ public class SqlVisitor
         expr.WithToggles.ForEach(x=>x.Accept(this));
     }
 
+    public virtual void Visit_TableIndexConstraint(SqlTableIndexConstraint expr)
+    {
+        AddSqlExpression(expr);
+        expr.Columns.ForEach(x=>x.Accept(this));
+    }
+
     public virtual void Visit_CreateTableExpression(SqlCreateTableExpression expr)
     {
         AddSqlExpression(expr);
@@ -563,6 +569,7 @@ public class SqlVisitor
         expr.Output?.Accept(this);
         expr.FromSources.ForEach(source => source.Accept(this));
         expr.Where?.Accept(this);
+        expr.Option?.Accept(this);
     }
 
     public virtual void Visit_MergeStatement(SqlMergeStatement expr)
@@ -573,6 +580,7 @@ public class SqlVisitor
         expr.OnCondition.Accept(this);
         expr.WhenClauses.ForEach(clause => clause.Accept(this));
         expr.Output?.Accept(this);
+        expr.Option?.Accept(this);
     }
 
     public virtual void Visit_MergeWhenClause(SqlMergeWhenClause expr)

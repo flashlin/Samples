@@ -3,7 +3,8 @@ namespace T1.SqlSharp.Expressions;
 public enum SqlWaitForKind
 {
     Delay,
-    Time
+    Time,
+    Receive
 }
 
 public class SqlWaitForStatement : ISqlExpression
@@ -18,9 +19,16 @@ public class SqlWaitForStatement : ISqlExpression
 
     public SqlWaitForKind Kind { get; set; }
     public required ISqlExpression Time { get; set; }
+    public ISqlExpression? Timeout { get; set; }
 
     public string ToSql()
     {
+        if (Kind == SqlWaitForKind.Receive)
+        {
+            var timeout = Timeout == null ? string.Empty : $", TIMEOUT {Timeout.ToSql()}";
+            return $"WAITFOR ({Time.ToSql()}){timeout}";
+        }
+
         var keyword = Kind == SqlWaitForKind.Delay ? "DELAY" : "TIME";
         return $"WAITFOR {keyword} {Time.ToSql()}";
     }

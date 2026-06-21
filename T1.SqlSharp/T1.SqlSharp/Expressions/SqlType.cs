@@ -160,6 +160,7 @@ public enum SqlType
     AlterTableSet,
     AlterTableGenericAction,
     AlterTableSwitch,
+    TableIndexConstraint,
     AlterAuthorizationStatement,
     CreateCertificateStatement,
     CreateMasterKeyStatement,

@@ -878,6 +878,167 @@ public class ParseRealCorpusRegressionSqlTest
             GRANT VIEW CHANGE TRACKING ON [dbo].[CustomerComplianceEffectFinal] TO [B_Artemis];
             GO
             """);
+
+        yield return Case(
+            "Account_Upsert_TransferDailyStatement_20.07.lock.sql",
+            """
+            BEGIN TRANSACTION
+            WAITFOR DELAY '00:00:00:003'
+            SELECT @resName = 'LockDailyStatement' + CAST(CustId AS nvarchar(50))
+            FROM @recordToInsert
+            EXEC @res = sp_getapplock @Resource = @resName,
+                @LockMode = 'Exclusive',
+                @LockOwner = 'Transaction'
+            COMMIT TRANSACTION
+            """);
+
+        yield return Case(
+            "adm_bbu_deleteDailyStatement_17.08.while.sql",
+            """
+            CREATE PROCEDURE [dbo].[adm_bbu_deleteDailyStatement_17.08]
+            AS
+            BEGIN
+                WHILE @count <> 0
+                BEGIN
+                    WAITFOR DELAY '00:00:00:300'
+                    DELETE TOP(@batchsize)
+                    FROM dailystatement
+                    WHERE winlostdate < @cutoffDate
+                    OPTION (MAXDOP 8)
+                    SET @count = @@ROWCOUNT
+                END
+            END
+            """);
+
+        yield return Case(
+            "Admin_SB_GetStatementDetails_1.0.0.deadlock.sql",
+            """
+            CREATE PROCEDURE [dbo].[Admin_SB_GetStatementDetails_1.0.0]
+            AS
+            BEGIN
+                SET DEADLOCK_PRIORITY low
+                SET @toDate = DATEADD(second, 1, @toDate)
+                (
+                    SELECT d.TransID, d.CustID
+                    FROM DailyStatement d WITH (NOLOCK)
+                )
+            END
+            """);
+
+        yield return Case(
+            "Admin_SB_Settlement_Settle_Early_Upsert_Early_Settlement_1.0.0.merge.sql",
+            """
+            CREATE PROCEDURE [dbo].[Admin_SB_Settlement_Settle_Early_Upsert_Early_Settlement_1.0.0]
+            AS
+            BEGIN
+                MERGE EarlySettlement WITH(HOLDLOCK) AS T
+                USING (VALUES (@matchResultId, @homeScore, @awayScore, @settlementTime)) AS S (matchResultId, homeScore, awayScore, settlementTime)
+                ON T.matchResultId = S.matchResultId AND T.homeScore = S.homeScore
+                WHEN MATCHED THEN
+                    UPDATE SET T.settlementTime = S.settlementTime
+                WHEN NOT MATCHED THEN
+                    INSERT (matchResultId, homeScore, awayScore, settlementTime)
+                    VALUES (S.matchResultId, S.homeScore, S.awayScore, S.settlementTime);
+            END
+            """);
+
+        yield return Case(
+            "ArgusJob_UpdateBlindRiskByBatch_1.0.0.index.sql",
+            """
+            CREATE PROCEDURE [dbo].[ArgusJob_UpdateBlindRiskByBatch_1.0.0]
+            AS
+            BEGIN
+                SELECT [Id], [Value]
+                INTO #remainingUpdates
+                FROM @customerBlindRiskRates
+                CREATE INDEX IX_remainingUpdates_Id ON #remainingUpdates (Id);
+                CREATE TABLE #pendingUpdates (
+                    [Id] INT,
+                    [Value] DECIMAL(3,2),
+                    INDEX IX_pendingUpdates_Id CLUSTERED ([Id])
+                )
+            END
+            """);
+
+        yield return Case(
+            "Admin_SB_Element_UpdateTimeZones_14.01.update-output.sql",
+            """
+            CREATE PROCEDURE [dbo].[Admin_SB_Element_UpdateTimeZones_14.01]
+            AS
+            BEGIN
+                UPDATE TimeZones WITH (ROWLOCK, UPDLOCK)
+                SET TimeZoneName = i.TimeZoneName,
+                    Presentation = i.Presentation
+                OUTPUT i.Id,
+                    deleted.TimeZoneName OldTimeZoneName,
+                    inserted.TimeZoneName
+                FROM @timeZones i
+                WHERE TimeZones.Id = i.Id
+            END
+            """);
+
+        yield return Case(
+            "Aither_LC_Player_GetCustomerBetSetting_19.02.01.scalar-function.sql",
+            """
+            CREATE PROCEDURE [dbo].[Aither_LC_Player_GetCustomerBetSetting_19.02.01]
+            AS
+            BEGIN
+                SELECT ([dbo].[fn_lc_getCustomerBetCredit_18.11] (@custID)) BetCredit,
+                    ([dbo].[fn_common_GetSingleWalletBetCredit] (@custID)) TotalBetCredit
+                FROM CustomerCredit WITH (NOLOCK)
+                WHERE CustID = @custID
+            END
+            """);
+
+        yield return Case(
+            "Karpos_Delete_BonusWalletDailyStatement_25.11.delete-output.sql",
+            """
+            CREATE PROCEDURE [dbo].[Karpos_Delete_BonusWalletDailyStatement_25.11]
+            AS
+            BEGIN
+                DELETE bwds
+                FROM BonusWalletDailyStatement bwds
+                INNER JOIN @t2 tmp ON bwds.transid = tmp.transid
+                OPTION (MAXDOP 4)
+                SET @totalDeleted = @totalDeleted + @@ROWCOUNT
+            END
+            """);
+
+        yield return Case(
+            "Admin_SB_Elements_InsertToContent_5.4.print.sql",
+            """
+            CREATE PROCEDURE [dbo].[Admin_SB_Elements_InsertToContent_5.4]
+            AS
+            BEGIN
+                PRINT @GroupID
+                PRINT @ID
+                INSERT INTO content (
+                    GroupID,
+                    ID,
+                    Lang
+                ) VALUES (
+                    @GroupID,
+                    @ID,
+                    'en'
+                )
+            END
+            """);
+
+        yield return Case(
+            "ServiceBroker_AutoDelete_Queue.waitfor-receive.sql",
+            """
+            CREATE PROCEDURE [dbo].[ServiceBroker_AutoDelete_Queue]
+            AS
+            BEGIN
+                WAITFOR (
+                    RECEIVE TOP (1)
+                        [conversation_handle],
+                        [message_type_name],
+                        [message_body]
+                    FROM [dbo].[Grani_MessageQueue]
+                ), TIMEOUT 1000
+            END
+            """);
     }
 
     private static TestCaseData Case(string sourceFile, string sql)

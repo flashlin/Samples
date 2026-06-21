@@ -15,7 +15,7 @@ public class SqlParser
         "BEGIN", "END", "IF", "ELSE", "WHILE", "RETURN", "DECLARE", "EXEC", "EXECUTE", "SET", "DELETE",
         "UPDATE", "INSERT", "MERGE", "TRUNCATE", "DROP", "PRINT", "RAISERROR", "THROW", "BREAK", "CONTINUE",
         "OPEN", "FETCH", "CLOSE", "DEALLOCATE", "WAITFOR", "COMMIT", "ROLLBACK", "SAVE", "GO",
-        "TABLESAMPLE", "WINDOW", "USING"
+        "TABLESAMPLE", "WINDOW", "USING", "CREATE", "ALTER", "GRANT", "DENY", "REVOKE", "VALUES"
     ];
 
     private static readonly string[] StatementBoundaryKeywords =
@@ -87,6 +87,11 @@ public class SqlParser
         if (Try(ParseWithCteStatement, out var withCteStatement))
         {
             return withCteStatement.Result;
+        }
+
+        if (Try(ParseCreateIndexStatement, out var createIndexStatementEarly))
+        {
+            return createIndexStatementEarly.Result;
         }
 
         if (Try(ParseCreateExternalStatement, out var createExternalStatement))
@@ -277,6 +282,11 @@ public class SqlParser
         if (Try(ParseCreateSymmetricKeyStatement, out var createSymmetricKeyStatement))
         {
             return createSymmetricKeyStatement.Result;
+        }
+
+        if (Try(ParseParenthesizedSelectStatement, out var parenthesizedSelectStatement))
+        {
+            return parenthesizedSelectStatement.Result;
         }
 
         if (Try(() => ParseSelectStatement(), out var selectStatement))
@@ -1178,7 +1188,8 @@ public class SqlParser
 
             // 一開始就定義這些 關鍵字表示不是 column  
             if (IsAny(PeekKeywords("CONSTRAINT"), PeekKeywords("PRIMARY", "KEY"), PeekKeywords("UNIQUE"),
-                    PeekKeywords("FOREIGN", "KEY"), PeekKeywords("CHECK"), PeekKeywords("PERIOD", "FOR")))
+                    PeekKeywords("FOREIGN", "KEY"), PeekKeywords("CHECK"), PeekKeywords("PERIOD", "FOR"),
+                    PeekKeywords("INDEX")))
             {
                 break;
             }
@@ -1262,6 +1273,22 @@ public class SqlParser
 
         while (!_text.IsEnd())
         {
+            if (IsTableConstraintStart())
+            {
+                var tableConstraintsResult = ParseWithComma(ParseTableConstraint);
+                if (tableConstraintsResult.HasError)
+                {
+                    return tableConstraintsResult.Error;
+                }
+
+                var tableConstraints = tableConstraintsResult.ResultValue;
+                if (tableConstraints.Count > 0)
+                {
+                    createTableStatement.Constraints.AddRange(tableConstraints);
+                    continue;
+                }
+            }
+
             var tableColumnsResult = ParseCreateTableColumns();
             if (tableColumnsResult.HasError)
             {
@@ -1272,19 +1299,6 @@ public class SqlParser
             if (tableColumns.Count > 0)
             {
                 createTableStatement.Columns.AddRange(tableColumns);
-                continue;
-            }
-
-            var tableConstraintsResult = ParseWithComma(ParseTableConstraint);
-            if (tableConstraintsResult.HasError)
-            {
-                return tableConstraintsResult.Error;
-            }
-
-            var tableConstraints = tableConstraintsResult.ResultValue;
-            if (tableConstraints.Count > 0)
-            {
-                createTableStatement.Constraints.AddRange(tableConstraints);
                 continue;
             }
 
@@ -1819,6 +1833,38 @@ public class SqlParser
         return CreateParseResult(selectStatement);
     }
 
+    private ParseResult<SqlParenthesizedExpression> ParseParenthesizedSelectStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryMatch("(", out var openSpan))
+        {
+            return NoneResult<SqlParenthesizedExpression>();
+        }
+
+        if (!IsPeekKeywords("SELECT"))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlParenthesizedExpression>();
+        }
+
+        var select = ParseSelectStatement();
+        if (select.HasError)
+        {
+            return select.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected ) after parenthesized SELECT");
+        }
+
+        return CreateParseResult(new SqlParenthesizedExpression
+        {
+            Span = _text.CreateSpan(openSpan),
+            Inner = select.ResultValue
+        });
+    }
+
     private ParseResult<List<ISqlExpression>> Parse_FromSources()
     {
         var f1 = FlatFn(() => ParseWithCommaOrNone(Parse_FromGroupWithTableSources));
@@ -1866,39 +1912,16 @@ public class SqlParser
 
         if (TryKeyword("VALUES", out _))
         {
-            var rows = Parse_InsertValuesRows();
-            if (rows.HasError)
+            _text.Position = startPosition;
+            var valuesSource = Parse_ValuesTableSource();
+            if (valuesSource.HasError)
             {
-                return rows.Error;
-            }
-
-            if (!TryMatch(")", out _))
-            {
-                return CreateParseError("Expected ) after VALUES rows");
-            }
-
-            var valuesAlias = ParseAliasExpr();
-            var columnAliases = new List<string>();
-            if (IsPeekMatch("("))
-            {
-                var columns = Parse_ParenthesizedColumns();
-                if (columns.HasError)
-                {
-                    return columns.Error;
-                }
-
-                columnAliases = columns.ResultValue.OfType<SqlFieldExpr>().Select(f => f.FieldName).ToList();
+                return valuesSource.Error;
             }
 
             return CreateParseResult(new List<ISqlExpression>
             {
-                new SqlValuesTableSource
-                {
-                    Span = _text.CreateSpan(startPosition),
-                    Rows = rows.ResultValue,
-                    Alias = valuesAlias.Result?.Name ?? string.Empty,
-                    ColumnAliases = columnAliases
-                }
+                valuesSource.ResultValue
             });
         }
 
@@ -1955,6 +1978,53 @@ public class SqlParser
         }
 
         return tableSources.ResultValue;
+    }
+
+    private ParseResult<ITableSource> Parse_ValuesTableSource()
+    {
+        var startPosition = _text.Position;
+        if (!TryMatch("(", out _))
+        {
+            return NoneResult<ITableSource>();
+        }
+
+        if (!TryKeyword("VALUES", out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<ITableSource>();
+        }
+
+        var rows = Parse_InsertValuesRows();
+        if (rows.HasError)
+        {
+            return rows.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected ) after VALUES rows");
+        }
+
+        var valuesAlias = ParseAliasExpr();
+        var columnAliases = new List<string>();
+        if (IsPeekMatch("("))
+        {
+            var columns = Parse_ParenthesizedColumns();
+            if (columns.HasError)
+            {
+                return columns.Error;
+            }
+
+            columnAliases = columns.ResultValue.OfType<SqlFieldExpr>().Select(field => field.FieldName).ToList();
+        }
+
+        return CreateParseResult<ITableSource>(new SqlValuesTableSource
+        {
+            Span = _text.CreateSpan(startPosition),
+            Rows = rows.ResultValue,
+            Alias = valuesAlias.Result?.Name ?? string.Empty,
+            ColumnAliases = columnAliases
+        });
     }
 
     private ParseResult<ISqlForXmlClause> ParseForXmlClause()
@@ -8736,7 +8806,7 @@ public class SqlParser
     private bool IsTableConstraintStart()
     {
         return IsPeekKeywords("CONSTRAINT") || IsPeekKeywords("PRIMARY") || IsPeekKeywords("UNIQUE")
-            || IsPeekKeywords("FOREIGN") || IsPeekKeywords("CHECK");
+            || IsPeekKeywords("FOREIGN") || IsPeekKeywords("CHECK") || IsPeekKeywords("INDEX");
     }
 
     private ParseResult<SqlTruncateTableStatement> ParseTruncateTableStatement()
@@ -8945,7 +9015,13 @@ public class SqlParser
             return CreateParseError("Expected USING in MERGE");
         }
 
-        if (!Try(Parse_TableSourceWithHints, out var source))
+        var source = Or<ITableSource>(Parse_ValuesTableSource, Parse_TableSourceWithHints)();
+        if (source.HasError)
+        {
+            return source.Error;
+        }
+
+        if (source.Result == null)
         {
             return CreateParseError("Expected source table after USING");
         }
@@ -9213,6 +9289,14 @@ public class SqlParser
             deleteStatement.Where = where.Result;
         }
 
+        var optionClause = ParseOptionClause();
+        if (optionClause.HasError)
+        {
+            return optionClause.Error;
+        }
+
+        deleteStatement.Option = optionClause.Result;
+
         deleteStatement.Span = _text.CreateSpan(startSpan);
         return CreateParseResult(deleteStatement);
     }
@@ -9431,6 +9515,11 @@ public class SqlParser
             };
         }
 
+        if (!IsPeekKeywords("FROM") && !IsPeekKeywords("INTO") && Try(ParseAliasExpr, out var alias))
+        {
+            columnExpr.Alias = alias.ResultValue.Name;
+        }
+
         return CreateParseResult(columnExpr);
     }
 
@@ -9495,7 +9584,8 @@ public class SqlParser
         "BEGIN", "COMMIT", "ROLLBACK", "SAVE", "END", "ELSE", "GO",
         "SET", "IF", "WHILE", "RETURN", "DECLARE", "EXEC", "EXECUTE",
         "SELECT", "INSERT", "UPDATE", "DELETE", "MERGE", "TRUNCATE",
-        "DROP", "ALTER", "CREATE", "WITH"
+        "DROP", "ALTER", "CREATE", "WITH", "WAITFOR", "PRINT", "RAISERROR",
+        "THROW", "BREAK", "CONTINUE", "OPEN", "FETCH", "CLOSE", "DEALLOCATE"
     ];
 
     private ParseResult<List<ISqlExpression>> ParseStatementsUntil(params string[] endKeywords)
@@ -10417,6 +10507,40 @@ public class SqlParser
             return NoneResult<SqlWaitForStatement>();
         }
 
+        if (TryMatch("(", out _))
+        {
+            var receive = ParseReceiveStatement();
+            if (receive.HasError)
+            {
+                return receive.Error;
+            }
+
+            if (!TryMatch(")", out _))
+            {
+                return CreateParseError("Expected ) after WAITFOR statement");
+            }
+
+            ISqlExpression? timeout = null;
+            if (TryMatch(",", out _) && TryKeyword("TIMEOUT", out _))
+            {
+                var timeoutValue = ParseArithmeticExpr();
+                if (timeoutValue.HasError)
+                {
+                    return timeoutValue.Error;
+                }
+
+                timeout = timeoutValue.ResultValue;
+            }
+
+            return CreateParseResult(new SqlWaitForStatement
+            {
+                Span = _text.CreateSpan(startSpan),
+                Kind = SqlWaitForKind.Receive,
+                Time = receive.ResultValue,
+                Timeout = timeout
+            });
+        }
+
         SqlWaitForKind kind;
         if (TryKeyword("DELAY", out _))
         {
@@ -10431,7 +10555,7 @@ public class SqlParser
             return CreateParseError("Expected DELAY or TIME after WAITFOR");
         }
 
-        var time = ParseArithmeticExpr();
+        var time = ParseWaitForTimeValue();
         if (time.HasError)
         {
             return time.Error;
@@ -10448,6 +10572,16 @@ public class SqlParser
             Kind = kind,
             Time = time.ResultValue
         });
+    }
+
+    private ParseResult<ISqlExpression> ParseWaitForTimeValue()
+    {
+        if (Try(ParseSqlQuotedString, out var quoted))
+        {
+            return quoted.To<ISqlExpression>();
+        }
+
+        return ParseArithmeticExpr();
     }
 
     private ParseResult<SqlSetValueStatement> ParseSetValueStatement()
@@ -10665,6 +10799,11 @@ public class SqlParser
         if (withHints.Result != null)
         {
             tableSourceExpr.Withs = withHints.ResultValue;
+        }
+
+        if (string.IsNullOrEmpty(tableSourceExpr.Alias) && Try(ParseAliasExpr, out var aliasAfterHints))
+        {
+            tableSourceExpr.Alias = aliasAfterHints.ResultValue.Name;
         }
 
         return CreateParseResult(tableSourceExpr);
@@ -11869,6 +12008,18 @@ public class SqlParser
             constraintName = ReadSqlIdentifier().Word;
         }
 
+        var tableIndex = ParseTableIndexConstraint();
+        if (tableIndex.HasError)
+        {
+            return tableIndex.Error;
+        }
+
+        if (tableIndex.Result != null)
+        {
+            tableIndex.Result.ConstraintName = constraintName;
+            return tableIndex.Result;
+        }
+
         var tablePrimaryKeyOrUniqueExpr = ParsePrimaryKeyOrUniqueExpression();
         if (tablePrimaryKeyOrUniqueExpr.HasError)
         {
@@ -11928,6 +12079,44 @@ public class SqlParser
         }
 
         return NoneResult<ISqlConstraint>();
+    }
+
+    private ParseResult<SqlTableIndexConstraint> ParseTableIndexConstraint()
+    {
+        if (!TryKeyword("INDEX", out var startSpan))
+        {
+            return NoneResult<SqlTableIndexConstraint>();
+        }
+
+        var indexName = Parse_SqlIdentifier();
+        if (indexName.Result == null)
+        {
+            return CreateParseError("Expected index name after INDEX");
+        }
+
+        var clustered = string.Empty;
+        if (TryKeyword("CLUSTERED", out _))
+        {
+            clustered = "CLUSTERED";
+        }
+        else if (TryKeyword("NONCLUSTERED", out _))
+        {
+            clustered = "NONCLUSTERED";
+        }
+
+        var columns = ParseColumnsAscDesc();
+        if (columns.HasError)
+        {
+            return columns.Error;
+        }
+
+        return CreateParseResult(new SqlTableIndexConstraint
+        {
+            Span = _text.CreateSpan(startSpan),
+            IndexName = indexName.ResultValue.FieldName,
+            Clustered = clustered,
+            Columns = columns.ResultValue
+        });
     }
 
     private ParseResult<SqlConstraintCheck> ParseCheckConstraint()
