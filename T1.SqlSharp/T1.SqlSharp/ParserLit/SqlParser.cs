@@ -74,6 +74,11 @@ public class SqlParser
             return createTableStatement.Result;
         }
 
+        if (Try(ParseCreateViewStatement, out var createViewStatement))
+        {
+            return createViewStatement.Result;
+        }
+
         if (Try(() => ParseSelectStatement(), out var selectStatement))
         {
             return selectStatement.Result;
@@ -3268,6 +3273,72 @@ public class SqlParser
         }
 
         return CreateParseError("Expected VALUES, SELECT or DEFAULT VALUES after INSERT");
+    }
+
+    private ParseResult<SqlCreateViewStatement> ParseCreateViewStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<SqlCreateViewStatement>();
+        }
+
+        var isOrAlter = TryKeywords(["OR", "ALTER"], out _);
+
+        if (!TryKeyword("VIEW", out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlCreateViewStatement>();
+        }
+
+        var viewName = Parse_SqlIdentifier();
+        if (viewName.Result == null)
+        {
+            return CreateParseError("Expected view name after CREATE VIEW");
+        }
+
+        var columnNames = new List<string>();
+        if (IsPeekMatch("("))
+        {
+            var columns = Parse_ParenthesizedColumns();
+            if (columns.HasError)
+            {
+                return columns.Error;
+            }
+
+            columnNames = columns.ResultValue
+                .OfType<SqlFieldExpr>()
+                .Select(field => field.FieldName)
+                .ToList();
+        }
+
+        if (!TryKeyword("AS", out _))
+        {
+            return CreateParseError("Expected AS in CREATE VIEW");
+        }
+
+        var query = Parse_CteBodyStatement();
+        if (query.HasError)
+        {
+            return query.Error;
+        }
+
+        if (query.Result == null)
+        {
+            return CreateParseError("Expected query after AS in CREATE VIEW");
+        }
+
+        var withCheckOption = TryKeywords(["WITH", "CHECK", "OPTION"], out _);
+
+        return CreateParseResult(new SqlCreateViewStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            IsOrAlter = isOrAlter,
+            ViewName = viewName.ResultValue.FieldName,
+            ColumnNames = columnNames,
+            Query = query.ResultValue,
+            WithCheckOption = withCheckOption
+        });
     }
 
     private ParseResult<SqlAlterTableStatement> ParseAlterTableStatement()

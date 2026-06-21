@@ -634,4 +634,10 @@ public class SqlVisitor
         AddSqlExpression(expr);
         expr.Column.Accept(this);
     }
+
+    public virtual void Visit_CreateViewStatement(SqlCreateViewStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Query.Accept(this);
+    }
 }
