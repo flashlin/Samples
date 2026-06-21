@@ -187,4 +187,8 @@ public enum SqlType
     CreateEndpointStatement,
     CreateColumnKeyStatement,
     TextPointerStatement,
+    AlterObjectStatement,
+    SignatureStatement,
+    ConversationStatement,
+    CreateObjectStatement,
 }

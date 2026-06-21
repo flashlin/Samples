@@ -15,6 +15,8 @@ public class SqlCreateIndexStatement : ISqlExpression
     public bool IsUnique { get; set; }
     public bool IsColumnstore { get; set; }
     public bool IsSpatial { get; set; }
+    public bool IsXml { get; set; }
+    public bool IsPrimaryXml { get; set; }
     public string Clustered { get; set; } = string.Empty;
     public string IndexName { get; set; } = string.Empty;
     public string TableName { get; set; } = string.Empty;
@@ -42,6 +44,14 @@ public class SqlCreateIndexStatement : ISqlExpression
         if (IsSpatial)
         {
             sql.Append("SPATIAL ");
+        }
+        if (IsPrimaryXml)
+        {
+            sql.Append("PRIMARY ");
+        }
+        if (IsXml)
+        {
+            sql.Append("XML ");
         }
         sql.Append($"INDEX {IndexName} ON {TableName}");
         if (Columns.Count > 0)

@@ -143,6 +143,11 @@ public class SqlParser
             return createColumnKeyStatement.Result;
         }
 
+        if (Try(ParseCreateObjectStatement, out var createObjectStatement))
+        {
+            return createObjectStatement.Result;
+        }
+
         if (Try(ParseSendStatement, out var sendStatement))
         {
             return sendStatement.Result;
@@ -298,6 +303,11 @@ public class SqlParser
             return truncateStatement.Result;
         }
 
+        if (Try(ParseSignatureStatement, out var signatureStatement))
+        {
+            return signatureStatement.Result;
+        }
+
         if (Try(ParseDropStatement, out var dropStatement))
         {
             return dropStatement.Result;
@@ -353,6 +363,11 @@ public class SqlParser
             return alterPrincipalStatement.Result;
         }
 
+        if (Try(ParseAlterObjectStatement, out var alterObjectStatement))
+        {
+            return alterObjectStatement.Result;
+        }
+
         if (Try(ParseExecSpAddExtendedProperty, out var execSpAddExtendedProperty))
         {
             return execSpAddExtendedProperty.Result;
@@ -366,6 +381,11 @@ public class SqlParser
         if (Try(ParseDeclareStatement, out var declareStatement))
         {
             return declareStatement.Result;
+        }
+
+        if (Try(ParseConversationStatement, out var conversationStatement))
+        {
+            return conversationStatement.Result;
         }
 
         if (Try(ParseTryCatchStatement, out var tryCatchStatement))
@@ -5365,6 +5385,94 @@ public class SqlParser
         });
     }
 
+    private ParseResult<SqlConversationStatement> ParseConversationStatement()
+    {
+        string operation;
+        TextSpan startSpan;
+        if (TryKeywords(["BEGIN", "DIALOG", "CONVERSATION"], out startSpan))
+        {
+            operation = "BEGIN DIALOG CONVERSATION";
+        }
+        else if (TryKeywords(["BEGIN", "DIALOG"], out startSpan))
+        {
+            operation = "BEGIN DIALOG";
+        }
+        else if (TryKeywords(["END", "CONVERSATION"], out startSpan))
+        {
+            operation = "END CONVERSATION";
+        }
+        else if (TryKeywords(["MOVE", "CONVERSATION"], out startSpan))
+        {
+            operation = "MOVE CONVERSATION";
+        }
+        else if (TryKeywords(["GET", "CONVERSATION", "GROUP"], out startSpan))
+        {
+            operation = "GET CONVERSATION GROUP";
+        }
+        else
+        {
+            return NoneResult<SqlConversationStatement>();
+        }
+
+        var handle = Parse_SqlIdentifier().Result?.FieldName ?? string.Empty;
+        var action = ReadActionTokens();
+
+        return CreateParseResult(new SqlConversationStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Operation = operation,
+            Handle = handle,
+            Action = action
+        });
+    }
+
+    private static readonly string[][] CreateObjectKinds =
+    [
+        ["EVENT", "SESSION"],
+        ["EVENT", "NOTIFICATION"],
+        ["REMOTE", "SERVICE", "BINDING"],
+        ["APPLICATION", "ROLE"],
+        ["SERVER", "ROLE"],
+        ["AVAILABILITY", "GROUP"],
+        ["ROUTE"]
+    ];
+
+    private ParseResult<SqlCreateObjectStatement> ParseCreateObjectStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<SqlCreateObjectStatement>();
+        }
+
+        var kind = string.Empty;
+        foreach (var phrase in CreateObjectKinds)
+        {
+            if (TryKeywords(phrase, out _))
+            {
+                kind = string.Join(" ", phrase);
+                break;
+            }
+        }
+
+        if (string.IsNullOrEmpty(kind))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlCreateObjectStatement>();
+        }
+
+        var name = Parse_SqlIdentifier().Result?.FieldName ?? string.Empty;
+        var action = ReadActionTokens();
+
+        return CreateParseResult(new SqlCreateObjectStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Kind = kind,
+            Name = name,
+            Action = action
+        });
+    }
+
     private ParseResult<SqlSendStatement> ParseSendStatement()
     {
         if (!TryKeywords(["SEND", "ON", "CONVERSATION"], out var startSpan))
@@ -6211,6 +6319,116 @@ public class SqlParser
         }
 
         return CreateParseResult(statement);
+    }
+
+    private static readonly string[][] AlterObjectKinds =
+    [
+        ["RESOURCE", "GOVERNOR"],
+        ["PARTITION", "FUNCTION"],
+        ["PARTITION", "SCHEME"],
+        ["MESSAGE", "TYPE"],
+        ["SYMMETRIC", "KEY"],
+        ["MASTER", "KEY"],
+        ["REMOTE", "SERVICE", "BINDING"],
+        ["SERVER", "ROLE"],
+        ["FULLTEXT", "CATALOG"],
+        ["FULLTEXT", "STOPLIST"],
+        ["ASSEMBLY"], ["CERTIFICATE"], ["SERVICE"], ["QUEUE"], ["ENDPOINT"],
+        ["CONTRACT"], ["ROUTE"], ["APPLICATION"], ["CREDENTIAL"]
+    ];
+
+    private ParseResult<SqlAlterObjectStatement> ParseAlterObjectStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("ALTER", out var startSpan))
+        {
+            return NoneResult<SqlAlterObjectStatement>();
+        }
+
+        var kind = string.Empty;
+        foreach (var phrase in AlterObjectKinds)
+        {
+            if (TryKeywords(phrase, out _))
+            {
+                kind = string.Join(" ", phrase);
+                break;
+            }
+        }
+
+        if (string.IsNullOrEmpty(kind))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlAlterObjectStatement>();
+        }
+
+        var name = string.Empty;
+        if (kind != "RESOURCE GOVERNOR")
+        {
+            name = Parse_SqlIdentifier().Result?.FieldName ?? string.Empty;
+        }
+
+        var action = ReadActionTokens();
+
+        return CreateParseResult(new SqlAlterObjectStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Kind = kind,
+            Name = name,
+            Action = action
+        });
+    }
+
+    private string ReadActionTokens()
+    {
+        var parts = new List<string>();
+        while (!_text.IsEnd() && !IsPeekMatch(";"))
+        {
+            if (TryMatch("(", out _))
+            {
+                parts.Add("(");
+                continue;
+            }
+
+            if (TryMatch(")", out _))
+            {
+                parts.Add(")");
+                continue;
+            }
+
+            if (TryMatch("=", out _))
+            {
+                parts.Add("=");
+                continue;
+            }
+
+            if (TryMatch(",", out _))
+            {
+                parts.Add(",");
+                continue;
+            }
+
+            if (Try(ParseSqlQuotedString, out var str))
+            {
+                parts.Add(str.ResultValue.ToSql());
+                continue;
+            }
+
+            if (Try(ParseNumberValue, out var num))
+            {
+                parts.Add(num.ResultValue.ToSql());
+                continue;
+            }
+
+            var word = ReadSqlIdentifier().Word;
+            if (string.IsNullOrEmpty(word))
+            {
+                break;
+            }
+
+            parts.Add(word);
+        }
+
+        return string.Join(" ", parts);
     }
 
     private ParseResult<SqlAlterFulltextIndexStatement> ParseAlterFulltextIndexStatement()
@@ -7378,6 +7596,8 @@ public class SqlParser
 
         var isColumnstore = TryKeyword("COLUMNSTORE", out _);
         var isSpatial = TryKeyword("SPATIAL", out _);
+        var isPrimaryXml = TryKeyword("PRIMARY", out _);
+        var isXml = TryKeyword("XML", out _);
 
         if (!TryKeyword("INDEX", out _))
         {
@@ -7420,6 +7640,8 @@ public class SqlParser
             IsUnique = isUnique,
             IsColumnstore = isColumnstore,
             IsSpatial = isSpatial,
+            IsXml = isXml,
+            IsPrimaryXml = isPrimaryXml,
             Clustered = clustered,
             IndexName = indexName.ResultValue.FieldName,
             TableName = tableName.ResultValue.FieldName,
@@ -7985,6 +8207,80 @@ public class SqlParser
         ["ROLE"] = SqlDropObjectType.Role
     };
 
+    private static readonly string[][] MultiWordDropTypes =
+    [
+        ["COLUMN", "MASTER", "KEY"],
+        ["COLUMN", "ENCRYPTION", "KEY"],
+        ["EXTERNAL", "DATA", "SOURCE"],
+        ["EXTERNAL", "FILE", "FORMAT"],
+        ["EXTERNAL", "TABLE"],
+        ["MESSAGE", "TYPE"],
+        ["MASTER", "KEY"],
+        ["SYMMETRIC", "KEY"],
+        ["PARTITION", "FUNCTION"],
+        ["PARTITION", "SCHEME"],
+        ["FULLTEXT", "INDEX"],
+        ["FULLTEXT", "CATALOG"],
+        ["FULLTEXT", "STOPLIST"],
+        ["SECURITY", "POLICY"]
+    ];
+
+    private string MatchMultiWordDropType()
+    {
+        foreach (var phrase in MultiWordDropTypes)
+        {
+            if (TryKeywords(phrase, out _))
+            {
+                return string.Join(" ", phrase);
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private ParseResult<SqlSignatureStatement> ParseSignatureStatement()
+    {
+        bool isAdd;
+        TextSpan startSpan;
+        if (TryKeywords(["ADD", "SIGNATURE"], out startSpan))
+        {
+            isAdd = true;
+        }
+        else if (TryKeywords(["DROP", "SIGNATURE"], out startSpan))
+        {
+            isAdd = false;
+        }
+        else
+        {
+            return NoneResult<SqlSignatureStatement>();
+        }
+
+        if (!TryKeyword("TO", out _))
+        {
+            return CreateParseError("Expected TO in ADD/DROP SIGNATURE");
+        }
+
+        var target = Parse_SqlIdentifier();
+        if (target.Result == null)
+        {
+            return CreateParseError("Expected target in ADD/DROP SIGNATURE");
+        }
+
+        var by = string.Empty;
+        if (TryKeyword("BY", out _))
+        {
+            by = ReadActionTokens();
+        }
+
+        return CreateParseResult(new SqlSignatureStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            IsAdd = isAdd,
+            Target = target.ResultValue.FieldName,
+            By = by
+        });
+    }
+
     private ParseResult<SqlDropStatement> ParseDropStatement()
     {
         if (!TryKeyword("DROP", out var startSpan))
@@ -7992,34 +8288,54 @@ public class SqlParser
             return NoneResult<SqlDropStatement>();
         }
 
-        var objectTypeWord = ReadSqlIdentifier().Word;
-        if (!DropObjectTypes.TryGetValue(objectTypeWord, out var objectType))
+        var objectType = SqlDropObjectType.Table;
+        var typeName = string.Empty;
+        var multiWordType = MatchMultiWordDropType();
+        if (!string.IsNullOrEmpty(multiWordType))
         {
-            return CreateParseError($"Unsupported DROP object type: {objectTypeWord}");
+            typeName = multiWordType;
+        }
+        else
+        {
+            var objectTypeWord = ReadSqlIdentifier().Word;
+            if (string.IsNullOrEmpty(objectTypeWord))
+            {
+                return CreateParseError("Expected object type after DROP");
+            }
+
+            if (DropObjectTypes.TryGetValue(objectTypeWord, out objectType))
+            {
+                typeName = string.Empty;
+            }
+            else
+            {
+                typeName = objectTypeWord.ToUpperInvariant();
+            }
         }
 
         var ifExists = TryKeywords(["IF", "EXISTS"], out _);
-
-        var names = ParseWithComma(Parse_SqlIdentifier);
-        if (names.HasError)
-        {
-            return names.Error;
-        }
-
-        if (names.Result == null || names.ResultValue.Count == 0)
-        {
-            return CreateParseError("Expected object name after DROP");
-        }
 
         var dropStatement = new SqlDropStatement
         {
             Span = _text.CreateSpan(startSpan),
             ObjectType = objectType,
-            IfExists = ifExists,
-            Names = names.ResultValue.Select(name => name.FieldName).ToList()
+            TypeName = typeName,
+            IfExists = ifExists
         };
 
-        if (objectType == SqlDropObjectType.Index && TryKeyword("ON", out _))
+        var isFulltextIndex = string.Equals(typeName, "FULLTEXT INDEX", StringComparison.OrdinalIgnoreCase);
+        if (!isFulltextIndex && !IsPeekKeywords("ON"))
+        {
+            var names = ParseWithComma(Parse_SqlIdentifier);
+            if (names.HasError)
+            {
+                return names.Error;
+            }
+
+            dropStatement.Names = names.ResultValue?.Select(name => name.FieldName).ToList() ?? [];
+        }
+
+        if ((objectType == SqlDropObjectType.Index || isFulltextIndex) && TryKeyword("ON", out _))
         {
             var onTable = Parse_SqlIdentifier();
             if (onTable.Result == null)

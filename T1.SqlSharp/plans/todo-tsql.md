@@ -2,8 +2,8 @@
 
 > 用途：追蹤 parser 目前支援哪些 T-SQL 語法，方便維護與規劃。
 > 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援、`[N/A]` 不適用 T-SQL（不實作）。
-> 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對；538 測試全綠）。
-> 入口：`SqlParser.Parse()` dispatch ~93 種頂層語句（WITH CTE / CREATE TABLE|VIEW|INDEX|PROCEDURE|FUNCTION|TRIGGER|SCHEMA|DATABASE / SELECT / INSERT / UPDATE / DELETE / MERGE / TRUNCATE / DROP / ALTER TABLE / EXEC sp_addextendedproperty / EXEC proc / DECLARE / BEGIN TRY…CATCH / TRANSACTION（BEGIN|COMMIT|ROLLBACK|SAVE）/ BEGIN…END / IF / WHILE / RETURN / PRINT / THROW / RAISERROR / BREAK / CONTINUE / OPEN|CLOSE|DEALLOCATE / FETCH / WAITFOR / USE / GO / GRANT|REVOKE|DENY / SET（變數賦值 + session 選項 ON/OFF/取值））。
+> 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對；568 測試全綠）。
+> 入口：`SqlParser.Parse()` dispatch ~97 種頂層語句（WITH CTE / CREATE TABLE|VIEW|INDEX|PROCEDURE|FUNCTION|TRIGGER|SCHEMA|DATABASE / SELECT / INSERT / UPDATE / DELETE / MERGE / TRUNCATE / DROP / ALTER TABLE / EXEC sp_addextendedproperty / EXEC proc / DECLARE / BEGIN TRY…CATCH / TRANSACTION（BEGIN|COMMIT|ROLLBACK|SAVE）/ BEGIN…END / IF / WHILE / RETURN / PRINT / THROW / RAISERROR / BREAK / CONTINUE / OPEN|CLOSE|DEALLOCATE / FETCH / WAITFOR / USE / GO / GRANT|REVOKE|DENY / SET（變數賦值 + session 選項 ON/OFF/取值））。
 
 ---
 
@@ -23,7 +23,7 @@
 - [~] `DELETE`（parser 可解析：`[FROM] t` / 省略 FROM / 第二個 `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.3。已大致完整）
 - [x] `MERGE`（parser 可解析：TOP、target/source（含 hint）、`ON`、三種 WHEN、`AND` 過濾、UPDATE/DELETE/INSERT（含 DEFAULT VALUES）action、OUTPUT、OPTION、CTE 前綴、結尾 `;`，細目見 §1.4）
 - [~] `ALTER TABLE`（ADD 欄位（多）/ ADD CONSTRAINT（含 `WITH CHECK/NOCHECK` 前綴）/ DROP COLUMN（多）/ DROP CONSTRAINT（多）/ ALTER COLUMN / `{ENABLE\|DISABLE} TRIGGER {ALL\|names}` / `{CHECK\|NOCHECK} CONSTRAINT {ALL\|names}`，細目見 §1.5。含 ADD 混合欄位+約束）；`ALTER VIEW/PROCEDURE/FUNCTION/TRIGGER` 已支援（見對應 CREATE 列）
-- [~] `DROP ...`（支援 `DROP {TABLE|VIEW|PROCEDURE|FUNCTION|INDEX|TRIGGER|SCHEMA|DATABASE|SEQUENCE|TYPE|SYNONYM|LOGIN|USER|ROLE} [IF EXISTS] name1[, ...]`，含 `DROP INDEX ix ON table`（`SqlDropStatement.OnTable`）；`SqlDropStatement` + `SqlDropObjectType` enum。未做舊式 `DROP INDEX table.idx`、多 `idx ON tbl` 對）
+- [~] `DROP ...`（核心型別走 `SqlDropObjectType` enum：`TABLE|VIEW|PROCEDURE|FUNCTION|INDEX|TRIGGER|SCHEMA|DATABASE|SEQUENCE|TYPE|SYNONYM|LOGIN|USER|ROLE`；擴充型別走 `SqlDropStatement.TypeName` 字串（多字 via `MatchMultiWordDropType`）：`CERTIFICATE`/`ASSEMBLY`/`CREDENTIAL`/`AGGREGATE`/`RULE`/`DEFAULT`/`QUEUE`/`SERVICE`/`CONTRACT`/`ENDPOINT`/`STATISTICS`、`MESSAGE TYPE`/`MASTER KEY`/`SYMMETRIC KEY`/`PARTITION FUNCTION`/`PARTITION SCHEME`/`FULLTEXT INDEX (ON t)`/`FULLTEXT CATALOG`/`SECURITY POLICY`/`EXTERNAL TABLE`/`EXTERNAL DATA SOURCE`/`EXTERNAL FILE FORMAT`/`COLUMN MASTER KEY`/`COLUMN ENCRYPTION KEY`；`[IF EXISTS]` + 多名稱 + `DROP INDEX ix ON table`。未做舊式 `DROP INDEX table.idx`）
 - [x] `TRUNCATE TABLE`（`SqlTruncateTableStatement`）
 - [~] `CREATE VIEW` / `ALTER VIEW`（`{CREATE [OR ALTER]|ALTER} VIEW v [(cols)] [WITH opt[, ...]] AS <query> [WITH CHECK OPTION]`；body 走 `Parse_CteBodyStatement` 故支援 CTE/SELECT；AS 前 `WITH opt`（SCHEMABINDING/ENCRYPTION…，含多字 `EXECUTE AS x`/`RETURNS NULL ON NULL INPUT`/`CALLED ON NULL INPUT`）入 `Options`（共用 `Parse_WithOptionList`/`Parse_WithOption`）。`SqlCreateViewStatement`（`IsAlter` 旗標）。）
 - [~] `CREATE INDEX`（支援 `CREATE [UNIQUE] [CLUSTERED|NONCLUSTERED] [COLUMNSTORE] INDEX ix ON t [(col [ASC|DESC], ...)] [INCLUDE (cols)] [WHERE filter] [WITH (options)]`；含 clustered/nonclustered COLUMNSTORE（`IsColumnstore`，欄位可省）、`SPATIAL`（`IsSpatial`）；重用 `ParseColumnsAscDesc`。`SqlCreateIndexStatement`）
@@ -347,6 +347,11 @@
 - [x] Resource Governor `CREATE {WORKLOAD GROUP|RESOURCE POOL} name [WITH (opts)]`（單一 `SqlCreateResourceGovernorObjectStatement` + `Kind`）
 - [x] Always Encrypted `CREATE COLUMN {MASTER KEY|ENCRYPTION KEY} name WITH (opts)`（`SqlCreateColumnKeyStatement` + `IsMasterKey`）
 - [x] `READTEXT` / `WRITETEXT` / `UPDATETEXT`（單一 `SqlTextPointerStatement`，引數收集至 `;`/EOF）
+- [x] 通用 `ALTER {ASSEMBLY|CERTIFICATE|SERVICE|QUEUE|ENDPOINT|CONTRACT|ROUTE|CREDENTIAL|RESOURCE GOVERNOR|PARTITION FUNCTION|PARTITION SCHEME|MESSAGE TYPE|SYMMETRIC KEY|MASTER KEY|FULLTEXT CATALOG|SERVER ROLE|REMOTE SERVICE BINDING|...} [name] <action>`（單一 `SqlAlterObjectStatement` + `Kind`/`Name`/`Action`，`AlterObjectKinds` 多字比對，dispatch 置於各專屬 ALTER 之後；action 經 `ReadActionTokens` 收集）
+- [x] `{ADD|DROP} SIGNATURE TO obj BY ...`（`SqlSignatureStatement`，dispatch 置於 DROP 前）
+- [x] `CREATE [PRIMARY] XML INDEX ix ON t (col)`（`SqlCreateIndexStatement.IsXml`/`IsPrimaryXml`）
+- [x] Service Broker 對話 DML：`BEGIN DIALOG [CONVERSATION]` / `END CONVERSATION` / `MOVE CONVERSATION` / `GET CONVERSATION GROUP`（單一 `SqlConversationStatement` + `Operation`/`Handle`/`Action`；dispatch 置於 BEGIN…END/TRY/TRAN 前）
+- [x] 通用 `CREATE {EVENT SESSION|EVENT NOTIFICATION|REMOTE SERVICE BINDING|APPLICATION ROLE|SERVER ROLE|AVAILABILITY GROUP|ROUTE} name <action>`（單一 `SqlCreateObjectStatement` + `CreateObjectKinds`，dispatch 置於各專屬 CREATE 之後）
 - [x] `CREATE FULLTEXT CATALOG name [AS DEFAULT] [AUTHORIZATION owner]`（`SqlCreateFulltextCatalogStatement`）/ `CREATE FULLTEXT STOPLIST name [FROM SYSTEM STOPLIST|src]`（`SqlCreateFulltextStoplistStatement`）
 - [x] `CREATE SYMMETRIC KEY name [WITH opt[, ...]] [ENCRYPTION BY ...]`（`SqlCreateSymmetricKeyStatement`）
 - [x] `{OPEN|CLOSE} SYMMETRIC KEY name [DECRYPTION BY ...]` / `{OPEN|CLOSE} ALL SYMMETRIC KEYS`（`SqlSymmetricKeyStatement`；dispatch 置於游標 OPEN/CLOSE 前，非 SYMMETRIC 則 reset 落回游標操作）

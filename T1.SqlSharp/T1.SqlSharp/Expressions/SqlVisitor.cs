@@ -1120,4 +1120,24 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
     }
+
+    public virtual void Visit_AlterObjectStatement(SqlAlterObjectStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_SignatureStatement(SqlSignatureStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_ConversationStatement(SqlConversationStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateObjectStatement(SqlCreateObjectStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
 }

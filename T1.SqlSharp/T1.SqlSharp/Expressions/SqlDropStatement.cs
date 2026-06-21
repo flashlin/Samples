@@ -31,6 +31,7 @@ public class SqlDropStatement : ISqlExpression
     }
 
     public SqlDropObjectType ObjectType { get; set; }
+    public string TypeName { get; set; } = string.Empty;
     public bool IfExists { get; set; }
     public List<string> Names { get; set; } = [];
     public string OnTable { get; set; } = string.Empty;
@@ -38,12 +39,16 @@ public class SqlDropStatement : ISqlExpression
     public string ToSql()
     {
         var sql = new StringBuilder();
-        sql.Append($"DROP {ObjectType.ToString().ToUpper()}");
+        var typeText = string.IsNullOrEmpty(TypeName) ? ObjectType.ToString().ToUpper() : TypeName;
+        sql.Append($"DROP {typeText}");
         if (IfExists)
         {
             sql.Append(" IF EXISTS");
         }
-        sql.Append($" {string.Join(", ", Names)}");
+        if (Names.Count > 0)
+        {
+            sql.Append($" {string.Join(", ", Names)}");
+        }
         if (!string.IsNullOrEmpty(OnTable))
         {
             sql.Append($" ON {OnTable}");
