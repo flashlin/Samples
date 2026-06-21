@@ -271,4 +271,50 @@ public class ParseMergeSqlTest
             ]
         });
     }
+
+    [Test]
+    public void Merge_with_output_action()
+    {
+        var sql = "MERGE INTO Target AS t USING Source AS s ON t.id = s.id "
+                  + "WHEN MATCHED THEN UPDATE SET t.name = s.name "
+                  + "OUTPUT $action, inserted.id";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlMergeStatement
+        {
+            Target = new SqlTableSource { TableName = "Target", Alias = "t" },
+            Source = new SqlTableSource { TableName = "Source", Alias = "s" },
+            OnCondition = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "t.id" },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlFieldExpr { FieldName = "s.id" }
+            },
+            WhenClauses =
+            [
+                new SqlMergeWhenClause
+                {
+                    MatchType = MergeMatchType.Matched,
+                    Action = new SqlMergeUpdateAction
+                    {
+                        SetClauses =
+                        [
+                            new SqlAssignExpr
+                            {
+                                Left = new SqlFieldExpr { FieldName = "t.name" },
+                                Right = new SqlFieldExpr { FieldName = "s.name" }
+                            }
+                        ]
+                    }
+                }
+            ],
+            Output = new SqlOutputClause
+            {
+                Columns =
+                [
+                    new SelectColumn { Field = new SqlFieldExpr { FieldName = "$action" } },
+                    new SelectColumn { Field = new SqlFieldExpr { FieldName = "inserted.id" } }
+                ]
+            }
+        });
+    }
 }

@@ -6,4 +6,6 @@ public class SqlVariableDeclaration
     public string DataType { get; set; } = string.Empty;
     public SqlDataSize? DataSize { get; set; }
     public ISqlExpression? InitialValue { get; set; }
+    public bool IsTable { get; set; }
+    public List<SqlColumnDefinition> TableColumns { get; set; } = [];
 }

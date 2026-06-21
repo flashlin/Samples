@@ -122,4 +122,5 @@ public enum SqlType
     PermissionStatement,
     CreateSchemaStatement,
     CreateDatabaseStatement,
+    ExecArgument,
 }

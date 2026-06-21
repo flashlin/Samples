@@ -3394,6 +3394,11 @@ public class SqlParser
             return NoneResult<SqlExecStatement>();
         }
 
+        if (IsPeekMatch("("))
+        {
+            return Parse_ExecDynamicSql(startSpan);
+        }
+
         var procedureName = Parse_SqlIdentifier();
         if (procedureName.Result == null)
         {
@@ -3403,7 +3408,7 @@ public class SqlParser
         var arguments = new List<ISqlExpression>();
         if (!_text.IsEnd() && !IsPeekMatch(";"))
         {
-            var parsedArguments = ParseWithComma(ParseArithmeticExpr);
+            var parsedArguments = ParseWithComma(Parse_ExecArgument);
             if (parsedArguments.HasError)
             {
                 return parsedArguments.Error;
@@ -3418,6 +3423,55 @@ public class SqlParser
             ProcedureName = procedureName.ResultValue.FieldName,
             Arguments = arguments
         });
+    }
+
+    private ParseResult<SqlExecStatement> Parse_ExecDynamicSql(TextSpan startSpan)
+    {
+        TryMatch("(", out _);
+        var dynamicSql = ParseArithmeticExpr();
+        if (dynamicSql.HasError)
+        {
+            return dynamicSql.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected ) after EXEC dynamic SQL");
+        }
+
+        return CreateParseResult(new SqlExecStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            DynamicSql = dynamicSql.ResultValue
+        });
+    }
+
+    private ParseResult<ISqlExpression> Parse_ExecArgument()
+    {
+        var startPosition = _text.Position;
+        if (IsPeekMatch("@"))
+        {
+            var parameterName = Parse_SqlIdentifier();
+            if (parameterName.Result != null && TryMatch("=", out _))
+            {
+                var value = ParseArithmeticExpr();
+                if (value.HasError)
+                {
+                    return value.Error;
+                }
+
+                return CreateParseResult<ISqlExpression>(new SqlExecArgument
+                {
+                    ParameterName = parameterName.ResultValue.FieldName,
+                    Value = value.ResultValue,
+                    IsOutput = TryKeyword("OUTPUT", out _) || TryKeyword("OUT", out _)
+                });
+            }
+
+            _text.Position = startPosition;
+        }
+
+        return ParseArithmeticExpr();
     }
 
     private ParseResult<SqlReturnStatement> ParseReturnStatement()
@@ -3832,6 +3886,27 @@ public class SqlParser
         return CreateParseResult(events);
     }
 
+    private ParseResult<List<SqlColumnDefinition>> Parse_ParenthesizedColumnDefinitions()
+    {
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected ( for column definitions");
+        }
+
+        var columns = ParseWithComma(ParseColumnDefinition);
+        if (columns.HasError)
+        {
+            return columns.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected ) after column definitions");
+        }
+
+        return columns;
+    }
+
     private ParseResult<SqlUseStatement> ParseUseStatement()
     {
         if (!TryKeyword("USE", out var startSpan))
@@ -3970,20 +4045,10 @@ public class SqlParser
                 return CreateParseError("Expected TABLE after table variable in RETURNS");
             }
 
-            if (!TryMatch("(", out _))
-            {
-                return CreateParseError("Expected ( for table columns in RETURNS");
-            }
-
-            var columns = ParseWithComma(ParseColumnDefinition);
+            var columns = Parse_ParenthesizedColumnDefinitions();
             if (columns.HasError)
             {
                 return columns.Error;
-            }
-
-            if (!TryMatch(")", out _))
-            {
-                return CreateParseError("Expected ) after table columns in RETURNS");
             }
 
             createFunctionStatement.ReturnType = "TABLE";
@@ -5410,6 +5475,23 @@ public class SqlParser
         if (string.IsNullOrEmpty(dataType))
         {
             return CreateParseError("Expected data type in DECLARE");
+        }
+
+        if (string.Equals(dataType, "TABLE", StringComparison.OrdinalIgnoreCase) && IsPeekMatch("("))
+        {
+            var tableColumns = Parse_ParenthesizedColumnDefinitions();
+            if (tableColumns.HasError)
+            {
+                return tableColumns.Error;
+            }
+
+            return CreateParseResult(new SqlVariableDeclaration
+            {
+                Name = name.ResultValue.FieldName,
+                DataType = "TABLE",
+                IsTable = true,
+                TableColumns = tableColumns.ResultValue
+            });
         }
 
         var dataSize = Parse_DataSize();

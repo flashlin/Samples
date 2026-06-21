@@ -43,4 +43,70 @@ public class ParseExecSqlTest
             ]
         });
     }
+
+    [Test]
+    public void Exec_dynamic_sql_string()
+    {
+        var sql = "EXEC ('SELECT * FROM Users')";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlExecStatement
+        {
+            DynamicSql = new SqlValue { SqlType = SqlType.String, Value = "'SELECT * FROM Users'" }
+        });
+    }
+
+    [Test]
+    public void Exec_dynamic_sql_variable()
+    {
+        var sql = "EXECUTE (@sql)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlExecStatement
+        {
+            DynamicSql = new SqlFieldExpr { FieldName = "@sql" }
+        });
+    }
+
+    [Test]
+    public void Exec_proc_with_named_parameters()
+    {
+        var sql = "EXEC GetUser @id = 1, @name = 'admin'";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlExecStatement
+        {
+            ProcedureName = "GetUser",
+            Arguments =
+            [
+                new SqlExecArgument
+                {
+                    ParameterName = "@id",
+                    Value = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                },
+                new SqlExecArgument
+                {
+                    ParameterName = "@name",
+                    Value = new SqlValue { SqlType = SqlType.String, Value = "'admin'" }
+                }
+            ]
+        });
+    }
+
+    [Test]
+    public void Exec_proc_with_named_output_parameter()
+    {
+        var sql = "EXEC GetCount @total = @result OUTPUT";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlExecStatement
+        {
+            ProcedureName = "GetCount",
+            Arguments =
+            [
+                new SqlExecArgument
+                {
+                    ParameterName = "@total",
+                    Value = new SqlFieldExpr { FieldName = "@result" },
+                    IsOutput = true
+                }
+            ]
+        });
+    }
 }

@@ -59,4 +59,33 @@ public class ParseDeclareSqlTest
             ]
         });
     }
+
+    [Test]
+    public void Declare_table_variable()
+    {
+        var sql = "DECLARE @t TABLE (Id INT, Name VARCHAR(50))";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDeclareStatement
+        {
+            Declarations =
+            [
+                new SqlVariableDeclaration
+                {
+                    Name = "@t",
+                    DataType = "TABLE",
+                    IsTable = true,
+                    TableColumns =
+                    [
+                        new SqlColumnDefinition { ColumnName = "Id", DataType = "INT" },
+                        new SqlColumnDefinition
+                        {
+                            ColumnName = "Name",
+                            DataType = "VARCHAR",
+                            DataSize = new SqlDataSize { Size = "50" }
+                        }
+                    ]
+                }
+            ]
+        });
+    }
 }

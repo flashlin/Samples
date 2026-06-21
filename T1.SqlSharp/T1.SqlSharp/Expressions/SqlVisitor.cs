@@ -664,12 +664,23 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
         expr.Arguments.ForEach(argument => argument.Accept(this));
+        expr.DynamicSql?.Accept(this);
+    }
+
+    public virtual void Visit_ExecArgument(SqlExecArgument expr)
+    {
+        AddSqlExpression(expr);
+        expr.Value.Accept(this);
     }
 
     public virtual void Visit_DeclareStatement(SqlDeclareStatement expr)
     {
         AddSqlExpression(expr);
-        expr.Declarations.ForEach(declaration => declaration.InitialValue?.Accept(this));
+        expr.Declarations.ForEach(declaration =>
+        {
+            declaration.InitialValue?.Accept(this);
+            declaration.TableColumns.ForEach(column => column.Accept(this));
+        });
     }
 
     public virtual void Visit_BlockStatement(SqlBlockStatement expr)

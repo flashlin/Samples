@@ -14,9 +14,15 @@ public class SqlExecStatement : ISqlExpression
 
     public string ProcedureName { get; set; } = string.Empty;
     public List<ISqlExpression> Arguments { get; set; } = [];
+    public ISqlExpression? DynamicSql { get; set; }
 
     public string ToSql()
     {
+        if (DynamicSql != null)
+        {
+            return $"EXEC ({DynamicSql.ToSql()})";
+        }
+
         var sql = new StringBuilder();
         sql.Append($"EXEC {ProcedureName}");
         if (Arguments.Count > 0)
