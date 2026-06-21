@@ -3217,6 +3217,12 @@ public class SqlParser
                 continue;
             }
 
+            if (TryKeyword("COLLATE", out _))
+            {
+                sqlColumn.Collation = ReadSqlIdentifier().Word;
+                continue;
+            }
+
             if (Try(ParseCheckConstraint, out var checkConstraint))
             {
                 sqlColumn.Constraints.Add(checkConstraint.ResultValue);

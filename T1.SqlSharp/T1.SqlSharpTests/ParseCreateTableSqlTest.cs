@@ -40,6 +40,32 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void Column_With_Collation()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1 (
+                       name VARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SqlCreateTableExpression()
+        {
+            TableName = "tb1",
+            Columns =
+            [
+                new SqlColumnDefinition
+                {
+                    ColumnName = "name",
+                    DataType = "VARCHAR",
+                    DataSize = new SqlDataSize { Size = "50" },
+                    Collation = "Latin1_General_CI_AS",
+                    IsNullable = false
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void ColumnLevel_Check_Constraint()
     {
         var sql = $"""

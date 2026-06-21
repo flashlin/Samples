@@ -12,6 +12,7 @@ public class SqlColumnDefinition : ISqlExpression
     public string ColumnName { get; set; } = string.Empty;
     public string DataType { get; set; } = string.Empty;
     public SqlDataSize? DataSize { get; set; }
+    public string Collation { get; set; } = string.Empty;
     public SqlIdentity Identity { get; set; } = SqlIdentity.Default;
     public bool IsNullable { get; set; } = true;
     public bool NotForReplication { get; set; }
@@ -27,6 +28,10 @@ public class SqlColumnDefinition : ISqlExpression
         if(DataSize != null)
         {
             sql.Write(DataSize.ToSql());
+        }
+        if (!string.IsNullOrEmpty(Collation))
+        {
+            sql.Write($" COLLATE {Collation}");
         }
         if (Identity != SqlIdentity.Default)
         {

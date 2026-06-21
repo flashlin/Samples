@@ -111,7 +111,7 @@
 - [x] 一元負號（negative value）
 - [x] `NOT` 運算式
 - [x] 括號運算式
-- [ ] `COLLATE`
+- [~] `COLLATE`（欄位定義已支援，見 §6；運算式層級 `WHERE / ORDER BY ... COLLATE` 未支援）
 
 ---
 
@@ -127,6 +127,7 @@
 - [x] `FOREIGN KEY ... REFERENCES ...`
 - [x] `CONSTRAINT` 命名
 - [x] `CHECK` 約束（欄位層級與資料表層級、含 `CONSTRAINT` 命名）
+- [x] 欄位 `COLLATE`（如 `VARCHAR(50) COLLATE Latin1_General_CI_AS`）
 - [x] 欄位/資料表註解（透過獨立的 `sp_addextendedproperty` 語句）
 
 ---
@@ -155,8 +156,8 @@
 ## 維護建議優先序（未完成項目）
 
 1. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
-2. 🟢 `COLLATE`
+2. 🟢 運算式層級 `COLLATE`（`WHERE / ORDER BY ... COLLATE`；欄位定義 COLLATE 已完成）
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。
