@@ -138,4 +138,38 @@ public class ParseCreateProcedureSqlTest
             }
         });
     }
+
+    [Test]
+    public void Create_proc_with_table_valued_parameter()
+    {
+        var sql = """
+                  CREATE PROCEDURE [dbo].[ArgusJob_InsertM10OverallTurnoverProfile_1.0.0]
+                      @tvpTable [TvpOverallTurnoverProfile] READONLY
+                  AS
+                  BEGIN
+                      SET NOCOUNT ON;
+                  END
+                  """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateProcedureStatement
+        {
+            ProcedureName = "[dbo].[ArgusJob_InsertM10OverallTurnoverProfile_1.0.0]",
+            Parameters =
+            [
+                new SqlProcedureParameter
+                {
+                    Name = "@tvpTable",
+                    DataType = "[TvpOverallTurnoverProfile]",
+                    IsReadOnly = true
+                }
+            ],
+            Body = new SqlBlockStatement
+            {
+                Statements =
+                [
+                    new SqlSetOptionStatement { Option = "NOCOUNT", Value = "ON" }
+                ]
+            }
+        });
+    }
 }

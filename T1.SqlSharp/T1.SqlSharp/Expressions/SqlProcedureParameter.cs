@@ -7,4 +7,5 @@ public class SqlProcedureParameter
     public SqlDataSize? DataSize { get; set; }
     public ISqlExpression? DefaultValue { get; set; }
     public bool IsOutput { get; set; }
+    public bool IsReadOnly { get; set; }
 }

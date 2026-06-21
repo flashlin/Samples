@@ -51,6 +51,10 @@ public class SqlCreateProcedureStatement : ISqlExpression
         {
             text += " OUTPUT";
         }
+        if (parameter.IsReadOnly)
+        {
+            text += " READONLY";
+        }
         return text;
     }
 }

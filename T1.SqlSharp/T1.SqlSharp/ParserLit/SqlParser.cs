@@ -544,6 +544,38 @@ public class SqlParser
         }
     }
 
+    public IEnumerable<ParseResult<ISqlExpression>> ExtractStatementResults()
+    {
+        while (!_text.IsEnd())
+        {
+            MoveToNextStatementStart();
+            if (_text.IsEnd())
+            {
+                yield break;
+            }
+
+            var rc = Parse();
+            yield return rc;
+            if (rc.HasError)
+            {
+                yield break;
+            }
+        }
+    }
+
+    private void MoveToNextStatementStart()
+    {
+        while (true)
+        {
+            var skippedWhitespace = _text.SkipWhitespace();
+            var skippedComment = _text.SkipSqlComment();
+            if (!skippedWhitespace && !skippedComment)
+            {
+                return;
+            }
+        }
+    }
+
     public ParseResult<SelectType> Parse_SelectTypeClause()
     {
         var rc = Or(Keywords("ALL"), Keywords("DISTINCT"))();
@@ -7902,6 +7934,8 @@ public class SqlParser
             DataType = dataType,
             DataSize = dataSize.Result
         };
+
+        parameter.IsReadOnly = TryKeyword("READONLY", out _);
 
         if (TryMatch("=", out _))
         {
