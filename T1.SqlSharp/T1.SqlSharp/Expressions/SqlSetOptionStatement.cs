@@ -12,13 +12,12 @@ public class SqlSetOptionStatement : ISqlExpression
 
     public string Option { get; set; } = string.Empty;
     public string Target { get; set; } = string.Empty;
-    public bool IsOn { get; set; }
+    public string Value { get; set; } = string.Empty;
 
     public string ToSql()
     {
-        var state = IsOn ? "ON" : "OFF";
         return string.IsNullOrEmpty(Target)
-            ? $"SET {Option} {state}"
-            : $"SET {Option} {Target} {state}";
+            ? $"SET {Option} {Value}"
+            : $"SET {Option} {Target} {Value}";
     }
 }

@@ -219,6 +219,11 @@ public class SqlParser
             return fetchStatement.Result;
         }
 
+        if (Try(ParseWaitForStatement, out var waitForStatement))
+        {
+            return waitForStatement.Result;
+        }
+
         if (Try(ParseUseStatement, out var useStatement))
         {
             return useStatement.Result;
@@ -5771,31 +5776,27 @@ public class SqlParser
         }
 
         var target = string.Empty;
-        if (!IsPeekKeywords("ON") && !IsPeekKeywords("OFF"))
+        string value;
+        if (TryMatchOnOff(out value))
         {
-            var targetName = Parse_SqlIdentifier();
-            if (targetName.Result == null)
+        }
+        else
+        {
+            var first = ParseArithmeticExpr();
+            if (first.HasError || first.Result == null)
             {
                 _text.Position = startPosition;
                 return NoneResult<SqlSetOptionStatement>();
             }
 
-            target = targetName.ResultValue.FieldName;
-        }
-
-        bool isOn;
-        if (TryKeyword("ON", out _))
-        {
-            isOn = true;
-        }
-        else if (TryKeyword("OFF", out _))
-        {
-            isOn = false;
-        }
-        else
-        {
-            _text.Position = startPosition;
-            return NoneResult<SqlSetOptionStatement>();
+            if (TryMatchOnOff(out value))
+            {
+                target = first.ResultValue.ToSql();
+            }
+            else
+            {
+                value = first.ResultValue.ToSql();
+            }
         }
 
         return CreateParseResult(new SqlSetOptionStatement
@@ -5803,7 +5804,65 @@ public class SqlParser
             Span = _text.CreateSpan(startSpan),
             Option = option.ResultValue.FieldName,
             Target = target,
-            IsOn = isOn
+            Value = value
+        });
+    }
+
+    private bool TryMatchOnOff(out string value)
+    {
+        if (TryKeyword("ON", out _))
+        {
+            value = "ON";
+            return true;
+        }
+
+        if (TryKeyword("OFF", out _))
+        {
+            value = "OFF";
+            return true;
+        }
+
+        value = string.Empty;
+        return false;
+    }
+
+    private ParseResult<SqlWaitForStatement> ParseWaitForStatement()
+    {
+        if (!TryKeyword("WAITFOR", out var startSpan))
+        {
+            return NoneResult<SqlWaitForStatement>();
+        }
+
+        SqlWaitForKind kind;
+        if (TryKeyword("DELAY", out _))
+        {
+            kind = SqlWaitForKind.Delay;
+        }
+        else if (TryKeyword("TIME", out _))
+        {
+            kind = SqlWaitForKind.Time;
+        }
+        else
+        {
+            return CreateParseError("Expected DELAY or TIME after WAITFOR");
+        }
+
+        var time = ParseArithmeticExpr();
+        if (time.HasError)
+        {
+            return time.Error;
+        }
+
+        if (time.Result == null)
+        {
+            return CreateParseError("Expected time value in WAITFOR");
+        }
+
+        return CreateParseResult(new SqlWaitForStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Kind = kind,
+            Time = time.ResultValue
         });
     }
 

@@ -127,4 +127,5 @@ public enum SqlType
     CursorOperationStatement,
     FetchStatement,
     SetOptionStatement,
+    WaitForStatement,
 }

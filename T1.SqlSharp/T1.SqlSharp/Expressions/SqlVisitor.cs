@@ -819,4 +819,10 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
     }
+
+    public virtual void Visit_WaitForStatement(SqlWaitForStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Time.Accept(this);
+    }
 }

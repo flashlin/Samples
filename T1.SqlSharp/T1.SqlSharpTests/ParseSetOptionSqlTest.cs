@@ -11,7 +11,7 @@ public class ParseSetOptionSqlTest
     {
         var sql = "SET NOCOUNT ON";
         var rc = sql.ParseSql();
-        rc.ShouldBe(new SqlSetOptionStatement { Option = "NOCOUNT", IsOn = true });
+        rc.ShouldBe(new SqlSetOptionStatement { Option = "NOCOUNT", Value = "ON" });
     }
 
     [Test]
@@ -19,7 +19,7 @@ public class ParseSetOptionSqlTest
     {
         var sql = "SET XACT_ABORT OFF";
         var rc = sql.ParseSql();
-        rc.ShouldBe(new SqlSetOptionStatement { Option = "XACT_ABORT", IsOn = false });
+        rc.ShouldBe(new SqlSetOptionStatement { Option = "XACT_ABORT", Value = "OFF" });
     }
 
     [Test]
@@ -27,7 +27,23 @@ public class ParseSetOptionSqlTest
     {
         var sql = "SET IDENTITY_INSERT dbo.Users ON";
         var rc = sql.ParseSql();
-        rc.ShouldBe(new SqlSetOptionStatement { Option = "IDENTITY_INSERT", Target = "dbo.Users", IsOn = true });
+        rc.ShouldBe(new SqlSetOptionStatement { Option = "IDENTITY_INSERT", Target = "dbo.Users", Value = "ON" });
+    }
+
+    [Test]
+    public void Set_rowcount_number()
+    {
+        var sql = "SET ROWCOUNT 100";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlSetOptionStatement { Option = "ROWCOUNT", Value = "100" });
+    }
+
+    [Test]
+    public void Set_dateformat_identifier()
+    {
+        var sql = "SET DATEFORMAT mdy";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlSetOptionStatement { Option = "DATEFORMAT", Value = "mdy" });
     }
 
     [Test]
