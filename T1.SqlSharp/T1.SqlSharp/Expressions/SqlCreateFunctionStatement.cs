@@ -17,6 +17,8 @@ public class SqlCreateFunctionStatement : ISqlExpression
     public List<SqlProcedureParameter> Parameters { get; set; } = [];
     public string ReturnType { get; set; } = string.Empty;
     public SqlDataSize? ReturnSize { get; set; }
+    public string ReturnTableVariable { get; set; } = string.Empty;
+    public List<SqlColumnDefinition> ReturnTableColumns { get; set; } = [];
     public required ISqlExpression Body { get; set; }
 
     public string ToSql()

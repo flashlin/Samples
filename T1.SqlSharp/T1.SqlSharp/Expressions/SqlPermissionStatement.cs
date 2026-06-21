@@ -1,0 +1,65 @@
+using System.Text;
+
+namespace T1.SqlSharp.Expressions;
+
+public enum SqlPermissionAction
+{
+    Grant,
+    Revoke,
+    Deny
+}
+
+public class SqlPermissionStatement : ISqlExpression
+{
+    public SqlType SqlType => SqlType.PermissionStatement;
+    public TextSpan Span { get; set; } = new();
+
+    public void Accept(SqlVisitor visitor)
+    {
+        visitor.Visit_PermissionStatement(this);
+    }
+
+    public SqlPermissionAction Action { get; set; }
+    public List<string> Permissions { get; set; } = [];
+    public string ObjectName { get; set; } = string.Empty;
+    public List<string> Principals { get; set; } = [];
+    public bool WithGrantOption { get; set; }
+    public bool Cascade { get; set; }
+
+    public string ToSql()
+    {
+        var sql = new StringBuilder();
+        sql.Append(ActionToSql());
+        sql.Append(' ');
+        sql.Append(string.Join(", ", Permissions));
+        if (!string.IsNullOrEmpty(ObjectName))
+        {
+            sql.Append($" ON {ObjectName}");
+        }
+
+        sql.Append(Action == SqlPermissionAction.Revoke ? " FROM " : " TO ");
+        sql.Append(string.Join(", ", Principals));
+        if (WithGrantOption)
+        {
+            sql.Append(" WITH GRANT OPTION");
+        }
+
+        if (Cascade)
+        {
+            sql.Append(" CASCADE");
+        }
+
+        return sql.ToString();
+    }
+
+    private string ActionToSql()
+    {
+        return Action switch
+        {
+            SqlPermissionAction.Grant => "GRANT",
+            SqlPermissionAction.Revoke => "REVOKE",
+            SqlPermissionAction.Deny => "DENY",
+            _ => string.Empty
+        };
+    }
+}

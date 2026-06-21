@@ -56,6 +56,29 @@ public class ParseCreateFunctionSqlTest
     }
 
     [Test]
+    public void Create_multi_statement_table_function()
+    {
+        var sql = "CREATE FUNCTION GetOrders (@id INT) RETURNS @result TABLE (Id INT, Total INT) AS BEGIN RETURN END";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateFunctionStatement
+        {
+            FunctionName = "GetOrders",
+            Parameters = [new SqlProcedureParameter { Name = "@id", DataType = "INT" }],
+            ReturnType = "TABLE",
+            ReturnTableVariable = "@result",
+            ReturnTableColumns =
+            [
+                new SqlColumnDefinition { ColumnName = "Id", DataType = "INT" },
+                new SqlColumnDefinition { ColumnName = "Total", DataType = "INT" }
+            ],
+            Body = new SqlBlockStatement
+            {
+                Statements = [new SqlReturnStatement()]
+            }
+        });
+    }
+
+    [Test]
     public void Create_or_alter_inline_table_function()
     {
         var sql = "CREATE OR ALTER FUNCTION GetUsers () RETURNS TABLE AS RETURN (SELECT Id FROM Users)";

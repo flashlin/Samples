@@ -700,6 +700,7 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
         expr.Parameters.ForEach(parameter => parameter.DefaultValue?.Accept(this));
+        expr.ReturnTableColumns.ForEach(column => column.Accept(this));
         expr.Body.Accept(this);
     }
 
@@ -755,6 +756,11 @@ public class SqlVisitor
     }
 
     public virtual void Visit_GoStatement(SqlGoStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_PermissionStatement(SqlPermissionStatement expr)
     {
         AddSqlExpression(expr);
     }

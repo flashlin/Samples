@@ -214,6 +214,11 @@ public class SqlParser
             return goStatement.Result;
         }
 
+        if (Try(ParsePermissionStatement, out var permissionStatement))
+        {
+            return permissionStatement.Result;
+        }
+
         if (Try(ParseSetValueStatement, out var setValueStatement))
         {
             return setValueStatement.Result;
@@ -3570,6 +3575,89 @@ public class SqlParser
         return NoneResult<SqlLoopControlStatement>();
     }
 
+    private ParseResult<SqlPermissionStatement> ParsePermissionStatement()
+    {
+        if (!TryParsePermissionAction(out var action, out var startSpan))
+        {
+            return NoneResult<SqlPermissionStatement>();
+        }
+
+        var permissions = ReadCommaSeparatedIdentifiers();
+        if (permissions.Count == 0)
+        {
+            return CreateParseError("Expected permission name");
+        }
+
+        var objectName = string.Empty;
+        if (TryKeyword("ON", out _))
+        {
+            var securable = Parse_SqlIdentifier();
+            if (securable.Result == null)
+            {
+                return CreateParseError("Expected securable name after ON");
+            }
+
+            objectName = securable.ResultValue.FieldName;
+        }
+
+        if (!TryKeyword("TO", out _) && !TryKeyword("FROM", out _))
+        {
+            return CreateParseError("Expected TO or FROM in permission statement");
+        }
+
+        var principals = ReadCommaSeparatedIdentifiers();
+        if (principals.Count == 0)
+        {
+            return CreateParseError("Expected principal name");
+        }
+
+        return CreateParseResult(new SqlPermissionStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Action = action,
+            Permissions = permissions,
+            ObjectName = objectName,
+            Principals = principals,
+            WithGrantOption = TryKeywords(["WITH", "GRANT", "OPTION"], out _),
+            Cascade = TryKeyword("CASCADE", out _)
+        });
+    }
+
+    private bool TryParsePermissionAction(out SqlPermissionAction action, out TextSpan startSpan)
+    {
+        if (TryKeyword("GRANT", out startSpan))
+        {
+            action = SqlPermissionAction.Grant;
+            return true;
+        }
+
+        if (TryKeyword("REVOKE", out startSpan))
+        {
+            action = SqlPermissionAction.Revoke;
+            return true;
+        }
+
+        if (TryKeyword("DENY", out startSpan))
+        {
+            action = SqlPermissionAction.Deny;
+            return true;
+        }
+
+        action = SqlPermissionAction.Grant;
+        return false;
+    }
+
+    private List<string> ReadCommaSeparatedIdentifiers()
+    {
+        var identifiers = new List<string>();
+        do
+        {
+            identifiers.Add(ReadSqlIdentifier().Word);
+        } while (TryMatch(",", out _));
+
+        return identifiers;
+    }
+
     private ParseResult<SqlCreateTriggerStatement> ParseCreateTriggerStatement()
     {
         var startPosition = _text.Position;
@@ -3777,11 +3865,19 @@ public class SqlParser
             return CreateParseError("Expected RETURNS in CREATE FUNCTION");
         }
 
-        var returnType = ReadSqlIdentifier().Word;
-        var returnSize = Parse_DataSize();
-        if (returnSize.HasError)
+        var createFunctionStatement = new SqlCreateFunctionStatement
         {
-            return returnSize.Error;
+            Span = _text.CreateSpan(startSpan),
+            IsOrAlter = isOrAlter,
+            FunctionName = functionName.ResultValue.FieldName,
+            Parameters = parameters.ResultValue,
+            Body = new SqlBlockStatement()
+        };
+
+        var returnClause = ParseFunctionReturnClause(createFunctionStatement);
+        if (returnClause.HasError)
+        {
+            return returnClause.Error;
         }
 
         if (!TryKeyword("AS", out _))
@@ -3795,16 +3891,56 @@ public class SqlParser
             return body.Error;
         }
 
-        return CreateParseResult(new SqlCreateFunctionStatement
+        createFunctionStatement.Body = body.ResultValue;
+        return CreateParseResult(createFunctionStatement);
+    }
+
+    private ParseResult<bool> ParseFunctionReturnClause(SqlCreateFunctionStatement createFunctionStatement)
+    {
+        if (IsPeekMatch("@"))
         {
-            Span = _text.CreateSpan(startSpan),
-            IsOrAlter = isOrAlter,
-            FunctionName = functionName.ResultValue.FieldName,
-            Parameters = parameters.ResultValue,
-            ReturnType = returnType,
-            ReturnSize = returnSize.Result,
-            Body = body.ResultValue
-        });
+            var tableVariable = Parse_SqlIdentifier();
+            if (tableVariable.Result == null)
+            {
+                return CreateParseError("Expected table variable after RETURNS");
+            }
+
+            if (!TryKeyword("TABLE", out _))
+            {
+                return CreateParseError("Expected TABLE after table variable in RETURNS");
+            }
+
+            if (!TryMatch("(", out _))
+            {
+                return CreateParseError("Expected ( for table columns in RETURNS");
+            }
+
+            var columns = ParseWithComma(ParseColumnDefinition);
+            if (columns.HasError)
+            {
+                return columns.Error;
+            }
+
+            if (!TryMatch(")", out _))
+            {
+                return CreateParseError("Expected ) after table columns in RETURNS");
+            }
+
+            createFunctionStatement.ReturnType = "TABLE";
+            createFunctionStatement.ReturnTableVariable = tableVariable.ResultValue.FieldName;
+            createFunctionStatement.ReturnTableColumns = columns.ResultValue;
+            return CreateParseResult(true);
+        }
+
+        createFunctionStatement.ReturnType = ReadSqlIdentifier().Word;
+        var returnSize = Parse_DataSize();
+        if (returnSize.HasError)
+        {
+            return returnSize.Error;
+        }
+
+        createFunctionStatement.ReturnSize = returnSize.Result;
+        return CreateParseResult(true);
     }
 
     private ParseResult<SqlCreateProcedureStatement> ParseCreateProcedureStatement()

@@ -19,7 +19,7 @@ parser 在 `T1.SqlSharp/ParserLit/SqlParser.cs` + `LinqParser.cs`。
 
 ## Current Progress（目前進度）
 
-測試狀態：**332 passed / 0 failed / 0 build warning**。工作區乾淨（HANDOFF.md 本身為 untracked，不需 commit）。
+測試狀態：**338 passed / 0 failed / 0 build warning**。工作區乾淨（HANDOFF.md 本身為 untracked，不需 commit）。
 
 本 session 已完成（皆 TDD + 已驗證綠燈 + 已 commit）：
 
@@ -59,6 +59,7 @@ parser 在 `T1.SqlSharp/ParserLit/SqlParser.cs` + `LinqParser.cs`。
 | `BEGIN TRY…CATCH` + `TRANSACTION` | _未 commit_ | 新 AST：`SqlTryCatchStatement`、`SqlTransactionStatement`(+`SqlTransactionAction` enum) + 2 `SqlType` + 2 Visit。**抽共用 `ParseStatementsUntil(params endKeywords)`** 解析「迴圈 `Parse()` 到指定結尾關鍵字序列」，並 **refactor `ParseBlockStatement` 復用**（行為不變、原 ControlFlow 測試保護）。`ParseTryCatchStatement`：BEGIN 後非 TRY 即 reset；try/catch body 各 `ParseStatementsUntil("END","TRY")`/`("END","CATCH")`。`ParseTransactionStatement`：`BEGIN|SAVE TRAN[SACTION]`、`COMMIT|ROLLBACK [TRAN\|TRANSACTION\|WORK]`，選擇性交易名稱用 `TransactionNameBoundaryKeywords` stop-set 擋後續語句關鍵字（避免吃掉 `COMMIT`/`END` 等）。dispatch 排在 `ParseBlockStatement` 前。8 測試（`ParseTryCatchSqlTest.cs` 2 + `ParseTransactionSqlTest.cs` 6） |
 | `PRINT`/`THROW`/`RAISERROR` + `BREAK`/`CONTINUE` | _未 commit_ | 新 AST：`SqlPrintStatement`、`SqlThrowStatement`、`SqlRaiseErrorStatement`、`SqlLoopControlStatement`(+`SqlLoopControlAction` enum) + 4 `SqlType` + 4 Visit。`PRINT` 值走 `ParseArithmeticExpr`；`THROW` bare 或三參數（`ParseWithComma`→ErrorNumber/Message/State）；`RAISERROR (msg,sev,state[,args]) [WITH opt,...]`（前三必填、其餘入 `Arguments`、WITH 選項 `ReadSqlIdentifier` loop 入 `Options`）；`BREAK`/`CONTINUE` 關鍵字語句共用單類別 enum。dispatch 排在 `ParseReturnStatement` 後。**回歸修正**：`ExcludeNonSelectStatementTest.ExtractKnownStatements` 原用 `print '123'` 當被略過的未知語句，PRINT 已支援故改用 `use mydb`。9 新測試（`ParsePrintThrowRaiseErrorSqlTest.cs` 6 + `ParseLoopControlSqlTest.cs` 3） |
 | `CREATE TRIGGER` + `USE`/`GO` | _未 commit_ | 新 AST：`SqlCreateTriggerStatement`(+`SqlTriggerTiming`/`SqlTriggerEvent` enum)、`SqlUseStatement`、`SqlGoStatement` + 3 `SqlType` + 3 Visit。`CREATE TRIGGER name ON target {FOR\|AFTER\|INSTEAD OF} {INSERT\|UPDATE\|DELETE}[, ...] AS <body>`：`CREATE` 共用 → 非 TRIGGER reset position；timing 用 `ParseTriggerTiming`（INSTEAD OF 先比，雙關鍵字）、events 用 `ParseTriggerEvents`（逗號 loop）、body 重用 `Parse()`；target/name 用 `Parse_SqlIdentifier`（含 `dbo.x` 點名）。`USE db`、`GO [count]`（count 經 `ParseArithmeticExpr` 取 IntValue、非整數則 reset）排在 loop-control 後。**回歸修正（連鎖）**：上一輪改用的 `use mydb` 現已被 USE 支援，故 `ExtractKnownStatements` 再改用不衝突任何 dispatch 關鍵字的 `dbcc checkdb`。6 新測試（`ParseCreateTriggerSqlTest.cs` 3 + `ParseUseGoSqlTest.cs` 3） |
+| multi-statement TVF + `GRANT`/`REVOKE`/`DENY` | _未 commit_ | ① **additive 擴充 `SqlCreateFunctionStatement`**（`ReturnTableVariable`/`ReturnTableColumns`，不動既有 scalar/inline 路徑與 ToSql 形狀）；**refactor `ParseCreateFunctionStatement` 抽 `ParseFunctionReturnClause`**（return clause 三分支：`@var TABLE (cols)` multi-statement TVF / `TABLE` inline / scalar `type[(size)]`），TVF 欄位重用 `ParseColumnDefinition`；Visitor 補走訪 `ReturnTableColumns`。② 新 AST：`SqlPermissionStatement` + `SqlPermissionAction` enum（Grant/Revoke/Deny）+ 1 `SqlType` + 1 Visit。`{GRANT\|REVOKE\|DENY} perm[, ...] [ON securable] {TO\|FROM} principal[, ...] [WITH GRANT OPTION] [CASCADE]`；perm/principal 用共用 `ReadCommaSeparatedIdentifiers`、securable 用 `Parse_SqlIdentifier`、action 用 `TryParsePermissionAction`。dispatch 排在 GO 後。6 新測試（`ParseCreateFunctionSqlTest.cs` +1 = 4 + `ParsePermissionSqlTest.cs` 5） |
 | 具名 `WINDOW` 子句（MVP） | `84d24ff12` | `SqlWindowClause`/`SqlWindowDefinition` 掛 `SelectStatement.Window`（HAVING 後、ORDER BY 前）+ `func() OVER name`（`SqlOverWindowName`）；**`WINDOW` 已加入 ReservedWords**；改 `ParseOverOrderByClause` 在無 `(` 時 reset 位置，讓新的 bare `OVER name` 能接在後面試；行內延伸/互參照延後（見 todo §4） |
 
 ---
@@ -86,11 +87,11 @@ parser 在 `T1.SqlSharp/ParserLit/SqlParser.cs` + `LinqParser.cs`。
 
 清單在 `plans/todo-tsql.md`，目前剩餘：
 
-1. 🟢 **DDL 續攻**（DROP/TRUNCATE/ALTER TABLE/CREATE VIEW/INDEX/PROCEDURE/FUNCTION/TRIGGER 已完成）：multi-statement TVF `RETURNS @t TABLE(...)`、`CREATE SCHEMA`/`DATABASE`、ALTER TABLE 第二階段（見 §1.5）。
+1. 🟢 **DDL 續攻**（DROP/TRUNCATE/ALTER TABLE/CREATE VIEW/INDEX/PROCEDURE/FUNCTION（含 multi-statement TVF）/TRIGGER、GRANT/REVOKE/DENY 已完成）：`CREATE SCHEMA`/`DATABASE`、ALTER TABLE 第二階段（見 §1.5）。
 2. 🟢 **控制流程**（DECLARE/IF/WHILE/BEGIN…END/RETURN/TRY…CATCH/TRANSACTION/BREAK/CONTINUE/PRINT/THROW/RAISERROR 已完成）：剩 `DECLARE @t TABLE`、`BEGIN DISTRIBUTED TRANSACTION`、`;THROW` 分號語意。
 3. 🟢 **DML 細項剩餘**（皆小）：`EXEC ('dynamic sql')`、EXEC 具名參數 `@p = val`、MERGE `OUTPUT $action`。
 
-**立即動作建議**：DML + DDL（含 `CREATE PROCEDURE/FUNCTION/TRIGGER`）+ 控制流程 + 批次（`USE`/`GO`）皆已備齊。下一步可挑 **multi-statement TVF** `RETURNS @t TABLE(...)`（補滿 CREATE FUNCTION 缺口）、**`GRANT`/`REVOKE`/`DENY`** 權限語句，或 **`CREATE SCHEMA`/`DATABASE`**。
+**立即動作建議**：DML + DDL（含 `CREATE PROCEDURE/FUNCTION`（scalar/inline/multi-statement TVF）/`TRIGGER`、`GRANT`/`REVOKE`/`DENY`）+ 控制流程 + 批次皆已備齊。下一步可挑 **`CREATE SCHEMA`/`DATABASE`**、**ALTER TABLE 第二階段**（見 §1.5），或回頭補各語句的選項缺口（TRIGGER `WITH`、FUNCTION `WITH SCHEMABINDING`、權限 `object_type::` 前綴）。
 
 > ⚠️ **commit 雷點**：git repo root 是上層的 `Samples/`，不是 `T1.SqlSharp/`。**絕對不要用 `git add -A` / `git add .`**，會把 repo 根一堆無關 untracked（`openSource/` 內嵌 git repo、`gsoft/`、大型二進位）和本檔（`HANDOFF.md`，刻意 untracked）一起 commit。一律用「明確列出檔案路徑」的 `git add <path...>`。
 

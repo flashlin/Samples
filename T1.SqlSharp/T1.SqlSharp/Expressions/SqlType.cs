@@ -117,4 +117,5 @@ public enum SqlType
     CreateTriggerStatement,
     UseStatement,
     GoStatement,
+    PermissionStatement,
 }
