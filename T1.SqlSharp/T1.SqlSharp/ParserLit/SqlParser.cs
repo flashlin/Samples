@@ -209,6 +209,16 @@ public class SqlParser
             return loopControlStatement.Result;
         }
 
+        if (Try(ParseCursorOperationStatement, out var cursorOperationStatement))
+        {
+            return cursorOperationStatement.Result;
+        }
+
+        if (Try(ParseFetchStatement, out var fetchStatement))
+        {
+            return fetchStatement.Result;
+        }
+
         if (Try(ParseUseStatement, out var useStatement))
         {
             return useStatement.Result;
@@ -3609,6 +3619,107 @@ public class SqlParser
         } while (TryMatch(",", out _));
 
         return options;
+    }
+
+    private ParseResult<SqlCursorOperationStatement> ParseCursorOperationStatement()
+    {
+        SqlCursorOperation action;
+        TextSpan startSpan;
+        if (TryKeyword("OPEN", out startSpan))
+        {
+            action = SqlCursorOperation.Open;
+        }
+        else if (TryKeyword("CLOSE", out startSpan))
+        {
+            action = SqlCursorOperation.Close;
+        }
+        else if (TryKeyword("DEALLOCATE", out startSpan))
+        {
+            action = SqlCursorOperation.Deallocate;
+        }
+        else
+        {
+            return NoneResult<SqlCursorOperationStatement>();
+        }
+
+        var cursorName = Parse_SqlIdentifier();
+        if (cursorName.Result == null)
+        {
+            return CreateParseError("Expected cursor name");
+        }
+
+        return CreateParseResult(new SqlCursorOperationStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Action = action,
+            CursorName = cursorName.ResultValue.FieldName
+        });
+    }
+
+    private ParseResult<SqlFetchStatement> ParseFetchStatement()
+    {
+        if (!TryKeyword("FETCH", out var startSpan))
+        {
+            return NoneResult<SqlFetchStatement>();
+        }
+
+        var fetchStatement = new SqlFetchStatement
+        {
+            Span = _text.CreateSpan(startSpan)
+        };
+
+        var direction = ParseFetchDirection(fetchStatement);
+        if (direction.HasError)
+        {
+            return direction.Error;
+        }
+
+        TryKeyword("FROM", out _);
+
+        var cursorName = Parse_SqlIdentifier();
+        if (cursorName.Result == null)
+        {
+            return CreateParseError("Expected cursor name in FETCH");
+        }
+
+        fetchStatement.CursorName = cursorName.ResultValue.FieldName;
+
+        if (TryKeyword("INTO", out _))
+        {
+            fetchStatement.IntoVariables = ReadCommaSeparatedIdentifiers();
+        }
+
+        return CreateParseResult(fetchStatement);
+    }
+
+    private ParseResult<bool> ParseFetchDirection(SqlFetchStatement fetchStatement)
+    {
+        foreach (var keyword in new[] { "NEXT", "PRIOR", "FIRST", "LAST" })
+        {
+            if (TryKeyword(keyword, out _))
+            {
+                fetchStatement.Direction = keyword;
+                return CreateParseResult(true);
+            }
+        }
+
+        foreach (var keyword in new[] { "ABSOLUTE", "RELATIVE" })
+        {
+            if (TryKeyword(keyword, out _))
+            {
+                fetchStatement.Direction = keyword;
+                var rowCount = ParseArithmeticExpr();
+                if (rowCount.HasError)
+                {
+                    return rowCount.Error;
+                }
+
+                fetchStatement.RowCount = rowCount.ResultValue;
+                return CreateParseResult(true);
+            }
+        }
+
+        return CreateParseResult(true);
     }
 
     private ParseResult<SqlLoopControlStatement> ParseLoopControlStatement()

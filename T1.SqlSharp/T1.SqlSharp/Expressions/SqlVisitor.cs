@@ -803,4 +803,15 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
     }
+
+    public virtual void Visit_CursorOperationStatement(SqlCursorOperationStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_FetchStatement(SqlFetchStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.RowCount?.Accept(this);
+    }
 }

@@ -124,4 +124,6 @@ public enum SqlType
     CreateSchemaStatement,
     CreateDatabaseStatement,
     ExecArgument,
+    CursorOperationStatement,
+    FetchStatement,
 }
