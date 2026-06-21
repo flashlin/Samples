@@ -1033,6 +1033,11 @@ public class SqlParser
             selectStatement.ForXml = forXmlClause.ResultValue;
         }
 
+        if (Try(ParseForJsonClause, out var forJsonClause))
+        {
+            selectStatement.ForJson = forJsonClause.ResultValue;
+        }
+
         if (Try(ParseUnionSelectClauseList, out var unionSelectClauseList))
         {
             selectStatement.Unions = unionSelectClauseList.ResultValue;
@@ -1156,6 +1161,79 @@ public class SqlParser
         }
 
         return NoneResult<ISqlForXmlClause>();
+    }
+
+    private ParseResult<SqlForJsonClause> ParseForJsonClause()
+    {
+        if (!TryKeywords(["FOR", "JSON"], out var startSpan))
+        {
+            return NoneResult<SqlForJsonClause>();
+        }
+
+        var modeResult = ParseForJsonMode();
+        if (modeResult.HasError)
+        {
+            return modeResult.Error;
+        }
+
+        var forJsonClause = new SqlForJsonClause { Mode = modeResult.ResultValue };
+        var directivesResult = Parse_ForJsonDirectives(forJsonClause);
+        if (directivesResult.HasError)
+        {
+            return directivesResult.Error;
+        }
+
+        forJsonClause.Span = _text.CreateSpan(startSpan);
+        return forJsonClause;
+    }
+
+    private ParseResult<SqlForJsonMode> ParseForJsonMode()
+    {
+        if (TryKeyword("AUTO", out _))
+        {
+            return CreateParseResult(SqlForJsonMode.Auto);
+        }
+
+        if (TryKeyword("PATH", out _))
+        {
+            return CreateParseResult(SqlForJsonMode.Path);
+        }
+
+        return CreateParseError("Expected AUTO or PATH after FOR JSON");
+    }
+
+    private ParseResult<SqlForJsonClause> Parse_ForJsonDirectives(SqlForJsonClause forJsonClause)
+    {
+        while (TryMatch(",", out _))
+        {
+            if (TryKeyword("ROOT", out _))
+            {
+                forJsonClause.HasRoot = true;
+                if (IsPeekMatch("("))
+                {
+                    var rootName = ParseWithParentheses(ParseValue);
+                    if (rootName.HasError)
+                    {
+                        return rootName.Error;
+                    }
+                    forJsonClause.RootName = rootName.ResultValue;
+                }
+            }
+            else if (TryKeyword("INCLUDE_NULL_VALUES", out _))
+            {
+                forJsonClause.IncludeNullValues = true;
+            }
+            else if (TryKeyword("WITHOUT_ARRAY_WRAPPER", out _))
+            {
+                forJsonClause.WithoutArrayWrapper = true;
+            }
+            else
+            {
+                return CreateParseError("Expected FOR JSON directive");
+            }
+        }
+
+        return CreateParseResult(forJsonClause);
     }
 
     private ParseResult<SqlPivotClause> ParsePivotClause()

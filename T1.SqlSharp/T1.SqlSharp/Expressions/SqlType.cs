@@ -55,6 +55,7 @@ public enum SqlType
     ForXmlPathClause,
     ForXmlAutoClause,
     ForXmlRootDirective,
+    ForJsonClause,
     LogicalOperator,
     ComparisonOperator,
     OverOrderBy,

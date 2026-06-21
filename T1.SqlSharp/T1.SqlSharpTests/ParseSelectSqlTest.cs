@@ -1140,6 +1140,123 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void ForJsonAuto()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM customer
+                   for json auto
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            ForJson = new SqlForJsonClause
+            {
+                Mode = SqlForJsonMode.Auto
+            }
+        });
+    }
+
+    [Test]
+    public void ForJsonPath()
+    {
+        var sql = $"""
+                   select id from customer
+                   for json path
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            ForJson = new SqlForJsonClause
+            {
+                Mode = SqlForJsonMode.Path
+            }
+        });
+    }
+
+    [Test]
+    public void ForJsonPathWithRoot()
+    {
+        var sql = $"""
+                   select id from customer
+                   for json path, ROOT('customer')
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            ForJson = new SqlForJsonClause
+            {
+                Mode = SqlForJsonMode.Path,
+                HasRoot = true,
+                RootName = new SqlValue { Value = "'customer'" }
+            }
+        });
+    }
+
+    [Test]
+    public void ForJsonAutoWithDirectives()
+    {
+        var sql = $"""
+                   select id from customer
+                   for json auto, INCLUDE_NULL_VALUES, WITHOUT_ARRAY_WRAPPER
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            ForJson = new SqlForJsonClause
+            {
+                Mode = SqlForJsonMode.Auto,
+                IncludeNullValues = true,
+                WithoutArrayWrapper = true
+            }
+        });
+    }
+
+    [Test]
     public void Unpivot()
     {
         var sql = $"""

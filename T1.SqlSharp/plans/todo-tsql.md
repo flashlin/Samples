@@ -2,7 +2,7 @@
 
 > 用途：追蹤 parser 目前支援哪些 T-SQL 語法，方便維護與規劃。
 > 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援。
-> 最後驗證：2026-06-20（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對）。
+> 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對）。
 > 入口：`SqlParser.Parse()` 只 dispatch 5 種頂層語句（WITH CTE / CREATE TABLE / SELECT / EXEC sp_addextendedproperty / SET）。
 
 ---
@@ -58,7 +58,7 @@
 - [x] `INTERSECT` / `EXCEPT`
 - [x] `PIVOT` / `UNPIVOT`
 - [~] `FOR XML`（支援 `PATH`、`AUTO`、`ROOT`；未支援 `RAW`、`EXPLICIT`）
-- [ ] `FOR JSON`
+- [x] `FOR JSON`（`AUTO` / `PATH`、`ROOT[('name')]`、`INCLUDE_NULL_VALUES`、`WITHOUT_ARRAY_WRAPPER`）
 - [x] `SELECT ... INTO new_table`（含暫存表 `#temp`）
 - [ ] `OPTION (query hint)`（如 `OPTION(RECOMPILE / MAXDOP n)`）
 - [ ] `TABLESAMPLE`
@@ -152,11 +152,10 @@
 
 ## 維護建議優先序（未完成項目）
 
-1. 🟡 `FOR JSON`（API 場景）
-2. 🟡 視窗框架 `ROWS / RANGE BETWEEN`
-3. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
-4. 🟢 `GROUP BY ALL`、`CHECK` 約束、`COLLATE`、`OPTION` query hint、`WITHIN GROUP`
+1. 🟡 視窗框架 `ROWS / RANGE BETWEEN`
+2. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
+3. 🟢 `GROUP BY ALL`、`CHECK` 約束、`COLLATE`、`OPTION` query hint、`WITHIN GROUP`
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。

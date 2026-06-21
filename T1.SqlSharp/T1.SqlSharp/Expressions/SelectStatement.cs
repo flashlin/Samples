@@ -17,6 +17,7 @@ public class SelectStatement : ISqlExpression
     public string? Into { get; set; }
     public List<ISqlExpression> FromSources { get; set; } = [];
     public ISqlForXmlClause? ForXml { get; set; }
+    public SqlForJsonClause? ForJson { get; set; }
     public ISqlExpression? Where { get; set; }
     public SqlOrderByClause? OrderBy { get; set; }
     public List<SqlUnionSelect> Unions { get; set; } = [];

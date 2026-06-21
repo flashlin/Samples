@@ -77,6 +77,10 @@ public class SqlVisitor
         {
             expr.ForXml.Accept(this);
         }
+        if(expr.ForJson != null)
+        {
+            expr.ForJson.Accept(this);
+        }
         if(expr.Where != null)
         {
             expr.Where.Accept(this);
@@ -220,6 +224,12 @@ public class SqlVisitor
     }
 
     public virtual void Visit_ForXmlRootDirective(SqlForXmlRootDirective expr)
+    {
+        AddSqlExpression(expr);
+        expr.RootName?.Accept(this);
+    }
+
+    public virtual void Visit_ForJsonClause(SqlForJsonClause expr)
     {
         AddSqlExpression(expr);
         expr.RootName?.Accept(this);
