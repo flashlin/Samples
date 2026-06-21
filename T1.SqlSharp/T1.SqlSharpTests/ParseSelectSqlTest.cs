@@ -1686,6 +1686,63 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void Union_with_top_level_order_by()
+    {
+        var sql = $"""
+                   select id from customer
+                   union
+                   select id from emp
+                   order by id desc
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            Unions =
+            [
+                new SqlUnionSelect
+                {
+                    SelectStatement = new SelectStatement
+                    {
+                        Columns =
+                        [
+                            new SelectColumn
+                            {
+                                Field = new SqlFieldExpr { FieldName = "id" }
+                            }
+                        ],
+                        FromSources =
+                        [
+                            new SqlTableSource { TableName = "emp" }
+                        ]
+                    }
+                }
+            ],
+            OrderBy = new SqlOrderByClause
+            {
+                Columns =
+                [
+                    new SqlOrderColumn
+                    {
+                        ColumnName = new SqlFieldExpr { FieldName = "id" },
+                        Order = OrderType.Desc
+                    }
+                ]
+            }
+        });
+    }
+
+    [Test]
     public void Where_cast_left_as_int()
     {
         var sql = $"""

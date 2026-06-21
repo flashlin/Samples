@@ -73,7 +73,7 @@ public class SqlParser
             return createTableStatement.Result;
         }
 
-        if (Try(ParseSelectStatement, out var selectStatement))
+        if (Try(() => ParseSelectStatement(), out var selectStatement))
         {
             return selectStatement.Result;
         }
@@ -381,7 +381,7 @@ public class SqlParser
 
         if (TryKeyword("EXISTS", out var existsSpan))
         {
-            var query = ParseParenthesesWith(ParseSelectStatement);
+            var query = ParseParenthesesWith(() => ParseSelectStatement());
             if (query.HasError)
             {
                 return query.Error;
@@ -953,7 +953,7 @@ public class SqlParser
         };
     }
 
-    public ParseResult<SelectStatement> ParseSelectStatement()
+    public ParseResult<SelectStatement> ParseSelectStatement(bool asSetOperand = false)
     {
         if (!TryKeyword("SELECT", out var startSpan))
         {
@@ -1041,13 +1041,16 @@ public class SqlParser
             selectStatement.Having = havingClause.Result;
         }
 
-        var orderByClause = ParseOrderByClause();
-        if (orderByClause.HasError)
+        if (!asSetOperand)
         {
-            return orderByClause.Error;
-        }
+            var orderByClause = ParseOrderByClause();
+            if (orderByClause.HasError)
+            {
+                return orderByClause.Error;
+            }
 
-        selectStatement.OrderBy = orderByClause.Result;
+            selectStatement.OrderBy = orderByClause.Result;
+        }
 
         if (Try(ParseForXmlClause, out var forXmlClause))
         {
@@ -1062,6 +1065,17 @@ public class SqlParser
         if (Try(ParseUnionSelectClauseList, out var unionSelectClauseList))
         {
             selectStatement.Unions = unionSelectClauseList.ResultValue;
+        }
+
+        if (!asSetOperand && selectStatement.OrderBy == null && selectStatement.Unions.Count > 0)
+        {
+            var topLevelOrderBy = ParseOrderByClause();
+            if (topLevelOrderBy.HasError)
+            {
+                return topLevelOrderBy.Error;
+            }
+
+            selectStatement.OrderBy = topLevelOrderBy.Result;
         }
 
         if (Try(ParseOptionClause, out var optionClause))
@@ -1487,7 +1501,7 @@ public class SqlParser
             return NoneResult<SqlUnionSelect>();
         }
 
-        var select = ParseGroupOr(ParseSelectStatement);
+        var select = ParseGroupOr(() => ParseSelectStatement(), () => ParseSelectStatement(asSetOperand: true));
         if (select.HasError)
         {
             return select.Error;
@@ -1501,7 +1515,7 @@ public class SqlParser
         };
     }
 
-    private ParseResult<ISqlExpression> ParseGroupOr<T>(Func<ParseResult<T>> parseFn)
+    private ParseResult<ISqlExpression> ParseGroupOr<T>(Func<ParseResult<T>> parseFn, Func<ParseResult<T>>? bareParseFn = null)
         where T : ISqlExpression
     {
         if (TryMatch("(", out var openSpan))
@@ -1516,7 +1530,7 @@ public class SqlParser
             {
                 return CreateParseError("Expected )");
             }
-            
+
             return new SqlParenthesizedExpression()
             {
                 Span = _text.CreateSpan(openSpan, closeSpan),
@@ -1524,7 +1538,7 @@ public class SqlParser
             };
         }
 
-        return parseFn().To<ISqlExpression>();
+        return (bareParseFn ?? parseFn)().To<ISqlExpression>();
     }
 
     public bool Try<T>(Func<ParseResult<T>> parseFunc, out ParseResult<T> result)
