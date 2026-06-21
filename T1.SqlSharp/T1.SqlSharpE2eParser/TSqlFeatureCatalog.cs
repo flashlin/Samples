@@ -1,0 +1,83 @@
+namespace T1.SqlSharpE2eParser;
+
+public static class TSqlFeatureCatalog
+{
+    public static IReadOnlyList<TSqlFeatureDefinition> All { get; } =
+    [
+        Feature("create_procedure", "DDL", "CREATE PROCEDURE", 100, [@"\bCREATE\s+(OR\s+ALTER\s+)?PROC(EDURE)?\b"], ["CREATE PROCEDURE variant", "Parser returned null result"]),
+        Feature("create_procedure_tvp", "DDL", "CREATE PROCEDURE TVP READONLY parameter", 95, [@"@\w+\s+[\[\]\w\.]+\s+READONLY\b"], ["CREATE PROCEDURE variant"]),
+        Feature("create_function", "DDL", "CREATE FUNCTION", 90, [@"\bCREATE\s+(OR\s+ALTER\s+)?FUNCTION\b"], ["CREATE FUNCTION variant"]),
+        Feature("create_view", "DDL", "CREATE VIEW", 80, [@"\bCREATE\s+(OR\s+ALTER\s+)?VIEW\b"], ["Unsupported or partial CREATE VIEW"]),
+        Feature("create_table", "DDL", "CREATE TABLE", 100, [@"\bCREATE\s+TABLE\b"], ["CREATE TABLE variant"]),
+        Feature("create_temp_table", "DDL", "CREATE TABLE #temp", 95, [@"\bCREATE\s+TABLE\s+#"], ["CREATE TABLE variant"]),
+        Feature("create_table_constraints", "DDL", "CREATE TABLE constraints", 90, [@"\b(CONSTRAINT|PRIMARY\s+KEY|FOREIGN\s+KEY|CHECK|UNIQUE)\b"], ["CREATE TABLE variant"]),
+        Feature("create_table_column_constraint", "DDL", "Column-level constraint", 90, [@"\b\w+\s+\w+[^,\)]*\b(PRIMARY\s+KEY|DEFAULT|IDENTITY|NOT\s+NULL|NULL)\b"], ["CREATE TABLE variant"]),
+        Feature("create_index", "DDL", "CREATE INDEX", 85, [@"\bCREATE\s+(UNIQUE\s+)?(CLUSTERED\s+|NONCLUSTERED\s+)?INDEX\b"], ["Unsupported or partial CREATE CLUSTERED"]),
+        Feature("create_synonym", "DDL", "CREATE SYNONYM", 70, [@"\bCREATE\s+SYNONYM\b"], ["CREATE SYNONYM variant"]),
+        Feature("create_type_table", "DDL", "CREATE TYPE AS TABLE", 70, [@"\bCREATE\s+TYPE\b[\s\S]*\bAS\s+TABLE\b"], ["CREATE TABLE variant"]),
+        Feature("create_trigger", "DDL", "CREATE TRIGGER", 70, [@"\bCREATE\s+(OR\s+ALTER\s+)?TRIGGER\b"], ["CREATE PROCEDURE variant"]),
+        Feature("alter_table", "DDL", "ALTER TABLE", 75, [@"\bALTER\s+TABLE\b"], ["ALTER TABLE variant"]),
+        Feature("drop_table", "DDL", "DROP TABLE", 70, [@"\bDROP\s+TABLE\b"], ["Unclassified parser failure"]),
+        Feature("truncate_table", "DML", "TRUNCATE TABLE", 70, [@"\bTRUNCATE\s+TABLE\b"], ["INSERT data script without INTO"]),
+        Feature("use_go_batch", "Script", "USE and GO batch separator", 80, [@"\bUSE\s+\[[^\]]+\][\s;]*\bGO\b|\bGO\b"], ["Parser returned null result"]),
+        Feature("declare_scalar", "Procedure body", "DECLARE scalar variable", 95, [@"\bDECLARE\s+@\w+\s+(AS\s+)?\w+"], ["DECLARE variant"]),
+        Feature("declare_table_variable", "Procedure body", "DECLARE @table TABLE", 95, [@"\bDECLARE\s+@\w+\s+TABLE\s*\("], ["DECLARE variant", "IF conditional script"]),
+        Feature("declare_cursor", "Procedure body", "DECLARE cursor", 75, [@"\bDECLARE\s+\w+\s+CURSOR\b|\bDECLARE\s+@\w+\s+CURSOR\b"], ["DECLARE variant"]),
+        Feature("set_option", "Procedure body", "SET option", 85, [@"\bSET\s+(NOCOUNT|ANSI_NULLS|QUOTED_IDENTIFIER|XACT_ABORT|DEADLOCK_PRIORITY)\b"], ["Permission statement variant"]),
+        Feature("set_transaction_isolation", "Procedure body", "SET TRANSACTION ISOLATION LEVEL", 85, [@"\bSET\s+TRANSACTION\s+ISOLATION\s+LEVEL\b"], ["Permission statement variant"]),
+        Feature("set_variable", "Procedure body", "SET variable assignment", 90, [@"\bSET\s+@\w+\s*="], ["Parser returned null result"]),
+        Feature("set_compound_assignment", "Procedure body", "SET compound assignment", 95, [@"\bSET\s+@\w+\s*(\+=|-=|\*=|/=|%=|&=|\|=|\^=)"], ["Parser returned null result"]),
+        Feature("if_statement", "Control flow", "IF statement", 95, [@"\bIF\s*(\(|@\w+|\w+|EXISTS\b)"], ["IF conditional script", "Permission statement variant"]),
+        Feature("else_statement", "Control flow", "ELSE statement", 85, [@"\bELSE\b"], ["Permission statement variant"]),
+        Feature("while_statement", "Control flow", "WHILE loop", 80, [@"\bWHILE\b"], ["DECLARE variant"]),
+        Feature("try_catch", "Control flow", "TRY CATCH", 75, [@"\bBEGIN\s+TRY\b[\s\S]*\bBEGIN\s+CATCH\b"], ["CREATE PROCEDURE variant"]),
+        Feature("return_statement", "Control flow", "RETURN statement", 80, [@"\bRETURN\b"], ["Permission statement variant"]),
+        Feature("break_continue", "Control flow", "BREAK or CONTINUE", 60, [@"\b(BREAK|CONTINUE)\b"], ["CREATE PROCEDURE variant"]),
+        Feature("waitfor_delay", "Control flow", "WAITFOR DELAY", 90, [@"\bWAITFOR\s+DELAY\b"], ["DECLARE variant"]),
+        Feature("transaction_statement", "Transaction", "BEGIN/COMMIT/ROLLBACK transaction", 85, [@"\b(BEGIN\s+TRAN|COMMIT\s+TRAN|ROLLBACK\s+TRAN|SAVE\s+TRAN)\b"], ["Permission statement variant"]),
+        Feature("select_statement", "DML", "SELECT", 100, [@"\bSELECT\b"], ["Unsupported or partial SELECT"]),
+        Feature("select_assignment", "DML", "SELECT variable assignment", 90, [@"\bSELECT\s+@\w+\s*="], ["Permission statement variant"]),
+        Feature("select_top", "DML", "SELECT TOP", 75, [@"\bSELECT\s+TOP\s*\(?\d+"], ["IF conditional script"]),
+        Feature("cte", "DML", "WITH CTE", 85, [@"\bWITH\s+\w+\s+AS\s*\("], ["Permission statement variant"]),
+        Feature("join", "DML", "JOIN", 90, [@"\b(INNER|LEFT|RIGHT|FULL|CROSS)?\s*JOIN\b"], ["IF conditional script"]),
+        Feature("apply_join", "DML", "CROSS/OUTER APPLY", 80, [@"\b(CROSS|OUTER)\s+APPLY\b"], ["Unsupported or partial SELECT"]),
+        Feature("table_hint", "DML", "Table hints", 90, [@"\bWITH\s*\((NOLOCK|ROWLOCK|UPDLOCK|HOLDLOCK|INDEX|FORCESEEK)"], ["Permission statement variant"]),
+        Feature("derived_table", "DML", "Derived table", 85, [@"\bFROM\s*\(\s*SELECT\b"], ["IF conditional script"]),
+        Feature("xml_nodes_alias", "DML", "XML nodes table source alias", 95, [@"\.\s*nodes\s*\([\s\S]*?\)\s+AS\s+\w+\s*\(\w+\)"], ["Permission statement variant"]),
+        Feature("insert_values", "DML", "INSERT VALUES", 90, [@"\bINSERT\s+(INTO\s+)?[\[\]@\w\.]+\s*(\([^\)]*\))?\s+VALUES\s*\("], ["INSERT multi-row VALUES continuation"]),
+        Feature("insert_multi_values", "DML", "INSERT multi-row VALUES", 100, [@"\bINSERT\s+(INTO\s+)?[\[\]@\w\.]+\s*(\([^\)]*\))?\s+VALUES\s*\([\s\S]*?\)\s*,"], ["INSERT multi-row VALUES continuation"]),
+        Feature("insert_select", "DML", "INSERT SELECT", 95, [@"\bINSERT\s+(INTO\s+)?[\[\]@\w\.#]+\s*(\([^\)]*\))?\s*\(?\s*SELECT\b"], ["Permission statement variant", "Unsupported or partial INSERT INTO"]),
+        Feature("insert_without_into", "DML", "INSERT without INTO", 90, [@"\bINSERT\s+\[[^\]]+\]\.\[[^\]]+\]|\bINSERT\s+\[[^\]]+\]\s*\("], ["INSERT data script without INTO"]),
+        Feature("insert_exec", "DML", "INSERT EXEC", 85, [@"\bINSERT\s+(INTO\s+)?[\[\]@\w\.#]+\s*(\([^\)]*\))?\s+EXEC(UTE)?\b"], ["Permission statement variant"]),
+        Feature("update_statement", "DML", "UPDATE", 95, [@"\bUPDATE\s+[\[\]@\w\.#]+"], ["Unsupported or partial UPDATE B", "Unsupported or partial UPDATE O"]),
+        Feature("update_with_hints", "DML", "UPDATE with table hints", 90, [@"\bUPDATE\s+[\[\]@\w\.#]+\s+WITH\s*\("], ["Unsupported or partial UPDATE MATCHRISK"]),
+        Feature("update_output", "DML", "UPDATE OUTPUT", 85, [@"\bUPDATE\b[\s\S]*\bOUTPUT\s+inserted\."], ["Unsupported or partial UPDATE B"]),
+        Feature("delete_statement", "DML", "DELETE", 85, [@"\bDELETE\s+(TOP\s*\([^\)]*\)\s*)?(FROM\s+)?[\[\]@\w\.#]+"], ["INSERT data script without INTO"]),
+        Feature("merge_statement", "DML", "MERGE", 85, [@"\bMERGE\s+"], ["MERGE variant"]),
+        Feature("output_clause", "DML", "OUTPUT clause", 80, [@"\bOUTPUT\s+(inserted|deleted)\."], ["Unsupported or partial UPDATE B"]),
+        Feature("case_expression", "Expression", "CASE expression", 85, [@"\bCASE\s+WHEN\b|\bCASE\s+\w+\s+WHEN\b"], ["Permission statement variant"]),
+        Feature("cast_convert", "Expression", "CAST or CONVERT", 80, [@"\b(CAST|CONVERT)\s*\("], ["Parser returned null result"]),
+        Feature("function_call", "Expression", "Function call", 85, [@"\b\w+\s*\("], ["Parser returned null result"]),
+        Feature("datepart", "Expression", "DATEPART", 75, [@"\bDATEPART\s*\("], ["Parser returned null result"]),
+        Feature("bitwise_condition", "Expression", "Bitwise condition", 85, [@"@\w+\s*&\s*\d+|[\w\.]+\s*&\s*\d+"], ["IF conditional script"]),
+        Feature("exists_condition", "Expression", "EXISTS condition", 75, [@"\bEXISTS\s*\("], ["IF conditional script"]),
+        Feature("in_condition", "Expression", "IN condition", 70, [@"\bIN\s*\("], ["IF conditional script"]),
+        Feature("query_option", "DML", "OPTION query hint", 75, [@"\bOPTION\s*\("], ["CREATE PROCEDURE variant"]),
+        Feature("exec_statement", "Execution", "EXEC statement", 90, [@"\bEXEC(UTE)?\s+"], ["EXEC statement variant"]),
+        Feature("exec_output_argument", "Execution", "EXEC OUTPUT argument", 80, [@"\bEXEC(UTE)?\b[\s\S]*\b@\w+\s+OUTPUT\b"], ["EXEC statement variant"]),
+        Feature("extended_property", "Execution", "sp_addextendedproperty", 65, [@"\bsp_addextendedproperty\b"], ["EXEC statement variant"]),
+        Feature("permission_statement", "Security", "GRANT/DENY/REVOKE", 90, [@"\b(GRANT|DENY|REVOKE)\b"], ["Permission statement variant"]),
+        Feature("sqlcmd_include", "Script", "SQLCMD include", 60, [@"^\s*:r\s+", @"\n\s*:r\s+"], ["Unclassified parser failure"])
+    ];
+
+    private static TSqlFeatureDefinition Feature(
+        string featureId,
+        string category,
+        string feature,
+        int priority,
+        string[] patterns,
+        string[] corpusCategories)
+    {
+        return new TSqlFeatureDefinition(featureId, category, feature, priority, patterns, corpusCategories);
+    }
+}

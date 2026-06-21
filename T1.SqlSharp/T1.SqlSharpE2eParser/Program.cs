@@ -8,6 +8,7 @@ public static class Program
     private const string ScanFileCommand = "--scan-file";
     private const string WorkerCommand = "--worker";
     private const string AnalyzeReportCommand = "--analyze-report";
+    private const string AnalyzeTestCoverageCommand = "--analyze-test-coverage";
 
     public static int Main(string[] args)
     {
@@ -24,6 +25,11 @@ public static class Program
         if (args.Length > 0 && args[0] == AnalyzeReportCommand)
         {
             return AnalyzeReport(args);
+        }
+
+        if (args.Length > 0 && args[0] == AnalyzeTestCoverageCommand)
+        {
+            return AnalyzeTestCoverage(args);
         }
 
         var sourcePath = args.Length > 0 ? args[0] : DefaultSourcePath;
@@ -59,6 +65,28 @@ public static class Program
         var result = analyzer.Analyze(sourcePath, outputPath);
         Console.WriteLine($"Error report: {result.ErrorCsvPath}");
         Console.WriteLine($"Error summary: {result.ErrorSummaryCsvPath}");
+        return 0;
+    }
+
+    private static int AnalyzeTestCoverage(string[] args)
+    {
+        var testPath = args.Length > 1 ? args[1] : ResolveDefaultTestPath();
+        var outputPath = args.Length > 2 ? args[2] : ResolveDefaultOutputPath();
+
+        if (!Directory.Exists(testPath))
+        {
+            Console.Error.WriteLine($"Test path not found: {testPath}");
+            return 1;
+        }
+
+        var analyzer = new TestSyntaxCoverageAnalyzer();
+        var result = analyzer.Analyze(testPath, outputPath);
+        Console.WriteLine($"SQL snippets: {result.SnippetCount}");
+        Console.WriteLine($"Features: {result.CoveredFeatureCount}/{result.FeatureCount}");
+        Console.WriteLine($"Corpus matched features: {result.CorpusMatchedFeatureCount}");
+        Console.WriteLine($"Test syntax coverage: {result.TestSyntaxCoverageCsvPath}");
+        Console.WriteLine($"Feature matrix: {result.FeatureMatrixCsvPath}");
+        Console.WriteLine($"Feature priority: {result.FeaturePriorityCsvPath}");
         return 0;
     }
 
@@ -110,5 +138,22 @@ public static class Program
         }
 
         return Path.Combine(currentPath, "out");
+    }
+
+    private static string ResolveDefaultTestPath()
+    {
+        var currentPath = Directory.GetCurrentDirectory();
+        if (Path.GetFileName(currentPath) == "T1.SqlSharpTests")
+        {
+            return currentPath;
+        }
+
+        var testPath = Path.Combine(currentPath, "T1.SqlSharpTests");
+        if (Directory.Exists(testPath))
+        {
+            return testPath;
+        }
+
+        return currentPath;
     }
 }
