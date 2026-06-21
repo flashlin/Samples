@@ -33,6 +33,18 @@ public class ParseAlterPrincipalSqlTest
     }
 
     [Test]
+    public void Alter_role_rename()
+    {
+        var sql = "ALTER ROLE sales WITH NAME = sales_v2";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterRoleStatement
+        {
+            RoleName = "sales",
+            NewName = "sales_v2"
+        });
+    }
+
+    [Test]
     public void Alter_login_disable()
     {
         var sql = "ALTER LOGIN appuser DISABLE";

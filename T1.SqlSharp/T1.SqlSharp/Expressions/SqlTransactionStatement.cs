@@ -23,6 +23,7 @@ public class SqlTransactionStatement : ISqlExpression
     public bool IsDistributed { get; set; }
     public bool WithMark { get; set; }
     public string MarkDescription { get; set; } = string.Empty;
+    public List<string> WithOptions { get; set; } = [];
 
     public string ToSql()
     {
@@ -35,11 +36,16 @@ public class SqlTransactionStatement : ISqlExpression
             _ => string.Empty
         };
         var sql = string.IsNullOrEmpty(Name) ? keyword : $"{keyword} {Name}";
-        if (!WithMark)
+        if (WithMark)
         {
-            return sql;
+            return string.IsNullOrEmpty(MarkDescription) ? $"{sql} WITH MARK" : $"{sql} WITH MARK {MarkDescription}";
         }
 
-        return string.IsNullOrEmpty(MarkDescription) ? $"{sql} WITH MARK" : $"{sql} WITH MARK {MarkDescription}";
+        if (WithOptions.Count > 0)
+        {
+            return $"{sql} WITH ({string.Join(", ", WithOptions)})";
+        }
+
+        return sql;
     }
 }

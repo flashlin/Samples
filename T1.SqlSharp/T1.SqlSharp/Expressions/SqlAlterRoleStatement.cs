@@ -13,9 +13,15 @@ public class SqlAlterRoleStatement : ISqlExpression
     public string RoleName { get; set; } = string.Empty;
     public bool IsAddMember { get; set; }
     public string MemberName { get; set; } = string.Empty;
+    public string NewName { get; set; } = string.Empty;
 
     public string ToSql()
     {
+        if (!string.IsNullOrEmpty(NewName))
+        {
+            return $"ALTER ROLE {RoleName} WITH NAME = {NewName}";
+        }
+
         var action = IsAddMember ? "ADD" : "DROP";
         return $"ALTER ROLE {RoleName} {action} MEMBER {MemberName}";
     }

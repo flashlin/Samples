@@ -15,6 +15,7 @@ public class SqlFetchStatement : ISqlExpression
     public string Direction { get; set; } = string.Empty;
     public ISqlExpression? RowCount { get; set; }
     public string CursorName { get; set; } = string.Empty;
+    public bool IsGlobal { get; set; }
     public List<string> IntoVariables { get; set; } = [];
 
     public string ToSql()
@@ -31,7 +32,8 @@ public class SqlFetchStatement : ISqlExpression
             sql.Append($" {RowCount.ToSql()}");
         }
 
-        sql.Append($" FROM {CursorName}");
+        var global = IsGlobal ? "GLOBAL " : string.Empty;
+        sql.Append($" FROM {global}{CursorName}");
         if (IntoVariables.Count > 0)
         {
             sql.Append($" INTO {string.Join(", ", IntoVariables)}");

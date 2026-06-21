@@ -4313,6 +4313,8 @@ public class SqlParser
             return NoneResult<SqlCursorOperationStatement>();
         }
 
+        var isGlobal = TryKeyword("GLOBAL", out _);
+
         var cursorName = Parse_SqlIdentifier();
         if (cursorName.Result == null)
         {
@@ -4323,6 +4325,7 @@ public class SqlParser
         {
             Span = _text.CreateSpan(startSpan),
             Action = action,
+            IsGlobal = isGlobal,
             CursorName = cursorName.ResultValue.FieldName
         });
     }
@@ -4346,6 +4349,8 @@ public class SqlParser
         }
 
         TryKeyword("FROM", out _);
+
+        fetchStatement.IsGlobal = TryKeyword("GLOBAL", out _);
 
         var cursorName = Parse_SqlIdentifier();
         if (cursorName.Result == null)
@@ -4684,6 +4689,27 @@ public class SqlParser
             return CreateParseError("Expected role name after ALTER ROLE");
         }
 
+        if (TryKeywords(["WITH", "NAME"], out _))
+        {
+            if (!TryMatch("=", out _))
+            {
+                return CreateParseError("Expected = after WITH NAME in ALTER ROLE");
+            }
+
+            var newName = Parse_SqlIdentifier();
+            if (newName.Result == null)
+            {
+                return CreateParseError("Expected new name after WITH NAME =");
+            }
+
+            return CreateParseResult(new SqlAlterRoleStatement
+            {
+                Span = _text.CreateSpan(startSpan),
+                RoleName = roleName.ResultValue.FieldName,
+                NewName = newName.ResultValue.FieldName
+            });
+        }
+
         bool isAddMember;
         if (TryKeywords(["ADD", "MEMBER"], out _))
         {
@@ -4695,7 +4721,7 @@ public class SqlParser
         }
         else
         {
-            return CreateParseError("Expected ADD MEMBER or DROP MEMBER in ALTER ROLE");
+            return CreateParseError("Expected ADD MEMBER, DROP MEMBER or WITH NAME in ALTER ROLE");
         }
 
         var memberName = Parse_SqlIdentifier();
@@ -4916,7 +4942,8 @@ public class SqlParser
                 IsCreate = true,
                 Name = name.ResultValue.FieldName,
                 TableName = tableName.ResultValue.FieldName,
-                Columns = columns.ResultValue.OfType<SqlFieldExpr>().Select(f => f.FieldName).ToList()
+                Columns = columns.ResultValue.OfType<SqlFieldExpr>().Select(f => f.FieldName).ToList(),
+                Options = ReadStatisticsWithOptions()
             });
         }
 
@@ -4933,12 +4960,51 @@ public class SqlParser
             TableName = updateTable.ResultValue.FieldName
         };
 
-        if (!_text.IsEnd() && !IsPeekMatch(";") && Try(Parse_SqlIdentifier, out var statName))
+        if (!_text.IsEnd() && !IsPeekMatch(";") && !IsPeekKeywords("WITH") && Try(Parse_SqlIdentifier, out var statName))
         {
             statistics.Name = statName.ResultValue.FieldName;
         }
 
+        statistics.Options = ReadStatisticsWithOptions();
+
         return CreateParseResult(statistics);
+    }
+
+    private List<string> ReadStatisticsWithOptions()
+    {
+        var options = new List<string>();
+        if (!TryKeyword("WITH", out _))
+        {
+            return options;
+        }
+
+        do
+        {
+            var parts = new List<string>();
+            while (!_text.IsEnd() && !IsPeekMatch(";") && !IsPeekMatch(","))
+            {
+                if (Try(ParseNumberValue, out var number))
+                {
+                    parts.Add(number.ResultValue.ToSql());
+                    continue;
+                }
+
+                var word = ReadSqlIdentifier().Word;
+                if (string.IsNullOrEmpty(word))
+                {
+                    break;
+                }
+
+                parts.Add(word);
+            }
+
+            if (parts.Count > 0)
+            {
+                options.Add(string.Join(" ", parts));
+            }
+        } while (TryMatch(",", out _));
+
+        return options;
     }
 
     private ParseResult<SqlCreateSynonymStatement> ParseCreateSynonymStatement()
@@ -7617,7 +7683,7 @@ public class SqlParser
             return CreateParseError("Expected AS in CREATE PROCEDURE");
         }
 
-        var body = Parse();
+        var body = ParseProcedureBody();
         if (body.HasError)
         {
             return body.Error;
@@ -7632,6 +7698,43 @@ public class SqlParser
             Parameters = parameters.ResultValue,
             Options = options,
             Body = body.ResultValue
+        });
+    }
+
+    private ParseResult<ISqlExpression> ParseProcedureBody()
+    {
+        var statements = new List<ISqlExpression>();
+        while (!_text.IsEnd() && !IsPeekKeywords("GO"))
+        {
+            var statement = Parse();
+            if (statement.HasError)
+            {
+                return statement.Error;
+            }
+
+            if (statement.Result == null)
+            {
+                break;
+            }
+
+            statements.Add(statement.ResultValue);
+            TryMatch(";", out _);
+        }
+
+        if (statements.Count == 0)
+        {
+            return CreateParseError("Expected procedure body after AS");
+        }
+
+        if (statements.Count == 1)
+        {
+            return CreateParseResult(statements[0]);
+        }
+
+        return CreateParseResult<ISqlExpression>(new SqlBlockStatement
+        {
+            Statements = statements,
+            IsImplicit = true
         });
     }
 
@@ -9135,11 +9238,29 @@ public class SqlParser
     private ParseResult<SqlTransactionStatement> CreateTransactionStatement(SqlTransactionAction action, TextSpan startSpan, bool isDistributed = false)
     {
         var name = ReadOptionalTransactionName();
-        var withMark = TryKeywords(["WITH", "MARK"], out _);
+        var withMark = false;
         var markDescription = string.Empty;
-        if (withMark && Try(ParseSqlQuotedString, out var description))
+        var withOptions = new List<string>();
+        if (TryKeyword("WITH", out _))
         {
-            markDescription = description.ResultValue.ToSql();
+            if (TryKeyword("MARK", out _))
+            {
+                withMark = true;
+                if (Try(ParseSqlQuotedString, out var description))
+                {
+                    markDescription = description.ResultValue.ToSql();
+                }
+            }
+            else if (IsPeekMatch("("))
+            {
+                var options = ReadParenthesizedAssignmentList();
+                if (options.HasError)
+                {
+                    return options.Error;
+                }
+
+                withOptions = options.ResultValue;
+            }
         }
 
         return CreateParseResult(new SqlTransactionStatement
@@ -9149,7 +9270,8 @@ public class SqlParser
             IsDistributed = isDistributed,
             Name = name,
             WithMark = withMark,
-            MarkDescription = markDescription
+            MarkDescription = markDescription,
+            WithOptions = withOptions
         });
     }
 

@@ -16,6 +16,7 @@ public class SqlStatisticsStatement : ISqlExpression
     public string Name { get; set; } = string.Empty;
     public string TableName { get; set; } = string.Empty;
     public List<string> Columns { get; set; } = [];
+    public List<string> Options { get; set; } = [];
 
     public string ToSql()
     {
@@ -31,6 +32,11 @@ public class SqlStatisticsStatement : ISqlExpression
             {
                 sql.Append($" {Name}");
             }
+        }
+
+        if (Options.Count > 0)
+        {
+            sql.Append($" WITH {string.Join(", ", Options)}");
         }
 
         return sql.ToString();

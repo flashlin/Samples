@@ -95,4 +95,16 @@ public class ParseTransactionSqlTest
         var rc = sql.ParseSql();
         rc.ShouldBe(new SqlTransactionStatement { Action = SqlTransactionAction.Begin, Name = "@t" });
     }
+
+    [Test]
+    public void Commit_transaction_with_delayed_durability()
+    {
+        var sql = "COMMIT TRANSACTION WITH (DELAYED_DURABILITY = ON)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlTransactionStatement
+        {
+            Action = SqlTransactionAction.Commit,
+            WithOptions = ["DELAYED_DURABILITY = ON"]
+        });
+    }
 }

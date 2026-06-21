@@ -68,6 +68,29 @@ public class ParseCreateProcedureSqlTest
     }
 
     [Test]
+    public void Create_proc_multiple_bare_statements_body()
+    {
+        var sql = "CREATE PROCEDURE p AS SET NOCOUNT ON SELECT 1";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateProcedureStatement
+        {
+            ProcedureName = "p",
+            Body = new SqlBlockStatement
+            {
+                IsImplicit = true,
+                Statements =
+                [
+                    new SqlSetOptionStatement { Option = "NOCOUNT", Value = "ON" },
+                    new SelectStatement
+                    {
+                        Columns = [new SelectColumn { Field = new SqlValue { SqlType = SqlType.IntValue, Value = "1" } }]
+                    }
+                ]
+            }
+        });
+    }
+
+    [Test]
     public void Create_or_alter_proc_with_default_output_and_block_body()
     {
         var sql = "CREATE OR ALTER PROCEDURE Upd @id INT, @name VARCHAR(50) = 'x' OUTPUT "

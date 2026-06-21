@@ -13,9 +13,15 @@ public class SqlBlockStatement : ISqlExpression
     }
 
     public List<ISqlExpression> Statements { get; set; } = [];
+    public bool IsImplicit { get; set; }
 
     public string ToSql()
     {
+        if (IsImplicit)
+        {
+            return string.Join(" ", Statements.Select(s => s.ToSql()));
+        }
+
         var sql = new StringBuilder();
         sql.Append("BEGIN ");
         sql.Append(string.Join("; ", Statements.Select(s => s.ToSql())));

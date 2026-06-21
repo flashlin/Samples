@@ -19,9 +19,11 @@ public class SqlCursorOperationStatement : ISqlExpression
 
     public SqlCursorOperation Action { get; set; }
     public string CursorName { get; set; } = string.Empty;
+    public bool IsGlobal { get; set; }
 
     public string ToSql()
     {
-        return $"{Action.ToString().ToUpperInvariant()} {CursorName}";
+        var global = IsGlobal ? "GLOBAL " : string.Empty;
+        return $"{Action.ToString().ToUpperInvariant()} {global}{CursorName}";
     }
 }

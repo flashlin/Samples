@@ -64,4 +64,44 @@ public class ParseCursorOperationSqlTest
             IntoVariables = ["@id"]
         });
     }
+
+    [Test]
+    public void Close_global_cursor()
+    {
+        var sql = "CLOSE GLOBAL curUsers";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCursorOperationStatement
+        {
+            Action = SqlCursorOperation.Close,
+            IsGlobal = true,
+            CursorName = "curUsers"
+        });
+    }
+
+    [Test]
+    public void Deallocate_global_cursor()
+    {
+        var sql = "DEALLOCATE GLOBAL curUsers";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCursorOperationStatement
+        {
+            Action = SqlCursorOperation.Deallocate,
+            IsGlobal = true,
+            CursorName = "curUsers"
+        });
+    }
+
+    [Test]
+    public void Fetch_next_from_global_cursor()
+    {
+        var sql = "FETCH NEXT FROM GLOBAL curUsers INTO @id";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlFetchStatement
+        {
+            Direction = "NEXT",
+            IsGlobal = true,
+            CursorName = "curUsers",
+            IntoVariables = ["@id"]
+        });
+    }
 }
