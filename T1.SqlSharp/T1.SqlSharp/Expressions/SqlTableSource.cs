@@ -13,6 +13,7 @@ public class SqlTableSource : ITableSource
 
     public string TableName { get; set; } = string.Empty;
     public string Alias { get; set; } = string.Empty;
+    public string ForSystemTime { get; set; } = string.Empty;
     public SqlTableSampleClause? TableSample { get; set; }
     public List<ISqlExpression> Withs { get; set; } = [];
 
@@ -26,9 +27,18 @@ public class SqlTableSource : ITableSource
 
     protected void WriteSqlAfterTableName(IndentStringBuilder sql)
     {
+        WriteForSystemTimeSql(sql);
         WriteAliasSql(sql);
         WriteTableSampleSql(sql);
         WriteWithsSql(sql);
+    }
+
+    private void WriteForSystemTimeSql(IndentStringBuilder sql)
+    {
+        if (!string.IsNullOrEmpty(ForSystemTime))
+        {
+            sql.Write($" FOR SYSTEM_TIME {ForSystemTime}");
+        }
     }
 
     private void WriteTableSampleSql(IndentStringBuilder sql)

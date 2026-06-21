@@ -55,6 +55,43 @@ public class ParseDdlDropTruncateTest
     }
 
     [Test]
+    public void Drop_login()
+    {
+        var sql = "DROP LOGIN appuser";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDropStatement
+        {
+            ObjectType = SqlDropObjectType.Login,
+            Names = ["appuser"]
+        });
+    }
+
+    [Test]
+    public void Drop_user_if_exists()
+    {
+        var sql = "DROP USER IF EXISTS appuser";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDropStatement
+        {
+            ObjectType = SqlDropObjectType.User,
+            IfExists = true,
+            Names = ["appuser"]
+        });
+    }
+
+    [Test]
+    public void Drop_role()
+    {
+        var sql = "DROP ROLE app_role";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDropStatement
+        {
+            ObjectType = SqlDropObjectType.Role,
+            Names = ["app_role"]
+        });
+    }
+
+    [Test]
     public void Drop_index_on_table()
     {
         var sql = "DROP INDEX ix_Name ON Customer";

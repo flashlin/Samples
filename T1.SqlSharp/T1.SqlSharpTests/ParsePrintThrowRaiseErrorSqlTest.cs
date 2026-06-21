@@ -50,6 +50,19 @@ public class ParsePrintThrowRaiseErrorSqlTest
     }
 
     [Test]
+    public void Throw_with_leading_semicolon()
+    {
+        var sql = ";THROW 50000, 'Custom error', 1";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlThrowStatement
+        {
+            ErrorNumber = new SqlValue { SqlType = SqlType.IntValue, Value = "50000" },
+            Message = new SqlValue { SqlType = SqlType.String, Value = "'Custom error'" },
+            State = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+        });
+    }
+
+    [Test]
     public void Raiserror_basic()
     {
         var sql = "RAISERROR ('Error occurred', 16, 1)";

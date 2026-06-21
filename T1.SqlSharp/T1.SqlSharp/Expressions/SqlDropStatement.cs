@@ -14,7 +14,10 @@ public enum SqlDropObjectType
     Database,
     Sequence,
     Type,
-    Synonym
+    Synonym,
+    Login,
+    User,
+    Role
 }
 
 public class SqlDropStatement : ISqlExpression

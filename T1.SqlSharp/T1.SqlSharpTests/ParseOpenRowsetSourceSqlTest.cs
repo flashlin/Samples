@@ -17,6 +17,23 @@ public class ParseOpenRowsetSourceSqlTest
     }
 
     [Test]
+    public void Select_from_openjson_with_schema()
+    {
+        var sql = "SELECT * FROM OPENJSON(@json) WITH (id int '$.id', name nvarchar(100) '$.name', tags nvarchar(max) '$.tags' AS JSON)";
+        var rc = sql.ParseSql();
+        var result = rc.ResultValue as SelectStatement;
+        Assert.That(result, Is.Not.Null);
+        var source = result!.FromSources[0] as SqlFuncTableSource;
+        Assert.That(source, Is.Not.Null);
+        Assert.That(source!.JsonSchemaColumns, Is.EqualTo(new List<string>
+        {
+            "id int '$.id'",
+            "name nvarchar(100) '$.name'",
+            "tags nvarchar(MAX) '$.tags' AS JSON"
+        }));
+    }
+
+    [Test]
     public void Select_from_openquery()
     {
         var sql = "SELECT * FROM OPENQUERY(LinkedSrv, 'SELECT 1')";

@@ -91,4 +91,76 @@ public class ParsePermissionSqlTest
             Principals = ["appuser"]
         });
     }
+
+    [Test]
+    public void Grant_multiword_permission_on_object()
+    {
+        var sql = "GRANT VIEW DEFINITION ON dbo.Orders TO appuser";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlPermissionStatement
+        {
+            Action = SqlPermissionAction.Grant,
+            Permissions = ["VIEW DEFINITION"],
+            ObjectName = "dbo.Orders",
+            Principals = ["appuser"]
+        });
+    }
+
+    [Test]
+    public void Grant_multiword_statement_permission()
+    {
+        var sql = "GRANT CREATE TABLE TO appuser";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlPermissionStatement
+        {
+            Action = SqlPermissionAction.Grant,
+            Permissions = ["CREATE TABLE"],
+            Principals = ["appuser"]
+        });
+    }
+
+    [Test]
+    public void Revoke_grant_option_for()
+    {
+        var sql = "REVOKE GRANT OPTION FOR SELECT ON Orders FROM appuser CASCADE";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlPermissionStatement
+        {
+            Action = SqlPermissionAction.Revoke,
+            GrantOptionFor = true,
+            Permissions = ["SELECT"],
+            ObjectName = "Orders",
+            Principals = ["appuser"],
+            Cascade = true
+        });
+    }
+
+    [Test]
+    public void Grant_with_as_grantor()
+    {
+        var sql = "GRANT SELECT ON Orders TO appuser AS dbo";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlPermissionStatement
+        {
+            Action = SqlPermissionAction.Grant,
+            Permissions = ["SELECT"],
+            ObjectName = "Orders",
+            Principals = ["appuser"],
+            AsGrantor = "dbo"
+        });
+    }
+
+    [Test]
+    public void Grant_mixed_single_and_multiword_permissions()
+    {
+        var sql = "GRANT SELECT, VIEW DEFINITION ON dbo.Orders TO appuser";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlPermissionStatement
+        {
+            Action = SqlPermissionAction.Grant,
+            Permissions = ["SELECT", "VIEW DEFINITION"],
+            ObjectName = "dbo.Orders",
+            Principals = ["appuser"]
+        });
+    }
 }

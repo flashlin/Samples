@@ -895,4 +895,64 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
     }
+
+    public virtual void Visit_AlterRoleStatement(SqlAlterRoleStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterPrincipalStatement(SqlAlterPrincipalStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_DbccStatement(SqlDbccStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_BulkInsertStatement(SqlBulkInsertStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterSequenceStatement(SqlAlterSequenceStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_KillStatement(SqlKillStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_BackupRestoreStatement(SqlBackupRestoreStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateFulltextIndexStatement(SqlCreateFulltextIndexStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreatePartitionFunctionStatement(SqlCreatePartitionFunctionStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreatePartitionSchemeStatement(SqlCreatePartitionSchemeStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateXmlSchemaCollectionStatement(SqlCreateXmlSchemaCollectionStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_OdbcEscapeExpr(SqlOdbcEscapeExpr expr)
+    {
+        AddSqlExpression(expr);
+    }
 }
