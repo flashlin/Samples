@@ -362,6 +362,141 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void Over_OrderBy_WindowFrame_Rows_Between_Unbounded_And_CurrentRow()
+    {
+        var sql = $"""
+                   select sum(amount) over(order by id rows between unbounded preceding and current row) as Total
+                   from customer
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlOverOrderByClause
+                    {
+                        Field = new SqlFunctionExpression
+                        {
+                            FunctionName = "sum",
+                            Parameters = [new SqlFieldExpr { FieldName = "amount" }]
+                        },
+                        Columns =
+                        [
+                            new SqlOrderColumn { ColumnName = new SqlFieldExpr { FieldName = "id" } }
+                        ],
+                        Frame = new SqlWindowFrameClause
+                        {
+                            Unit = SqlFrameUnit.Rows,
+                            Start = new SqlWindowFrameBound { Kind = SqlFrameBoundKind.UnboundedPreceding },
+                            End = new SqlWindowFrameBound { Kind = SqlFrameBoundKind.CurrentRow }
+                        }
+                    },
+                    Alias = "Total"
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+
+    [Test]
+    public void Over_PartitionBy_WindowFrame_Rows_Unbounded_Preceding()
+    {
+        var sql = $"""
+                   select sum(amount) over(partition by cid order by id rows unbounded preceding) as Total
+                   from customer
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlOverPartitionByClause
+                    {
+                        Field = new SqlFunctionExpression
+                        {
+                            FunctionName = "sum",
+                            Parameters = [new SqlFieldExpr { FieldName = "amount" }]
+                        },
+                        By = [new SqlFieldExpr { FieldName = "cid" }],
+                        Columns =
+                        [
+                            new SqlOrderColumn { ColumnName = new SqlFieldExpr { FieldName = "id" } }
+                        ],
+                        Frame = new SqlWindowFrameClause
+                        {
+                            Unit = SqlFrameUnit.Rows,
+                            Start = new SqlWindowFrameBound { Kind = SqlFrameBoundKind.UnboundedPreceding }
+                        }
+                    },
+                    Alias = "Total"
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+
+    [Test]
+    public void Over_PartitionBy_WindowFrame_Range_Between_N_Preceding_And_N_Following()
+    {
+        var sql = $"""
+                   select sum(amount) over(partition by cid order by id range between 1 preceding and 2 following) as Total
+                   from customer
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlOverPartitionByClause
+                    {
+                        Field = new SqlFunctionExpression
+                        {
+                            FunctionName = "sum",
+                            Parameters = [new SqlFieldExpr { FieldName = "amount" }]
+                        },
+                        By = [new SqlFieldExpr { FieldName = "cid" }],
+                        Columns =
+                        [
+                            new SqlOrderColumn { ColumnName = new SqlFieldExpr { FieldName = "id" } }
+                        ],
+                        Frame = new SqlWindowFrameClause
+                        {
+                            Unit = SqlFrameUnit.Range,
+                            Start = new SqlWindowFrameBound
+                            {
+                                Kind = SqlFrameBoundKind.Preceding,
+                                Offset = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                            },
+                            End = new SqlWindowFrameBound
+                            {
+                                Kind = SqlFrameBoundKind.Following,
+                                Offset = new SqlValue { SqlType = SqlType.IntValue, Value = "2" }
+                            }
+                        }
+                    },
+                    Alias = "Total"
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+
+    [Test]
     public void From_ChangeTable_Changes()
     {
         var sql = $"""

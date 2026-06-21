@@ -60,6 +60,8 @@ public enum SqlType
     ComparisonOperator,
     OverOrderBy,
     OverPartitionByClause,
+    WindowFrameClause,
+    WindowFrameBound,
     HavingClause,
     SetValueStatement,
     NotExpression,

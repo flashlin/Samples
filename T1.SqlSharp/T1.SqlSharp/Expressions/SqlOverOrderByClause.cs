@@ -13,6 +13,7 @@ public class SqlOverOrderByClause : ISqlExpression
 
     public ISqlExpression Field { get; set; } = new SqlFieldExpr();
     public List<SqlOrderColumn> Columns { get; set; } = [];
+    public SqlWindowFrameClause? Frame { get; set; }
 
     public string ToSql()
     {
@@ -30,6 +31,11 @@ public class SqlOverOrderByClause : ISqlExpression
                     sql.Write(", ");
                 }
             }
+        }
+        if (Frame != null)
+        {
+            sql.Write(" ");
+            sql.Write(Frame.ToSql());
         }
         sql.Write(")");
         return sql.ToString();

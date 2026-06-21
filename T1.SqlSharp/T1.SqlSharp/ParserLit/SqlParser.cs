@@ -1692,6 +1692,12 @@ public class SqlParser
         }
 
         var orderColumns = orderByClause.Result?.Columns ?? [];
+        SqlWindowFrameClause? frame = null;
+        if (Try(ParseWindowFrameClause, out var frameResult))
+        {
+            frame = frameResult.ResultValue;
+        }
+
         if (!TryMatch(")", out _))
         {
             return CreateParseError("Expected )");
@@ -1700,7 +1706,8 @@ public class SqlParser
         return new SqlOverOrderByClause
         {
             Span = _text.CreateSpan(startSpan),
-            Columns = orderColumns
+            Columns = orderColumns,
+            Frame = frame
         };
     }
 
@@ -1731,6 +1738,12 @@ public class SqlParser
         }
 
         var orderColumns = orderBy.Result?.Columns ?? [];
+        SqlWindowFrameClause? frame = null;
+        if (Try(ParseWindowFrameClause, out var frameResult))
+        {
+            frame = frameResult.ResultValue;
+        }
+
         if (!TryMatch(")", out _))
         {
             return CreateParseError("Expected )");
@@ -1740,7 +1753,8 @@ public class SqlParser
         {
             Span = _text.CreateSpan(startSpan),
             By = partitionBy.ResultValue.Cast<ISqlExpression>().ToList(),
-            Columns = orderColumns
+            Columns = orderColumns,
+            Frame = frame
         };
     }
 
@@ -1762,6 +1776,112 @@ public class SqlParser
             Span = _text.CreateSpan(startSpan),
             Columns = columns.ResultValue
         });
+    }
+
+    private ParseResult<SqlWindowFrameClause> ParseWindowFrameClause()
+    {
+        SqlFrameUnit unit;
+        TextSpan startSpan;
+        if (TryKeyword("ROWS", out startSpan))
+        {
+            unit = SqlFrameUnit.Rows;
+        }
+        else if (TryKeyword("RANGE", out startSpan))
+        {
+            unit = SqlFrameUnit.Range;
+        }
+        else
+        {
+            return NoneResult<SqlWindowFrameClause>();
+        }
+
+        var frame = new SqlWindowFrameClause { Unit = unit };
+        if (TryKeyword("BETWEEN", out _))
+        {
+            var start = ParseWindowFrameBound();
+            if (start.HasError)
+            {
+                return start.Error;
+            }
+
+            if (!TryKeyword("AND", out _))
+            {
+                return CreateParseError("Expected AND in window frame");
+            }
+
+            var end = ParseWindowFrameBound();
+            if (end.HasError)
+            {
+                return end.Error;
+            }
+
+            frame.Start = start.ResultValue;
+            frame.End = end.ResultValue;
+        }
+        else
+        {
+            var start = ParseWindowFrameBound();
+            if (start.HasError)
+            {
+                return start.Error;
+            }
+
+            frame.Start = start.ResultValue;
+        }
+
+        frame.Span = _text.CreateSpan(startSpan);
+        return frame;
+    }
+
+    private ParseResult<SqlWindowFrameBound> ParseWindowFrameBound()
+    {
+        if (TryKeyword("UNBOUNDED", out var unboundedSpan))
+        {
+            if (TryKeyword("PRECEDING", out _))
+            {
+                return CreateFrameBound(SqlFrameBoundKind.UnboundedPreceding, null, unboundedSpan);
+            }
+
+            if (TryKeyword("FOLLOWING", out _))
+            {
+                return CreateFrameBound(SqlFrameBoundKind.UnboundedFollowing, null, unboundedSpan);
+            }
+
+            return CreateParseError("Expected PRECEDING or FOLLOWING after UNBOUNDED");
+        }
+
+        if (TryKeywords(["CURRENT", "ROW"], out var currentRowSpan))
+        {
+            return CreateFrameBound(SqlFrameBoundKind.CurrentRow, null, currentRowSpan);
+        }
+
+        var offset = ParseValue();
+        if (offset.HasError)
+        {
+            return offset.Error;
+        }
+
+        if (TryKeyword("PRECEDING", out _))
+        {
+            return CreateFrameBound(SqlFrameBoundKind.Preceding, offset.ResultValue, offset.ResultValue.Span);
+        }
+
+        if (TryKeyword("FOLLOWING", out _))
+        {
+            return CreateFrameBound(SqlFrameBoundKind.Following, offset.ResultValue, offset.ResultValue.Span);
+        }
+
+        return CreateParseError("Expected PRECEDING or FOLLOWING in window frame bound");
+    }
+
+    private ParseResult<SqlWindowFrameBound> CreateFrameBound(SqlFrameBoundKind kind, ISqlExpression? offset, TextSpan startSpan)
+    {
+        return new SqlWindowFrameBound
+        {
+            Kind = kind,
+            Offset = offset,
+            Span = _text.CreateSpan(startSpan)
+        };
     }
 
     private bool IsPeekKeywords(params string[] keywords)

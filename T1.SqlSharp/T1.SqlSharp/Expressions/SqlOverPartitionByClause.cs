@@ -14,6 +14,8 @@ public class SqlOverPartitionByClause : ISqlExpression
     public ISqlExpression Field { get; set; } = new SqlFieldExpr();
     public List<ISqlExpression> By { get; set; } = [];
     public List<SqlOrderColumn> Columns { get; set; } = [];
+    public SqlWindowFrameClause? Frame { get; set; }
+
     public string ToSql()
     {
         var sql = new IndentStringBuilder();
@@ -29,6 +31,11 @@ public class SqlOverPartitionByClause : ISqlExpression
             {
                 sql.Write(", ");
             }
+        }
+        if (Frame != null)
+        {
+            sql.Write(" ");
+            sql.Write(Frame.ToSql());
         }
         sql.Write(")");
         return sql.ToString();

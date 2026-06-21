@@ -327,6 +327,7 @@ public class SqlVisitor
         AddSqlExpression(expr);
         expr.Field.Accept(this);
         expr.Columns.ForEach(x=>x.Accept(this));
+        expr.Frame?.Accept(this);
     }
 
     public virtual void Visit_OverPartitionByClause(SqlOverPartitionByClause expr)
@@ -335,6 +336,20 @@ public class SqlVisitor
         expr.Field.Accept(this);
         expr.By.ForEach(x=>x.Accept(this));
         expr.Columns.ForEach(x=>x.Accept(this));
+        expr.Frame?.Accept(this);
+    }
+
+    public virtual void Visit_WindowFrameClause(SqlWindowFrameClause expr)
+    {
+        AddSqlExpression(expr);
+        expr.Start.Accept(this);
+        expr.End?.Accept(this);
+    }
+
+    public virtual void Visit_WindowFrameBound(SqlWindowFrameBound expr)
+    {
+        AddSqlExpression(expr);
+        expr.Offset?.Accept(this);
     }
 
     public virtual void Visit_ParameterValue(SqlParameterValue expr)

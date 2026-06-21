@@ -86,7 +86,7 @@
 - [x] `OVER (ORDER BY ...)`
 - [x] `OVER (PARTITION BY ... ORDER BY ...)`
 - [x] `RANK()` / `ROW_NUMBER()` / 等（一般函式 + `OVER`）
-- [ ] 視窗框架 `ROWS / RANGE BETWEEN ... PRECEDING/FOLLOWING/CURRENT ROW/UNBOUNDED`
+- [x] 視窗框架 `ROWS / RANGE BETWEEN ... PRECEDING/FOLLOWING/CURRENT ROW/UNBOUNDED`（含單一 bound 與 BETWEEN 兩種形式）
 - [ ] `WITHIN GROUP (...)`（`STRING_AGG`、`PERCENTILE_CONT/DISC`）
 - [ ] 具名 `WINDOW` 子句
 
@@ -152,10 +152,9 @@
 
 ## 維護建議優先序（未完成項目）
 
-1. 🟡 視窗框架 `ROWS / RANGE BETWEEN`
-2. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
-3. 🟢 `GROUP BY ALL`、`CHECK` 約束、`COLLATE`、`OPTION` query hint、`WITHIN GROUP`
+1. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
+2. 🟢 `GROUP BY ALL`、`CHECK` 約束、`COLLATE`、`OPTION` query hint、`WITHIN GROUP`
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。
