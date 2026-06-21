@@ -187,6 +187,11 @@ public class SqlParser
             return NoneResult<SqlGroupByClause>();
         }
 
+        if (TryKeyword("ALL", out _))
+        {
+            return Parse_GroupBySimpleColumns(startSpan, isAll: true);
+        }
+
         if (TryKeyword("ROLLUP", out _))
         {
             return Parse_GroupByGroupingFunction(GroupingType.Rollup, startSpan);
@@ -202,6 +207,11 @@ public class SqlParser
             return Parse_GroupByGroupingSets(startSpan);
         }
 
+        return Parse_GroupBySimpleColumns(startSpan, isAll: false);
+    }
+
+    private ParseResult<SqlGroupByClause> Parse_GroupBySimpleColumns(TextSpan startSpan, bool isAll)
+    {
         var groupByColumns = ParseWithComma(ParseArithmeticExpr);
         if (groupByColumns.HasError)
         {
@@ -211,6 +221,7 @@ public class SqlParser
         return new SqlGroupByClause
         {
             Span = _text.CreateSpan(startSpan),
+            IsAll = isAll,
             Columns = groupByColumns.ResultValue
         };
     }

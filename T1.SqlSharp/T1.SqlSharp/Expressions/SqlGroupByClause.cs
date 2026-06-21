@@ -12,6 +12,7 @@ public class SqlGroupByClause : ISqlExpression
     }
 
     public GroupingType GroupingType { get; set; } = GroupingType.Simple;
+    public bool IsAll { get; set; }
     public List<ISqlExpression> Columns { get; set; } = [];
     public List<SqlGroupingSet> GroupingSets { get; set; } = [];
 
@@ -19,6 +20,10 @@ public class SqlGroupByClause : ISqlExpression
     {
         var sql = new IndentStringBuilder();
         sql.Write("GROUP BY ");
+        if (IsAll)
+        {
+            sql.Write("ALL ");
+        }
         sql.Write(GroupingBodyToSql());
         return sql.ToString();
     }

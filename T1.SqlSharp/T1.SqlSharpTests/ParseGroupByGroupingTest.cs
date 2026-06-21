@@ -62,6 +62,34 @@ public class ParseGroupByGroupingTest
     }
 
     [Test]
+    public void Group_by_all()
+    {
+        var sql = $"""
+                   select id, name from customer
+                   group by all id, name
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } },
+                new SelectColumn { Field = new SqlFieldExpr { FieldName = "name" } }
+            ],
+            FromSources = [new SqlTableSource { TableName = "customer" }],
+            GroupBy = new SqlGroupByClause
+            {
+                IsAll = true,
+                Columns =
+                [
+                    new SqlFieldExpr { FieldName = "id" },
+                    new SqlFieldExpr { FieldName = "name" }
+                ]
+            }
+        });
+    }
+
+    [Test]
     public void Group_by_grouping_sets()
     {
         var sql = $"""
