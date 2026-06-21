@@ -689,4 +689,17 @@ public class SqlVisitor
         expr.Parameters.ForEach(parameter => parameter.DefaultValue?.Accept(this));
         expr.Body.Accept(this);
     }
+
+    public virtual void Visit_ReturnStatement(SqlReturnStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Value?.Accept(this);
+    }
+
+    public virtual void Visit_CreateFunctionStatement(SqlCreateFunctionStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Parameters.ForEach(parameter => parameter.DefaultValue?.Accept(this));
+        expr.Body.Accept(this);
+    }
 }

@@ -89,6 +89,11 @@ public class SqlParser
             return createProcedureStatement.Result;
         }
 
+        if (Try(ParseCreateFunctionStatement, out var createFunctionStatement))
+        {
+            return createFunctionStatement.Result;
+        }
+
         if (Try(() => ParseSelectStatement(), out var selectStatement))
         {
             return selectStatement.Result;
@@ -157,6 +162,11 @@ public class SqlParser
         if (Try(ParseWhileStatement, out var whileStatement))
         {
             return whileStatement.Result;
+        }
+
+        if (Try(ParseReturnStatement, out var returnStatement))
+        {
+            return returnStatement.Result;
         }
 
         if (Try(ParseSetValueStatement, out var setValueStatement))
@@ -3352,6 +3362,105 @@ public class SqlParser
             Span = _text.CreateSpan(startSpan),
             ProcedureName = procedureName.ResultValue.FieldName,
             Arguments = arguments
+        });
+    }
+
+    private ParseResult<SqlReturnStatement> ParseReturnStatement()
+    {
+        if (!TryKeyword("RETURN", out var startSpan))
+        {
+            return NoneResult<SqlReturnStatement>();
+        }
+
+        var returnStatement = new SqlReturnStatement
+        {
+            Span = _text.CreateSpan(startSpan)
+        };
+
+        if (!_text.IsEnd() && !IsPeekMatch(";") && !IsPeekKeywords("END"))
+        {
+            var value = ParseArithmeticExpr();
+            if (value.HasError)
+            {
+                return value.Error;
+            }
+
+            returnStatement.Value = value.Result;
+        }
+
+        return CreateParseResult(returnStatement);
+    }
+
+    private ParseResult<SqlCreateFunctionStatement> ParseCreateFunctionStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<SqlCreateFunctionStatement>();
+        }
+
+        var isOrAlter = TryKeywords(["OR", "ALTER"], out _);
+
+        if (!TryKeyword("FUNCTION", out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlCreateFunctionStatement>();
+        }
+
+        var functionName = Parse_SqlIdentifier();
+        if (functionName.Result == null)
+        {
+            return CreateParseError("Expected function name after CREATE FUNCTION");
+        }
+
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected ( for function parameters");
+        }
+
+        var parameters = ParseWithComma(Parse_ProcedureParameter);
+        if (parameters.HasError)
+        {
+            return parameters.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected ) after function parameters");
+        }
+
+        if (!TryKeyword("RETURNS", out _))
+        {
+            return CreateParseError("Expected RETURNS in CREATE FUNCTION");
+        }
+
+        var returnType = ReadSqlIdentifier().Word;
+        var returnSize = Parse_DataSize();
+        if (returnSize.HasError)
+        {
+            return returnSize.Error;
+        }
+
+        if (!TryKeyword("AS", out _))
+        {
+            return CreateParseError("Expected AS in CREATE FUNCTION");
+        }
+
+        var body = Parse();
+        if (body.HasError)
+        {
+            return body.Error;
+        }
+
+        return CreateParseResult(new SqlCreateFunctionStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            IsOrAlter = isOrAlter,
+            FunctionName = functionName.ResultValue.FieldName,
+            Parameters = parameters.ResultValue,
+            ReturnType = returnType,
+            ReturnSize = returnSize.Result,
+            Body = body.ResultValue
         });
     }
 

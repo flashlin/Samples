@@ -3,7 +3,7 @@
 > 用途：追蹤 parser 目前支援哪些 T-SQL 語法，方便維護與規劃。
 > 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援、`[N/A]` 不適用 T-SQL（不實作）。
 > 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對）。
-> 入口：`SqlParser.Parse()` dispatch ~20 種頂層語句（WITH CTE / CREATE TABLE|VIEW|INDEX|PROCEDURE / SELECT / INSERT / UPDATE / DELETE / MERGE / TRUNCATE / DROP / ALTER TABLE / EXEC sp_addextendedproperty / EXEC proc / DECLARE / BEGIN…END / IF / WHILE / SET）。
+> 入口：`SqlParser.Parse()` dispatch ~22 種頂層語句（WITH CTE / CREATE TABLE|VIEW|INDEX|PROCEDURE|FUNCTION / SELECT / INSERT / UPDATE / DELETE / MERGE / TRUNCATE / DROP / ALTER TABLE / EXEC sp_addextendedproperty / EXEC proc / DECLARE / BEGIN…END / IF / WHILE / RETURN / SET）。
 
 ---
 
@@ -24,11 +24,13 @@
 - [~] `CREATE VIEW`（支援 `CREATE [OR ALTER] VIEW v [(cols)] AS <query> [WITH CHECK OPTION]`；body 走 `Parse_CteBodyStatement` 故支援 CTE/SELECT。`SqlCreateViewStatement`。未做 `WITH SCHEMABINDING/ENCRYPTION`）
 - [~] `CREATE INDEX`（支援 `CREATE [UNIQUE] [CLUSTERED|NONCLUSTERED] INDEX ix ON t (col [ASC|DESC], ...) [INCLUDE (cols)] [WHERE filter]`；重用 `ParseColumnsAscDesc`。`SqlCreateIndexStatement`。未做尾端 `WITH (options)`）
 - [~] `CREATE PROCEDURE`（`CREATE [OR ALTER] {PROCEDURE|PROC} name [([@p type [(size)] [= default] [OUTPUT]] , ...)] AS <body>`；body 走 `Parse()`（單一語句／`BEGIN…END`）。`SqlCreateProcedureStatement` + `SqlProcedureParameter`。未做 `WITH` 選項、`FOR REPLICATION`、無 BEGIN 的多裸語句 body）
-- [ ] `CREATE FUNCTION` / `TRIGGER` / `SCHEMA` / `DATABASE`
+- [~] `CREATE FUNCTION`（scalar：`CREATE [OR ALTER] FUNCTION name (params) RETURNS type[(size)] AS <body>`，body 含 `RETURN expr`；inline TVF：`RETURNS TABLE AS RETURN (select)`。`SqlCreateFunctionStatement`，body 走 `Parse()`。未做 multi-statement TVF `RETURNS @t TABLE(...)`、`WITH` 選項）
+- [ ] `CREATE TRIGGER` / `SCHEMA` / `DATABASE`
 - [~] `DECLARE`（`DECLARE @v type [(size)] [= value] [, ...]`；`SqlDeclareStatement` + `SqlVariableDeclaration`。未做 `DECLARE @t TABLE (...)`、`CURSOR`）
 - [x] `IF / ELSE`（`SqlIfStatement`；條件用 `Parse_WhereExpression`、then/else 各為單一語句，body 可為 `BEGIN...END`）
 - [x] `WHILE`（`SqlWhileStatement`；body 為單一語句／`BEGIN...END`。未做 `BREAK`/`CONTINUE`）
 - [~] `BEGIN ... END`（`SqlBlockStatement`，內含多語句迴圈解析；刻意排除 `BEGIN TRY`/`BEGIN TRAN` 等變體（reset position 不攔截））
+- [~] `RETURN [expr]`（`SqlReturnStatement`；值走 `ParseArithmeticExpr`，bare RETURN 在 `END`/`;`/EOF 前不取值。未做 `BREAK`/`CONTINUE`）
 - [ ] `BEGIN TRY ... END TRY / BEGIN CATCH ... END CATCH`
 - [ ] `BEGIN / COMMIT / ROLLBACK TRANSACTION`
 - [~] `EXEC`（一般預存程序）：`{EXEC|EXECUTE} proc [arg, ...]`（`Parse_ExecStatement` → `SqlExecStatement`，dispatch 在 sp_addextendedproperty 之後）。未做具名參數 `@p = val`、`EXEC ('dynamic sql')`、`EXEC (...) AT linked_server`
@@ -310,11 +312,11 @@
 
 ## 維護建議優先序（未完成項目）
 
-1. 🟢 控制流程續攻（DECLARE/IF/WHILE/BEGIN…END 已完成）：`BEGIN TRY…END TRY / BEGIN CATCH`、`BEGIN/COMMIT/ROLLBACK TRANSACTION`、`BREAK`/`CONTINUE`/`RETURN`、`PRINT`/`THROW`/`RAISERROR`、`DECLARE @t TABLE`
-2. 🟢 DDL（CREATE PROCEDURE 已完成）：`CREATE FUNCTION|TRIGGER`、ALTER TABLE 第二階段（見 §1.5）
+1. 🟢 控制流程續攻（DECLARE/IF/WHILE/BEGIN…END/RETURN 已完成）：`BEGIN TRY…END TRY / BEGIN CATCH`、`BEGIN/COMMIT/ROLLBACK TRANSACTION`、`BREAK`/`CONTINUE`、`PRINT`/`THROW`/`RAISERROR`、`DECLARE @t TABLE`
+2. 🟢 DDL（CREATE PROCEDURE/FUNCTION 已完成）：`CREATE TRIGGER`、multi-statement TVF、ALTER TABLE 第二階段（見 §1.5）
 3. 🟢 DML 細項剩餘：`EXEC ('dynamic sql')`、EXEC 具名參數 `@p = val`、MERGE `OUTPUT $action`
 4. 🟢 具名 `WINDOW` 子句的延伸：`OVER (existing_window ...)` 行內參照、定義間互相參照、RANK 路徑 bare `OVER name`（見 §4 註）
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）、`MERGE` 解析 MVP（INTO/USING/ON/三種 WHEN/AND/三種 action，2026-06-21）、`TRUNCATE TABLE` + `DROP`（多型別 + IF EXISTS + 多名稱，2026-06-21）、`ALTER TABLE`（ADD/DROP COLUMN、ADD/DROP CONSTRAINT、ALTER COLUMN，2026-06-21）、`CREATE VIEW`（OR ALTER / 欄位清單 / WITH CHECK OPTION，2026-06-21）、`CREATE INDEX`（UNIQUE/CLUSTERED/ASC-DESC/INCLUDE/filtered WHERE，2026-06-21）、`DROP INDEX ix ON table`（2026-06-21）、DML 收尾（MERGE CTE 前綴 + DEFAULT VALUES、UPDATE 複合指派 `+=`、`INSERT ... EXEC`，2026-06-21）、頂層 `EXEC proc [args]`（2026-06-21）、MERGE 第二階段（TOP/hint/OUTPUT/OPTION，2026-06-21）、控制流程（`DECLARE`/`IF…ELSE`/`WHILE`/`BEGIN…END`，2026-06-21）、`CREATE PROCEDURE`（OR ALTER / 參數含 default+OUTPUT / body 重用 Parse()，2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）、`MERGE` 解析 MVP（INTO/USING/ON/三種 WHEN/AND/三種 action，2026-06-21）、`TRUNCATE TABLE` + `DROP`（多型別 + IF EXISTS + 多名稱，2026-06-21）、`ALTER TABLE`（ADD/DROP COLUMN、ADD/DROP CONSTRAINT、ALTER COLUMN，2026-06-21）、`CREATE VIEW`（OR ALTER / 欄位清單 / WITH CHECK OPTION，2026-06-21）、`CREATE INDEX`（UNIQUE/CLUSTERED/ASC-DESC/INCLUDE/filtered WHERE，2026-06-21）、`DROP INDEX ix ON table`（2026-06-21）、DML 收尾（MERGE CTE 前綴 + DEFAULT VALUES、UPDATE 複合指派 `+=`、`INSERT ... EXEC`，2026-06-21）、頂層 `EXEC proc [args]`（2026-06-21）、MERGE 第二階段（TOP/hint/OUTPUT/OPTION，2026-06-21）、控制流程（`DECLARE`/`IF…ELSE`/`WHILE`/`BEGIN…END`，2026-06-21）、`CREATE PROCEDURE`（OR ALTER / 參數含 default+OUTPUT / body 重用 Parse()，2026-06-21）、`RETURN` + `CREATE FUNCTION`（scalar + inline TVF，2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。

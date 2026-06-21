@@ -106,4 +106,6 @@ public enum SqlType
     IfStatement,
     WhileStatement,
     CreateProcedureStatement,
+    ReturnStatement,
+    CreateFunctionStatement,
 }
