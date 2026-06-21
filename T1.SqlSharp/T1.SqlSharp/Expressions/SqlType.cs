@@ -99,4 +99,5 @@ public enum SqlType
     AlterTableDropConstraint,
     AlterTableAlterColumn,
     CreateViewStatement,
+    CreateIndexStatement,
 }

@@ -640,4 +640,11 @@ public class SqlVisitor
         AddSqlExpression(expr);
         expr.Query.Accept(this);
     }
+
+    public virtual void Visit_CreateIndexStatement(SqlCreateIndexStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Columns.ForEach(column => column.Accept(this));
+        expr.Where?.Accept(this);
+    }
 }

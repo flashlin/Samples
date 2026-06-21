@@ -79,6 +79,11 @@ public class SqlParser
             return createViewStatement.Result;
         }
 
+        if (Try(ParseCreateIndexStatement, out var createIndexStatement))
+        {
+            return createIndexStatement.Result;
+        }
+
         if (Try(() => ParseSelectStatement(), out var selectStatement))
         {
             return selectStatement.Result;
@@ -3273,6 +3278,93 @@ public class SqlParser
         }
 
         return CreateParseError("Expected VALUES, SELECT or DEFAULT VALUES after INSERT");
+    }
+
+    private ParseResult<SqlCreateIndexStatement> ParseCreateIndexStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<SqlCreateIndexStatement>();
+        }
+
+        var isUnique = TryKeyword("UNIQUE", out _);
+
+        var clustered = string.Empty;
+        if (TryKeyword("CLUSTERED", out _))
+        {
+            clustered = "CLUSTERED";
+        }
+        else if (TryKeyword("NONCLUSTERED", out _))
+        {
+            clustered = "NONCLUSTERED";
+        }
+
+        if (!TryKeyword("INDEX", out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlCreateIndexStatement>();
+        }
+
+        var indexName = Parse_SqlIdentifier();
+        if (indexName.Result == null)
+        {
+            return CreateParseError("Expected index name after CREATE INDEX");
+        }
+
+        if (!TryKeyword("ON", out _))
+        {
+            return CreateParseError("Expected ON in CREATE INDEX");
+        }
+
+        var tableName = Parse_SqlIdentifier();
+        if (tableName.Result == null)
+        {
+            return CreateParseError("Expected table name after ON in CREATE INDEX");
+        }
+
+        var columns = ParseColumnsAscDesc();
+        if (columns.HasError)
+        {
+            return columns.Error;
+        }
+
+        var createIndexStatement = new SqlCreateIndexStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            IsUnique = isUnique,
+            Clustered = clustered,
+            IndexName = indexName.ResultValue.FieldName,
+            TableName = tableName.ResultValue.FieldName,
+            Columns = columns.ResultValue
+        };
+
+        if (TryKeyword("INCLUDE", out _))
+        {
+            var includeColumns = Parse_ParenthesizedColumns();
+            if (includeColumns.HasError)
+            {
+                return includeColumns.Error;
+            }
+
+            createIndexStatement.IncludeColumns = includeColumns.ResultValue
+                .OfType<SqlFieldExpr>()
+                .Select(field => field.FieldName)
+                .ToList();
+        }
+
+        if (TryKeyword("WHERE", out _))
+        {
+            var where = Parse_WhereExpression();
+            if (where.HasError)
+            {
+                return where.Error;
+            }
+
+            createIndexStatement.Where = where.Result;
+        }
+
+        return CreateParseResult(createIndexStatement);
     }
 
     private ParseResult<SqlCreateViewStatement> ParseCreateViewStatement()
