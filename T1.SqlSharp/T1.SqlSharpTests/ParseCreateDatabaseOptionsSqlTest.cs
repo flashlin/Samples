@@ -48,6 +48,28 @@ public class ParseCreateDatabaseOptionsSqlTest
     }
 
     [Test]
+    public void Create_database_with_filegroup()
+    {
+        var sql = "CREATE DATABASE Sales ON PRIMARY (NAME = s, FILENAME = 'c:\\s.mdf'), " +
+                  "FILEGROUP fg1 (NAME = f1, FILENAME = 'c:\\f1.ndf')";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateDatabaseStatement
+        {
+            DatabaseName = "Sales",
+            OnPrimary = true,
+            DataFiles = ["(NAME = s, FILENAME = 'c:\\s.mdf')"],
+            FileGroups =
+            [
+                new SqlDatabaseFileGroup
+                {
+                    Name = "fg1",
+                    Files = ["(NAME = f1, FILENAME = 'c:\\f1.ndf')"]
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void Create_database_with_containment()
     {
         var sql = "CREATE DATABASE Sales CONTAINMENT = PARTIAL";

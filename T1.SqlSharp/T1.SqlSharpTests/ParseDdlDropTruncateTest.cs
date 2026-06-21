@@ -119,6 +119,30 @@ public class ParseDdlDropTruncateTest
     }
 
     [Test]
+    public void Drop_index_legacy_table_dot_index()
+    {
+        var sql = "DROP INDEX Customer.ix_Name";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDropStatement
+        {
+            ObjectType = SqlDropObjectType.Index,
+            Names = ["Customer.ix_Name"]
+        });
+    }
+
+    [Test]
+    public void Drop_index_legacy_multiple_table_dot_index()
+    {
+        var sql = "DROP INDEX t1.ix1, t2.ix2";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDropStatement
+        {
+            ObjectType = SqlDropObjectType.Index,
+            Names = ["t1.ix1", "t2.ix2"]
+        });
+    }
+
+    [Test]
     public void Drop_procedure()
     {
         var sql = "DROP PROCEDURE IF EXISTS usp_GetUser";

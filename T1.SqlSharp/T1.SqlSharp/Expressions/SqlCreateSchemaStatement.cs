@@ -12,10 +12,21 @@ public class SqlCreateSchemaStatement : ISqlExpression
 
     public string SchemaName { get; set; } = string.Empty;
     public string Authorization { get; set; } = string.Empty;
+    public List<ISqlExpression> Elements { get; set; } = [];
 
     public string ToSql()
     {
         var sql = $"CREATE SCHEMA {SchemaName}";
-        return string.IsNullOrEmpty(Authorization) ? sql : $"{sql} AUTHORIZATION {Authorization}";
+        if (!string.IsNullOrEmpty(Authorization))
+        {
+            sql = $"{sql} AUTHORIZATION {Authorization}";
+        }
+
+        if (Elements.Count > 0)
+        {
+            sql = $"{sql} {string.Join(" ", Elements.Select(element => element.ToSql()))}";
+        }
+
+        return sql;
     }
 }

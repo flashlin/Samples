@@ -799,6 +799,40 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void Option_Hash_Join_And_Optimize_For_Unknown()
+    {
+        var sql = $"""
+                   select id from customer
+                   OPTION (HASH JOIN, OPTIMIZE FOR UNKNOWN)
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
+            FromSources = [new SqlTableSource { TableName = "customer" }],
+            Option = new SqlOptionClause
+            {
+                Hints =
+                [
+                    new SqlQueryHint { Name = "HASH JOIN" },
+                    new SqlQueryHint { Name = "OPTIMIZE FOR UNKNOWN" }
+                ]
+            }
+        });
+    }
+
+    [Test]
+    public void Option_Unknown_Hint_Is_Error()
+    {
+        var sql = $"""
+                   select id from customer
+                   OPTION (FOOBAR)
+                   """;
+        var rc = sql.ParseSql();
+        Assert.That(rc.HasError, Is.True);
+    }
+
+    [Test]
     public void From_ChangeTable_Changes()
     {
         var sql = $"""

@@ -1740,7 +1740,13 @@ public class SqlParser
             selectStatement.OrderBy = topLevelOrderBy.Result;
         }
 
-        if (Try(ParseOptionClause, out var optionClause))
+        var optionClause = ParseOptionClause();
+        if (optionClause.HasError)
+        {
+            return optionClause.Error;
+        }
+
+        if (optionClause.Result != null)
         {
             selectStatement.Option = optionClause.ResultValue;
         }
@@ -3552,6 +3558,32 @@ public class SqlParser
         };
     }
 
+    private static readonly HashSet<string> QueryHints = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "HASH GROUP", "ORDER GROUP",
+        "CONCAT UNION", "HASH UNION", "MERGE UNION",
+        "LOOP JOIN", "MERGE JOIN", "HASH JOIN",
+        "DISABLE_OPTIMIZED_PLAN_FORCING",
+        "EXPAND VIEWS",
+        "FAST",
+        "FORCE ORDER",
+        "FORCE EXTERNALPUSHDOWN", "DISABLE EXTERNALPUSHDOWN",
+        "FORCE SCALEOUTEXECUTION", "DISABLE SCALEOUTEXECUTION",
+        "IGNORE_NONCLUSTERED_COLUMNSTORE_INDEX",
+        "KEEP PLAN",
+        "KEEPFIXED PLAN",
+        "MAX_GRANT_PERCENT", "MIN_GRANT_PERCENT",
+        "MAXDOP", "MAXRECURSION",
+        "NO_PERFORMANCE_SPOOL",
+        "OPTIMIZE FOR", "OPTIMIZE FOR UNKNOWN",
+        "PARAMETERIZATION SIMPLE", "PARAMETERIZATION FORCED",
+        "QUERYTRACEON",
+        "RECOMPILE",
+        "ROBUST PLAN",
+        "USE HINT", "USE PLAN",
+        "TABLE HINT"
+    };
+
     private ParseResult<SqlQueryHint> Parse_QueryHint()
     {
         var startPosition = _text.Position;
@@ -3566,7 +3598,13 @@ public class SqlParser
             return NoneResult<SqlQueryHint>();
         }
 
-        var hint = new SqlQueryHint { Name = string.Join(" ", nameWords) };
+        var name = string.Join(" ", nameWords);
+        if (!QueryHints.Contains(name))
+        {
+            return CreateParseError($"Unknown query hint '{name}'");
+        }
+
+        var hint = new SqlQueryHint { Name = name };
         if (IsPeekMatch("("))
         {
             var arguments = ParseParenthesesWithComma(ParseArithmeticExpr);
@@ -6954,11 +6992,29 @@ public class SqlParser
                 authorization = owner.ResultValue.FieldName;
             }
 
+            var elements = new List<ISqlExpression>();
+            while (true)
+            {
+                var element = ParseSchemaElement();
+                if (element.HasError)
+                {
+                    return element.Error;
+                }
+
+                if (element.Result == null)
+                {
+                    break;
+                }
+
+                elements.Add(element.ResultValue);
+            }
+
             return CreateParseResult<ISqlExpression>(new SqlCreateSchemaStatement
             {
                 Span = _text.CreateSpan(startSpan),
                 SchemaName = schemaName.ResultValue.FieldName,
-                Authorization = authorization
+                Authorization = authorization,
+                Elements = elements
             });
         }
 
@@ -6992,6 +7048,22 @@ public class SqlParser
                 }
 
                 databaseStatement.DataFiles = dataFiles.ResultValue;
+
+                while (TryKeyword("FILEGROUP", out _))
+                {
+                    var fileGroupName = ReadSqlIdentifier().Word;
+                    var fileGroupFiles = ReadFileSpecList();
+                    if (fileGroupFiles.HasError)
+                    {
+                        return fileGroupFiles.Error;
+                    }
+
+                    databaseStatement.FileGroups.Add(new SqlDatabaseFileGroup
+                    {
+                        Name = fileGroupName,
+                        Files = fileGroupFiles.ResultValue
+                    });
+                }
             }
 
             if (TryKeywords(["LOG", "ON"], out _))
@@ -7019,6 +7091,26 @@ public class SqlParser
         }
 
         _text.Position = startPosition;
+        return NoneResult<ISqlExpression>();
+    }
+
+    private ParseResult<ISqlExpression> ParseSchemaElement()
+    {
+        if (IsPeekKeywords("CREATE", "TABLE"))
+        {
+            return ParseCreateTableStatement().To<ISqlExpression>();
+        }
+
+        if (IsPeekKeywords("CREATE", "VIEW"))
+        {
+            return ParseCreateViewStatement().To<ISqlExpression>();
+        }
+
+        if (IsPeekKeywords("GRANT") || IsPeekKeywords("REVOKE") || IsPeekKeywords("DENY"))
+        {
+            return ParsePermissionStatement().To<ISqlExpression>();
+        }
+
         return NoneResult<ISqlExpression>();
     }
 

@@ -16,6 +16,7 @@ public class SqlCreateDatabaseStatement : ISqlExpression
     public string Containment { get; set; } = string.Empty;
     public bool OnPrimary { get; set; }
     public List<string> DataFiles { get; set; } = [];
+    public List<SqlDatabaseFileGroup> FileGroups { get; set; } = [];
     public List<string> LogFiles { get; set; } = [];
     public string Collation { get; set; } = string.Empty;
     public List<string> Options { get; set; } = [];
@@ -33,6 +34,11 @@ public class SqlCreateDatabaseStatement : ISqlExpression
         {
             sql.Append(OnPrimary ? " ON PRIMARY " : " ON ");
             sql.Append(string.Join(", ", DataFiles));
+        }
+
+        foreach (var fileGroup in FileGroups)
+        {
+            sql.Append($", {fileGroup.ToSql()}");
         }
 
         if (LogFiles.Count > 0)
