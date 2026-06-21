@@ -29,6 +29,7 @@ public class SqlDropStatement : ISqlExpression
     public SqlDropObjectType ObjectType { get; set; }
     public bool IfExists { get; set; }
     public List<string> Names { get; set; } = [];
+    public string OnTable { get; set; } = string.Empty;
 
     public string ToSql()
     {
@@ -39,6 +40,10 @@ public class SqlDropStatement : ISqlExpression
             sql.Append(" IF EXISTS");
         }
         sql.Append($" {string.Join(", ", Names)}");
+        if (!string.IsNullOrEmpty(OnTable))
+        {
+            sql.Append($" ON {OnTable}");
+        }
         return sql.ToString();
     }
 }

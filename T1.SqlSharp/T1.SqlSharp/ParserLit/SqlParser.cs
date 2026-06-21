@@ -3622,13 +3622,26 @@ public class SqlParser
             return CreateParseError("Expected object name after DROP");
         }
 
-        return CreateParseResult(new SqlDropStatement
+        var dropStatement = new SqlDropStatement
         {
             Span = _text.CreateSpan(startSpan),
             ObjectType = objectType,
             IfExists = ifExists,
             Names = names.ResultValue.Select(name => name.FieldName).ToList()
-        });
+        };
+
+        if (objectType == SqlDropObjectType.Index && TryKeyword("ON", out _))
+        {
+            var onTable = Parse_SqlIdentifier();
+            if (onTable.Result == null)
+            {
+                return CreateParseError("Expected table name after ON in DROP INDEX");
+            }
+
+            dropStatement.OnTable = onTable.ResultValue.FieldName;
+        }
+
+        return CreateParseResult(dropStatement);
     }
 
     private ParseResult<SqlMergeStatement> ParseMergeStatement()

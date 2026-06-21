@@ -55,6 +55,33 @@ public class ParseDdlDropTruncateTest
     }
 
     [Test]
+    public void Drop_index_on_table()
+    {
+        var sql = "DROP INDEX ix_Name ON Customer";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDropStatement
+        {
+            ObjectType = SqlDropObjectType.Index,
+            Names = ["ix_Name"],
+            OnTable = "Customer"
+        });
+    }
+
+    [Test]
+    public void Drop_index_if_exists_on_table()
+    {
+        var sql = "DROP INDEX IF EXISTS ix_Name ON Customer";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlDropStatement
+        {
+            ObjectType = SqlDropObjectType.Index,
+            IfExists = true,
+            Names = ["ix_Name"],
+            OnTable = "Customer"
+        });
+    }
+
+    [Test]
     public void Drop_procedure()
     {
         var sql = "DROP PROCEDURE IF EXISTS usp_GetUser";
