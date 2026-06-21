@@ -84,6 +84,16 @@ public class SqlParser
             return insertStatement.Result;
         }
 
+        if (Try(ParseUpdateStatement, out var updateStatement))
+        {
+            return updateStatement.Result;
+        }
+
+        if (Try(ParseDeleteStatement, out var deleteStatement))
+        {
+            return deleteStatement.Result;
+        }
+
         if (Try(ParseExecSpAddExtendedProperty, out var execSpAddExtendedProperty))
         {
             return execSpAddExtendedProperty.Result;
@@ -3210,6 +3220,186 @@ public class SqlParser
         return CreateParseError("Expected VALUES, SELECT or DEFAULT VALUES after INSERT");
     }
 
+    private ParseResult<SqlDeleteStatement> ParseDeleteStatement()
+    {
+        if (!TryKeyword("DELETE", out var startSpan))
+        {
+            return NoneResult<SqlDeleteStatement>();
+        }
+
+        var topClause = Parse_TopClause();
+        if (topClause.HasError)
+        {
+            return topClause.Error;
+        }
+
+        TryKeyword("FROM", out _);
+
+        var tableName = Parse_SqlIdentifier();
+        if (tableName.Result == null)
+        {
+            return CreateParseError("Expected table name after DELETE");
+        }
+
+        var withHints = Parse_WithTableHints();
+        if (withHints.HasError)
+        {
+            return withHints.Error;
+        }
+
+        var deleteStatement = new SqlDeleteStatement
+        {
+            Top = topClause.Result,
+            TableName = tableName.ResultValue.FieldName
+        };
+
+        if (withHints.Result != null)
+        {
+            deleteStatement.Withs = withHints.ResultValue;
+        }
+
+        var outputClause = Parse_OutputClause();
+        if (outputClause.HasError)
+        {
+            return outputClause.Error;
+        }
+
+        deleteStatement.Output = outputClause.Result;
+
+        if (TryKeyword("FROM", out _))
+        {
+            var fromSources = Parse_FromSources();
+            if (fromSources.HasError)
+            {
+                return fromSources.Error;
+            }
+
+            deleteStatement.FromSources = fromSources.ResultValue;
+        }
+
+        if (TryKeyword("WHERE", out _))
+        {
+            var where = Parse_WhereExpression();
+            if (where.HasError)
+            {
+                return where.Error;
+            }
+
+            deleteStatement.Where = where.Result;
+        }
+
+        deleteStatement.Span = _text.CreateSpan(startSpan);
+        return CreateParseResult(deleteStatement);
+    }
+
+    private ParseResult<SqlUpdateStatement> ParseUpdateStatement()
+    {
+        if (!TryKeyword("UPDATE", out var startSpan))
+        {
+            return NoneResult<SqlUpdateStatement>();
+        }
+
+        var topClause = Parse_TopClause();
+        if (topClause.HasError)
+        {
+            return topClause.Error;
+        }
+
+        var tableName = Parse_SqlIdentifier();
+        if (tableName.Result == null)
+        {
+            return CreateParseError("Expected table name after UPDATE");
+        }
+
+        var withHints = Parse_WithTableHints();
+        if (withHints.HasError)
+        {
+            return withHints.Error;
+        }
+
+        if (!TryKeyword("SET", out _))
+        {
+            return CreateParseError("Expected SET after UPDATE table");
+        }
+
+        var setClauses = ParseWithComma(Parse_UpdateSetClause);
+        if (setClauses.HasError)
+        {
+            return setClauses.Error;
+        }
+
+        var updateStatement = new SqlUpdateStatement
+        {
+            Top = topClause.Result,
+            TableName = tableName.ResultValue.FieldName,
+            SetClauses = setClauses.ResultValue
+        };
+
+        if (withHints.Result != null)
+        {
+            updateStatement.Withs = withHints.ResultValue;
+        }
+
+        var outputClause = Parse_OutputClause();
+        if (outputClause.HasError)
+        {
+            return outputClause.Error;
+        }
+
+        updateStatement.Output = outputClause.Result;
+
+        if (TryKeyword("FROM", out _))
+        {
+            var fromSources = Parse_FromSources();
+            if (fromSources.HasError)
+            {
+                return fromSources.Error;
+            }
+
+            updateStatement.FromSources = fromSources.ResultValue;
+        }
+
+        if (TryKeyword("WHERE", out _))
+        {
+            var where = Parse_WhereExpression();
+            if (where.HasError)
+            {
+                return where.Error;
+            }
+
+            updateStatement.Where = where.Result;
+        }
+
+        updateStatement.Span = _text.CreateSpan(startSpan);
+        return CreateParseResult(updateStatement);
+    }
+
+    private ParseResult<SqlAssignExpr> Parse_UpdateSetClause()
+    {
+        var left = Parse_SqlIdentifier();
+        if (left.Result == null)
+        {
+            return NoneResult<SqlAssignExpr>();
+        }
+
+        if (!TryMatch("=", out _))
+        {
+            return CreateParseError("Expected = in SET clause");
+        }
+
+        var right = Parse_ValueOrDefault();
+        if (right.HasError)
+        {
+            return right.Error;
+        }
+
+        return new SqlAssignExpr
+        {
+            Left = left.ResultValue,
+            Right = right.ResultValue
+        };
+    }
+
     private ParseResult<SqlOutputClause> Parse_OutputClause()
     {
         if (!TryKeyword("OUTPUT", out var startSpan))
@@ -3308,7 +3498,7 @@ public class SqlParser
             return CreateParseError("Expected (");
         }
 
-        var values = ParseWithComma(Parse_InsertRowValue);
+        var values = ParseWithComma(Parse_ValueOrDefault);
         if (values.HasError)
         {
             return values.Error;
@@ -3322,7 +3512,7 @@ public class SqlParser
         return values;
     }
 
-    private ParseResult<ISqlExpression> Parse_InsertRowValue()
+    private ParseResult<ISqlExpression> Parse_ValueOrDefault()
     {
         if (TryKeyword("DEFAULT", out var defaultSpan))
         {

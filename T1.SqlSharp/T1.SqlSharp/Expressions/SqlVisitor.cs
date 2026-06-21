@@ -544,5 +544,17 @@ public class SqlVisitor
     public virtual void Visit_UpdateStatement(SqlUpdateStatement expr)
     {
         AddSqlExpression(expr);
+        expr.SetClauses.ForEach(clause => clause.Accept(this));
+        expr.Output?.Accept(this);
+        expr.FromSources.ForEach(source => source.Accept(this));
+        expr.Where?.Accept(this);
+    }
+
+    public virtual void Visit_DeleteStatement(SqlDeleteStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Output?.Accept(this);
+        expr.FromSources.ForEach(source => source.Accept(this));
+        expr.Where?.Accept(this);
     }
 }

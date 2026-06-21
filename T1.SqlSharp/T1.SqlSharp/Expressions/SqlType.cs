@@ -84,4 +84,5 @@ public enum SqlType
     OverWindowName,
     OutputClause,
     DefaultValue,
+    DeleteStatement,
 }

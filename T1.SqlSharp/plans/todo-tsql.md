@@ -3,7 +3,7 @@
 > 用途：追蹤 parser 目前支援哪些 T-SQL 語法，方便維護與規劃。
 > 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援、`[N/A]` 不適用 T-SQL（不實作）。
 > 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對）。
-> 入口：`SqlParser.Parse()` dispatch 6 種頂層語句（WITH CTE / CREATE TABLE / SELECT / INSERT / EXEC sp_addextendedproperty / SET）。
+> 入口：`SqlParser.Parse()` dispatch 8 種頂層語句（WITH CTE / CREATE TABLE / SELECT / INSERT / UPDATE / DELETE / EXEC sp_addextendedproperty / SET）。
 
 ---
 
@@ -15,8 +15,8 @@
 - [x] `SET @var = value`（變數賦值）
 - [x] `EXEC sp_addextendedproperty ...`（僅此特定 SP）
 - [~] `INSERT`（parser 可解析大部分常用語法，細目見 §1.1。additive 擴充 `SqlInsertStatement`（`Top`/`Withs`/`ValuesRows`/`SourceSelect`/`IsDefaultValues`/`Output`），builder 路徑不受影響。僅剩 `INSERT ... EXEC`、CTE 前綴未做）
-- [ ] `UPDATE`（同上，有 builder 無 parser）
-- [ ] `DELETE`
+- [~] `UPDATE`（parser 可解析：SET 多指派 / `t.col` / `DEFAULT` 值 / `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT`，細目見 §1.2。剩複合指派、CTE 前綴）
+- [~] `DELETE`（parser 可解析：`[FROM] t` / 省略 FROM / 第二個 `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT`，細目見 §1.3。剩 CTE 前綴）
 - [ ] `MERGE`
 - [ ] `ALTER TABLE` / `ALTER ...`
 - [ ] `DROP ...`
@@ -51,6 +51,80 @@
 未支援（依價值排序）：
 - [ ] `INSERT INTO t EXEC proc` / `EXEC ('sql')`（rowset 來源）
 - [ ] CTE 前綴 `WITH cte AS (...) INSERT ...`（需擴充 `SqlWithCte.Statement` 接受 INSERT，目前只接 SELECT）
+
+### 1.2 UPDATE 細目（已實作，見 `ParseUpdateSqlTest.cs`）
+
+> 沿用 INSERT 的成功模式：**additive 擴充、重用既有 helper、TDD 一項一 commit**。
+
+**核心約束（與 INSERT 同）**：`SqlUpdateStatement` 目前是 builder 專用形狀
+（`SetColumns : List<SqlSetColumn>`，`SqlSetColumn` 帶 `ColumnName`/`ParameterName`/`Value`，
+`ToSql()` 固定輸出 `UPDATE t SET [col] = @p0`），被 `SqlUpdateExpressionBuilder` +
+`SqlUpdateExpressionBuilderTest` 消費，**不可改形狀、不可動 `ToSql()`**。
+
+**AST 設計（additive，parser 走新欄位、builder 走舊欄位）**：
+- 新增 `SetClauses : List<SqlAssignExpr>`（`= []`）——**重用既有 `SqlAssignExpr { Left, Right }`**
+  （`Parse_SelectColumns` 在 assign 情境已會產生它），不要動 builder 的 `SetColumns`，兩條路互不干擾。
+- 新增 `Top : SqlTopClause?`、`Withs : List<ISqlExpression>`（`= []`）、
+  `FromSources : List<ISqlExpression>`（`= []`）、`Where : ISqlExpression?`、`Output : SqlOutputClause?`。
+- `SqlType.UpdateStatement` 已存在；`Visit_UpdateStatement` 目前只 `AddSqlExpression`，
+  **要補走訪** `SetClauses` / `FromSources` / `Where` / `Output`（否則重演「子節點沒被走訪」雷）。
+
+**Parser 整合**：`Parse()` dispatch 加 `ParseUpdateStatement`（INSERT 之後）。子句順序（T-SQL）：
+`UPDATE [TOP (n) [PERCENT]] target [WITH (hints)] SET col=expr[, ...] [OUTPUT ...] [FROM src[, ...]] [WHERE ...]`
+- TOP → 重用 `Parse_TopClause`
+- target table → `Parse_SqlIdentifier`
+- table hint → 重用 `Parse_WithTableHints`
+- SET 清單 → `ParseWithComma` 解析 `col = expr`；左值用 `Parse_SqlIdentifier`（支援 `t.col`）、
+  右值用 `ParseArithmeticExpr`，組成 `SqlAssignExpr`（或直接借 `Parse_Column_Arithmetic` 的 assign 路徑，先驗證再決定）
+- OUTPUT → 重用 `Parse_OutputClause`（注意 UPDATE 的 OUTPUT 可引用 `inserted.`/`deleted.` 兩個偽資料表，欄位解析不變）
+- FROM → 重用 `Parse_FromSources`（含 JOIN）
+- WHERE → 重用 `Parse_WhereExpression`
+
+實際實作：SET 左值用 `Parse_SqlIdentifier`、右值用共用 `Parse_ValueOrDefault`（由原
+`Parse_InsertRowValue` 改名而來，INSERT 列值與 UPDATE SET 共用），組成 `SqlAssignExpr`。
+
+**MVP 清單**：
+- [x] `UPDATE t SET a = 1`（單一指派）
+- [x] `UPDATE t SET a = 1, b = 'x'`（多指派）
+- [x] `UPDATE t SET a = expr WHERE ...`
+- [x] `UPDATE t SET t.a = s.b FROM t JOIN s ON ...`（UPDATE ... FROM）
+- [x] `SET col = DEFAULT`（共用 `Parse_ValueOrDefault` → `SqlDefaultValue`）
+**第二階段**：
+- [x] `UPDATE TOP (n) [PERCENT] ...`
+- [x] 目標 table hint `WITH (...)`
+- [x] `OUTPUT col [INTO target]`（`inserted.`/`deleted.` 偽資料表）
+- [ ] 複合指派 `+= -= *= /=`（需新運算子，價值低）
+- [ ] CTE 前綴 `WITH cte AS (...) UPDATE ...`
+
+### 1.3 DELETE 細目（已實作 MVP，見 `ParseDeleteSqlTest.cs`）
+
+**AST 設計**：DELETE 無現成 AST，已**新增三處**（照 recipe）：
+`SqlDeleteStatement` 類別 + `SqlType.DeleteStatement` enum 成員 + `Visit_DeleteStatement`（走訪 `FromSources`/`Where`/`Output`）。
+欄位：`Top : SqlTopClause?`、`TableName : string`（`= string.Empty`）、`Withs`、
+`FromSources : List<ISqlExpression>`（`= []`，第二個 FROM 的 join 來源）、`Where : ISqlExpression?`、`Output : SqlOutputClause?`。
+
+**Parser 整合**：`Parse()` dispatch 加 `ParseDeleteStatement`。子句順序（T-SQL）：
+`DELETE [TOP (n) [PERCENT]] [FROM] target [WITH (hints)] [OUTPUT ...] [FROM src[, ...]] [WHERE ...]`
+- 注意 **兩個 FROM**：第一個 `FROM`（可省）後接 target；第二個 `FROM` 才是 join 來源。
+  解析：`DELETE` → optional `TOP` → optional `FROM` → target 名（`Parse_SqlIdentifier`）→ hint → OUTPUT → optional 第二個 `FROM`（`Parse_FromSources`）→ WHERE。
+- 其餘全部重用：`Parse_TopClause` / `Parse_WithTableHints` / `Parse_OutputClause` / `Parse_FromSources` / `Parse_WhereExpression`。
+
+**MVP 清單**：
+- [x] `DELETE FROM t`
+- [x] `DELETE FROM t WHERE ...`
+- [x] `DELETE t WHERE ...`（省略 FROM）
+- [x] `DELETE t FROM t JOIN s ON ... WHERE ...`（DELETE ... 第二個 FROM）
+**第二階段**：
+- [x] `DELETE TOP (n) [PERCENT] ...`
+- [x] 目標 table hint `WITH (...)`、`OUTPUT col [INTO]`（`deleted.`/`inserted.` 偽資料表）
+- [ ] CTE 前綴 `WITH cte AS (...) DELETE ...`
+
+**共同雷點（UPDATE/DELETE 動手前先想）**：
+1. **ReservedWords**：`SET`、`FROM`、`WHERE`、`OUTPUT` 多為既有 / 位置順序消費，預期不需新增；
+   但 `UPDATE`/`DELETE` 之後若有「值/別名位置會吃掉關鍵字」的情況再個別評估（參考 INSERT 的 OUTPUT 教訓）。
+2. **builder 測試零回歸**：`SqlUpdateExpressionBuilderTest`（+ `ToSql()` 字串）必須保持綠燈——additive 設計就是為保它。
+3. **OUTPUT 偽資料表**：UPDATE/DELETE 的 OUTPUT 可用 `deleted.` / `inserted.`，欄位解析沿用 `Parse_OutputClause`（不需改）。
+4. **DELETE 雙 FROM** 是最易錯處，務必先寫「DELETE t FROM t JOIN s」測試守住。
 
 ---
 
@@ -175,9 +249,10 @@
 
 ## 維護建議優先序（未完成項目）
 
-1. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
-2. 🟢 具名 `WINDOW` 子句的延伸：`OVER (existing_window ...)` 行內參照、定義間互相參照、RANK 路徑 bare `OVER name`（見 §4 註）
+1. 🟢 DML 收尾：`INSERT ... EXEC`、CTE 前綴 `WITH cte AS (...) {INSERT|UPDATE|DELETE}`（共同需先擴充 `ParseWithCteStatement` 接受非 SELECT 主體）、UPDATE 複合指派 `+=`（見 §1.1/§1.2/§1.3）
+2. 🟢 `MERGE`（DML 最後一塊）
+3. 🟢 具名 `WINDOW` 子句的延伸：`OVER (existing_window ...)` 行內參照、定義間互相參照、RANK 路徑 bare `OVER name`（見 §4 註）
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。
