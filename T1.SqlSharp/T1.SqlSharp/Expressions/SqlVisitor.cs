@@ -647,6 +647,13 @@ public class SqlVisitor
         AddSqlExpression(expr);
     }
 
+    public virtual void Visit_AlterTableAddElements(SqlAlterTableAddElements expr)
+    {
+        AddSqlExpression(expr);
+        expr.Columns.ForEach(column => column.Accept(this));
+        expr.Constraints.ForEach(constraint => constraint.Accept(this));
+    }
+
     public virtual void Visit_CreateViewStatement(SqlCreateViewStatement expr)
     {
         AddSqlExpression(expr);

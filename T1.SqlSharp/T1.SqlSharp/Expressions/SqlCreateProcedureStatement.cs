@@ -16,6 +16,7 @@ public class SqlCreateProcedureStatement : ISqlExpression
     public bool IsAlter { get; set; }
     public string ProcedureName { get; set; } = string.Empty;
     public List<SqlProcedureParameter> Parameters { get; set; } = [];
+    public List<string> Options { get; set; } = [];
     public required ISqlExpression Body { get; set; }
 
     public string ToSql()
@@ -26,6 +27,10 @@ public class SqlCreateProcedureStatement : ISqlExpression
         if (Parameters.Count > 0)
         {
             sql.Append($" {string.Join(", ", Parameters.Select(FormatParameter))}");
+        }
+        if (Options.Count > 0)
+        {
+            sql.Append($" WITH {string.Join(", ", Options)}");
         }
         sql.Append($" AS {Body.ToSql()}");
         return sql.ToString();

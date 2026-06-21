@@ -3772,6 +3772,16 @@ public class SqlParser
         return identifiers;
     }
 
+    private List<string> Parse_WithOptionList()
+    {
+        if (!TryKeyword("WITH", out _))
+        {
+            return [];
+        }
+
+        return ReadCommaSeparatedIdentifiers();
+    }
+
     private bool TryDefinitionLead(out TextSpan startSpan, out bool isAlter, out bool isOrAlter)
     {
         isAlter = false;
@@ -3822,6 +3832,8 @@ public class SqlParser
             return CreateParseError("Expected target table after ON in CREATE TRIGGER");
         }
 
+        var options = Parse_WithOptionList();
+
         var timing = ParseTriggerTiming();
         if (timing.HasError)
         {
@@ -3852,6 +3864,7 @@ public class SqlParser
             IsAlter = isAlter,
             TriggerName = triggerName.ResultValue.FieldName,
             TableName = target.ResultValue.FieldName,
+            Options = options,
             Timing = timing.ResultValue,
             Events = events.ResultValue,
             Body = body.ResultValue
@@ -4032,6 +4045,8 @@ public class SqlParser
             return returnClause.Error;
         }
 
+        createFunctionStatement.Options = Parse_WithOptionList();
+
         if (!TryKeyword("AS", out _))
         {
             return CreateParseError("Expected AS in CREATE FUNCTION");
@@ -4118,6 +4133,8 @@ public class SqlParser
             return CreateParseError("Expected ) after procedure parameters");
         }
 
+        var options = Parse_WithOptionList();
+
         if (!TryKeyword("AS", out _))
         {
             return CreateParseError("Expected AS in CREATE PROCEDURE");
@@ -4136,6 +4153,7 @@ public class SqlParser
             IsAlter = isAlter,
             ProcedureName = procedureName.ResultValue.FieldName,
             Parameters = parameters.ResultValue,
+            Options = options,
             Body = body.ResultValue
         });
     }
@@ -4306,6 +4324,8 @@ public class SqlParser
                 .ToList();
         }
 
+        var options = Parse_WithOptionList();
+
         if (!TryKeyword("AS", out _))
         {
             return CreateParseError("Expected AS in CREATE VIEW");
@@ -4331,6 +4351,7 @@ public class SqlParser
             IsAlter = isAlter,
             ViewName = viewName.ResultValue.FieldName,
             ColumnNames = columnNames,
+            Options = options,
             Query = query.ResultValue,
             WithCheckOption = withCheckOption
         });
@@ -4515,42 +4536,70 @@ public class SqlParser
 
     private ParseResult<ISqlAlterTableAction> Parse_AlterTableAddAction(bool? withCheck)
     {
-        if (IsPeekKeywords("CONSTRAINT") || IsPeekKeywords("PRIMARY") || IsPeekKeywords("UNIQUE")
-            || IsPeekKeywords("FOREIGN") || IsPeekKeywords("CHECK"))
+        var columns = new List<SqlColumnDefinition>();
+        var constraints = new List<ISqlConstraint>();
+        do
         {
-            var constraint = ParseTableConstraint();
-            if (constraint.HasError)
+            if (IsTableConstraintStart())
             {
-                return constraint.Error;
-            }
+                var constraint = ParseTableConstraint();
+                if (constraint.HasError)
+                {
+                    return constraint.Error;
+                }
 
-            if (constraint.Result == null)
+                if (constraint.Result == null)
+                {
+                    return CreateParseError("Expected constraint after ADD");
+                }
+
+                constraints.Add(constraint.ResultValue);
+            }
+            else
             {
-                return CreateParseError("Expected constraint after ADD");
-            }
+                var column = ParseColumnDefinition();
+                if (column.HasError)
+                {
+                    return column.Error;
+                }
 
+                if (column.Result == null)
+                {
+                    return CreateParseError("Expected column definition after ADD");
+                }
+
+                columns.Add(column.ResultValue);
+            }
+        } while (TryMatch(",", out _));
+
+        if (constraints.Count == 0)
+        {
+            return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableAddColumns
+            {
+                Columns = columns
+            });
+        }
+
+        if (columns.Count == 0 && constraints.Count == 1)
+        {
             return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableAddConstraint
             {
-                Constraint = constraint.ResultValue,
+                Constraint = constraints[0],
                 WithCheck = withCheck
             });
         }
 
-        var columns = ParseWithComma(ParseColumnDefinition);
-        if (columns.HasError)
+        return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableAddElements
         {
-            return columns.Error;
-        }
-
-        if (columns.Result == null || columns.ResultValue.Count == 0)
-        {
-            return CreateParseError("Expected column definition after ADD");
-        }
-
-        return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableAddColumns
-        {
-            Columns = columns.ResultValue
+            Columns = columns,
+            Constraints = constraints
         });
+    }
+
+    private bool IsTableConstraintStart()
+    {
+        return IsPeekKeywords("CONSTRAINT") || IsPeekKeywords("PRIMARY") || IsPeekKeywords("UNIQUE")
+            || IsPeekKeywords("FOREIGN") || IsPeekKeywords("CHECK");
     }
 
     private ParseResult<SqlTruncateTableStatement> ParseTruncateTableStatement()

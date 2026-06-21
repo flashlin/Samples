@@ -20,6 +20,7 @@ public class SqlCreateFunctionStatement : ISqlExpression
     public SqlDataSize? ReturnSize { get; set; }
     public string ReturnTableVariable { get; set; } = string.Empty;
     public List<SqlColumnDefinition> ReturnTableColumns { get; set; } = [];
+    public List<string> Options { get; set; } = [];
     public required ISqlExpression Body { get; set; }
 
     public string ToSql()
@@ -32,6 +33,10 @@ public class SqlCreateFunctionStatement : ISqlExpression
         if (ReturnSize != null)
         {
             sql.Append(ReturnSize.ToSql());
+        }
+        if (Options.Count > 0)
+        {
+            sql.Append($" WITH {string.Join(", ", Options)}");
         }
         sql.Append($" AS {Body.ToSql()}");
         return sql.ToString();

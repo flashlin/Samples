@@ -32,6 +32,7 @@ public class SqlCreateTriggerStatement : ISqlExpression
     public string TableName { get; set; } = string.Empty;
     public SqlTriggerTiming Timing { get; set; }
     public List<SqlTriggerEvent> Events { get; set; } = [];
+    public List<string> Options { get; set; } = [];
     public required ISqlExpression Body { get; set; }
 
     public string ToSql()
@@ -39,6 +40,10 @@ public class SqlCreateTriggerStatement : ISqlExpression
         var sql = new StringBuilder();
         sql.Append(DefinitionLead.ToSql(IsAlter, IsOrAlter, "TRIGGER"));
         sql.Append($"{TriggerName} ON {TableName} ");
+        if (Options.Count > 0)
+        {
+            sql.Append($"WITH {string.Join(", ", Options)} ");
+        }
         sql.Append(TimingToSql());
         sql.Append(' ');
         sql.Append(string.Join(", ", Events.Select(e => e.ToString().ToUpperInvariant())));

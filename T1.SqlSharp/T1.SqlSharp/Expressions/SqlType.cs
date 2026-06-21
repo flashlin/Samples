@@ -100,6 +100,7 @@ public enum SqlType
     AlterTableAlterColumn,
     AlterTableToggleTrigger,
     AlterTableCheckConstraint,
+    AlterTableAddElements,
     CreateViewStatement,
     CreateIndexStatement,
     ExecStatement,

@@ -200,4 +200,38 @@ public class ParseAlterTableSqlTest
             }
         });
     }
+
+    [Test]
+    public void Alter_table_add_mixed_columns_and_constraint()
+    {
+        var sql = "ALTER TABLE Users ADD Age INT, CONSTRAINT PK_Users PRIMARY KEY (Id), Nickname VARCHAR(50)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Users",
+            Action = new SqlAlterTableAddElements
+            {
+                Columns =
+                [
+                    new SqlColumnDefinition { ColumnName = "Age", DataType = "INT" },
+                    new SqlColumnDefinition
+                    {
+                        ColumnName = "Nickname",
+                        DataType = "VARCHAR",
+                        DataSize = new SqlDataSize { Size = "50" }
+                    }
+                ],
+                Constraints =
+                [
+                    new SqlConstraintPrimaryKeyOrUnique
+                    {
+                        ConstraintName = "PK_Users",
+                        ConstraintType = "PRIMARY KEY",
+                        Clustered = "",
+                        Columns = [new SqlConstraintColumn { ColumnName = "Id", Order = "" }]
+                    }
+                ]
+            }
+        });
+    }
 }
