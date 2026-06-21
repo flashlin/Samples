@@ -149,6 +149,16 @@ public class SqlParser
             return declareStatement.Result;
         }
 
+        if (Try(ParseTryCatchStatement, out var tryCatchStatement))
+        {
+            return tryCatchStatement.Result;
+        }
+
+        if (Try(ParseTransactionStatement, out var transactionStatement))
+        {
+            return transactionStatement.Result;
+        }
+
         if (Try(ParseBlockStatement, out var blockStatement))
         {
             return blockStatement.Result;
@@ -4480,6 +4490,161 @@ public class SqlParser
         return ParseArithmeticExpr();
     }
 
+    private static readonly string[] TransactionNameBoundaryKeywords =
+    [
+        "BEGIN", "COMMIT", "ROLLBACK", "SAVE", "END", "ELSE", "GO",
+        "SET", "IF", "WHILE", "RETURN", "DECLARE", "EXEC", "EXECUTE",
+        "SELECT", "INSERT", "UPDATE", "DELETE", "MERGE", "TRUNCATE",
+        "DROP", "ALTER", "CREATE", "WITH"
+    ];
+
+    private ParseResult<List<ISqlExpression>> ParseStatementsUntil(params string[] endKeywords)
+    {
+        var statements = new List<ISqlExpression>();
+        while (!IsPeekKeywords(endKeywords) && !_text.IsEnd())
+        {
+            var statement = Parse();
+            if (statement.HasError)
+            {
+                return statement.Error;
+            }
+
+            statements.Add(statement.ResultValue);
+            TryMatch(";", out _);
+        }
+
+        return CreateParseResult(statements);
+    }
+
+    private ParseResult<SqlTryCatchStatement> ParseTryCatchStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("BEGIN", out var startSpan))
+        {
+            return NoneResult<SqlTryCatchStatement>();
+        }
+
+        if (!TryKeyword("TRY", out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlTryCatchStatement>();
+        }
+
+        var tryStatements = ParseStatementsUntil("END", "TRY");
+        if (tryStatements.HasError)
+        {
+            return tryStatements.Error;
+        }
+
+        if (!TryKeywords(["END", "TRY"], out _))
+        {
+            return CreateParseError("Expected END TRY to close BEGIN TRY block");
+        }
+
+        if (!TryKeywords(["BEGIN", "CATCH"], out _))
+        {
+            return CreateParseError("Expected BEGIN CATCH after END TRY");
+        }
+
+        var catchStatements = ParseStatementsUntil("END", "CATCH");
+        if (catchStatements.HasError)
+        {
+            return catchStatements.Error;
+        }
+
+        if (!TryKeywords(["END", "CATCH"], out _))
+        {
+            return CreateParseError("Expected END CATCH to close BEGIN CATCH block");
+        }
+
+        return CreateParseResult(new SqlTryCatchStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            TryStatements = tryStatements.ResultValue,
+            CatchStatements = catchStatements.ResultValue
+        });
+    }
+
+    private ParseResult<SqlTransactionStatement> ParseTransactionStatement()
+    {
+        var startPosition = _text.Position;
+        if (TryKeyword("BEGIN", out var beginSpan))
+        {
+            if (!TryKeyword("TRANSACTION", out _) && !TryKeyword("TRAN", out _))
+            {
+                _text.Position = startPosition;
+                return NoneResult<SqlTransactionStatement>();
+            }
+
+            return CreateTransactionStatement(SqlTransactionAction.Begin, beginSpan);
+        }
+
+        if (TryKeyword("COMMIT", out var commitSpan))
+        {
+            SkipTransactionKeyword();
+            return CreateTransactionStatement(SqlTransactionAction.Commit, commitSpan);
+        }
+
+        if (TryKeyword("ROLLBACK", out var rollbackSpan))
+        {
+            SkipTransactionKeyword();
+            return CreateTransactionStatement(SqlTransactionAction.Rollback, rollbackSpan);
+        }
+
+        if (TryKeyword("SAVE", out var saveSpan))
+        {
+            if (!TryKeyword("TRANSACTION", out _) && !TryKeyword("TRAN", out _))
+            {
+                _text.Position = startPosition;
+                return NoneResult<SqlTransactionStatement>();
+            }
+
+            return CreateTransactionStatement(SqlTransactionAction.Save, saveSpan);
+        }
+
+        return NoneResult<SqlTransactionStatement>();
+    }
+
+    private void SkipTransactionKeyword()
+    {
+        if (TryKeyword("TRANSACTION", out _) || TryKeyword("TRAN", out _))
+        {
+            return;
+        }
+
+        TryKeyword("WORK", out _);
+    }
+
+    private ParseResult<SqlTransactionStatement> CreateTransactionStatement(SqlTransactionAction action, TextSpan startSpan)
+    {
+        return CreateParseResult(new SqlTransactionStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Action = action,
+            Name = ReadOptionalTransactionName()
+        });
+    }
+
+    private string ReadOptionalTransactionName()
+    {
+        var startPosition = _text.Position;
+        SkipWhiteSpace();
+        if (_text.IsEnd() || IsPeekMatch(";"))
+        {
+            return string.Empty;
+        }
+
+        var word = _text.ReadSqlIdentifier().Word;
+        if (string.IsNullOrEmpty(word)
+            || TransactionNameBoundaryKeywords.Contains(word, StringComparer.OrdinalIgnoreCase))
+        {
+            _text.Position = startPosition;
+            return string.Empty;
+        }
+
+        return word;
+    }
+
     private ParseResult<SqlBlockStatement> ParseBlockStatement()
     {
         var startPosition = _text.Position;
@@ -4495,17 +4660,10 @@ public class SqlParser
             return NoneResult<SqlBlockStatement>();
         }
 
-        var statements = new List<ISqlExpression>();
-        while (!IsPeekKeywords("END") && !_text.IsEnd())
+        var statements = ParseStatementsUntil("END");
+        if (statements.HasError)
         {
-            var statement = Parse();
-            if (statement.HasError)
-            {
-                return statement.Error;
-            }
-
-            statements.Add(statement.ResultValue);
-            TryMatch(";", out _);
+            return statements.Error;
         }
 
         if (!TryKeyword("END", out _))
@@ -4516,7 +4674,7 @@ public class SqlParser
         return CreateParseResult(new SqlBlockStatement
         {
             Span = _text.CreateSpan(startSpan),
-            Statements = statements
+            Statements = statements.ResultValue
         });
     }
 

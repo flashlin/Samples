@@ -108,4 +108,6 @@ public enum SqlType
     CreateProcedureStatement,
     ReturnStatement,
     CreateFunctionStatement,
+    TryCatchStatement,
+    TransactionStatement,
 }

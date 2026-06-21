@@ -702,4 +702,16 @@ public class SqlVisitor
         expr.Parameters.ForEach(parameter => parameter.DefaultValue?.Accept(this));
         expr.Body.Accept(this);
     }
+
+    public virtual void Visit_TryCatchStatement(SqlTryCatchStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.TryStatements.ForEach(statement => statement.Accept(this));
+        expr.CatchStatements.ForEach(statement => statement.Accept(this));
+    }
+
+    public virtual void Visit_TransactionStatement(SqlTransactionStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
 }

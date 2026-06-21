@@ -19,7 +19,7 @@ parser 在 `T1.SqlSharp/ParserLit/SqlParser.cs` + `LinqParser.cs`。
 
 ## Current Progress（目前進度）
 
-測試狀態：**309 passed / 0 failed / 0 build warning**。工作區乾淨（HANDOFF.md 本身為 untracked，不需 commit）。
+測試狀態：**317 passed / 0 failed / 0 build warning**。工作區乾淨（HANDOFF.md 本身為 untracked，不需 commit）。
 
 本 session 已完成（皆 TDD + 已驗證綠燈 + 已 commit）：
 
@@ -56,6 +56,7 @@ parser 在 `T1.SqlSharp/ParserLit/SqlParser.cs` + `LinqParser.cs`。
 | 控制流程（DECLARE/IF/WHILE/BEGIN…END） | _未 commit_ | 新 AST：`SqlDeclareStatement`(+`SqlVariableDeclaration`)、`SqlBlockStatement`、`SqlIfStatement`、`SqlWhileStatement` + 4 `SqlType` + 4 Visit。**body/分支用 `Parse()` 遞迴解析單一語句**（IF/WHILE 的 then/else/body 可為 `BEGIN…END`）；DECLARE 型別用 `ReadSqlIdentifier`+`Parse_DataSize`、值用 `ParseArithmeticExpr`；條件用 `Parse_WhereExpression`。`BEGIN` 對 `TRY`/`TRAN`/`TRANSACTION`/`CATCH` reset position 不攔截（留給未來）。8 測試（`ParseDeclareSqlTest.cs` 3 + `ParseControlFlowSqlTest.cs` 5） |
 | `CREATE PROCEDURE`（MVP） | _未 commit_ | `SqlCreateProcedureStatement` + `SqlProcedureParameter`。`CREATE` 共用 → 消費後若非 `PROCEDURE`/`PROC` reset position。參數含 `(size)`/`= default`/`OUTPUT`，無 paren / 有 paren 皆可；`Parse_ProcedureParameter` 以「名稱須 `@` 開頭、否則 reset」區分無參數（讀到 `AS` 即停）。**body 直接重用 `Parse()`**（單一語句或 `BEGIN…END`）。4 測試 `ParseCreateProcedureSqlTest.cs` |
 | `RETURN` + `CREATE FUNCTION`（MVP） | _未 commit_ | `SqlReturnStatement`（值走 `ParseArithmeticExpr`，bare RETURN 在 `END`/`;`/EOF 前不取值）；`SqlCreateFunctionStatement`（scalar `RETURNS type[(size)]` + inline TVF `RETURNS TABLE AS RETURN (select)`；params 重用 `Parse_ProcedureParameter`、body 重用 `Parse()`）。`CREATE` 共用 → 非 FUNCTION reset position。5 測試（`ParseReturnSqlTest.cs` 2 + `ParseCreateFunctionSqlTest.cs` 3） |
+| `BEGIN TRY…CATCH` + `TRANSACTION` | _未 commit_ | 新 AST：`SqlTryCatchStatement`、`SqlTransactionStatement`(+`SqlTransactionAction` enum) + 2 `SqlType` + 2 Visit。**抽共用 `ParseStatementsUntil(params endKeywords)`** 解析「迴圈 `Parse()` 到指定結尾關鍵字序列」，並 **refactor `ParseBlockStatement` 復用**（行為不變、原 ControlFlow 測試保護）。`ParseTryCatchStatement`：BEGIN 後非 TRY 即 reset；try/catch body 各 `ParseStatementsUntil("END","TRY")`/`("END","CATCH")`。`ParseTransactionStatement`：`BEGIN|SAVE TRAN[SACTION]`、`COMMIT|ROLLBACK [TRAN\|TRANSACTION\|WORK]`，選擇性交易名稱用 `TransactionNameBoundaryKeywords` stop-set 擋後續語句關鍵字（避免吃掉 `COMMIT`/`END` 等）。dispatch 排在 `ParseBlockStatement` 前。8 測試（`ParseTryCatchSqlTest.cs` 2 + `ParseTransactionSqlTest.cs` 6） |
 | 具名 `WINDOW` 子句（MVP） | `84d24ff12` | `SqlWindowClause`/`SqlWindowDefinition` 掛 `SelectStatement.Window`（HAVING 後、ORDER BY 前）+ `func() OVER name`（`SqlOverWindowName`）；**`WINDOW` 已加入 ReservedWords**；改 `ParseOverOrderByClause` 在無 `(` 時 reset 位置，讓新的 bare `OVER name` 能接在後面試；行內延伸/互參照延後（見 todo §4） |
 
 ---
@@ -83,11 +84,11 @@ parser 在 `T1.SqlSharp/ParserLit/SqlParser.cs` + `LinqParser.cs`。
 
 清單在 `plans/todo-tsql.md`，目前剩餘：
 
-1. 🟢 **DDL 續攻**（DROP/TRUNCATE/ALTER TABLE/CREATE VIEW/CREATE INDEX/DROP INDEX ON 已完成）：`CREATE PROCEDURE|FUNCTION|TRIGGER`（較大，含參數 + 語句 body）、ALTER TABLE 第二階段（見 §1.5）。
-2. 🟢 **控制流程續攻**（DECLARE/IF/WHILE/BEGIN…END/RETURN 已完成）：`BEGIN TRY…END TRY / CATCH`、`BEGIN/COMMIT/ROLLBACK TRANSACTION`、`BREAK`/`CONTINUE`、`PRINT`/`THROW`/`RAISERROR`。
+1. 🟢 **DDL 續攻**（DROP/TRUNCATE/ALTER TABLE/CREATE VIEW/CREATE INDEX/DROP INDEX ON / CREATE PROCEDURE/FUNCTION 已完成）：`CREATE TRIGGER`（含 FOR/AFTER/INSTEAD OF + 語句 body）、multi-statement TVF `RETURNS @t TABLE(...)`、ALTER TABLE 第二階段（見 §1.5）。
+2. 🟢 **控制流程續攻**（DECLARE/IF/WHILE/BEGIN…END/RETURN/TRY…CATCH/TRANSACTION 已完成）：`BREAK`/`CONTINUE`、`PRINT`/`THROW`/`RAISERROR`、`DECLARE @t TABLE`、`BEGIN DISTRIBUTED TRANSACTION`。
 3. 🟢 **DML 細項剩餘**（皆小）：`EXEC ('dynamic sql')`、EXEC 具名參數 `@p = val`、MERGE `OUTPUT $action`。
 
-**立即動作建議**：DML + DDL（含 `CREATE PROCEDURE/FUNCTION`）+ 控制流程基礎（含 RETURN）皆已備齊。下一步可挑 **`BEGIN TRY…CATCH` + `TRANSACTION`**（補滿錯誤處理 / 交易），或 **`PRINT`/`THROW`/`RAISERROR`**（簡單），或 multi-statement TVF / `CREATE TRIGGER`。
+**立即動作建議**：DML + DDL（含 `CREATE PROCEDURE/FUNCTION`）+ 控制流程（含 RETURN/TRY…CATCH/TRANSACTION）皆已備齊。下一步可挑 **`PRINT`/`THROW`/`RAISERROR`**（簡單，常與 CATCH 搭配）、**`BREAK`/`CONTINUE`**（WHILE 配套，簡單），或 **`CREATE TRIGGER`** / multi-statement TVF（較大）。
 
 > ⚠️ **commit 雷點**：git repo root 是上層的 `Samples/`，不是 `T1.SqlSharp/`。**絕對不要用 `git add -A` / `git add .`**，會把 repo 根一堆無關 untracked（`openSource/` 內嵌 git repo、`gsoft/`、大型二進位）和本檔（`HANDOFF.md`，刻意 untracked）一起 commit。一律用「明確列出檔案路徑」的 `git add <path...>`。
 
