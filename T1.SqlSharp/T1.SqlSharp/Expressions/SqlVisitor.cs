@@ -814,4 +814,9 @@ public class SqlVisitor
         AddSqlExpression(expr);
         expr.RowCount?.Accept(this);
     }
+
+    public virtual void Visit_SetOptionStatement(SqlSetOptionStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
 }

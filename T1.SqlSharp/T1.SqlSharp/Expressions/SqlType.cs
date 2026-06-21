@@ -126,4 +126,5 @@ public enum SqlType
     ExecArgument,
     CursorOperationStatement,
     FetchStatement,
+    SetOptionStatement,
 }

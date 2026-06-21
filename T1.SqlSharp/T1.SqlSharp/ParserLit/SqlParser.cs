@@ -234,6 +234,11 @@ public class SqlParser
             return permissionStatement.Result;
         }
 
+        if (Try(ParseSetOptionStatement, out var setOptionStatement))
+        {
+            return setOptionStatement.Result;
+        }
+
         if (Try(ParseSetValueStatement, out var setValueStatement))
         {
             return setValueStatement.Result;
@@ -5748,6 +5753,58 @@ public class SqlParser
         }
 
         return CreateParseResult(declaration);
+    }
+
+    private ParseResult<SqlSetOptionStatement> ParseSetOptionStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("SET", out var startSpan))
+        {
+            return NoneResult<SqlSetOptionStatement>();
+        }
+
+        var option = Parse_SqlIdentifier();
+        if (option.Result == null || IsPeekMatch("="))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlSetOptionStatement>();
+        }
+
+        var target = string.Empty;
+        if (!IsPeekKeywords("ON") && !IsPeekKeywords("OFF"))
+        {
+            var targetName = Parse_SqlIdentifier();
+            if (targetName.Result == null)
+            {
+                _text.Position = startPosition;
+                return NoneResult<SqlSetOptionStatement>();
+            }
+
+            target = targetName.ResultValue.FieldName;
+        }
+
+        bool isOn;
+        if (TryKeyword("ON", out _))
+        {
+            isOn = true;
+        }
+        else if (TryKeyword("OFF", out _))
+        {
+            isOn = false;
+        }
+        else
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlSetOptionStatement>();
+        }
+
+        return CreateParseResult(new SqlSetOptionStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Option = option.ResultValue.FieldName,
+            Target = target,
+            IsOn = isOn
+        });
     }
 
     private ParseResult<SqlSetValueStatement> ParseSetValueStatement()
