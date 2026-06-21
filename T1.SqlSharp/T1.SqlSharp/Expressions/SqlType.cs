@@ -63,6 +63,8 @@ public enum SqlType
     WindowFrameClause,
     WindowFrameBound,
     WithinGroupClause,
+    OptionClause,
+    QueryHint,
     HavingClause,
     SetValueStatement,
     NotExpression,

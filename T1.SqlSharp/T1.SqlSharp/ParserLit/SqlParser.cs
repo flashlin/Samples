@@ -11,7 +11,7 @@ public class SqlParser
     private static readonly string[] ReservedWords =
     [
         "FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH",
-        "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING", "INTERSECT", "EXCEPT"
+        "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING", "INTERSECT", "EXCEPT", "OPTION"
     ];
 
     private static string[] DataTypes =
@@ -1052,6 +1052,11 @@ public class SqlParser
         if (Try(ParseUnionSelectClauseList, out var unionSelectClauseList))
         {
             selectStatement.Unions = unionSelectClauseList.ResultValue;
+        }
+
+        if (Try(ParseOptionClause, out var optionClause))
+        {
+            selectStatement.Option = optionClause.ResultValue;
         }
 
         SkipStatementEnd();
@@ -2511,6 +2516,71 @@ public class SqlParser
             Span = _text.CreateSpan(startSpan),
             Columns = orderColumns
         };
+    }
+
+    private ParseResult<SqlOptionClause> ParseOptionClause()
+    {
+        if (!TryKeyword("OPTION", out var startSpan))
+        {
+            return NoneResult<SqlOptionClause>();
+        }
+
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected ( after OPTION");
+        }
+
+        var hints = ParseWithComma(Parse_QueryHint);
+        if (hints.HasError)
+        {
+            return hints.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return new SqlOptionClause
+        {
+            Span = _text.CreateSpan(startSpan),
+            Hints = hints.ResultValue
+        };
+    }
+
+    private ParseResult<SqlQueryHint> Parse_QueryHint()
+    {
+        var startPosition = _text.Position;
+        var nameWords = new List<string>();
+        while (TryReadSqlIdentifier(out var word))
+        {
+            nameWords.Add(word.Word);
+        }
+
+        if (nameWords.Count == 0)
+        {
+            return NoneResult<SqlQueryHint>();
+        }
+
+        var hint = new SqlQueryHint { Name = string.Join(" ", nameWords) };
+        if (IsPeekMatch("("))
+        {
+            var arguments = ParseParenthesesWithComma(ParseArithmeticExpr);
+            if (arguments.HasError)
+            {
+                return arguments.Error;
+            }
+
+            hint.Arguments = arguments.ResultValue;
+            hint.ArgumentsInParentheses = true;
+        }
+        else if (Try(ParseValue, out var argument))
+        {
+            hint.Arguments = [argument.ResultValue];
+        }
+
+        hint.Span = _text.CreateSpan(startPosition);
+        return hint;
     }
 
     private ParseResult<SqlHavingClause> ParseHavingClause()

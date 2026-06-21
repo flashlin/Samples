@@ -578,6 +578,79 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void Option_Recompile()
+    {
+        var sql = $"""
+                   select id from customer
+                   OPTION (RECOMPILE)
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
+            FromSources = [new SqlTableSource { TableName = "customer" }],
+            Option = new SqlOptionClause
+            {
+                Hints = [new SqlQueryHint { Name = "RECOMPILE" }]
+            }
+        });
+    }
+
+    [Test]
+    public void Option_Maxdop_WithNumber()
+    {
+        var sql = $"""
+                   select id from customer
+                   OPTION (MAXDOP 4)
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
+            FromSources = [new SqlTableSource { TableName = "customer" }],
+            Option = new SqlOptionClause
+            {
+                Hints =
+                [
+                    new SqlQueryHint
+                    {
+                        Name = "MAXDOP",
+                        Arguments = [new SqlValue { SqlType = SqlType.IntValue, Value = "4" }]
+                    }
+                ]
+            }
+        });
+    }
+
+    [Test]
+    public void Option_MultipleHints()
+    {
+        var sql = $"""
+                   select id from customer
+                   OPTION (FORCE ORDER, MAXDOP 1, RECOMPILE)
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
+            FromSources = [new SqlTableSource { TableName = "customer" }],
+            Option = new SqlOptionClause
+            {
+                Hints =
+                [
+                    new SqlQueryHint { Name = "FORCE ORDER" },
+                    new SqlQueryHint
+                    {
+                        Name = "MAXDOP",
+                        Arguments = [new SqlValue { SqlType = SqlType.IntValue, Value = "1" }]
+                    },
+                    new SqlQueryHint { Name = "RECOMPILE" }
+                ]
+            }
+        });
+    }
+
+    [Test]
     public void From_ChangeTable_Changes()
     {
         var sql = $"""

@@ -101,6 +101,22 @@ public class SqlVisitor
         {
             expr.Having.Accept(this);
         }
+        if(expr.Option != null)
+        {
+            expr.Option.Accept(this);
+        }
+    }
+
+    public virtual void Visit_OptionClause(SqlOptionClause expr)
+    {
+        AddSqlExpression(expr);
+        expr.Hints.ForEach(x=>x.Accept(this));
+    }
+
+    public virtual void Visit_QueryHint(SqlQueryHint expr)
+    {
+        AddSqlExpression(expr);
+        expr.Arguments.ForEach(x=>x.Accept(this));
     }
 
     public virtual void Visit_SqlToken(SqlToken expr)
