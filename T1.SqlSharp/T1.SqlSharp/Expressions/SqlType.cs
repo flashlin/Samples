@@ -98,6 +98,8 @@ public enum SqlType
     AlterTableDropColumn,
     AlterTableDropConstraint,
     AlterTableAlterColumn,
+    AlterTableToggleTrigger,
+    AlterTableCheckConstraint,
     CreateViewStatement,
     CreateIndexStatement,
     ExecStatement,
@@ -118,4 +120,6 @@ public enum SqlType
     UseStatement,
     GoStatement,
     PermissionStatement,
+    CreateSchemaStatement,
+    CreateDatabaseStatement,
 }

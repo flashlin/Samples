@@ -11,9 +11,16 @@ public class SqlAlterTableAddConstraint : ISqlAlterTableAction
     }
 
     public required ISqlConstraint Constraint { get; set; }
+    public bool? WithCheck { get; set; }
 
     public string ToSql()
     {
-        return $"ADD {Constraint.ToSql()}";
+        var prefix = WithCheck switch
+        {
+            true => "WITH CHECK ",
+            false => "WITH NOCHECK ",
+            _ => string.Empty
+        };
+        return $"{prefix}ADD {Constraint.ToSql()}";
     }
 }

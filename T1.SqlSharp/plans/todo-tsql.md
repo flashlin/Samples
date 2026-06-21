@@ -2,8 +2,8 @@
 
 > 用途：追蹤 parser 目前支援哪些 T-SQL 語法，方便維護與規劃。
 > 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援、`[N/A]` 不適用 T-SQL（不實作）。
-> 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對；338 測試全綠）。
-> 入口：`SqlParser.Parse()` dispatch ~32 種頂層語句（WITH CTE / CREATE TABLE|VIEW|INDEX|PROCEDURE|FUNCTION|TRIGGER / SELECT / INSERT / UPDATE / DELETE / MERGE / TRUNCATE / DROP / ALTER TABLE / EXEC sp_addextendedproperty / EXEC proc / DECLARE / BEGIN TRY…CATCH / TRANSACTION（BEGIN|COMMIT|ROLLBACK|SAVE）/ BEGIN…END / IF / WHILE / RETURN / PRINT / THROW / RAISERROR / BREAK / CONTINUE / USE / GO / GRANT|REVOKE|DENY / SET）。
+> 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對；346 測試全綠）。
+> 入口：`SqlParser.Parse()` dispatch ~34 種頂層語句（WITH CTE / CREATE TABLE|VIEW|INDEX|PROCEDURE|FUNCTION|TRIGGER|SCHEMA|DATABASE / SELECT / INSERT / UPDATE / DELETE / MERGE / TRUNCATE / DROP / ALTER TABLE / EXEC sp_addextendedproperty / EXEC proc / DECLARE / BEGIN TRY…CATCH / TRANSACTION（BEGIN|COMMIT|ROLLBACK|SAVE）/ BEGIN…END / IF / WHILE / RETURN / PRINT / THROW / RAISERROR / BREAK / CONTINUE / USE / GO / GRANT|REVOKE|DENY / SET）。
 
 ---
 
@@ -18,7 +18,7 @@
 - [x] `UPDATE`（parser 可解析：SET 多指派 / 複合指派 `+=` / `t.col` / `DEFAULT` 值 / `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.2）
 - [~] `DELETE`（parser 可解析：`[FROM] t` / 省略 FROM / 第二個 `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.3。已大致完整）
 - [x] `MERGE`（parser 可解析：TOP、target/source（含 hint）、`ON`、三種 WHEN、`AND` 過濾、UPDATE/DELETE/INSERT（含 DEFAULT VALUES）action、OUTPUT、OPTION、CTE 前綴、結尾 `;`，細目見 §1.4）
-- [~] `ALTER TABLE`（支援 ADD 欄位（多）/ ADD CONSTRAINT / DROP COLUMN（多）/ DROP CONSTRAINT（多）/ ALTER COLUMN，細目見 §1.5。剩 `WITH CHECK/NOCHECK`、`{ENABLE|DISABLE} TRIGGER`、ADD 混合欄位+約束）；其他 `ALTER VIEW/PROC/...` 未做
+- [~] `ALTER TABLE`（ADD 欄位（多）/ ADD CONSTRAINT（含 `WITH CHECK/NOCHECK` 前綴）/ DROP COLUMN（多）/ DROP CONSTRAINT（多）/ ALTER COLUMN / `{ENABLE\|DISABLE} TRIGGER {ALL\|names}` / `{CHECK\|NOCHECK} CONSTRAINT {ALL\|names}`，細目見 §1.5。剩 ADD 混合欄位+約束）；其他 `ALTER VIEW/PROC/...` 未做
 - [~] `DROP ...`（支援 `DROP {TABLE|VIEW|PROCEDURE|FUNCTION|INDEX|TRIGGER|SCHEMA|DATABASE|SEQUENCE|TYPE} [IF EXISTS] name1[, ...]`，含 `DROP INDEX ix ON table`（`SqlDropStatement.OnTable`）；`SqlDropStatement` + `SqlDropObjectType` enum。未做舊式 `DROP INDEX table.idx`、多 `idx ON tbl` 對）
 - [x] `TRUNCATE TABLE`（`SqlTruncateTableStatement`）
 - [~] `CREATE VIEW`（支援 `CREATE [OR ALTER] VIEW v [(cols)] AS <query> [WITH CHECK OPTION]`；body 走 `Parse_CteBodyStatement` 故支援 CTE/SELECT。`SqlCreateViewStatement`。未做 `WITH SCHEMABINDING/ENCRYPTION`）
@@ -26,7 +26,7 @@
 - [~] `CREATE PROCEDURE`（`CREATE [OR ALTER] {PROCEDURE|PROC} name [([@p type [(size)] [= default] [OUTPUT]] , ...)] AS <body>`；body 走 `Parse()`（單一語句／`BEGIN…END`）。`SqlCreateProcedureStatement` + `SqlProcedureParameter`。未做 `WITH` 選項、`FOR REPLICATION`、無 BEGIN 的多裸語句 body）
 - [~] `CREATE FUNCTION`（scalar：`RETURNS type[(size)] AS <body>`；inline TVF：`RETURNS TABLE AS RETURN (select)`；multi-statement TVF：`RETURNS @t TABLE (col defs) AS BEGIN…RETURN END`（`ReturnTableVariable`/`ReturnTableColumns`，欄位重用 `ParseColumnDefinition`）。`SqlCreateFunctionStatement`，body 走 `Parse()`、return clause 抽 `ParseFunctionReturnClause`。未做 `WITH SCHEMABINDING`/`RETURNS NULL ON NULL INPUT` 等選項）
 - [~] `CREATE TRIGGER`（`SqlCreateTriggerStatement` + `SqlTriggerTiming`/`SqlTriggerEvent` enum；`CREATE [OR ALTER] TRIGGER name ON target {FOR|AFTER|INSTEAD OF} {INSERT|UPDATE|DELETE}[, ...] AS <body>`，body 重用 `Parse()`。未做 `WITH` 選項、`DDL/LOGON` trigger、`FOR EACH ROW`）
-- [ ] `CREATE SCHEMA` / `DATABASE`
+- [~] `CREATE SCHEMA`（`SqlCreateSchemaStatement`；`CREATE SCHEMA name [AUTHORIZATION owner]`。未做 inline 物件定義 / GRANT 子句）/ `CREATE DATABASE`（`SqlCreateDatabaseStatement`；`CREATE DATABASE name`。未做 `ON`/`LOG ON`/`COLLATE` 等選項）
 - [~] `DECLARE`（`DECLARE @v type [(size)] [= value] [, ...]`；`SqlDeclareStatement` + `SqlVariableDeclaration`。未做 `DECLARE @t TABLE (...)`、`CURSOR`）
 - [x] `IF / ELSE`（`SqlIfStatement`；條件用 `Parse_WhereExpression`、then/else 各為單一語句，body 可為 `BEGIN...END`）
 - [x] `WHILE`（`SqlWhileStatement`；body 為單一語句／`BEGIN...END`）
@@ -187,9 +187,10 @@
 - [x] `DROP COLUMN col [, col2]`
 - [x] `DROP CONSTRAINT name [, name2]`
 - [x] `ALTER COLUMN col newtype [NULL|NOT NULL]`
-**第二階段（可延後）**：
-- [ ] `WITH CHECK / WITH NOCHECK ADD CONSTRAINT ...`、`CHECK/NOCHECK CONSTRAINT all`
-- [ ] `{ENABLE|DISABLE} TRIGGER`
+**第二階段**：
+- [x] `WITH CHECK / WITH NOCHECK ADD CONSTRAINT ...`（additive `SqlAlterTableAddConstraint.WithCheck : bool?`，前綴 `WITH CHECK`/`WITH NOCHECK` 在 ADD 前解析）
+- [x] `CHECK / NOCHECK CONSTRAINT {ALL | name[, ...]}`（`SqlAlterTableCheckConstraint`）
+- [x] `{ENABLE|DISABLE} TRIGGER {ALL | name[, ...]}`（`SqlAlterTableToggleTrigger`）
 - [ ] ADD 同時混合欄位 + 約束（`ADD c INT, CONSTRAINT ...`）
 - [ ] `ALTER COLUMN` 的 `ADD/DROP` 子選項（罕見）
 
@@ -317,10 +318,10 @@
 ## 維護建議優先序（未完成項目）
 
 1. 🟢 控制流程續攻（DECLARE/IF/WHILE/BEGIN…END/RETURN/TRY…CATCH/TRANSACTION/BREAK/CONTINUE/PRINT/THROW/RAISERROR 已完成）：`DECLARE @t TABLE`、`BEGIN DISTRIBUTED TRANSACTION`、`;THROW` 分號語意
-2. 🟢 DDL（CREATE PROCEDURE/FUNCTION（含 multi-statement TVF）/TRIGGER 已完成）：`CREATE SCHEMA`/`DATABASE`、ALTER TABLE 第二階段（見 §1.5）
+2. 🟢 DDL（CREATE PROCEDURE/FUNCTION（含 multi-statement TVF）/TRIGGER/SCHEMA/DATABASE、ALTER TABLE 第二階段已完成）：ADD 混合欄位+約束、`ALTER VIEW/PROC/FUNCTION/TRIGGER`、DATABASE/SCHEMA 進階選項
 3. 🟢 DML 細項剩餘：`EXEC ('dynamic sql')`、EXEC 具名參數 `@p = val`、MERGE `OUTPUT $action`
 4. 🟢 具名 `WINDOW` 子句的延伸：`OVER (existing_window ...)` 行內參照、定義間互相參照、RANK 路徑 bare `OVER name`（見 §4 註）
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）、`MERGE` 解析 MVP（INTO/USING/ON/三種 WHEN/AND/三種 action，2026-06-21）、`TRUNCATE TABLE` + `DROP`（多型別 + IF EXISTS + 多名稱，2026-06-21）、`ALTER TABLE`（ADD/DROP COLUMN、ADD/DROP CONSTRAINT、ALTER COLUMN，2026-06-21）、`CREATE VIEW`（OR ALTER / 欄位清單 / WITH CHECK OPTION，2026-06-21）、`CREATE INDEX`（UNIQUE/CLUSTERED/ASC-DESC/INCLUDE/filtered WHERE，2026-06-21）、`DROP INDEX ix ON table`（2026-06-21）、DML 收尾（MERGE CTE 前綴 + DEFAULT VALUES、UPDATE 複合指派 `+=`、`INSERT ... EXEC`，2026-06-21）、頂層 `EXEC proc [args]`（2026-06-21）、MERGE 第二階段（TOP/hint/OUTPUT/OPTION，2026-06-21）、控制流程（`DECLARE`/`IF…ELSE`/`WHILE`/`BEGIN…END`，2026-06-21）、`CREATE PROCEDURE`（OR ALTER / 參數含 default+OUTPUT / body 重用 Parse()，2026-06-21）、`RETURN` + `CREATE FUNCTION`（scalar + inline TVF，2026-06-21）、`BEGIN TRY…CATCH` + `TRANSACTION`（BEGIN/COMMIT/ROLLBACK/SAVE，2026-06-21）、`PRINT`/`THROW`/`RAISERROR` + `BREAK`/`CONTINUE`（2026-06-21）、`CREATE TRIGGER` + `USE`/`GO`（2026-06-21）、multi-statement TVF + `GRANT`/`REVOKE`/`DENY`（2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）、`MERGE` 解析 MVP（INTO/USING/ON/三種 WHEN/AND/三種 action，2026-06-21）、`TRUNCATE TABLE` + `DROP`（多型別 + IF EXISTS + 多名稱，2026-06-21）、`ALTER TABLE`（ADD/DROP COLUMN、ADD/DROP CONSTRAINT、ALTER COLUMN，2026-06-21）、`CREATE VIEW`（OR ALTER / 欄位清單 / WITH CHECK OPTION，2026-06-21）、`CREATE INDEX`（UNIQUE/CLUSTERED/ASC-DESC/INCLUDE/filtered WHERE，2026-06-21）、`DROP INDEX ix ON table`（2026-06-21）、DML 收尾（MERGE CTE 前綴 + DEFAULT VALUES、UPDATE 複合指派 `+=`、`INSERT ... EXEC`，2026-06-21）、頂層 `EXEC proc [args]`（2026-06-21）、MERGE 第二階段（TOP/hint/OUTPUT/OPTION，2026-06-21）、控制流程（`DECLARE`/`IF…ELSE`/`WHILE`/`BEGIN…END`，2026-06-21）、`CREATE PROCEDURE`（OR ALTER / 參數含 default+OUTPUT / body 重用 Parse()，2026-06-21）、`RETURN` + `CREATE FUNCTION`（scalar + inline TVF，2026-06-21）、`BEGIN TRY…CATCH` + `TRANSACTION`（BEGIN/COMMIT/ROLLBACK/SAVE，2026-06-21）、`PRINT`/`THROW`/`RAISERROR` + `BREAK`/`CONTINUE`（2026-06-21）、`CREATE TRIGGER` + `USE`/`GO`（2026-06-21）、multi-statement TVF + `GRANT`/`REVOKE`/`DENY`（2026-06-21）、`CREATE SCHEMA`/`DATABASE` + ALTER TABLE 第二階段（WITH CHECK/NOCHECK ADD、CHECK/NOCHECK CONSTRAINT、ENABLE/DISABLE TRIGGER，2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。

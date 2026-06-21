@@ -637,6 +637,16 @@ public class SqlVisitor
         expr.Column.Accept(this);
     }
 
+    public virtual void Visit_AlterTableToggleTrigger(SqlAlterTableToggleTrigger expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterTableCheckConstraint(SqlAlterTableCheckConstraint expr)
+    {
+        AddSqlExpression(expr);
+    }
+
     public virtual void Visit_CreateViewStatement(SqlCreateViewStatement expr)
     {
         AddSqlExpression(expr);
@@ -761,6 +771,16 @@ public class SqlVisitor
     }
 
     public virtual void Visit_PermissionStatement(SqlPermissionStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateSchemaStatement(SqlCreateSchemaStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateDatabaseStatement(SqlCreateDatabaseStatement expr)
     {
         AddSqlExpression(expr);
     }

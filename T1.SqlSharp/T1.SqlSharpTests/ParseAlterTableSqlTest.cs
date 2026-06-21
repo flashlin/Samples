@@ -122,4 +122,82 @@ public class ParseAlterTableSqlTest
             }
         });
     }
+
+    [Test]
+    public void Alter_table_enable_trigger_all()
+    {
+        var sql = "ALTER TABLE Users ENABLE TRIGGER ALL";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Users",
+            Action = new SqlAlterTableToggleTrigger { Enable = true, AllTriggers = true }
+        });
+    }
+
+    [Test]
+    public void Alter_table_disable_trigger_named()
+    {
+        var sql = "ALTER TABLE Users DISABLE TRIGGER trg_audit, trg_log";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Users",
+            Action = new SqlAlterTableToggleTrigger
+            {
+                Enable = false,
+                TriggerNames = ["trg_audit", "trg_log"]
+            }
+        });
+    }
+
+    [Test]
+    public void Alter_table_check_constraint_all()
+    {
+        var sql = "ALTER TABLE Users CHECK CONSTRAINT ALL";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Users",
+            Action = new SqlAlterTableCheckConstraint { Check = true, AllConstraints = true }
+        });
+    }
+
+    [Test]
+    public void Alter_table_nocheck_constraint_named()
+    {
+        var sql = "ALTER TABLE Users NOCHECK CONSTRAINT FK_Users_Orders";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Users",
+            Action = new SqlAlterTableCheckConstraint
+            {
+                Check = false,
+                ConstraintNames = ["FK_Users_Orders"]
+            }
+        });
+    }
+
+    [Test]
+    public void Alter_table_with_nocheck_add_constraint()
+    {
+        var sql = "ALTER TABLE Orders WITH NOCHECK ADD CONSTRAINT FK_Orders_Users FOREIGN KEY (UserId) REFERENCES Users (Id)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Orders",
+            Action = new SqlAlterTableAddConstraint
+            {
+                WithCheck = false,
+                Constraint = new SqlConstraintForeignKey
+                {
+                    ConstraintName = "FK_Orders_Users",
+                    Columns = [new SqlConstraintColumn { ColumnName = "UserId", Order = "" }],
+                    ReferencedTableName = "Users",
+                    RefColumn = "Id"
+                }
+            }
+        });
+    }
 }

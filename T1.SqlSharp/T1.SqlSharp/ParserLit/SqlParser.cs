@@ -99,6 +99,11 @@ public class SqlParser
             return createTriggerStatement.Result;
         }
 
+        if (Try(ParseCreateSchemaOrDatabaseStatement, out var createSchemaOrDatabaseStatement))
+        {
+            return createSchemaOrDatabaseStatement;
+        }
+
         if (Try(() => ParseSelectStatement(), out var selectStatement))
         {
             return selectStatement.Result;
@@ -3575,6 +3580,61 @@ public class SqlParser
         return NoneResult<SqlLoopControlStatement>();
     }
 
+    private ParseResult<ISqlExpression> ParseCreateSchemaOrDatabaseStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<ISqlExpression>();
+        }
+
+        if (TryKeyword("SCHEMA", out _))
+        {
+            var schemaName = Parse_SqlIdentifier();
+            if (schemaName.Result == null)
+            {
+                return CreateParseError("Expected schema name after CREATE SCHEMA");
+            }
+
+            var authorization = string.Empty;
+            if (TryKeyword("AUTHORIZATION", out _))
+            {
+                var owner = Parse_SqlIdentifier();
+                if (owner.Result == null)
+                {
+                    return CreateParseError("Expected owner after AUTHORIZATION");
+                }
+
+                authorization = owner.ResultValue.FieldName;
+            }
+
+            return CreateParseResult<ISqlExpression>(new SqlCreateSchemaStatement
+            {
+                Span = _text.CreateSpan(startSpan),
+                SchemaName = schemaName.ResultValue.FieldName,
+                Authorization = authorization
+            });
+        }
+
+        if (TryKeyword("DATABASE", out _))
+        {
+            var databaseName = Parse_SqlIdentifier();
+            if (databaseName.Result == null)
+            {
+                return CreateParseError("Expected database name after CREATE DATABASE");
+            }
+
+            return CreateParseResult<ISqlExpression>(new SqlCreateDatabaseStatement
+            {
+                Span = _text.CreateSpan(startSpan),
+                DatabaseName = databaseName.ResultValue.FieldName
+            });
+        }
+
+        _text.Position = startPosition;
+        return NoneResult<ISqlExpression>();
+    }
+
     private ParseResult<SqlPermissionStatement> ParsePermissionStatement()
     {
         if (!TryParsePermissionAction(out var action, out var startSpan))
@@ -4230,9 +4290,19 @@ public class SqlParser
 
     private ParseResult<ISqlAlterTableAction> Parse_AlterTableAction()
     {
+        bool? withCheck = null;
+        if (TryKeywords(["WITH", "CHECK"], out _))
+        {
+            withCheck = true;
+        }
+        else if (TryKeywords(["WITH", "NOCHECK"], out _))
+        {
+            withCheck = false;
+        }
+
         if (TryKeyword("ADD", out _))
         {
-            return Parse_AlterTableAddAction();
+            return Parse_AlterTableAddAction(withCheck);
         }
 
         if (TryKeywords(["DROP", "COLUMN"], out _))
@@ -4282,10 +4352,88 @@ public class SqlParser
             });
         }
 
+        if (TryKeyword("CHECK", out _))
+        {
+            return Parse_AlterTableCheckConstraint(check: true);
+        }
+
+        if (TryKeyword("NOCHECK", out _))
+        {
+            return Parse_AlterTableCheckConstraint(check: false);
+        }
+
+        if (TryKeyword("ENABLE", out _))
+        {
+            return Parse_AlterTableToggleTrigger(enable: true);
+        }
+
+        if (TryKeyword("DISABLE", out _))
+        {
+            return Parse_AlterTableToggleTrigger(enable: false);
+        }
+
         return NoneResult<ISqlAlterTableAction>();
     }
 
-    private ParseResult<ISqlAlterTableAction> Parse_AlterTableAddAction()
+    private ParseResult<ISqlAlterTableAction> Parse_AlterTableCheckConstraint(bool check)
+    {
+        if (!TryKeyword("CONSTRAINT", out _))
+        {
+            return CreateParseError("Expected CONSTRAINT after CHECK/NOCHECK");
+        }
+
+        if (TryKeyword("ALL", out _))
+        {
+            return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableCheckConstraint
+            {
+                Check = check,
+                AllConstraints = true
+            });
+        }
+
+        var constraintNames = ParseWithComma(Parse_SqlIdentifier);
+        if (constraintNames.HasError)
+        {
+            return constraintNames.Error;
+        }
+
+        return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableCheckConstraint
+        {
+            Check = check,
+            ConstraintNames = constraintNames.ResultValue.Select(name => name.FieldName).ToList()
+        });
+    }
+
+    private ParseResult<ISqlAlterTableAction> Parse_AlterTableToggleTrigger(bool enable)
+    {
+        if (!TryKeyword("TRIGGER", out _))
+        {
+            return CreateParseError("Expected TRIGGER after ENABLE/DISABLE");
+        }
+
+        if (TryKeyword("ALL", out _))
+        {
+            return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableToggleTrigger
+            {
+                Enable = enable,
+                AllTriggers = true
+            });
+        }
+
+        var triggerNames = ParseWithComma(Parse_SqlIdentifier);
+        if (triggerNames.HasError)
+        {
+            return triggerNames.Error;
+        }
+
+        return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableToggleTrigger
+        {
+            Enable = enable,
+            TriggerNames = triggerNames.ResultValue.Select(name => name.FieldName).ToList()
+        });
+    }
+
+    private ParseResult<ISqlAlterTableAction> Parse_AlterTableAddAction(bool? withCheck)
     {
         if (IsPeekKeywords("CONSTRAINT") || IsPeekKeywords("PRIMARY") || IsPeekKeywords("UNIQUE")
             || IsPeekKeywords("FOREIGN") || IsPeekKeywords("CHECK"))
@@ -4303,7 +4451,8 @@ public class SqlParser
 
             return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableAddConstraint
             {
-                Constraint = constraint.ResultValue
+                Constraint = constraint.ResultValue,
+                WithCheck = withCheck
             });
         }
 
