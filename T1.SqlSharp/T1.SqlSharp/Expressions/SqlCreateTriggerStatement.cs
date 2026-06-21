@@ -32,6 +32,7 @@ public class SqlCreateTriggerStatement : ISqlExpression
     public string TableName { get; set; } = string.Empty;
     public SqlTriggerTiming Timing { get; set; }
     public List<SqlTriggerEvent> Events { get; set; } = [];
+    public List<string> DdlEvents { get; set; } = [];
     public List<string> Options { get; set; } = [];
     public required ISqlExpression Body { get; set; }
 
@@ -46,7 +47,10 @@ public class SqlCreateTriggerStatement : ISqlExpression
         }
         sql.Append(TimingToSql());
         sql.Append(' ');
-        sql.Append(string.Join(", ", Events.Select(e => e.ToString().ToUpperInvariant())));
+        var eventList = DdlEvents.Count > 0
+            ? string.Join(", ", DdlEvents)
+            : string.Join(", ", Events.Select(e => e.ToString().ToUpperInvariant()));
+        sql.Append(eventList);
         sql.Append($" AS {Body.ToSql()}");
         return sql.ToString();
     }

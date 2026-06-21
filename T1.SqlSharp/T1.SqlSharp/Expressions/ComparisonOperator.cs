@@ -13,5 +13,7 @@ public enum ComparisonOperator
     In,
     Between,
     Is,
-    IsNot
+    IsNot,
+    IsDistinctFrom,
+    IsNotDistinctFrom
 }

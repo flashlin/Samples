@@ -2,8 +2,8 @@
 
 > 用途：追蹤 parser 目前支援哪些 T-SQL 語法，方便維護與規劃。
 > 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援、`[N/A]` 不適用 T-SQL（不實作）。
-> 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對；504 測試全綠）。
-> 入口：`SqlParser.Parse()` dispatch ~77 種頂層語句（WITH CTE / CREATE TABLE|VIEW|INDEX|PROCEDURE|FUNCTION|TRIGGER|SCHEMA|DATABASE / SELECT / INSERT / UPDATE / DELETE / MERGE / TRUNCATE / DROP / ALTER TABLE / EXEC sp_addextendedproperty / EXEC proc / DECLARE / BEGIN TRY…CATCH / TRANSACTION（BEGIN|COMMIT|ROLLBACK|SAVE）/ BEGIN…END / IF / WHILE / RETURN / PRINT / THROW / RAISERROR / BREAK / CONTINUE / OPEN|CLOSE|DEALLOCATE / FETCH / WAITFOR / USE / GO / GRANT|REVOKE|DENY / SET（變數賦值 + session 選項 ON/OFF/取值））。
+> 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對；538 測試全綠）。
+> 入口：`SqlParser.Parse()` dispatch ~93 種頂層語句（WITH CTE / CREATE TABLE|VIEW|INDEX|PROCEDURE|FUNCTION|TRIGGER|SCHEMA|DATABASE / SELECT / INSERT / UPDATE / DELETE / MERGE / TRUNCATE / DROP / ALTER TABLE / EXEC sp_addextendedproperty / EXEC proc / DECLARE / BEGIN TRY…CATCH / TRANSACTION（BEGIN|COMMIT|ROLLBACK|SAVE）/ BEGIN…END / IF / WHILE / RETURN / PRINT / THROW / RAISERROR / BREAK / CONTINUE / OPEN|CLOSE|DEALLOCATE / FETCH / WAITFOR / USE / GO / GRANT|REVOKE|DENY / SET（變數賦值 + session 選項 ON/OFF/取值））。
 
 ---
 
@@ -29,7 +29,7 @@
 - [~] `CREATE INDEX`（支援 `CREATE [UNIQUE] [CLUSTERED|NONCLUSTERED] [COLUMNSTORE] INDEX ix ON t [(col [ASC|DESC], ...)] [INCLUDE (cols)] [WHERE filter] [WITH (options)]`；含 clustered/nonclustered COLUMNSTORE（`IsColumnstore`，欄位可省）、`SPATIAL`（`IsSpatial`）；重用 `ParseColumnsAscDesc`。`SqlCreateIndexStatement`）
 - [~] `CREATE PROCEDURE` / `ALTER PROCEDURE`（`{CREATE [OR ALTER]|ALTER} {PROCEDURE|PROC} name [([@p type [(size)] [= default] [OUTPUT]] , ...)] AS <body>`；AS 前 `WITH opt[, ...]`（ENCRYPTION/RECOMPILE…）入 `Options`；body 走 `Parse()`（單一語句／`BEGIN…END`）。含多字 `EXECUTE AS {CALLER|OWNER|SELF}`。`SqlCreateProcedureStatement`（`IsAlter` 旗標）+ `SqlProcedureParameter`。未做 `FOR REPLICATION`、無 BEGIN 的多裸語句 body）
 - [~] `CREATE FUNCTION` / `ALTER FUNCTION`（scalar：`RETURNS type[(size)] AS <body>`；inline TVF：`RETURNS TABLE AS RETURN (select)`；multi-statement TVF：`RETURNS @t TABLE (col defs) AS BEGIN…RETURN END`（`ReturnTableVariable`/`ReturnTableColumns`，欄位重用 `ParseColumnDefinition`）。AS 前 `WITH opt[, ...]`（SCHEMABINDING…）入 `Options`。`SqlCreateFunctionStatement`（`IsAlter` 旗標），body 走 `Parse()`、return clause 抽 `ParseFunctionReturnClause`。含多字選項 `RETURNS NULL ON NULL INPUT`/`CALLED ON NULL INPUT`）
-- [~] `CREATE TRIGGER` / `ALTER TRIGGER`（`SqlCreateTriggerStatement`（`IsAlter` 旗標）+ `SqlTriggerTiming`/`SqlTriggerEvent` enum；`{CREATE [OR ALTER]|ALTER} TRIGGER name ON target {FOR|AFTER|INSTEAD OF} {INSERT|UPDATE|DELETE}[, ...] AS <body>`；ON 後、timing 前 `WITH opt[, ...]`（ENCRYPTION…）入 `Options`；body 重用 `Parse()`。未做 `DDL/LOGON` trigger、`FOR EACH ROW`）
+- [~] `CREATE TRIGGER` / `ALTER TRIGGER`（`SqlCreateTriggerStatement`（`IsAlter` 旗標）+ `SqlTriggerTiming`/`SqlTriggerEvent` enum；`{CREATE [OR ALTER]|ALTER} TRIGGER name ON target {FOR|AFTER|INSTEAD OF} {INSERT|UPDATE|DELETE}[, ...] AS <body>`；ON 後、timing 前 `WITH opt[, ...]`（ENCRYPTION…）入 `Options`；body 重用 `Parse()`。DDL/LOGON trigger：`ON {DATABASE|ALL SERVER}` + DDL 事件名（`DdlEvents` 字串清單，如 `CREATE_TABLE`/`LOGON`）已支援。未做 `FOR EACH ROW`）
 - [~] `CREATE SCHEMA`（`SqlCreateSchemaStatement`；`CREATE SCHEMA name [AUTHORIZATION owner]`。未做 inline 物件定義 / GRANT 子句）/ `CREATE DATABASE`（`SqlCreateDatabaseStatement`；`CREATE DATABASE name [ON [PRIMARY] (filespec)[, ...]] [LOG ON (filespec)[, ...]] [COLLATE x]`，filespec 走 `ReadFileSpecList` 收集 `(K = V[, ...])`。未做 `SIZE = 10MB` 帶單位值、FILEGROUP、`CONTAINMENT`/`WITH` 資料庫選項）
 - [~] `DECLARE`（`DECLARE @v type [(size)] [= value] [, ...]`；`@t TABLE (col defs [, table constraints])` 表變數（`IsTable`/`TableColumns`/`TableConstraints`，新 `Parse_ParenthesizedTableElements` 同時收欄位與 table 約束 PK/UNIQUE/CHECK/FK，`IsTableConstraintStart` 分流）；`{@c|name} CURSOR [opt...] [FOR <select>]` 游標（`IsCursor`/`CursorSource`/`CursorOptions`，`Parse_CursorDeclaration`，選項 LOCAL/GLOBAL/SCROLL/STATIC/KEYSET/DYNAMIC/FAST_FORWARD/READ_ONLY… 走 `TryMatchCursorOption`）；`SqlDeclareStatement` + `SqlVariableDeclaration`。未做表變數內 table 約束、ISO 式前置 `INSENSITIVE SCROLL CURSOR`）
 - [~] 游標操作 `OPEN` / `CLOSE` / `DEALLOCATE`（單一 `SqlCursorOperationStatement` + `SqlCursorOperation` enum）、`FETCH [NEXT|PRIOR|FIRST|LAST|ABSOLUTE n|RELATIVE n] [FROM] cur [INTO @v[, ...]]`（`SqlFetchStatement`）；`@@FETCH_STATUS` 等全域變數已可用於 WHILE 條件（見 §5）。未做 `GLOBAL` 游標
@@ -200,6 +200,7 @@
 - [x] `ALTER TABLE t REBUILD [WITH (options)]`（`SqlAlterTableRebuild`）
 - [x] `ALTER TABLE t SET (option = value[, ...])`（`SqlAlterTableSet`，如 `SYSTEM_VERSIONING = ON`；`ReadParenthesizedAssignmentList`）
 - [x] `ALTER TABLE t SWITCH [PARTITION n] TO target [PARTITION m]`（`SqlAlterTableSwitch`）
+- [x] `ALTER TABLE t {ADD PERIOD FOR SYSTEM_TIME (c1, c2) | DROP PERIOD FOR SYSTEM_TIME}`（`SqlAlterTablePeriod`，分流於 ADD/DROP COLUMN 前）
 - [ ] `ALTER COLUMN` 的 `ADD/DROP` 子選項（罕見）
 
 ---
@@ -270,7 +271,11 @@
 - [x] 算術 `+ - * /`
 - [x] 位元 `& | ^`、一元 `~`
 - [x] 比較 `= <> != > < >= <=`
-- [x] `LIKE` / `NOT LIKE`
+- [x] `LIKE` / `NOT LIKE`（含 `ESCAPE 'c'`，`SqlConditionExpression.Escape`）
+- [x] 量化比較 `{> | < | = | ...} {ALL | ANY | SOME} (subquery)`（`SqlQuantifiedExpr`，在 `Parse_ConditionExpr` 比較運算子右側偵測 quantifier + `(子查詢)`）
+- [x] `IS DISTINCT FROM` / `IS NOT DISTINCT FROM`（`ComparisonOperator.IsDistinctFrom`/`IsNotDistinctFrom`，多字運算子排在 `IS`/`IS NOT` 前比對）
+- [x] 變數指派 `SELECT @v = expr` / `UPDATE t SET @v = expr`（既有 `SqlAssignExpr` 路徑，補回歸測試）
+- [x] Unicode 字串字面值 `N'...'`（既有 field/value reader 保留 `N` 前綴，補回歸測試）
 - [x] `IN (value list)`
 - [x] `IN (subquery)`（既有功能；2026-06-21 補測試驗證並加回歸守護）
 - [x] `BETWEEN ... AND ...`
@@ -324,12 +329,24 @@
 - [x] `CREATE TYPE`（`SqlCreateTypeStatement`；`CREATE TYPE name {FROM base[(size)] | AS TABLE (col defs)}`，表型別欄位重用 `Parse_ParenthesizedColumnDefinitions`。`DROP TYPE` 已在 enum）
 - [x] `CREATE SYNONYM name FOR target`（`SqlCreateSynonymStatement`）/ `DROP SYNONYM`（`SqlDropObjectType.Synonym`）
 - [~] `ALTER INDEX {ix|ALL} ON t {REBUILD | REORGANIZE | DISABLE | SET (opt = val[, ...])}`（`SqlAlterIndexStatement`，`SET` 選項走 `ReadParenthesizedAssignmentList`）。未做 `REBUILD WITH (...)`/`PARTITION` 選項
-- [~] `ALTER DATABASE name SET setting [value]`（`SqlAlterDatabaseStatement`；如 `SET RECOVERY SIMPLE`/`SET SINGLE_USER`。未做 `MODIFY`/`ADD FILE`/多 token 值）
+- [~] `ALTER DATABASE name {SET setting [value] | ADD FILE (spec) | ADD LOG FILE (spec) | MODIFY FILE (spec)}`（`SqlAlterDatabaseStatement` + `FileAction`/`FileSpec`，filespec 重用 `ReadFileSpecList`）。未做多 token SET 值
 - [x] `ALTER SCHEMA name TRANSFER [OBJECT::]obj`（`SqlAlterSchemaStatement`）
 - [x] `ALTER AUTHORIZATION ON [class::]securable TO principal`（`SqlAlterAuthorizationStatement`，含 `OBJECT::`/`SCHEMA::` 等 class 前綴。未做 `TO SCHEMA OWNER`）
 - [x] `CREATE CERTIFICATE name [FROM FILE = 'x'] [ENCRYPTION BY PASSWORD = 'x'] [WITH opt = val[, ...]]`（`SqlCreateCertificateStatement`，clause loop）
 - [x] `CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'x'`（`SqlCreateMasterKeyStatement`）
 - [x] `SETUSER ['user']`（`SqlSetUserStatement`）
+- [x] PolyBase/外部物件：`CREATE EXTERNAL {TABLE (cols) | DATA SOURCE | FILE FORMAT} ... WITH (opt = val[, ...])`（單一 `SqlCreateExternalStatement` + `Kind`）
+- [x] `CREATE SECURITY POLICY name ADD {FILTER|BLOCK} PREDICATE fn(args) ON table[, ...] [WITH (STATE = ON)]`（`SqlCreateSecurityPolicyStatement`）
+- [x] `CREATE [DATABASE SCOPED] CREDENTIAL name WITH IDENTITY = 'x'[, SECRET = 'y']`（`SqlCreateCredentialStatement`，`IsDatabaseScoped`；dispatch 置於 CREATE DATABASE 前）
+- [x] `CREATE ASSEMBLY name [AUTHORIZATION o] [FROM 'x'] [WITH opt[, ...]]`（`SqlCreateAssemblyStatement`）
+- [x] `CREATE {RULE|DEFAULT} name AS expr`（單一 `SqlCreateRuleOrDefaultStatement` + `IsRule`）
+- [x] `CREATE AGGREGATE name (params) RETURNS type [EXTERNAL NAME asm.cls]`（`SqlCreateAggregateStatement`）
+- [x] Service Broker `CREATE QUEUE name [WITH (opt = val[, ...])]`（`SqlCreateQueueStatement`）/ `CREATE SERVICE name ON QUEUE q [(contract)]`（`SqlCreateServiceStatement`）/ `CREATE CONTRACT name (msg SENT BY X)`（`SqlCreateContractStatement`）/ `CREATE MESSAGE TYPE name [VALIDATION = X]`（`SqlCreateMessageTypeStatement`）
+- [x] Service Broker DML `SEND ON CONVERSATION @h [MESSAGE TYPE mt] (@body)`（`SqlSendStatement`）/ `RECEIVE [TOP (n)] * FROM q`（`SqlReceiveStatement`）
+- [x] `CREATE ENDPOINT name [STATE = x] AS protocol (opts)`（`SqlCreateEndpointStatement`）
+- [x] Resource Governor `CREATE {WORKLOAD GROUP|RESOURCE POOL} name [WITH (opts)]`（單一 `SqlCreateResourceGovernorObjectStatement` + `Kind`）
+- [x] Always Encrypted `CREATE COLUMN {MASTER KEY|ENCRYPTION KEY} name WITH (opts)`（`SqlCreateColumnKeyStatement` + `IsMasterKey`）
+- [x] `READTEXT` / `WRITETEXT` / `UPDATETEXT`（單一 `SqlTextPointerStatement`，引數收集至 `;`/EOF）
 - [x] `CREATE FULLTEXT CATALOG name [AS DEFAULT] [AUTHORIZATION owner]`（`SqlCreateFulltextCatalogStatement`）/ `CREATE FULLTEXT STOPLIST name [FROM SYSTEM STOPLIST|src]`（`SqlCreateFulltextStoplistStatement`）
 - [x] `CREATE SYMMETRIC KEY name [WITH opt[, ...]] [ENCRYPTION BY ...]`（`SqlCreateSymmetricKeyStatement`）
 - [x] `{OPEN|CLOSE} SYMMETRIC KEY name [DECRYPTION BY ...]` / `{OPEN|CLOSE} ALL SYMMETRIC KEYS`（`SqlSymmetricKeyStatement`；dispatch 置於游標 OPEN/CLOSE 前，非 SYMMETRIC 則 reset 落回游標操作）

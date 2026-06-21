@@ -7,6 +7,34 @@ namespace T1.SqlSharpTests;
 public class ParseAlterTableSqlTest
 {
     [Test]
+    public void Alter_table_add_period()
+    {
+        var sql = "ALTER TABLE Orders ADD PERIOD FOR SYSTEM_TIME (ValidFrom, ValidTo)";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Orders",
+            Action = new SqlAlterTablePeriod
+            {
+                IsAdd = true,
+                Columns = ["ValidFrom", "ValidTo"]
+            }
+        });
+    }
+
+    [Test]
+    public void Alter_table_drop_period()
+    {
+        var sql = "ALTER TABLE Orders DROP PERIOD FOR SYSTEM_TIME";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlAlterTableStatement
+        {
+            TableName = "Orders",
+            Action = new SqlAlterTablePeriod { IsAdd = false }
+        });
+    }
+
+    [Test]
     public void Alter_table_rebuild()
     {
         var sql = "ALTER TABLE Orders REBUILD";

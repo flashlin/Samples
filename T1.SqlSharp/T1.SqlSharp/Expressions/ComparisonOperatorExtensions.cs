@@ -18,6 +18,8 @@ public static class ComparisonOperatorExtensions
             ComparisonOperator.Is => "IS",
             ComparisonOperator.IsNot => "IS NOT",
             ComparisonOperator.NotLike=> "NOT LIKE",
+            ComparisonOperator.IsDistinctFrom => "IS DISTINCT FROM",
+            ComparisonOperator.IsNotDistinctFrom => "IS NOT DISTINCT FROM",
             _ => throw new NotImplementedException()
         };
     }
@@ -39,6 +41,8 @@ public static class ComparisonOperatorExtensions
             "IS" => ComparisonOperator.Is,
             "IS NOT" => ComparisonOperator.IsNot,
             "NOT LIKE" => ComparisonOperator.NotLike,
+            "IS DISTINCT FROM" => ComparisonOperator.IsDistinctFrom,
+            "IS NOT DISTINCT FROM" => ComparisonOperator.IsNotDistinctFrom,
             _ => throw new NotImplementedException()
         };
     }

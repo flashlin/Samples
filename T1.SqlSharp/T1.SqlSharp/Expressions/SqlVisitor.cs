@@ -1030,4 +1030,94 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
     }
+
+    public virtual void Visit_QuantifiedExpr(SqlQuantifiedExpr expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateExternalStatement(SqlCreateExternalStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateSecurityPolicyStatement(SqlCreateSecurityPolicyStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateCredentialStatement(SqlCreateCredentialStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterTablePeriod(SqlAlterTablePeriod expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateRuleOrDefaultStatement(SqlCreateRuleOrDefaultStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateAssemblyStatement(SqlCreateAssemblyStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateAggregateStatement(SqlCreateAggregateStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateQueueStatement(SqlCreateQueueStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateServiceStatement(SqlCreateServiceStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateContractStatement(SqlCreateContractStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateMessageTypeStatement(SqlCreateMessageTypeStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_SendStatement(SqlSendStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_ReceiveStatement(SqlReceiveStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateResourceGovernorObjectStatement(SqlCreateResourceGovernorObjectStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateEndpointStatement(SqlCreateEndpointStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateColumnKeyStatement(SqlCreateColumnKeyStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_TextPointerStatement(SqlTextPointerStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
 }

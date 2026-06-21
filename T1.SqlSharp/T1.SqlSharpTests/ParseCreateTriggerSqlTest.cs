@@ -32,6 +32,44 @@ public class ParseCreateTriggerSqlTest
     }
 
     [Test]
+    public void Create_ddl_trigger_on_database()
+    {
+        var sql = "CREATE TRIGGER trg ON DATABASE FOR CREATE_TABLE AS SET @x = 1";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateTriggerStatement
+        {
+            TriggerName = "trg",
+            TableName = "DATABASE",
+            Timing = SqlTriggerTiming.For,
+            DdlEvents = ["CREATE_TABLE"],
+            Body = new SqlSetValueStatement
+            {
+                Name = new SqlFieldExpr { FieldName = "@x" },
+                Value = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+            }
+        });
+    }
+
+    [Test]
+    public void Create_ddl_trigger_on_all_server()
+    {
+        var sql = "CREATE TRIGGER trg ON ALL SERVER FOR LOGON AS SET @x = 1";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlCreateTriggerStatement
+        {
+            TriggerName = "trg",
+            TableName = "ALL SERVER",
+            Timing = SqlTriggerTiming.For,
+            DdlEvents = ["LOGON"],
+            Body = new SqlSetValueStatement
+            {
+                Name = new SqlFieldExpr { FieldName = "@x" },
+                Value = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+            }
+        });
+    }
+
+    [Test]
     public void Create_for_insert_update_trigger()
     {
         var sql = "CREATE TRIGGER trg ON dbo.Customers FOR INSERT, UPDATE AS SET @x = 1";

@@ -13,9 +13,16 @@ public class SqlAlterDatabaseStatement : ISqlExpression
     public string DatabaseName { get; set; } = string.Empty;
     public string Setting { get; set; } = string.Empty;
     public string SettingValue { get; set; } = string.Empty;
+    public string FileAction { get; set; } = string.Empty;
+    public string FileSpec { get; set; } = string.Empty;
 
     public string ToSql()
     {
+        if (!string.IsNullOrEmpty(FileAction))
+        {
+            return $"ALTER DATABASE {DatabaseName} {FileAction} {FileSpec}";
+        }
+
         var sql = $"ALTER DATABASE {DatabaseName} SET {Setting}";
         return string.IsNullOrEmpty(SettingValue) ? sql : $"{sql} {SettingValue}";
     }
