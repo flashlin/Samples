@@ -101,7 +101,7 @@
 - [x] 比較 `= <> != > < >= <=`
 - [x] `LIKE` / `NOT LIKE`
 - [x] `IN (value list)`
-- [ ] `IN (subquery)`（未驗證／未支援）
+- [x] `IN (subquery)`（既有功能；2026-06-21 補測試驗證並加回歸守護）
 - [x] `BETWEEN ... AND ...`
 - [x] `IS NULL` / `IS NOT NULL`
 - [x] `EXISTS (subquery)`
@@ -156,7 +156,7 @@
 ## 維護建議優先序（未完成項目）
 
 1. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
-2. 🟢 其餘小單點：`TABLESAMPLE`、`FOR XML RAW/EXPLICIT`、`IN (subquery)`、UNION 後 top-level `ORDER BY`、具名 `WINDOW` 子句
+2. 🟢 其餘小單點：`TABLESAMPLE`、`FOR XML RAW/EXPLICIT`、UNION 後 top-level `ORDER BY`、具名 `WINDOW` 子句
 
 ✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）
 

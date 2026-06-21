@@ -2169,6 +2169,40 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void Where_id_in_plain_subquery()
+    {
+        var sql = $"""
+                   SELECT id FROM customer
+                   where id in (select customer_id from orders where amount > 100)
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
+            FromSources = [new SqlTableSource { TableName = "customer" }],
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "id" },
+                ComparisonOperator = ComparisonOperator.In,
+                Right = new SqlParenthesizedExpression
+                {
+                    Inner = new SelectStatement
+                    {
+                        Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "customer_id" } }],
+                        FromSources = [new SqlTableSource { TableName = "orders" }],
+                        Where = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpr { FieldName = "amount" },
+                            ComparisonOperator = ComparisonOperator.GreaterThan,
+                            Right = new SqlValue { SqlType = SqlType.IntValue, Value = "100" }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    [Test]
     public void Where_id_in_select_from_custom_function()
     {
         var sql = $"""
