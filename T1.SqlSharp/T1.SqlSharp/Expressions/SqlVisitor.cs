@@ -590,4 +590,14 @@ public class SqlVisitor
         AddSqlExpression(expr);
         expr.Values.ForEach(value => value.Accept(this));
     }
+
+    public virtual void Visit_TruncateTableStatement(SqlTruncateTableStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_DropStatement(SqlDropStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
 }

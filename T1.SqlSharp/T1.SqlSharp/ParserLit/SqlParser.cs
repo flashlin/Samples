@@ -99,6 +99,16 @@ public class SqlParser
             return mergeStatement.Result;
         }
 
+        if (Try(ParseTruncateTableStatement, out var truncateStatement))
+        {
+            return truncateStatement.Result;
+        }
+
+        if (Try(ParseDropStatement, out var dropStatement))
+        {
+            return dropStatement.Result;
+        }
+
         if (Try(ParseExecSpAddExtendedProperty, out var execSpAddExtendedProperty))
         {
             return execSpAddExtendedProperty.Result;
@@ -3253,6 +3263,76 @@ public class SqlParser
         }
 
         return CreateParseError("Expected VALUES, SELECT or DEFAULT VALUES after INSERT");
+    }
+
+    private ParseResult<SqlTruncateTableStatement> ParseTruncateTableStatement()
+    {
+        if (!TryKeywords(["TRUNCATE", "TABLE"], out var startSpan))
+        {
+            return NoneResult<SqlTruncateTableStatement>();
+        }
+
+        var tableName = Parse_SqlIdentifier();
+        if (tableName.Result == null)
+        {
+            return CreateParseError("Expected table name after TRUNCATE TABLE");
+        }
+
+        return CreateParseResult(new SqlTruncateTableStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            TableName = tableName.ResultValue.FieldName
+        });
+    }
+
+    private static readonly Dictionary<string, SqlDropObjectType> DropObjectTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["TABLE"] = SqlDropObjectType.Table,
+        ["VIEW"] = SqlDropObjectType.View,
+        ["PROCEDURE"] = SqlDropObjectType.Procedure,
+        ["PROC"] = SqlDropObjectType.Procedure,
+        ["FUNCTION"] = SqlDropObjectType.Function,
+        ["INDEX"] = SqlDropObjectType.Index,
+        ["TRIGGER"] = SqlDropObjectType.Trigger,
+        ["SCHEMA"] = SqlDropObjectType.Schema,
+        ["DATABASE"] = SqlDropObjectType.Database,
+        ["SEQUENCE"] = SqlDropObjectType.Sequence,
+        ["TYPE"] = SqlDropObjectType.Type
+    };
+
+    private ParseResult<SqlDropStatement> ParseDropStatement()
+    {
+        if (!TryKeyword("DROP", out var startSpan))
+        {
+            return NoneResult<SqlDropStatement>();
+        }
+
+        var objectTypeWord = ReadSqlIdentifier().Word;
+        if (!DropObjectTypes.TryGetValue(objectTypeWord, out var objectType))
+        {
+            return CreateParseError($"Unsupported DROP object type: {objectTypeWord}");
+        }
+
+        var ifExists = TryKeywords(["IF", "EXISTS"], out _);
+
+        var names = ParseWithComma(Parse_SqlIdentifier);
+        if (names.HasError)
+        {
+            return names.Error;
+        }
+
+        if (names.Result == null || names.ResultValue.Count == 0)
+        {
+            return CreateParseError("Expected object name after DROP");
+        }
+
+        return CreateParseResult(new SqlDropStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            ObjectType = objectType,
+            IfExists = ifExists,
+            Names = names.ResultValue.Select(name => name.FieldName).ToList()
+        });
     }
 
     private ParseResult<SqlMergeStatement> ParseMergeStatement()

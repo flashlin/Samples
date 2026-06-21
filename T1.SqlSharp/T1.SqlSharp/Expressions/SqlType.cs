@@ -90,4 +90,6 @@ public enum SqlType
     MergeUpdateAction,
     MergeDeleteAction,
     MergeInsertAction,
+    TruncateTableStatement,
+    DropStatement,
 }
