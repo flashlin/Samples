@@ -20,12 +20,13 @@ public class SqlTransactionStatement : ISqlExpression
 
     public SqlTransactionAction Action { get; set; }
     public string Name { get; set; } = string.Empty;
+    public bool IsDistributed { get; set; }
 
     public string ToSql()
     {
         var keyword = Action switch
         {
-            SqlTransactionAction.Begin => "BEGIN TRANSACTION",
+            SqlTransactionAction.Begin => IsDistributed ? "BEGIN DISTRIBUTED TRANSACTION" : "BEGIN TRANSACTION",
             SqlTransactionAction.Commit => "COMMIT TRANSACTION",
             SqlTransactionAction.Rollback => "ROLLBACK TRANSACTION",
             SqlTransactionAction.Save => "SAVE TRANSACTION",

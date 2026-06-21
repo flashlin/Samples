@@ -825,4 +825,74 @@ public class SqlVisitor
         AddSqlExpression(expr);
         expr.Time.Accept(this);
     }
+
+    public virtual void Visit_GotoStatement(SqlGotoStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_LabelStatement(SqlLabelStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_KeywordStatement(SqlKeywordStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateSequenceStatement(SqlCreateSequenceStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.StartWith?.Accept(this);
+        expr.IncrementBy?.Accept(this);
+    }
+
+    public virtual void Visit_NextValueForExpr(SqlNextValueForExpr expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreateTypeStatement(SqlCreateTypeStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.TableColumns.ForEach(column => column.Accept(this));
+    }
+
+    public virtual void Visit_CreateSynonymStatement(SqlCreateSynonymStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterIndexStatement(SqlAlterIndexStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AtTimeZoneExpr(SqlAtTimeZoneExpr expr)
+    {
+        AddSqlExpression(expr);
+        expr.Expression.Accept(this);
+        expr.TimeZone.Accept(this);
+    }
+
+    public virtual void Visit_AlterDatabaseStatement(SqlAlterDatabaseStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_AlterSchemaStatement(SqlAlterSchemaStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_CreatePrincipalStatement(SqlCreatePrincipalStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_StatisticsStatement(SqlStatisticsStatement expr)
+    {
+        AddSqlExpression(expr);
+    }
 }

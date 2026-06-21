@@ -19,6 +19,7 @@ public class SqlCreateIndexStatement : ISqlExpression
     public List<SqlConstraintColumn> Columns { get; set; } = [];
     public List<string> IncludeColumns { get; set; } = [];
     public ISqlExpression? Where { get; set; }
+    public List<string> Options { get; set; } = [];
 
     public string ToSql()
     {
@@ -41,6 +42,10 @@ public class SqlCreateIndexStatement : ISqlExpression
         if (Where != null)
         {
             sql.Append($" WHERE {Where.ToSql()}");
+        }
+        if (Options.Count > 0)
+        {
+            sql.Append($" WITH ({string.Join(", ", Options)})");
         }
         return sql.ToString();
     }

@@ -13,7 +13,8 @@ public enum SqlDropObjectType
     Schema,
     Database,
     Sequence,
-    Type
+    Type,
+    Synonym
 }
 
 public class SqlDropStatement : ISqlExpression

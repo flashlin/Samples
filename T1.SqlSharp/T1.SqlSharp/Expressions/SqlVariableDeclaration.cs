@@ -10,4 +10,5 @@ public class SqlVariableDeclaration
     public List<SqlColumnDefinition> TableColumns { get; set; } = [];
     public bool IsCursor { get; set; }
     public ISqlExpression? CursorSource { get; set; }
+    public List<string> CursorOptions { get; set; } = [];
 }

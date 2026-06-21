@@ -47,6 +47,22 @@ public class ParseSetOptionSqlTest
     }
 
     [Test]
+    public void Set_transaction_isolation_level_read_committed()
+    {
+        var sql = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlSetOptionStatement { Option = "TRANSACTION ISOLATION LEVEL", Value = "READ COMMITTED" });
+    }
+
+    [Test]
+    public void Set_transaction_isolation_level_serializable()
+    {
+        var sql = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlSetOptionStatement { Option = "TRANSACTION ISOLATION LEVEL", Value = "SERIALIZABLE" });
+    }
+
+    [Test]
     public void Set_variable_assignment_still_works()
     {
         var sql = "SET @x = 1";

@@ -65,6 +65,21 @@ public class ParsePermissionSqlTest
     }
 
     [Test]
+    public void Grant_with_securable_class_prefix()
+    {
+        var sql = "GRANT SELECT ON OBJECT::dbo.Orders TO appuser";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlPermissionStatement
+        {
+            Action = SqlPermissionAction.Grant,
+            Permissions = ["SELECT"],
+            SecurableClass = "OBJECT",
+            ObjectName = "dbo.Orders",
+            Principals = ["appuser"]
+        });
+    }
+
+    [Test]
     public void Grant_statement_permission_without_object()
     {
         var sql = "GRANT EXECUTE TO appuser";

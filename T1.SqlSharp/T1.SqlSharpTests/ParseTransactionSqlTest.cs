@@ -53,4 +53,12 @@ public class ParseTransactionSqlTest
         var rc = sql.ParseSql();
         rc.ShouldBe(new SqlTransactionStatement { Action = SqlTransactionAction.Save, Name = "SavePoint1" });
     }
+
+    [Test]
+    public void Begin_distributed_transaction()
+    {
+        var sql = "BEGIN DISTRIBUTED TRANSACTION";
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SqlTransactionStatement { Action = SqlTransactionAction.Begin, IsDistributed = true });
+    }
 }
