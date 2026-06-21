@@ -250,6 +250,11 @@ public class SqlVisitor
         AddSqlExpression(expr);
         expr.CommonDirectives.ForEach(x=>x.Accept(this));
     }
+    public virtual void Visit_ForXmlModeClause(SqlForXmlModeClause expr)
+    {
+        AddSqlExpression(expr);
+        expr.CommonDirectives.ForEach(x=>x.Accept(this));
+    }
 
     public virtual void Visit_ForXmlRootDirective(SqlForXmlRootDirective expr)
     {

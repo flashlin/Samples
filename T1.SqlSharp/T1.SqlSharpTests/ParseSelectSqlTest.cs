@@ -1548,6 +1548,70 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void ForXmlRaw()
+    {
+        var sql = $"""
+                   select id from customer
+                   for xml raw('row'), ROOT('customer')
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            ForXml = new SqlForXmlModeClause
+            {
+                Mode = SqlForXmlMode.Raw,
+                ElementName = "'row'",
+                CommonDirectives =
+                [
+                    new SqlForXmlRootDirective
+                    {
+                        RootName = new SqlValue { Value = "'customer'" }
+                    }
+                ]
+            }
+        });
+    }
+
+    [Test]
+    public void ForXmlExplicit()
+    {
+        var sql = $"""
+                   select id from customer
+                   for xml explicit
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            ForXml = new SqlForXmlModeClause
+            {
+                Mode = SqlForXmlMode.Explicit
+            }
+        });
+    }
+
+    [Test]
     public void ForJsonAuto()
     {
         var sql = $"""

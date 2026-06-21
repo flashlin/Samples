@@ -57,7 +57,7 @@
 - [x] `UNION` / `UNION ALL`
 - [x] `INTERSECT` / `EXCEPT`
 - [x] `PIVOT` / `UNPIVOT`
-- [~] `FOR XML`（支援 `PATH`、`AUTO`、`ROOT`；未支援 `RAW`、`EXPLICIT`）
+- [x] `FOR XML`（`PATH`、`AUTO`、`RAW [('elem')]`、`EXPLICIT`、`ROOT`）
 - [x] `FOR JSON`（`AUTO` / `PATH`、`ROOT[('name')]`、`INCLUDE_NULL_VALUES`、`WITHOUT_ARRAY_WRAPPER`）
 - [x] `SELECT ... INTO new_table`（含暫存表 `#temp`）
 - [~] `OPTION (query hint)`（支援 bare hint、`MAXDOP n` 數值、括號參數 hint、多 hint；hint 名稱以通用方式收集，未逐一驗證合法 hint 清單）

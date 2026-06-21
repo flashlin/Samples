@@ -1201,7 +1201,54 @@ public class SqlParser
             return forXmlAutoClause.ResultValue;
         }
 
+        if (Try(ParseForXmlRawClause, out var forXmlRawClause))
+        {
+            return forXmlRawClause.ResultValue;
+        }
+
+        if (Try(ParseForXmlExplicitClause, out var forXmlExplicitClause))
+        {
+            return forXmlExplicitClause.ResultValue;
+        }
+
         return NoneResult<ISqlForXmlClause>();
+    }
+
+    private ParseResult<SqlForXmlModeClause> ParseForXmlRawClause()
+    {
+        if (!TryKeywords(["FOR", "XML", "RAW"], out var startSpan))
+        {
+            return NoneResult<SqlForXmlModeClause>();
+        }
+
+        var forXmlClause = new SqlForXmlModeClause { Mode = SqlForXmlMode.Raw };
+        if (TryMatch("(", out _))
+        {
+            forXmlClause.ElementName = Parse_QuotedString().ResultValue.Value;
+            if (!TryMatch(")", out _))
+            {
+                return CreateParseError("Expected )");
+            }
+        }
+
+        forXmlClause.CommonDirectives = Parse_ForXmlRootDirectives();
+        forXmlClause.Span = _text.CreateSpan(startSpan);
+        return forXmlClause;
+    }
+
+    private ParseResult<SqlForXmlModeClause> ParseForXmlExplicitClause()
+    {
+        if (!TryKeywords(["FOR", "XML", "EXPLICIT"], out var startSpan))
+        {
+            return NoneResult<SqlForXmlModeClause>();
+        }
+
+        return new SqlForXmlModeClause
+        {
+            Mode = SqlForXmlMode.Explicit,
+            CommonDirectives = Parse_ForXmlRootDirectives(),
+            Span = _text.CreateSpan(startSpan),
+        };
     }
 
     private ParseResult<SqlForJsonClause> ParseForJsonClause()

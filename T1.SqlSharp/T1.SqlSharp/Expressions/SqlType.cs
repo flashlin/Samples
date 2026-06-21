@@ -78,4 +78,5 @@ public enum SqlType
     WithCte,
     GroupingSet,
     TableSampleClause,
+    ForXmlModeClause,
 }
