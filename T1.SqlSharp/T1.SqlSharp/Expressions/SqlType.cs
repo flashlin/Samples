@@ -158,6 +158,7 @@ public enum SqlType
     ToggleTriggerStatement,
     AlterTableRebuild,
     AlterTableSet,
+    AlterTableGenericAction,
     AlterTableSwitch,
     AlterAuthorizationStatement,
     CreateCertificateStatement,

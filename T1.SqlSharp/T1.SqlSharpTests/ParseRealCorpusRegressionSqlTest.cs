@@ -709,6 +709,175 @@ public class ParseRealCorpusRegressionSqlTest
                 DROP TABLE #SourceBets
             END
             """);
+
+        yield return Case(
+            "adm_sch_UpdateCustomerToQuarantine.sql",
+            """
+            CREATE PROCEDURE [dbo].[adm_sch_UpdateCustomerToQuarantine]
+            AS
+            BEGIN
+                DECLARE @today datetime = DATEADD(D, 0, DATEDIFF(d, 0, GETDATE()))
+                DECLARE @body varchar(max)
+                DECLARE @c int
+                SELECT @body = @body + '<tr><td>' + CAST(@c AS varchar(10)) + '</td>' + + '</tr>',
+                    @c = @c + 1
+                FROM (
+                    SELECT c.UserName
+                    FROM QuarantineAgentList l WITH (NOLOCK)
+                    INNER JOIN customer c WITH (NOLOCK) ON l.Recommend = c.custid
+                ) a
+            END
+            """);
+
+        yield return Case(
+            "Admin_SB_Settlement_Settle_Early_Sure_Win_Bets_1.1.0.index.sql",
+            """
+            CREATE TABLE #tempBetTrans (
+                TransID bigint,
+                MatchResultId int,
+                CustID int
+            )
+            CREATE CLUSTERED INDEX cix_wl ON #tempBetTrans (MatchResultId, custid)
+            """);
+
+        yield return Case(
+            "Smaug_ES_AddSubBet_23.09.19.sql",
+            """
+            CREATE PROCEDURE [dbo].[Smaug_ES_AddSubBet_23.09.19]
+                @DisplaySelection nvarchar (200) NULL,
+                @GameTypeDescription nvarchar (200) NULL
+            AS
+            BEGIN
+                INSERT EsportMPBetDetails (
+                    DisplaySelection,
+                    GameTypeDescription
+                ) VALUES (
+                    @DisplaySelection,
+                    @GameTypeDescription
+                )
+                SELECT @@error AS 'errcode'
+            END
+            GO
+            GRANT EXECUTE ON [dbo].[Smaug_ES_AddSubBet_23.09.19] TO RoleSmaug
+            GO
+            """);
+
+        yield return Case(
+            "CashSettled.values-comments.sql",
+            """
+            INSERT [dbo].[CashSettled] ([custid], username, [LastTransferOn])
+            VALUES
+            (101103, 'pskrw', GETDATE()),
+            /*-----start test how to add new currency and b2c customer-----*/
+            /*-----for real customer hierarchy-----*/
+            (100120, 'smwmmk', GETDATE()),
+            (100121, 'swmmk', GETDATE())
+            """);
+
+        yield return Case(
+            "Leo_GM_Transfer_GetCustomerChainForFullTransfer_1.22.sql",
+            """
+            CREATE PROCEDURE [dbo].[Leo_GM_Transfer_GetCustomerChainForFullTransfer_1.22]
+                @customerRole int,
+                @descendantRole int
+            AS
+            BEGIN
+                IF (@customerRole = 3)
+                BEGIN
+                    IF (@descendantRole = 1)
+                    BEGIN
+                        SELECT s.CustID AS PlayerID
+                        FROM (
+                            SELECT AgtID, CustID
+                            FROM (
+                                SELECT AgtID, CustID, SUM(YesterdayTotalBalance) AS YesterdayTotalBalance
+                                FROM (
+                                    SELECT AgtID, CustID, SUM(CASE WHEN WinLostDate < @today THEN WinLost ELSE 0 END) AS YesterdayTotalBalance
+                                    FROM Statement WITH (NOLOCK)
+                                    GROUP BY CustID, AgtID
+                                ) detail
+                                GROUP BY AgtID, CustID
+                            ) summary
+                        ) s
+                    END
+                END
+            END
+            """);
+
+        yield return Case(
+            "Admin_SB_SpecialAccount_GetAllSpecialAccounts_13.08.sql",
+            """
+            CREATE PROCEDURE [dbo].[Admin_SB_SpecialAccount_GetAllSpecialAccounts_13.08]
+            AS
+            BEGIN
+                INSERT INTO #SpecialAccounts(UserId, UserName, SMAName)
+                (
+                    SELECT c.custid, c.username, tmp.UserName
+                    FROM customer c WITH (NOLOCK), #SpecialAccountsInResource tmp
+                    WHERE c.srecommend = tmp.UserId AND tmp.RoleId = 4
+                    UNION
+                    SELECT c.custid, c.username, tmp.UserName
+                    FROM customer c WITH (NOLOCK), #SpecialAccountsInResource tmp
+                    WHERE c.recommend = tmp.UserId AND tmp.RoleId = 2
+                )
+            END
+            """);
+
+        yield return Case(
+            "AccountAPI_TriggerUpsertDailyStatement_20.04.sql",
+            """
+            CREATE PROCEDURE [dbo].[AccountAPI_TriggerUpsertDailyStatement_20.04]
+                @now datetime
+            AS
+            BEGIN
+                IF @now IS NULL
+                BEGIN
+                    RETURN;
+                END;
+                ELSE
+                BEGIN
+                    BEGIN TRAN [doUpsert];
+                    DECLARE @result AS int;
+                    EXEC @result = [sp_getapplock] @DbPrincipal = 'public',
+                        @Resource = 'TriggerUpsertDailyStatement',
+                        @LockMode = 'Exclusive',
+                        @LockOwner = 'Transaction',
+                        @LockTimeout = 0;
+                    COMMIT TRAN [doUpsert];
+                END
+            END
+            """);
+
+        yield return Case(
+            "vSBBettransm.sql",
+            """
+            CREATE VIEW [dbo].[vSBBettransm] AS
+            SELECT 1 AS MonthKey, [transid]
+            FROM m1_bettransm WITH (NOLOCK)
+            UNION ALL
+            SELECT 2 AS MonthKey, [transid]
+            FROM m2_bettransm WITH (NOLOCK)
+            """);
+
+        yield return Case(
+            "tvpEsportBetDetails.sql",
+            """
+            CREATE TYPE [dbo].[tvpEsportBetDetails] AS TABLE
+            (
+                [Id] [bigint] NULL,
+                [SportName] [nvarchar] (30) NULL,
+                [Odds] [decimal] (12, 4) NULL
+            )
+            """);
+
+        yield return Case(
+            "CustomerComplianceEffectFinal.sql",
+            """
+            ALTER TABLE [dbo].[CustomerComplianceEffectFinal] ENABLE CHANGE_TRACKING WITH (TRACK_COLUMNS_UPDATED = OFF)
+            GO
+            GRANT VIEW CHANGE TRACKING ON [dbo].[CustomerComplianceEffectFinal] TO [B_Artemis];
+            GO
+            """);
     }
 
     private static TestCaseData Case(string sourceFile, string sql)

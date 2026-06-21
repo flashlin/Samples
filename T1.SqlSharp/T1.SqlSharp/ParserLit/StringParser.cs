@@ -749,24 +749,14 @@ public class StringParser
 
     public bool SkipSqlDoubleComment()
     {
-        var startPosition = _position;
-        if (Try(ReadSymbols, out var openSymbol))
+        if (_position + 1 >= _text.Length || _text[_position] != '/' || _text[_position + 1] != '*')
         {
-            if (openSymbol.Word == "/**/")
-            {
-                return true;
-            }
-            
-            if (openSymbol.Word == "/*")
-            {
-                _position = startPosition;
-                ReadDoubleComment();
-                return true;
-            }
+            return false;
         }
 
-        _position = startPosition;
-        return false;
+        var endPosition = _text.IndexOf("*/", _position + 2, StringComparison.Ordinal);
+        _position = endPosition < 0 ? _text.Length : endPosition + 2;
+        return true;
     }
 
     public bool SkipSqlSingleComment()

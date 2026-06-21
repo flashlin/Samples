@@ -982,6 +982,11 @@ public class SqlVisitor
         AddSqlExpression(expr);
     }
 
+    public virtual void Visit_AlterTableGenericAction(SqlAlterTableGenericAction expr)
+    {
+        AddSqlExpression(expr);
+    }
+
     public virtual void Visit_AlterTableSwitch(SqlAlterTableSwitch expr)
     {
         AddSqlExpression(expr);

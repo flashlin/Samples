@@ -4137,6 +4137,24 @@ public class SqlParser
             return CreateParseResult(insertStatement);
         }
 
+        if (TryMatch("(", out _))
+        {
+            var parenthesizedSelect = ParseSelectStatement();
+            if (parenthesizedSelect.HasError)
+            {
+                return parenthesizedSelect.Error;
+            }
+
+            if (!TryMatch(")", out _))
+            {
+                return CreateParseError("Expected ) after INSERT source query");
+            }
+
+            insertStatement.SourceSelect = parenthesizedSelect.ResultValue;
+            insertStatement.Span = _text.CreateSpan(startSpan);
+            return CreateParseResult(insertStatement);
+        }
+
         if (Try(() => ParseSelectStatement(), out var sourceSelect))
         {
             insertStatement.SourceSelect = sourceSelect.ResultValue;
@@ -8025,6 +8043,8 @@ public class SqlParser
         };
 
         parameter.IsReadOnly = TryKeyword("READONLY", out _);
+        TryKeywords(["NOT", "NULL"], out _);
+        TryKeyword("NULL", out _);
 
         if (TryMatch("=", out _))
         {
@@ -8415,8 +8435,29 @@ public class SqlParser
             return Parse_AlterTableCheckConstraint(check: false);
         }
 
-        if (TryKeyword("ENABLE", out _))
+        if (TryKeyword("ENABLE", out var enableSpan))
         {
+            if (TryKeyword("CHANGE_TRACKING", out _))
+            {
+                var action = "ENABLE CHANGE_TRACKING";
+                if (IsPeekKeywords("WITH"))
+                {
+                    var options = Parse_ParenthesizedOptionList();
+                    if (options.HasError)
+                    {
+                        return options.Error;
+                    }
+
+                    action += $" WITH ({string.Join(", ", options.ResultValue)})";
+                }
+
+                return CreateParseResult<ISqlAlterTableAction>(new SqlAlterTableGenericAction
+                {
+                    Span = _text.CreateSpan(enableSpan),
+                    Action = action
+                });
+            }
+
             return Parse_AlterTableToggleTrigger(enable: true);
         }
 
@@ -9396,8 +9437,9 @@ public class SqlParser
     private ParseResult<List<List<ISqlExpression>>> Parse_InsertValuesRows()
     {
         var rows = new List<List<ISqlExpression>>();
-        do
+        while (true)
         {
+            SkipWhiteSpace();
             var row = Parse_InsertValuesRow();
             if (row.HasError)
             {
@@ -9405,7 +9447,11 @@ public class SqlParser
             }
 
             rows.Add(row.ResultValue);
-        } while (TryMatch(",", out _));
+            if (!TryMatch(",", out _))
+            {
+                break;
+            }
+        }
 
         return CreateParseResult(rows);
     }
@@ -9694,6 +9740,7 @@ public class SqlParser
             Then = thenStatement.ResultValue
         };
 
+        TryMatch(";", out _);
         if (TryKeyword("ELSE", out _))
         {
             var elseStatement = Parse();
@@ -10872,6 +10919,11 @@ public class SqlParser
             return value.To<ISqlExpression>();
         }
 
+        if (TryMatch("+", out _))
+        {
+            return ParseArithmetic_Primary();
+        }
+
         if (TryMatch("(", out var openSpan))
         {
             var subExpr = ParseArithmeticExpr();
@@ -11991,6 +12043,7 @@ public class SqlParser
         var elements = new List<T>();
         do
         {
+            SkipWhiteSpace();
             if (PeekBracket().Equals(")"))
             {
                 break;
@@ -12008,6 +12061,7 @@ public class SqlParser
             }
 
             elements.Add(elem.ResultValue);
+            SkipWhiteSpace();
             if (_text.PeekChar() != ',')
             {
                 break;
