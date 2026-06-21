@@ -85,4 +85,9 @@ public enum SqlType
     OutputClause,
     DefaultValue,
     DeleteStatement,
+    MergeStatement,
+    MergeWhenClause,
+    MergeUpdateAction,
+    MergeDeleteAction,
+    MergeInsertAction,
 }

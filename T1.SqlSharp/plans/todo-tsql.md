@@ -3,7 +3,7 @@
 > 用途：追蹤 parser 目前支援哪些 T-SQL 語法，方便維護與規劃。
 > 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援、`[N/A]` 不適用 T-SQL（不實作）。
 > 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對）。
-> 入口：`SqlParser.Parse()` dispatch 8 種頂層語句（WITH CTE / CREATE TABLE / SELECT / INSERT / UPDATE / DELETE / EXEC sp_addextendedproperty / SET）。
+> 入口：`SqlParser.Parse()` dispatch 9 種頂層語句（WITH CTE / CREATE TABLE / SELECT / INSERT / UPDATE / DELETE / MERGE / EXEC sp_addextendedproperty / SET）。
 
 ---
 
@@ -17,7 +17,7 @@
 - [~] `INSERT`（parser 可解析大部分常用語法，細目見 §1.1。additive 擴充 `SqlInsertStatement`（`Top`/`Withs`/`ValuesRows`/`SourceSelect`/`IsDefaultValues`/`Output`），builder 路徑不受影響。僅剩 `INSERT ... EXEC`、CTE 前綴未做）
 - [~] `UPDATE`（parser 可解析：SET 多指派 / `t.col` / `DEFAULT` 值 / `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.2。僅剩複合指派 `+=`）
 - [~] `DELETE`（parser 可解析：`[FROM] t` / 省略 FROM / 第二個 `FROM`+JOIN / `WHERE` / `TOP` / table hint / `OUTPUT` / CTE 前綴，細目見 §1.3。已大致完整）
-- [ ] `MERGE`
+- [~] `MERGE`（parser 可解析：`[INTO]` target/source（含 alias / 無 alias）、`ON`、`WHEN MATCHED`/`NOT MATCHED [BY TARGET]`/`NOT MATCHED BY SOURCE`、`AND` 過濾、UPDATE/DELETE/INSERT action、結尾 `;`，細目見 §1.4。剩 TOP/hint/OUTPUT/OPTION/CTE 前綴）
 - [ ] `ALTER TABLE` / `ALTER ...`
 - [ ] `DROP ...`
 - [ ] `TRUNCATE TABLE`
@@ -125,6 +125,43 @@
 2. **builder 測試零回歸**：`SqlUpdateExpressionBuilderTest`（+ `ToSql()` 字串）必須保持綠燈——additive 設計就是為保它。
 3. **OUTPUT 偽資料表**：UPDATE/DELETE 的 OUTPUT 可用 `deleted.` / `inserted.`，欄位解析沿用 `Parse_OutputClause`（不需改）。
 4. **DELETE 雙 FROM** 是最易錯處，務必先寫「DELETE t FROM t JOIN s」測試守住。
+
+### 1.4 MERGE 細目（已實作 MVP，見 `ParseMergeSqlTest.cs`）
+
+> MERGE 是 DML 最大一塊。沿用既有手法：**重用 helper、TDD 一項一 commit**。
+
+**AST 設計**（分離 action，避免單一類別塞各 action 的欄位 = code smell）：
+- `SqlMergeStatement`：`Target`/`Source : ITableSource`、`OnCondition : ISqlExpression`、`WhenClauses : List<SqlMergeWhenClause>`。
+- `SqlMergeWhenClause`：`MatchType`（enum `MergeMatchType { Matched, NotMatchedByTarget, NotMatchedBySource }`）、`AndCondition : ISqlExpression?`、`Action : ISqlMergeAction`。
+- `ISqlMergeAction` 三實作：`SqlMergeUpdateAction { SetClauses : List<SqlAssignExpr> }`、`SqlMergeDeleteAction`、`SqlMergeInsertAction { Columns / Values / IsDefaultValues }`。
+- 新增 5 個 `SqlType` 成員 + 5 個 `Visit_Merge*`（走訪子節點）。
+
+**Parser 整合**：`Parse()` dispatch 加 `ParseMergeStatement`。文法（T-SQL）：
+`MERGE [TOP(n)] [INTO] target [hints] [alias] USING source [alias] ON cond { WHEN ... THEN ... }+ [OUTPUT] [OPTION] ;`
+- target/source → 重用 `Parse_TableSourceWithHints`（含 alias / 衍生表 / hint）
+- ON / WHEN 的 `AND` 條件 → 重用 `Parse_WhereExpression`
+- UPDATE action 的 SET → 重用 `Parse_UpdateSetClause`
+- INSERT action 的 `(cols)` / `VALUES (row)` / `DEFAULT VALUES` → 重用 `Parse_ParenthesizedColumns` / `Parse_InsertValuesRow`
+- WHEN 種類關鍵字用 `TryKeywords`（`MATCHED` / `NOT MATCHED [BY TARGET]` / `NOT MATCHED BY SOURCE`）
+
+**MVP 清單**：
+- [x] `MERGE [INTO] t [AS a] USING s [AS b] ON cond WHEN MATCHED THEN UPDATE SET ...`
+- [x] `WHEN MATCHED THEN DELETE`
+- [x] `WHEN NOT MATCHED [BY TARGET] THEN INSERT (cols) VALUES (...)`
+- [x] `WHEN NOT MATCHED BY SOURCE THEN UPDATE/DELETE`
+- [x] WHEN 的 `AND <condition>` 過濾（重用 `Parse_WhereExpression`，停在 `THEN`）
+- [x] 結尾 `;`（可省）
+- [x] 無 alias `MERGE Target USING Source ON ...`（靠 `USING` 入 `ReservedWords`）
+**第二階段（可延後）**：
+- [ ] `MERGE TOP (n) [PERCENT]`
+- [ ] target table hint、`OUTPUT [$action]`、結尾 `OPTION (...)`
+- [ ] `INSERT DEFAULT VALUES` action（程式碼路徑已接 `Parse_MergeInsertAction`，待補測試）
+- [ ] CTE 前綴 `WITH cte AS (...) MERGE ...`（`Parse_CteBodyStatement` 加一條）
+
+**實作雷點（已確認）**：
+1. **`USING` 必須入 `ReservedWords`**：否則無 alias 的 `MERGE Target USING ...` 會把 `USING` 當 target 的 bare alias 吃掉（`ON`/`WHEN`/`THEN` 因條件 / 運算式不解析 alias 而安全，故未加）。
+2. 多個 `WHEN` 子句用 `while (Try(Parse_MergeWhenClause...))` loop 收集。
+3. action 全部重用：UPDATE→`Parse_UpdateSetClause`、INSERT→`Parse_ParenthesizedColumns`+`Parse_InsertValuesRow`、DELETE→無。
 
 ---
 
@@ -249,10 +286,10 @@
 
 ## 維護建議優先序（未完成項目）
 
-1. 🟢 DML 收尾（小單點）：`INSERT ... EXEC`、UPDATE 複合指派 `+=`（見 §1.1/§1.2）
-2. 🟢 `MERGE`（DML 最後一塊）
+1. 🟢 DML 收尾（小單點）：`INSERT ... EXEC`、UPDATE 複合指派 `+=`、MERGE 第二階段（TOP/hint/OUTPUT/OPTION/CTE 前綴，見 §1.4）
+2. 🟢 DDL：`ALTER TABLE` / `DROP` / `TRUNCATE TABLE` / `CREATE VIEW|PROC|...`
 3. 🟢 具名 `WINDOW` 子句的延伸：`OVER (existing_window ...)` 行內參照、定義間互相參照、RANK 路徑 bare `OVER name`（見 §4 註）
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）、`MERGE` 解析 MVP（INTO/USING/ON/三種 WHEN/AND/三種 action，2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。

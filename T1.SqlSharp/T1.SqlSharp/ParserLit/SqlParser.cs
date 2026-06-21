@@ -12,7 +12,7 @@ public class SqlParser
     [
         "FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH",
         "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING", "INTERSECT", "EXCEPT", "OPTION",
-        "TABLESAMPLE", "WINDOW"
+        "TABLESAMPLE", "WINDOW", "USING"
     ];
 
     private static string[] DataTypes =
@@ -92,6 +92,11 @@ public class SqlParser
         if (Try(ParseDeleteStatement, out var deleteStatement))
         {
             return deleteStatement.Result;
+        }
+
+        if (Try(ParseMergeStatement, out var mergeStatement))
+        {
+            return mergeStatement.Result;
         }
 
         if (Try(ParseExecSpAddExtendedProperty, out var execSpAddExtendedProperty))
@@ -3248,6 +3253,210 @@ public class SqlParser
         }
 
         return CreateParseError("Expected VALUES, SELECT or DEFAULT VALUES after INSERT");
+    }
+
+    private ParseResult<SqlMergeStatement> ParseMergeStatement()
+    {
+        if (!TryKeyword("MERGE", out var startSpan))
+        {
+            return NoneResult<SqlMergeStatement>();
+        }
+
+        TryKeyword("INTO", out _);
+
+        if (!Try(Parse_TableSourceWithHints, out var target))
+        {
+            return CreateParseError("Expected target table after MERGE");
+        }
+
+        if (!TryKeyword("USING", out _))
+        {
+            return CreateParseError("Expected USING in MERGE");
+        }
+
+        if (!Try(Parse_TableSourceWithHints, out var source))
+        {
+            return CreateParseError("Expected source table after USING");
+        }
+
+        if (!TryKeyword("ON", out _))
+        {
+            return CreateParseError("Expected ON in MERGE");
+        }
+
+        var onCondition = Parse_WhereExpression();
+        if (onCondition.HasError)
+        {
+            return onCondition.Error;
+        }
+
+        if (onCondition.Result == null)
+        {
+            return CreateParseError("Expected ON condition in MERGE");
+        }
+
+        var whenClauses = new List<SqlMergeWhenClause>();
+        while (Try(Parse_MergeWhenClause, out var whenClause))
+        {
+            whenClauses.Add(whenClause.ResultValue);
+        }
+
+        TryMatch(";", out _);
+
+        return CreateParseResult(new SqlMergeStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            Target = target.ResultValue,
+            Source = source.ResultValue,
+            OnCondition = onCondition.ResultValue,
+            WhenClauses = whenClauses
+        });
+    }
+
+    private ParseResult<SqlMergeWhenClause> Parse_MergeWhenClause()
+    {
+        if (!TryKeyword("WHEN", out var startSpan))
+        {
+            return NoneResult<SqlMergeWhenClause>();
+        }
+
+        var matchType = Parse_MergeMatchType();
+        if (matchType.HasError)
+        {
+            return matchType.Error;
+        }
+
+        ISqlExpression? andCondition = null;
+        if (TryKeyword("AND", out _))
+        {
+            var condition = Parse_WhereExpression();
+            if (condition.HasError)
+            {
+                return condition.Error;
+            }
+
+            andCondition = condition.Result;
+        }
+
+        if (!TryKeyword("THEN", out _))
+        {
+            return CreateParseError("Expected THEN in MERGE WHEN clause");
+        }
+
+        var action = Parse_MergeAction();
+        if (action.HasError)
+        {
+            return action.Error;
+        }
+
+        if (action.Result == null)
+        {
+            return CreateParseError("Expected UPDATE, DELETE or INSERT in MERGE WHEN clause");
+        }
+
+        return CreateParseResult(new SqlMergeWhenClause
+        {
+            Span = _text.CreateSpan(startSpan),
+            MatchType = matchType.ResultValue,
+            AndCondition = andCondition,
+            Action = action.ResultValue
+        });
+    }
+
+    private ParseResult<MergeMatchType> Parse_MergeMatchType()
+    {
+        if (TryKeywords(["NOT", "MATCHED"], out _))
+        {
+            if (TryKeywords(["BY", "SOURCE"], out _))
+            {
+                return CreateParseResult(MergeMatchType.NotMatchedBySource);
+            }
+
+            TryKeywords(["BY", "TARGET"], out _);
+            return CreateParseResult(MergeMatchType.NotMatchedByTarget);
+        }
+
+        if (TryKeyword("MATCHED", out _))
+        {
+            return CreateParseResult(MergeMatchType.Matched);
+        }
+
+        return CreateParseError("Expected MATCHED or NOT MATCHED in MERGE WHEN clause");
+    }
+
+    private ParseResult<ISqlMergeAction> Parse_MergeAction()
+    {
+        if (TryKeyword("UPDATE", out _))
+        {
+            if (!TryKeyword("SET", out _))
+            {
+                return CreateParseError("Expected SET after UPDATE in MERGE");
+            }
+
+            var setClauses = ParseWithComma(Parse_UpdateSetClause);
+            if (setClauses.HasError)
+            {
+                return setClauses.Error;
+            }
+
+            return CreateParseResult<ISqlMergeAction>(new SqlMergeUpdateAction
+            {
+                SetClauses = setClauses.ResultValue
+            });
+        }
+
+        if (TryKeyword("DELETE", out _))
+        {
+            return CreateParseResult<ISqlMergeAction>(new SqlMergeDeleteAction());
+        }
+
+        if (TryKeyword("INSERT", out _))
+        {
+            return Parse_MergeInsertAction();
+        }
+
+        return NoneResult<ISqlMergeAction>();
+    }
+
+    private ParseResult<ISqlMergeAction> Parse_MergeInsertAction()
+    {
+        if (TryKeywords(["DEFAULT", "VALUES"], out _))
+        {
+            return CreateParseResult<ISqlMergeAction>(new SqlMergeInsertAction
+            {
+                IsDefaultValues = true
+            });
+        }
+
+        var insertAction = new SqlMergeInsertAction();
+
+        if (IsPeekMatch("("))
+        {
+            var columns = Parse_ParenthesizedColumns();
+            if (columns.HasError)
+            {
+                return columns.Error;
+            }
+
+            insertAction.Columns = columns.ResultValue
+                .OfType<SqlFieldExpr>()
+                .Select(field => field.FieldName)
+                .ToList();
+        }
+
+        if (!TryKeyword("VALUES", out _))
+        {
+            return CreateParseError("Expected VALUES in MERGE INSERT action");
+        }
+
+        var row = Parse_InsertValuesRow();
+        if (row.HasError)
+        {
+            return row.Error;
+        }
+
+        insertAction.Values = row.ResultValue;
+        return CreateParseResult<ISqlMergeAction>(insertAction);
     }
 
     private ParseResult<SqlDeleteStatement> ParseDeleteStatement()

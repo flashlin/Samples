@@ -557,4 +557,37 @@ public class SqlVisitor
         expr.FromSources.ForEach(source => source.Accept(this));
         expr.Where?.Accept(this);
     }
+
+    public virtual void Visit_MergeStatement(SqlMergeStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Target.Accept(this);
+        expr.Source.Accept(this);
+        expr.OnCondition.Accept(this);
+        expr.WhenClauses.ForEach(clause => clause.Accept(this));
+    }
+
+    public virtual void Visit_MergeWhenClause(SqlMergeWhenClause expr)
+    {
+        AddSqlExpression(expr);
+        expr.AndCondition?.Accept(this);
+        expr.Action.Accept(this);
+    }
+
+    public virtual void Visit_MergeUpdateAction(SqlMergeUpdateAction expr)
+    {
+        AddSqlExpression(expr);
+        expr.SetClauses.ForEach(clause => clause.Accept(this));
+    }
+
+    public virtual void Visit_MergeDeleteAction(SqlMergeDeleteAction expr)
+    {
+        AddSqlExpression(expr);
+    }
+
+    public virtual void Visit_MergeInsertAction(SqlMergeInsertAction expr)
+    {
+        AddSqlExpression(expr);
+        expr.Values.ForEach(value => value.Accept(this));
+    }
 }
