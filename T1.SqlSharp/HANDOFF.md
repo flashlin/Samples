@@ -7,6 +7,193 @@
 
 ## 當前狀態
 
+### 最新進度：Top 10 error cluster TDD — ✅ 已完成
+
+使用者要求從目前 `FailedFiles: 863` 找最大宗 error，挑 TOP 10 種不同測試案例用 TDD 開發。
+
+已完成：
+
+- 從 `T1.SqlSharpE2eParser/out/error-summary.csv` 選前 10 個代表 cluster，新增 10 個 embedded corpus regression case 到 `T1.SqlSharpTests/ParseRealCorpusRegressionSqlTest.cs`。
+- 新增 case 對應：
+  - `CREATE TABLE` temp table + `CREATE CLUSTERED INDEX`
+  - `SET @message += 'pass'`
+  - consecutive `DECLARE` + `WHILE` + `WAITFOR DELAY`
+  - `SET TRANSACTION ISOLATION LEVEL` + `RETURN` 後接 `BEGIN TRAN`
+  - XML method source `FROM @xml.nodes(...) AS XMLNode(Node)`
+  - table variable column `PRIMARY KEY NONCLUSTERED`
+  - multi-row data script `INSERT table (...) VALUES (...), (...)`
+  - TVP proc + `FLOAT(53)` temp table
+  - bitwise IF condition `@status & 24 > 0`
+  - `DROP TABLE #temp`
+- 10 個新增 case 初跑紅燈：5 failed / 45 passed。
+- 修正 parser：
+  - `WAITFOR` / transaction keywords 加進 reserved/boundary，避免被前一個 SELECT/RETURN 當 alias/value 吃掉
+  - `RETURN` 遇 statement boundary 不再解析下一個 statement 當 return value
+  - `SET @x += value` 改交給 `ParseSetValueStatement`，`SqlSetValueStatement` 新增 `Operator`
+  - function table source 支援並消費 column alias list：`AS XMLNode(Node)`
+  - column-level `PRIMARY KEY NONCLUSTERED` 支援；保留既有「欄位漏逗號後接 table constraint」保護
+- 回歸測試：
+
+```bash
+dotnet test T1.SqlSharpTests/T1.SqlSharpTests.csproj --no-restore --filter "FullyQualifiedName~ParseRealCorpusRegressionSqlTest"
+# 50 passed / 0 failed
+
+dotnet test T1.SqlSharpTests/T1.SqlSharpTests.csproj --no-restore --filter "FullyQualifiedName~LastFieldNoCommaAndTableConstraint"
+# 1 passed / 0 failed
+
+dotnet test --no-restore
+# 663 passed / 0 failed
+
+dotnet build T1.SqlSharp/T1.SqlSharp.csproj --no-restore
+# 0 warning / 0 error
+
+dotnet build T1.SqlSharpTests/T1.SqlSharpTests.csproj --no-restore
+# 0 warning / 0 error
+
+dotnet build T1.SqlSharpE2eParser/T1.SqlSharpE2eParser.csproj --no-restore
+# 0 warning / 0 error
+
+git diff --check
+# pass
+
+bun /Users/flash/.claude/skills/gitNexus/scripts/detect_changes.ts --repo /Users/flash/vdisk/github/Samples/T1.SqlSharp --scope unstaged --depth 2
+# changedSymbolCount=11 / totalUpstream=56
+```
+
+重新跑完整 corpus scan：
+
+```text
+TotalFiles: 46106
+SucceededFiles: 45430
+FailedFiles: 676
+TotalStatements: 264874
+SucceededStatements: 264198
+FailedStatements: 676
+ElapsedSeconds: 49.5273977
+ErrorBuckets:
+  Unknown statement: 590
+  Result is null: 86
+```
+
+fail 數變化：
+
+```text
+上一輪: 863
+本輪: 676
+下降: 187
+```
+
+`T1.SqlSharpE2eParser/out/error.csv` 與 `error-summary.csv` 已重建。剩餘前幾大 cluster：
+
+```text
+Parser returned null result: 71
+CREATE TABLE variant: 60
+Permission statement variant / CREATE PROCEDURE: 35
+INSERT multi-row VALUES continuation: 27
+CREATE PROCEDURE variant: 26
+IF conditional script: 22
+Unclassified parser failure: 19
+Permission statement variant / INSERT INTO: 17
+```
+
+目前工作樹相關變更：
+
+```text
+M HANDOFF.md
+M T1.SqlSharp/Expressions/SqlSetValueStatement.cs
+M T1.SqlSharp/ParserLit/SqlParser.cs
+M T1.SqlSharpTests/ParseRealCorpusRegressionSqlTest.cs
+```
+
+上層 `../...` untracked 仍是既有無關項目，未處理。
+
+### 上一輪進度：cluster 修正與 full scan — ✅ 已完成
+
+使用者同意改用 cluster 方式修 parser，而不是繼續純隨機抽 10 個失敗檔逐案補。
+
+已完成並驗證：
+
+- 使用者先前已 commit `fix: improve parser boundary handling and update options`，目前 HEAD 已包含主要 cluster 修正：
+  - statement boundary / reserved words cluster
+  - `EXEC` argument 不再吃掉下一個 statement
+  - procedure parameter default 不再把 `AS SET...` 當 alias
+  - procedure body `SET` statement 改走專用 parsing
+  - `UPDATE ... OPTION (...)`
+  - top-level `;` terminator 消費，避免 `GRANT ...;` 後產生空的 `Unknown statement`
+- 本輪剩餘工作樹狀態：
+  - staged：`T1.SqlSharpTests/ExtractStatementResultsTest.cs`
+  - 新增 `ExtractStatementResults_ShouldIgnoreTopLevelStatementTerminators`
+  - 測試 `select 1; select 2;` 應回傳兩個成功 statement，不應在 `;` 後產生錯誤
+  - unstaged：`HANDOFF.md`
+- 重新跑完整 corpus scan：
+
+```text
+TotalFiles: 46106
+SucceededFiles: 45243
+FailedFiles: 863
+TotalStatements: 264340
+SucceededStatements: 263477
+FailedStatements: 863
+ElapsedSeconds: 49.2522809
+ErrorBuckets:
+  Unknown statement: 757
+  Result is null: 106
+```
+
+fail 數變化：
+
+```text
+上一輪基準: 20496
+第一批 cluster 後: 18713
+top-level semicolon terminator cluster 後: 863
+本輪總下降: 19633
+```
+
+錯誤分析檔已重建：
+
+```text
+T1.SqlSharpE2eParser/out/error.csv          864 lines (header + 863 failures)
+T1.SqlSharpE2eParser/out/error-summary.csv  134 lines
+```
+
+剩餘前幾大 cluster：
+
+```text
+CREATE TABLE variant: 101
+Parser returned null result: 91
+DECLARE variant: 77
+Permission statement variant: 36 / 34 / 24 / ...
+IF conditional script: 28
+INSERT multi-row VALUES continuation: 27
+CREATE PROCEDURE variant: 26
+Unclassified parser failure: 19
+```
+
+驗證結果：
+
+```bash
+dotnet test T1.SqlSharpTests/T1.SqlSharpTests.csproj --no-restore --filter "FullyQualifiedName~ExtractStatementResultsTest"
+# 2 passed / 0 failed
+
+dotnet test --no-restore
+# 653 passed / 0 failed
+
+dotnet build T1.SqlSharp/T1.SqlSharp.csproj --no-restore
+# 0 warning / 0 error
+
+dotnet build T1.SqlSharpTests/T1.SqlSharpTests.csproj --no-restore
+# 0 warning / 0 error
+
+dotnet build T1.SqlSharpE2eParser/T1.SqlSharpE2eParser.csproj --no-restore
+# 0 warning / 0 error
+
+git diff --check
+# pass
+
+bun /Users/flash/.claude/skills/gitNexus/scripts/detect_changes.ts --repo /Users/flash/vdisk/github/Samples/T1.SqlSharp --scope unstaged --depth 2
+# changedSymbolCount=0 / totalUpstream=0
+```
+
 ### 線一:INSERT/UPDATE ToSql 忠實化 — ✅ 已完成且使用者已 commit
 
 上一輪交接提到「尚未 commit」已過期；使用者明確告知剛剛已 commit。這條線不用再處理。

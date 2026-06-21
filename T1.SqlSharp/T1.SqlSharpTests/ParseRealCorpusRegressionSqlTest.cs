@@ -517,6 +517,198 @@ public class ParseRealCorpusRegressionSqlTest
                 DECLARE @totalbalance AS float
                 SET @totalbalance = 0
             """);
+
+        yield return Case(
+            "Admin_SB_Settlement_Settle_Early_Sure_Win_Bets_1.1.0.sql",
+            """
+            CREATE PROCEDURE [dbo].[Admin_SB_Settlement_Settle_Early_Sure_Win_Bets_1.1.0]
+            AS
+            BEGIN
+                BEGIN TRY
+                    CREATE TABLE #tempBetTrans (
+                        TransID bigint,
+                        MatchResultId int,
+                        CustID int,
+                        Actual_Stake float,
+                        Status nvarchar(10),
+                        ActualRate decimal(12,8)
+                    )
+                    CREATE CLUSTERED INDEX cix_wl ON #tempBetTrans (MatchResultId, custid)
+                END TRY
+                BEGIN CATCH
+                    SELECT ERROR_MESSAGE()
+                END CATCH
+            END
+            """);
+
+        yield return Case(
+            "adm_bbu_checkDates_17.08.sql",
+            """
+            CREATE PROCEDURE [dbo].[adm_bbu_checkDates_17.08]
+                @cutOffDate smalldatetime,
+                @lastCutOffDate smalldatetime
+            AS
+            BEGIN
+                SET NOCOUNT ON;
+                DECLARE @message varchar(400) = '';
+                IF DATEPART(DD, @cutOffDate) = 1
+                    SET @message += 'pass'
+                ELSE
+                    SET @message += 'fail'
+                SELECT @message
+            END
+            GO
+            GRANT EXECUTE ON [dbo].[adm_bbu_checkDates_17.08] TO [RoleKarpos]
+            GO
+            """);
+
+        yield return Case(
+            "adm_sch_AccountingCheckSum.sql",
+            """
+            CREATE PROCEDURE [dbo].[adm_sch_AccountingCheckSum]
+            AS
+            BEGIN
+                DECLARE @getlocktry int
+                DECLARE @rowcount int
+                DECLARE @getlock bit
+                SET @getlocktry = 0
+                SET @rowcount = 0
+                SET @getlock = 0
+                WHILE @rowcount = 0 AND @getlocktry < 120
+                BEGIN
+                    UPDATE SettlementLock WITH (ROWLOCK)
+                    SET IsLock = 1
+                    WHERE IsLock = 0
+                    SELECT @rowcount = @@rowcount, @getlocktry = @getlocktry + 1
+                    WAITFOR DELAY '00:00:01'
+                END
+            END
+            """);
+
+        yield return Case(
+            "dotnet_betlistrunning_pbcheck.sql",
+            """
+            CREATE PROCEDURE [dbo].[dotnet_betlistrunning_pbcheck]
+                @custid int,
+                @translist nvarchar(4000)
+            AS
+            SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+            DECLARE @checker nvarchar(50)
+            DECLARE @date datetime
+            SET @date = GETDATE()
+            IF @@rowcount <> 1
+                RETURN
+            BEGIN TRAN
+            COMMIT TRAN
+            GO
+            GRANT EXECUTE
+                ON OBJECT::[dbo].[dotnet_betlistrunning_pbcheck] TO [RolePhoebe]
+                AS [dbo];
+            """);
+
+        yield return Case(
+            "Stilbe_RTote_Runner_UpdateNedaRunnerOdds_16.11.25.sql",
+            """
+            CREATE PROCEDURE [dbo].[Stilbe_RTote_Runner_UpdateNedaRunnerOdds_16.11.25]
+                @xml xml
+            AS
+            BEGIN
+                DECLARE @tempTable TABLE (RunnerNo int)
+                INSERT INTO @tempTable
+                SELECT
+                    Node.value('(RunnerNo[1]/text())[1]', 'int') AS RunnerNo
+                FROM @xml.nodes('/ArrayOfRunnerUpdate/RunnerUpdate') AS XMLNode(Node)
+            END
+            GO
+            GRANT EXECUTE
+                ON OBJECT::[dbo].[Stilbe_RTote_Runner_UpdateNedaRunnerOdds_16.11.25] TO [rolestilbe]
+            """);
+
+        yield return Case(
+            "Argo_CashOut_Void_MixParlay_SubBet_1.0.0.sql",
+            """
+            CREATE PROCEDURE [dbo].[Argo_CashOut_Void_MixParlay_SubBet_1.0.0]
+                @statementDetailStatus int
+            AS
+            BEGIN
+                IF (@statementDetailStatus = 9)
+                BEGIN
+                    DECLARE @tmpBetTrans2 TABLE (ID BIGINT PRIMARY KEY NONCLUSTERED, refno bigint, transid bigint)
+                    INSERT INTO @tmpBetTrans2
+                    SELECT b.ID, b.refno, b.transid
+                    FROM BetTrans b WITH (NOLOCK), @transIds t
+                    WHERE b.TransID = t.Id
+                        AND b.betstatus & 524288 <> 524288
+                        AND b.betstatus & 16 = 16
+                END
+            END
+            """);
+
+        yield return Case(
+            "CashSettled.sql",
+            """
+            USE [AccountDB]
+            GO
+            TRUNCATE TABLE [dbo].[CashSettled]
+            INSERT [dbo].[CashSettled] ([custid], username, [LastTransferOn])
+            VALUES
+            (12111, 'PhotonPlayer111', GETDATE()),
+            (12110, 'PhotonAgent11', GETDATE()),
+            (12100, 'PhotonMa1', GETDATE())
+            """);
+
+        yield return Case(
+            "AccountSettleAPI_Settlement_Cancel_22.12.sql",
+            """
+            CREATE PROCEDURE [dbo].[AccountSettleAPI_Settlement_Cancel_22.12]
+                @settleBets TvpSettleBetInfo READONLY
+            AS
+            BEGIN
+                SET NOCOUNT ON;
+                DECLARE @cutDate AS datetime
+                SET @cutDate = dbo.[fn_common_getCutoffDate_0.1]()
+                DECLARE @today AS smalldatetime = CAST(GETDATE() AS date)
+                CREATE TABLE #tmpBetTrans (
+                    [transid] BIGINT NOT NULL,
+                    [hdp1] DECIMAL (12, 2) NULL,
+                    [oddsspread] FLOAT (53) NULL
+                )
+            END
+            """);
+
+        yield return Case(
+            "Common_SB_CreditCheckWithRunningCredit_5.9.sql",
+            """
+            CREATE PROCEDURE [dbo].[Common_SB_CreditCheckWithRunningCredit_5.9]
+                @directCustId int,
+                @custId int,
+                @status int
+            AS
+            BEGIN
+                IF @directCustId = 0
+                BEGIN
+                    SET @directCustId = @custId
+                END
+                IF (@status & 24 > 0)
+                BEGIN
+                    SELECT @status Status, 0 AS Credit, @directCustId AS DirectCustId
+                END
+                ELSE
+                BEGIN
+                    SELECT @status AS Status, @directCustId AS DirectCustId
+                END
+            END
+            """);
+
+        yield return Case(
+            "adm_manual_sync_bettrans.sql",
+            """
+            CREATE PROCEDURE [dbo].[adm_manual_sync_bettrans]
+            AS
+            BEGIN
+                DROP TABLE #SourceBets
+            END
+            """);
     }
 
     private static TestCaseData Case(string sourceFile, string sql)

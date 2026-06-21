@@ -14,7 +14,7 @@ public class SqlParser
         "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING", "INTERSECT", "EXCEPT", "OPTION",
         "BEGIN", "END", "IF", "ELSE", "WHILE", "RETURN", "DECLARE", "EXEC", "EXECUTE", "SET", "DELETE",
         "UPDATE", "INSERT", "MERGE", "TRUNCATE", "DROP", "PRINT", "RAISERROR", "THROW", "BREAK", "CONTINUE",
-        "OPEN", "FETCH", "CLOSE", "DEALLOCATE", "GO",
+        "OPEN", "FETCH", "CLOSE", "DEALLOCATE", "WAITFOR", "COMMIT", "ROLLBACK", "SAVE", "GO",
         "TABLESAMPLE", "WINDOW", "USING"
     ];
 
@@ -23,7 +23,7 @@ public class SqlParser
         "SELECT", "INSERT", "UPDATE", "DELETE", "MERGE", "TRUNCATE", "DROP", "CREATE", "ALTER",
         "BEGIN", "END", "IF", "ELSE", "WHILE", "RETURN", "DECLARE", "EXEC", "EXECUTE", "SET",
         "PRINT", "RAISERROR", "THROW", "BREAK", "CONTINUE", "OPEN", "FETCH", "CLOSE", "DEALLOCATE",
-        "GRANT", "DENY", "REVOKE", "GO"
+        "WAITFOR", "COMMIT", "ROLLBACK", "SAVE", "GRANT", "DENY", "REVOKE", "GO"
     ];
 
     private static string[] DataTypes =
@@ -4284,7 +4284,7 @@ public class SqlParser
             Span = _text.CreateSpan(startSpan)
         };
 
-        if (!_text.IsEnd() && !IsPeekMatch(";") && !IsPeekKeywords("END"))
+        if (!_text.IsEnd() && !IsPeekMatch(";") && !IsPeekKeywords("END") && !IsPeekStatementBoundaryKeyword())
         {
             var value = ParseArithmeticExpr();
             if (value.HasError)
@@ -9296,6 +9296,11 @@ public class SqlParser
 
     private static readonly string[] CompoundAssignOperators = ["+=", "-=", "*=", "/=", "%=", "&=", "|=", "^="];
 
+    private bool IsPeekAssignOperator()
+    {
+        return CompoundAssignOperators.Any(IsPeekMatch) || IsPeekMatch("=");
+    }
+
     private string? Parse_AssignOperator()
     {
         foreach (var compound in CompoundAssignOperators)
@@ -9925,7 +9930,7 @@ public class SqlParser
         }
 
         var option = Parse_SqlIdentifier();
-        if (option.Result == null || IsPeekMatch("="))
+        if (option.Result == null || option.ResultValue.FieldName.StartsWith("@") || IsPeekAssignOperator())
         {
             _text.Position = startPosition;
             return NoneResult<SqlSetOptionStatement>();
@@ -10411,9 +10416,10 @@ public class SqlParser
             return NoneResult<SqlSetValueStatement>();
         }
 
-        if (!TryMatch("=", out var equalSpan))
+        var assignOperator = Parse_AssignOperator();
+        if (assignOperator == null)
         {
-            return CreateParseError("Expected =");
+            return CreateParseError("Expected assignment operator");
         }
 
         var value = Or<ISqlExpression>(Parse_CursorDefinitionExpression, ParseArithmeticExpr)().ResultValue;
@@ -10421,6 +10427,7 @@ public class SqlParser
         {
             Span = _text.CreateSpan(startSpan),
             Name = name.ResultValue,
+            Operator = assignOperator,
             Value = value
         };
     }
@@ -10587,6 +10594,14 @@ public class SqlParser
             }
 
             innerTableSource.ColumnAliases = columns.ResultValue.OfType<SqlFieldExpr>().Select(field => field.FieldName).ToList();
+        }
+        else if (tableSourceExpr is SqlFuncTableSource && IsPeekMatch("("))
+        {
+            var columns = Parse_ParenthesizedColumns();
+            if (columns.HasError)
+            {
+                return columns.Error;
+            }
         }
 
         if (tableSourceExpr is SqlTableSource baseTableSource && Try(Parse_TableSampleClause, out var tableSampleClause))
@@ -10892,14 +10907,15 @@ public class SqlParser
             var startPosition = _text.Position;
             if (TryKeywords(["PRIMARY", "KEY"], out _))
             {
-                // 最後一個column 有可能沒有逗號 又寫 Table Constraint 的話會被誤判, 所以要檢查是否有 CLUSTERED 
-                if (TryKeyword("CLUSTERED", out _))
+                sqlColumn.IsPrimaryKey = true;
+                if (TryKeyword("CLUSTERED", out _) && IsPeekMatch("("))
                 {
+                    sqlColumn.IsPrimaryKey = false;
                     _text.Position = startPosition;
                     break;
                 }
 
-                sqlColumn.IsPrimaryKey = true;
+                TryKeyword("NONCLUSTERED", out _);
                 continue;
             }
 
