@@ -105,4 +105,5 @@ public enum SqlType
     BlockStatement,
     IfStatement,
     WhileStatement,
+    CreateProcedureStatement,
 }

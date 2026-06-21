@@ -682,4 +682,11 @@ public class SqlVisitor
         expr.Condition.Accept(this);
         expr.Body.Accept(this);
     }
+
+    public virtual void Visit_CreateProcedureStatement(SqlCreateProcedureStatement expr)
+    {
+        AddSqlExpression(expr);
+        expr.Parameters.ForEach(parameter => parameter.DefaultValue?.Accept(this));
+        expr.Body.Accept(this);
+    }
 }

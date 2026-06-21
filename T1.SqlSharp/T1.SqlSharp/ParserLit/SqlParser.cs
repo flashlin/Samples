@@ -84,6 +84,11 @@ public class SqlParser
             return createIndexStatement.Result;
         }
 
+        if (Try(ParseCreateProcedureStatement, out var createProcedureStatement))
+        {
+            return createProcedureStatement.Result;
+        }
+
         if (Try(() => ParseSelectStatement(), out var selectStatement))
         {
             return selectStatement.Result;
@@ -3348,6 +3353,106 @@ public class SqlParser
             ProcedureName = procedureName.ResultValue.FieldName,
             Arguments = arguments
         });
+    }
+
+    private ParseResult<SqlCreateProcedureStatement> ParseCreateProcedureStatement()
+    {
+        var startPosition = _text.Position;
+        if (!TryKeyword("CREATE", out var startSpan))
+        {
+            return NoneResult<SqlCreateProcedureStatement>();
+        }
+
+        var isOrAlter = TryKeywords(["OR", "ALTER"], out _);
+
+        if (!TryKeyword("PROCEDURE", out _) && !TryKeyword("PROC", out _))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlCreateProcedureStatement>();
+        }
+
+        var procedureName = Parse_SqlIdentifier();
+        if (procedureName.Result == null)
+        {
+            return CreateParseError("Expected procedure name after CREATE PROCEDURE");
+        }
+
+        var hasParenthesis = TryMatch("(", out _);
+
+        var parameters = ParseWithComma(Parse_ProcedureParameter);
+        if (parameters.HasError)
+        {
+            return parameters.Error;
+        }
+
+        if (hasParenthesis && !TryMatch(")", out _))
+        {
+            return CreateParseError("Expected ) after procedure parameters");
+        }
+
+        if (!TryKeyword("AS", out _))
+        {
+            return CreateParseError("Expected AS in CREATE PROCEDURE");
+        }
+
+        var body = Parse();
+        if (body.HasError)
+        {
+            return body.Error;
+        }
+
+        return CreateParseResult(new SqlCreateProcedureStatement
+        {
+            Span = _text.CreateSpan(startSpan),
+            IsOrAlter = isOrAlter,
+            ProcedureName = procedureName.ResultValue.FieldName,
+            Parameters = parameters.ResultValue,
+            Body = body.ResultValue
+        });
+    }
+
+    private ParseResult<SqlProcedureParameter> Parse_ProcedureParameter()
+    {
+        var startPosition = _text.Position;
+        var name = Parse_SqlIdentifier();
+        if (name.Result == null)
+        {
+            return NoneResult<SqlProcedureParameter>();
+        }
+
+        if (!name.ResultValue.FieldName.StartsWith("@"))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlProcedureParameter>();
+        }
+
+        var dataType = ReadSqlIdentifier().Word;
+        var dataSize = Parse_DataSize();
+        if (dataSize.HasError)
+        {
+            return dataSize.Error;
+        }
+
+        var parameter = new SqlProcedureParameter
+        {
+            Name = name.ResultValue.FieldName,
+            DataType = dataType,
+            DataSize = dataSize.Result
+        };
+
+        if (TryMatch("=", out _))
+        {
+            var defaultValue = ParseArithmeticExpr();
+            if (defaultValue.HasError)
+            {
+                return defaultValue.Error;
+            }
+
+            parameter.DefaultValue = defaultValue.ResultValue;
+        }
+
+        parameter.IsOutput = TryKeyword("OUTPUT", out _) || TryKeyword("OUT", out _);
+        return CreateParseResult(parameter);
     }
 
     private ParseResult<SqlCreateIndexStatement> ParseCreateIndexStatement()
