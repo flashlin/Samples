@@ -27,6 +27,7 @@ public class SqlCreateTriggerStatement : ISqlExpression
     }
 
     public bool IsOrAlter { get; set; }
+    public bool IsAlter { get; set; }
     public string TriggerName { get; set; } = string.Empty;
     public string TableName { get; set; } = string.Empty;
     public SqlTriggerTiming Timing { get; set; }
@@ -36,13 +37,8 @@ public class SqlCreateTriggerStatement : ISqlExpression
     public string ToSql()
     {
         var sql = new StringBuilder();
-        sql.Append("CREATE ");
-        if (IsOrAlter)
-        {
-            sql.Append("OR ALTER ");
-        }
-
-        sql.Append($"TRIGGER {TriggerName} ON {TableName} ");
+        sql.Append(DefinitionLead.ToSql(IsAlter, IsOrAlter, "TRIGGER"));
+        sql.Append($"{TriggerName} ON {TableName} ");
         sql.Append(TimingToSql());
         sql.Append(' ');
         sql.Append(string.Join(", ", Events.Select(e => e.ToString().ToUpperInvariant())));

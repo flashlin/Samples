@@ -13,6 +13,7 @@ public class SqlCreateFunctionStatement : ISqlExpression
     }
 
     public bool IsOrAlter { get; set; }
+    public bool IsAlter { get; set; }
     public string FunctionName { get; set; } = string.Empty;
     public List<SqlProcedureParameter> Parameters { get; set; } = [];
     public string ReturnType { get; set; } = string.Empty;
@@ -24,7 +25,7 @@ public class SqlCreateFunctionStatement : ISqlExpression
     public string ToSql()
     {
         var sql = new StringBuilder();
-        sql.Append(IsOrAlter ? "CREATE OR ALTER FUNCTION " : "CREATE FUNCTION ");
+        sql.Append(DefinitionLead.ToSql(IsAlter, IsOrAlter, "FUNCTION"));
         sql.Append(FunctionName);
         sql.Append($" ({string.Join(", ", Parameters.Select(p => $"{p.Name} {p.DataType}"))})");
         sql.Append($" RETURNS {ReturnType}");

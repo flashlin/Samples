@@ -13,6 +13,7 @@ public class SqlCreateProcedureStatement : ISqlExpression
     }
 
     public bool IsOrAlter { get; set; }
+    public bool IsAlter { get; set; }
     public string ProcedureName { get; set; } = string.Empty;
     public List<SqlProcedureParameter> Parameters { get; set; } = [];
     public required ISqlExpression Body { get; set; }
@@ -20,7 +21,7 @@ public class SqlCreateProcedureStatement : ISqlExpression
     public string ToSql()
     {
         var sql = new StringBuilder();
-        sql.Append(IsOrAlter ? "CREATE OR ALTER PROCEDURE " : "CREATE PROCEDURE ");
+        sql.Append(DefinitionLead.ToSql(IsAlter, IsOrAlter, "PROCEDURE"));
         sql.Append(ProcedureName);
         if (Parameters.Count > 0)
         {

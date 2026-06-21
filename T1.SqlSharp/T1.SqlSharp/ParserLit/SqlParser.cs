@@ -3772,15 +3772,32 @@ public class SqlParser
         return identifiers;
     }
 
+    private bool TryDefinitionLead(out TextSpan startSpan, out bool isAlter, out bool isOrAlter)
+    {
+        isAlter = false;
+        isOrAlter = false;
+        if (TryKeyword("CREATE", out startSpan))
+        {
+            isOrAlter = TryKeywords(["OR", "ALTER"], out _);
+            return true;
+        }
+
+        if (TryKeyword("ALTER", out startSpan))
+        {
+            isAlter = true;
+            return true;
+        }
+
+        return false;
+    }
+
     private ParseResult<SqlCreateTriggerStatement> ParseCreateTriggerStatement()
     {
         var startPosition = _text.Position;
-        if (!TryKeyword("CREATE", out var startSpan))
+        if (!TryDefinitionLead(out var startSpan, out var isAlter, out var isOrAlter))
         {
             return NoneResult<SqlCreateTriggerStatement>();
         }
-
-        var isOrAlter = TryKeywords(["OR", "ALTER"], out _);
 
         if (!TryKeyword("TRIGGER", out _))
         {
@@ -3832,6 +3849,7 @@ public class SqlParser
         {
             Span = _text.CreateSpan(startSpan),
             IsOrAlter = isOrAlter,
+            IsAlter = isAlter,
             TriggerName = triggerName.ResultValue.FieldName,
             TableName = target.ResultValue.FieldName,
             Timing = timing.ResultValue,
@@ -3960,12 +3978,10 @@ public class SqlParser
     private ParseResult<SqlCreateFunctionStatement> ParseCreateFunctionStatement()
     {
         var startPosition = _text.Position;
-        if (!TryKeyword("CREATE", out var startSpan))
+        if (!TryDefinitionLead(out var startSpan, out var isAlter, out var isOrAlter))
         {
             return NoneResult<SqlCreateFunctionStatement>();
         }
-
-        var isOrAlter = TryKeywords(["OR", "ALTER"], out _);
 
         if (!TryKeyword("FUNCTION", out _))
         {
@@ -4004,6 +4020,7 @@ public class SqlParser
         {
             Span = _text.CreateSpan(startSpan),
             IsOrAlter = isOrAlter,
+            IsAlter = isAlter,
             FunctionName = functionName.ResultValue.FieldName,
             Parameters = parameters.ResultValue,
             Body = new SqlBlockStatement()
@@ -4071,12 +4088,10 @@ public class SqlParser
     private ParseResult<SqlCreateProcedureStatement> ParseCreateProcedureStatement()
     {
         var startPosition = _text.Position;
-        if (!TryKeyword("CREATE", out var startSpan))
+        if (!TryDefinitionLead(out var startSpan, out var isAlter, out var isOrAlter))
         {
             return NoneResult<SqlCreateProcedureStatement>();
         }
-
-        var isOrAlter = TryKeywords(["OR", "ALTER"], out _);
 
         if (!TryKeyword("PROCEDURE", out _) && !TryKeyword("PROC", out _))
         {
@@ -4118,6 +4133,7 @@ public class SqlParser
         {
             Span = _text.CreateSpan(startSpan),
             IsOrAlter = isOrAlter,
+            IsAlter = isAlter,
             ProcedureName = procedureName.ResultValue.FieldName,
             Parameters = parameters.ResultValue,
             Body = body.ResultValue
@@ -4258,12 +4274,10 @@ public class SqlParser
     private ParseResult<SqlCreateViewStatement> ParseCreateViewStatement()
     {
         var startPosition = _text.Position;
-        if (!TryKeyword("CREATE", out var startSpan))
+        if (!TryDefinitionLead(out var startSpan, out var isAlter, out var isOrAlter))
         {
             return NoneResult<SqlCreateViewStatement>();
         }
-
-        var isOrAlter = TryKeywords(["OR", "ALTER"], out _);
 
         if (!TryKeyword("VIEW", out _))
         {
@@ -4314,6 +4328,7 @@ public class SqlParser
         {
             Span = _text.CreateSpan(startSpan),
             IsOrAlter = isOrAlter,
+            IsAlter = isAlter,
             ViewName = viewName.ResultValue.FieldName,
             ColumnNames = columnNames,
             Query = query.ResultValue,

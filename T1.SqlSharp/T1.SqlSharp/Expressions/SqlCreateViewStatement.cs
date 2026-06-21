@@ -13,6 +13,7 @@ public class SqlCreateViewStatement : ISqlExpression
     }
 
     public bool IsOrAlter { get; set; }
+    public bool IsAlter { get; set; }
     public string ViewName { get; set; } = string.Empty;
     public List<string> ColumnNames { get; set; } = [];
     public required ISqlExpression Query { get; set; }
@@ -21,7 +22,7 @@ public class SqlCreateViewStatement : ISqlExpression
     public string ToSql()
     {
         var sql = new StringBuilder();
-        sql.Append(IsOrAlter ? "CREATE OR ALTER VIEW " : "CREATE VIEW ");
+        sql.Append(DefinitionLead.ToSql(IsAlter, IsOrAlter, "VIEW"));
         sql.Append(ViewName);
         if (ColumnNames.Count > 0)
         {
