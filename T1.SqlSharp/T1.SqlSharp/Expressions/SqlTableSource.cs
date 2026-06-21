@@ -13,6 +13,7 @@ public class SqlTableSource : ITableSource
 
     public string TableName { get; set; } = string.Empty;
     public string Alias { get; set; } = string.Empty;
+    public SqlTableSampleClause? TableSample { get; set; }
     public List<ISqlExpression> Withs { get; set; } = [];
 
     public virtual string ToSql()
@@ -26,7 +27,16 @@ public class SqlTableSource : ITableSource
     protected void WriteSqlAfterTableName(IndentStringBuilder sql)
     {
         WriteAliasSql(sql);
+        WriteTableSampleSql(sql);
         WriteWithsSql(sql);
+    }
+
+    private void WriteTableSampleSql(IndentStringBuilder sql)
+    {
+        if (TableSample != null)
+        {
+            sql.Write($" {TableSample.ToSql()}");
+        }
     }
 
     private void WriteAliasSql(IndentStringBuilder sql)

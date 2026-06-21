@@ -11,7 +11,8 @@ public class SqlParser
     private static readonly string[] ReservedWords =
     [
         "FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH",
-        "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING", "INTERSECT", "EXCEPT", "OPTION"
+        "WHERE", "UNPIVOT", "PIVOT", "FOR", "AS", "ORDER", "HAVING", "INTERSECT", "EXCEPT", "OPTION",
+        "TABLESAMPLE"
     ];
 
     private static string[] DataTypes =
@@ -3103,6 +3104,11 @@ public class SqlParser
             tableSourceExpr.Alias = aliasExpr.ResultValue.Name;
         }
 
+        if (tableSourceExpr is SqlTableSource baseTableSource && Try(Parse_TableSampleClause, out var tableSampleClause))
+        {
+            baseTableSource.TableSample = tableSampleClause.ResultValue;
+        }
+
         if (TryKeyword("WITH", out _))
         {
             if (!TryMatch("(", out _))
@@ -3137,6 +3143,88 @@ public class SqlParser
         }
 
         return CreateParseResult(tableSourceExpr);
+    }
+
+    private ParseResult<SqlTableSampleClause> Parse_TableSampleClause()
+    {
+        if (!TryKeyword("TABLESAMPLE", out var startSpan))
+        {
+            return NoneResult<SqlTableSampleClause>();
+        }
+
+        var isSystem = TryKeyword("SYSTEM", out _);
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var sampleNumber = ParseArithmeticExpr();
+        if (sampleNumber.HasError)
+        {
+            return sampleNumber.Error;
+        }
+
+        var unit = Parse_TableSampleUnit();
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        var repeatableSeed = Parse_TableSampleRepeatable();
+        if (repeatableSeed.HasError)
+        {
+            return repeatableSeed.Error;
+        }
+
+        return new SqlTableSampleClause
+        {
+            Span = _text.CreateSpan(startSpan),
+            IsSystem = isSystem,
+            SampleNumber = sampleNumber.ResultValue,
+            Unit = unit,
+            RepeatableSeed = repeatableSeed.Result
+        };
+    }
+
+    private SqlTableSampleUnit Parse_TableSampleUnit()
+    {
+        if (TryKeyword("PERCENT", out _))
+        {
+            return SqlTableSampleUnit.Percent;
+        }
+
+        if (TryKeyword("ROWS", out _))
+        {
+            return SqlTableSampleUnit.Rows;
+        }
+
+        return SqlTableSampleUnit.Unspecified;
+    }
+
+    private ParseResult<ISqlExpression> Parse_TableSampleRepeatable()
+    {
+        if (!TryKeyword("REPEATABLE", out _))
+        {
+            return NoneResult<ISqlExpression>();
+        }
+
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var seed = ParseArithmeticExpr();
+        if (seed.HasError)
+        {
+            return seed.Error;
+        }
+
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return seed;
     }
 
     private ParseResult<ISqlExpression> Parse_WhereExpression()

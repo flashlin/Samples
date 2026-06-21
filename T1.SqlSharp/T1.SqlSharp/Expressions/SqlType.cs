@@ -77,4 +77,5 @@ public enum SqlType
     CommonTableExpression,
     WithCte,
     GroupingSet,
+    TableSampleClause,
 }

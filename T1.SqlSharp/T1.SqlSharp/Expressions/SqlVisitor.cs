@@ -431,7 +431,15 @@ public class SqlVisitor
     public virtual void Visit_TableSource(SqlTableSource expr)
     {
         AddSqlExpression(expr);
+        expr.TableSample?.Accept(this);
         expr.Withs.ForEach(x=>x.Accept(this));
+    }
+
+    public virtual void Visit_TableSampleClause(SqlTableSampleClause expr)
+    {
+        AddSqlExpression(expr);
+        expr.SampleNumber.Accept(this);
+        expr.RepeatableSeed?.Accept(this);
     }
 
     public virtual void Visit_Toggle(SqlToggle expr)

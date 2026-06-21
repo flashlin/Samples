@@ -994,6 +994,70 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void Tablesample_percent()
+    {
+        var sql = $"""
+                   select id from customer tablesample (10 percent)
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                    TableSample = new SqlTableSampleClause
+                    {
+                        SampleNumber = new SqlValue { SqlType = SqlType.IntValue, Value = "10" },
+                        Unit = SqlTableSampleUnit.Percent
+                    }
+                }
+            ]
+        });
+    }
+
+    [Test]
+    public void Tablesample_system_rows_repeatable()
+    {
+        var sql = $"""
+                   select id from customer tablesample system (1000 rows) repeatable (5)
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                    TableSample = new SqlTableSampleClause
+                    {
+                        IsSystem = true,
+                        SampleNumber = new SqlValue { SqlType = SqlType.IntValue, Value = "1000" },
+                        Unit = SqlTableSampleUnit.Rows,
+                        RepeatableSeed = new SqlValue { SqlType = SqlType.IntValue, Value = "5" }
+                    }
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void Between_var_and_func_with_var()
     {
         var sql = $"""
