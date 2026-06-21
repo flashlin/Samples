@@ -41,4 +41,35 @@ public class ExtractStatementResultsTest
             }
         ]);
     }
+
+    [Test]
+    public void ExtractStatementResults_ShouldIgnoreTopLevelStatementTerminators()
+    {
+        var sql = """
+                  select 1;
+                  select 2;
+                  """;
+
+        var results = new SqlParser(sql)
+            .ExtractStatementResults()
+            .Select(x => new
+            {
+                x.HasError,
+                TypeName = x.HasError ? string.Empty : x.ResultValue.GetType().Name
+            })
+            .ToList();
+
+        results.Should().BeEquivalentTo([
+            new
+            {
+                HasError = false,
+                TypeName = nameof(SelectStatement)
+            },
+            new
+            {
+                HasError = false,
+                TypeName = nameof(SelectStatement)
+            }
+        ]);
+    }
 }

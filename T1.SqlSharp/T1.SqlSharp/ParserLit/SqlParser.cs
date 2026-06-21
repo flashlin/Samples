@@ -576,6 +576,15 @@ public class SqlParser
             {
                 yield break;
             }
+
+            ConsumeStatementTerminators();
+        }
+    }
+
+    private void ConsumeStatementTerminators()
+    {
+        while (TryMatch(";", out _))
+        {
         }
     }
 
