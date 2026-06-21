@@ -3,7 +3,7 @@
 > 用途：追蹤 parser 目前支援哪些 T-SQL 語法，方便維護與規劃。
 > 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援、`[N/A]` 不適用 T-SQL（不實作）。
 > 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對）。
-> 入口：`SqlParser.Parse()` dispatch 14 種頂層語句（WITH CTE / CREATE TABLE / CREATE VIEW / CREATE INDEX / SELECT / INSERT / UPDATE / DELETE / MERGE / TRUNCATE TABLE / DROP / ALTER TABLE / EXEC sp_addextendedproperty / SET）。
+> 入口：`SqlParser.Parse()` dispatch 15 種頂層語句（WITH CTE / CREATE TABLE / CREATE VIEW / CREATE INDEX / SELECT / INSERT / UPDATE / DELETE / MERGE / TRUNCATE TABLE / DROP / ALTER TABLE / EXEC sp_addextendedproperty / EXEC proc / SET）。
 
 ---
 
@@ -30,7 +30,7 @@
 - [ ] `BEGIN ... END`
 - [ ] `BEGIN TRY ... END TRY / BEGIN CATCH ... END CATCH`
 - [ ] `BEGIN / COMMIT / ROLLBACK TRANSACTION`
-- [ ] `EXEC`（一般預存程序，非 sp_addextendedproperty）
+- [~] `EXEC`（一般預存程序）：`{EXEC|EXECUTE} proc [arg, ...]`（`Parse_ExecStatement` → `SqlExecStatement`，dispatch 在 sp_addextendedproperty 之後）。未做具名參數 `@p = val`、`EXEC ('dynamic sql')`、`EXEC (...) AT linked_server`
 - [ ] `USE <db>`
 - [ ] `GO`（批次分隔）
 - [ ] `GRANT / REVOKE / DENY`
@@ -308,9 +308,9 @@
 ## 維護建議優先序（未完成項目）
 
 1. 🟢 DDL（DROP/TRUNCATE/ALTER TABLE/CREATE VIEW/CREATE INDEX/DROP INDEX ON 已完成）：`CREATE PROCEDURE|FUNCTION|TRIGGER`、ALTER TABLE 第二階段（見 §1.5）
-2. 🟢 DML 收尾剩餘：MERGE 第二階段（TOP/hint/OUTPUT/OPTION，見 §1.4）、`EXEC ('dynamic sql')`、頂層一般 `EXEC proc`（可重用 `Parse_ExecStatement`/`SqlExecStatement`）
+2. 🟢 DML 收尾剩餘：MERGE 第二階段（TOP/hint/OUTPUT/OPTION，見 §1.4）、`EXEC ('dynamic sql')`、EXEC 具名參數 `@p = val`
 3. 🟢 具名 `WINDOW` 子句的延伸：`OVER (existing_window ...)` 行內參照、定義間互相參照、RANK 路徑 bare `OVER name`（見 §4 註）
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）、`MERGE` 解析 MVP（INTO/USING/ON/三種 WHEN/AND/三種 action，2026-06-21）、`TRUNCATE TABLE` + `DROP`（多型別 + IF EXISTS + 多名稱，2026-06-21）、`ALTER TABLE`（ADD/DROP COLUMN、ADD/DROP CONSTRAINT、ALTER COLUMN，2026-06-21）、`CREATE VIEW`（OR ALTER / 欄位清單 / WITH CHECK OPTION，2026-06-21）、`CREATE INDEX`（UNIQUE/CLUSTERED/ASC-DESC/INCLUDE/filtered WHERE，2026-06-21）、`DROP INDEX ix ON table`（2026-06-21）、DML 收尾（MERGE CTE 前綴 + DEFAULT VALUES、UPDATE 複合指派 `+=`、`INSERT ... EXEC`，2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）、`GROUP BY ALL`（2026-06-21）、`OPTION (query hint)`（2026-06-21）、`CHECK` 約束（2026-06-21）、欄位 `COLLATE`（2026-06-21）、運算式 `COLLATE`（2026-06-21）、UNION 後 top-level `ORDER BY`（2026-06-21）、`TABLESAMPLE`（2026-06-21）、`FOR XML RAW/EXPLICIT`（2026-06-21）、具名 `WINDOW` 子句 MVP（2026-06-21）、`INSERT` 解析（MVP + TOP/OUTPUT/hint/DEFAULT 值，2026-06-21）、`UPDATE` 解析（SET/FROM/WHERE/TOP/hint/OUTPUT/DEFAULT，2026-06-21）、`DELETE` 解析（雙 FROM/WHERE/TOP/hint/OUTPUT，2026-06-21）、CTE 前綴接 INSERT/UPDATE/DELETE（2026-06-21）、`MERGE` 解析 MVP（INTO/USING/ON/三種 WHEN/AND/三種 action，2026-06-21）、`TRUNCATE TABLE` + `DROP`（多型別 + IF EXISTS + 多名稱，2026-06-21）、`ALTER TABLE`（ADD/DROP COLUMN、ADD/DROP CONSTRAINT、ALTER COLUMN，2026-06-21）、`CREATE VIEW`（OR ALTER / 欄位清單 / WITH CHECK OPTION，2026-06-21）、`CREATE INDEX`（UNIQUE/CLUSTERED/ASC-DESC/INCLUDE/filtered WHERE，2026-06-21）、`DROP INDEX ix ON table`（2026-06-21）、DML 收尾（MERGE CTE 前綴 + DEFAULT VALUES、UPDATE 複合指派 `+=`、`INSERT ... EXEC`，2026-06-21）、頂層 `EXEC proc [args]`（2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。

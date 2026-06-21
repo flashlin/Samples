@@ -129,6 +129,11 @@ public class SqlParser
             return execSpAddExtendedProperty.Result;
         }
 
+        if (Try(Parse_ExecStatement, out var execStatement))
+        {
+            return execStatement.Result;
+        }
+
         if (Try(ParseSetValueStatement, out var setValueStatement))
         {
             return setValueStatement.Result;
