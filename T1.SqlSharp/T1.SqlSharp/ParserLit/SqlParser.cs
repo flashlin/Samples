@@ -2459,12 +2459,47 @@ public class SqlParser
                     Parameters = parameters.ResultValue
                 };
                 function = NormalizeFunctionName(function);
+                if (Try(ParseWithinGroupClause, out var withinGroup))
+                {
+                    function.WithinGroup = withinGroup.ResultValue;
+                }
                 return function;
             }
         }
 
         _text.Position = startPosition;
         return NoneResult<SqlFunctionExpression>();
+    }
+
+    private ParseResult<SqlWithinGroupClause> ParseWithinGroupClause()
+    {
+        if (!TryKeywords(["WITHIN", "GROUP"], out var startSpan))
+        {
+            return NoneResult<SqlWithinGroupClause>();
+        }
+
+        if (!TryMatch("(", out _))
+        {
+            return CreateParseError("Expected ( after WITHIN GROUP");
+        }
+
+        var orderBy = ParseOrderByClause();
+        if (orderBy.HasError)
+        {
+            return orderBy.Error;
+        }
+
+        var orderColumns = orderBy.Result?.Columns ?? [];
+        if (!TryMatch(")", out _))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return new SqlWithinGroupClause
+        {
+            Span = _text.CreateSpan(startSpan),
+            Columns = orderColumns
+        };
     }
 
     private ParseResult<SqlHavingClause> ParseHavingClause()

@@ -497,6 +497,87 @@ public class ParseSelectSqlTest
     }
 
     [Test]
+    public void StringAgg_WithinGroup_OrderBy()
+    {
+        var sql = $"""
+                   select STRING_AGG(name, ',') WITHIN GROUP (ORDER BY id) as names
+                   from customer
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFunctionExpression
+                    {
+                        FunctionName = "STRING_AGG",
+                        Parameters =
+                        [
+                            new SqlFieldExpr { FieldName = "name" },
+                            new SqlValue { Value = "','" }
+                        ],
+                        WithinGroup = new SqlWithinGroupClause
+                        {
+                            Columns =
+                            [
+                                new SqlOrderColumn { ColumnName = new SqlFieldExpr { FieldName = "id" } }
+                            ]
+                        }
+                    },
+                    Alias = "names"
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+
+    [Test]
+    public void StringAgg_WithinGroup_OrderBy_MultipleColumns_WithDirection()
+    {
+        var sql = $"""
+                   select STRING_AGG(name, '; ') WITHIN GROUP (ORDER BY age DESC, name ASC) as names
+                   from customer
+                   """;
+        var rc = sql.ParseSql();
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFunctionExpression
+                    {
+                        FunctionName = "STRING_AGG",
+                        Parameters =
+                        [
+                            new SqlFieldExpr { FieldName = "name" },
+                            new SqlValue { Value = "'; '" }
+                        ],
+                        WithinGroup = new SqlWithinGroupClause
+                        {
+                            Columns =
+                            [
+                                new SqlOrderColumn { ColumnName = new SqlFieldExpr { FieldName = "age" }, Order = OrderType.Desc },
+                                new SqlOrderColumn { ColumnName = new SqlFieldExpr { FieldName = "name" }, Order = OrderType.Asc }
+                            ]
+                        }
+                    },
+                    Alias = "names"
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+
+    [Test]
     public void From_ChangeTable_Changes()
     {
         var sql = $"""

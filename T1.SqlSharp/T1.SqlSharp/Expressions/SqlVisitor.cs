@@ -239,6 +239,13 @@ public class SqlVisitor
     {
         AddSqlExpression(expr);
         expr.Parameters.ForEach(x=>x.Accept(this));
+        expr.WithinGroup?.Accept(this);
+    }
+
+    public virtual void Visit_WithinGroupClause(SqlWithinGroupClause expr)
+    {
+        AddSqlExpression(expr);
+        expr.Columns.ForEach(x=>x.Accept(this));
     }
 
     public virtual void Visit_ParenthesizedExpression(SqlParenthesizedExpression expr)

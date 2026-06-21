@@ -1,7 +1,7 @@
 # T1.SqlSharp — T-SQL 語法支援清單
 
 > 用途：追蹤 parser 目前支援哪些 T-SQL 語法，方便維護與規劃。
-> 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援。
+> 圖例：`[x]` 已支援、`[ ]` 未支援、`[~]` 部分支援、`[N/A]` 不適用 T-SQL（不實作）。
 > 最後驗證：2026-06-21（依 `T1.SqlSharp/ParserLit/SqlParser.cs`、`LinqParser.cs` 與測試實際比對）。
 > 入口：`SqlParser.Parse()` 只 dispatch 5 種頂層語句（WITH CTE / CREATE TABLE / SELECT / EXEC sp_addextendedproperty / SET）。
 
@@ -88,8 +88,8 @@
 - [x] `RANK()` / `ROW_NUMBER()` / 等（一般函式 + `OVER`）
 - [~] 視窗框架 `ROWS / RANGE BETWEEN ... PRECEDING/FOLLOWING/CURRENT ROW/UNBOUNDED`（含單一 bound 與 BETWEEN 兩種形式）
   - 註：frame 只掛在「泛用值 + `OVER`」路徑（聚合視窗函式 `SUM()`/`AVG()` 等）。`RANK()`/`ROW_NUMBER()` 走 `ParseRankClause` 獨立路徑、未加 frame——但排名函式在 T-SQL 本就不允許 frame，故為刻意不做、非遺漏。
-- [ ] 視窗框架 `EXCLUDE` 選項（`EXCLUDE CURRENT ROW / GROUP / TIES / NO OTHERS`）
-- [ ] `WITHIN GROUP (...)`（`STRING_AGG`、`PERCENTILE_CONT/DISC`）
+- [N/A] 視窗框架 `EXCLUDE` 選項（`EXCLUDE CURRENT ROW / GROUP / TIES / NO OTHERS`）— SQL:2011 標準語法，**SQL Server 不支援**，不適用 T-SQL parser，不實作
+- [x] `WITHIN GROUP (...)`（`STRING_AGG`、`PERCENTILE_CONT/DISC`；含多欄與 `ASC`/`DESC`）
 - [ ] 具名 `WINDOW` 子句
 
 ---
@@ -155,8 +155,8 @@
 ## 維護建議優先序（未完成項目）
 
 1. 🟢 `INSERT` / `UPDATE` / `DELETE` 的「解析」能力（目前只有「產生」）
-2. 🟢 `GROUP BY ALL`、`CHECK` 約束、`COLLATE`、`OPTION` query hint、`WITHIN GROUP`
+2. 🟢 `GROUP BY ALL`、`CHECK` 約束、`COLLATE`、`OPTION` query hint
 
-✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）
+✅ 已完成：`SELECT ... INTO`（2026-06-20）、`GROUP BY ROLLUP/CUBE/GROUPING SETS`（2026-06-20）、`FOR JSON`（2026-06-21）、視窗框架 `ROWS/RANGE BETWEEN`（2026-06-21）、`WITHIN GROUP`（2026-06-21）
 
 > 更新規則：每完成一項，於對應 `[ ]` 改成 `[x]`（部分完成用 `[~]` 並註記），並更新「最後驗證」日期。

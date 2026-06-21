@@ -62,6 +62,7 @@ public enum SqlType
     OverPartitionByClause,
     WindowFrameClause,
     WindowFrameBound,
+    WithinGroupClause,
     HavingClause,
     SetValueStatement,
     NotExpression,

@@ -13,6 +13,7 @@ public class SqlFunctionExpression : ISqlExpression
 
     public string FunctionName { get; set; } =string.Empty;
     public List<ISqlExpression> Parameters { get; set; } = [];
+    public SqlWithinGroupClause? WithinGroup { get; set; }
 
     public string ToSql()
     {
@@ -28,6 +29,11 @@ public class SqlFunctionExpression : ISqlExpression
             }
         }
         sql.Write(")");
+        if (WithinGroup != null)
+        {
+            sql.Write(" ");
+            sql.Write(WithinGroup.ToSql());
+        }
         return sql.ToString();
     }
 
