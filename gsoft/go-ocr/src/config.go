@@ -21,7 +21,7 @@ type Config struct {
 func DefaultConfig() Config {
 	return Config{
 		OCREndpoint:        "http://127.0.0.1:11434/v1/chat/completions",
-		OCRModel:           "English-Document-OCR-Qwen3.5-0.8B",
+		OCRModel:           "qwen3.5:35b-a3b-nvfp4",
 		OCRPrompt:          "Extract all visible text from this document image and return only the transcription in reading order using a markdown-first format. Use HTML only for tables. Use LaTeX only for formulas.",
 		TranslateModel:     "sun_leaf/HY-MT:1.8b",
 		TranslatePrompt:    "Translate the following text to {target_lang}. Output ONLY the translation, with no explanation, no quotes, no markdown, no language label.",
