@@ -135,7 +135,7 @@ func resolveTranslateSourceText() (string, error) {
 
 func runTranslateAndNotify(source string) {
 	cfg := GetCurrentConfig()
-	log.Printf("Translate: POST %s model=%s chars=%d", cfg.OCREndpoint, cfg.TranslateModel, len(source))
+	log.Printf("Translate: POST %s model=%s chars=%d", cfg.TranslateEndpoint, cfg.TranslateModel, len(source))
 	translated, err := RunTranslate(cfg, source)
 	if err != nil {
 		log.Printf("Translate: failed: %v", err)
@@ -149,7 +149,7 @@ func runTranslateAndNotify(source string) {
 
 func runOCRAndNotify(png []byte) {
 	cfg := GetCurrentConfig()
-	log.Printf("OCR: POST %s model=%s bytes=%d", cfg.OCREndpoint, cfg.OCRModel, len(png))
+	log.Printf("OCR: POST %s bytes=%d", cfg.OCREndpoint, len(png))
 	text, err := RunOCR(OCRRequest{Config: cfg, PNG: png})
 	if err != nil {
 		log.Printf("OCR: failed: %v", err)

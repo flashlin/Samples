@@ -18,11 +18,11 @@ func RunTranslate(cfg *Config, sourceText string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	body, err := postOCR(cfg.OCREndpoint, payload)
+	body, err := postOCR(cfg.TranslateEndpoint, payload)
 	if err != nil {
 		return "", err
 	}
-	return parseOCRResponse(body)
+	return parseChatResponse(body)
 }
 
 func detectTargetLanguage(text string) string {

@@ -31,29 +31,26 @@ func OpenSettingsWindow(deps SettingsWindowDeps) {
 }
 
 type settingsFields struct {
-	endpoint        *widget.Entry
-	model           *widget.Entry
-	prompt          *widget.Entry
-	translateModel  *widget.Entry
-	translatePrompt *widget.Entry
-	screenHK        *widget.Entry
-	clipHK          *widget.Entry
-	translateHK     *widget.Entry
+	endpoint          *widget.Entry
+	translateEndpoint *widget.Entry
+	translateModel    *widget.Entry
+	translatePrompt   *widget.Entry
+	screenHK          *widget.Entry
+	clipHK            *widget.Entry
+	translateHK       *widget.Entry
 }
 
 func newSettingsFields(cfg *Config) *settingsFields {
-	prompt := newMultiLineEntry(cfg.OCRPrompt)
 	translatePrompt := newMultiLineEntry(cfg.TranslatePrompt)
 
 	return &settingsFields{
-		endpoint:        entryWithValue(cfg.OCREndpoint),
-		model:           entryWithValue(cfg.OCRModel),
-		prompt:          prompt,
-		translateModel:  entryWithValue(cfg.TranslateModel),
-		translatePrompt: translatePrompt,
-		screenHK:        entryWithValue(cfg.ScreenshotHotkey),
-		clipHK:          entryWithValue(cfg.ClipboardOCRHotkey),
-		translateHK:     entryWithValue(cfg.TranslateHotkey),
+		endpoint:          entryWithValue(cfg.OCREndpoint),
+		translateEndpoint: entryWithValue(cfg.TranslateEndpoint),
+		translateModel:    entryWithValue(cfg.TranslateModel),
+		translatePrompt:   translatePrompt,
+		screenHK:          entryWithValue(cfg.ScreenshotHotkey),
+		clipHK:            entryWithValue(cfg.ClipboardOCRHotkey),
+		translateHK:       entryWithValue(cfg.TranslateHotkey),
 	}
 }
 
@@ -77,10 +74,8 @@ func buildSettingsForm(f *settingsFields) fyne.CanvasObject {
 	return container.NewVBox(
 		widget.NewLabel("OCR Endpoint"),
 		f.endpoint,
-		widget.NewLabel("OCR Model"),
-		f.model,
-		widget.NewLabel("OCR Prompt"),
-		f.prompt,
+		widget.NewLabel("Translate Endpoint"),
+		f.translateEndpoint,
 		widget.NewLabel("Translate Model"),
 		f.translateModel,
 		widget.NewLabel("Translate Prompt"),
@@ -106,8 +101,7 @@ func buildSettingsButtons(win fyne.Window, f *settingsFields, deps SettingsWindo
 func resetToDefaults(f *settingsFields) {
 	def := DefaultConfig()
 	f.endpoint.SetText(def.OCREndpoint)
-	f.model.SetText(def.OCRModel)
-	f.prompt.SetText(def.OCRPrompt)
+	f.translateEndpoint.SetText(def.TranslateEndpoint)
 	f.translateModel.SetText(def.TranslateModel)
 	f.translatePrompt.SetText(def.TranslatePrompt)
 	f.screenHK.SetText(def.ScreenshotHotkey)
@@ -118,8 +112,7 @@ func resetToDefaults(f *settingsFields) {
 func trySave(win fyne.Window, f *settingsFields, deps SettingsWindowDeps) {
 	newCfg := &Config{
 		OCREndpoint:        f.endpoint.Text,
-		OCRModel:           f.model.Text,
-		OCRPrompt:          f.prompt.Text,
+		TranslateEndpoint:  f.translateEndpoint.Text,
 		TranslateModel:     f.translateModel.Text,
 		TranslatePrompt:    f.translatePrompt.Text,
 		ScreenshotHotkey:   f.screenHK.Text,

@@ -9,8 +9,7 @@ import (
 
 type Config struct {
 	OCREndpoint        string `json:"ocr_endpoint"`
-	OCRModel           string `json:"ocr_model"`
-	OCRPrompt          string `json:"ocr_prompt"`
+	TranslateEndpoint  string `json:"translate_endpoint"`
 	TranslateModel     string `json:"translate_model"`
 	TranslatePrompt    string `json:"translate_prompt"`
 	ScreenshotHotkey   string `json:"screenshot_hotkey"`
@@ -20,9 +19,8 @@ type Config struct {
 
 func DefaultConfig() Config {
 	return Config{
-		OCREndpoint:        "http://127.0.0.1:11434/v1/chat/completions",
-		OCRModel:           "qwen3.5:35b-a3b-nvfp4",
-		OCRPrompt:          "Extract all visible text from this document image and return only the transcription in reading order using a markdown-first format. Use HTML only for tables. Use LaTeX only for formulas.",
+		OCREndpoint:        "http://127.0.0.1:1240/ocr",
+		TranslateEndpoint:  "http://127.0.0.1:11434/v1/chat/completions",
 		TranslateModel:     "sun_leaf/HY-MT:1.8b",
 		TranslatePrompt:    "Translate the following text to {target_lang}. Output ONLY the translation, with no explanation, no quotes, no markdown, no language label.",
 		ScreenshotHotkey:   "shift+cmd+t",
@@ -77,11 +75,8 @@ func applyConfigDefaults(cfg *Config) {
 	if cfg.OCREndpoint == "" {
 		cfg.OCREndpoint = def.OCREndpoint
 	}
-	if cfg.OCRModel == "" {
-		cfg.OCRModel = def.OCRModel
-	}
-	if cfg.OCRPrompt == "" {
-		cfg.OCRPrompt = def.OCRPrompt
+	if cfg.TranslateEndpoint == "" {
+		cfg.TranslateEndpoint = def.TranslateEndpoint
 	}
 	if cfg.ScreenshotHotkey == "" {
 		cfg.ScreenshotHotkey = def.ScreenshotHotkey

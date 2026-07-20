@@ -15,6 +15,18 @@ type OCRRequest struct {
 	PNG    []byte
 }
 
+type ocrRequest struct {
+	Image string `json:"image"`
+}
+
+type paddleOCRResponse struct {
+	Model string `json:"model"`
+	Text  string `json:"text"`
+	Error *struct {
+		Message string `json:"message"`
+	} `json:"error,omitempty"`
+}
+
 type chatRequest struct {
 	Model     string        `json:"model"`
 	Messages  []chatMessage `json:"messages"`
@@ -27,13 +39,8 @@ type chatMessage struct {
 }
 
 type contentPart struct {
-	Type     string    `json:"type"`
-	Text     string    `json:"text,omitempty"`
-	ImageURL *imageURL `json:"image_url,omitempty"`
-}
-
-type imageURL struct {
-	URL string `json:"url"`
+	Type string `json:"type"`
+	Text string `json:"text,omitempty"`
 }
 
 type chatResponse struct {
@@ -56,28 +63,23 @@ func RunOCR(req OCRRequest) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return parseOCRResponse(body)
+	return parsePaddleOCRResponse(body)
 }
 
 func buildOCRPayload(req OCRRequest) ([]byte, error) {
 	encoded := base64.StdEncoding.EncodeToString(req.PNG)
-	keepAliveForever := -1
-	payload := chatRequest{
-		Model: req.Config.OCRModel,
-		Messages: []chatMessage{
-			{
-				Role: "user",
-				Content: []contentPart{
-					{Type: "text", Text: req.Config.OCRPrompt},
-					{Type: "image_url", ImageURL: &imageURL{
-						URL: "data:image/png;base64," + encoded,
-					}},
-				},
-			},
-		},
-		KeepAlive: &keepAliveForever,
+	return json.Marshal(ocrRequest{Image: encoded})
+}
+
+func parsePaddleOCRResponse(data []byte) (string, error) {
+	var r paddleOCRResponse
+	if err := json.Unmarshal(data, &r); err != nil {
+		return "", fmt.Errorf("invalid ocr response: %w", err)
 	}
-	return json.Marshal(payload)
+	if r.Error != nil {
+		return "", fmt.Errorf("ocr error: %s", r.Error.Message)
+	}
+	return r.Text, nil
 }
 
 func postOCR(endpoint string, payload []byte) ([]byte, error) {
@@ -102,16 +104,16 @@ func postOCR(endpoint string, payload []byte) ([]byte, error) {
 	return body, nil
 }
 
-func parseOCRResponse(data []byte) (string, error) {
+func parseChatResponse(data []byte) (string, error) {
 	var r chatResponse
 	if err := json.Unmarshal(data, &r); err != nil {
-		return "", fmt.Errorf("invalid ocr response: %w", err)
+		return "", fmt.Errorf("invalid translate response: %w", err)
 	}
 	if r.Error != nil {
-		return "", fmt.Errorf("ocr error: %s", r.Error.Message)
+		return "", fmt.Errorf("translate error: %s", r.Error.Message)
 	}
 	if len(r.Choices) == 0 {
-		return "", fmt.Errorf("ocr response has no choices")
+		return "", fmt.Errorf("translate response has no choices")
 	}
 	return r.Choices[0].Message.Content, nil
 }
