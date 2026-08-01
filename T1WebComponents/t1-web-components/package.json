@@ -57,7 +57,7 @@
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.23",
     "happy-dom": "^20.0.11",
-    "postcss": "^8.5.6",
+    "postcss": "^8.5.18",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
     "vite": "^7.3.0",
@@ -65,5 +65,10 @@
     "vitest": "^4.0.16",
     "vue": "^3.5.26",
     "vue-tsc": "^3.1.8"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "8.5.18"
+    }
   }
 }
