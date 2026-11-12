@@ -15,6 +15,7 @@ fi
 brew install zsh-autosuggestions
 brew install ripgrep
 brew install fd
+brew install uv
 uv run ./install.py
 
 echo "Install done"
