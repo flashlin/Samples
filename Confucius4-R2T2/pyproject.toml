@@ -1,0 +1,120 @@
+# -----------------------------------------------------------------------------
+# Packaging config for Confucius4-R2T2.
+#
+# Confucius4-R2T2 is a multilingual streaming/one-shot ASR model built on the
+# Qwen3-ASR architecture. This file describes how to build, install, and
+# distribute the accompanying `r2t2` Python package (which wraps the upstream
+# `qwen_asr` architecture and adds streaming inference on top).
+#
+# Quick reference:
+#   pip install .                # install the package and vLLM backend
+#   pip install -e .             # editable install with the vLLM backend
+# -----------------------------------------------------------------------------
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+# --------------------------------- Project ---------------------------------- #
+
+[project]
+name = "confucius4-r2t2"
+version = "0.1.0"
+description = "Streaming and one-shot inference for Confucius4-R2T2, a multilingual ASR model built on the Qwen3-ASR architecture."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Confucius4-R2T2 contributors" },
+]
+keywords = [
+    "asr",
+    "speech-recognition",
+    "streaming",
+    "confucius",
+    "confucius4-r2t2",
+    "qwen",
+    "qwen3-asr",
+    "vllm",
+    "transformers",
+    "multilingual",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# Base runtime dependencies.
+#
+# Aligned with the upstream Qwen3-ASR `pyproject.toml` so environments built
+# for Qwen3-ASR work here out of the box. In particular:
+#   * `torch` is NOT listed here. Its correct wheel depends on the target CUDA
+#     runtime and is not resolvable via PyPI alone. Install it separately with
+#     the wheel index matching your CUDA version (see the README), or let it
+#     be pulled in transitively by `transformers` / `vllm`.
+#   * `numpy` / `scipy` are pulled in transitively by librosa / transformers,
+#     so we don't pin them here either.
+dependencies = [
+    # Pull in Qwen-ASR with its vLLM backend enabled by default.
+    "qwen-asr[vllm]",
+
+    # Audio I/O
+    "librosa",
+    "soundfile",
+    "sox",
+
+    "fireredvad",
+    "sanic",
+]
+
+[project.optional-dependencies]
+# Development helpers (linting, formatting, testing).
+dev = [
+    "pytest>=7",
+    "ruff>=0.5",
+]
+
+# Convenience: development helpers on top of the default runtime dependencies.
+all = [
+    "pytest>=7",
+    "ruff>=0.5",
+]
+
+[project.urls]
+Homepage = "https://r2t2.ai/"
+Repository = "https://github.com/<org>/confucius4-r2t2"
+Issues = "https://github.com/<org>/confucius4-r2t2/issues"
+
+
+# --------------------------------- setuptools ------------------------------- #
+
+# Note on names:
+#   * PyPI distribution name  -> "confucius4-r2t2" (see [project].name)
+#   * Python import name      -> "r2t2" (source directory below)
+#   * The upstream `qwen_asr` import path is NOT provided by this repository —
+#     it comes from the `qwen-asr` dependency below. Installing this project
+#     only puts `r2t2` on the path.
+
+[tool.setuptools.packages.find]
+include = ["r2t2*"]
+exclude = ["tests*", "examples*"]
+
+# The optional `r2t2_llama` package ships prebuilt llama.cpp artifacts: the
+# pybind11 extension in `native/` and the llama.cpp shared libraries in `bin/`.
+# They are release products rather than build output, so they must be installed
+# alongside the Python sources. Library lookup uses relative `$ORIGIN` RPATHs,
+# so the installed layout works without LD_LIBRARY_PATH. Version pins and
+# rebuild instructions are in r2t2_llama/README.md.
+[tool.setuptools.package-data]
+"r2t2_llama" = ["bin/*.so", "bin/*.so.*", "CMakeLists.txt", "native_ext.cpp", "README.md"]
+"r2t2_llama.native" = ["*.so"]
