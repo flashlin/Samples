@@ -93,3 +93,4 @@ mac/env.ini
 .claude
 gsoft/go-ocr/build
 .pnpm-store/
+mac-input/build/ModuleCache
