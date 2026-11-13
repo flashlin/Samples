@@ -12,6 +12,51 @@ if [ ! -d ~/miniconda3 ]; then
     conda init --all
 fi
 
+# 檢查 nvm 是否已安裝
+if [ ! -d "$HOME/.nvm" ]; then
+    echo "正在安裝 nvm..."
+    PROFILE=/dev/null bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash'
+fi
+
+# 檢查當下的 shell 並添加 nvm 設定
+CURRENT_SHELL=$(basename "$SHELL")
+case "$CURRENT_SHELL" in
+    zsh)
+        SHELL_RC="$HOME/.zshrc"
+        ;;
+    bash)
+        if [ -f "$HOME/.bashrc" ]; then
+            SHELL_RC="$HOME/.bashrc"
+        else
+            SHELL_RC="$HOME/.bash_profile"
+        fi
+        ;;
+    *)
+        SHELL_RC="$HOME/.profile"
+        ;;
+esac
+
+touch "$SHELL_RC"
+
+if ! grep -q 'export NVM_DIR="\$HOME/.nvm"' "$SHELL_RC"; then
+    echo "正在將 nvm 設定加入 $SHELL_RC..."
+    cat << 'EOF' >> "$SHELL_RC"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+EOF
+fi
+
+# 載入 nvm 並檢查是否已安裝 Node.js，若無則安裝最新 LTS 版本
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+if [ "$(nvm current)" = "none" ]; then
+    echo "正在安裝 Node.js LTS..."
+    nvm install --lts
+fi
+
 brew install zsh-autosuggestions
 brew install ripgrep
 brew install fd
