@@ -61,6 +61,26 @@ brew install zsh-autosuggestions
 brew install ripgrep
 brew install fd
 brew install uv
+
+# 檢查 zoxide 是否已安裝
+if ! command -v zoxide &> /dev/null; then
+    echo "正在安裝 zoxide..."
+    brew install zoxide
+fi
+
+# 檢查並設置 ~/.zshrc 以啟用 zoxide (使用 j 作為快速指令)
+ZSHRC="$HOME/.zshrc"
+touch "$ZSHRC"
+if ! grep -q 'zoxide init' "$ZSHRC"; then
+    echo "正在將 zoxide 設定加入 $ZSHRC..."
+    cat << 'EOF' >> "$ZSHRC"
+
+# zoxide (j)
+eval "$(zoxide init zsh --cmd j)"
+EOF
+fi
+
 uv run ./install.py
 
 echo "Install done"
+echo "請執行 'source ~/.zshrc' 或重新開啟終端機以使設定生效"
