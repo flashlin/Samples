@@ -1,0 +1,30 @@
+name: go_youtu
+description: Clean Architecture YouTube Preview, Background Queue Downloader & Offline Player App.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  flutter_riverpod: ^2.5.1
+  youtube_explode_dart: ^2.2.1
+  video_player: ^2.8.6
+  sqflite: ^2.3.3+1
+  path: ^1.9.0
+  path_provider: ^2.1.3
+  dio: ^5.4.3+1
+  equatable: ^2.0.5
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.2
+  sqflite_common_ffi: ^2.3.3
+
+flutter:
+  uses-material-design: true
