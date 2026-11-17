@@ -7,7 +7,8 @@ import '../datasources/youtube_remote_datasource.dart';
 import '../models/video_item_model.dart';
 
 /// Concrete implementation of [VideoRepository] coordinating remote YouTube
-/// previews, local SQLite state, channel subscriptions, and local MP4 file management.
+/// previews, local SQLite state, channel subscriptions, channel exclusions,
+/// channel video feeds, and local MP4 file management.
 class VideoRepositoryImpl implements VideoRepository {
   VideoRepositoryImpl({
     required LocalVideoDataSource localDataSource,
@@ -20,10 +21,53 @@ class VideoRepositoryImpl implements VideoRepository {
 
   @override
   Future<List<VideoItem>> refreshRemotePreviewFeed({String? query}) async {
-    final remoteModels =
-        await _remoteDataSource.fetchPreviewVideos(query: query);
     final existingModels = await _localDataSource.getAllVideos();
     final subscribedChannels = await _localDataSource.getSubscribedChannels();
+    final excludedChannels = await _localDataSource.getExcludedChannels();
+
+    // Build a list of channels the user is interested in (subscribed or downloaded,
+    // excluding any blocked channels) to feed into smart discovery on refresh.
+    final interestedSet = <String>{
+      ...subscribedChannels,
+      for (final item in existingModels)
+        if (item.hasEverDownloaded || item.isOfflineAvailable) item.channelName,
+    }..removeAll(excludedChannels);
+
+    final remoteModels = await _remoteDataSource.fetchPreviewVideos(
+      query: query,
+      interestedChannels: interestedSet.toList(),
+    );
+
+    return _mergeAndSaveRemoteVideos(
+      remoteModels: remoteModels,
+      existingModels: existingModels,
+      subscribedChannels: subscribedChannels,
+      excludedChannels: excludedChannels,
+    );
+  }
+
+  @override
+  Future<List<VideoItem>> fetchChannelVideos(String channelName) async {
+    final remoteModels =
+        await _remoteDataSource.fetchVideosForChannel(channelName);
+    final existingModels = await _localDataSource.getAllVideos();
+    final subscribedChannels = await _localDataSource.getSubscribedChannels();
+    final excludedChannels = await _localDataSource.getExcludedChannels();
+
+    return _mergeAndSaveRemoteVideos(
+      remoteModels: remoteModels,
+      existingModels: existingModels,
+      subscribedChannels: subscribedChannels,
+      excludedChannels: excludedChannels,
+    );
+  }
+
+  Future<List<VideoItem>> _mergeAndSaveRemoteVideos({
+    required List<VideoItemModel> remoteModels,
+    required List<VideoItemModel> existingModels,
+    required Set<String> subscribedChannels,
+    required Set<String> excludedChannels,
+  }) async {
     final existingById = <String, VideoItemModel>{
       for (final item in existingModels) item.id: item,
     };
@@ -33,15 +77,19 @@ class VideoRepositoryImpl implements VideoRepository {
     for (final remote in remoteModels) {
       final isChannelSubscribed =
           subscribedChannels.contains(remote.channelName);
+      final isChannelExcluded = excludedChannels.contains(remote.channelName);
       final existing = existingById[remote.id];
       if (existing == null) {
         mergedToUpsert.add(
           VideoItemModel.fromEntity(
-            remote.copyWith(isSubscribed: isChannelSubscribed),
+            remote.copyWith(
+              isSubscribed: isChannelSubscribed,
+              isExcluded: isChannelExcluded,
+            ),
           ),
         );
       } else {
-        // Preserve local user state (watched, downloaded, local file, queue status, subscription)
+        // Preserve local user state (watched, downloaded, local file, queue status, subscription, exclusion)
         final merged = VideoItemModel.fromEntity(
           existing.copyWith(
             title: remote.title,
@@ -49,6 +97,7 @@ class VideoRepositoryImpl implements VideoRepository {
             thumbnailUrl: remote.thumbnailUrl,
             durationSeconds: remote.durationSeconds,
             isSubscribed: existing.isSubscribed || isChannelSubscribed,
+            isExcluded: existing.isExcluded || isChannelExcluded,
           ),
         );
         mergedToUpsert.add(merged);
@@ -105,6 +154,24 @@ class VideoRepositoryImpl implements VideoRepository {
     await _localDataSource.setChannelSubscription(
       channelName,
       isSubscribed: false,
+    );
+    return _localDataSource.getAllVideos();
+  }
+
+  @override
+  Future<List<VideoItem>> excludeChannel(String channelName) async {
+    await _localDataSource.setChannelExclusion(
+      channelName,
+      isExcluded: true,
+    );
+    return _localDataSource.getAllVideos();
+  }
+
+  @override
+  Future<List<VideoItem>> unexcludeChannel(String channelName) async {
+    await _localDataSource.setChannelExclusion(
+      channelName,
+      isExcluded: false,
     );
     return _localDataSource.getAllVideos();
   }

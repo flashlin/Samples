@@ -13,8 +13,14 @@ import 'package:go_youtu/features/video/domain/usecases/video_usecases.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class _FakeRemoteDataSource implements RemoteYoutubeDataSource {
+  List<String> lastInterestedChannels = <String>[];
+
   @override
-  Future<List<VideoItemModel>> fetchPreviewVideos({String? query}) async {
+  Future<List<VideoItemModel>> fetchPreviewVideos({
+    String? query,
+    List<String> interestedChannels = const <String>[],
+  }) async {
+    lastInterestedChannels = List<String>.of(interestedChannels);
     final baseTime = DateTime(2026, 11, 16, 12);
     return <VideoItemModel>[
       VideoItemModel(
@@ -57,6 +63,31 @@ class _FakeRemoteDataSource implements RemoteYoutubeDataSource {
   }
 
   @override
+  Future<List<VideoItemModel>> fetchVideosForChannel(String channelName) async {
+    final baseTime = DateTime(2026, 11, 16, 15);
+    return <VideoItemModel>[
+      VideoItemModel(
+        id: 'ch_ep1',
+        title: '$channelName Episode 1',
+        channelName: channelName,
+        thumbnailUrl: 'https://example.com/ch1.jpg',
+        durationSeconds: 300,
+        publishedAt: baseTime,
+        updatedAt: baseTime,
+      ),
+      VideoItemModel(
+        id: 'ch_ep2',
+        title: '$channelName Episode 2',
+        channelName: channelName,
+        thumbnailUrl: 'https://example.com/ch2.jpg',
+        durationSeconds: 450,
+        publishedAt: baseTime.subtract(const Duration(hours: 1)),
+        updatedAt: baseTime,
+      ),
+    ];
+  }
+
+  @override
   Future<String> resolvePlayableStreamUrl(String videoId) async {
     return 'https://example.com/stream/$videoId.mp4';
   }
@@ -83,6 +114,7 @@ void main() {
 
   late Database db;
   late SqliteLocalDataSource localDataSource;
+  late _FakeRemoteDataSource fakeRemoteDataSource;
   late VideoRepositoryImpl repository;
   late VideoUseCases useCases;
   late Directory tempDir;
@@ -97,9 +129,10 @@ void main() {
       ),
     );
     localDataSource = SqliteLocalDataSource(injectedDatabase: db);
+    fakeRemoteDataSource = _FakeRemoteDataSource();
     repository = VideoRepositoryImpl(
       localDataSource: localDataSource,
-      remoteDataSource: _FakeRemoteDataSource(),
+      remoteDataSource: fakeRemoteDataSource,
     );
     useCases = VideoUseCases(repository);
   });
@@ -112,7 +145,7 @@ void main() {
   });
 
   test(
-    '1. 卡片清單排列方式：已下載優先 -> 已訂閱的優先 -> 最新時間，且已看過的影片移除不顯示',
+    '1. 卡片清單排列方式：已下載優先 -> 已訂閱的優先 -> 最新時間，且已看過與已排除頻道的影片移除不顯示',
     () async {
       await useCases.fetchInitialOrRefreshFeed();
 
@@ -136,26 +169,62 @@ void main() {
       final subscribedList = useCases.buildSubscribedList(allRecords);
       final watchedHistory = useCases.buildWatchedHistoryList(allRecords);
 
-      // vid_newest is watched -> must not appear in activeFeed
       expect(activeFeed.map((e) => e.id).contains('vid_newest'), isFalse);
       expect(watchedHistory.map((e) => e.id), contains('vid_newest'));
-
-      // Subscribed list must contain vid_subscribed
       expect(subscribedList.map((e) => e.id), contains('vid_subscribed'));
 
-      // Order in activeFeed must be:
-      // [0] vid_oldest (已下載優先)
-      // [1] vid_subscribed (已訂閱優先)
-      // [2] vid_middle (一般未看過影片)
       expect(
         activeFeed.map((e) => e.id).toList(),
         equals(<String>['vid_oldest', 'vid_subscribed', 'vid_middle']),
       );
+
+      // 4) Exclude 'Channel B' (vid_middle)
+      await useCases.excludeChannel('Channel B');
+      final afterExcludeRecords = await useCases.loadLocalRecords();
+      final activeFeedAfterExclude =
+          useCases.buildActiveFeedList(afterExcludeRecords);
+      final excludedList = useCases.buildExcludedList(afterExcludeRecords);
+
+      expect(
+        activeFeedAfterExclude.map((e) => e.id).contains('vid_middle'),
+        isFalse,
+      );
+      expect(excludedList.map((e) => e.id), contains('vid_middle'));
     },
   );
 
   test(
-    '2. 移除已下載影片檔案後，切換回線上狀態但保留「已下載過」紀錄',
+    '2. [進入頻道] 取得該頻道所有影片清單，且重新整理時會根據已訂閱/已下載興趣推薦相關頻道',
+    () async {
+      await useCases.fetchInitialOrRefreshFeed();
+      await useCases.subscribeToChannel('Channel Subscribed');
+
+      // Refresh feed -> should pass 'Channel Subscribed' as interestedChannels
+      await useCases.fetchInitialOrRefreshFeed();
+      expect(
+        fakeRemoteDataSource.lastInterestedChannels,
+        contains('Channel Subscribed'),
+      );
+
+      // Enter channel 'Channel Subscribed' -> fetches all videos for that channel
+      final updatedRecords =
+          await useCases.fetchChannelVideos('Channel Subscribed');
+      final channelList = useCases.buildChannelVideosList(
+        updatedRecords,
+        'Channel Subscribed',
+      );
+
+      expect(channelList.length, equals(3)); // vid_subscribed + ch_ep1 + ch_ep2
+      expect(
+        channelList.every((v) => v.channelName == 'Channel Subscribed'),
+        isTrue,
+      );
+      expect(channelList.every((v) => v.isSubscribed), isTrue);
+    },
+  );
+
+  test(
+    '3. 移除已下載影片檔案後，切換回線上狀態但保留「已下載過」紀錄',
     () async {
       await useCases.fetchInitialOrRefreshFeed();
 
@@ -189,7 +258,7 @@ void main() {
   );
 
   test(
-    '3. 紀錄筆數超過上限時自動淘汰最舊紀錄 (FIFO Cap / 10,000 limit mechanism)',
+    '4. 紀錄筆數超過上限時自動淘汰最舊紀錄 (FIFO Cap / 10,000 limit mechanism)',
     () async {
       final now = DateTime(2026, 11, 16, 14);
       final batchItems = List<VideoItemModel>.generate(15, (i) {

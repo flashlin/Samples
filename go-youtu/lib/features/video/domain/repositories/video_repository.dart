@@ -1,10 +1,16 @@
 import '../entities/video_item.dart';
 
-/// Repository contract for managing YouTube video feeds, local records, subscriptions, and downloads.
+/// Repository contract for managing YouTube video feeds, local records, subscriptions,
+/// channel exclusions, channel video lists, and downloads.
 abstract interface class VideoRepository {
-  /// Fetches latest preview videos from YouTube, merges them with local state,
+  /// Fetches latest preview videos from YouTube (mixing random discovery topics
+  /// and related channels from user interests), merges them with local state,
   /// enforces the 10,000 record cap, and returns all stored records.
   Future<List<VideoItem>> refreshRemotePreviewFeed({String? query});
+
+  /// Fetches more videos belonging to [channelName], merges them into local storage,
+  /// and returns the updated list of all stored records.
+  Future<List<VideoItem>> fetchChannelVideos(String channelName);
 
   /// Returns all locally cached video records without making network calls.
   Future<List<VideoItem>> getAllLocalRecords();
@@ -25,6 +31,13 @@ abstract interface class VideoRepository {
 
   /// Unsubscribes from the given [channelName].
   Future<List<VideoItem>> unsubscribeChannel(String channelName);
+
+  /// Excludes the given [channelName] so all videos from this channel are hidden
+  /// from the main feed and listed under [排除頻道].
+  Future<List<VideoItem>> excludeChannel(String channelName);
+
+  /// Removes the given [channelName] from the exclusion list.
+  Future<List<VideoItem>> unexcludeChannel(String channelName);
 
   /// Updates the download queue state of a video.
   Future<VideoItem> updateDownloadState({

@@ -39,6 +39,7 @@ class VideoItem extends Equatable {
     this.isWatched = false,
     this.hasEverDownloaded = false,
     this.isSubscribed = false,
+    this.isExcluded = false,
     this.lastPlaybackPositionSeconds = 0,
   });
 
@@ -60,6 +61,9 @@ class VideoItem extends Equatable {
 
   /// True if the user has subscribed to this video's channel.
   final bool isSubscribed;
+
+  /// True if the user has excluded/blocked this video's channel.
+  final bool isExcluded;
 
   final int lastPlaybackPositionSeconds;
 
@@ -88,6 +92,7 @@ class VideoItem extends Equatable {
     bool? isWatched,
     bool? hasEverDownloaded,
     bool? isSubscribed,
+    bool? isExcluded,
     int? lastPlaybackPositionSeconds,
   }) {
     return VideoItem(
@@ -105,6 +110,7 @@ class VideoItem extends Equatable {
       isWatched: isWatched ?? this.isWatched,
       hasEverDownloaded: hasEverDownloaded ?? this.hasEverDownloaded,
       isSubscribed: isSubscribed ?? this.isSubscribed,
+      isExcluded: isExcluded ?? this.isExcluded,
       lastPlaybackPositionSeconds:
           lastPlaybackPositionSeconds ?? this.lastPlaybackPositionSeconds,
     );
@@ -125,6 +131,7 @@ class VideoItem extends Equatable {
         isWatched,
         hasEverDownloaded,
         isSubscribed,
+        isExcluded,
         lastPlaybackPositionSeconds,
       ];
 }

@@ -5,7 +5,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/error/app_exceptions.dart';
 import '../models/video_item_model.dart';
 
-/// Contract for local persistence of video records and channel subscriptions.
+/// Contract for local persistence of video records, channel subscriptions, and channel exclusions.
 abstract interface class LocalVideoDataSource {
   Future<List<VideoItemModel>> getAllVideos();
   Future<VideoItemModel?> getVideoById(String id);
@@ -16,18 +16,24 @@ abstract interface class LocalVideoDataSource {
     String channelName, {
     required bool isSubscribed,
   });
+  Future<Set<String>> getExcludedChannels();
+  Future<void> setChannelExclusion(
+    String channelName, {
+    required bool isExcluded,
+  });
   Future<int> enforceRecordCap(int maxRecords);
 }
 
-/// SQLite implementation of [LocalVideoDataSource] with 10,000 record FIFO eviction
-/// and channel subscription persistence.
+/// SQLite implementation of [LocalVideoDataSource] with 10,000 record FIFO eviction,
+/// channel subscription persistence, and channel exclusion persistence.
 class SqliteLocalDataSource implements LocalVideoDataSource {
   SqliteLocalDataSource({Database? injectedDatabase})
       : _database = injectedDatabase;
 
   static const String tableName = 'video_records';
   static const String subscribedChannelsTable = 'subscribed_channels';
-  static const int schemaVersion = 2;
+  static const String excludedChannelsTable = 'excluded_channels';
+  static const int schemaVersion = 3;
 
   Database? _database;
 
@@ -62,6 +68,7 @@ class SqliteLocalDataSource implements LocalVideoDataSource {
         is_watched INTEGER NOT NULL DEFAULT 0,
         has_ever_downloaded INTEGER NOT NULL DEFAULT 0,
         is_subscribed INTEGER NOT NULL DEFAULT 0,
+        is_excluded INTEGER NOT NULL DEFAULT 0,
         last_playback_position_seconds INTEGER NOT NULL DEFAULT 0
       )
     ''');
@@ -69,6 +76,12 @@ class SqliteLocalDataSource implements LocalVideoDataSource {
       CREATE TABLE $subscribedChannelsTable (
         channel_name TEXT PRIMARY KEY,
         subscribed_at_ms INTEGER NOT NULL
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE $excludedChannelsTable (
+        channel_name TEXT PRIMARY KEY,
+        excluded_at_ms INTEGER NOT NULL
       )
     ''');
     await db.execute(
@@ -79,6 +92,9 @@ class SqliteLocalDataSource implements LocalVideoDataSource {
     );
     await db.execute(
       'CREATE INDEX idx_${tableName}_subscribed ON $tableName (is_subscribed)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_${tableName}_excluded ON $tableName (is_excluded)',
     );
   }
 
@@ -99,6 +115,20 @@ class SqliteLocalDataSource implements LocalVideoDataSource {
       ''');
       await db.execute(
         'CREATE INDEX IF NOT EXISTS idx_${tableName}_subscribed ON $tableName (is_subscribed)',
+      );
+    }
+    if (oldVersion < 3) {
+      await db.execute(
+        'ALTER TABLE $tableName ADD COLUMN is_excluded INTEGER NOT NULL DEFAULT 0',
+      );
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS $excludedChannelsTable (
+          channel_name TEXT PRIMARY KEY,
+          excluded_at_ms INTEGER NOT NULL
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_${tableName}_excluded ON $tableName (is_excluded)',
       );
     }
   }
@@ -231,6 +261,67 @@ class SqliteLocalDataSource implements LocalVideoDataSource {
     } catch (e) {
       throw LocalStorageException(
         'Failed to update subscription for $channelName',
+        cause: e,
+      );
+    }
+  }
+
+  @override
+  Future<Set<String>> getExcludedChannels() async {
+    try {
+      final db = await database;
+      final rows = await db.query(excludedChannelsTable);
+      return rows
+          .map((r) => (r['channel_name'] as String?) ?? '')
+          .where((name) => name.isNotEmpty)
+          .toSet();
+    } catch (e) {
+      throw LocalStorageException(
+        'Failed to read excluded channels',
+        cause: e,
+      );
+    }
+  }
+
+  @override
+  Future<void> setChannelExclusion(
+    String channelName, {
+    required bool isExcluded,
+  }) async {
+    try {
+      final db = await database;
+      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      await db.transaction((txn) async {
+        if (isExcluded) {
+          await txn.insert(
+            excludedChannelsTable,
+            <String, Object?>{
+              'channel_name': channelName,
+              'excluded_at_ms': nowMs,
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        } else {
+          await txn.delete(
+            excludedChannelsTable,
+            where: 'channel_name = ?',
+            whereArgs: <Object?>[channelName],
+          );
+        }
+
+        await txn.update(
+          tableName,
+          <String, Object?>{
+            'is_excluded': isExcluded ? 1 : 0,
+            'updated_at_ms': nowMs,
+          },
+          where: 'channel_name = ?',
+          whereArgs: <Object?>[channelName],
+        );
+      });
+    } catch (e) {
+      throw LocalStorageException(
+        'Failed to update exclusion for $channelName',
         cause: e,
       );
     }

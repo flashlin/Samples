@@ -8,19 +8,20 @@ import '../../domain/entities/video_item.dart';
 import '../../domain/repositories/video_repository.dart';
 import '../../domain/usecases/video_usecases.dart';
 
-/// Top navigation tab enum matching the 5 required sections.
+/// Top navigation tab enum matching the 6 required sections.
 enum TopNavigationTab {
   videoFeed('影片清單'),
   downloadedHistory('已下載過清單'),
   subscribedList('訂閱清單'),
   downloadQueue('下載佇列清單'),
-  watchedHistory('已看過清單');
+  watchedHistory('已看過清單'),
+  excludedChannels('排除頻道');
 
   const TopNavigationTab(this.label);
   final String label;
 }
 
-/// Immutable state holding all video records, derived lists for the 5 tabs,
+/// Immutable state holding all video records, derived lists for the 6 tabs,
 /// and current playback/loading states.
 class VideoBoardState {
   const VideoBoardState({
@@ -93,7 +94,7 @@ final videoBoardProvider =
   );
 });
 
-/// StateNotifier coordinating all user actions across the 5 tabs and video cards.
+/// StateNotifier coordinating all user actions across the 6 tabs, channel pages, and video cards.
 class VideoBoardNotifier extends StateNotifier<VideoBoardState> {
   VideoBoardNotifier({
     required VideoUseCases useCases,
@@ -121,6 +122,9 @@ class VideoBoardNotifier extends StateNotifier<VideoBoardState> {
   List<VideoItem> get subscribedVideos =>
       _useCases.buildSubscribedList(state.allRecords);
 
+  List<VideoItem> get excludedVideos =>
+      _useCases.buildExcludedList(state.allRecords);
+
   List<VideoItem> get downloadQueueVideos =>
       _useCases.buildDownloadQueueList(state.allRecords);
 
@@ -129,6 +133,9 @@ class VideoBoardNotifier extends StateNotifier<VideoBoardState> {
 
   List<VideoItem> get downloadedHistoryVideos =>
       _useCases.buildDownloadedHistoryList(state.allRecords);
+
+  List<VideoItem> getVideosForChannel(String channelName) =>
+      _useCases.buildChannelVideosList(state.allRecords, channelName);
 
   Future<void> initializeFeed({String? query}) async {
     state = state.copyWith(isLoading: true, clearError: true);
@@ -139,7 +146,7 @@ class VideoBoardNotifier extends StateNotifier<VideoBoardState> {
         state = state.copyWith(allRecords: cached);
       }
 
-      // Refresh latest YouTube preview cards and merge with local state
+      // Refresh latest YouTube preview cards (with random discovery + related channels)
       final refreshed = await _useCases.fetchInitialOrRefreshFeed(query: query);
       state = state.copyWith(allRecords: refreshed, isLoading: false);
     } catch (e) {
@@ -147,6 +154,24 @@ class VideoBoardNotifier extends StateNotifier<VideoBoardState> {
         isLoading: false,
         errorMessage: '無法更新最新影片清單: $e',
       );
+    }
+  }
+
+  /// Fetches all videos for a specific [channelName] when entering the channel page.
+  Future<void> loadChannelVideos(String channelName) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final updatedAll = await _useCases.fetchChannelVideos(channelName);
+      if (mounted) {
+        state = state.copyWith(allRecords: updatedAll, isLoading: false);
+      }
+    } catch (e) {
+      if (mounted) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: '無法載入頻道 ($channelName) 影片清單: $e',
+        );
+      }
     }
   }
 
@@ -188,6 +213,20 @@ class VideoBoardNotifier extends StateNotifier<VideoBoardState> {
     final updatedAll = subscribe
         ? await _useCases.subscribeToChannel(channelName)
         : await _useCases.unsubscribeFromChannel(channelName);
+    if (mounted) {
+      state = state.copyWith(allRecords: updatedAll);
+    }
+  }
+
+  /// Adds or removes a channel from the exclusion list ([排除頻道]).
+  /// When excluded, all videos from this channel are immediately hidden from [影片清單].
+  Future<void> setChannelExclusion(
+    String channelName, {
+    required bool exclude,
+  }) async {
+    final updatedAll = exclude
+        ? await _useCases.excludeChannel(channelName)
+        : await _useCases.unexcludeChannel(channelName);
     if (mounted) {
       state = state.copyWith(allRecords: updatedAll);
     }

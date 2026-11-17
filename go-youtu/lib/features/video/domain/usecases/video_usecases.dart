@@ -2,22 +2,24 @@ import '../../../../core/constants/app_constants.dart';
 import '../entities/video_item.dart';
 import '../repositories/video_repository.dart';
 
-/// Pure domain logic for sorting and filtering video lists across the 5 top tabs,
-/// as well as coordinating user actions on video cards.
+/// Pure domain logic for sorting and filtering video lists across the 6 top tabs
+/// and channel-specific views, as well as coordinating user actions on video cards.
 class VideoUseCases {
   const VideoUseCases(this._repository);
 
   final VideoRepository _repository;
 
   /// Filters and sorts the main [影片清單]:
-  /// 1. Excludes any video marked as watched (`isWatched == true`).
+  /// 1. Excludes any video marked as watched (`isWatched == true`) OR whose channel is excluded (`isExcluded == true`).
   /// 2. Places downloaded offline videos (`isOfflineAvailable == true`) at the top (已下載優先).
   /// 3. Places subscribed channel videos (`isSubscribed == true`) next (已訂閱優先).
   /// 4. Sorts remaining videos by `publishedAt` descending (newest preview first).
   List<VideoItem> buildActiveFeedList(List<VideoItem> allRecords) {
-    final unwatched = allRecords.where((item) => !item.isWatched).toList();
+    final visible = allRecords
+        .where((item) => !item.isWatched && !item.isExcluded)
+        .toList();
 
-    unwatched.sort((a, b) {
+    visible.sort((a, b) {
       final aDownloaded = a.isOfflineAvailable ? 1 : 0;
       final bDownloaded = b.isOfflineAvailable ? 1 : 0;
       if (aDownloaded != bDownloaded) {
@@ -33,14 +35,44 @@ class VideoUseCases {
       return b.publishedAt.compareTo(a.publishedAt);
     });
 
-    return unwatched;
+    return visible;
+  }
+
+  /// Filters and sorts all videos belonging to a specific [channelName] (used when clicking [進入頻道]):
+  /// Places downloaded offline videos first, followed by unwatched videos, then newest `publishedAt`.
+  List<VideoItem> buildChannelVideosList(
+    List<VideoItem> allRecords,
+    String channelName,
+  ) {
+    final target = channelName.trim().toLowerCase();
+    final channelVideos = allRecords
+        .where((item) => item.channelName.trim().toLowerCase() == target)
+        .toList();
+
+    channelVideos.sort((a, b) {
+      final aDownloaded = a.isOfflineAvailable ? 1 : 0;
+      final bDownloaded = b.isOfflineAvailable ? 1 : 0;
+      if (aDownloaded != bDownloaded) {
+        return bDownloaded.compareTo(aDownloaded);
+      }
+      final aUnwatched = a.isWatched ? 0 : 1;
+      final bUnwatched = b.isWatched ? 0 : 1;
+      if (aUnwatched != bUnwatched) {
+        return bUnwatched.compareTo(aUnwatched);
+      }
+      return b.publishedAt.compareTo(a.publishedAt);
+    });
+
+    return channelVideos;
   }
 
   /// Filters and sorts the [訂閱清單]:
-  /// Shows all videos belonging to subscribed channels (`isSubscribed == true`),
+  /// Shows all videos belonging to subscribed channels (`isSubscribed == true` and not excluded),
   /// prioritizing downloaded videos first, then newest `publishedAt`.
   List<VideoItem> buildSubscribedList(List<VideoItem> allRecords) {
-    final subscribed = allRecords.where((item) => item.isSubscribed).toList();
+    final subscribed = allRecords
+        .where((item) => item.isSubscribed && !item.isExcluded)
+        .toList();
     subscribed.sort((a, b) {
       final aDownloaded = a.isOfflineAvailable ? 1 : 0;
       final bDownloaded = b.isOfflineAvailable ? 1 : 0;
@@ -50,6 +82,14 @@ class VideoUseCases {
       return b.publishedAt.compareTo(a.publishedAt);
     });
     return subscribed;
+  }
+
+  /// Filters and sorts the [排除頻道] list:
+  /// Shows all videos belonging to excluded channels (`isExcluded == true`).
+  List<VideoItem> buildExcludedList(List<VideoItem> allRecords) {
+    final excluded = allRecords.where((item) => item.isExcluded).toList()
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    return excluded;
   }
 
   /// Filters and sorts the [下載佇列清單]:
@@ -110,6 +150,12 @@ class VideoUseCases {
     return records;
   }
 
+  Future<List<VideoItem>> fetchChannelVideos(String channelName) async {
+    final records = await _repository.fetchChannelVideos(channelName);
+    await _repository.enforceMaxRecordLimit(AppConstants.maxStoredRecords);
+    return records;
+  }
+
   Future<List<VideoItem>> loadLocalRecords() {
     return _repository.getAllLocalRecords();
   }
@@ -130,6 +176,14 @@ class VideoUseCases {
 
   Future<List<VideoItem>> unsubscribeFromChannel(String channelName) {
     return _repository.unsubscribeChannel(channelName);
+  }
+
+  Future<List<VideoItem>> excludeChannel(String channelName) {
+    return _repository.excludeChannel(channelName);
+  }
+
+  Future<List<VideoItem>> unexcludeChannel(String channelName) {
+    return _repository.unexcludeChannel(channelName);
   }
 
   Future<VideoItem> removeLocalFileKeepingHistory(String videoId) {

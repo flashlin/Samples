@@ -8,8 +8,8 @@ import '../providers/video_providers.dart';
 import '../widgets/video_card_widget.dart';
 
 /// Main application page that opens directly into the YouTube preview card list
-/// and displays the top bar with the 5 required sections:
-/// [影片清單] [訂閱清單] [下載佇列清單] [已看過清單] [已下載過清單]
+/// and displays the top bar with the 6 required sections:
+/// [影片清單] [已下載過清單] [訂閱清單] [下載佇列清單] [已看過清單] [排除頻道]
 class HomeShellPage extends ConsumerStatefulWidget {
   const HomeShellPage({super.key});
 
@@ -32,10 +32,11 @@ class _HomeShellPageState extends ConsumerState<HomeShellPage> {
     final notifier = ref.read(videoBoardProvider.notifier);
 
     final feedList = notifier.activeFeedVideos;
+    final downloadedHistoryList = notifier.downloadedHistoryVideos;
     final subscribedList = notifier.subscribedVideos;
     final queueList = notifier.downloadQueueVideos;
     final watchedList = notifier.watchedHistoryVideos;
-    final downloadedHistoryList = notifier.downloadedHistoryVideos;
+    final excludedList = notifier.excludedVideos;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -65,7 +66,7 @@ class _HomeShellPageState extends ConsumerState<HomeShellPage> {
                     ),
           ),
         ],
-        // 應用程式最上方顯示一列功能: [影片清單] [已下載過清單] [訂閱清單] [下載佇列清單] [已看過清單]
+        // 應用程式最上方顯示一列功能: [影片清單] [已下載過清單] [訂閱清單] [下載佇列清單] [已看過清單] [排除頻道]
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(54),
           child: Container(
@@ -118,6 +119,15 @@ class _HomeShellPageState extends ConsumerState<HomeShellPage> {
                     onTap: () =>
                         notifier.selectTab(TopNavigationTab.watchedHistory),
                   ),
+                  const SizedBox(width: 6),
+                  _TopSectionButton(
+                    label: '[${TopNavigationTab.excludedChannels.label}]',
+                    count: excludedList.map((e) => e.channelName).toSet().length,
+                    isSelected: boardState.activeTab ==
+                        TopNavigationTab.excludedChannels,
+                    onTap: () =>
+                        notifier.selectTab(TopNavigationTab.excludedChannels),
+                  ),
                 ],
               ),
             ),
@@ -144,6 +154,10 @@ class _HomeShellPageState extends ConsumerState<HomeShellPage> {
                   feedList: feedList,
                   notifier: notifier,
                 ),
+              TopNavigationTab.downloadedHistory => _buildDownloadedHistoryTab(
+                  downloadedHistoryList: downloadedHistoryList,
+                  notifier: notifier,
+                ),
               TopNavigationTab.subscribedList => _buildSubscribedTab(
                   subscribedList: subscribedList,
                   notifier: notifier,
@@ -155,8 +169,8 @@ class _HomeShellPageState extends ConsumerState<HomeShellPage> {
               TopNavigationTab.watchedHistory => _buildWatchedHistoryTab(
                   watchedList: watchedList,
                 ),
-              TopNavigationTab.downloadedHistory => _buildDownloadedHistoryTab(
-                  downloadedHistoryList: downloadedHistoryList,
+              TopNavigationTab.excludedChannels => _buildExcludedChannelsTab(
+                  excludedList: excludedList,
                   notifier: notifier,
                 ),
             },
@@ -166,7 +180,7 @@ class _HomeShellPageState extends ConsumerState<HomeShellPage> {
     );
   }
 
-  /// Tab 1: [影片清單] (已下載優先 / 已訂閱優先 / 已看過的影片不顯示)
+  /// Tab 1: [影片清單] (已下載優先 / 已訂閱優先 / 已看過與已排除頻道的影片不顯示)
   Widget _buildVideoFeedTab({
     required List<VideoItem> feedList,
     required VideoBoardNotifier notifier,
@@ -245,7 +259,7 @@ class _HomeShellPageState extends ConsumerState<HomeShellPage> {
           const Expanded(
             child: Center(
               child: Text(
-                '目前沒有未看過的預覽影片，請點擊重新整理或輸入關鍵字搜尋。',
+                '目前沒有可顯示的預覽影片，請點擊重新整理或輸入關鍵字搜尋。',
                 style: TextStyle(color: Colors.black54),
               ),
             ),
@@ -273,194 +287,7 @@ class _HomeShellPageState extends ConsumerState<HomeShellPage> {
     );
   }
 
-  /// Tab 2: [訂閱清單] (顯示已訂閱頻道與其所有影片)
-  Widget _buildSubscribedTab({
-    required List<VideoItem> subscribedList,
-    required VideoBoardNotifier notifier,
-  }) {
-    final channels = subscribedList
-        .map((e) => e.channelName)
-        .toSet()
-        .toList()
-      ..sort();
-
-    if (subscribedList.isEmpty) {
-      return const Center(
-        child: Text(
-          '尚無訂閱任何頻道，請在影片卡片下方點擊「訂閱」按鈕直接訂閱。',
-          style: TextStyle(color: Colors.black54, fontSize: 15),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Container(
-          color: Colors.red.shade50,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                '已訂閱頻道 (${channels.length})：',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red.shade900,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 8,
-                runSpacing: 6,
-                children: channels.map((channel) {
-                  return Chip(
-                    label: Text(
-                      channel,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    backgroundColor: Colors.white,
-                    deleteIcon: const Icon(Icons.close, size: 16),
-                    deleteButtonTooltipMessage: '取消訂閱此頻道',
-                    onDeleted: () => notifier.setChannelSubscription(
-                      channel,
-                      subscribe: false,
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.only(bottom: 24),
-            itemCount: subscribedList.length,
-            itemBuilder: (context, index) {
-              final video = subscribedList[index];
-              return VideoCardWidget(
-                key: ValueKey<String>('sub_${video.id}'),
-                video: video,
-                showRestoreWatchedButton: true,
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Tab 3: [下載佇列清單]
-  Widget _buildDownloadQueueTab({
-    required List<VideoItem> queueList,
-    required VideoBoardNotifier notifier,
-  }) {
-    if (queueList.isEmpty) {
-      return const Center(
-        child: Text(
-          '目前背景下載佇列沒有排程中的任務。',
-          style: TextStyle(color: Colors.black54, fontSize: 15),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(12),
-      itemCount: queueList.length,
-      itemBuilder: (context, index) {
-        final item = queueList[index];
-        final pct = (item.downloadProgress * 100).round();
-        final statusLabel = switch (item.downloadStatus) {
-          VideoDownloadStatus.downloading => '正在背景下載中 ($pct%)',
-          VideoDownloadStatus.queued => '排隊等候背景下載中...',
-          VideoDownloadStatus.failed => '下載失敗，可點擊重試',
-          _ => item.downloadStatus.name,
-        };
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: 10),
-          child: ListTile(
-            leading: const SizedBox(
-              width: 36,
-              height: 36,
-              child: Center(
-                child: CircularProgressIndicator(strokeWidth: 2.5),
-              ),
-            ),
-            title: Text(
-              item.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const SizedBox(height: 4),
-                Text(statusLabel, style: const TextStyle(fontSize: 12)),
-                const SizedBox(height: 6),
-                LinearProgressIndicator(value: item.downloadProgress),
-              ],
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.cancel_outlined, color: Colors.red),
-              tooltip: '取消排程下載',
-              onPressed: () => notifier.cancelDownload(item.id),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  /// Tab 4: [已看過清單] (最多紀錄 1 萬筆資訊)
-  Widget _buildWatchedHistoryTab({
-    required List<VideoItem> watchedList,
-  }) {
-    return Column(
-      children: <Widget>[
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          color: Colors.grey.shade200,
-          child: Text(
-            '已看過紀錄：共 ${watchedList.length} / ${AppConstants.maxStoredRecords} 筆（超過上限自動淘汰最舊紀錄）',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade800),
-          ),
-        ),
-        if (watchedList.isEmpty)
-          const Expanded(
-            child: Center(
-              child: Text(
-                '尚無標記為已看過的影片。',
-                style: TextStyle(color: Colors.black54, fontSize: 15),
-              ),
-            ),
-          )
-        else
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.only(bottom: 24),
-              itemCount: watchedList.length,
-              itemBuilder: (context, index) {
-                final video = watchedList[index];
-                return VideoCardWidget(
-                  key: ValueKey<String>('watched_${video.id}'),
-                  video: video,
-                  showRestoreWatchedButton: true,
-                );
-              },
-            ),
-          ),
-      ],
-    );
-  }
-
-  /// Tab 5: [已下載過清單] (包含仍在本地的離線影片，以及已移除本地檔案但保留紀錄的影片)
+  /// Tab 2: [已下載過清單]
   Widget _buildDownloadedHistoryTab({
     required List<VideoItem> downloadedHistoryList,
     required VideoBoardNotifier notifier,
@@ -546,6 +373,280 @@ class _HomeShellPageState extends ConsumerState<HomeShellPage> {
           ],
         );
       },
+    );
+  }
+
+  /// Tab 3: [訂閱清單]
+  Widget _buildSubscribedTab({
+    required List<VideoItem> subscribedList,
+    required VideoBoardNotifier notifier,
+  }) {
+    final channels = subscribedList
+        .map((e) => e.channelName)
+        .toSet()
+        .toList()
+      ..sort();
+
+    if (subscribedList.isEmpty) {
+      return const Center(
+        child: Text(
+          '尚無訂閱任何頻道，請在影片卡片下方點擊「訂閱」按鈕直接訂閱。',
+          style: TextStyle(color: Colors.black54, fontSize: 15),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Container(
+          color: Colors.red.shade50,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                '已訂閱頻道 (${channels.length})：',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red.shade900,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: channels.map((channel) {
+                  return Chip(
+                    label: Text(
+                      channel,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    backgroundColor: Colors.white,
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    deleteButtonTooltipMessage: '取消訂閱此頻道',
+                    onDeleted: () => notifier.setChannelSubscription(
+                      channel,
+                      subscribe: false,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.only(bottom: 24),
+            itemCount: subscribedList.length,
+            itemBuilder: (context, index) {
+              final video = subscribedList[index];
+              return VideoCardWidget(
+                key: ValueKey<String>('sub_${video.id}'),
+                video: video,
+                showRestoreWatchedButton: true,
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Tab 4: [下載佇列清單]
+  Widget _buildDownloadQueueTab({
+    required List<VideoItem> queueList,
+    required VideoBoardNotifier notifier,
+  }) {
+    if (queueList.isEmpty) {
+      return const Center(
+        child: Text(
+          '目前背景下載佇列沒有排程中的任務。',
+          style: TextStyle(color: Colors.black54, fontSize: 15),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(12),
+      itemCount: queueList.length,
+      itemBuilder: (context, index) {
+        final item = queueList[index];
+        final pct = (item.downloadProgress * 100).round();
+        final statusLabel = switch (item.downloadStatus) {
+          VideoDownloadStatus.downloading => '正在背景下載中 ($pct%)',
+          VideoDownloadStatus.queued => '排隊等候背景下載中...',
+          VideoDownloadStatus.failed => '下載失敗，可點擊重試',
+          _ => item.downloadStatus.name,
+        };
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 10),
+          child: ListTile(
+            leading: const SizedBox(
+              width: 36,
+              height: 36,
+              child: Center(
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              ),
+            ),
+            title: Text(
+              item.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const SizedBox(height: 4),
+                Text(statusLabel, style: const TextStyle(fontSize: 12)),
+                const SizedBox(height: 6),
+                LinearProgressIndicator(value: item.downloadProgress),
+              ],
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+              tooltip: '取消排程下載',
+              onPressed: () => notifier.cancelDownload(item.id),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Tab 5: [已看過清單] (最多紀錄 1 萬筆資訊)
+  Widget _buildWatchedHistoryTab({
+    required List<VideoItem> watchedList,
+  }) {
+    return Column(
+      children: <Widget>[
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          color: Colors.grey.shade200,
+          child: Text(
+            '已看過紀錄：共 ${watchedList.length} / ${AppConstants.maxStoredRecords} 筆（超過上限自動淘汰最舊紀錄）',
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade800),
+          ),
+        ),
+        if (watchedList.isEmpty)
+          const Expanded(
+            child: Center(
+              child: Text(
+                '尚無標記為已看過的影片。',
+                style: TextStyle(color: Colors.black54, fontSize: 15),
+              ),
+            ),
+          )
+        else
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.only(bottom: 24),
+              itemCount: watchedList.length,
+              itemBuilder: (context, index) {
+                final video = watchedList[index];
+                return VideoCardWidget(
+                  key: ValueKey<String>('watched_${video.id}'),
+                  video: video,
+                  showRestoreWatchedButton: true,
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Tab 6: [排除頻道] (顯示被列入排除名單的頻道與其被隱藏的影片，支援移除排除)
+  Widget _buildExcludedChannelsTab({
+    required List<VideoItem> excludedList,
+    required VideoBoardNotifier notifier,
+  }) {
+    final channels = excludedList
+        .map((e) => e.channelName)
+        .toSet()
+        .toList()
+      ..sort();
+
+    if (excludedList.isEmpty) {
+      return const Center(
+        child: Text(
+          '目前沒有任何被排除的頻道。可在影片卡片下方點擊「排除」將該頻道列入排除名單。',
+          style: TextStyle(color: Colors.black54, fontSize: 15),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Container(
+          color: Colors.brown.shade50,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                '已排除頻道名單 (${channels.length}) — 點擊 ✕ 可恢復顯示該頻道：',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown.shade900,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: channels.map((channel) {
+                  return Chip(
+                    avatar: Icon(
+                      Icons.block_rounded,
+                      size: 16,
+                      color: Colors.brown.shade700,
+                    ),
+                    label: Text(
+                      channel,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    backgroundColor: Colors.white,
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    deleteButtonTooltipMessage: '從排除名單移除',
+                    onDeleted: () => notifier.setChannelExclusion(
+                      channel,
+                      exclude: false,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.only(bottom: 24),
+            itemCount: excludedList.length,
+            itemBuilder: (context, index) {
+              final video = excludedList[index];
+              return VideoCardWidget(
+                key: ValueKey<String>('excluded_${video.id}'),
+                video: video,
+                showRestoreWatchedButton: true,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

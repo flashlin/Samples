@@ -4,34 +4,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../../../core/constants/app_constants.dart';
 import '../../domain/entities/video_item.dart';
+import '../pages/channel_videos_page.dart';
 import '../pages/fullscreen_player_page.dart';
 import '../providers/video_providers.dart';
 
 /// Displays a single YouTube video preview card with:
 /// - Greyed-out visual overlay + downloading icon when queued or downloading in background.
 /// - Inline video player (offline local MP4 or online stream).
-/// - Complete control bar underneath the card:
-///   1. 訂閱 / 已訂閱 (Directly subscribe to channel, prioritizing its videos)
-///   2. 標記已看過 (Mark as watched -> removes from feed)
-///   3. Download (Enqueues in background download queue & greys out card)
-///   4. Play 播放
-///   5. Pause 暫停
-///   6. 前進 30 秒 (+30s)
-///   7. 倒退 30 秒 (-30s)
-///   8. 標記 Icon (離線 / 線上)
-///   9. 移除已下載影片但保留已下載過紀錄 (Remove local file keeping history)
-///   10. 全螢幕播放 (Fullscreen playback)
+/// - Streamlined control bar underneath the card:
+///   1. 進入頻道 (Opens ChannelVideosPage showing all videos from this channel)
+///   2. 訂閱 / 已訂閱 (Directly subscribe to channel, prioritizing its videos)
+///   3. 排除 / 取消排除 (Exclude channel from feed -> listed in [排除頻道])
+///   4. 標記已看過 (Mark as watched -> removes from feed)
+///   5. Download (Enqueues in background download queue & greys out card)
+///   6. 標記 Icon (離線 / 線上)
+///   7. 移除已下載影片但保留已下載過紀錄 (Remove local file keeping history)
+///   8. 全螢幕播放 (Fullscreen playback)
 class VideoCardWidget extends ConsumerStatefulWidget {
   const VideoCardWidget({
     super.key,
     required this.video,
     this.showRestoreWatchedButton = false,
+    this.showEnterChannelButton = true,
   });
 
   final VideoItem video;
   final bool showRestoreWatchedButton;
+  final bool showEnterChannelButton;
 
   @override
   ConsumerState<VideoCardWidget> createState() => _VideoCardWidgetState();
@@ -131,26 +131,6 @@ class _VideoCardWidgetState extends ConsumerState<VideoCardWidget> {
     await ctrl?.play();
   }
 
-  Future<void> _handlePause() async {
-    if (_controller != null && _controller!.value.isInitialized) {
-      await _controller!.pause();
-    }
-  }
-
-  Future<void> _handleSeekRelative(Duration delta) async {
-    final ctrl = await _ensureControllerInitialized();
-    if (ctrl == null || !ctrl.value.isInitialized) {
-      return;
-    }
-    final current = ctrl.value.position;
-    final maxDuration = ctrl.value.duration;
-    final target = current + delta;
-    final clamped = target < Duration.zero
-        ? Duration.zero
-        : (target > maxDuration ? maxDuration : target);
-    await ctrl.seekTo(clamped);
-  }
-
   Future<void> _handleFullscreen() async {
     final ctrl = await _ensureControllerInitialized();
     if (ctrl == null || !mounted) {
@@ -165,6 +145,16 @@ class _VideoCardWidgetState extends ConsumerState<VideoCardWidget> {
         builder: (_) => FullscreenPlayerPage(
           video: widget.video,
           controller: ctrl,
+        ),
+      ),
+    );
+  }
+
+  void _handleEnterChannel() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ChannelVideosPage(
+          channelName: widget.video.channelName,
         ),
       ),
     );
@@ -186,6 +176,7 @@ class _VideoCardWidgetState extends ConsumerState<VideoCardWidget> {
     final isGreyedOutDownloading = video.isDownloadingOrQueued;
     final isOffline = video.isOfflineAvailable;
     final isSubscribed = video.isSubscribed;
+    final isExcluded = video.isExcluded;
     final activePlayingId = ref.watch(
       videoBoardProvider.select((s) => s.activePlayingVideoId),
     );
@@ -267,7 +258,7 @@ class _VideoCardWidgetState extends ConsumerState<VideoCardWidget> {
 
           const Divider(height: 1),
 
-          // 3. Complete Card Bottom Action Controls
+          // 3. Card Bottom Action Controls
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             child: Wrap(
@@ -276,7 +267,16 @@ class _VideoCardWidgetState extends ConsumerState<VideoCardWidget> {
               alignment: WrapAlignment.spaceBetween,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
-                // (A) 訂閱按鈕 (直接訂閱 / 取消訂閱該頻道)
+                // (A) 進入頻道按鈕 (點擊進入該頻道的所有影片清單)
+                if (widget.showEnterChannelButton)
+                  _ActionChipButton(
+                    icon: Icons.video_collection_rounded,
+                    label: '進入頻道',
+                    color: Colors.blue.shade800,
+                    onTap: _handleEnterChannel,
+                  ),
+
+                // (B) 訂閱按鈕 (直接訂閱 / 取消訂閱該頻道)
                 _ActionChipButton(
                   icon: isSubscribed
                       ? Icons.notifications_active_rounded
@@ -293,7 +293,24 @@ class _VideoCardWidgetState extends ConsumerState<VideoCardWidget> {
                       ),
                 ),
 
-                // (B) 標記已看過 (或還原未看過)
+                // (C) 排除按鈕 (將該影片頻道列入排除名單 / 取消排除)
+                _ActionChipButton(
+                  icon: isExcluded
+                      ? Icons.check_circle_outline_rounded
+                      : Icons.block_rounded,
+                  label: isExcluded ? '取消排除' : '排除',
+                  color: isExcluded
+                      ? Colors.teal.shade700
+                      : Colors.brown.shade700,
+                  onTap: () => ref
+                      .read(videoBoardProvider.notifier)
+                      .setChannelExclusion(
+                        video.channelName,
+                        exclude: !isExcluded,
+                      ),
+                ),
+
+                // (D) 標記已看過 (或還原未看過)
                 if (!video.isWatched)
                   _ActionChipButton(
                     icon: Icons.visibility_off_outlined,
@@ -313,7 +330,7 @@ class _VideoCardWidgetState extends ConsumerState<VideoCardWidget> {
                         .restoreWatched(video.id),
                   ),
 
-                // (C) Download 按鈕 (按下即變灰並排入後台下載佇列)
+                // (E) Download 按鈕 (按下即變灰並排入後台下載佇列)
                 _ActionChipButton(
                   icon: isGreyedOutDownloading
                       ? Icons.downloading
@@ -333,41 +350,7 @@ class _VideoCardWidgetState extends ConsumerState<VideoCardWidget> {
                           .startBackgroundDownload(video.id),
                 ),
 
-                // (D) Play 播放
-                _ActionChipButton(
-                  icon: Icons.play_arrow_rounded,
-                  label: 'Play 播放',
-                  color: Colors.green.shade800,
-                  onTap: _handlePlay,
-                ),
-
-                // (E) Pause 暫停
-                _ActionChipButton(
-                  icon: Icons.pause_rounded,
-                  label: 'Pause 暫停',
-                  color: Colors.amber.shade900,
-                  onTap: _handlePause,
-                ),
-
-                // (F) 倒退 30 秒
-                _ActionChipButton(
-                  icon: Icons.replay_30_rounded,
-                  label: '倒退 30 秒',
-                  color: Colors.blueGrey.shade800,
-                  onTap: () =>
-                      _handleSeekRelative(-AppConstants.seekStepDuration),
-                ),
-
-                // (G) 前進 30 秒
-                _ActionChipButton(
-                  icon: Icons.forward_30_rounded,
-                  label: '前進 30 秒',
-                  color: Colors.blueGrey.shade800,
-                  onTap: () =>
-                      _handleSeekRelative(AppConstants.seekStepDuration),
-                ),
-
-                // (H) 移除已下載影片但要紀錄已下載過
+                // (F) 移除已下載影片但要紀錄已下載過
                 _ActionChipButton(
                   icon: Icons.delete_sweep_outlined,
                   label: '移除已下載檔(保留紀錄)',
@@ -379,7 +362,7 @@ class _VideoCardWidgetState extends ConsumerState<VideoCardWidget> {
                       : null,
                 ),
 
-                // (I) 全螢幕播放
+                // (G) 全螢幕播放
                 _ActionChipButton(
                   icon: Icons.fullscreen_rounded,
                   label: '全螢幕播放',
@@ -393,7 +376,7 @@ class _VideoCardWidgetState extends ConsumerState<VideoCardWidget> {
       ),
     );
 
-    // Requirement 2: 當 download 按鈕按下時, 該卡片就灰灰的顯示 下載中圖示, 保存到 queue 中讓後台排程背景下載
+    // 當 download 按鈕按下時, 該卡片就灰灰的顯示 下載中圖示, 保存到 queue 中讓後台排程背景下載
     if (isGreyedOutDownloading) {
       cardBody = Stack(
         children: <Widget>[
@@ -488,7 +471,16 @@ class _VideoCardWidgetState extends ConsumerState<VideoCardWidget> {
                   aspectRatio: _controller!.value.aspectRatio > 0
                       ? _controller!.value.aspectRatio
                       : (16 / 9),
-                  child: VideoPlayer(_controller!),
+                  child: GestureDetector(
+                    onTap: () {
+                      if (_controller!.value.isPlaying) {
+                        _controller!.pause();
+                      } else {
+                        _controller!.play();
+                      }
+                    },
+                    child: VideoPlayer(_controller!),
+                  ),
                 ),
               ),
             ),

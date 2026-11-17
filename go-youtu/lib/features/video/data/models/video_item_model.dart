@@ -16,6 +16,7 @@ class VideoItemModel extends VideoItem {
     super.isWatched,
     super.hasEverDownloaded,
     super.isSubscribed,
+    super.isExcluded,
     super.lastPlaybackPositionSeconds,
   });
 
@@ -34,6 +35,7 @@ class VideoItemModel extends VideoItem {
       isWatched: entity.isWatched,
       hasEverDownloaded: entity.hasEverDownloaded,
       isSubscribed: entity.isSubscribed,
+      isExcluded: entity.isExcluded,
       lastPlaybackPositionSeconds: entity.lastPlaybackPositionSeconds,
     );
   }
@@ -63,6 +65,7 @@ class VideoItemModel extends VideoItem {
       isWatched: ((map['is_watched'] as int?) ?? 0) == 1,
       hasEverDownloaded: ((map['has_ever_downloaded'] as int?) ?? 0) == 1,
       isSubscribed: ((map['is_subscribed'] as int?) ?? 0) == 1,
+      isExcluded: ((map['is_excluded'] as int?) ?? 0) == 1,
       lastPlaybackPositionSeconds:
           (map['last_playback_position_seconds'] as int?) ?? 0,
     );
@@ -83,6 +86,7 @@ class VideoItemModel extends VideoItem {
       'is_watched': isWatched ? 1 : 0,
       'has_ever_downloaded': hasEverDownloaded ? 1 : 0,
       'is_subscribed': isSubscribed ? 1 : 0,
+      'is_excluded': isExcluded ? 1 : 0,
       'last_playback_position_seconds': lastPlaybackPositionSeconds,
     };
   }
