@@ -71,16 +71,18 @@ brew install fd
 brew install uv
 
 brew_install_if_missing() {
-    local package="$1"
-    if ! command -v "$package" &> /dev/null; then
-        echo "正在安裝 $package..."
-        brew install "$package"
+    local command_name="$1"
+    local formula="${2:-$1}"
+    if ! command -v "$command_name" &> /dev/null; then
+        echo "正在安裝 $command_name..."
+        brew install "$formula"
     fi
 }
 
 brew_install_if_missing zoxide
 brew_install_if_missing fzf
 brew_install_if_missing pnpm
+brew_install_if_missing bun oven-sh/bun/bun
 
 # 檢查並設置 ~/.zshrc 以啟用 zoxide (使用 j 作為快速指令)
 ZSHRC="$HOME/.zshrc"
