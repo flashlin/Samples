@@ -4,16 +4,16 @@ import os
 templates_content = """
 # ===== 自定義函數區塊開始 =====
 
-alias cc='/Users/flash/vdisk/qa-pair/my-tools/claude-code/cc.sh'
-alias co='/Users/flash/vdisk/qa-pair/my-tools/claude-code/my-codex/co.sh'
-alias fcodex='/Users/flash/vdisk/qa-pair/my-tools/claude-code/my-codex/codex-start.sh'
+alias cc='/Users/user/vdisk/qa-pair/my-tools/claude-code/cc.sh'
+alias co='/Users/user/vdisk/qa-pair/my-tools/claude-code/my-codex/co.sh'
+alias fcodex='/Users/user/vdisk/qa-pair/my-tools/claude-code/my-codex/codex-start.sh'
 alias codex-m='codex -m gpt-5.3-codex-spark -c model_reasoning_effort=high'
 
 # dk alias - 執行自定義 dk 腳本
-alias dk='/Users/flash/vdisk/Samples/gsoft/dk'
-alias ff='/Users/flash/vdisk/Samples/gsoft/ff'
-alias lf='/Users/flash/vdisk/Samples/gsoft/lf'
-alias ld='/Users/flash/vdisk/Samples/gsoft/outputs/ld'
+alias dk='/Users/user/vdisk/Samples/gsoft/dk'
+alias ff='/Users/user/vdisk/Samples/gsoft/ff'
+alias lf='/Users/user/vdisk/Samples/gsoft/lf'
+alias ld='/Users/user/vdisk/Samples/gsoft/outputs/ld'
 
 # nvm 自動切換版本
 autoload -U add-zsh-hook
