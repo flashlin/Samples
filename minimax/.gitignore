@@ -1,0 +1,8 @@
+# 隱藏資料夾 (.venv 等)
+.*/
+# 產出檔案
+outputs/
+# 由 setup.sh 產生
+ComfyUI/
+bin/
+__pycache__/
