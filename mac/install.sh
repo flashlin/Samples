@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# 詢問使用者家目錄路徑（用於 install.py 中的 alias 路徑）
+DEFAULT_BASE_PATH="/Users/flash/"
+read -r -p "請輸入使用者家目錄路徑 [預設: $DEFAULT_BASE_PATH]: " BASE_PATH
+BASE_PATH="${BASE_PATH:-$DEFAULT_BASE_PATH}"
+# 確保結尾有 /
+[[ "$BASE_PATH" != */ ]] && BASE_PATH="$BASE_PATH/"
+echo "使用路徑: $BASE_PATH"
+
 # 檢查 miniconda 是否已安裝
 if [ ! -d ~/miniconda3 ]; then
     echo "正在安裝 Miniconda..."
@@ -80,7 +88,7 @@ eval "$(zoxide init zsh --cmd j)"
 EOF
 fi
 
-uv run ./install.py
+uv run ./install.py "$BASE_PATH"
 
 echo "Install done"
 echo "請執行 'source ~/.zshrc' 或重新開啟終端機以使設定生效"

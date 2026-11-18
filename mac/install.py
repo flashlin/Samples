@@ -1,4 +1,12 @@
 import os
+import sys
+
+# 由 install.sh 傳入的使用者家目錄路徑，用來替換模板中的 /Users/user/
+TEMPLATE_BASE_PATH = "/Users/user/"
+base_path = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] else TEMPLATE_BASE_PATH
+base_path = os.path.expanduser(base_path)
+if not base_path.endswith("/"):
+    base_path += "/"
 
 # 所有模板內容
 templates_content = """
@@ -112,6 +120,9 @@ port() {
 PROMPT=$'%F{cyan}%~%f\\n%F{green}%#%f '
 # ===== 自定義函數區塊結束 =====
 """
+
+# 將模板中的路徑替換為指定的路徑
+templates_content = templates_content.replace(TEMPLATE_BASE_PATH, base_path)
 
 # 取得 .zshrc 的完整路徑
 zshrc_path = os.path.expanduser("~/.zshrc")
