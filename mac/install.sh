@@ -76,6 +76,12 @@ if ! command -v zoxide &> /dev/null; then
     brew install zoxide
 fi
 
+# 檢查 fzf 是否已安裝
+if ! command -v fzf &> /dev/null; then
+    echo "正在安裝 fzf..."
+    brew install fzf
+fi
+
 # 檢查並設置 ~/.zshrc 以啟用 zoxide (使用 j 作為快速指令)
 ZSHRC="$HOME/.zshrc"
 touch "$ZSHRC"
