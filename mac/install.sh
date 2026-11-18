@@ -70,17 +70,17 @@ brew install ripgrep
 brew install fd
 brew install uv
 
-# 檢查 zoxide 是否已安裝
-if ! command -v zoxide &> /dev/null; then
-    echo "正在安裝 zoxide..."
-    brew install zoxide
-fi
+brew_install_if_missing() {
+    local package="$1"
+    if ! command -v "$package" &> /dev/null; then
+        echo "正在安裝 $package..."
+        brew install "$package"
+    fi
+}
 
-# 檢查 fzf 是否已安裝
-if ! command -v fzf &> /dev/null; then
-    echo "正在安裝 fzf..."
-    brew install fzf
-fi
+brew_install_if_missing zoxide
+brew_install_if_missing fzf
+brew_install_if_missing pnpm
 
 # 檢查並設置 ~/.zshrc 以啟用 zoxide (使用 j 作為快速指令)
 ZSHRC="$HOME/.zshrc"
