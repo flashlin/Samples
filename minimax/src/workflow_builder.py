@@ -14,6 +14,8 @@ DEFAULT_AUDIO_VAE = "minimax_h3_audio_vae_fp32.safetensors"
 DEFAULT_SEEDVR2_DIT = "seedvr2_ema_3b_fp16.safetensors"
 DEFAULT_SEEDVR2_VAE = "ema_vae_fp16.safetensors"
 
+CANVAS_MULTIPLE = 32
+
 
 def seconds_to_h3_frames(seconds: float, fps: int = 24) -> int:
     """
@@ -61,9 +63,8 @@ def build_hyperflow_workflow(
     - 若提供 first_frame_image：執行 First-Frame Image-to-Video + Audio (hyperflow_i2v)
     - 若 upscale_with_seedvr2 為 True：在 VAEDecode 後串接 SeedVR2VideoUpscaler 將畫面放大，再與音軌合成影片
     """
-    # 確保寬高為 16 的倍數以相容 VAE 與 DiT patch
-    gen_w = max(256, (width // 16) * 16)
-    gen_h = max(256, (height // 16) * 16)
+    gen_w = max(256, (width // CANVAS_MULTIPLE) * CANVAS_MULTIPLE)
+    gen_h = max(256, (height // CANVAS_MULTIPLE) * CANVAS_MULTIPLE)
 
     workflow = {
         "1": {

@@ -35,7 +35,7 @@ import websocket
 
 from apply_mac_optimizations import patch_hyperflow_gguf
 from download_models import ensure_models
-from workflow_builder import build_hyperflow_workflow, seconds_to_h3_frames
+from workflow_builder import CANVAS_MULTIPLE, build_hyperflow_workflow, seconds_to_h3_frames
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -456,8 +456,8 @@ def main():
         # 維持目標長寬比，將基礎生成解析度控制在約 1024x768 像素量級，再交由 SeedVR2 放大
         aspect = target_w / target_h
         base_pixels = DEFAULT_WIDTH * DEFAULT_HEIGHT
-        gen_h = int(round(math.sqrt(base_pixels / aspect) / 16.0)) * 16
-        gen_w = int(round((gen_h * aspect) / 16.0)) * 16
+        gen_h = int(round(math.sqrt(base_pixels / aspect) / CANVAS_MULTIPLE)) * CANVAS_MULTIPLE
+        gen_w = int(round((gen_h * aspect) / CANVAS_MULTIPLE)) * CANVAS_MULTIPLE
         target_short_edge = min(target_w, target_h)
         target_max_edge = max(target_w, target_h)
         print(
