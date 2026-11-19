@@ -1,6 +1,5 @@
-import type { Cue } from "../shared/cue/cue";
+import type { Cue, SegmentSink } from "../shared/cue/cue";
 import { askBackground } from "./background-client";
-import type { SegmentSink } from "./transcription-queue";
 import { hideNativeYoutubeCaptions, isYoutubeAdPlaying, readVisibleYoutubeCaption } from "./youtube";
 
 const POLL_MILLISECONDS = 200;

@@ -6,6 +6,9 @@ import { addInterval, coveredSeconds, isRecognitionComplete, type Interval } fro
 import { decideOverwrite, type SubtitleProgress } from "./overwrite-policy";
 
 const RECORDER_GAP_TOLERANCE_SECONDS = 0.1;
+const FOREIGN_SESSION_ID = "foreign-session";
+
+export type OverwriteChoice = "pending" | "confirmed" | "declined";
 
 export interface SessionIdentity {
   readonly sessionId: string;
@@ -17,6 +20,7 @@ export interface SessionIdentity {
 export interface SessionSnapshot {
   readonly meta: SubtitleMetaPayload;
   readonly srt: string;
+  readonly confirmOverwrite: boolean;
 }
 
 export class RecognitionSession {
@@ -27,6 +31,7 @@ export class RecognitionSession {
   private seq = 0;
   private dirty = false;
   private source: SessionIdentity["source"];
+  private overwriteChoice: OverwriteChoice = "pending";
 
   constructor(
     private readonly identity: SessionIdentity,
@@ -40,6 +45,25 @@ export class RecognitionSession {
       this.source = source;
       this.dirty = true;
     }
+  }
+
+  get awaitingOverwriteDecision(): boolean {
+    return this.overwriteChoice === "pending" && this.cues.length > 0 && this.existing !== null && this.existing.sessionId !== this.identity.sessionId;
+  }
+
+  get savingDeclined(): boolean {
+    return this.overwriteChoice === "declined";
+  }
+
+  decideOverwrite(confirmed: boolean): void {
+    this.overwriteChoice = confirmed ? "confirmed" : "declined";
+    this.dirty = true;
+  }
+
+  markExistingReplacedElsewhere(): void {
+    this.existing = this.existing ? { ...this.existing, sessionId: FOREIGN_SESSION_ID } : null;
+    this.overwriteChoice = "pending";
+    this.dirty = true;
   }
 
   get liveCues(): readonly Cue[] {
@@ -88,11 +112,12 @@ export class RecognitionSession {
   }
 
   takeSnapshotIfWorthSaving(): SessionSnapshot | null {
-    if (!this.dirty) {
+    if (!this.dirty || this.savingDeclined) {
       return null;
     }
     const candidate = this.progress(this.seq + 1);
-    if (!decideOverwrite(this.existing, candidate).write) {
+    const confirmOverwrite = this.overwriteChoice === "confirmed";
+    if (!decideOverwrite(this.existing, candidate, confirmOverwrite).write) {
       return null;
     }
     this.seq = candidate.lastSeq;
@@ -110,6 +135,7 @@ export class RecognitionSession {
         lastSeq: candidate.lastSeq,
       },
       srt: serializeSrt(this.cues),
+      confirmOverwrite,
     };
   }
 

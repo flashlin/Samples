@@ -1,20 +1,20 @@
-import { previousCue, rollingCaption } from "../shared/cue/caption-lines";
-import type { Cue } from "../shared/cue/cue";
+import { latestSentences, previousCue } from "../shared/cue/caption-lines";
+import type { Cue, SegmentSink } from "../shared/cue/cue";
 import { findCueAt, selectDisplayCue } from "../shared/cue/cue-timeline";
 import type { ContentSettings, ResolvedPage, TabBroadcast, TabStatus } from "../shared/messages";
 import { RecognitionSession } from "../shared/progress/recognition-session";
 import { askBackground } from "./background-client";
 import { CaptionOverlay } from "./caption-overlay";
-import { CrossOriginMediaError, MediaAsrSource } from "./media-asr-source";
 import { findPlayingMedia, watchForPlayingMedia } from "./media-detector";
 import { SubtitleSaver } from "./subtitle-saver";
 import { TabCaptureReceiver } from "./tab-capture-receiver";
-import { TranscriptionQueue, type SegmentSink } from "./transcription-queue";
+import { CrossOriginMediaError, StreamingRecognizer } from "./streaming-recognizer";
 import { disableYoutubeCaptions, enableYoutubeCaptions, isYoutubeAdPlaying, isYoutubePage } from "./youtube";
 import { YoutubeCaptionReader } from "./youtube-caption-reader";
 
 const DISPLAY_REFRESH_MILLISECONDS = 200;
-const LIVE_CAPTION_HOLD_SECONDS = 6;
+const LIVE_CAPTION_HOLD_SECONDS = 3;
+const PAUSE_BEFORE_ASKING_MILLISECONDS = 800;
 
 type ResolvedForCaptions = Extract<ResolvedPage, { mode: "playback" | "recognize" }>;
 
@@ -27,6 +27,7 @@ interface ActiveRun {
   session: RecognitionSession | null;
   saver: SubtitleSaver | null;
   sink: SegmentSink | null;
+  overwriteQuestion: Promise<void> | null;
   stopSource: (() => void) | null;
   liveCue: () => Cue | null;
   tabCapture: TabCaptureReceiver | null;
@@ -61,6 +62,9 @@ export class PageCaptionController {
         return;
       case "tab-capture-segment":
         this.run?.tabCapture?.receive(message.start, message.end, message.display);
+        return;
+      case "tab-capture-partial":
+        this.run?.tabCapture?.receivePartial(message.start, message.end, message.text);
         return;
       case "tab-capture-stopped":
         await this.endTabCapture(message.message);
@@ -116,6 +120,7 @@ export class PageCaptionController {
       session: null,
       saver: null,
       sink: null,
+      overwriteQuestion: null,
       stopSource: null,
       liveCue: () => null,
       tabCapture: null,
@@ -131,7 +136,7 @@ export class PageCaptionController {
       return null;
     }
     const previous = previousCue(timeline, current, LIVE_CAPTION_HOLD_SECONDS);
-    return rollingCaption(previous?.text ?? null, current.text, run.resolved.settings.overlay.maxLines);
+    return latestSentences(previous?.text ?? null, current.text, run.resolved.settings.overlay.maxSentences);
   }
 
   private currentCue(run: ActiveRun): { current: Cue | null; timeline: readonly Cue[] } {
@@ -165,7 +170,14 @@ export class PageCaptionController {
     }
     media.addEventListener("ended", () => {
       run.session?.updateMedia(media.duration, true);
-      void run.saver?.flush();
+      void this.askToOverwriteIfPending(run).then(() => run.saver?.flush());
+    });
+    media.addEventListener("pause", () => {
+      setTimeout(() => {
+        if (media.paused && !media.seeking && !media.ended) {
+          void this.askToOverwriteIfPending(run);
+        }
+      }, PAUSE_BEFORE_ASKING_MILLISECONDS);
     });
     this.reportRun(run);
   }
@@ -193,6 +205,27 @@ export class PageCaptionController {
       }
     };
     return run.sink;
+  }
+
+  private askToOverwriteIfPending(run: ActiveRun): Promise<void> {
+    const session = run.session;
+    if (!session?.awaitingOverwriteDecision || this.run !== run) {
+      return Promise.resolve();
+    }
+    if (!run.overwriteQuestion) {
+      run.overwriteQuestion = this.askToOverwrite(run, session).finally(() => {
+        run.overwriteQuestion = null;
+        this.reportRun(run);
+      });
+      this.reportRun(run);
+    }
+    return run.overwriteQuestion;
+  }
+
+  private async askToOverwrite(run: ActiveRun, session: RecognitionSession): Promise<void> {
+    const confirmed = await run.overlay.askConfirmation("Replace the saved subtitles with this recording?", "Replace", "Keep existing");
+    session.decideOverwrite(confirmed);
+    await run.saver?.flush();
   }
 
   private async tryYoutubeCaptions(run: ActiveRun, media: HTMLMediaElement): Promise<boolean> {
@@ -227,36 +260,37 @@ export class PageCaptionController {
   }
 
   private startMediaAsr(run: ActiveRun, media: HTMLMediaElement, settings: ContentSettings): void {
-    const finalSink = this.sessionSink(run, "asr");
-    let interim: Cue | null = null;
-    const queue = new TranscriptionQueue(settings.queue, {
-      final: (start, end, display) => {
-        if (interim && interim.start <= start) {
-          interim = null;
-        }
-        finalSink(start, end, display);
+    const sink = this.sessionSink(run, "asr");
+    let partial: Cue | null = null;
+    const recognizer = new StreamingRecognizer(
+      media,
+      {
+        partial: (start, end, text) => {
+          partial = { start, end, text };
+        },
+        final: (start, end, segments) => {
+          if (partial && partial.start <= end) {
+            partial = null;
+          }
+          sink(start, end, "");
+          for (const segment of segments) {
+            sink(segment.start, segment.end, segment.display);
+          }
+        },
+        covered: (start, end) => sink(start, end, ""),
+        problem: (message) => run.overlay.showMessage(message),
       },
-      interim: (start, end, display) => {
-        interim = display ? { start, end, text: display } : null;
+      {
+        recognizeOnlyAtNormalRate: settings.features.recognizeOnlyAtNormalRate,
+        isAdPlaying: isYoutubePage() ? isYoutubeAdPlaying : () => false,
       },
-      error: (error) => run.overlay.showMessage(`Caption server error: ${describe(error)}`),
-    });
-    run.liveCue = () => (interim && media.currentTime - interim.end <= LIVE_CAPTION_HOLD_SECONDS ? interim : null);
-    const source = new MediaAsrSource(media, queue, {
-      limits: settings.chunk,
-      interimSeconds: settings.interimSeconds,
-      recognizeOnlyAtNormalRate: settings.features.recognizeOnlyAtNormalRate,
-      isAdPlaying: isYoutubePage() ? isYoutubeAdPlaying : () => false,
-    });
+    );
+    run.liveCue = () => (partial && media.currentTime - partial.end <= LIVE_CAPTION_HOLD_SECONDS ? partial : null);
     try {
-      source.start();
+      recognizer.start();
       run.mode = "recognize";
-      run.stopSource = () => {
-        source.stop();
-        queue.close();
-      };
+      run.stopSource = () => recognizer.stop();
     } catch (error) {
-      queue.close();
       run.liveCue = () => null;
       const message =
         error instanceof CrossOriginMediaError
@@ -267,6 +301,7 @@ export class PageCaptionController {
       this.report({ mode: "error", message });
     }
   }
+
 
   private async stopCurrentSource(run: ActiveRun): Promise<void> {
     run.stopSource?.();
@@ -304,9 +339,13 @@ export class PageCaptionController {
       run.overlay.showMessage(message);
     }
     this.reportRun(run);
+    await this.askToOverwriteIfPending(run);
   }
 
   private async closeByUser(): Promise<void> {
+    if (this.run) {
+      await this.askToOverwriteIfPending(this.run);
+    }
     this.closed = true;
     this.stopWatching?.();
     this.stopWatching = null;
@@ -333,7 +372,18 @@ export class PageCaptionController {
       urlKey: run.resolved.urlKey,
       coveredSeconds: run.session?.coveredSeconds ?? run.resolved.existing?.coveredSeconds ?? 0,
       cueCount: run.session?.liveCues.length ?? run.resolved.cues.length,
+      message: this.saveStatusMessage(run),
     });
+  }
+
+  private saveStatusMessage(run: ActiveRun): string | null {
+    if (run.session?.savingDeclined) {
+      return "Not saving this recording: the existing subtitles were kept";
+    }
+    if (run.overwriteQuestion) {
+      return "Waiting for your answer in the caption box";
+    }
+    return run.session?.awaitingOverwriteDecision ? "Not saved yet: you will be asked when you pause or stop" : null;
   }
 
   private report(partial: Partial<TabStatus> & Pick<TabStatus, "mode">): void {

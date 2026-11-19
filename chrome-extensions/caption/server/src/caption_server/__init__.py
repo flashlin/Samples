@@ -28,20 +28,30 @@ def _report_origins(settings: Settings) -> None:
 def main() -> None:
     import uvicorn
 
-    from .app import create_app
-    from .caption_pipeline import CaptionPipeline
-    from .engines import HyMtTranslator, QwenAsrRecognizer
+    from .app import CaptionServices, create_app
+    from .caption_pipeline import CaptionPipeline, PipelineOptions
+    from .engines import HyMtTranslator, QwenAsrRecognizer, SherpaPunctuator, SileroVadFactory, VadTuning
     from .subtitle_store import FileSubtitleStore
 
     settings = _ensure_token(Settings())
     _report_origins(settings)
     print(f"Bearer token file: {settings.token_file}", flush=True)
-    print(f"Loading ASR model {settings.asr_model} and translation model {settings.translate_model}", flush=True)
+    print(f"Loading ASR {settings.asr_model}, aligner {settings.aligner_model}, punctuation {settings.punctuation_model}, translation {settings.translate_model}", flush=True)
     pipeline = CaptionPipeline(
-        recognizer=QwenAsrRecognizer(settings.asr_model, settings.asr_language, settings.asr_device),
+        recognizer=QwenAsrRecognizer(settings.asr_model, settings.asr_language, settings.asr_device, settings.aligner_model),
+        punctuator=SherpaPunctuator(settings.punctuation_model),
         translator=HyMtTranslator(settings.translate_model, settings.translate_max_tokens),
-        keep_terms=settings.keep_terms,
-        bilingual_english=settings.bilingual_english,
+        options=PipelineOptions(keep_terms=settings.keep_terms, bilingual_english=settings.bilingual_english, max_sentence_units=settings.max_sentence_units),
     )
     store = FileSubtitleStore(settings.subtitles_dir, settings.audit_log)
-    uvicorn.run(create_app(settings, pipeline, store), host=settings.host, port=settings.port)
+    vad = SileroVadFactory(
+        settings.vad_model,
+        VadTuning(
+            threshold=settings.vad_threshold,
+            min_silence_seconds=settings.vad_min_silence_seconds,
+            min_speech_seconds=settings.vad_min_speech_seconds,
+            max_speech_seconds=settings.vad_max_speech_seconds,
+        ),
+    )
+    app = create_app(settings, CaptionServices(pipeline=pipeline, store=store, new_detector=vad))
+    uvicorn.run(app, host=settings.host, port=settings.port)

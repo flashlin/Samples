@@ -46,6 +46,7 @@ class PutSubtitleRequest(CamelModel):
     meta: SubtitleMetaInput
     srt: str
     expected_revision: int | None = Field(default=None, ge=0)
+    confirm_overwrite: bool = False
 
 
 class PutSubtitleResponse(CamelModel):
@@ -57,14 +58,6 @@ class PutSubtitleResponse(CamelModel):
 class SubtitleDocument(CamelModel):
     meta: SubtitleMeta
     srt: str
-
-
-class TranscriptionResponse(CamelModel):
-    text: str
-    language: str
-    translation: str | None
-    display: str
-    engine: dict[str, str]
 
 
 class TranslationRequest(CamelModel):

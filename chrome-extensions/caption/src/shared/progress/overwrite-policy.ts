@@ -7,7 +7,7 @@ export interface SubtitleProgress {
   readonly lastSeq: number;
 }
 
-export type OverwriteRejection = "empty-candidate" | "existing-complete" | "stale-sequence" | "not-ahead";
+export type OverwriteRejection = "empty-candidate" | "stale-sequence" | "confirmation-required";
 
 export type OverwriteDecision = { readonly write: true } | { readonly write: false; readonly reason: OverwriteRejection };
 
@@ -17,22 +17,15 @@ function reject(reason: OverwriteRejection): OverwriteDecision {
   return { write: false, reason };
 }
 
-export function decideOverwrite(existing: SubtitleProgress | null, candidate: SubtitleProgress): OverwriteDecision {
+export function decideOverwrite(existing: SubtitleProgress | null, candidate: SubtitleProgress, confirmed: boolean): OverwriteDecision {
   if (candidate.status === "partial" && candidate.coveredSeconds <= 0) {
     return reject("empty-candidate");
   }
   if (existing === null) {
     return ACCEPT;
   }
-  if (existing.status === "complete") {
-    return reject("existing-complete");
+  if (existing.sessionId === candidate.sessionId) {
+    return candidate.lastSeq > existing.lastSeq ? ACCEPT : reject("stale-sequence");
   }
-  const sameSession = existing.sessionId === candidate.sessionId;
-  if (sameSession && candidate.lastSeq <= existing.lastSeq) {
-    return reject("stale-sequence");
-  }
-  if (sameSession || candidate.status === "complete") {
-    return ACCEPT;
-  }
-  return candidate.coveredSeconds > existing.coveredSeconds ? ACCEPT : reject("not-ahead");
+  return confirmed ? ACCEPT : reject("confirmation-required");
 }

@@ -20,6 +20,8 @@ export function isTabBroadcast(value: unknown): value is TabBroadcast {
       return true;
     case "tab-capture-segment":
       return isFiniteNumber(value.start) && isFiniteNumber(value.end) && typeof value.display === "string";
+    case "tab-capture-partial":
+      return isFiniteNumber(value.start) && isFiniteNumber(value.end) && typeof value.text === "string";
     case "tab-capture-stopped":
       return value.message === null || typeof value.message === "string";
     default:
@@ -27,16 +29,12 @@ export function isTabBroadcast(value: unknown): value is TabBroadcast {
   }
 }
 
-function isChunkLimits(value: unknown): boolean {
-  return isRecord(value) && isFiniteNumber(value.minSeconds) && isFiniteNumber(value.maxSeconds) && isFiniteNumber(value.silenceSeconds);
-}
-
 export function isOffscreenCommand(value: unknown): value is OffscreenCommand {
   if (!isRecord(value) || value.target !== "offscreen" || !Number.isInteger(value.tabId)) {
     return false;
   }
   if (value.type === "offscreen-start") {
-    return typeof value.streamId === "string" && value.streamId.length > 0 && isChunkLimits(value.limits);
+    return typeof value.streamId === "string" && value.streamId.length > 0;
   }
   return value.type === "offscreen-stop";
 }

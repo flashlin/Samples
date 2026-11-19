@@ -26,6 +26,15 @@ class RevisionConflictError(Exception):
 
 
 @dataclass(frozen=True)
+class SubtitleWrite:
+    meta: SubtitleMetaInput
+    srt: str
+    expected_revision: int | None
+    confirm_overwrite: bool
+    engine: dict[str, str]
+
+
+@dataclass(frozen=True)
 class WriteOutcome:
     written: bool
     revision: int
@@ -72,23 +81,24 @@ class FileSubtitleStore:
         with self._lock_for(url_key):
             return self._read(url_key)
 
-    def put(self, url_key: str, meta: SubtitleMetaInput, srt: str, expected_revision: int | None, engine: dict[str, str]) -> WriteOutcome:
+    def put(self, url_key: str, request: SubtitleWrite) -> WriteOutcome:
         with self._lock_for(url_key):
             existing = self._read(url_key)
             current_revision = existing.meta.revision if existing else _INITIAL_REVISION
-            if expected_revision is not None and expected_revision != current_revision:
+            if request.expected_revision is not None and request.expected_revision != current_revision:
                 raise RevisionConflictError(current_revision)
-            decision = decide_overwrite(existing.meta.progress() if existing else None, meta.progress())
+            meta = request.meta
+            decision = decide_overwrite(existing.meta.progress() if existing else None, meta.progress(), request.confirm_overwrite)
             if not decision.write:
                 return WriteOutcome(False, current_revision, decision.reason)
             stored = SubtitleMeta(
                 **meta.model_dump(),
                 url_key=url_key,
                 revision=current_revision + 1,
-                engine=engine if meta.source == "asr" else {},
+                engine=request.engine if meta.source == "asr" else {},
                 updated_at=datetime.now(UTC).isoformat(),
             )
-            self._write(url_key, stored, srt, existing)
+            self._write(url_key, stored, request.srt, existing)
             self._audit("put", url_key, existing.meta if existing else None, stored)
             return WriteOutcome(True, stored.revision)
 

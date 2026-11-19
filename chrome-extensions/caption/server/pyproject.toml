@@ -8,14 +8,13 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "av>=19.0.2",
     "fastapi>=0.165.0",
     "mlx-lm>=0.29.1",
     "numpy>=2.5.5",
     "opencc-python-reimplemented>=0.1.7",
     "pydantic-settings>=2.16.3",
-    "python-multipart>=0.0.34",
     "qwen-asr>=0.0.6",
+    "sherpa-onnx>=2.0.2",
     "uvicorn[standard]>=0.54.0",
 ]
 
@@ -31,4 +30,5 @@ build-backend = "uv_build"
 dev = [
     "httpx>=0.28.1",
     "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
 ]

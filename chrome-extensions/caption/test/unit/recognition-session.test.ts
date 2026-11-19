@@ -44,22 +44,49 @@ describe("RecognitionSession", () => {
     expect(session.takeSnapshotIfWorthSaving()?.meta.lastSeq).toBe(2);
   });
 
-  it("holds back until the new session covers more than the old partial", () => {
+  it("asks before replacing subtitles saved by another session, no matter how much it covers", () => {
     const session = new RecognitionSession(identity, existingPartial(10));
-    session.recordSegment(0, 6, "a");
+    session.recordSegment(0, 3, "");
+    expect(session.awaitingOverwriteDecision).toBe(false);
+    session.recordSegment(3, 60, "a");
+    expect(session.awaitingOverwriteDecision).toBe(true);
     expect(session.takeSnapshotIfWorthSaving()).toBeNull();
-    session.recordSegment(6, 10, "b");
-    expect(session.takeSnapshotIfWorthSaving()).toBeNull();
-    session.recordSegment(10, 10.5, "c");
-    expect(session.takeSnapshotIfWorthSaving()?.meta.coveredSeconds).toBe(10.5);
   });
 
-  it("keeps writing its own progress after overtaking the old partial", () => {
-    const session = new RecognitionSession(identity, existingPartial(4));
+  it("saves with an explicit confirmation flag after the user agrees", () => {
+    const session = new RecognitionSession(identity, existingPartial(100));
     session.recordSegment(0, 5, "a");
-    session.acknowledgeSaved(session.takeSnapshotIfWorthSaving()!);
+    session.decideOverwrite(true);
+    expect(session.awaitingOverwriteDecision).toBe(false);
+    const snapshot = session.takeSnapshotIfWorthSaving()!;
+    expect(snapshot.confirmOverwrite).toBe(true);
+    session.acknowledgeSaved(snapshot);
     session.recordSegment(5, 6, "b");
     expect(session.takeSnapshotIfWorthSaving()?.meta.lastSeq).toBe(2);
+  });
+
+  it("never saves after the user keeps the existing subtitles", () => {
+    const session = new RecognitionSession(identity, existingPartial(4));
+    session.recordSegment(0, 50, "a");
+    session.decideOverwrite(false);
+    expect(session.savingDeclined).toBe(true);
+    expect(session.awaitingOverwriteDecision).toBe(false);
+    expect(session.takeSnapshotIfWorthSaving()).toBeNull();
+  });
+
+  it("asks again when another session replaced the file after we saved", () => {
+    const session = new RecognitionSession(identity, null);
+    session.recordSegment(0, 5, "a");
+    session.acknowledgeSaved(session.takeSnapshotIfWorthSaving()!);
+    session.markExistingReplacedElsewhere();
+    expect(session.awaitingOverwriteDecision).toBe(true);
+  });
+
+  it("saves without asking when nothing was saved before", () => {
+    const session = new RecognitionSession(identity, null);
+    session.recordSegment(0, 5, "a");
+    expect(session.awaitingOverwriteDecision).toBe(false);
+    expect(session.takeSnapshotIfWorthSaving()?.confirmOverwrite).toBe(false);
   });
 
   it("marks the subtitle complete when the media ends with enough coverage", () => {

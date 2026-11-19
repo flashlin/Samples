@@ -2,7 +2,7 @@ import type { RecognitionSession } from "../shared/progress/recognition-session"
 import { askBackground } from "./background-client";
 
 const MILLISECONDS_PER_SECOND = 1000;
-const EXISTING_COMPLETE = "existing-complete";
+const CONFIRMATION_REQUIRED = "confirmation-required";
 
 export class SubtitleSaver {
   private timer: ReturnType<typeof setInterval> | null = null;
@@ -41,18 +41,28 @@ export class SubtitleSaver {
   }
 
   private async saveSnapshot(): Promise<void> {
+    if (this.session.awaitingOverwriteDecision) {
+      return;
+    }
     const snapshot = this.session.takeSnapshotIfWorthSaving();
     if (!snapshot) {
       return;
     }
     try {
-      const result = await askBackground({ type: "save-subtitle", urlKey: this.urlKey, meta: snapshot.meta, srt: snapshot.srt, expectedRevision: this.revision });
+      const result = await askBackground({
+        type: "save-subtitle",
+        urlKey: this.urlKey,
+        meta: snapshot.meta,
+        srt: snapshot.srt,
+        expectedRevision: this.revision,
+        confirmOverwrite: snapshot.confirmOverwrite,
+      });
       this.revision = result.revision;
       if (result.written) {
         this.session.acknowledgeSaved(snapshot);
         this.onSaved();
-      } else if (result.reason === EXISTING_COMPLETE) {
-        this.stopped = true;
+      } else if (result.reason === CONFIRMATION_REQUIRED) {
+        this.session.markExistingReplacedElsewhere();
       } else {
         this.session.markDirty();
       }

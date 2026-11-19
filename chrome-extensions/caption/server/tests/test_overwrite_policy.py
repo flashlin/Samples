@@ -17,7 +17,7 @@ def _progress(raw: dict | None) -> SubtitleProgress | None:
 
 @pytest.mark.parametrize("case", CASES, ids=[case["name"] for case in CASES])
 def test_matches_shared_extension_cases(case: dict) -> None:
-    decision = decide_overwrite(_progress(case["existing"]), _progress(case["candidate"]))
+    decision = decide_overwrite(_progress(case["existing"]), _progress(case["candidate"]), case["confirmed"])
     expected = case["expected"]
     assert decision.write == expected["write"]
     assert decision.reason == expected.get("reason")

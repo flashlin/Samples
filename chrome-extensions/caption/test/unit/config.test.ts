@@ -17,8 +17,8 @@ describe("parseCaptionConfig", () => {
   });
 
   it("merges partial nested overrides with defaults", () => {
-    const result = parseCaptionConfig({ chunk: { maxSeconds: 10 } });
-    expect(result.ok && result.config.chunk).toEqual({ minSeconds: 2, maxSeconds: 10, silenceSeconds: 0.3, interimSeconds: 1 });
+    const result = parseCaptionConfig({ overlay: { fontSizePx: 30 } });
+    expect(result.ok && result.config.overlay).toEqual({ fontSizePx: 30, maxSentences: 1, opacity: 0.85, offsetX: 0, offsetY: 0 });
   });
 
   it.each(["http://192.168.1.5:8765", "ftp://127.0.0.1", "not-a-url"])("rejects insecure or invalid endpoint %s", (endpoint) => {
@@ -32,10 +32,10 @@ describe("parseCaptionConfig", () => {
   });
 
   it("reports the failing path for invalid values", () => {
-    const result = parseCaptionConfig({ chunk: { minSeconds: 8, maxSeconds: 4 } });
+    const result = parseCaptionConfig({ overlay: { fontSizePx: 2 } });
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.errors.join("\n")).toContain("chunk");
+    expect(result.errors.join("\n")).toContain("overlay.fontSizePx");
   });
 
   it("keeps dragged overlay offsets within one anchor size", () => {
@@ -43,7 +43,9 @@ describe("parseCaptionConfig", () => {
     expect(parseCaptionConfig({ overlay: { offsetX: 1.5 } }).ok).toBe(false);
   });
 
-  it("rejects unknown top-level keys", () => {
-    expect(parseCaptionConfig({ unexpected: true }).ok).toBe(false);
+  it("keeps the token when a stored config still has retired sections", () => {
+    const result = parseCaptionConfig({ server: { token: "abc" }, chunk: { maxSeconds: 8 }, queue: { maxRetries: 3 } });
+    expect(result.ok && result.config.server.token).toBe("abc");
+    expect(result.ok && "chunk" in result.config).toBe(false);
   });
 });

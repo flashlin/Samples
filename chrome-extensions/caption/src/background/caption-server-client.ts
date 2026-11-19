@@ -1,5 +1,4 @@
-import { base64ToBytes } from "../shared/base64";
-import type { SaveResult, SubtitleMetaPayload, TranscribeResult, TranslateLinesResult } from "../shared/messages";
+import type { SaveResult, SubtitleMetaPayload, TranslateLinesResult } from "../shared/messages";
 
 const MILLISECONDS_PER_SECOND = 1000;
 const HTTP_NOT_FOUND = 404;
@@ -14,6 +13,13 @@ export interface ServerConnection {
 export interface StoredSubtitle {
   readonly meta: SubtitleMetaPayload & { readonly revision: number };
   readonly srt: string;
+}
+
+export interface SubtitleWriteRequest {
+  readonly meta: SubtitleMetaPayload;
+  readonly srt: string;
+  readonly expectedRevision: number;
+  readonly confirmOverwrite: boolean;
 }
 
 export class CaptionServerError extends Error {
@@ -56,13 +62,6 @@ export class CaptionServerClient {
     return this.json(await this.request("/health"));
   }
 
-  async transcribe(audioBase64: string, mimeType: string, translate = true): Promise<TranscribeResult> {
-    const form = new FormData();
-    form.append("audio", new Blob([base64ToBytes(audioBase64)], { type: mimeType }), "chunk.webm");
-    form.append("translate", String(translate));
-    return this.json(await this.request("/v1/captions/transcribe", { method: "POST", body: form }));
-  }
-
   async translateLines(texts: string[]): Promise<TranslateLinesResult> {
     const body = await this.json<{ displays: string[] }>(
       await this.request("/v1/translations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ texts }) }),
@@ -78,11 +77,11 @@ export class CaptionServerClient {
     return this.json(response);
   }
 
-  async putSubtitle(urlKey: string, meta: SubtitleMetaPayload, srt: string, expectedRevision: number): Promise<SaveResult> {
+  async putSubtitle(urlKey: string, write: SubtitleWriteRequest): Promise<SaveResult> {
     const response = await this.request(`/v1/subtitles/${urlKey}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ meta, srt, expectedRevision }),
+      body: JSON.stringify(write),
     });
     if (response.status === HTTP_CONFLICT) {
       return (await response.json()) as SaveResult;

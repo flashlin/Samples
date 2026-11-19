@@ -1,16 +1,26 @@
 import { OFFSCREEN_TARGET, type OffscreenCommand, type OffscreenEvent, type TabBroadcast } from "../shared/messages";
-import type { ChunkLimits } from "../shared/audio/chunk-cut-policy";
-import type { CaptionServerClient } from "./caption-server-client";
+import type { StreamServerMessage } from "../shared/stream-protocol";
+
+function tabBroadcastsFor(message: StreamServerMessage): TabBroadcast[] {
+  switch (message.type) {
+    case "partial":
+      return [{ type: "tab-capture-partial", start: message.start, end: message.end, text: message.text }];
+    case "covered":
+      return [{ type: "tab-capture-segment", start: message.start, end: message.end, display: "" }];
+    case "final":
+      return [
+        { type: "tab-capture-segment", start: message.start, end: message.end, display: "" },
+        ...message.segments.map((segment): TabBroadcast => ({ type: "tab-capture-segment", start: segment.start, end: segment.end, display: segment.display })),
+      ];
+    default:
+      return [];
+  }
+}
 
 const OFFSCREEN_PATH = "offscreen.html";
 
 export class TabCaptureCoordinator {
   private readonly activeTabs = new Set<number>();
-
-  constructor(
-    private readonly createClient: () => Promise<CaptionServerClient>,
-    private readonly loadChunkLimits: () => Promise<ChunkLimits>,
-  ) {}
 
   isCapturing(tabId: number): boolean {
     return this.activeTabs.has(tabId);
@@ -22,9 +32,8 @@ export class TabCaptureCoordinator {
     }
     await this.ensureOffscreenDocument();
     const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tabId });
-    const limits = await this.loadChunkLimits();
     this.activeTabs.add(tabId);
-    await this.sendToOffscreen({ target: OFFSCREEN_TARGET, type: "offscreen-start", tabId, streamId, limits });
+    await this.sendToOffscreen({ target: OFFSCREEN_TARGET, type: "offscreen-start", tabId, streamId });
     await this.notifyTab(tabId, { type: "tab-capture-started" });
   }
 
@@ -36,20 +45,14 @@ export class TabCaptureCoordinator {
   }
 
   async handleOffscreenEvent(event: OffscreenEvent): Promise<void> {
-    switch (event.type) {
-      case "offscreen-chunk": {
-        const result = await (await this.createClient()).transcribe(event.audioBase64, event.mimeType);
-        await this.notifyTab(event.tabId, { type: "tab-capture-segment", start: event.start, end: event.end, display: result.display });
-        return;
-      }
-      case "offscreen-silence":
-        await this.notifyTab(event.tabId, { type: "tab-capture-segment", start: event.start, end: event.end, display: "" });
-        return;
-      case "offscreen-ended":
-        this.activeTabs.delete(event.tabId);
-        await this.notifyTab(event.tabId, { type: "tab-capture-stopped", message: event.message });
-        await this.closeOffscreenWhenIdle();
-        return;
+    this.activeTabs.delete(event.tabId);
+    await this.notifyTab(event.tabId, { type: "tab-capture-stopped", message: event.message });
+    await this.closeOffscreenWhenIdle();
+  }
+
+  forwardStreamMessage(tabId: number, message: StreamServerMessage): void {
+    for (const broadcast of tabBroadcastsFor(message)) {
+      void this.notifyTab(tabId, broadcast);
     }
   }
 

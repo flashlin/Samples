@@ -12,11 +12,8 @@ export async function loadConfig(): Promise<CaptionConfig> {
 
 export function toContentSettings(config: CaptionConfig): ContentSettings {
   return {
-    chunk: { minSeconds: config.chunk.minSeconds, maxSeconds: config.chunk.maxSeconds, silenceSeconds: config.chunk.silenceSeconds },
-    interimSeconds: config.chunk.interimSeconds,
     flushIntervalSeconds: config.flush.intervalSeconds,
     completionRatio: config.completion.ratio,
-    queue: config.queue,
     overlay: config.overlay,
     features: {
       autoStart: config.features.autoStart,

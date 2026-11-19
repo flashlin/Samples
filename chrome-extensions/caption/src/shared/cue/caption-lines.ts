@@ -1,15 +1,25 @@
 import type { Cue } from "./cue";
 
 const SENTENCE_END = /(?<=[。！？!?]|\.(?=\s|$))\s*/u;
+const HAN = /[㐀-鿿豈-﫿]/u;
+const LATIN = /[A-Za-z]/;
 
-export function splitIntoLines(text: string | null | undefined): string[] {
-  if (!text) {
-    return [];
-  }
-  return text
+function isBilingualPair(lines: readonly string[]): boolean {
+  const [original, translation] = lines;
+  return lines.length === 2 && original !== undefined && translation !== undefined && LATIN.test(original) && !HAN.test(original) && HAN.test(translation);
+}
+
+export function splitIntoSentences(text: string | null | undefined): string[] {
+  const lines = (text ?? "")
     .split("\n")
-    .flatMap((line) => line.split(SENTENCE_END))
     .map((line) => line.trim())
+    .filter(Boolean);
+  if (isBilingualPair(lines)) {
+    return [lines.join("\n")];
+  }
+  return lines
+    .flatMap((line) => line.split(SENTENCE_END))
+    .map((sentence) => sentence.trim())
     .filter(Boolean);
 }
 
@@ -24,7 +34,7 @@ export function previousCue(sortedCues: readonly Cue[], current: Cue, maxGapSeco
   return candidate && current.start - candidate.end <= maxGapSeconds ? candidate : null;
 }
 
-export function rollingCaption(previous: string | null, current: string | null, maxLines: number): string | null {
-  const lines = [...splitIntoLines(previous), ...splitIntoLines(current)];
-  return lines.length > 0 ? lines.slice(-maxLines).join("\n") : null;
+export function latestSentences(previous: string | null, current: string | null, maxSentences: number): string | null {
+  const sentences = [...splitIntoSentences(previous), ...splitIntoSentences(current)];
+  return sentences.length > 0 ? sentences.slice(-maxSentences).join("\n") : null;
 }

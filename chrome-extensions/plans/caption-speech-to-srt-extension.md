@@ -13,7 +13,7 @@
 | 架構 | 本機 Python caption-server 做 ASR + 存真實 `.srt`（ASR-A + 儲存-A） |
 | ASR 模型 | 要能中英混合、台灣口音、要快；找到台灣模型就下載來用 → TEA-ASR-1.1(-mini)，本機實測後定預設 |
 | Q2 | 舊 partial 還沒被超過前，overlay **也顯示舊 partial 的字幕**（新的還沒到的時間段用舊的） |
-| Q3 | 覆蓋條件：**新涵蓋秒數 > 舊涵蓋秒數** |
+| Q3 | ~~覆蓋條件：新涵蓋秒數 > 舊涵蓋秒數~~ → **2026-11-19 改為：頁面已有 .srt（partial 或 complete）時，錄製後在字幕框直接詢問是否覆蓋，不再依長短自動覆蓋** |
 | Q4 | 中文一律輸出**繁體** |
 | Q5 | **要支援** Google Meet 等 WebRTC 會議（走 tabCapture，需點擊啟用） |
 | Q6 | **所有網站**自動啟用；tooltip 視窗要有**關閉按鈕** |
@@ -619,6 +619,48 @@ Q1–Q9 已全部回覆，決定見 §0。仍待確認：
 - **字幕排版**：每句一行（依換行與 `。！？.!?` 切），目前這句在下、前一句在上，最多 2 行（`overlay.maxLines` 預設改 2）；英文雙語句本身就 2 行，單獨佔滿。直播辨識、YouTube 字幕、播放已存 SRT 三種模式共用 `shared/cue/caption-lines.ts`。
 - **setup**：`caption/setup.sh` → `uv sync` + `uv run caption-server-setup`；要下載哪些模型由 Python 讀 server Settings 決定，模型放在 Hugging Face cache，不進 repo。
 - 驗證：unit 122、server 61、`pnpm e2e` 通過（截圖：上一行前一句、下一行目前句）。
+
+### 單行字幕 + 句子分段模型（2026-11-19 17:00）
+
+- **單行**：只顯示目前這一句（`overlay.maxSentences` 預設 1，取代 `maxLines`）；英文句與其繁中翻譯視為同一句，一起顯示。
+- **根因（使用者 SRT 證據）**：戲劇有背景音樂，RMS 靜音偵測不觸發，chunk 幾乎都在 8 秒上限被切（句子、詞被切斷）；部分 chunk 沒標點（「先生老太太把我的工資…聽見沒有我兒子」）。
+- **方案比較**：A 標點恢復模型、B forced aligner、C 真正的 VAD（在網頁內跑 WebAssembly，可能被頁面 CSP 擋、改動大）。採 A + B，C 留待後續。
+- **實作**：server `sentence_segmenter.py`：標點只「插回」原文（保留原文空白、全形/半形依子句語言）、句末 `。？！.?!` 切句、過長句在逗號處再切（`CAPTION_MAX_SENTENCE_UNITS`=24）、用 aligner 的逐字時間給每句起訖（數量對不上時按字數比例）；chunk 尾端不補假的「。/，」（保留「？！」）。`/v1/captions/transcribe` 回 `segments[]`；`final=false`（暫時字幕）不跑 aligner、不翻譯。前端每句記成一個 cue；tab capture 也逐句。
+- **實測**：aligner 每段只多 0.06–0.16 秒；標點 5–12ms。YouTube 劇集同一段：原本 2.78→9.78 一整段 → 現在 3.85→6.09「三年前，林小姐，請我來林家。」、6.41→9.45「月薪三萬…」；對話會分開（「資料和接待的事兒你先準備。」/「好，好的，林小姐。」）。
+- **仍存在**：8 秒硬切造成的跨段斷句（「…做滿」/「三年再給…」）要靠 C（VAD）才能根治；標點模型偶有誤判（「兩萬，七」）。自動化瀏覽器播 YouTube 約 38 秒後會被 YouTube 擋（顯示「發生錯誤」），長時間測試只能手動。
+- 驗證：unit 123、server 76、`pnpm e2e`、`pnpm e2e:youtube` 通過。
+
+### 待辦：VAD 切段（使用者 2026-11-19 指定先記下，之後再做）
+
+- **問題**：背景音樂讓 RMS 靜音偵測失效，chunk 在 8 秒上限硬切，句子跨段被拆開（「…做滿」/「三年再給…」）。
+- **作法**：用真正的語音活動偵測（VAD，例如 Silero VAD，約 2MB ONNX）判斷「有人聲 / 沒人聲」，在人聲停頓處切 chunk，取代 `chunk-cut-policy` 的 RMS 門檻。
+- **放哪裡**：(a) content script 內用 onnxruntime-web（WebAssembly）跑，需確認頁面 CSP 是否擋 wasm、每頁載入成本；(b) 改成串流架構：前端每 0.5–1 秒送音訊、server 端跑 VAD + 切段 + ASR（需要 WebSocket 與 server 端 session 狀態）。先做 (a) 的可行性 probe（YouTube、一般網站各一）。
+- **驗收**：同一部背景音樂戲劇，跨段斷句數明顯下降；chunk 長度分布不再集中在 8 秒。
+
+### 覆蓋改為詢問使用者（2026-11-19 17:20，取代 Q3 的長短規則）
+
+- **規則**（TS `overwrite-policy.ts`、Python `overwrite_policy.py`、共用 `test/fixtures/overwrite-policy-cases.json`）：沒有舊檔 → 直接存；同一 session → 新 seq 就存；**其他 session 的舊檔（不論長短、partial 或 complete）→ 必須帶 `confirmOverwrite: true` 才寫**，否則 server 回 `confirmation-required`。不再比較涵蓋秒數。
+- **時機**：錄製後第一次存檔（約 10 秒，且至少已有一句字幕）時，字幕框下方出現「Replace the saved subtitles with this recording?」＋ Replace / Keep existing。Replace → 這次錄製之後都覆蓋；Keep existing → 這次不存，字幕照常顯示。若別的分頁在我們存檔後又寫入，server 回 `confirmation-required` → 再問一次。
+- **安全**：按鈕在 closed Shadow DOM 內，且只接受 `event.isTrusted` 的點擊，網頁腳本無法代替使用者按「Replace」。
+- **驗證**：unit 124、server 74、`pnpm e2e`（先錄一段 partial 後離開 → 再開同頁 → 出現詢問、回答前舊檔不變 → 按 Replace → 新 session 寫完 complete → 第三次開頁直接播放、0 次 ASR）。
+
+### 詢問時機改到錄製之後、延遲量測（2026-11-19 18:30）
+
+- **詢問時機**：不再在第一次存檔時（約 10 秒）就問；改成暫停超過 0.8 秒、影片播完、停止 tab capture、按 ✕ 時才問。回答前這次錄製都不存（只留在記憶體）；若沒回答就離開頁面，這次錄製不存，舊檔保持不變。
+- **延遲量測工具**：`test/e2e/caption-latency.diagnose.mjs`（每 0.3 秒用 CDP 讀 closed Shadow DOM 裡的字幕文字，對照 SRT 每句的說話時間）。結論：暫時字幕約在說話後 1–1.5 秒出現；先前量到的 5–7 秒是因為整段最終辨識漏了一句（「還有一個月合同就到期了」），aligner 把後一句排到錯的時間，屬於量測假象。真正的體感延遲來自段落交界：上一段正式結果回來時又顯示舊句子、且正式結果排在下一段暫時字幕前面。
+- **修正**：queue 改成暫時字幕優先（正式結果最多等 1.5 秒避免被丟掉）；舊句子保留時間 6 → 3 秒。新段落第一句提早約 0.4 秒出現。
+- **限制**：以 1 秒為單位的暫時辨識，延遲下限約 1 秒；要再降需要 server 端串流辨識（Qwen3-ASR 有 streaming API），與 VAD 待辦一起考慮。
+- **YouTube 自動化播放約 40 秒就出錯**：對照組（不裝 extension 的同一個自動化瀏覽器）也一樣，是 YouTube 擋自動化，不是 extension 造成。`test/e2e/youtube-long-play.diagnose.mjs` 可重現。
+
+### 串流辨識 + VAD（使用者 2026-11-19 選「選項 2」）
+
+- **Probe 結果**：(1) `qwen-asr` 的 `streaming_transcribe` 只支援 vLLM（NVIDIA），Mac 不能用；它本質是「每 2 秒把累積音訊重轉一次＋用前次輸出當 prompt」，所以改在 server 自己實作同一概念。(2) YouTube 上 `AudioContext({sampleRate:16000})` + ScriptProcessor 可取得 16kHz PCM；AudioWorklet 被 YouTube CSP 擋。(3) sherpa-onnx `VoiceActivityDetector` + Silero VAD（`istupakov/silero-vad-onnx`，2.3MB）在合成背景音樂下，句界誤差約 0.1 秒、0.25 秒停頓也抓得到，30 秒音訊 0.12 秒處理完。
+- **架構**：content（ScriptProcessor 每 ~0.13 秒送 16kHz PCM + 媒體時間）→ background（Port → 一條 WebSocket，唯一持有 token）→ server `/v1/captions/stream`（每連線一個串流 session：VAD 切句；說話中每 0.5 秒重轉目前這句 → `partial`；VAD 判定句子結束 → aligner + 標點 + 翻譯 → `final`；定期回報 `covered`）。暫停 / 拖曳 / 廣告 / 變速 → client 送 `break`，server 收尾目前這句並重設 VAD。tab capture 走同一條 relay。
+- **淘汰**：MediaRecorder 分段（`audio-tap`、`chunk-cut-policy`）、`transcription-queue`、`media-asr-source`、HTTP `/v1/captions/transcribe`、extension 設定的 `chunk` / `queue`（舊設定 key 改為忽略，不讓 token 因此遺失）。VAD / 間隔參數移到 server settings。
+- **刪除流程（依「先量耦合」規則）**：先讓 controller 改走新路徑 → 量反向依賴（4 個前端檔只彼此互相引用、不是 build 進入點）→ 第 1 批刪檔 + typecheck/unit/build；第 2 批刪型別與設定；server 端先把 `TARGET_SAMPLE_RATE` 移到 `audio.py` 切斷耦合 → 再刪 HTTP 端點、`audio_decoder`、`av`、`python-multipart`。
+- **結果**：YouTube 劇集前 34 秒，字幕在說話後 0.8–1.8 秒出現（中位數約 1.1 秒），先前 5–7 秒的離群值消失；字幕每 0.3–0.6 秒更新；VAD 依停頓切句，原本被漏掉的「還有一個月，合同就到期了。」與「兩萬七」都正確。
+- **e2e 修正**：舊的「重播時 0 次 ASR」檢查改數 WebSocket 連線（原本改架構後會變成 0 = 0 的空檢查），並要求兩次錄製造訪都確實開了串流。
+- **驗證**：unit 120、server 77、`pnpm e2e`、`pnpm e2e:youtube` 通過；量測工具 `test/e2e/caption-latency.diagnose.mjs`。
 
 ### 尚未自動驗證（需手動）
 

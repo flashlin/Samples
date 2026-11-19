@@ -7,3 +7,5 @@ export interface Cue {
 export function compareCuesByStart(a: Cue, b: Cue): number {
   return a.start - b.start || a.end - b.end;
 }
+
+export type SegmentSink = (start: number, end: number, display: string) => void;

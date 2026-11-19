@@ -1,62 +1,58 @@
 [
   {
-    "name": "no existing record accepts first partial",
+    "name": "no existing record accepts first partial without confirmation",
     "existing": null,
     "candidate": { "status": "partial", "coveredSeconds": 12.5, "sessionId": "b", "lastSeq": 1 },
+    "confirmed": false,
     "expected": { "write": true }
   },
   {
     "name": "empty partial candidate is rejected",
     "existing": null,
     "candidate": { "status": "partial", "coveredSeconds": 0, "sessionId": "b", "lastSeq": 1 },
+    "confirmed": true,
     "expected": { "write": false, "reason": "empty-candidate" }
   },
   {
-    "name": "existing complete is never overwritten",
-    "existing": { "status": "complete", "coveredSeconds": 100, "sessionId": "a", "lastSeq": 9 },
-    "candidate": { "status": "complete", "coveredSeconds": 120, "sessionId": "b", "lastSeq": 3 },
-    "expected": { "write": false, "reason": "existing-complete" }
+    "name": "other session needs confirmation even when it covers more",
+    "existing": { "status": "partial", "coveredSeconds": 30, "sessionId": "a", "lastSeq": 4 },
+    "candidate": { "status": "partial", "coveredSeconds": 300, "sessionId": "b", "lastSeq": 1 },
+    "confirmed": false,
+    "expected": { "write": false, "reason": "confirmation-required" }
   },
   {
-    "name": "other session with less coverage keeps old partial",
-    "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
-    "candidate": { "status": "partial", "coveredSeconds": 120, "sessionId": "b", "lastSeq": 20 },
-    "expected": { "write": false, "reason": "not-ahead" }
+    "name": "other session needs confirmation even when it is complete",
+    "existing": { "status": "partial", "coveredSeconds": 30, "sessionId": "a", "lastSeq": 4 },
+    "candidate": { "status": "complete", "coveredSeconds": 600, "sessionId": "b", "lastSeq": 1 },
+    "confirmed": false,
+    "expected": { "write": false, "reason": "confirmation-required" }
   },
   {
-    "name": "other session with equal coverage keeps old partial",
+    "name": "confirmed overwrite replaces a longer partial",
     "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
-    "candidate": { "status": "partial", "coveredSeconds": 300, "sessionId": "b", "lastSeq": 50 },
-    "expected": { "write": false, "reason": "not-ahead" }
-  },
-  {
-    "name": "other session strictly ahead overwrites old partial",
-    "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
-    "candidate": { "status": "partial", "coveredSeconds": 300.5, "sessionId": "b", "lastSeq": 2 },
+    "candidate": { "status": "partial", "coveredSeconds": 10, "sessionId": "b", "lastSeq": 1 },
+    "confirmed": true,
     "expected": { "write": true }
   },
   {
-    "name": "complete candidate overwrites partial even with less coverage",
-    "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
-    "candidate": { "status": "complete", "coveredSeconds": 250, "sessionId": "b", "lastSeq": 30 },
+    "name": "confirmed overwrite replaces a complete subtitle",
+    "existing": { "status": "complete", "coveredSeconds": 600, "sessionId": "a", "lastSeq": 9 },
+    "candidate": { "status": "partial", "coveredSeconds": 10, "sessionId": "b", "lastSeq": 1 },
+    "confirmed": true,
     "expected": { "write": true }
   },
   {
-    "name": "same session newer sequence always writes",
+    "name": "same session newer sequence writes without confirmation",
     "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
     "candidate": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 41 },
+    "confirmed": false,
     "expected": { "write": true }
   },
   {
     "name": "same session stale sequence is rejected",
     "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
-    "candidate": { "status": "partial", "coveredSeconds": 310, "sessionId": "a", "lastSeq": 40 },
-    "expected": { "write": false, "reason": "stale-sequence" }
-  },
-  {
-    "name": "same session stale complete is rejected",
-    "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
-    "candidate": { "status": "complete", "coveredSeconds": 310, "sessionId": "a", "lastSeq": 39 },
+    "candidate": { "status": "complete", "coveredSeconds": 310, "sessionId": "a", "lastSeq": 40 },
+    "confirmed": true,
     "expected": { "write": false, "reason": "stale-sequence" }
   }
 ]

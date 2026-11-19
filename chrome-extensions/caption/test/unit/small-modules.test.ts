@@ -1,27 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { rootMeanSquare, shouldCutChunk } from "../../src/shared/audio/chunk-cut-policy";
 import { MediaTimeMapper } from "../../src/shared/audio/media-time-mapper";
 import { base64ToBytes, bytesToBase64 } from "../../src/shared/base64";
 import { isOffscreenCommand, isTabBroadcast } from "../../src/shared/message-guards";
 import { hostMatches, isSiteAllowed } from "../../src/shared/site-access-policy";
-
-describe("shouldCutChunk", () => {
-  const limits = { minSeconds: 2, maxSeconds: 8, silenceSeconds: 0.3 };
-
-  it.each([
-    [{ elapsedSeconds: 1, trailingSilenceSeconds: 1 }, false],
-    [{ elapsedSeconds: 3, trailingSilenceSeconds: 0.1 }, false],
-    [{ elapsedSeconds: 3, trailingSilenceSeconds: 0.3 }, true],
-    [{ elapsedSeconds: 8, trailingSilenceSeconds: 0 }, true],
-  ])("decides %o -> %s", (state, expected) => {
-    expect(shouldCutChunk(state, limits)).toBe(expected);
-  });
-
-  it("computes RMS", () => {
-    expect(rootMeanSquare(new Float32Array([]))).toBe(0);
-    expect(rootMeanSquare(new Float32Array([0.5, -0.5]))).toBeCloseTo(0.5);
-  });
-});
 
 describe("MediaTimeMapper", () => {
   it("returns null before any sample", () => {
@@ -90,6 +71,7 @@ describe("message guards", () => {
     [{ type: "tab-capture-segment", start: 1, end: 2, display: "x" }, true],
     [{ type: "tab-capture-segment", start: "1", end: 2, display: "x" }, false],
     [{ type: "tab-capture-stopped", message: null }, true],
+    [{ type: "tab-capture-partial", start: 1, end: 2, text: "部分" }, true],
     [{ type: "unknown" }, false],
     [null, false],
   ])("isTabBroadcast(%o) is %s", (value, expected) => {
@@ -97,8 +79,8 @@ describe("message guards", () => {
   });
 
   it.each([
-    [{ target: "offscreen", type: "offscreen-start", tabId: 1, streamId: "abc", limits: { minSeconds: 2, maxSeconds: 8, silenceSeconds: 0.3 } }, true],
-    [{ target: "offscreen", type: "offscreen-start", tabId: 1, streamId: "", limits: { minSeconds: 2, maxSeconds: 8, silenceSeconds: 0.3 } }, false],
+    [{ target: "offscreen", type: "offscreen-start", tabId: 1, streamId: "abc" }, true],
+    [{ target: "offscreen", type: "offscreen-start", tabId: 1, streamId: "" }, false],
     [{ target: "offscreen", type: "offscreen-stop", tabId: 1 }, true],
     [{ target: "background", type: "offscreen-stop", tabId: 1 }, false],
     [{ target: "offscreen", type: "offscreen-stop", tabId: 1.5 }, false],

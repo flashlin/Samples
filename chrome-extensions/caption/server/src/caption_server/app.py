@@ -1,28 +1,29 @@
-from fastapi import APIRouter, Depends, FastAPI, File, Form, HTTPException, Response, UploadFile, status
+from collections.abc import Callable
+from dataclasses import dataclass
+
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Response, WebSocket, status
 from fastapi.responses import JSONResponse
 
-from .audio_decoder import AudioDecodeError, decode_to_mono_16k
 from .caption_pipeline import CaptionPipeline
 from .schemas import (
     PutSubtitleRequest,
     PutSubtitleResponse,
     SubtitleDocument,
-    TranscriptionResponse,
     TranslationRequest,
     TranslationResponse,
 )
 from .security import RequestGuard
 from .settings import Settings
-from .subtitle_store import FileSubtitleStore, InvalidUrlKeyError, RevisionConflictError
+from .stream_endpoint import pipeline_engines, serve_caption_stream
+from .stream_session import SpeechDetector, StreamTuning
+from .subtitle_store import FileSubtitleStore, InvalidUrlKeyError, RevisionConflictError, SubtitleWrite
 
 
-def _read_limited(upload: UploadFile, limit: int) -> bytes:
-    payload = upload.file.read(limit + 1)
-    if len(payload) > limit:
-        raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, f"Audio exceeds {limit} bytes")
-    if not payload:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Audio is empty")
-    return payload
+@dataclass(frozen=True)
+class CaptionServices:
+    pipeline: CaptionPipeline
+    store: FileSubtitleStore
+    new_detector: Callable[[], SpeechDetector]
 
 
 def _caption_routes(settings: Settings, pipeline: CaptionPipeline) -> APIRouter:
@@ -31,21 +32,6 @@ def _caption_routes(settings: Settings, pipeline: CaptionPipeline) -> APIRouter:
     @router.get("/health")
     def health() -> dict[str, object]:
         return {"status": "ok", "engine": pipeline.engine_names}
-
-    @router.post("/v1/captions/transcribe", response_model=TranscriptionResponse, response_model_by_alias=True)
-    def transcribe(audio: UploadFile = File(...), translate: bool = Form(True)) -> TranscriptionResponse:
-        try:
-            samples = decode_to_mono_16k(_read_limited(audio, settings.max_audio_bytes))
-        except AudioDecodeError as error:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(error)) from error
-        caption = pipeline.transcribe(samples, translate)
-        return TranscriptionResponse(
-            text=caption.text,
-            language=caption.language.value,
-            translation=caption.translation,
-            display=caption.display,
-            engine=pipeline.engine_names,
-        )
 
     @router.post("/v1/translations", response_model=TranslationResponse, response_model_by_alias=True)
     def translate(request: TranslationRequest) -> TranslationResponse:
@@ -81,7 +67,8 @@ def _subtitle_routes(settings: Settings, store: FileSubtitleStore, pipeline: Cap
         if len(request.srt.encode("utf-8")) > settings.max_srt_bytes:
             raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, f"SRT exceeds {settings.max_srt_bytes} bytes")
         try:
-            outcome = store.put(url_key, request.meta, request.srt, request.expected_revision, pipeline.engine_names)
+            write = SubtitleWrite(request.meta, request.srt, request.expected_revision, request.confirm_overwrite, pipeline.engine_names)
+            outcome = store.put(url_key, write)
         except InvalidUrlKeyError as error:
             raise invalid_key(error) from error
         except RevisionConflictError as conflict:
@@ -102,9 +89,16 @@ def _subtitle_routes(settings: Settings, store: FileSubtitleStore, pipeline: Cap
     return router
 
 
-def create_app(settings: Settings, pipeline: CaptionPipeline, store: FileSubtitleStore) -> FastAPI:
+def create_app(settings: Settings, services: CaptionServices) -> FastAPI:
     app = FastAPI(title="caption-server", docs_url=None, redoc_url=None, openapi_url=None)
-    guard = Depends(RequestGuard(settings))
-    app.include_router(_caption_routes(settings, pipeline), dependencies=[guard])
-    app.include_router(_subtitle_routes(settings, store, pipeline), dependencies=[guard])
+    guard = RequestGuard(settings)
+    app.include_router(_caption_routes(settings, services.pipeline), dependencies=[Depends(guard)])
+    app.include_router(_subtitle_routes(settings, services.store, services.pipeline), dependencies=[Depends(guard)])
+    engines = pipeline_engines(services.pipeline, services.new_detector)
+    tuning = StreamTuning(partial_interval_seconds=settings.stream_partial_interval_seconds)
+
+    @app.websocket("/v1/captions/stream")
+    async def caption_stream(websocket: WebSocket) -> None:
+        await serve_caption_stream(websocket, guard, engines, tuning)
+
     return app

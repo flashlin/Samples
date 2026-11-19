@@ -19,9 +19,17 @@ const STYLE = `
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); pointer-events: auto; cursor: grab; user-select: none; touch-action: none;
 }
 .box.dragging { cursor: grabbing; }
+.content { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+.prompt { display: none; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; font-size: 0.7em; cursor: default; }
+.prompt.visible { display: flex; }
+.prompt button {
+  all: unset; cursor: pointer; padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.5); color: #fff;
+}
+.prompt button.primary { background: #1f6feb; border-color: #1f6feb; }
+.prompt button:hover, .prompt button:focus-visible { filter: brightness(1.15); }
 .text {
-  flex: 1; white-space: pre-line; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical;
-  -webkit-line-clamp: var(--caption-max-lines); text-align: center;
+  white-space: pre-line; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4; text-align: center;
 }
 .message { font-size: 0.75em; opacity: 0.85; font-style: italic; }
 .close {
@@ -55,6 +63,7 @@ export class CaptionOverlay {
   private readonly host = document.createElement("div");
   private readonly box: HTMLDivElement;
   private readonly text: HTMLDivElement;
+  private readonly prompt: HTMLDivElement;
   private anchor: HTMLMediaElement | null = null;
   private readonly positionTimer: ReturnType<typeof setInterval>;
   private messageTimer: ReturnType<typeof setTimeout> | null = null;
@@ -76,11 +85,16 @@ export class CaptionOverlay {
     this.box.className = "box";
     this.box.title = "Drag to move, double-click to reset position";
     this.box.style.setProperty("--caption-font-size", `${settings.fontSizePx}px`);
-    this.box.style.setProperty("--caption-max-lines", String(settings.maxLines));
     this.box.style.setProperty("--caption-opacity", String(settings.opacity));
     this.text = document.createElement("div");
     this.text.className = "text";
-    this.box.append(this.text, this.createCloseButton());
+    this.prompt = document.createElement("div");
+    this.prompt.className = "prompt";
+    this.prompt.addEventListener("pointerdown", (event) => event.stopPropagation());
+    const content = document.createElement("div");
+    content.className = "content";
+    content.append(this.text, this.prompt);
+    this.box.append(content, this.createCloseButton());
     this.listenForDrag();
     shadow.append(style, this.box);
     this.reparent();
@@ -111,6 +125,36 @@ export class CaptionOverlay {
     }, MESSAGE_SECONDS * MILLISECONDS_PER_SECOND);
   }
 
+  askConfirmation(question: string, confirmLabel: string, declineLabel: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const label = document.createElement("span");
+      label.textContent = question;
+      const answer = (confirmed: boolean) => {
+        this.prompt.replaceChildren();
+        this.prompt.classList.remove("visible");
+        this.reposition();
+        resolve(confirmed);
+      };
+      this.prompt.replaceChildren(label, this.promptButton(confirmLabel, true, () => answer(true)), this.promptButton(declineLabel, false, () => answer(false)));
+      this.prompt.classList.add("visible");
+      this.reposition();
+    });
+  }
+
+  private promptButton(text: string, primary: boolean, onClick: () => void): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = text;
+    button.classList.toggle("primary", primary);
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (event.isTrusted) {
+        onClick();
+      }
+    });
+    return button;
+  }
+
   destroy(): void {
     clearInterval(this.positionTimer);
     if (this.messageTimer !== null) {
@@ -130,7 +174,9 @@ export class CaptionOverlay {
     close.addEventListener("pointerdown", (event) => event.stopPropagation());
     close.addEventListener("click", (event) => {
       event.stopPropagation();
-      this.callbacks.onClose();
+      if (event.isTrusted) {
+        this.callbacks.onClose();
+      }
     });
     return close;
   }
@@ -180,8 +226,12 @@ export class CaptionOverlay {
   }
 
   private render(text: string, isMessage: boolean): void {
+    if (this.text.textContent === text && this.text.classList.contains("message") === isMessage) {
+      return;
+    }
     this.text.textContent = text;
     this.text.classList.toggle("message", isMessage);
+    this.reposition();
   }
 
   private reparent(): void {

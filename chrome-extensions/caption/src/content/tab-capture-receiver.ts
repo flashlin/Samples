@@ -1,6 +1,6 @@
 import { MediaTimeMapper } from "../shared/audio/media-time-mapper";
-import type { Cue } from "../shared/cue/cue";
-import type { SegmentSink } from "./transcription-queue";
+import type { Cue, SegmentSink } from "../shared/cue/cue";
+
 
 const MEDIA_SAMPLE_MILLISECONDS = 250;
 const MILLISECONDS_PER_SECOND = 1000;
@@ -24,6 +24,11 @@ export class TabCaptureReceiver {
 
   get latestCue(): Cue | null {
     return this.latest;
+  }
+
+  receivePartial(startWall: number, endWall: number, text: string): void {
+    const start = this.toTimeline(startWall);
+    this.latest = { start, end: Math.max(start, this.toTimeline(endWall)), text };
   }
 
   receive(startWall: number, endWall: number, display: string): void {

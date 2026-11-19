@@ -4,7 +4,7 @@ from .settings import Settings
 
 
 def required_models(settings: Settings) -> list[str]:
-    return list(dict.fromkeys([settings.asr_model, settings.translate_model]))
+    return list(dict.fromkeys([settings.asr_model, settings.aligner_model, settings.punctuation_model, settings.vad_model, settings.translate_model]))
 
 
 def main() -> None:

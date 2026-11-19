@@ -6,11 +6,12 @@ interface PolicyCase {
   name: string;
   existing: SubtitleProgress | null;
   candidate: SubtitleProgress;
+  confirmed: boolean;
   expected: OverwriteDecision;
 }
 
 describe("decideOverwrite", () => {
-  it.each(cases as PolicyCase[])("$name", ({ existing, candidate, expected }) => {
-    expect(decideOverwrite(existing, candidate)).toEqual(expected);
+  it.each(cases as PolicyCase[])("$name", ({ existing, candidate, confirmed, expected }) => {
+    expect(decideOverwrite(existing, candidate, confirmed)).toEqual(expected);
   });
 });

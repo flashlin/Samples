@@ -5,6 +5,7 @@ import { createWorkDir, launchExtensionWithServer, waitFor } from "./harness.mjs
 
 const VIDEO_URL = process.env.CAPTION_E2E_YOUTUBE_URL ?? "https://www.youtube.com/watch?v=mAbdM_F0sQI";
 const FALLBACK_WAIT_MILLISECONDS = 90_000;
+const MIN_COVERED_SECONDS = Number(process.env.CAPTION_E2E_MIN_COVERED_SECONDS ?? 0);
 
 function savedMeta(dataDir) {
   const subtitles = path.join(dataDir, "subtitles");
@@ -28,23 +29,33 @@ async function main() {
       return video.play();
     });
     const pressed = await waitFor(() => page.getAttribute(".ytp-subtitles-button", "aria-pressed"), 15_000, "subtitles button");
-    await waitFor(() => server.transcribeCount() > 0, FALLBACK_WAIT_MILLISECONDS, "fallback to speech recognition");
+    await waitFor(() => server.streamCount() > 0, FALLBACK_WAIT_MILLISECONDS, "fallback to speech recognition");
+    const describeVideo = () =>
+      page.evaluate(() => {
+        const video = document.querySelector("video");
+        const player = document.querySelector("#movie_player");
+        return { currentTime: video.currentTime, paused: video.paused, ended: video.ended, readyState: video.readyState, ad: player?.classList.contains("ad-showing") ?? false };
+      });
     const saved = await waitFor(
       () => {
         try {
           const current = savedMeta(dataDir);
-          return current && current.srt.trim().length > 0 ? current : null;
+          return current && current.srt.trim().length > 0 && current.meta.coveredSeconds >= MIN_COVERED_SECONDS ? current : null;
         } catch {
           return null;
         }
       },
-      FALLBACK_WAIT_MILLISECONDS,
+      FALLBACK_WAIT_MILLISECONDS + MIN_COVERED_SECONDS * 1000,
       "non-empty SRT saved from speech recognition",
-    );
+    ).catch(async (error) => {
+      await page.screenshot({ path: path.join(workDir, "youtube-timeout.png") });
+      console.error(JSON.stringify({ video: await describeVideo(), saved: savedMeta(dataDir)?.meta, workDir }));
+      throw error;
+    });
     await page.screenshot({ path: path.join(workDir, "youtube-fallback.png") });
     assert.equal(saved.meta.source, "asr");
     assert.equal(await page.getAttribute(".ytp-subtitles-button", "aria-pressed"), "false", "the CC button must be left as it was");
-    console.log(JSON.stringify({ ok: true, workDir, ccButtonBefore: pressed, transcribeCalls: server.transcribeCount(), meta: saved.meta, srtHead: saved.srt.slice(0, 300) }, null, 1));
+    console.log(JSON.stringify({ ok: true, workDir, ccButtonBefore: pressed, streams: server.streamCount(), meta: saved.meta, srt: saved.srt }, null, 1));
   } finally {
     await close();
   }

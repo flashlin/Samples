@@ -1,6 +1,6 @@
 import hmac
 
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, Request, WebSocket, status
 
 from .settings import Settings
 
@@ -17,6 +17,17 @@ class RequestGuard:
         self._check_host(request.headers.get("host", ""))
         self._check_origin(request.headers.get("origin"))
         self._check_token(request.headers.get("authorization", ""))
+
+    def accepts_websocket(self, websocket: WebSocket) -> bool:
+        try:
+            self._check_host(websocket.headers.get("host", ""))
+            self._check_origin(websocket.headers.get("origin"))
+        except HTTPException:
+            return False
+        return True
+
+    def is_valid_token(self, token: object) -> bool:
+        return isinstance(token, str) and bool(token) and hmac.compare_digest(token.encode(), self._token.encode())
 
     def _check_host(self, host: str) -> None:
         if host not in self._allowed_hosts:

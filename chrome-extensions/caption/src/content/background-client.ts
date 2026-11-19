@@ -1,8 +1,7 @@
-import type { ContentRequest, Reply, ResolvedPage, SaveResult, TranscribeResult, TranslateLinesResult } from "../shared/messages";
+import type { ContentRequest, Reply, ResolvedPage, SaveResult, TranslateLinesResult } from "../shared/messages";
 
 interface ResultByRequest {
   "resolve-page": ResolvedPage;
-  transcribe: TranscribeResult;
   "translate-lines": TranslateLinesResult;
   "save-subtitle": SaveResult;
   "report-status": null;

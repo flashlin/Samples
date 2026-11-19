@@ -12,7 +12,9 @@ import {
 import { CaptionServerClient } from "./caption-server-client";
 import { loadConfig, saveOverlayOffset } from "./config-repository";
 import { identifyPage, resolvePage } from "./page-resolver";
+import { relayPort, type RelayConnection } from "./stream-relay";
 import { TabCaptureCoordinator } from "./tab-capture-coordinator";
+import { CONTENT_STREAM_PORT, TAB_STREAM_PORT_PREFIX } from "../shared/stream-protocol";
 import { TabStatusRegistry } from "./tab-status-registry";
 
 const OFFSCREEN_URL = chrome.runtime.getURL("offscreen.html");
@@ -25,18 +27,53 @@ async function createClient(): Promise<CaptionServerClient> {
   return new CaptionServerClient({ endpoint: config.server.endpoint, token: config.server.token, timeoutSeconds: config.server.requestTimeoutSeconds });
 }
 
-const tabCapture = new TabCaptureCoordinator(createClient, async () => (await loadConfig()).chunk);
+const tabCapture = new TabCaptureCoordinator();
+
+async function relayConnection(): Promise<RelayConnection> {
+  const config = await loadConfig();
+  if (!config.server.token) {
+    throw new Error("Caption server token is not configured, open the extension options");
+  }
+  return { endpoint: config.server.endpoint, token: config.server.token };
+}
+
+chrome.runtime.onConnect.addListener((port) => {
+  const sender = port.sender;
+  if (sender?.id !== chrome.runtime.id) {
+    port.disconnect();
+    return;
+  }
+  if (port.name === CONTENT_STREAM_PORT && sender.tab?.id !== undefined) {
+    relayPort(port, relayConnection(), (message) => {
+      try {
+        port.postMessage(message);
+      } catch {
+        return;
+      }
+    });
+    return;
+  }
+  const tabId = Number(port.name.slice(TAB_STREAM_PORT_PREFIX.length));
+  if (port.name.startsWith(TAB_STREAM_PORT_PREFIX) && sender.url === OFFSCREEN_URL && Number.isInteger(tabId)) {
+    relayPort(port, relayConnection(), (message) => tabCapture.forwardStreamMessage(tabId, message));
+    return;
+  }
+  port.disconnect();
+});
 
 async function handleContentRequest(request: ContentRequest, tabId: number): Promise<unknown> {
   switch (request.type) {
     case "resolve-page":
       return resolvePage(request.pageUrl, await loadConfig(), await createClient());
-    case "transcribe":
-      return (await createClient()).transcribe(request.audioBase64, request.mimeType, !request.interim);
     case "translate-lines":
       return (await createClient()).translateLines(request.texts);
     case "save-subtitle":
-      return (await createClient()).putSubtitle(request.urlKey, request.meta, request.srt, request.expectedRevision);
+      return (await createClient()).putSubtitle(request.urlKey, {
+        meta: request.meta,
+        srt: request.srt,
+        expectedRevision: request.expectedRevision,
+        confirmOverwrite: request.confirmOverwrite,
+      });
     case "save-overlay-offset":
       return saveOverlayOffset(request.x, request.y);
     case "report-status":

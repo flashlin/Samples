@@ -42,23 +42,8 @@ export const captionConfigSchema = z
         requestTimeoutSeconds: z.number().positive().default(30),
       })
       .prefault({}),
-    chunk: z
-      .object({
-        minSeconds: z.number().positive().default(2),
-        maxSeconds: z.number().positive().default(8),
-        silenceSeconds: z.number().positive().default(0.3),
-        interimSeconds: z.number().min(0).default(1),
-      })
-      .refine((chunk) => chunk.maxSeconds > chunk.minSeconds, { message: "chunk.maxSeconds must be greater than chunk.minSeconds" })
-      .prefault({}),
     flush: z.object({ intervalSeconds: z.number().positive().default(10) }).prefault({}),
     completion: z.object({ ratio: z.number().gt(0).max(1).default(0.95) }).prefault({}),
-    queue: z
-      .object({
-        maxBacklogChunks: z.number().int().positive().default(5),
-        maxRetries: z.number().int().nonnegative().default(3),
-      })
-      .prefault({}),
     sites: z
       .object({
         mode: z.enum(["all-except-denylist", "allowlist"]).default("all-except-denylist"),
@@ -75,7 +60,7 @@ export const captionConfigSchema = z
     overlay: z
       .object({
         fontSizePx: z.number().int().min(10).max(64).default(20),
-        maxLines: z.number().int().min(1).max(6).default(2),
+        maxSentences: z.number().int().min(1).max(4).default(1),
         opacity: z.number().min(0.2).max(1).default(0.85),
         offsetX: z.number().min(-1).max(1).default(0),
         offsetY: z.number().min(-1).max(1).default(0),
@@ -90,8 +75,7 @@ export const captionConfigSchema = z
         recognizeOnlyAtNormalRate: z.boolean().default(true),
       })
       .prefault({}),
-  })
-  .strict();
+  });
 
 export type CaptionConfig = z.infer<typeof captionConfigSchema>;
 

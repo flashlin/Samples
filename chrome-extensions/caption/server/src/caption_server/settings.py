@@ -38,11 +38,19 @@ class Settings(BaseSettings):
     asr_model: str = "JacobLinCool/TEA-ASR-1.1-mini"
     asr_language: str = "Chinese"
     asr_device: str = "mps"
+    aligner_model: str = "Qwen/Qwen3-ForcedAligner-0.6B"
+    punctuation_model: str = "ranger810/sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12-int8"
+    max_sentence_units: int = 24
+    vad_model: str = "istupakov/silero-vad-onnx"
+    vad_threshold: float = 0.5
+    vad_min_silence_seconds: float = 0.3
+    vad_min_speech_seconds: float = 0.25
+    vad_max_speech_seconds: float = 10.0
+    stream_partial_interval_seconds: float = 0.5
     translate_model: str = "mlx-community/HY-MT1.5-1.8B-8bit"
     translate_max_tokens: int = 256
     keep_terms: Annotated[list[str], NoDecode] = Field(default_factory=lambda: list(DEFAULT_KEEP_TERMS))
     bilingual_english: bool = True
-    max_audio_bytes: int = 2_000_000
     max_srt_bytes: int = 5_000_000
     max_translation_lines: int = 200
 

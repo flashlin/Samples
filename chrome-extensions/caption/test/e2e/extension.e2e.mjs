@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import assert from "node:assert/strict";
-import { createWorkDir, launchExtensionWithServer, waitFor } from "./harness.mjs";
+import { createWorkDir, findButtonInClosedShadow, launchExtensionWithServer, waitFor } from "./harness.mjs";
 
 const workDir = createWorkDir();
 const PAGE_PORT = 8811;
@@ -69,53 +69,79 @@ async function playVideo(page) {
   await page.evaluate(() => document.getElementById("v").play());
 }
 
+function readSavedSubtitle(dataDir) {
+  try {
+    const files = execFileSync("ls", [path.join(dataDir, "subtitles")]).toString().split("\n");
+    const meta = files.find((name) => name.endsWith(".meta.json"));
+    if (!meta) return null;
+    const parsed = JSON.parse(readFileSync(path.join(dataDir, "subtitles", meta), "utf8"));
+    return { meta: parsed, srt: readFileSync(path.join(dataDir, "subtitles", meta.replace(".meta.json", ".srt")), "utf8") };
+  } catch {
+    return null;
+  }
+}
+
+const currentTime = (page) => page.evaluate(() => document.getElementById("v").currentTime);
+
+async function recordPartialThenLeave(context, dataDir) {
+  const page = await context.newPage();
+  await playVideo(page);
+  await waitFor(() => page.locator("[data-caption-extension]").count(), 15000, "caption overlay");
+  await waitFor(async () => (await currentTime(page)) >= 0.5, 10000, "playback start");
+  await page.screenshot({ path: path.join(workDir, "silence-0.5s.png") });
+  await waitFor(async () => (await currentTime(page)) >= 3, 10000, "3 seconds of playback");
+  await page.screenshot({ path: path.join(workDir, "interim-3s.png") });
+  const partial = await waitFor(() => readSavedSubtitle(dataDir), 20000, "first partial save");
+  await page.close();
+  return partial;
+}
+
+async function replaceAfterConfirmation(context, dataDir, first) {
+  const page = await context.newPage();
+  await playVideo(page);
+  const duration = await page.evaluate(() => document.getElementById("v").duration);
+  await waitFor(async () => (await currentTime(page)) >= 11, 20000, "11 seconds of playback");
+  assert.equal(await findButtonInClosedShadow(page, "Replace"), null, "the overwrite question must wait until recording stops");
+  await page.screenshot({ path: path.join(workDir, "recognizing.png") });
+  const replace = await waitFor(() => findButtonInClosedShadow(page, "Replace"), duration * 1000 + 15000, "overwrite question after the video ended");
+  await page.screenshot({ path: path.join(workDir, "overwrite-question.png") });
+  assert.equal(readSavedSubtitle(dataDir).meta.sessionId, first.meta.sessionId, "nothing may be overwritten before the user answers");
+  await page.mouse.click(replace.x, replace.y);
+  const replaced = await waitFor(
+    () => {
+      const saved = readSavedSubtitle(dataDir);
+      return saved && saved.meta.sessionId !== first.meta.sessionId && saved.meta.status === "complete" ? saved : null;
+    },
+    20000,
+    "complete subtitle written by the confirmed session",
+  );
+  await page.close();
+  return { replaced, duration };
+}
+
 async function main() {
   const wav = buildFixtureWav();
   const pageServer = await servePage(wav);
   const { context, worker, extensionId, dataDir, server, close } = await launchExtensionWithServer(workDir);
   try {
-    const page = await context.newPage();
-    await playVideo(page);
-    await waitFor(() => page.locator("[data-caption-extension]").count(), 15000, "caption overlay");
-    const duration = await page.evaluate(() => document.getElementById("v").duration);
-    await waitFor(() => page.evaluate(() => document.getElementById("v").currentTime >= 0.5), 10000, "playback start");
-    await page.screenshot({ path: path.join(workDir, "silence-0.5s.png") });
-    await waitFor(() => page.evaluate(() => document.getElementById("v").currentTime >= 3), 10000, "3 seconds of playback");
-    await page.screenshot({ path: path.join(workDir, "interim-3s.png") });
-    const interimCalls = server.transcribeCount();
-    await page.waitForTimeout(duration * 0.4 * 1000);
-    await page.screenshot({ path: path.join(workDir, "recognizing.png") });
-
-    const subtitleFile = await waitFor(
-      () => {
-        try {
-          const files = execFileSync("ls", [path.join(dataDir, "subtitles")]).toString().split("\n");
-          const meta = files.find((name) => name.endsWith(".meta.json"));
-          if (!meta) return null;
-          const parsed = JSON.parse(readFileSync(path.join(dataDir, "subtitles", meta), "utf8"));
-          return parsed.status === "complete" ? { meta: parsed, srt: readFileSync(path.join(dataDir, "subtitles", meta.replace(".meta.json", ".srt")), "utf8") } : null;
-        } catch {
-          return null;
-        }
-      },
-      duration * 1000 + 30000,
-      "complete subtitle on the server",
-    );
-    const firstPassTranscribes = server.transcribeCount();
+    const first = await recordPartialThenLeave(context, dataDir);
+    assert.equal(first.meta.status, "partial");
+    const { replaced: subtitleFile, duration } = await replaceAfterConfirmation(context, dataDir, first);
+    const streamsBeforeReplay = server.streamCount();
+    assert.ok(streamsBeforeReplay >= 2, `both recording visits must open a recognition stream, saw ${streamsBeforeReplay}`);
     writeFileSync(path.join(workDir, "result.srt"), subtitleFile.srt);
     assert.equal(subtitleFile.meta.canonicalUrl, `http://127.0.0.1:${PAGE_PORT}/`);
     assert.ok(subtitleFile.meta.coveredSeconds >= duration * 0.95, `coverage ${subtitleFile.meta.coveredSeconds} of ${duration}`);
     assert.match(subtitleFile.srt, /transformer/i);
     assert.match(subtitleFile.srt, /attention/i);
-    assert.match(subtitleFile.srt, /[一-鿿]/);
-    assert.ok(firstPassTranscribes > 0, "first visit should call the ASR endpoint");
+    assert.match(subtitleFile.srt, /[\u4e00-\u9fff]/);
 
     const second = await context.newPage();
     await playVideo(second);
-    await waitFor(() => second.locator("[data-caption-extension]").count(), 15000, "overlay on second visit");
+    await waitFor(() => second.locator("[data-caption-extension]").count(), 15000, "overlay on playback visit");
     await second.waitForTimeout(3000);
     await second.screenshot({ path: path.join(workDir, "playback.png") });
-    assert.equal(server.transcribeCount(), firstPassTranscribes, "second visit must reuse the saved SRT without ASR calls");
+    assert.equal(server.streamCount(), streamsBeforeReplay, "a complete subtitle must be replayed without ASR calls");
 
     await second.mouse.move(320, 290);
     await second.mouse.down();
@@ -136,7 +162,7 @@ async function main() {
     await options.click("#test");
     await waitFor(async () => (await options.textContent("#status"))?.startsWith("Connected"), 10000, "options page connection test");
 
-    console.log(JSON.stringify({ ok: true, workDir, duration, coveredSeconds: subtitleFile.meta.coveredSeconds, transcribeCalls: firstPassTranscribes, transcribeCallsBy3s: interimCalls, savedOffset, srt: subtitleFile.srt }, null, 1));
+    console.log(JSON.stringify({ ok: true, workDir, duration, firstSession: first.meta.sessionId, replacedBy: subtitleFile.meta.sessionId, coveredSeconds: subtitleFile.meta.coveredSeconds, srt: subtitleFile.srt }, null, 1));
   } finally {
     await close();
     pageServer.close();

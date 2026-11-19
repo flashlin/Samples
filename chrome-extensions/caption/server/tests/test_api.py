@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from .conftest import TOKEN, encode_tone
+from .conftest import TOKEN
 
 KEY = "b" * 64
 
@@ -23,7 +23,7 @@ def put_body(covered: float, session: str = "s1", seq: int = 1, srt: str = "1\n0
 
 
 def test_health_reports_engines(client: TestClient) -> None:
-    assert client.get("/health").json() == {"status": "ok", "engine": {"asr": "fake-asr", "translate": "fake-mt"}}
+    assert client.get("/health").json() == {"status": "ok", "engine": {"asr": "fake-asr", "punctuation": "fake-punct", "translate": "fake-mt"}}
 
 
 @pytest.mark.parametrize(
@@ -46,23 +46,6 @@ def test_requests_without_origin_are_allowed_with_token(client: TestClient) -> N
     assert client.get("/health").status_code == 200
 
 
-def test_transcribe_decodes_webm_and_returns_display_text(client: TestClient, recognizer) -> None:
-    response = client.post("/v1/captions/transcribe", files={"audio": ("chunk.webm", encode_tone(1.5), "audio/webm")})
-    assert response.status_code == 200
-    body = response.json()
-    assert body["text"] == "這個是 decoder 的輸出"
-    assert body["language"] == "zh"
-    assert body["translation"] is None
-    assert len(recognizer.received[0]) > 16_000
-
-
-def test_transcribe_rejects_oversized_and_invalid_audio(client: TestClient) -> None:
-    too_big = client.post("/v1/captions/transcribe", files={"audio": ("a.webm", b"0" * 200_001, "audio/webm")})
-    assert too_big.status_code == 413
-    invalid = client.post("/v1/captions/transcribe", files={"audio": ("a.webm", b"garbage", "audio/webm")})
-    assert invalid.status_code == 422
-
-
 def test_translations_return_bilingual_display_for_english_lines(client: TestClient) -> None:
     response = client.post("/v1/translations", json={"texts": ["Hello there friends", "中文句子"]})
     assert response.json() == {
@@ -80,11 +63,13 @@ def test_subtitle_lifecycle(client: TestClient) -> None:
     assert document["meta"]["revision"] == 1
     assert document["meta"]["urlKey"] == KEY
     assert document["srt"].endswith("hi\n")
-    behind = client.put(f"/v1/subtitles/{KEY}", json=put_body(5, session="other"))
-    assert behind.json() == {"written": False, "revision": 1, "reason": "not-ahead"}
-    conflict = client.put(f"/v1/subtitles/{KEY}", json=put_body(20, seq=2, expectedRevision=0))
+    other = client.put(f"/v1/subtitles/{KEY}", json=put_body(50, session="other"))
+    assert other.json() == {"written": False, "revision": 1, "reason": "confirmation-required"}
+    confirmed = client.put(f"/v1/subtitles/{KEY}", json=put_body(5, session="other", confirmOverwrite=True, expectedRevision=1))
+    assert confirmed.json() == {"written": True, "revision": 2, "reason": None}
+    conflict = client.put(f"/v1/subtitles/{KEY}", json=put_body(20, session="other", seq=2, expectedRevision=0))
     assert conflict.status_code == 409
-    assert conflict.json()["revision"] == 1
+    assert conflict.json()["revision"] == 2
     assert client.delete(f"/v1/subtitles/{KEY}").status_code == 204
     assert client.delete(f"/v1/subtitles/{KEY}").status_code == 404
 
@@ -102,11 +87,3 @@ def test_put_rejects_oversized_srt_and_unknown_fields(client: TestClient) -> Non
     assert client.put(f"/v1/subtitles/{KEY}", json=body).status_code == 422
 
 
-def test_interim_transcription_skips_translation(client: TestClient, recognizer, translator) -> None:
-    recognizer.next_text = "The transformer reads every token."
-    files = {"audio": ("chunk.webm", encode_tone(1.0), "audio/webm")}
-    interim = client.post("/v1/captions/transcribe", files=files, data={"translate": "false"}).json()
-    assert (interim["language"], interim["translation"], interim["display"]) == ("en", None, "The transformer reads every token.")
-    assert translator.calls == []
-    final = client.post("/v1/captions/transcribe", files={"audio": ("chunk.webm", encode_tone(1.0), "audio/webm")}).json()
-    assert final["display"] == "The transformer reads every token.\n譯:The transformer reads every token."

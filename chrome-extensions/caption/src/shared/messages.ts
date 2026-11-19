@@ -1,12 +1,10 @@
 import { z } from "zod";
 import type { Cue } from "./cue/cue";
 
-const MAX_AUDIO_BASE64_LENGTH = 3_000_000;
 const MAX_TRANSLATE_LINES = 200;
 
 export const urlKeySchema = z.string().regex(/^[0-9a-f]{64}$/);
 const intervalSchema = z.tuple([z.number().nonnegative(), z.number().nonnegative()]);
-const audioPayloadSchema = { audioBase64: z.string().min(1).max(MAX_AUDIO_BASE64_LENGTH), mimeType: z.string().min(1).max(100) };
 
 export const subtitleMetaSchema = z.object({
   canonicalUrl: z.string().min(1),
@@ -35,10 +33,16 @@ export type TabStatus = z.infer<typeof tabStatusSchema>;
 
 export const contentRequestSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("resolve-page"), pageUrl: z.string().max(8192) }),
-  z.object({ type: z.literal("transcribe"), ...audioPayloadSchema, interim: z.boolean().default(false) }),
   z.object({ type: z.literal("save-overlay-offset"), x: z.number().min(-1).max(1), y: z.number().min(-1).max(1) }),
   z.object({ type: z.literal("translate-lines"), texts: z.array(z.string().max(2000)).min(1).max(MAX_TRANSLATE_LINES) }),
-  z.object({ type: z.literal("save-subtitle"), urlKey: urlKeySchema, meta: subtitleMetaSchema, srt: z.string(), expectedRevision: z.number().int().nonnegative() }),
+  z.object({
+    type: z.literal("save-subtitle"),
+    urlKey: urlKeySchema,
+    meta: subtitleMetaSchema,
+    srt: z.string(),
+    expectedRevision: z.number().int().nonnegative(),
+    confirmOverwrite: z.boolean().default(false),
+  }),
   z.object({ type: z.literal("report-status"), status: tabStatusSchema }),
 ]);
 
@@ -62,31 +66,24 @@ export type OffscreenCommand =
       readonly type: "offscreen-start";
       readonly tabId: number;
       readonly streamId: string;
-      readonly limits: { readonly minSeconds: number; readonly maxSeconds: number; readonly silenceSeconds: number };
     }
   | { readonly target: typeof OFFSCREEN_TARGET; readonly type: "offscreen-stop"; readonly tabId: number };
 
-export const offscreenEventSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("offscreen-chunk"), tabId: z.number().int(), start: z.number().nonnegative(), end: z.number().nonnegative(), ...audioPayloadSchema }),
-  z.object({ type: z.literal("offscreen-silence"), tabId: z.number().int(), start: z.number().nonnegative(), end: z.number().nonnegative() }),
-  z.object({ type: z.literal("offscreen-ended"), tabId: z.number().int(), message: z.string().nullable() }),
-]);
+export const offscreenEventSchema = z.object({ type: z.literal("offscreen-ended"), tabId: z.number().int(), message: z.string().nullable() });
 
 export type OffscreenEvent = z.infer<typeof offscreenEventSchema>;
 
 export type TabBroadcast =
   | { readonly type: "tab-capture-started" }
+  | { readonly type: "tab-capture-partial"; readonly start: number; readonly end: number; readonly text: string }
   | { readonly type: "tab-capture-segment"; readonly start: number; readonly end: number; readonly display: string }
   | { readonly type: "tab-capture-stopped"; readonly message: string | null }
   | { readonly type: "subtitle-deleted" };
 
 export interface ContentSettings {
-  readonly chunk: { readonly minSeconds: number; readonly maxSeconds: number; readonly silenceSeconds: number };
   readonly flushIntervalSeconds: number;
   readonly completionRatio: number;
-  readonly queue: { readonly maxBacklogChunks: number; readonly maxRetries: number };
-  readonly overlay: { readonly fontSizePx: number; readonly maxLines: number; readonly opacity: number; readonly offsetX: number; readonly offsetY: number };
-  readonly interimSeconds: number;
+  readonly overlay: { readonly fontSizePx: number; readonly maxSentences: number; readonly opacity: number; readonly offsetX: number; readonly offsetY: number };
   readonly features: { readonly autoStart: boolean; readonly useYoutubeCaptions: boolean; readonly recognizeOnlyAtNormalRate: boolean };
 }
 
@@ -101,12 +98,6 @@ export type ResolvedPage =
       readonly existing: SubtitleMetaPayload | null;
       readonly settings: ContentSettings;
     };
-
-export interface TranscribeResult {
-  readonly text: string;
-  readonly display: string;
-  readonly language: string;
-}
 
 export interface TranslateLinesResult {
   readonly displays: string[];

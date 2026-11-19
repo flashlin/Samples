@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { previousCue, rollingCaption, splitIntoLines } from "../../src/shared/cue/caption-lines";
+import { latestSentences, previousCue, splitIntoSentences } from "../../src/shared/cue/caption-lines";
 
-describe("splitIntoLines", () => {
+describe("splitIntoSentences", () => {
   it.each([
     [null, []],
     ["", []],
@@ -9,28 +9,29 @@ describe("splitIntoLines", () => {
     ["第一句。第二句！第三句？", ["第一句。", "第二句！", "第三句？"]],
     ["It works. Really? Yes!", ["It works.", "Really?", "Yes!"]],
     ["version 1.5 is out", ["version 1.5 is out"]],
-    ["Today we talk about attention\n今天我們討論 attention。", ["Today we talk about attention", "今天我們討論 attention。"]],
+    ["Today we talk about attention\n今天我們討論 attention。", ["Today we talk about attention\n今天我們討論 attention。"]],
+    ["第一行\n第二行", ["第一行", "第二行"]],
   ])("splits %j", (text, expected) => {
-    expect(splitIntoLines(text)).toEqual(expected);
+    expect(splitIntoSentences(text)).toEqual(expected);
   });
 });
 
-describe("rollingCaption", () => {
-  it("puts the new sentence below the previous one", () => {
-    expect(rollingCaption("第一句。", "第二句。", 2)).toBe("第一句。\n第二句。");
+describe("latestSentences", () => {
+  it("shows only the newest sentence by default", () => {
+    expect(latestSentences("第一句。", "第二句。", 1)).toBe("第二句。");
+    expect(latestSentences(null, "做了八年。三年前林小姐請我來。", 1)).toBe("三年前林小姐請我來。");
   });
 
-  it("keeps only the newest lines when there are more than the limit", () => {
-    expect(rollingCaption("第一句。", "第二句。第三句。", 2)).toBe("第二句。\n第三句。");
+  it("keeps an English sentence and its translation together", () => {
+    expect(latestSentences("上一句。", "Hello there\n你好", 1)).toBe("Hello there\n你好");
   });
 
-  it("gives a bilingual sentence the whole box", () => {
-    expect(rollingCaption("上一句。", "Hello there\n你好", 2)).toBe("Hello there\n你好");
+  it("can show more sentences when configured", () => {
+    expect(latestSentences("第一句。", "第二句。第三句。", 2)).toBe("第二句。\n第三句。");
   });
 
-  it("shows a single sentence alone and nothing for empty input", () => {
-    expect(rollingCaption(null, "只有一句", 2)).toBe("只有一句");
-    expect(rollingCaption(null, null, 2)).toBeNull();
+  it("returns null for empty input", () => {
+    expect(latestSentences(null, null, 1)).toBeNull();
   });
 });
 
