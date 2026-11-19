@@ -13,7 +13,7 @@
 - 覆蓋規則：頁面已有 .srt 時，錄製停止（暫停 / 播完 / 停止擷取 / 按 ✕）後在字幕框詢問 Replace / Keep existing。
 - 字幕：單行（目前這句）、可拖曳、常駐框。
 - 驗證：`cd caption && pnpm check`（unit 120）、`cd caption/server && uv run pytest -q`（77）、`pnpm e2e`、`pnpm e2e:youtube` 通過；延遲量測 `node test/e2e/caption-latency.diagnose.mjs`（YouTube 前 34 秒，延遲 0.8–1.8 秒）。
-- 沒有背景程序在跑。上次 commit：`215f42e0e`；之後所有改動未 commit。
+- 沒有背景程序在跑。全部改動已 commit 並 merge 回 `master`（`8e76c4a60`）。
 
 ## Blockers and Active Decisions
 
@@ -26,8 +26,8 @@
 1. 使用者重跑 `caption/setup.sh`（新電腦才會真的下載 aligner 與標點模型）、重新載入 extension、重啟 `dev.sh`，實測。
 2. VAD 切段已在串流架構中完成。
 3. 待釐清：使用者 18:14 錄到 37 秒停止的原因（當時是舊架構；請使用者用新版重測並描述畫面）。
-3. 依回饋修正；這一輪改動待使用者要求再 commit。
+3. 依回饋修正。
 
 ## Worktree State
 
-- 分支 `master`；最後一次 commit 是 `215f42e0e`。之後的改動（單行字幕、句子分段、sherpa-onnx 依賴、詢問覆蓋）尚未 commit。`../minimax/prompt.txt` 是先前就存在的未 commit 改動，與本工作無關，未動。
+- 分支 `master`，工作區乾淨（`../minimax/prompt.txt` 是先前就存在的無關改動）。`../minimax/prompt.txt` 是先前就存在的未 commit 改動，與本工作無關，未動。
