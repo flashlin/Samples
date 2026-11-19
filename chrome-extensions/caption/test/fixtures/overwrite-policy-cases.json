@@ -1,0 +1,62 @@
+[
+  {
+    "name": "no existing record accepts first partial",
+    "existing": null,
+    "candidate": { "status": "partial", "coveredSeconds": 12.5, "sessionId": "b", "lastSeq": 1 },
+    "expected": { "write": true }
+  },
+  {
+    "name": "empty partial candidate is rejected",
+    "existing": null,
+    "candidate": { "status": "partial", "coveredSeconds": 0, "sessionId": "b", "lastSeq": 1 },
+    "expected": { "write": false, "reason": "empty-candidate" }
+  },
+  {
+    "name": "existing complete is never overwritten",
+    "existing": { "status": "complete", "coveredSeconds": 100, "sessionId": "a", "lastSeq": 9 },
+    "candidate": { "status": "complete", "coveredSeconds": 120, "sessionId": "b", "lastSeq": 3 },
+    "expected": { "write": false, "reason": "existing-complete" }
+  },
+  {
+    "name": "other session with less coverage keeps old partial",
+    "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
+    "candidate": { "status": "partial", "coveredSeconds": 120, "sessionId": "b", "lastSeq": 20 },
+    "expected": { "write": false, "reason": "not-ahead" }
+  },
+  {
+    "name": "other session with equal coverage keeps old partial",
+    "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
+    "candidate": { "status": "partial", "coveredSeconds": 300, "sessionId": "b", "lastSeq": 50 },
+    "expected": { "write": false, "reason": "not-ahead" }
+  },
+  {
+    "name": "other session strictly ahead overwrites old partial",
+    "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
+    "candidate": { "status": "partial", "coveredSeconds": 300.5, "sessionId": "b", "lastSeq": 2 },
+    "expected": { "write": true }
+  },
+  {
+    "name": "complete candidate overwrites partial even with less coverage",
+    "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
+    "candidate": { "status": "complete", "coveredSeconds": 250, "sessionId": "b", "lastSeq": 30 },
+    "expected": { "write": true }
+  },
+  {
+    "name": "same session newer sequence always writes",
+    "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
+    "candidate": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 41 },
+    "expected": { "write": true }
+  },
+  {
+    "name": "same session stale sequence is rejected",
+    "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
+    "candidate": { "status": "partial", "coveredSeconds": 310, "sessionId": "a", "lastSeq": 40 },
+    "expected": { "write": false, "reason": "stale-sequence" }
+  },
+  {
+    "name": "same session stale complete is rejected",
+    "existing": { "status": "partial", "coveredSeconds": 300, "sessionId": "a", "lastSeq": 40 },
+    "candidate": { "status": "complete", "coveredSeconds": 310, "sessionId": "a", "lastSeq": 39 },
+    "expected": { "write": false, "reason": "stale-sequence" }
+  }
+]

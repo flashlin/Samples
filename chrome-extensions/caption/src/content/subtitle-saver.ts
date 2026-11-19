@@ -1,0 +1,64 @@
+import type { RecognitionSession } from "../shared/progress/recognition-session";
+import { askBackground } from "./background-client";
+
+const MILLISECONDS_PER_SECOND = 1000;
+const EXISTING_COMPLETE = "existing-complete";
+
+export class SubtitleSaver {
+  private timer: ReturnType<typeof setInterval> | null = null;
+  private inFlight: Promise<void> | null = null;
+  private stopped = false;
+
+  constructor(
+    private readonly session: RecognitionSession,
+    private readonly urlKey: string,
+    private revision: number,
+    private readonly intervalSeconds: number,
+    private readonly onSaved: () => void,
+  ) {}
+
+  start(): void {
+    this.timer ??= setInterval(() => void this.flush(), this.intervalSeconds * MILLISECONDS_PER_SECOND);
+  }
+
+  async stop(): Promise<void> {
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    await this.flush();
+    this.stopped = true;
+  }
+
+  flush(): Promise<void> {
+    if (this.stopped) {
+      return Promise.resolve();
+    }
+    this.inFlight ??= this.saveSnapshot().finally(() => {
+      this.inFlight = null;
+    });
+    return this.inFlight;
+  }
+
+  private async saveSnapshot(): Promise<void> {
+    const snapshot = this.session.takeSnapshotIfWorthSaving();
+    if (!snapshot) {
+      return;
+    }
+    try {
+      const result = await askBackground({ type: "save-subtitle", urlKey: this.urlKey, meta: snapshot.meta, srt: snapshot.srt, expectedRevision: this.revision });
+      this.revision = result.revision;
+      if (result.written) {
+        this.session.acknowledgeSaved(snapshot);
+        this.onSaved();
+      } else if (result.reason === EXISTING_COMPLETE) {
+        this.stopped = true;
+      } else {
+        this.session.markDirty();
+      }
+    } catch (error) {
+      this.session.markDirty();
+      console.warn("Caption subtitle save failed", error);
+    }
+  }
+}

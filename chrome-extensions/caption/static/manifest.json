@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Caption",
+  "version": "0.1.0",
+  "description": "Live captions for web media with Taiwanese Mandarin / English speech recognition, translation and saved SRT subtitles.",
+  "minimum_chrome_version": "116",
+  "permissions": ["storage", "tabCapture", "offscreen", "activeTab"],
+  "host_permissions": ["http://127.0.0.1/*", "http://localhost/*"],
+  "optional_host_permissions": ["https://*/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_popup": "popup.html", "default_title": "Caption" },
+  "options_page": "options.html"
+}
