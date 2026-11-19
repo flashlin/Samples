@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { OVERLAY_HEIGHT_LINES } from "./overlay-layout";
 import { DEFAULT_CANONICALIZER_OPTIONS } from "./url/default-site-rules";
 import type { SiteRule } from "./url/url-canonicalizer";
 
@@ -64,6 +65,7 @@ export const captionConfigSchema = z
         opacity: z.number().min(0.2).max(1).default(0.85),
         offsetX: z.number().min(-1).max(1).default(0),
         offsetY: z.number().min(-1).max(1).default(0),
+        heightLines: z.number().int().min(OVERLAY_HEIGHT_LINES.min).max(OVERLAY_HEIGHT_LINES.max).default(OVERLAY_HEIGHT_LINES.initial),
       })
       .prefault({}),
     features: z

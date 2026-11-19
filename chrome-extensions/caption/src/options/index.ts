@@ -15,6 +15,7 @@ const siteMode = field<HTMLSelectElement>("site-mode");
 const allowlist = field<HTMLTextAreaElement>("allowlist");
 const denylist = field<HTMLTextAreaElement>("denylist");
 const fontSize = field<HTMLInputElement>("font-size");
+const heightLines = field<HTMLInputElement>("height-lines");
 const useYoutubeCaptions = field<HTMLInputElement>("use-youtube-captions");
 const autoStart = field<HTMLInputElement>("auto-start");
 const statusText = field<HTMLElement>("status");
@@ -38,6 +39,7 @@ function render(config: CaptionConfig): void {
   allowlist.value = config.sites.allowlist.join("\n");
   denylist.value = config.sites.denylist.join("\n");
   fontSize.value = String(config.overlay.fontSizePx);
+  heightLines.value = String(config.overlay.heightLines);
   useYoutubeCaptions.checked = config.features.useYoutubeCaptions;
   autoStart.checked = config.features.autoStart;
 }
@@ -47,7 +49,7 @@ function collect(current: CaptionConfig): unknown {
     ...current,
     server: { ...current.server, endpoint: endpoint.value.trim(), token: token.value.trim() },
     sites: { mode: siteMode.value, allowlist: lines(allowlist), denylist: lines(denylist) },
-    overlay: { ...current.overlay, fontSizePx: Number(fontSize.value) },
+    overlay: { ...current.overlay, fontSizePx: Number(fontSize.value), heightLines: Number(heightLines.value) },
     features: { ...current.features, useYoutubeCaptions: useYoutubeCaptions.checked, autoStart: autoStart.checked },
   };
 }

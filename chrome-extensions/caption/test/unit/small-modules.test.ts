@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCaptionSettingsHint } from "../../src/content/youtube";
 import { MediaTimeMapper } from "../../src/shared/audio/media-time-mapper";
 import { base64ToBytes, bytesToBase64 } from "../../src/shared/base64";
 import { isOffscreenCommand, isTabBroadcast } from "../../src/shared/message-guards";
@@ -86,5 +87,17 @@ describe("message guards", () => {
     [{ target: "offscreen", type: "offscreen-stop", tabId: 1.5 }, false],
   ])("isOffscreenCommand(%o) is %s", (value, expected) => {
     expect(isOffscreenCommand(value)).toBe(expected);
+  });
+});
+
+describe("YouTube caption settings hint", () => {
+  const segment = (...children: { tagName: string; textContent: string }[]) => ({ children }) as unknown as Element;
+
+  it("treats a caption window with an icon element as the settings hint", () => {
+    expect(isCaptionSettingsHint([segment(), segment({ tagName: "svg", textContent: "" })])).toBe(true);
+  });
+
+  it("keeps real captions, including styled text and line breaks", () => {
+    expect(isCaptionSettingsHint([segment(), segment({ tagName: "SPAN", textContent: "bold words" }, { tagName: "BR", textContent: "" })])).toBe(false);
   });
 });

@@ -10,7 +10,7 @@ import {
   type TabBroadcast,
 } from "../shared/messages";
 import { CaptionServerClient } from "./caption-server-client";
-import { loadConfig, saveOverlayOffset } from "./config-repository";
+import { loadConfig, saveOverlayLayout } from "./config-repository";
 import { identifyPage, resolvePage } from "./page-resolver";
 import { relayPort, type RelayConnection } from "./stream-relay";
 import { TabCaptureCoordinator } from "./tab-capture-coordinator";
@@ -75,8 +75,10 @@ async function handleContentRequest(request: ContentRequest, tabId: number): Pro
         expectedRevision: request.expectedRevision,
         confirmOverwrite: request.confirmOverwrite,
       });
-    case "save-overlay-offset":
-      return saveOverlayOffset(request.x, request.y);
+    case "save-overlay-layout": {
+      const { type: _type, ...layout } = request;
+      return saveOverlayLayout(layout);
+    }
     case "report-status":
       statuses.set(tabId, request.status);
       return null;

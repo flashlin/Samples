@@ -2,6 +2,7 @@ const YOUTUBE_HOST_PATTERN = /(^|\.)youtube(-nocookie)?\.com$/;
 const PLAYER_SELECTOR = "#movie_player, .html5-video-player";
 const SUBTITLES_BUTTON_SELECTOR = ".ytp-subtitles-button";
 const CAPTION_SEGMENT_SELECTOR = ".ytp-caption-segment";
+const CAPTION_WINDOW_SELECTOR = ".caption-window";
 const AD_SHOWING_CLASS = "ad-showing";
 const CAPTION_TOGGLE_SETTLE_MILLISECONDS = 1000;
 const HIDE_NATIVE_CAPTIONS_CSS = ".ytp-caption-window-container { opacity: 0 !important; }";
@@ -44,8 +45,23 @@ export function disableYoutubeCaptions(): void {
   }
 }
 
+function hasIconElement(segment: Element): boolean {
+  return [...segment.children].some((child) => child.tagName !== "BR" && !child.textContent?.trim());
+}
+
+export function isCaptionSettingsHint(segments: readonly Element[]): boolean {
+  return segments.some(hasIconElement);
+}
+
+function visibleCaptionWindows(): Element[][] {
+  const windows = [...document.querySelectorAll(CAPTION_WINDOW_SELECTOR)].map((window) => [...window.querySelectorAll(CAPTION_SEGMENT_SELECTOR)]);
+  return windows.length > 0 ? windows : [[...document.querySelectorAll(CAPTION_SEGMENT_SELECTOR)]];
+}
+
 export function readVisibleYoutubeCaption(): string {
-  return [...document.querySelectorAll(CAPTION_SEGMENT_SELECTOR)]
+  return visibleCaptionWindows()
+    .filter((segments) => !isCaptionSettingsHint(segments))
+    .flat()
     .map((segment) => segment.textContent?.trim() ?? "")
     .filter(Boolean)
     .join("\n");

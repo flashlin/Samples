@@ -11,7 +11,7 @@
 - 計畫：`plans/caption-speech-to-srt-extension.md`。§0 = 使用者決定；§16 = 實作紀錄（以 §16 為準）。
 - 架構已改為**串流辨識**（2026-11-19 晚）：content ScriptProcessor 16kHz PCM → background Port → 一條 WebSocket `/v1/captions/stream` → server（Silero VAD 切句、說話中每 0.5 秒 partial、句尾 final = aligner + 標點 + 翻譯）。tab capture 走同一條 relay。舊的 MediaRecorder 分段與 HTTP 轉錄端點已刪除。
 - 覆蓋規則：頁面已有 .srt 時，錄製停止（暫停 / 播完 / 停止擷取 / 按 ✕）後在字幕框詢問 Replace / Keep existing。
-- 字幕：單行（目前這句）、可拖曳、常駐框。
+- 字幕：一次一句、可拖曳、常駐框。框高 = `overlay.heightLines` 行（預設 2，1–10），拖框的上緣或在 options 改，存回設定（message `save-overlay-layout`，取代舊的 `save-overlay-offset`）。字超過框高就自動往下捲（`src/content/caption-auto-scroller.ts`），使用者滾輪後暫停。英文句 = 英文 + 繁中；中文開頭的雙語字幕只顯示中文。YouTube 換字幕軌的提示框（片段裡有無文字的 icon 元素）不再當字幕讀（`src/content/youtube.ts`）。舊檔已清掉提示行，原檔備份在 `~/.caption-server/backup-2026-11-20-youtube-hint-cleanup/`。
 - 驗證：`cd caption && pnpm check`（unit 120）、`cd caption/server && uv run pytest -q`（77）、`pnpm e2e`、`pnpm e2e:youtube` 通過；延遲量測 `node test/e2e/caption-latency.diagnose.mjs`（YouTube 前 34 秒，延遲 0.8–1.8 秒）。
 - 沒有背景程序在跑。全部改動已 commit 並 merge 回 `master`。
 
@@ -27,9 +27,10 @@
 
 1. 使用者重跑 `caption/setup.sh`（新電腦才會真的下載 aligner 與標點模型）、重新載入 extension、重啟 `dev.sh`，實測。
 2. VAD 切段已在串流架構中完成。
-3. 待釐清：使用者 18:14 錄到 37 秒停止的原因（當時是舊架構；請使用者用新版重測並描述畫面）。
-3. 依回饋修正。
+3. YouTube 提示框過濾是依據存檔裡的痕跡（icon 位置變成兩個空白），自動化瀏覽器拿不到 YouTube 字幕，無法實測；請使用者在真的 Chrome 開字幕確認。
+4. 待釐清：使用者 18:14 錄到 37 秒停止的原因（當時是舊架構；請使用者用新版重測並描述畫面）。
+5. 依回饋修正。
 
 ## Worktree State
 
-- 分支 `master`，工作區乾淨（`../minimax/prompt.txt` 是先前就存在的無關改動）。`../minimax/prompt.txt` 是先前就存在的未 commit 改動，與本工作無關，未動。
+- 分支 `master`，雙語顯示、框高可調與自動捲動、YouTube 提示框過濾、`content.js` 瘦身（489 KB → 33 KB）都已 commit 並合併回 `master`。`pnpm check`（121）與 `pnpm e2e` 通過。`../minimax/prompt.txt` 是先前就存在的無關改動，未動。

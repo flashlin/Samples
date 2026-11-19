@@ -1,5 +1,6 @@
 import { CONFIG_STORAGE_KEY, parseCaptionConfigOrDefault, type CaptionConfig } from "../shared/config";
 import type { ContentSettings } from "../shared/messages";
+import type { OverlayLayout } from "../shared/overlay-layout";
 
 export async function loadConfig(): Promise<CaptionConfig> {
   const stored = await chrome.storage.local.get(CONFIG_STORAGE_KEY);
@@ -23,7 +24,7 @@ export function toContentSettings(config: CaptionConfig): ContentSettings {
   };
 }
 
-export async function saveOverlayOffset(x: number, y: number): Promise<void> {
+export async function saveOverlayLayout(layout: Partial<OverlayLayout>): Promise<void> {
   const config = await loadConfig();
-  await chrome.storage.local.set({ [CONFIG_STORAGE_KEY]: { ...config, overlay: { ...config.overlay, offsetX: x, offsetY: y } } });
+  await chrome.storage.local.set({ [CONFIG_STORAGE_KEY]: { ...config, overlay: { ...config.overlay, ...layout } } });
 }

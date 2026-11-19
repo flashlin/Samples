@@ -1,5 +1,6 @@
 import type { Cue, SegmentSink } from "../shared/cue/cue";
-import { IDLE_TAB_STATUS, type ContentSettings, type ResolvedPage, type TabBroadcast, type TabStatus } from "../shared/messages";
+import { IDLE_TAB_STATUS } from "../shared/idle-tab-status";
+import type { ContentSettings, ResolvedPage, TabBroadcast, TabStatus } from "../shared/messages";
 import { RecognitionSession } from "../shared/progress/recognition-session";
 import { askBackground } from "./background-client";
 import { captionTextFor, LIVE_CAPTION_HOLD_SECONDS } from "./caption-display";
@@ -122,7 +123,7 @@ export class PageCaptionController {
     }
     const overlay = new CaptionOverlay(resolved.settings.overlay, {
       onClose: () => void this.closeByUser(),
-      onMoved: (offset) => void askBackground({ type: "save-overlay-offset", x: offset.x, y: offset.y }).catch(() => undefined),
+      onLayoutChanged: (layout) => void askBackground({ type: "save-overlay-layout", ...layout }).catch(() => undefined),
     });
     overlay.attachTo(media);
     const run: ActiveRun = {

@@ -11,6 +11,8 @@ describe("splitIntoSentences", () => {
     ["version 1.5 is out", ["version 1.5 is out"]],
     ["Today we talk about attention\n今天我們討論 attention。", ["Today we talk about attention\n今天我們討論 attention。"]],
     ["第一行\n第二行", ["第一行", "第二行"]],
+    ["這是中文字幕\nThis is the English line", ["這是中文字幕"]],
+    ["Every week developers release\nopen-source dev tools\n每週都有新的開源工具", ["Every week developers release open-source dev tools\n每週都有新的開源工具"]],
   ])("splits %j", (text, expected) => {
     expect(splitIntoSentences(text)).toEqual(expected);
   });
@@ -24,6 +26,10 @@ describe("latestSentences", () => {
 
   it("keeps an English sentence and its translation together", () => {
     expect(latestSentences("上一句。", "Hello there\n你好", 1)).toBe("Hello there\n你好");
+  });
+
+  it("shows only the Chinese line of a Chinese-first bilingual cue", () => {
+    expect(latestSentences(null, "大家好\nHello everyone", 1)).toBe("大家好");
   });
 
   it("can show more sentences when configured", () => {

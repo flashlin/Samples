@@ -1,4 +1,5 @@
-import { IDLE_TAB_STATUS, type TabStatus } from "../shared/messages";
+import { IDLE_TAB_STATUS } from "../shared/idle-tab-status";
+import type { TabStatus } from "../shared/messages";
 
 const BADGE_BY_MODE: Partial<Record<TabStatus["mode"], { text: string; color: string }>> = {
   playback: { text: "SRT", color: "#2e7d32" },

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { Cue } from "./cue/cue";
+import { OVERLAY_HEIGHT_LINES } from "./overlay-layout";
 
 const MAX_TRANSLATE_LINES = 200;
 
@@ -36,23 +37,14 @@ export const tabStatusSchema = z.object({
 
 export type TabStatus = z.output<typeof tabStatusSchema>;
 
-export const IDLE_TAB_STATUS: TabStatus = {
-  mode: "idle",
-  canonicalUrl: null,
-  urlKey: null,
-  coveredSeconds: 0,
-  cueCount: 0,
-  message: null,
-  recording: false,
-  canSave: false,
-  mediaDuration: null,
-  currentTime: null,
-  coverage: [],
-};
-
 export const contentRequestSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("resolve-page"), pageUrl: z.string().max(8192) }),
-  z.object({ type: z.literal("save-overlay-offset"), x: z.number().min(-1).max(1), y: z.number().min(-1).max(1) }),
+  z.object({
+    type: z.literal("save-overlay-layout"),
+    offsetX: z.number().min(-1).max(1).optional(),
+    offsetY: z.number().min(-1).max(1).optional(),
+    heightLines: z.number().int().min(OVERLAY_HEIGHT_LINES.min).max(OVERLAY_HEIGHT_LINES.max).optional(),
+  }),
   z.object({ type: z.literal("translate-lines"), texts: z.array(z.string().max(2000)).min(1).max(MAX_TRANSLATE_LINES) }),
   z.object({
     type: z.literal("save-subtitle"),
@@ -112,7 +104,7 @@ export type TabBroadcast =
 export interface ContentSettings {
   readonly flushIntervalSeconds: number;
   readonly completionRatio: number;
-  readonly overlay: { readonly fontSizePx: number; readonly maxSentences: number; readonly opacity: number; readonly offsetX: number; readonly offsetY: number };
+  readonly overlay: { readonly fontSizePx: number; readonly maxSentences: number; readonly opacity: number; readonly offsetX: number; readonly offsetY: number; readonly heightLines: number };
   readonly features: { readonly autoStart: boolean; readonly useYoutubeCaptions: boolean; readonly recognizeOnlyAtNormalRate: boolean };
 }
 

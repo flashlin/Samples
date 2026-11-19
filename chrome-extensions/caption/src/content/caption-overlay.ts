@@ -1,4 +1,7 @@
 import type { ContentSettings } from "../shared/messages";
+import type { OverlayLayout } from "../shared/overlay-layout";
+import { CaptionAutoScroller } from "./caption-auto-scroller";
+import { CaptionHeightResizer } from "./caption-height-resizer";
 
 const POSITION_REFRESH_MILLISECONDS = 250;
 const BOTTOM_OFFSET_RATIO = 0.14;
@@ -7,15 +10,16 @@ const VIEWPORT_EDGE_MARGIN_PX = 8;
 const MESSAGE_SECONDS = 6;
 const MILLISECONDS_PER_SECOND = 1000;
 const MAX_OFFSET_RATIO = 1;
+const LINE_HEIGHT_RATIO = 1.4;
 
 const STYLE = `
 :host { all: initial; }
 .box {
   position: fixed; transform: translate(-50%, -100%); box-sizing: border-box;
-  min-width: min(420px, 80vw); max-width: min(80vw, 960px); min-height: calc(var(--caption-font-size) * 1.4 + 12px);
+  width: max-content; min-width: min(420px, 80vw); max-width: min(80vw, 960px);
   display: flex; align-items: center; gap: 8px; padding: 6px 10px 6px 14px; border-radius: 8px;
   background: rgba(0, 0, 0, var(--caption-opacity)); color: #fff; z-index: 2147483647;
-  font: 500 var(--caption-font-size)/1.4 system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+  font: 500 var(--caption-font-size)/${LINE_HEIGHT_RATIO} system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); pointer-events: auto; cursor: grab; user-select: none; touch-action: none;
 }
 .box.dragging { cursor: grabbing; }
@@ -28,9 +32,19 @@ const STYLE = `
 .prompt button.primary { background: #1f6feb; border-color: #1f6feb; }
 .prompt button:hover, .prompt button:focus-visible { filter: brightness(1.15); }
 .text {
-  white-space: pre-line; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4; text-align: center;
+  height: calc(var(--caption-font-size) * ${LINE_HEIGHT_RATIO} * var(--caption-lines)); max-width: 100%;
+  overflow-x: hidden; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+  display: flex; flex-direction: column; justify-content: safe center; align-items: center; text-align: center;
 }
+.row { max-width: 100%; overflow-wrap: anywhere; }
+.resize {
+  position: absolute; left: 24px; right: 24px; top: -5px; height: 10px; cursor: ns-resize; touch-action: none;
+}
+.resize::after {
+  content: ""; position: absolute; left: 50%; top: 3px; width: 36px; height: 4px; margin-left: -18px;
+  border-radius: 2px; background: rgba(255, 255, 255, 0.5); opacity: 0; transition: opacity 0.15s;
+}
+.box:hover .resize::after { opacity: 1; }
 .message { font-size: 0.75em; opacity: 0.85; font-style: italic; }
 .close {
   all: unset; cursor: pointer; font-size: 14px; line-height: 1; padding: 2px 4px; border-radius: 4px; opacity: 0.7; color: #fff;
@@ -38,14 +52,14 @@ const STYLE = `
 .close:hover, .close:focus-visible { opacity: 1; background: rgba(255, 255, 255, 0.2); }
 `;
 
-export interface OverlayOffset {
+interface OverlayOffset {
   readonly x: number;
   readonly y: number;
 }
 
 export interface OverlayCallbacks {
   readonly onClose: () => void;
-  readonly onMoved: (offset: OverlayOffset) => void;
+  readonly onLayoutChanged: (layout: Partial<OverlayLayout>) => void;
 }
 
 interface DragState {
@@ -64,10 +78,12 @@ export class CaptionOverlay {
   private readonly box: HTMLDivElement;
   private readonly text: HTMLDivElement;
   private readonly prompt: HTMLDivElement;
+  private readonly scroller: CaptionAutoScroller;
   private anchor: HTMLMediaElement | null = null;
   private readonly positionTimer: ReturnType<typeof setInterval>;
   private messageTimer: ReturnType<typeof setTimeout> | null = null;
   private captionText = "";
+  private renderedText: string | null = null;
   private offset: OverlayOffset;
   private drag: DragState | null = null;
   private readonly onFullscreenChange = () => this.reparent();
@@ -88,13 +104,25 @@ export class CaptionOverlay {
     this.box.style.setProperty("--caption-opacity", String(settings.opacity));
     this.text = document.createElement("div");
     this.text.className = "text";
+    const lineHeightPx = () => settings.fontSizePx * LINE_HEIGHT_RATIO;
+    this.scroller = new CaptionAutoScroller(this.text, lineHeightPx);
+    const resizeHandle = document.createElement("div");
+    resizeHandle.className = "resize";
+    resizeHandle.title = "Drag to change the caption height";
+    new CaptionHeightResizer(
+      resizeHandle,
+      lineHeightPx,
+      settings.heightLines,
+      (lines) => this.applyHeight(lines),
+      (heightLines) => this.callbacks.onLayoutChanged({ heightLines }),
+    );
     this.prompt = document.createElement("div");
     this.prompt.className = "prompt";
     this.prompt.addEventListener("pointerdown", (event) => event.stopPropagation());
     const content = document.createElement("div");
     content.className = "content";
     content.append(this.text, this.prompt);
-    this.box.append(content, this.createCloseButton());
+    this.box.append(resizeHandle, content, this.createCloseButton());
     this.listenForDrag();
     shadow.append(style, this.box);
     this.reparent();
@@ -157,6 +185,7 @@ export class CaptionOverlay {
 
   destroy(): void {
     clearInterval(this.positionTimer);
+    this.scroller.stop();
     if (this.messageTimer !== null) {
       clearTimeout(this.messageTimer);
     }
@@ -183,7 +212,7 @@ export class CaptionOverlay {
 
   private listenForDrag(): void {
     this.box.addEventListener("pointerdown", (event) => {
-      if (event.button !== 0) {
+      if (event.button !== 0 || this.isOnTextScrollbar(event)) {
         return;
       }
       event.preventDefault();
@@ -210,7 +239,7 @@ export class CaptionOverlay {
       }
       this.drag = null;
       this.box.classList.remove("dragging");
-      this.callbacks.onMoved(this.offset);
+      this.callbacks.onLayoutChanged({ offsetX: this.offset.x, offsetY: this.offset.y });
     };
     this.box.addEventListener("pointerup", endDrag);
     this.box.addEventListener("pointercancel", endDrag);
@@ -218,7 +247,7 @@ export class CaptionOverlay {
       event.stopPropagation();
       this.offset = { x: 0, y: 0 };
       this.reposition();
-      this.callbacks.onMoved(this.offset);
+      this.callbacks.onLayoutChanged({ offsetX: 0, offsetY: 0 });
     });
     for (const type of ["click", "mousedown", "mouseup"]) {
       this.box.addEventListener(type, (event) => event.stopPropagation());
@@ -226,12 +255,35 @@ export class CaptionOverlay {
   }
 
   private render(text: string, isMessage: boolean): void {
-    if (this.text.textContent === text && this.text.classList.contains("message") === isMessage) {
+    const previous = this.renderedText;
+    if (previous === text && this.text.classList.contains("message") === isMessage) {
       return;
     }
-    this.text.textContent = text;
+    this.renderedText = text;
+    this.text.replaceChildren(...text.split("\n").filter(Boolean).map((line) => this.row(line)));
     this.text.classList.toggle("message", isMessage);
+    if (previous && text.startsWith(previous)) {
+      this.scroller.showGrownText();
+    } else {
+      this.scroller.showNewText();
+    }
     this.reposition();
+  }
+
+  private isOnTextScrollbar(event: PointerEvent): boolean {
+    return event.target === this.text && event.offsetX >= this.text.clientWidth;
+  }
+
+  private applyHeight(lines: number): void {
+    this.box.style.setProperty("--caption-lines", String(lines));
+    this.reposition();
+  }
+
+  private row(line: string): HTMLDivElement {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.textContent = line;
+    return row;
   }
 
   private reparent(): void {

@@ -18,7 +18,7 @@ describe("parseCaptionConfig", () => {
 
   it("merges partial nested overrides with defaults", () => {
     const result = parseCaptionConfig({ overlay: { fontSizePx: 30 } });
-    expect(result.ok && result.config.overlay).toEqual({ fontSizePx: 30, maxSentences: 1, opacity: 0.85, offsetX: 0, offsetY: 0 });
+    expect(result.ok && result.config.overlay).toEqual({ fontSizePx: 30, maxSentences: 1, opacity: 0.85, offsetX: 0, offsetY: 0, heightLines: 2 });
   });
 
   it.each(["http://192.168.1.5:8765", "ftp://127.0.0.1", "not-a-url"])("rejects insecure or invalid endpoint %s", (endpoint) => {
@@ -36,6 +36,13 @@ describe("parseCaptionConfig", () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.errors.join("\n")).toContain("overlay.fontSizePx");
+  });
+
+  it("accepts caption box heights from 1 to 10 whole lines", () => {
+    expect(parseCaptionConfig({ overlay: { heightLines: 5 } }).ok).toBe(true);
+    expect(parseCaptionConfig({ overlay: { heightLines: 0 } }).ok).toBe(false);
+    expect(parseCaptionConfig({ overlay: { heightLines: 11 } }).ok).toBe(false);
+    expect(parseCaptionConfig({ overlay: { heightLines: 2.5 } }).ok).toBe(false);
   });
 
   it("keeps dragged overlay offsets within one anchor size", () => {

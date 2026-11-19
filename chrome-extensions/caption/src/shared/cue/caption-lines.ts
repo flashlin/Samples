@@ -9,11 +9,25 @@ function isBilingualPair(lines: readonly string[]): boolean {
   return lines.length === 2 && original !== undefined && translation !== undefined && LATIN.test(original) && !HAN.test(original) && HAN.test(translation);
 }
 
+function chineseOrBilingualLines(lines: readonly string[]): string[] {
+  const firstChinese = lines.findIndex((line) => HAN.test(line));
+  if (firstChinese === -1) {
+    return [...lines];
+  }
+  const chinese = lines.filter((line) => HAN.test(line));
+  if (firstChinese === 0) {
+    return chinese;
+  }
+  return [lines.slice(0, firstChinese).join(" "), chinese.join("")];
+}
+
 export function splitIntoSentences(text: string | null | undefined): string[] {
-  const lines = (text ?? "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const lines = chineseOrBilingualLines(
+    (text ?? "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean),
+  );
   if (isBilingualPair(lines)) {
     return [lines.join("\n")];
   }

@@ -5,7 +5,7 @@ interface ResultByRequest {
   "translate-lines": TranslateLinesResult;
   "save-subtitle": SaveResult;
   "report-status": null;
-  "save-overlay-offset": null;
+  "save-overlay-layout": null;
 }
 
 export async function askBackground<R extends ContentRequest>(request: R): Promise<ResultByRequest[R["type"]]> {
