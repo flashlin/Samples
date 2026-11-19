@@ -25,7 +25,7 @@ Models are loaded from the Hugging Face cache. Download them once with `../setup
 
 | Variable | Default | Notes |
 |---|---|---|
-| `CAPTION_DATA_DIR` | `~/.caption-server` | `subtitles/<urlKey>.srt`, `<urlKey>.meta.json`, `<urlKey>.srt.prev`, `audit.jsonl`, `token` |
+| `CAPTION_DATA_DIR` | `~/.caption-server` | `subtitles/<urlKey>.srt`, `<urlKey>.meta.json`, `<urlKey>.history/` (one version per recording, for undo), `audit.jsonl`, `token` |
 | `CAPTION_HOST` / `CAPTION_PORT` | `127.0.0.1` / `8765` | Keep loopback unless TLS and per-user tokens are in place |
 | `CAPTION_TOKEN` | generated | Bearer token required on every request |
 | `CAPTION_ALLOWED_ORIGINS` | empty | Comma separated; requests carrying any other `Origin` are rejected |
@@ -39,7 +39,8 @@ Models are loaded from the Hugging Face cache. Download them once with `../setup
 | `CAPTION_TRANSLATE_MODEL` | `mlx-community/HY-MT1.5-1.8B-8bit` | |
 | `CAPTION_KEEP_TERMS` | built-in list | Comma separated terms kept in English when translating |
 | `CAPTION_BILINGUAL_ENGLISH` | `true` | English lines shown as original + translation |
-| `CAPTION_MAX_SRT_BYTES` | `5000000` | |
+| `CAPTION_HISTORY_VERSIONS` | `5` | Versions kept per page for "Undo last recording" |
+| `CAPTION_COMPLETION_RATIO` | `0.95` | A page is complete once the merged coverage reaches this share of the media duration |
 | `CAPTION_VAD_MODEL` | `istupakov/silero-vad-onnx` | Silero VAD used to cut the live stream into sentences |
 | `CAPTION_VAD_THRESHOLD` / `CAPTION_VAD_MIN_SILENCE_SECONDS` / `CAPTION_VAD_MAX_SPEECH_SECONDS` | `0.5` / `0.3` / `10` | Speech probability threshold, pause that ends a sentence, forced cut for long speech |
 | `CAPTION_STREAM_PARTIAL_INTERVAL_SECONDS` | `0.5` | How often the sentence in progress is re-transcribed for interim captions |
@@ -54,10 +55,11 @@ HTTP routes require `Authorization: Bearer <token>`; the WebSocket sends the tok
 | WS | `/v1/captions/stream` | first text message `{"type":"start","token":…}`; then binary frames (8-byte little-endian float64 media start time + 16 kHz mono int16 PCM) and text `{"type":"break"}` / `{"type":"stop"}` | `ready`, `partial` (`start`, `end`, `text`; every 0.5 s while someone speaks), `final` (`start`, `end`, `segments[]` with per-sentence `start`/`end`/`display`), `covered` (`start`, `end`), `error` |
 | POST | `/v1/translations` | `{"texts": [...]}` | `translations`, `displays` |
 | GET | `/v1/subtitles/{urlKey}` | | `meta` + `srt`, 404 if missing |
-| PUT | `/v1/subtitles/{urlKey}` | `meta`, `srt`, optional `expectedRevision`, `confirmOverwrite` | `written`, `revision`, `reason` (`confirmation-required` when another session's subtitle exists and `confirmOverwrite` is false); 409 on revision conflict |
+| PUT | `/v1/subtitles/{urlKey}` | `meta` (this recording's coverage), `cues[]` (`start`, `end`, `text`), `placement` (`timeline` or `append`), optional `expectedRevision`, `confirmOverwrite` | `written`, `revision`, `reason` (`confirmation-required` when another session's subtitle exists and `confirmOverwrite` is false); 409 on revision conflict |
+| POST | `/v1/subtitles/{urlKey}/undo` | | `restored`, `revision`, `remainingVersions`; restores the version saved before the last recording |
 | DELETE | `/v1/subtitles/{urlKey}` | | 204 / 404 |
 
-`PUT` re-checks the overwrite policy server side (same cases as `caption/test/fixtures/overwrite-policy-cases.json`): a subtitle saved by another session is only replaced when the request carries `confirmOverwrite: true`, which the extension sends after the user clicks **Replace** in the caption box.
+`PUT` re-checks the overwrite policy server side (same cases as `caption/test/fixtures/overwrite-policy-cases.json`): another session's subtitle is only changed when the request carries `confirmOverwrite: true` (the user pressed **Save** or answered **Merge**). The server then merges on the timeline inside the per-page lock: where the new recording produced text it replaces old cues (an old cue at least half covered is dropped, otherwise trimmed); everywhere else, including silence in the new recording, old cues are kept. Each later save of the same recording merges onto the version saved before that recording started. Pages without media time (`placement: append`) are appended after the old file.
 
 ## Test
 

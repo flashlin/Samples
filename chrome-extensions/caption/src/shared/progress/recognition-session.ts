@@ -1,6 +1,5 @@
 import type { Cue } from "../cue/cue";
 import { mergeCues } from "../cue/cue-merger";
-import { serializeSrt } from "../srt/srt-codec";
 import type { SubtitleMetaPayload } from "../messages";
 import { addInterval, coveredSeconds, isRecognitionComplete, type Interval } from "./coverage";
 import { decideOverwrite, type SubtitleProgress } from "./overwrite-policy";
@@ -15,11 +14,15 @@ export interface SessionIdentity {
   readonly canonicalUrl: string;
   readonly source: SubtitleMetaPayload["source"];
   readonly completionRatio: number;
+  readonly placement: SubtitlePlacement;
 }
+
+export type SubtitlePlacement = "timeline" | "append";
 
 export interface SessionSnapshot {
   readonly meta: SubtitleMetaPayload;
-  readonly srt: string;
+  readonly cues: readonly Cue[];
+  readonly placement: SubtitlePlacement;
   readonly confirmOverwrite: boolean;
 }
 
@@ -134,7 +137,8 @@ export class RecognitionSession {
         sessionId: this.identity.sessionId,
         lastSeq: candidate.lastSeq,
       },
-      srt: serializeSrt(this.cues),
+      cues: this.cues.map((cue) => ({ ...cue })),
+      placement: this.identity.placement,
       confirmOverwrite,
     };
   }

@@ -96,27 +96,46 @@ async function recordPartialThenLeave(context, dataDir) {
   return partial;
 }
 
-async function replaceAfterConfirmation(context, dataDir, first) {
+const GAP_START_SECONDS = 10;
+
+async function fillGapAfterConfirmation(context, dataDir, first) {
   const page = await context.newPage();
-  await playVideo(page);
+  await page.goto(`http://127.0.0.1:${PAGE_PORT}/`);
+  await page.evaluate((start) => {
+    const video = document.getElementById("v");
+    video.currentTime = start;
+    return video.play();
+  }, GAP_START_SECONDS);
   const duration = await page.evaluate(() => document.getElementById("v").duration);
-  await waitFor(async () => (await currentTime(page)) >= 11, 20000, "11 seconds of playback");
-  assert.equal(await findButtonInClosedShadow(page, "Replace"), null, "the overwrite question must wait until recording stops");
+  await waitFor(async () => (await currentTime(page)) >= GAP_START_SECONDS + 1, 20000, "playback after the gap start");
+  assert.equal(await findButtonInClosedShadow(page, "Merge"), null, "the merge question must wait until recording stops");
   await page.screenshot({ path: path.join(workDir, "recognizing.png") });
-  const replace = await waitFor(() => findButtonInClosedShadow(page, "Replace"), duration * 1000 + 15000, "overwrite question after the video ended");
-  await page.screenshot({ path: path.join(workDir, "overwrite-question.png") });
-  assert.equal(readSavedSubtitle(dataDir).meta.sessionId, first.meta.sessionId, "nothing may be overwritten before the user answers");
-  await page.mouse.click(replace.x, replace.y);
-  const replaced = await waitFor(
+  const merge = await waitFor(() => findButtonInClosedShadow(page, "Merge"), duration * 1000 + 15000, "merge question after the video ended");
+  await page.screenshot({ path: path.join(workDir, "merge-question.png") });
+  assert.equal(readSavedSubtitle(dataDir).meta.sessionId, first.meta.sessionId, "nothing may be merged before the user answers");
+  await page.mouse.click(merge.x, merge.y);
+  const merged = await waitFor(
     () => {
       const saved = readSavedSubtitle(dataDir);
       return saved && saved.meta.sessionId !== first.meta.sessionId && saved.meta.status === "complete" ? saved : null;
     },
     20000,
-    "complete subtitle written by the confirmed session",
+    "complete subtitle after merging the gap",
   );
   await page.close();
-  return { replaced, duration };
+  return { merged, duration };
+}
+
+async function askBackgroundAs(extensionPage, request) {
+  return extensionPage.evaluate(async (message) => {
+    const [tab] = await chrome.tabs.query({ url: "http://127.0.0.1/*" });
+    return chrome.runtime.sendMessage({ ...message, tabId: tab.id });
+  }, request);
+}
+
+async function tabStatus(extensionPage) {
+  const reply = await askBackgroundAs(extensionPage, { type: "get-tab-status" });
+  return reply.value.status;
 }
 
 async function main() {
@@ -126,15 +145,15 @@ async function main() {
   try {
     const first = await recordPartialThenLeave(context, dataDir);
     assert.equal(first.meta.status, "partial");
-    const { replaced: subtitleFile, duration } = await replaceAfterConfirmation(context, dataDir, first);
+    const { merged: subtitleFile, duration } = await fillGapAfterConfirmation(context, dataDir, first);
     const streamsBeforeReplay = server.streamCount();
     assert.ok(streamsBeforeReplay >= 2, `both recording visits must open a recognition stream, saw ${streamsBeforeReplay}`);
     writeFileSync(path.join(workDir, "result.srt"), subtitleFile.srt);
     assert.equal(subtitleFile.meta.canonicalUrl, `http://127.0.0.1:${PAGE_PORT}/`);
     assert.ok(subtitleFile.meta.coveredSeconds >= duration * 0.95, `coverage ${subtitleFile.meta.coveredSeconds} of ${duration}`);
-    assert.match(subtitleFile.srt, /transformer/i);
-    assert.match(subtitleFile.srt, /attention/i);
-    assert.match(subtitleFile.srt, /[\u4e00-\u9fff]/);
+    assert.match(subtitleFile.srt, /transformer/i, "the first visit's sentence must survive the merge");
+    assert.match(subtitleFile.srt, /attention/i, "the first visit's English sentence must survive the merge");
+    assert.match(subtitleFile.srt, /performance/i, "the gap must be filled by the second visit");
 
     const second = await context.newPage();
     await playVideo(second);
@@ -162,7 +181,21 @@ async function main() {
     await options.click("#test");
     await waitFor(async () => (await options.textContent("#status"))?.startsWith("Connected"), 10000, "options page connection test");
 
-    console.log(JSON.stringify({ ok: true, workDir, duration, firstSession: first.meta.sessionId, replacedBy: subtitleFile.meta.sessionId, coveredSeconds: subtitleFile.meta.coveredSeconds, srt: subtitleFile.srt }, null, 1));
+    await second.evaluate(() => document.getElementById("v").play());
+    await askBackgroundAs(options, { type: "start-recognition" });
+    await waitFor(async () => (await tabStatus(options)).recording, 10000, "manual recognition on a complete page");
+    await askBackgroundAs(options, { type: "stop-recognition" });
+    await waitFor(async () => !(await tabStatus(options)).recording, 10000, "manual recognition stopped");
+    const timeline = await tabStatus(options);
+    assert.ok(timeline.mediaDuration > 0 && timeline.coverage.length > 0, `popup timeline data missing: ${JSON.stringify(timeline)}`);
+
+    const undo = await askBackgroundAs(options, { type: "undo-recording" });
+    assert.equal(undo.value.restored, true);
+    const restored = readSavedSubtitle(dataDir);
+    assert.equal(restored.meta.sessionId, first.meta.sessionId, "undo must restore the version before the gap-filling recording");
+    assert.doesNotMatch(restored.srt, /performance/i);
+
+    console.log(JSON.stringify({ ok: true, workDir, duration, firstSession: first.meta.sessionId, mergedBy: subtitleFile.meta.sessionId, coveredSeconds: subtitleFile.meta.coveredSeconds, srt: subtitleFile.srt }, null, 1));
   } finally {
     await close();
     pageServer.close();

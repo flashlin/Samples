@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 
 from .overwrite_policy import SubtitleProgress, SubtitleStatus
+from .subtitle_merge import Placement
 
 URL_KEY_PATTERN = r"^[0-9a-f]{64}$"
 SCHEMA_VERSION = 1
@@ -40,11 +41,25 @@ class SubtitleMeta(SubtitleMetaInput):
     revision: int
     engine: dict[str, str] = Field(default_factory=dict)
     updated_at: str
+    base_version: str | None = None
+
+
+class CueInput(CamelModel):
+    start: float = Field(ge=0)
+    end: float = Field(ge=0)
+    text: str = Field(min_length=1, max_length=2000)
+
+    @model_validator(mode="after")
+    def _ends_after_start(self) -> "CueInput":
+        if self.end < self.start:
+            raise ValueError("cue end must not be before its start")
+        return self
 
 
 class PutSubtitleRequest(CamelModel):
     meta: SubtitleMetaInput
-    srt: str
+    cues: list[CueInput] = Field(default_factory=list, max_length=20_000)
+    placement: Placement = "timeline"
     expected_revision: int | None = Field(default=None, ge=0)
     confirm_overwrite: bool = False
 
@@ -58,6 +73,12 @@ class PutSubtitleResponse(CamelModel):
 class SubtitleDocument(CamelModel):
     meta: SubtitleMeta
     srt: str
+
+
+class UndoResponse(CamelModel):
+    restored: bool
+    revision: int
+    remaining_versions: int
 
 
 class TranslationRequest(CamelModel):

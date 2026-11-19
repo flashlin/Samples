@@ -1,5 +1,8 @@
 import { askBackgroundFromPage } from "../shared/extension-page-client";
-import type { TabStatus } from "../shared/messages";
+import type { ExtensionPageRequest, TabStatus } from "../shared/messages";
+import { TimelineBar } from "./timeline-bar";
+
+const REFRESH_MILLISECONDS = 1000;
 
 const MODE_LABELS: Record<TabStatus["mode"], string> = {
   idle: "Waiting for media to play",
@@ -12,6 +15,11 @@ const MODE_LABELS: Record<TabStatus["mode"], string> = {
   error: "Error",
 };
 
+interface TabState {
+  readonly status: TabStatus;
+  readonly tabCapture: boolean;
+}
+
 function element<T extends HTMLElement>(id: string): T {
   const found = document.getElementById(id);
   if (!found) {
@@ -20,10 +28,17 @@ function element<T extends HTMLElement>(id: string): T {
   return found as T;
 }
 
+function describe(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 const modeText = element<HTMLElement>("mode");
 const detailText = element<HTMLElement>("detail");
 const serverText = element<HTMLElement>("server");
+const recognitionButton = element<HTMLButtonElement>("recognition");
+const saveButton = element<HTMLButtonElement>("save");
 const captureButton = element<HTMLButtonElement>("capture");
+const undoButton = element<HTMLButtonElement>("undo");
 const resetButton = element<HTMLButtonElement>("reset");
 const optionsButton = element<HTMLButtonElement>("options");
 
@@ -35,17 +50,18 @@ async function activeTabId(): Promise<number> {
   return tab.id;
 }
 
-async function refresh(tabId: number): Promise<void> {
-  const { status, tabCapture } = await askBackgroundFromPage<{ status: TabStatus; tabCapture: boolean }>({ type: "get-tab-status", tabId });
+function render(state: TabState, timeline: TimelineBar): void {
+  const { status, tabCapture } = state;
   modeText.textContent = MODE_LABELS[status.mode];
-  const details = [
-    status.canonicalUrl,
-    status.coveredSeconds > 0 ? `Covered ${Math.round(status.coveredSeconds)} s, ${status.cueCount} cues` : null,
-    status.message,
-  ].filter(Boolean);
-  detailText.textContent = details.join("\n");
+  detailText.textContent = [status.canonicalUrl, status.message].filter(Boolean).join("\n");
+  const recordingMedia = status.recording && !tabCapture;
+  recognitionButton.textContent = recordingMedia ? "Stop recognition" : "Start recognition";
+  recognitionButton.dataset.recording = String(recordingMedia);
+  recognitionButton.disabled = tabCapture;
+  saveButton.disabled = !status.canSave;
   captureButton.textContent = tabCapture ? "Stop tab audio capture" : "Capture tab audio";
   captureButton.dataset.capturing = String(tabCapture);
+  timeline.render(status.mediaDuration ? { duration: status.mediaDuration, currentTime: status.currentTime, coverage: status.coverage } : null);
 }
 
 async function checkServer(): Promise<void> {
@@ -53,33 +69,44 @@ async function checkServer(): Promise<void> {
     const health = await askBackgroundFromPage<{ engine: Record<string, string> }>({ type: "check-server" });
     serverText.textContent = `Server OK · ${health.engine.asr ?? "unknown model"}`;
   } catch (error) {
-    serverText.textContent = `Server unavailable: ${error instanceof Error ? error.message : String(error)}`;
+    serverText.textContent = `Server unavailable: ${describe(error)}`;
   }
+}
+
+function bindAction(button: HTMLButtonElement, request: () => ExtensionPageRequest, done?: (result: unknown) => string | null): void {
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    try {
+      const result = await askBackgroundFromPage<unknown>(request());
+      const message = done?.(result);
+      if (message) {
+        detailText.textContent = message;
+      }
+    } catch (error) {
+      detailText.textContent = describe(error);
+    } finally {
+      button.disabled = false;
+    }
+  });
 }
 
 async function main(): Promise<void> {
   const tabId = await activeTabId();
-  captureButton.addEventListener("click", async () => {
-    const capturing = captureButton.dataset.capturing === "true";
-    try {
-      await askBackgroundFromPage({ type: capturing ? "stop-tab-capture" : "start-tab-capture", tabId });
-    } catch (error) {
-      detailText.textContent = error instanceof Error ? error.message : String(error);
-    }
-    await refresh(tabId);
+  const timeline = new TimelineBar(element("timeline"), element("gaps"), (time) => void askBackgroundFromPage({ type: "seek", tabId, time }));
+  const refresh = async () => render(await askBackgroundFromPage<TabState>({ type: "get-tab-status", tabId }), timeline);
+  bindAction(recognitionButton, () => ({ type: recognitionButton.dataset.recording === "true" ? "stop-recognition" : "start-recognition", tabId }));
+  bindAction(saveButton, () => ({ type: "save-now", tabId }), () => "Saved");
+  bindAction(captureButton, () => ({ type: captureButton.dataset.capturing === "true" ? "stop-tab-capture" : "start-tab-capture", tabId }));
+  bindAction(undoButton, () => ({ type: "undo-recording", tabId }), (result) => {
+    const outcome = result as { restored: boolean; remainingVersions: number };
+    return outcome.restored ? `Restored the version before the last recording (${outcome.remainingVersions} older versions left)` : "Nothing to undo";
   });
-  resetButton.addEventListener("click", async () => {
-    try {
-      await askBackgroundFromPage({ type: "delete-subtitle", tabId });
-      detailText.textContent = "Saved subtitles for this page were deleted";
-    } catch (error) {
-      detailText.textContent = error instanceof Error ? error.message : String(error);
-    }
-  });
+  bindAction(resetButton, () => ({ type: "delete-subtitle", tabId }), () => "Saved subtitles for this page were deleted");
   optionsButton.addEventListener("click", () => void chrome.runtime.openOptionsPage());
-  await Promise.all([refresh(tabId), checkServer()]);
+  await Promise.all([refresh(), checkServer()]);
+  setInterval(() => void refresh().catch(() => undefined), REFRESH_MILLISECONDS);
 }
 
 void main().catch((error: unknown) => {
-  modeText.textContent = error instanceof Error ? error.message : String(error);
+  modeText.textContent = describe(error);
 });

@@ -10,11 +10,21 @@
       #detail { white-space: pre-line; color: #57606a; word-break: break-all; margin: 4px 0 10px; }
       #server { font-size: 12px; color: #57606a; margin-bottom: 10px; }
       button { display: block; width: 100%; margin: 6px 0 0; padding: 7px 10px; border: 1px solid #d0d7de; border-radius: 6px; background: #f6f8fa; cursor: pointer; font: inherit; }
-      button:hover { background: #eef1f4; }
+      button:hover:not(:disabled) { background: #eef1f4; }
+      button:disabled { opacity: 0.5; cursor: default; }
       button.primary { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+      .row { display: flex; gap: 6px; }
+      .row button { flex: 1; }
+      #timeline { position: relative; height: 14px; margin: 8px 0 4px; border-radius: 4px; background: #d0d7de; cursor: pointer; overflow: hidden; }
+      #timeline .covered { position: absolute; top: 0; bottom: 0; background: #2da44e; }
+      #timeline .playhead { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #cf222e; }
+      #gaps { font-size: 12px; color: #57606a; margin-bottom: 6px; }
+      #gaps .gap { display: inline; width: auto; margin: 0 4px 0 0; padding: 0 4px; border: none; background: none; color: #0969da; text-decoration: underline; font-size: 12px; }
       @media (prefers-color-scheme: dark) {
         body { background: #161b22; color: #e6edf3; }
-        #detail, #server { color: #8b949e; }
+        #detail, #server, #gaps { color: #8b949e; }
+        #timeline { background: #30363d; }
+        #gaps .gap { color: #58a6ff; }
         button { background: #21262d; border-color: #30363d; color: #e6edf3; }
         button:hover { background: #30363d; }
       }
@@ -25,7 +35,14 @@
     <div id="mode">Loading…</div>
     <div id="detail"></div>
     <div id="server">Checking server…</div>
-    <button id="capture" class="primary" type="button">Capture tab audio</button>
+    <div id="timeline" title="Green: has subtitles · Grey: gap · Red: current position. Click to jump." hidden></div>
+    <div id="gaps" hidden></div>
+    <div class="row">
+      <button id="recognition" class="primary" type="button">Start recognition</button>
+      <button id="save" type="button" disabled>Save</button>
+    </div>
+    <button id="capture" type="button">Capture tab audio</button>
+    <button id="undo" type="button">Undo last recording</button>
     <button id="reset" type="button">Delete saved subtitles for this page</button>
     <button id="options" type="button">Options</button>
     <script src="popup.js" type="module"></script>

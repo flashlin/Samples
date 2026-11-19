@@ -662,6 +662,33 @@ Q1–Q9 已全部回覆，決定見 §0。仍待確認：
 - **e2e 修正**：舊的「重播時 0 次 ASR」檢查改數 WebSocket 連線（原本改架構後會變成 0 = 0 的空檢查），並要求兩次錄製造訪都確實開了串流。
 - **驗證**：unit 120、server 77、`pnpm e2e`、`pnpm e2e:youtube` 通過；量測工具 `test/e2e/caption-latency.diagnose.mjs`。
 
+### 規格：時間軸合併、Save / Start / Undo、空白時間軸（2026-11-19 grill-me 共識，已實作）
+
+**現況（程式碼確認）**：Replace 只存「這次錄的」字幕（`serializeSrt(this.cues)`），舊檔整份被換掉；舊字幕只在畫面顯示、不會合併。popup 沒有 Save；`.srt.prev` 每 10 秒被覆蓋，等於沒有可用的還原點。
+
+| # | 決定 |
+|---|---|
+| 1 | **合併規則**：新的這次「有辨識出字」的時段用新字幕，其餘保留舊字幕。 |
+| 2 | **跨界舊句**：舊句有 ≥ 50% 時間被新字幕蓋到 → 拿掉；< 50% → 保留舊句，時間裁到不與新句重疊。 |
+| 3 | **新錄但沒辨識出字的時段**（靜音 / 音樂）→ 保留舊字幕。 |
+| 4 | **Save（popup）**：立即依時間軸合併存檔，之後這次錄製自動持續合併；停止錄製時若還沒按過 Save，字幕框仍問一次（按鈕改為 Merge / Keep existing）。 |
+| 5 | **完整判定**：舊檔＋新錄的涵蓋聯集 ≥ 影片總長 95% 即 complete（不再要求「這一次」播到結尾）。 |
+| 6 | **Start / Stop recognition（popup）**：辨識頁面影片聲音；已 complete（只播放）的頁面也能手動開始，用來修正一段；Capture tab audio 保留給抓不到影片聲音的網站。 |
+| 7 | **自動開始維持**；Stop 只停這一頁，換頁或重新整理後恢復。 |
+| 8 | **合併在 server 做**：extension 送「這次的字幕＋涵蓋時段」，server 在該 urlKey 的鎖內讀最新舊檔合併、原子寫入（多分頁不互蓋、規則只有一份、無法繞過）。 |
+| 9 | **備份**：每次錄製第一次合併前，把當下舊檔存成一個版本（`<urlKey>.history/<時間>.srt`），最多 5 份；popup 加「Undo last recording」。 |
+| 10 | **空白時間軸（popup）**：橫條顯示已處理（綠）/ 空白（灰）/ 目前位置（紅線），點空白把影片跳過去。 |
+| 11 | **沒有影片時間軸的頁面**（Meet 等 tab capture）：新錄製接在舊檔最後一句之後（間隔 2 秒），不依時間軸覆蓋。 |
+| 12 | **錄製中按 Undo**：先停止這次辨識（不再存），再還原到這次錄製開始前的版本；要再錄就按 Start。 |
+
+**我自行決定的細節**（可再調）：同一次錄製內重聽同一段，也用同一套規則（#1–#3）；Save 在沒有新內容時變灰；時間軸的「綠」= 曾經被處理過的時間（含靜音），不是只有有字的地方。
+
+#### 實作紀錄（時間軸合併）
+
+- server：`srt_codec.py`（SRT 讀寫）、`subtitle_merge.py`（合併規則、聯集、append）、`subtitle_history.py`（每次錄製一個版本、最多 5 份）、`atomic_file.py`、`subtitle_store.py`（鎖、覆蓋規則、選合併基準、狀態判定、稽核）；`PUT` 改收 `cues` + `placement`；新增 `POST /v1/subtitles/{urlKey}/undo`；status 由 server 依聯集涵蓋判定。舊的 `.srt.prev` 與 `CAPTION_MAX_SRT_BYTES` 移除。
+- 前端：`caption-display.ts`、`run-status.ts`（從 controller 拆出的純函式）、`popup/timeline-bar.ts`、`findGaps`；popup 加 Start/Stop、Save、Undo、時間軸；字幕框詢問改為 Merge / Keep existing；`serializeSrt` 不再使用已刪除。
+- 測試：既有測試只改 helper 與因行為改變必須改的預期值；新增 server 合併 / 歷史 / undo 測試、`findGaps` 測試、e2e「跳到第 10 秒補錄 → Merge → 保留前段＋補上後段且判定完整」與「complete 頁 Start/Stop、Undo 還原」。unit 115、server 92、`pnpm e2e`、`pnpm e2e:youtube` 通過。
+
 ### 尚未自動驗證（需手動）
 
 - YouTube 有字幕影片的 DOM 讀取路徑（自動化瀏覽器拿不到 YouTube 字幕）。

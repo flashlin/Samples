@@ -6,7 +6,7 @@ from .conftest import TOKEN
 KEY = "b" * 64
 
 
-def put_body(covered: float, session: str = "s1", seq: int = 1, srt: str = "1\n00:00:00,000 --> 00:00:01,000\nhi\n", **extra) -> dict:
+def put_body(covered: float, session: str = "s1", seq: int = 1, text: str = "hi", **extra) -> dict:
     return {
         "meta": {
             "canonicalUrl": "https://www.youtube.com/watch?v=x",
@@ -17,7 +17,7 @@ def put_body(covered: float, session: str = "s1", seq: int = 1, srt: str = "1\n0
             "sessionId": session,
             "lastSeq": seq,
         },
-        "srt": srt,
+        "cues": [{"start": 0.0, "end": 1.0, "text": text}],
         **extra,
     }
 
@@ -80,10 +80,18 @@ def test_subtitle_routes_reject_invalid_keys(client: TestClient, bad_key: str) -
     assert client.put(f"/v1/subtitles/{bad_key}", json=put_body(1)).status_code in {400, 404}
 
 
-def test_put_rejects_oversized_srt_and_unknown_fields(client: TestClient) -> None:
-    assert client.put(f"/v1/subtitles/{KEY}", json=put_body(1, srt="x" * 1_001)).status_code == 413
+def test_put_rejects_oversized_cues_and_unknown_fields(client: TestClient) -> None:
+    assert client.put(f"/v1/subtitles/{KEY}", json=put_body(1, text="x" * 2_001)).status_code == 422
     body = put_body(1)
     body["meta"]["unexpected"] = True
     assert client.put(f"/v1/subtitles/{KEY}", json=body).status_code == 422
 
 
+
+
+def test_undo_endpoint_restores_the_previous_recording(client: TestClient) -> None:
+    client.put(f"/v1/subtitles/{KEY}", json=put_body(10, text="first"))
+    client.put(f"/v1/subtitles/{KEY}", json=put_body(10, session="other", text="second", confirmOverwrite=True))
+    undone = client.post(f"/v1/subtitles/{KEY}/undo").json()
+    assert undone["restored"] is True
+    assert client.get(f"/v1/subtitles/{KEY}").json()["srt"].endswith("first\n")

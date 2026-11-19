@@ -9,11 +9,13 @@ from .schemas import (
     PutSubtitleRequest,
     PutSubtitleResponse,
     SubtitleDocument,
+    UndoResponse,
     TranslationRequest,
     TranslationResponse,
 )
 from .security import RequestGuard
 from .settings import Settings
+from .srt_codec import Cue
 from .stream_endpoint import pipeline_engines, serve_caption_stream
 from .stream_session import SpeechDetector, StreamTuning
 from .subtitle_store import FileSubtitleStore, InvalidUrlKeyError, RevisionConflictError, SubtitleWrite
@@ -64,10 +66,15 @@ def _subtitle_routes(settings: Settings, store: FileSubtitleStore, pipeline: Cap
 
     @router.put("", response_model=PutSubtitleResponse, response_model_by_alias=True)
     def put_subtitle(url_key: str, request: PutSubtitleRequest) -> PutSubtitleResponse | JSONResponse:
-        if len(request.srt.encode("utf-8")) > settings.max_srt_bytes:
-            raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, f"SRT exceeds {settings.max_srt_bytes} bytes")
         try:
-            write = SubtitleWrite(request.meta, request.srt, request.expected_revision, request.confirm_overwrite, pipeline.engine_names)
+            write = SubtitleWrite(
+                meta=request.meta,
+                cues=[Cue(cue.start, cue.end, cue.text) for cue in request.cues],
+                placement=request.placement,
+                expected_revision=request.expected_revision,
+                confirm_overwrite=request.confirm_overwrite,
+                engine=pipeline.engine_names,
+            )
             outcome = store.put(url_key, write)
         except InvalidUrlKeyError as error:
             raise invalid_key(error) from error
@@ -75,6 +82,14 @@ def _subtitle_routes(settings: Settings, store: FileSubtitleStore, pipeline: Cap
             body = PutSubtitleResponse(written=False, revision=conflict.current_revision, reason="revision-conflict")
             return JSONResponse(status_code=status.HTTP_409_CONFLICT, content=body.model_dump(by_alias=True))
         return PutSubtitleResponse(written=outcome.written, revision=outcome.revision, reason=outcome.reason)
+
+    @router.post("/undo", response_model=UndoResponse, response_model_by_alias=True)
+    def undo_subtitle(url_key: str) -> UndoResponse:
+        try:
+            outcome = store.undo(url_key)
+        except InvalidUrlKeyError as error:
+            raise invalid_key(error) from error
+        return UndoResponse(restored=outcome.restored, revision=outcome.revision, remaining_versions=outcome.remaining_versions)
 
     @router.delete("", status_code=status.HTTP_204_NO_CONTENT)
     def delete_subtitle(url_key: str) -> Response:

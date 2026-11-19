@@ -70,7 +70,8 @@ async function handleContentRequest(request: ContentRequest, tabId: number): Pro
     case "save-subtitle":
       return (await createClient()).putSubtitle(request.urlKey, {
         meta: request.meta,
-        srt: request.srt,
+        cues: request.cues,
+        placement: request.placement,
         expectedRevision: request.expectedRevision,
         confirmOverwrite: request.confirmOverwrite,
       });
@@ -82,15 +83,30 @@ async function handleContentRequest(request: ContentRequest, tabId: number): Pro
   }
 }
 
-async function deleteSubtitleForTab(tabId: number): Promise<void> {
+async function urlKeyOfTab(tabId: number): Promise<string> {
   const tab = await chrome.tabs.get(tabId);
   const identity = tab.url ? await identifyPage(tab.url, await loadConfig()) : null;
   if (identity === null) {
     throw new Error("This tab has no subtitle key");
   }
-  await (await createClient()).deleteSubtitle(identity.urlKey);
-  const message: TabBroadcast = { type: "subtitle-deleted" };
-  await chrome.tabs.sendMessage(tabId, message).catch(() => undefined);
+  return identity.urlKey;
+}
+
+async function tellTab(tabId: number, message: TabBroadcast): Promise<void> {
+  await chrome.tabs.sendMessage(tabId, message, { frameId: 0 }).catch(() => undefined);
+}
+
+async function deleteSubtitleForTab(tabId: number): Promise<void> {
+  await (await createClient()).deleteSubtitle(await urlKeyOfTab(tabId));
+  await tellTab(tabId, { type: "subtitle-changed" });
+}
+
+async function undoRecordingForTab(tabId: number): Promise<{ restored: boolean; remainingVersions: number }> {
+  const urlKey = await urlKeyOfTab(tabId);
+  await tellTab(tabId, { type: "recognition-stop", discard: true });
+  const outcome = await (await createClient()).undoSubtitle(urlKey);
+  await tellTab(tabId, { type: "subtitle-changed" });
+  return outcome;
 }
 
 async function handleExtensionPageRequest(request: ExtensionPageRequest): Promise<unknown> {
@@ -99,6 +115,16 @@ async function handleExtensionPageRequest(request: ExtensionPageRequest): Promis
       return { status: statuses.get(request.tabId), tabCapture: tabCapture.isCapturing(request.tabId) };
     case "delete-subtitle":
       return deleteSubtitleForTab(request.tabId);
+    case "undo-recording":
+      return undoRecordingForTab(request.tabId);
+    case "start-recognition":
+      return tellTab(request.tabId, { type: "recognition-start" });
+    case "stop-recognition":
+      return tellTab(request.tabId, { type: "recognition-stop", discard: false });
+    case "save-now":
+      return tellTab(request.tabId, { type: "save-now" });
+    case "seek":
+      return tellTab(request.tabId, { type: "seek", time: request.time });
     case "start-tab-capture":
       return tabCapture.start(request.tabId);
     case "stop-tab-capture":

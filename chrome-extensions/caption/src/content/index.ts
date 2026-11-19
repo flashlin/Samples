@@ -22,11 +22,10 @@ setInterval(() => void handleNavigation(), URL_POLL_MILLISECONDS);
 window.addEventListener("yt-navigate-finish", () => void handleNavigation());
 window.addEventListener("popstate", () => void handleNavigation());
 
-chrome.runtime.onMessage.addListener((message, sender) => {
-  if (sender.id !== chrome.runtime.id) {
-    return;
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (sender.id !== chrome.runtime.id || !isTabBroadcast(message)) {
+    return false;
   }
-  if (isTabBroadcast(message)) {
-    void controller.handleBroadcast(message);
-  }
+  void controller.handleBroadcast(message).finally(() => sendResponse(null));
+  return true;
 });

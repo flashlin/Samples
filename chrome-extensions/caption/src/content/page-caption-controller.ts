@@ -1,11 +1,11 @@
-import { latestSentences, previousCue } from "../shared/cue/caption-lines";
 import type { Cue, SegmentSink } from "../shared/cue/cue";
-import { findCueAt, selectDisplayCue } from "../shared/cue/cue-timeline";
-import type { ContentSettings, ResolvedPage, TabBroadcast, TabStatus } from "../shared/messages";
+import { IDLE_TAB_STATUS, type ContentSettings, type ResolvedPage, type TabBroadcast, type TabStatus } from "../shared/messages";
 import { RecognitionSession } from "../shared/progress/recognition-session";
 import { askBackground } from "./background-client";
+import { captionTextFor, LIVE_CAPTION_HOLD_SECONDS } from "./caption-display";
 import { CaptionOverlay } from "./caption-overlay";
 import { findPlayingMedia, watchForPlayingMedia } from "./media-detector";
+import { buildRunStatus } from "./run-status";
 import { SubtitleSaver } from "./subtitle-saver";
 import { TabCaptureReceiver } from "./tab-capture-receiver";
 import { CrossOriginMediaError, StreamingRecognizer } from "./streaming-recognizer";
@@ -13,15 +13,16 @@ import { disableYoutubeCaptions, enableYoutubeCaptions, isYoutubeAdPlaying, isYo
 import { YoutubeCaptionReader } from "./youtube-caption-reader";
 
 const DISPLAY_REFRESH_MILLISECONDS = 200;
-const LIVE_CAPTION_HOLD_SECONDS = 3;
+const STATUS_REFRESH_MILLISECONDS = 1000;
 const PAUSE_BEFORE_ASKING_MILLISECONDS = 800;
+const NO_MEDIA_MESSAGE = "No video or audio is playing on this page. Use Capture tab audio instead.";
 
 type ResolvedForCaptions = Extract<ResolvedPage, { mode: "playback" | "recognize" }>;
 
 interface ActiveRun {
   readonly resolved: ResolvedForCaptions;
   readonly overlay: CaptionOverlay;
-  readonly displayTimer: ReturnType<typeof setInterval>;
+  readonly timers: ReturnType<typeof setInterval>[];
   media: HTMLMediaElement | null;
   mode: TabStatus["mode"];
   session: RecognitionSession | null;
@@ -31,6 +32,7 @@ interface ActiveRun {
   stopSource: (() => void) | null;
   liveCue: () => Cue | null;
   tabCapture: TabCaptureReceiver | null;
+  watchingMediaEnd: boolean;
 }
 
 function describe(error: unknown): string {
@@ -58,8 +60,7 @@ export class PageCaptionController {
   async handleBroadcast(message: TabBroadcast): Promise<void> {
     switch (message.type) {
       case "tab-capture-started":
-        await this.beginTabCapture();
-        return;
+        return this.beginTabCapture();
       case "tab-capture-segment":
         this.run?.tabCapture?.receive(message.start, message.end, message.display);
         return;
@@ -67,14 +68,25 @@ export class PageCaptionController {
         this.run?.tabCapture?.receivePartial(message.start, message.end, message.text);
         return;
       case "tab-capture-stopped":
-        await this.endTabCapture(message.message);
-        return;
-      case "subtitle-deleted":
-        await this.dispose();
-        this.closed = false;
-        this.start();
+        return this.endTabCapture(message.message);
+      case "subtitle-changed":
+        return this.reload();
+      case "recognition-start":
+        return this.startRecognitionByUser();
+      case "recognition-stop":
+        return this.stopRecognitionByUser(message.discard);
+      case "save-now":
+        return this.saveNow();
+      case "seek":
+        this.seek(message.time);
         return;
     }
+  }
+
+  private async reload(): Promise<void> {
+    await this.dispose();
+    this.closed = false;
+    this.start();
   }
 
   private async onMediaPlaying(media: HTMLMediaElement): Promise<void> {
@@ -89,9 +101,10 @@ export class PageCaptionController {
     try {
       const run = await this.openRun(media);
       if (run?.resolved.mode === "playback") {
-        this.startPlayback(run);
+        run.mode = "playback";
+        this.reportRun(run);
       } else if (run) {
-        await this.startRecognition(run, media);
+        await this.startAutomaticRecognition(run, media);
       }
     } catch (error) {
       this.report({ mode: "error", message: describe(error) });
@@ -124,50 +137,97 @@ export class PageCaptionController {
       stopSource: null,
       liveCue: () => null,
       tabCapture: null,
-      displayTimer: setInterval(() => overlay.showCaption(this.displayText(run)), DISPLAY_REFRESH_MILLISECONDS),
+      watchingMediaEnd: false,
+      timers: [
+        setInterval(() => overlay.showCaption(this.displayText(run)), DISPLAY_REFRESH_MILLISECONDS),
+        setInterval(() => this.reportRun(run), STATUS_REFRESH_MILLISECONDS),
+      ],
     };
     this.run = run;
     return run;
   }
 
   private displayText(run: ActiveRun): string | null {
-    const { current, timeline } = this.currentCue(run);
-    if (!current) {
-      return null;
-    }
-    const previous = previousCue(timeline, current, LIVE_CAPTION_HOLD_SECONDS);
-    return latestSentences(previous?.text ?? null, current.text, run.resolved.settings.overlay.maxSentences);
+    return captionTextFor({
+      liveCue: run.liveCue(),
+      liveCues: run.session?.liveCues ?? null,
+      liveCoverage: run.session?.liveCoverage ?? [],
+      savedCues: run.resolved.cues,
+      time: run.media?.currentTime ?? null,
+      maxSentences: run.resolved.settings.overlay.maxSentences,
+    });
   }
 
-  private currentCue(run: ActiveRun): { current: Cue | null; timeline: readonly Cue[] } {
-    const live = run.liveCue();
-    if (live) {
-      return { current: live, timeline: run.session?.liveCues ?? [] };
-    }
-    if (!run.media) {
-      return { current: null, timeline: [] };
-    }
-    const time = run.media.currentTime;
-    const fallbackCues = run.resolved.cues;
-    if (!run.session) {
-      return { current: findCueAt(fallbackCues, time), timeline: fallbackCues };
-    }
-    const liveCues = run.session.liveCues;
-    const current = selectDisplayCue({ liveCues, liveCoverage: run.session.liveCoverage, fallbackCues, liveHoldSeconds: LIVE_CAPTION_HOLD_SECONDS }, time);
-    return { current, timeline: current && liveCues.includes(current) ? liveCues : fallbackCues };
-  }
-
-  private startPlayback(run: ActiveRun): void {
-    run.mode = "playback";
-    this.reportRun(run);
-  }
-
-  private async startRecognition(run: ActiveRun, media: HTMLMediaElement): Promise<void> {
+  private async startAutomaticRecognition(run: ActiveRun, media: HTMLMediaElement): Promise<void> {
     const settings = run.resolved.settings;
     const youtubeStarted = isYoutubePage() && settings.features.useYoutubeCaptions && (await this.tryYoutubeCaptions(run, media));
     if (!youtubeStarted && settings.features.autoStart) {
       this.startMediaAsr(run, media, settings);
     }
+    this.reportRun(run);
+  }
+
+  private async startRecognitionByUser(): Promise<void> {
+    if (window !== window.top) {
+      return;
+    }
+    const media = this.run?.media ?? findPlayingMedia() ?? document.querySelector<HTMLMediaElement>("video, audio");
+    if (!media) {
+      this.run?.overlay.showMessage(NO_MEDIA_MESSAGE);
+      this.report({ mode: "error", message: NO_MEDIA_MESSAGE });
+      return;
+    }
+    this.closed = false;
+    const run = this.run ?? (await this.openRun(media));
+    if (!run || run.stopSource) {
+      return;
+    }
+    run.media ??= media;
+    run.overlay.attachTo(media);
+    this.startMediaAsr(run, media, run.resolved.settings);
+    this.reportRun(run);
+  }
+
+  private async stopRecognitionByUser(discard: boolean): Promise<void> {
+    const run = this.run;
+    if (!run) {
+      return;
+    }
+    if (discard) {
+      run.session?.decideOverwrite(false);
+    }
+    await this.stopCurrentSource(run);
+    run.mode = run.resolved.mode === "playback" ? "playback" : "idle";
+    this.reportRun(run);
+    if (!discard) {
+      void this.askToOverwriteIfPending(run);
+    }
+  }
+
+  private async saveNow(): Promise<void> {
+    const run = this.run;
+    if (!run?.session || run.session.savingDeclined) {
+      return;
+    }
+    if (run.session.awaitingOverwriteDecision) {
+      run.session.decideOverwrite(true);
+    }
+    await run.saver?.flush();
+    this.reportRun(run);
+  }
+
+  private seek(time: number): void {
+    const media = this.run?.media ?? findPlayingMedia();
+    if (media && Number.isFinite(media.duration)) {
+      media.currentTime = Math.min(time, media.duration);
+    }
+  }
+
+  private watchRecordingEnd(run: ActiveRun, media: HTMLMediaElement): void {
+    if (run.watchingMediaEnd) {
+      return;
+    }
+    run.watchingMediaEnd = true;
     media.addEventListener("ended", () => {
       run.session?.updateMedia(media.duration, true);
       void this.askToOverwriteIfPending(run).then(() => run.saver?.flush());
@@ -179,7 +239,6 @@ export class PageCaptionController {
         }
       }, PAUSE_BEFORE_ASKING_MILLISECONDS);
     });
-    this.reportRun(run);
   }
 
   private sessionSink(run: ActiveRun, source: "asr" | "youtube-captions"): SegmentSink {
@@ -189,7 +248,13 @@ export class PageCaptionController {
     }
     const { resolved } = run;
     const session = new RecognitionSession(
-      { sessionId: crypto.randomUUID(), canonicalUrl: resolved.canonicalUrl, source, completionRatio: resolved.settings.completionRatio },
+      {
+        sessionId: crypto.randomUUID(),
+        canonicalUrl: resolved.canonicalUrl,
+        source,
+        completionRatio: resolved.settings.completionRatio,
+        placement: run.media ? "timeline" : "append",
+      },
       resolved.existing,
     );
     run.session = session;
@@ -223,7 +288,7 @@ export class PageCaptionController {
   }
 
   private async askToOverwrite(run: ActiveRun, session: RecognitionSession): Promise<void> {
-    const confirmed = await run.overlay.askConfirmation("Replace the saved subtitles with this recording?", "Replace", "Keep existing");
+    const confirmed = await run.overlay.askConfirmation("Merge this recording into the saved subtitles?", "Merge", "Keep existing");
     session.decideOverwrite(confirmed);
     await run.saver?.flush();
   }
@@ -253,6 +318,7 @@ export class PageCaptionController {
       restoreCaptionButton();
     };
     reader.start();
+    this.watchRecordingEnd(run, media);
     run.mode = "youtube-captions";
     run.liveCue = () => reader.currentCue;
     run.stopSource = stopReader;
@@ -288,6 +354,7 @@ export class PageCaptionController {
     run.liveCue = () => (partial && media.currentTime - partial.end <= LIVE_CAPTION_HOLD_SECONDS ? partial : null);
     try {
       recognizer.start();
+      this.watchRecordingEnd(run, media);
       run.mode = "recognize";
       run.stopSource = () => recognizer.stop();
     } catch (error) {
@@ -301,7 +368,6 @@ export class PageCaptionController {
       this.report({ mode: "error", message });
     }
   }
-
 
   private async stopCurrentSource(run: ActiveRun): Promise<void> {
     run.stopSource?.();
@@ -358,7 +424,7 @@ export class PageCaptionController {
     if (!run) {
       return;
     }
-    clearInterval(run.displayTimer);
+    run.timers.forEach(clearInterval);
     run.overlay.destroy();
     await this.stopCurrentSource(run);
     await run.saver?.stop();
@@ -366,31 +432,26 @@ export class PageCaptionController {
   }
 
   private reportRun(run: ActiveRun): void {
-    this.report({
-      mode: run.mode,
-      canonicalUrl: run.resolved.canonicalUrl,
-      urlKey: run.resolved.urlKey,
-      coveredSeconds: run.session?.coveredSeconds ?? run.resolved.existing?.coveredSeconds ?? 0,
-      cueCount: run.session?.liveCues.length ?? run.resolved.cues.length,
-      message: this.saveStatusMessage(run),
-    });
-  }
-
-  private saveStatusMessage(run: ActiveRun): string | null {
-    if (run.session?.savingDeclined) {
-      return "Not saving this recording: the existing subtitles were kept";
-    }
-    if (run.overwriteQuestion) {
-      return "Waiting for your answer in the caption box";
-    }
-    return run.session?.awaitingOverwriteDecision ? "Not saved yet: you will be asked when you pause or stop" : null;
+    this.report(
+      buildRunStatus({
+        mode: run.mode,
+        canonicalUrl: run.resolved.canonicalUrl,
+        urlKey: run.resolved.urlKey,
+        savedCoverage: run.resolved.existing?.coveredIntervals ?? [],
+        savedCueCount: run.resolved.cues.length,
+        session: run.session,
+        recording: run.stopSource !== null || run.tabCapture !== null,
+        askingOverwrite: run.overwriteQuestion !== null,
+        media: run.media,
+      }),
+    );
   }
 
   private report(partial: Partial<TabStatus> & Pick<TabStatus, "mode">): void {
     if (window !== window.top && (partial.mode === "idle" || partial.mode === "disabled")) {
       return;
     }
-    const status: TabStatus = { canonicalUrl: null, urlKey: null, coveredSeconds: 0, cueCount: 0, message: null, ...partial };
+    const status: TabStatus = { ...IDLE_TAB_STATUS, ...partial };
     void askBackground({ type: "report-status", status }).catch(() => undefined);
   }
 }

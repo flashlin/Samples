@@ -53,7 +53,8 @@ export class SubtitleSaver {
         type: "save-subtitle",
         urlKey: this.urlKey,
         meta: snapshot.meta,
-        srt: snapshot.srt,
+        cues: [...snapshot.cues],
+        placement: snapshot.placement,
         expectedRevision: this.revision,
         confirmOverwrite: snapshot.confirmOverwrite,
       });

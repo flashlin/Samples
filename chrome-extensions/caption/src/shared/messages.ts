@@ -27,9 +27,28 @@ export const tabStatusSchema = z.object({
   coveredSeconds: z.number().nonnegative(),
   cueCount: z.number().int().nonnegative(),
   message: z.string().nullable(),
+  recording: z.boolean().default(false),
+  canSave: z.boolean().default(false),
+  mediaDuration: z.number().nonnegative().nullable().default(null),
+  currentTime: z.number().nonnegative().nullable().default(null),
+  coverage: z.array(intervalSchema).max(10_000).default([]),
 });
 
-export type TabStatus = z.infer<typeof tabStatusSchema>;
+export type TabStatus = z.output<typeof tabStatusSchema>;
+
+export const IDLE_TAB_STATUS: TabStatus = {
+  mode: "idle",
+  canonicalUrl: null,
+  urlKey: null,
+  coveredSeconds: 0,
+  cueCount: 0,
+  message: null,
+  recording: false,
+  canSave: false,
+  mediaDuration: null,
+  currentTime: null,
+  coverage: [],
+};
 
 export const contentRequestSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("resolve-page"), pageUrl: z.string().max(8192) }),
@@ -39,7 +58,8 @@ export const contentRequestSchema = z.discriminatedUnion("type", [
     type: z.literal("save-subtitle"),
     urlKey: urlKeySchema,
     meta: subtitleMetaSchema,
-    srt: z.string(),
+    cues: z.array(z.object({ start: z.number().nonnegative(), end: z.number().nonnegative(), text: z.string().min(1).max(2000) })).max(20_000),
+    placement: z.enum(["timeline", "append"]),
     expectedRevision: z.number().int().nonnegative(),
     confirmOverwrite: z.boolean().default(false),
   }),
@@ -51,6 +71,11 @@ export type ContentRequest = z.infer<typeof contentRequestSchema>;
 export const extensionPageRequestSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("get-tab-status"), tabId: z.number().int() }),
   z.object({ type: z.literal("delete-subtitle"), tabId: z.number().int() }),
+  z.object({ type: z.literal("undo-recording"), tabId: z.number().int() }),
+  z.object({ type: z.literal("start-recognition"), tabId: z.number().int() }),
+  z.object({ type: z.literal("stop-recognition"), tabId: z.number().int() }),
+  z.object({ type: z.literal("save-now"), tabId: z.number().int() }),
+  z.object({ type: z.literal("seek"), tabId: z.number().int(), time: z.number().nonnegative() }),
   z.object({ type: z.literal("start-tab-capture"), tabId: z.number().int() }),
   z.object({ type: z.literal("stop-tab-capture"), tabId: z.number().int() }),
   z.object({ type: z.literal("check-server") }),
@@ -78,7 +103,11 @@ export type TabBroadcast =
   | { readonly type: "tab-capture-partial"; readonly start: number; readonly end: number; readonly text: string }
   | { readonly type: "tab-capture-segment"; readonly start: number; readonly end: number; readonly display: string }
   | { readonly type: "tab-capture-stopped"; readonly message: string | null }
-  | { readonly type: "subtitle-deleted" };
+  | { readonly type: "subtitle-changed" }
+  | { readonly type: "recognition-start" }
+  | { readonly type: "recognition-stop"; readonly discard: boolean }
+  | { readonly type: "save-now" }
+  | { readonly type: "seek"; readonly time: number };
 
 export interface ContentSettings {
   readonly flushIntervalSeconds: number;

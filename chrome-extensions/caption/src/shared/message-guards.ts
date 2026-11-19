@@ -16,8 +16,14 @@ export function isTabBroadcast(value: unknown): value is TabBroadcast {
   }
   switch (value.type) {
     case "tab-capture-started":
-    case "subtitle-deleted":
+    case "subtitle-changed":
+    case "recognition-start":
+    case "save-now":
       return true;
+    case "recognition-stop":
+      return typeof value.discard === "boolean";
+    case "seek":
+      return isFiniteNumber(value.time) && value.time >= 0;
     case "tab-capture-segment":
       return isFiniteNumber(value.start) && isFiniteNumber(value.end) && typeof value.display === "string";
     case "tab-capture-partial":

@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { RecognitionSession } from "../../src/shared/progress/recognition-session";
-import { parseSrt } from "../../src/shared/srt/srt-codec";
 import type { SubtitleMetaPayload } from "../../src/shared/messages";
 
-const identity = { sessionId: "s-new", canonicalUrl: "https://www.youtube.com/watch?v=x", source: "asr" as const, completionRatio: 0.95 };
+const identity = { sessionId: "s-new", canonicalUrl: "https://www.youtube.com/watch?v=x", source: "asr" as const, completionRatio: 0.95, placement: "timeline" as const };
 
 function existingPartial(coveredSeconds: number): SubtitleMetaPayload {
   return {
@@ -32,7 +31,7 @@ describe("RecognitionSession", () => {
     session.updateMedia(100, false);
     const snapshot = session.takeSnapshotIfWorthSaving();
     expect(snapshot?.meta).toMatchObject({ status: "partial", coveredSeconds: 8, coveredIntervals: [[0, 8]], mediaDuration: 100, lastSeq: 1, sessionId: "s-new" });
-    expect(parseSrt(snapshot!.srt).map((cue) => cue.text)).toEqual(["第一句", "Hello world\n哈囉世界"]);
+    expect(snapshot!.cues.map((cue) => cue.text)).toEqual(["第一句", "Hello world\n哈囉世界"]);
   });
 
   it("does not save again until something changes", () => {

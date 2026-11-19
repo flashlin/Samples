@@ -7,6 +7,8 @@ Chrome extension (MV3) that shows live captions for web media, saves them as `.s
 - English sentences are shown bilingual (original + Traditional Chinese translation); mixed sentences keep their English words.
 - YouTube videos that have captions use the captions shown by the player instead of ASR.
 - Pages whose media cannot be captured directly (cross-origin video, Google Meet, …): toolbar button → **Capture tab audio**.
+- Toolbar popup: **Start / Stop recognition** (also on pages that already have complete subtitles), **Save** (merge this recording now), **Undo last recording**, and a timeline bar showing which parts have subtitles; click a gap to jump there.
+- Re-recording never wipes the saved file: the new recording replaces only the time ranges where it produced text, and you confirm with **Save** or **Merge** before anything is changed.
 
 ## Setup
 

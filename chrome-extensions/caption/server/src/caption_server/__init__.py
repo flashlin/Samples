@@ -31,7 +31,7 @@ def main() -> None:
     from .app import CaptionServices, create_app
     from .caption_pipeline import CaptionPipeline, PipelineOptions
     from .engines import HyMtTranslator, QwenAsrRecognizer, SherpaPunctuator, SileroVadFactory, VadTuning
-    from .subtitle_store import FileSubtitleStore
+    from .subtitle_store import FileSubtitleStore, StorePolicy
 
     settings = _ensure_token(Settings())
     _report_origins(settings)
@@ -43,7 +43,7 @@ def main() -> None:
         translator=HyMtTranslator(settings.translate_model, settings.translate_max_tokens),
         options=PipelineOptions(keep_terms=settings.keep_terms, bilingual_english=settings.bilingual_english, max_sentence_units=settings.max_sentence_units),
     )
-    store = FileSubtitleStore(settings.subtitles_dir, settings.audit_log)
+    store = FileSubtitleStore(settings.subtitles_dir, settings.audit_log, StorePolicy(settings.history_versions, settings.completion_ratio))
     vad = SileroVadFactory(
         settings.vad_model,
         VadTuning(

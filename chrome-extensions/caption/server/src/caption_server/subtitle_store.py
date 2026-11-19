@@ -1,15 +1,17 @@
 import json
-import os
 import re
-import tempfile
 import threading
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-from .overwrite_policy import decide_overwrite
+from .atomic_file import write_atomically
+from .overwrite_policy import SubtitleStatus, decide_overwrite
 from .schemas import URL_KEY_PATTERN, SubtitleDocument, SubtitleMeta, SubtitleMetaInput
+from .srt_codec import Cue, parse_srt, serialize_srt
+from .subtitle_history import SubtitleHistory
+from .subtitle_merge import Interval, Placement, Recording, combine_recordings, covered_seconds
 
 _URL_KEY = re.compile(URL_KEY_PATTERN)
 _INITIAL_REVISION = 0
@@ -28,7 +30,8 @@ class RevisionConflictError(Exception):
 @dataclass(frozen=True)
 class SubtitleWrite:
     meta: SubtitleMetaInput
-    srt: str
+    cues: list[Cue]
+    placement: Placement
     expected_revision: int | None
     confirm_overwrite: bool
     engine: dict[str, str]
@@ -41,21 +44,41 @@ class WriteOutcome:
     reason: str | None = None
 
 
-def _atomic_write(path: Path, content: str) -> None:
-    descriptor, temp_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
-    try:
-        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
-            handle.write(content)
-        os.replace(temp_name, path)
-    except BaseException:
-        Path(temp_name).unlink(missing_ok=True)
-        raise
+@dataclass(frozen=True)
+class UndoOutcome:
+    restored: bool
+    revision: int
+    remaining_versions: int
+
+
+@dataclass(frozen=True)
+class StorePolicy:
+    history_limit: int = 5
+    completion_ratio: float = 0.95
+
+
+@dataclass(frozen=True)
+class _MergeBase:
+    recording: Recording | None
+    version: str
+
+
+def _recording_of(document: SubtitleDocument | None) -> Recording | None:
+    if document is None:
+        return None
+    return Recording(parse_srt(document.srt), list(document.meta.covered_intervals))
+
+
+def _now() -> str:
+    return datetime.now(UTC).isoformat()
 
 
 class FileSubtitleStore:
-    def __init__(self, root: Path, audit_log: Path) -> None:
+    def __init__(self, root: Path, audit_log: Path, policy: StorePolicy = StorePolicy()) -> None:
         self._root = root
         self._audit_log = audit_log
+        self._policy = policy
+        self._history = SubtitleHistory(root, policy.history_limit)
         self._root.mkdir(parents=True, exist_ok=True)
         self._key_locks: defaultdict[str, threading.Lock] = defaultdict(threading.Lock)
         self._registry_lock = threading.Lock()
@@ -81,43 +104,86 @@ class FileSubtitleStore:
         with self._lock_for(url_key):
             return self._read(url_key)
 
-    def put(self, url_key: str, request: SubtitleWrite) -> WriteOutcome:
+    def put(self, url_key: str, write: SubtitleWrite) -> WriteOutcome:
         with self._lock_for(url_key):
             existing = self._read(url_key)
-            current_revision = existing.meta.revision if existing else _INITIAL_REVISION
-            if request.expected_revision is not None and request.expected_revision != current_revision:
-                raise RevisionConflictError(current_revision)
-            meta = request.meta
-            decision = decide_overwrite(existing.meta.progress() if existing else None, meta.progress(), request.confirm_overwrite)
+            revision = existing.meta.revision if existing else _INITIAL_REVISION
+            if write.expected_revision is not None and write.expected_revision != revision:
+                raise RevisionConflictError(revision)
+            decision = decide_overwrite(existing.meta.progress() if existing else None, write.meta.progress(), write.confirm_overwrite)
             if not decision.write:
-                return WriteOutcome(False, current_revision, decision.reason)
-            stored = SubtitleMeta(
-                **meta.model_dump(),
-                url_key=url_key,
-                revision=current_revision + 1,
-                engine=request.engine if meta.source == "asr" else {},
-                updated_at=datetime.now(UTC).isoformat(),
-            )
-            self._write(url_key, stored, request.srt, existing)
+                return WriteOutcome(False, revision, decision.reason)
+            base = self._merge_base(url_key, existing, write.meta.session_id)
+            combined = combine_recordings(base.recording, Recording(write.cues, list(write.meta.covered_intervals)), write.placement)
+            stored = self._stored_meta(url_key, write, combined.coverage, revision + 1, base.version)
+            self._save(url_key, stored, serialize_srt(combined.cues))
             self._audit("put", url_key, existing.meta if existing else None, stored)
             return WriteOutcome(True, stored.revision)
+
+    def undo(self, url_key: str) -> UndoOutcome:
+        with self._lock_for(url_key):
+            existing = self._read(url_key)
+            revision = existing.meta.revision if existing else _INITIAL_REVISION
+            version = self._history.pop_latest(url_key)
+            remaining = self._history.count(url_key)
+            if version is None:
+                return UndoOutcome(False, revision, remaining)
+            if version.document is None:
+                self._remove_current(url_key)
+                self._audit("undo", url_key, existing.meta if existing else None, None)
+                return UndoOutcome(True, _INITIAL_REVISION, remaining)
+            restored = version.document.meta.model_copy(update={"revision": revision + 1, "base_version": None, "updated_at": _now()})
+            self._save(url_key, restored, version.document.srt)
+            self._audit("undo", url_key, existing.meta if existing else None, restored)
+            return UndoOutcome(True, restored.revision, remaining)
 
     def delete(self, url_key: str) -> bool:
         with self._lock_for(url_key):
             existing = self._read(url_key)
-            srt_path, meta_path = self._paths(url_key)
-            for path in (meta_path, srt_path, srt_path.with_suffix(".srt.prev")):
-                path.unlink(missing_ok=True)
+            self._remove_current(url_key)
+            self._history.clear(url_key)
             if existing:
                 self._audit("delete", url_key, existing.meta, None)
             return existing is not None
 
-    def _write(self, url_key: str, meta: SubtitleMeta, srt: str, existing: SubtitleDocument | None) -> None:
+    def _merge_base(self, url_key: str, existing: SubtitleDocument | None, session_id: str) -> _MergeBase:
+        if existing and existing.meta.session_id == session_id and existing.meta.base_version:
+            saved = self._history.load(url_key, existing.meta.base_version)
+            if saved is not None:
+                return _MergeBase(_recording_of(saved.document), saved.name)
+        return _MergeBase(_recording_of(existing), self._history.save(url_key, existing))
+
+    def _status(self, requested: SubtitleStatus, coverage: list[Interval], media_duration: float | None) -> SubtitleStatus:
+        if requested == "complete":
+            return "complete"
+        if media_duration and covered_seconds(coverage) >= media_duration * self._policy.completion_ratio:
+            return "complete"
+        return "partial"
+
+    def _stored_meta(self, url_key: str, write: SubtitleWrite, coverage: list[Interval], revision: int, base_version: str) -> SubtitleMeta:
+        fields = write.meta.model_dump()
+        fields.update(
+            status=self._status(write.meta.status, coverage, write.meta.media_duration),
+            covered_intervals=coverage,
+            covered_seconds=covered_seconds(coverage),
+        )
+        return SubtitleMeta(
+            **fields,
+            url_key=url_key,
+            revision=revision,
+            engine=write.engine if write.meta.source == "asr" else {},
+            updated_at=_now(),
+            base_version=base_version,
+        )
+
+    def _save(self, url_key: str, meta: SubtitleMeta, srt: str) -> None:
         srt_path, meta_path = self._paths(url_key)
-        if existing:
-            _atomic_write(srt_path.with_suffix(".srt.prev"), existing.srt)
-        _atomic_write(srt_path, srt)
-        _atomic_write(meta_path, meta.model_dump_json(by_alias=True, indent=1))
+        write_atomically(srt_path, srt)
+        write_atomically(meta_path, meta.model_dump_json(by_alias=True, indent=1))
+
+    def _remove_current(self, url_key: str) -> None:
+        for path in self._paths(url_key):
+            path.unlink(missing_ok=True)
 
     def _audit(self, action: str, url_key: str, before: SubtitleMeta | None, after: SubtitleMeta | None) -> None:
         def summary(meta: SubtitleMeta | None) -> dict[str, object] | None:
@@ -125,6 +191,6 @@ class FileSubtitleStore:
                 return None
             return {"revision": meta.revision, "status": meta.status, "coveredSeconds": meta.covered_seconds, "sessionId": meta.session_id}
 
-        entry = {"at": datetime.now(UTC).isoformat(), "action": action, "urlKey": url_key, "before": summary(before), "after": summary(after)}
+        entry = {"at": _now(), "action": action, "urlKey": url_key, "before": summary(before), "after": summary(after)}
         with self._audit_lock, self._audit_log.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(entry) + "\n")

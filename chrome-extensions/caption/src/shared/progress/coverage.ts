@@ -18,6 +18,25 @@ export function addInterval(intervals: readonly Interval[], added: Interval, tol
   return merged;
 }
 
+export function unionIntervals(intervals: readonly Interval[]): Interval[] {
+  return intervals.reduce<Interval[]>((merged, interval) => addInterval(merged, interval), []);
+}
+
+export function findGaps(coverage: readonly Interval[], duration: number, minimumSeconds: number): Interval[] {
+  const gaps: Interval[] = [];
+  let cursor = 0;
+  for (const [start, end] of unionIntervals(coverage)) {
+    if (start - cursor >= minimumSeconds) {
+      gaps.push([cursor, Math.min(start, duration)]);
+    }
+    cursor = Math.max(cursor, end);
+  }
+  if (duration - cursor >= minimumSeconds) {
+    gaps.push([cursor, duration]);
+  }
+  return gaps;
+}
+
 export function coveredSeconds(intervals: readonly Interval[]): number {
   return intervals.reduce((total, [start, end]) => total + (end - start), 0);
 }

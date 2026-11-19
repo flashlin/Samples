@@ -1,3 +1,4 @@
+import type { Cue } from "../shared/cue/cue";
 import type { SaveResult, SubtitleMetaPayload, TranslateLinesResult } from "../shared/messages";
 
 const MILLISECONDS_PER_SECOND = 1000;
@@ -17,7 +18,8 @@ export interface StoredSubtitle {
 
 export interface SubtitleWriteRequest {
   readonly meta: SubtitleMetaPayload;
-  readonly srt: string;
+  readonly cues: readonly Cue[];
+  readonly placement: "timeline" | "append";
   readonly expectedRevision: number;
   readonly confirmOverwrite: boolean;
 }
@@ -87,6 +89,10 @@ export class CaptionServerClient {
       return (await response.json()) as SaveResult;
     }
     return this.json(response);
+  }
+
+  async undoSubtitle(urlKey: string): Promise<{ restored: boolean; revision: number; remainingVersions: number }> {
+    return this.json(await this.request(`/v1/subtitles/${urlKey}/undo`, { method: "POST" }));
   }
 
   async deleteSubtitle(urlKey: string): Promise<void> {

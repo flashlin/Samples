@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addInterval, coveredSeconds, isCovered, isRecognitionComplete } from "../../src/shared/progress/coverage";
+import { addInterval, coveredSeconds, findGaps, isCovered, isRecognitionComplete } from "../../src/shared/progress/coverage";
 
 describe("addInterval", () => {
   it("merges overlapping and touching intervals", () => {
@@ -56,5 +56,23 @@ describe("isRecognitionComplete", () => {
   it("never completes live streams without a finite duration", () => {
     expect(isRecognitionComplete({ ...base, mediaDuration: null })).toBe(false);
     expect(isRecognitionComplete({ ...base, mediaDuration: Number.POSITIVE_INFINITY })).toBe(false);
+  });
+});
+
+describe("findGaps", () => {
+  it("lists uncovered stretches longer than the minimum, including the start and the end", () => {
+    expect(findGaps([[10, 20], [40, 60]], 100, 1)).toEqual([
+      [0, 10],
+      [20, 40],
+      [60, 100],
+    ]);
+  });
+
+  it("ignores gaps shorter than the minimum and overlapping coverage", () => {
+    expect(findGaps([[0, 20], [20.5, 50], [30, 100]], 100, 1)).toEqual([]);
+  });
+
+  it("reports the whole media as one gap when nothing is covered", () => {
+    expect(findGaps([], 30, 1)).toEqual([[0, 30]]);
   });
 });

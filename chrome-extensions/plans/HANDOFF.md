@@ -13,9 +13,11 @@
 - 覆蓋規則：頁面已有 .srt 時，錄製停止（暫停 / 播完 / 停止擷取 / 按 ✕）後在字幕框詢問 Replace / Keep existing。
 - 字幕：單行（目前這句）、可拖曳、常駐框。
 - 驗證：`cd caption && pnpm check`（unit 120）、`cd caption/server && uv run pytest -q`（77）、`pnpm e2e`、`pnpm e2e:youtube` 通過；延遲量測 `node test/e2e/caption-latency.diagnose.mjs`（YouTube 前 34 秒，延遲 0.8–1.8 秒）。
-- 沒有背景程序在跑。全部改動已 commit 並 merge 回 `master`（`8e76c4a60`）。
+- 沒有背景程序在跑。全部改動已 commit 並 merge 回 `master`。
 
 ## Blockers and Active Decisions
+
+- 時間軸合併、Save / Start / Undo、空白時間軸已實作並 commit（計畫 §16）。
 
 - YouTube 字幕讀畫面 DOM；不用 YouTube 內部 API（auto mode 擋過）。
 - 根目錄 `.gitignore` 有 `*.lock`；使用者決定 `caption/server/uv.lock` 要進版控，例外寫在 `caption/.gitignore`（`!server/uv.lock`）。

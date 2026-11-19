@@ -51,7 +51,8 @@ class Settings(BaseSettings):
     translate_max_tokens: int = 256
     keep_terms: Annotated[list[str], NoDecode] = Field(default_factory=lambda: list(DEFAULT_KEEP_TERMS))
     bilingual_english: bool = True
-    max_srt_bytes: int = 5_000_000
+    history_versions: int = 5
+    completion_ratio: float = 0.95
     max_translation_lines: int = 200
 
     @field_validator("allowed_origins", "keep_terms", mode="before")

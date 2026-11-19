@@ -1,4 +1,4 @@
-import type { TabStatus } from "../shared/messages";
+import { IDLE_TAB_STATUS, type TabStatus } from "../shared/messages";
 
 const BADGE_BY_MODE: Partial<Record<TabStatus["mode"], { text: string; color: string }>> = {
   playback: { text: "SRT", color: "#2e7d32" },
@@ -8,13 +8,11 @@ const BADGE_BY_MODE: Partial<Record<TabStatus["mode"], { text: string; color: st
   error: { text: "!", color: "#ef6c00" },
 };
 
-export const IDLE_STATUS: TabStatus = { mode: "idle", canonicalUrl: null, urlKey: null, coveredSeconds: 0, cueCount: 0, message: null };
-
 export class TabStatusRegistry {
   private readonly statuses = new Map<number, TabStatus>();
 
   get(tabId: number): TabStatus {
-    return this.statuses.get(tabId) ?? IDLE_STATUS;
+    return this.statuses.get(tabId) ?? IDLE_TAB_STATUS;
   }
 
   set(tabId: number, status: TabStatus): void {
