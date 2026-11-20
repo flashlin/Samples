@@ -14,11 +14,11 @@ from huggingface_hub import hf_hub_download
 
 REQUIRED_MODELS = [
     {
-        "name": "MiniMax H3 HyperFlow Flash 14B (Q4_K_M GGUF - 6步無審查版)",
+        "name": "MiniMax H3 Ref2VA HyperFlow Flash 14B (Q4_K_M GGUF - 6步參考圖生片版)",
         "repo_id": "VideoRebirthAI/hyperflow-h3-flash",
-        "repo_filename": "fl2va_gguf/minimax_h3_fl2va_hyperflow_flash_14b-Q4_K_M.gguf",
+        "repo_filename": "ref2va_gguf/minimax_h3_ref2va_hyperflow_flash_14b-Q4_K_M.gguf",
         "target_subdir": "models/diffusion_models",
-        "local_filename": "minimax_h3_fl2va_hyperflow_flash_14b-Q4_K_M.gguf",
+        "local_filename": "minimax_h3_ref2va_hyperflow_flash_14b-Q4_K_M.gguf",
         "essential": True,
     },
     {

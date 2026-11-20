@@ -11,7 +11,7 @@ set -euo pipefail
 #    - Video-Rebirth/ComfyUI-HyperFlow-Flash (6步生成 MiniMax H3 Flash 工作流)
 #    - numz/ComfyUI-SeedVR2_VideoUpscaler (SeedVR2 3B 影片放大)
 # 4. 模型權重下載 (支援斷點續傳):
-#    - minimax_h3_fl2va_hyperflow_flash_14b-Q4_K_M.gguf (HyperFlow H3 Flash 無審查版)
+#    - minimax_h3_ref2va_hyperflow_flash_14b-Q4_K_M.gguf (HyperFlow H3 Ref2VA Flash 參考圖生片版)
 #    - qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors (MiniMax H3 Text Encoder)
 #    - minimax_h3_video_vae_fp16.safetensors (Video VAE)
 #    - minimax_h3_audio_vae_fp32.safetensors (Audio VAE)
@@ -140,7 +140,7 @@ mkdir -p \
 if [ "${SKIP_MODELS:-0}" = "1" ]; then
     echo "⏭️ 已設定 SKIP_MODELS=1，略過模型權重下載（將於執行 dev.sh 時自動檢查與補齊）。"
 else
-    echo "📥 正在檢查與下載 MiniMax H3 HyperFlow Flash (6步版) & SeedVR2 模型..."
+    echo "📥 正在檢查與下載 MiniMax H3 Ref2VA HyperFlow Flash (6步參考圖生片版) & SeedVR2 模型..."
     "$VENV_PYTHON" "$ROOT_DIR/src/download_models.py" --comfy-dir "$COMFY_DIR"
 fi
 

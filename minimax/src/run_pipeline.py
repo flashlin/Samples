@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """
-MiniMax H3 HyperFlow Flash (6步生成影音) + SeedVR2 放大 主執行程式
+MiniMax H3 Ref2VA HyperFlow Flash (6步參考圖影音生成) + SeedVR2 放大 主執行程式
 功能：
 1. 讀取專案根目錄下的 prompt.txt 提示詞檔案
-2. 詢問使用者：
+2. 自動讀取人物定裝參考圖：
+   - 固定檢查專案目錄下的 person1.jpg、person2.jpg（若存在則自動載入，不存在則忽略跳過）
+   - 若提示詞中包含 <person1.jpg> 或其他 <檔名.jpg/png/webp> 標籤，自動載入對應圖檔並轉換為 <Picture N>；找不到檔案則忽略跳過
+3. 詢問使用者：
    - 影片解析度 (預設 1024x768；若大於 1024x768 則先以 1024x768 生成後自動用 SeedVR2 3B 放大)
-   - 影片秒數 (預設 15 秒；超過單段 5 秒時，自動擷取上一段最後一格影格作為第一格繼續接續生成)
-3. 透過 comfy-cli (或本地 ComfyUI Server) 啟動並執行 HyperFlow 6步工作流
-4. 產生期間即時顯示 tqdm 進度條 (節點進度與步數進度)
-5. 將所有分段影音無縫合併並固定輸出至 outputs/ 目錄
+   - 影片秒數 (預設 15 秒；超過單段 5 秒時，自動擷取上一段最後一格影格作為開頭錨點，並持續套用人物參考圖接續生成)
+4. 透過 comfy-cli (或本地 ComfyUI Server) 啟動並執行 HyperFlow Ref2VA 6步工作流
+5. 產生期間即時顯示 tqdm 進度條 (節點進度與步數進度)
+6. 將所有分段影音無縫合併並固定輸出至 outputs/ 目錄
 """
 
 import argparse
@@ -35,7 +38,13 @@ import websocket
 
 from apply_mac_optimizations import patch_hyperflow_gguf
 from download_models import ensure_models
-from workflow_builder import CANVAS_MULTIPLE, build_hyperflow_workflow, seconds_to_h3_frames
+from workflow_builder import (
+    CANVAS_MULTIPLE,
+    DEFAULT_REF_IMAGE_FILES,
+    build_hyperflow_workflow,
+    parse_and_resolve_references,
+    seconds_to_h3_frames,
+)
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -92,7 +101,7 @@ def ask_user_parameters(
     non_interactive: bool = False,
 ) -> Tuple[int, int, float, int]:
     print("\n========================================================")
-    print("🎬 MiniMax H3 HyperFlow Flash (6步影音生成) + SeedVR2 放大")
+    print("🎬 MiniMax H3 Ref2VA HyperFlow Flash (6步參考圖影音生成) + SeedVR2 放大")
     print("========================================================")
 
     if cli_resolution:
@@ -423,25 +432,87 @@ def concatenate_segments(segment_paths: List[Path], final_output_path: Path) -> 
     return final_output_path
 
 
+def prepare_reference_images_for_comfy(
+    resolved_refs: List[Tuple[str, Path]],
+    comfy_input_dir: Path,
+    dry_run: bool = False,
+) -> List[str]:
+    """
+    將解析到的人物定裝參考圖複製至 ComfyUI/input/，回傳供 LoadImage 節點使用的檔名清單。
+    """
+    comfy_filenames: List[str] = []
+    if not resolved_refs:
+        return comfy_filenames
+
+    if not dry_run:
+        comfy_input_dir.mkdir(parents=True, exist_ok=True)
+
+    for idx, (_label, src_path) in enumerate(resolved_refs, start=1):
+        safe_name = f"_ref_{idx}_{src_path.name}"
+        dest_path = comfy_input_dir / safe_name
+        if not dry_run and src_path.resolve() != dest_path.resolve():
+            shutil.copy2(str(src_path), str(dest_path))
+        comfy_filenames.append(safe_name)
+
+    return comfy_filenames
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="讀取 prompt.txt 並使用 MiniMax H3 HyperFlow Flash (6步) + SeedVR2 產生有聲影片"
+        description="讀取 prompt.txt 與人物定裝參考圖 (person1.jpg / person2.jpg)，使用 MiniMax H3 Ref2VA HyperFlow Flash + SeedVR2 產生有聲影片"
     )
     parser.add_argument("--resolution", type=str, default=None, help="指定畫面解析度，如 1024x768 或 1920x1080")
     parser.add_argument("--duration", type=float, default=None, help="指定影片總秒數，預設 15 秒")
     parser.add_argument("--steps", type=int, default=6, choices=[4, 6, 8], help="HyperFlow 採樣步數 (預設 6 步)")
     parser.add_argument("--seed", type=int, default=None, help="隨機種子 (預設隨機產生)")
+    parser.add_argument(
+        "--ref-image-size",
+        type=str,
+        default="match",
+        choices=["match", "max"],
+        help="參考圖輸入尺寸策略：match (預設，符合輸出面積較快) 或 max (2048px 短邊，臉部特徵最精準但較慢)",
+    )
     parser.add_argument("--prompt-file", type=str, default=str(PROMPT_FILE), help="提示詞檔案路徑 (預設 ./prompt.txt)")
     parser.add_argument("--yes", "-y", action="store_true", help="使用預設參數不互動詢問")
     parser.add_argument("--dry-run", action="store_true", help="僅產生並驗證工作流 JSON，不實際執行推論")
     args = parser.parse_args()
 
     prompt_path = Path(args.prompt_file).resolve()
-    prompt_text = read_prompt_file(prompt_path)
+    raw_prompt_text = read_prompt_file(prompt_path)
+
+    # 解析固定參考圖 (person1.jpg, person2.jpg) 與提示詞中的 <檔名> 標籤
+    ref_search_dirs = [prompt_path.parent, ROOT_DIR, ROOT_DIR / "refs", COMFY_DIR / "input"]
+    # 去除重複搜尋目錄同時保留順序
+    dedup_search_dirs: List[Path] = []
+    for d in ref_search_dirs:
+        rd = d.resolve()
+        if rd not in dedup_search_dirs:
+            dedup_search_dirs.append(rd)
+
+    prompt_text, resolved_refs, missing_tags = parse_and_resolve_references(
+        prompt_text=raw_prompt_text,
+        search_dirs=dedup_search_dirs,
+        fixed_files=DEFAULT_REF_IMAGE_FILES,
+    )
+    comfy_ref_filenames = prepare_reference_images_for_comfy(
+        resolved_refs=resolved_refs,
+        comfy_input_dir=COMFY_DIR / "input",
+        dry_run=args.dry_run,
+    )
 
     print("========================================================")
     print(f"📄 讀取提示詞檔案: {prompt_path}")
-    print(f"💬 提示詞內容:\n   {prompt_text}")
+    print(f"💬 原始提示詞:\n   {raw_prompt_text}")
+    if resolved_refs:
+        print(f"🖼️  已載入人物定裝參考圖 ({len(resolved_refs)} 張, ref_image_size={args.ref_image_size}):")
+        for idx, (label, img_path) in enumerate(resolved_refs, start=1):
+            print(f"   - <Picture {idx}> <- {label} ({img_path})")
+    else:
+        print("ℹ️  未偵測到 person1.jpg / person2.jpg 或其他參考圖，將以純文字 Ref2VA 模式生成")
+    if missing_tags:
+        print(f"⚠️  以下提示詞參考圖找不到對應檔案，已自動忽略跳過: {', '.join(f'<{t}>' for t in missing_tags)}")
+    if prompt_text != raw_prompt_text:
+        print(f"✨ 轉換後提示詞 (送入 MiniMaxH3ReferenceToVideo):\n   {prompt_text}")
     print("========================================================")
 
     target_w, target_h, total_seconds, steps = ask_user_parameters(
@@ -470,7 +541,7 @@ def main():
         target_max_edge = max(target_w, target_h)
         print(f"📐 使用原生解析度生成: {gen_w}x{gen_h} (無需額外放大)")
 
-    # 計算分段數量 (每段最長 SEGMENT_MAX_SECONDS = 5 秒，若影片很長則把最後一格作為下一段第一格繼續產生)
+    # 計算分段數量 (每段最長 SEGMENT_MAX_SECONDS = 5 秒，若影片很長則把最後一格作為開頭錨點並持續注入人物參考圖)
     num_segments = max(1, int(math.ceil(total_seconds / SEGMENT_MAX_SECONDS)))
     segment_durations = []
     rem = total_seconds
@@ -486,7 +557,7 @@ def main():
         f"({', '.join(f'{d:.1f}s' for d in segment_durations)})"
     )
     if num_segments > 1:
-        print("🔗 長影片接續模式已啟用：每段完成後將自動擷取最後一格影格作為下一段的第一格繼續產生！")
+        print("🔗 長影片接續模式已啟用：每段將錨定上一段最後一格，並持續注入人物定裝參考圖保持角色一致！")
 
     base_seed = args.seed if args.seed is not None else random.randint(1, 2**31 - 1)
     WORKFLOWS_TMP_DIR.mkdir(parents=True, exist_ok=True)
@@ -502,6 +573,8 @@ def main():
                 length_frames=frames,
                 steps=steps,
                 seed=base_seed + idx - 1,
+                ref_images=comfy_ref_filenames,
+                ref_image_size=args.ref_image_size,
                 first_frame_image=f"continuation_frame_{idx-1}.png" if idx > 1 else None,
                 upscale_with_seedvr2=need_seedvr2_upscale,
                 target_short_edge=target_short_edge,
@@ -537,7 +610,12 @@ def main():
 
         for idx, seg_sec in enumerate(segment_durations, start=1):
             frames = seconds_to_h3_frames(seg_sec)
-            mode_label = "T2V 首段生成" if idx == 1 else f"I2V 接續生成 (首格: {last_frame_filename})"
+            ref_info = f"{len(comfy_ref_filenames)} 張參考圖" if comfy_ref_filenames else "無參考圖"
+            mode_label = (
+                f"Ref2VA 首段生成 ({ref_info})"
+                if idx == 1
+                else f"Ref2VA 接續生成 ({ref_info}, 首格錨點: {last_frame_filename})"
+            )
             print(f"\n▶️  開始執行第 {idx}/{num_segments} 段 [{mode_label}] ({seg_sec:.1f} 秒 / {frames} 影格, {steps} 步)...")
 
             wf = build_hyperflow_workflow(
@@ -547,6 +625,8 @@ def main():
                 length_frames=frames,
                 steps=steps,
                 seed=base_seed + idx - 1,
+                ref_images=comfy_ref_filenames,
+                ref_image_size=args.ref_image_size,
                 first_frame_image=last_frame_filename,
                 upscale_with_seedvr2=need_seedvr2_upscale,
                 target_short_edge=target_short_edge,
@@ -575,7 +655,7 @@ def main():
         overall_pbar.close()
 
         # 3. 合併所有分段並輸出至 outputs/
-        final_filename = f"minimax_h3_{target_w}x{target_h}_{int(total_seconds)}s_{timestamp}.mp4"
+        final_filename = f"minimax_h3_ref2va_{target_w}x{target_h}_{int(total_seconds)}s_{timestamp}.mp4"
         final_output_path = OUTPUTS_DIR / final_filename
         print(f"\n🎞️  正在合成最終有聲影片至 {final_output_path}...")
         concatenate_segments(segment_video_paths, final_output_path)
