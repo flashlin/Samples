@@ -1,0 +1,40 @@
+{
+  "subjects": [
+    {
+      "label": "subject from the first frame",
+      "appearance": "keep the look, clothing and identity exactly as in the input image",
+      "position": "same position as in the first frame",
+      "motion": "turns slightly toward the camera, natural breathing and small head movements",
+      "interaction": "smiles softly at the camera"
+    }
+  ],
+  "objects": [],
+  "environment": {
+    "setting": "same scene as the first frame",
+    "layout": "unchanged",
+    "background": "unchanged, subtle natural movement only",
+    "foreground": "unchanged"
+  },
+  "camera": {
+    "framing": "same framing as the first frame",
+    "angle": "same angle as the first frame",
+    "movement": "slow gentle push-in"
+  },
+  "temporal": {
+    "overall_action": "the still image comes to life with calm, natural motion",
+    "motion_sequence": [
+      "the subject holds still for a moment",
+      "the subject turns slightly toward the camera",
+      "the camera slowly pushes in",
+      "the subject smiles and settles"
+    ]
+  },
+  "audio_context": [
+    "soft ambient room tone",
+    "light background music"
+  ],
+  "salient_details": [
+    "consistent lighting with the input image",
+    "no flicker, no warping of the face or hands"
+  ]
+}
