@@ -1,0 +1,41 @@
+{
+  "subjects": [
+    {
+      "label": "woman",
+      "appearance": "adult, late twenties, fair skin, long red hair, toned arms, wearing a white tank top and dark jeans",
+      "position": "center of frame, full body, standing on a wooden floor",
+      "motion": "moves her hips in a playful way, twists her torso, raises and lowers her arms",
+      "interaction": "grins at the camera and winks"
+    }
+  ],
+  "objects": [],
+  "environment": {
+    "setting": "modern kitchen",
+    "layout": "open space with a counter, sink, and appliances",
+    "background": "counter with a coffee mug and a phone",
+    "foreground": "wooden floor with a small rug"
+  },
+  "camera": {
+    "framing": "phone video, medium shot",
+    "angle": "slightly above eye level",
+    "movement": "static, phone propped on the counter"
+  },
+  "temporal": {
+    "overall_action": "the woman dances playfully in her kitchen",
+    "motion_sequence": [
+      "she stands still and looks at the camera",
+      "she begins moving her hips and twisting her body",
+      "she raises her arms and spins slightly",
+      "she stops and grins at the camera"
+    ]
+  },
+  "audio_context": [
+    "upbeat jazz music playing from the phone",
+    "her soft laughter"
+  ],
+  "salient_details": [
+    "sunlight streaming through the window",
+    "her red hair flows slightly as she moves",
+    "the phone is visible on the counter"
+  ]
+}

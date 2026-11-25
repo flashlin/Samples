@@ -16,10 +16,15 @@ set -euo pipefail
 #    - minimax_h3_video_vae_fp16.safetensors (Video VAE)
 #    - minimax_h3_audio_vae_fp32.safetensors (Audio VAE)
 #    - seedvr2_ema_3b_fp16.safetensors & ema_vae_fp16.safetensors (SeedVR2 3B 放大模型)
+#    - Sulphur 3: s3_w4a8.safetensors、qwen3vl_32b_minimax_h3_w4a8_int8down.safetensors、s3_corrector.safetensors
+# 5. Sulphur 3 H3 校正器 custom node (S3_ComfyUI.zip) 與 workflows/ 內的 ComfyUI 工作流程 (給 gen.sh 使用)
 # ==============================================================================
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
+
+# HuggingFace token：只讀取 .env 中的 HF_TOKEN= 一行 (不 source 整個 .env)，可用 HF_ENV_FILE 覆寫路徑
+source "$ROOT_DIR/lib/load_hf_token.sh"
 
 echo "========================================================"
 echo "🚀 開始執行 MiniMax H3 HyperFlow Flash + SeedVR2 環境安裝"
@@ -138,13 +143,16 @@ mkdir -p \
     "$COMFY_DIR/models/SEEDVR2"
 
 if [ "${SKIP_MODELS:-0}" = "1" ]; then
-    echo "⏭️ 已設定 SKIP_MODELS=1，略過模型權重下載（將於執行 dev.sh 時自動檢查與補齊）。"
+    echo "⏭️ 已設定 SKIP_MODELS=1，略過模型權重下載（將於執行 dev.sh / gen.sh 時自動檢查與補齊）。"
+    "$VENV_PYTHON" "$ROOT_DIR/src/sulphur_assets.py" --comfy-dir "$COMFY_DIR" --skip-models
 else
     echo "📥 正在檢查與下載 MiniMax H3 Ref2VA HyperFlow Flash (6步參考圖生片版) & SeedVR2 模型..."
     "$VENV_PYTHON" "$ROOT_DIR/src/download_models.py" --comfy-dir "$COMFY_DIR"
+    echo "📥 正在檢查與下載 Sulphur 3 模型、H3 校正器 node 與 ComfyUI 工作流程..."
+    "$VENV_PYTHON" "$ROOT_DIR/src/sulphur_assets.py" --comfy-dir "$COMFY_DIR"
 fi
 
 echo "========================================================"
 echo "🎉 setup.sh 執行完畢！所有環境與工具已準備就緒。"
-echo "👉 現在可以執行 ./dev.sh 來產生影片！"
+echo "👉 現在可以執行 ./dev.sh 或 ./gen.sh (Sulphur 3) 來產生影片！"
 echo "========================================================"

@@ -60,6 +60,19 @@ def patch_hyperflow_gguf(comfy_dir: Path) -> None:
         print("✅ 已自動套用 Apple Silicon GGUF 權重快取無損加速補丁！")
 
 
+def patch_h3_corrector_mps(comfy_dir: Path) -> None:
+    corrector_init = comfy_dir / "custom_nodes" / "ComfyUI-H3-Corrector" / "__init__.py"
+    if not corrector_init.exists():
+        return
+    mps_unsafe = 'sample_sigmas.to(device="cpu", dtype=torch.float64)'
+    content = corrector_init.read_text(encoding="utf-8")
+    if mps_unsafe not in content:
+        return
+    corrector_init.write_text(content.replace(mps_unsafe, "sample_sigmas.cpu().to(torch.float64)"), encoding="utf-8")
+    print("✅ Patched H3 corrector for MPS (float64 cast moved to CPU)")
+
+
 if __name__ == "__main__":
     root_dir = Path(__file__).resolve().parent.parent
     patch_hyperflow_gguf(root_dir / "ComfyUI")
+    patch_h3_corrector_mps(root_dir / "ComfyUI")
