@@ -65,7 +65,6 @@ if [ "$(nvm current)" = "none" ]; then
     nvm install --lts
 fi
 
-brew install zsh-autosuggestions
 brew install ripgrep
 brew install fd
 brew install uv
@@ -79,10 +78,20 @@ brew_install_if_missing() {
     fi
 }
 
+brew_formula_install_if_missing() {
+    local formula="$1"
+    if ! brew list --formula "$formula" &> /dev/null; then
+        echo "正在安裝 $formula..."
+        brew install "$formula"
+    fi
+}
+
 brew_install_if_missing zoxide
 brew_install_if_missing fzf
 brew_install_if_missing pnpm
 brew_install_if_missing bun oven-sh/bun/bun
+brew_formula_install_if_missing zsh-autosuggestions
+brew_formula_install_if_missing zsh-syntax-highlighting
 
 # 檢查並設置 ~/.zshrc 以啟用 zoxide (使用 j 作為快速指令)
 ZSHRC="$HOME/.zshrc"
@@ -95,6 +104,19 @@ if ! grep -q 'zoxide init' "$ZSHRC"; then
 eval "$(zoxide init zsh --cmd j)"
 EOF
 fi
+
+append_zsh_plugin_source() {
+    local plugin="$1"
+    local plugin_file
+    plugin_file="$(brew --prefix)/share/$plugin/$plugin.zsh"
+    if ! grep -q "$plugin.zsh" "$ZSHRC"; then
+        echo "正在將 $plugin 設定加入 $ZSHRC..."
+        printf '\n# %s\nsource %s\n' "$plugin" "$plugin_file" >> "$ZSHRC"
+    fi
+}
+
+append_zsh_plugin_source zsh-autosuggestions
+append_zsh_plugin_source zsh-syntax-highlighting
 
 uv run ./install.py "$BASE_PATH"
 
