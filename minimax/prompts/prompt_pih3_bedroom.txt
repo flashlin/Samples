@@ -1,0 +1,22 @@
+integrated_multimodal_description:
+Create a realistic, live-action lifestyle video, exactly 10 seconds, 16:9, in one continuous take. An adult East Asian woman moves from a bedroom window to the bed, settles onto her side, and finally looks into the camera. The mood is quiet, casual, and unhurried.
+
+The woman appears to be in her mid-twenties. She has a softly oval face, fair skin with a natural rosy tone, dark brown eyes, straight dark brows, light pink lips, and subtle everyday makeup. Her long, dark chestnut hair falls in loose waves to the middle of her back, with soft wispy bangs across her forehead. She wears a fitted light taupe short-sleeve ringer T-shirt with dark navy trim around the crew neck and sleeve cuffs, black athletic shorts with two parallel white stripes down each outer side, and opaque white over-the-knee socks. Her posture and expressions are relaxed, with small natural shifts in her gaze.
+
+The room is a modern high-rise bedroom. A tall black-framed window sits directly beside the bed. Translucent white sheers diffuse the daylight, and heavier charcoal-gray curtains are gathered with matching tiebacks. Pale apartment towers are visible through the glass. Cool blue-gray daylight fills the room, with slightly deeper shadows on the side away from the window. The bed has a low cream upholstered headboard, large white pillows, a softly rumpled white duvet, and a fluffy white coverlet. A flat rust-brown rectangular cushion lies near the front of the bed. An open compact laptop sits on the bedding near the head pillows, its screen showing blurred blue and white shapes. A light wood bedside surface is partly visible beyond the pillows.
+
+00:00–00:02 — Start behind the woman in a medium shot at the window. She faces the glass with both elbows bent and her hands raised near the curtains on either side. Her loose hair falls down her back. She lowers her hands, looks toward the bed on screen left, and turns until her side profile comes into view. The camera glides with her at close range.
+
+00:02–00:05 — As the bed enters the foreground, she places both palms on the coverlet, leans forward, and brings her knees onto the mattress. The bedding compresses and wrinkles beneath her hands and knees. Her hair falls forward over one shoulder as she shifts her weight toward the rust-brown cushion. The camera follows from the side, beginning to rise gently as she lowers herself.
+
+00:05–00:08 — She settles onto her side, with her head toward screen left and both knees relaxed and bent toward screen right. Her hair spills partly over the brown cushion. She props her head with one hand, lightly brushes her hair near the temple, then brings the fingertips of her free hand briefly near her chin while looking down. The camera glides up into an oblique overhead angle, revealing more of the white bedding and the open laptop behind her.
+
+00:08–00:10 — She lowers her free hand onto the coverlet, lifts her eyes to meet the lens, and gives a slight head tilt. Keep her expression soft and attentive, with only a hint of a smile. The camera eases back a little and settles on the diagonal composition: her face and the brown cushion on the left, her bent legs on the right, and the pillows and laptop behind her. End while she is still looking into the lens.
+
+Maintain a single smooth camera path from the rear window view to the elevated bedside view. Keep the lighting, room layout, and wardrobe consistent. The movement plays in real time with no cuts.
+
+overall_soundscape:
+N/A
+
+non_diegetic_music:
+N/A

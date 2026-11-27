@@ -1,0 +1,31 @@
+integrated_multimodal_description:
+Create a 10-second, 16:9 live-action wuxia fantasy sequence set inside a two-story Chinese timber inn. An adult swordswoman in pale blue is surrounded by crimson-hooded guards. The action moves from a dining table to the upper gallery and back down to the main hall, ending on a brief wide shot of the swordswoman alone on her feet.
+
+The swordswoman is an adult East Asian woman with a softly tapered face, dark almond-shaped eyes, straight dark brows, and a focused, composed expression. Her long black hair falls past her waist, with wispy bangs and a partially pinned crown decorated with small silver floral ornaments and narrow pale-blue ribbons. She wears an ice-blue and ivory wuxia gown with layered skirt panels, flowing detached sleeves, a dark structured waist cincher with silver detailing, one dark ornamental shoulder guard, dark forearm guards, and black boots. The skirt is lined and opaque; the lightweight sleeves and outer panels flare sharply with each turn. She carries a straight silver sword with a dark hilt.
+
+The guards wear deep crimson hoods and heavy cloaks over dark bronze armor, with dark trousers and boots. Their curved blades briefly catch the lantern light. Several stand behind the swordswoman at the start, while a red-cloaked figure partly frames the near foreground.
+
+The inn has thick dark timber pillars, exposed beams, and a wooden upper gallery overlooking the central hall. Cylindrical amber lanterns hang at both levels. Cool blue light enters through square lattice windows and cuts through a faint haze. Rough wooden tables and benches sit on a polished plank floor. The nearest table holds a black wine jar with a red label, a pale celadon ewer, dark bowls, and a plate of food. Shelves of red jars line the back wall. Keep the warm lanterns, blue window light, pale clothing, and crimson cloaks visually distinct.
+
+[Shot 1 | 00:00–00:01.4]
+Start in a medium-wide view across the dining table. The swordswoman sits calmly with one hand near the wine jar, surrounded by the hooded guards. A brief white splash catches the light against a guard's hood behind her. Blades flash into frame as she rises sharply. Cut on the movement.
+
+[Shot 2 | 00:01.4–00:03.4]
+From a low three-quarter angle, she springs onto the tabletop and immediately turns through the air. Pale sleeves and skirt panels whip around her against the red cloaks. Cut with the turn to floor level as she lands between the tables and the guards recoil. Use short tracking moves and keep her pale silhouette readable through the fast exchange.
+
+[Shot 3 | 00:03.4–00:05.8]
+She races past a bench and launches toward the second-floor gallery in a stylized wire-fu leap. Tilt up fast from the main hall. Amber lanterns and the railing sweep past as she reaches gallery height and spins through a brief exchange with two red-cloaked figures. Follow her immediately back down toward the floor, with the fabric trailing above her for an instant before settling.
+
+[Shot 4 | 00:05.8–00:08.7]
+Return to a moving wide shot in the main hall. Crimson cloaks rush in from both sides as she moves through the open space between the tables. Use brief blade flashes and sparks to punctuate the exchange. She dips low and rises into a quick airborne turn. A single bright silver-white crescent traces the turn and fades almost immediately. The surrounding guards reel away and drop to the floor in broad, stylized motion.
+
+[Shot 5 | 00:08.7–00:10.0]
+Finish in a frontal wide view. The swordswoman stands in the center of the hall with her sword lowered at her side. Her sleeves and layered skirt settle as the camera eases back, revealing fallen guards, discarded blades, scattered tableware, and the lantern-lit gallery above. End before she makes another move.
+
+Play every movement at full speed. Use immediate takeoffs and landings, quick changes of direction, whip pans, and sharp cuts on movement. Let hair, fabric, sparks, and the silver arc emphasize speed. No slow motion, speed ramps, freeze frames, or suspended midair poses. Keep the action stylized and bloodless.
+
+overall_soundscape:
+N/A
+
+non_diegetic_music:
+N/A

@@ -128,6 +128,7 @@ install_or_update_node() {
 install_or_update_node "https://github.com/city96/ComfyUI-GGUF.git" "ComfyUI-GGUF"
 install_or_update_node "https://github.com/Video-Rebirth/ComfyUI-HyperFlow-Flash.git" "ComfyUI-HyperFlow-Flash"
 install_or_update_node "https://github.com/numz/ComfyUI-SeedVR2_VideoUpscaler.git" "seedvr2_videoupscaler"
+install_or_update_node "https://github.com/Lakonik/ComfyUI-piFlow.git" "ComfyUI-piFlow"
 
 # 套用 Apple Silicon M4 Max 無損加速補丁
 "$VENV_PYTHON" "$ROOT_DIR/src/apply_mac_optimizations.py"
@@ -145,14 +146,18 @@ mkdir -p \
 if [ "${SKIP_MODELS:-0}" = "1" ]; then
     echo "⏭️ 已設定 SKIP_MODELS=1，略過模型權重下載（將於執行 dev.sh / gen.sh 時自動檢查與補齊）。"
     "$VENV_PYTHON" "$ROOT_DIR/src/sulphur_assets.py" --comfy-dir "$COMFY_DIR" --skip-models
+    "$VENV_PYTHON" "$ROOT_DIR/src/pi_h3_assets.py" --comfy-dir "$COMFY_DIR" --skip-models
 else
     echo "📥 正在檢查與下載 MiniMax H3 Ref2VA HyperFlow Flash (6步參考圖生片版) & SeedVR2 模型..."
     "$VENV_PYTHON" "$ROOT_DIR/src/download_models.py" --comfy-dir "$COMFY_DIR"
     echo "📥 正在檢查與下載 Sulphur 3 模型、H3 校正器 node 與 ComfyUI 工作流程..."
     "$VENV_PYTHON" "$ROOT_DIR/src/sulphur_assets.py" --comfy-dir "$COMFY_DIR"
+    echo "📥 Checking and downloading pi-H3 models (FL2VA base, INT8 video VAE, 4-step DWD adapter)..."
+    "$VENV_PYTHON" "$ROOT_DIR/src/pi_h3_assets.py" --comfy-dir "$COMFY_DIR" --steps 4
 fi
 
 echo "========================================================"
 echo "🎉 setup.sh 執行完畢！所有環境與工具已準備就緒。"
 echo "👉 現在可以執行 ./dev.sh 或 ./gen.sh (Sulphur 3) 來產生影片！"
+echo "👉 Run ./gen-pi-h3.sh to generate a video with pi-H3"
 echo "========================================================"

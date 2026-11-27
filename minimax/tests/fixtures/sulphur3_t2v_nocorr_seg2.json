@@ -1,0 +1,229 @@
+{
+  "1": {
+    "_meta": {
+      "title": "Sulphur 3 (W4A8)"
+    },
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "s3_w4a8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "10": {
+    "_meta": {
+      "title": "Sampler (euler)"
+    },
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "euler"
+    }
+  },
+  "11": {
+    "_meta": {
+      "title": "Noise seed"
+    },
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 8
+    }
+  },
+  "12": {
+    "_meta": {
+      "title": "Sampling"
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "guider": [
+        "23",
+        0
+      ],
+      "latent_image": [
+        "21",
+        1
+      ],
+      "noise": [
+        "11",
+        0
+      ],
+      "sampler": [
+        "10",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ]
+    }
+  },
+  "13": {
+    "_meta": {
+      "title": "Decode video"
+    },
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "12",
+        0
+      ],
+      "vae": [
+        "4",
+        0
+      ]
+    }
+  },
+  "14": {
+    "_meta": {
+      "title": "Decode audio"
+    },
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "12",
+        0
+      ],
+      "vae": [
+        "5",
+        0
+      ]
+    }
+  },
+  "15": {
+    "_meta": {
+      "title": "Combine video + audio"
+    },
+    "class_type": "CreateVideo",
+    "inputs": {
+      "audio": [
+        "14",
+        0
+      ],
+      "fps": 24.0,
+      "images": [
+        "13",
+        0
+      ]
+    }
+  },
+  "16": {
+    "_meta": {
+      "title": "Save MP4"
+    },
+    "class_type": "SaveVideo",
+    "inputs": {
+      "codec": "auto",
+      "filename_prefix": "sulphur3/20260101_000000_t2v_seg02",
+      "format": "mp4",
+      "video": [
+        "15",
+        0
+      ]
+    }
+  },
+  "2": {
+    "_meta": {
+      "title": "Sigma shift 12 / 3"
+    },
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "shift_audio": 3.0,
+      "shift_video": 12.0
+    }
+  },
+  "21": {
+    "_meta": {
+      "title": "Image to video"
+    },
+    "class_type": "MiniMaxH3ImageToVideo",
+    "inputs": {
+      "clip": [
+        "3",
+        0
+      ],
+      "first_frame": [
+        "22",
+        0
+      ],
+      "height": 384,
+      "length": 243,
+      "prompt": "PROMPT",
+      "vae": [
+        "4",
+        0
+      ],
+      "width": 672
+    }
+  },
+  "22": {
+    "_meta": {
+      "title": "First frame"
+    },
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "_s3_20260101_000000_last_frame_01.png"
+    }
+  },
+  "23": {
+    "_meta": {
+      "title": "Basic guider"
+    },
+    "class_type": "BasicGuider",
+    "inputs": {
+      "conditioning": [
+        "21",
+        0
+      ],
+      "model": [
+        "2",
+        0
+      ]
+    }
+  },
+  "3": {
+    "_meta": {
+      "title": "Text encoder (Qwen3-VL W4A8)"
+    },
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_w4a8_int8down.safetensors",
+      "device": "default",
+      "type": "minimax"
+    }
+  },
+  "4": {
+    "_meta": {
+      "title": "Video VAE"
+    },
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    }
+  },
+  "5": {
+    "_meta": {
+      "title": "Audio VAE"
+    },
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    }
+  },
+  "9": {
+    "_meta": {
+      "title": "Scheduler (20 steps)"
+    },
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "denoise": 1.0,
+      "model": [
+        "2",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 20
+    }
+  }
+}

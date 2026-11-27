@@ -28,6 +28,10 @@ REF_TAG_PATTERN = re.compile(
 )
 
 
+def api_node(class_type: str, title: str, **inputs) -> dict:
+    return {"class_type": class_type, "inputs": inputs, "_meta": {"title": title}}
+
+
 def seconds_to_h3_frames(seconds: float, fps: int = 24) -> int:
     """
     將秒數轉換為 MiniMax H3 原生 17k + 5 影格網格 (24 fps；官方預設 5.2 秒 = 124 frames)。

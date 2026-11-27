@@ -1,0 +1,5 @@
+integrated_multimodal_description: Live-action, cinematic, one continuous take. The scene in the first frame comes to life: the subject moves naturally and the camera slowly pushes in, keeping the lighting, setting and wardrobe consistent with the first frame.
+
+overall_soundscape: Natural ambient sound that matches the setting.
+
+non_diegetic_music: N/A

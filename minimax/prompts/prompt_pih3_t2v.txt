@@ -1,0 +1,5 @@
+integrated_multimodal_description: [Shot 1] Live-action, epic cinematic, a slow push-in through a dim, dusty server room overgrown with thick cobwebs, a single ancient computer monitor glowing at the center of the frame showing a progress bar stuck at "99%", a skeleton in an office chair slumped in front of it with one bony finger still on the mouse, dust drifting through a shaft of cold light. A deep, gravelly movie-trailer narrator (S1) says off-screen: <d>[English] In a world where your render outlived you...</d>
+
+overall_soundscape: A low electrical hum, the slow creak of the office chair, and a single cooling fan rattling and winding down.
+
+non_diegetic_music: Ominous low brass and taiko drums build slowly.
