@@ -15,11 +15,10 @@
 
 ## Next Steps
 
-1. 等使用者決定是否 commit。
+1. 無。
 
 ## Worktree State
 
-- 分支 `master`，未 commit。
+- 分支 `master`，本次改動已 commit 並 push（`586b8f364`）。
 - 使用者原本就有的未 commit 改動：`prompts/prompt_s3_t2v.txt`（不要動）。
-- 本次改動：`gen.sh`、`setup.sh`、`src/sulphur_gen.py`、`src/sulphur_workflow.py`、`src/workflow_builder.py`；新增 `gen-pi-h3.sh`、`lib/run_python_entry.sh`、`src/video_gen_cli.py`、`src/pi_h3_assets.py`、`src/pi_h3_gen.py`、`src/pi_h3_workflow.py`、`src/prompt_templates/pih3/`、`prompts/prompt_pih3_*.txt`、`workflows/pi-H3-DWD.json`、`tests/`、`plans/HANDOFF.md`、`docs/`。
 - `.venv` 新裝 `pytest`。
