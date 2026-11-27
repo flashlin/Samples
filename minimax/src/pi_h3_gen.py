@@ -15,7 +15,7 @@ class PiH3Profile:
     title = "pi-H3"
     description = "Generate a video with pi-H3 (MiniMax H3 FL2VA + pi-Flow DWD adapter)"
     default_size = (672, 384)
-    default_seconds = 10.0
+    default_seconds = 15.0
     default_steps = 4
     step_choices = PI_H3_STEPS
     prompt_template_dir = Path(__file__).resolve().parent / "prompt_templates" / "pih3"
